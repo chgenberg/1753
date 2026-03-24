@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>1753 SKINCARE</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <div class="announcement-bar" role="region" aria-label="Erbjudanden">
+    <p>Fri frakt över 700 kr · Holistisk hudanalys med foto</p>
+  </div>
+
+  <nav class="nav" id="site-nav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo">1753 Skincare</a>
+      <ul class="nav-links">
+        <li><a href="index.html">Hem</a></li>
+        <li><a href="#shop-section" class="active">Produkter</a></li>
+        <li><a href="about.html">Om oss</a></li>
+        <li><a href="contact.html">Kontakt</a></li>
+        <li><button type="button" class="cart-btn" onclick="toggleCart()">Varukorg <span class="cart-count"></span></button></li>
+      </ul>
+      <button type="button" class="nav-hamburger" onclick="toggleMobileMenu()" aria-label="Meny">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <section class="hero">
+    <h1>Hudvård som arbetar med huden, inte mot den</h1>
+    <p>CBD och CBG som stödjer hudens eget ekosystem. Minimalt antal ingredienser, maximala resultat. 100% naturligt.</p>
+  </section>
+
+  <section class="section section--featured reveal" id="featured-section">
+    <h2 class="section-title">Från 1753</h2>
+    <p class="section-lede">Utvalda favoriter som passar de flesta hudtyper.</p>
+    <div class="products-grid" id="featured-products"></div>
+  </section>
+
+  <section class="section reveal" id="shop-section">
+    <div class="shop-toolbar">
+      <div class="shop-toolbar-group">
+        <label for="shop-sort">Sortera</label>
+        <select id="shop-sort" class="shop-select" aria-label="Sortera produkter">
+          <option value="reviews-desc">Popularitet</option>
+          <option value="price-asc">Pris: lägst först</option>
+          <option value="price-desc">Pris: högst först</option>
+        </select>
+      </div>
+      <div class="shop-toolbar-group">
+        <label for="shop-filter">Kategori</label>
+        <select id="shop-filter" class="shop-select" aria-label="Filtrera kategori">
+          <option value="all">Alla</option>
+          <option value="oil">Ansiktsoljor</option>
+          <option value="serum">Serum</option>
+          <option value="kit">Kit</option>
+          <option value="cleanser">Rengöring</option>
+          <option value="supplement">Kosttillskott</option>
+          <option value="paket">Paket</option>
+        </select>
+      </div>
+    </div>
+    <h2 class="section-title">Alla produkter</h2>
+    <div class="products-grid" id="all-products"></div>
+  </section>
+
+  <section class="analysis-cta reveal">
+    <div class="analysis-cta-inner">
+      <div class="analysis-cta-text">
+        <h2>Prova vår holistiska hudanalys</h2>
+        <p>Ladda upp ett foto och få personliga rekommendationer kring hudvård och livsstil baserat på hudens egna behov.</p>
+      </div>
+      <a href="analysis.html" class="btn btn-primary">Starta hudanalys</a>
+    </div>
+  </section>
+
+  <div class="cart-overlay" onclick="toggleCart()"></div>
+  <aside class="cart-drawer">
+    <div class="cart-drawer-header">
+      <h2>Varukorg</h2>
+      <button type="button" class="cart-close" onclick="toggleCart()">&times;</button>
+    </div>
+    <div class="cart-items"></div>
+    <div class="cart-footer" style="display:none;">
+      <div class="cart-total">
+        <span>Totalt</span>
+        <span class="cart-total-amount"></span>
+      </div>
+      <a href="checkout.html" class="btn btn-primary" style="width:100%;text-align:center;display:block;">Till kassan</a>
+    </div>
+  </aside>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-col">
+        <h4>1753 Skincare</h4>
+        <p>Södra Skjutbanevägen 10<br>439 55, Åsa<br>Sverige</p>
+      </div>
+      <div class="footer-col">
+        <h4>Kontakt</h4>
+        <a href="tel:0732305521">0732 - 30 55 21</a>
+        <a href="mailto:hej@1753skincare.com">hej@1753skincare.com</a>
+      </div>
+      <div class="footer-col">
+        <h4>Navigera</h4>
+        <a href="index.html">Hem</a>
+        <a href="#shop-section">Produkter</a>
+        <a href="about.html">Om oss</a>
+        <a href="contact.html">Kontakt</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      &copy; 2026 Floranie International AB
+    </div>
+  </footer>
+
+  <script src="animations.js"></script>
+  <script src="app.js"></script>
+  <script src="auth.js"></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      renderProductsGrid("featured-products", ["the-one-facial-oil", "ta-da-serum", "duo-kit"]);
+      initShopGrid("all-products");
+    });
+  </script>
+</body>
+</html>

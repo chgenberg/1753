@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Hudanalys – 1753 SKINCARE</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <div class="announcement-bar" role="region" aria-label="Information">
+    <p>Fri frakt över 700 kr · Holistisk hudanalys med foto</p>
+  </div>
+
+  <nav class="nav" id="site-nav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo">1753 Skincare</a>
+      <ul class="nav-links">
+        <li><a href="index.html">Hem</a></li>
+        <li><a href="index.html#shop-section">Produkter</a></li>
+        <li><a href="about.html">Om oss</a></li>
+        <li><a href="contact.html">Kontakt</a></li>
+        <li><button type="button" class="cart-btn" onclick="toggleCart()">Varukorg <span class="cart-count"></span></button></li>
+      </ul>
+      <button class="nav-hamburger" onclick="toggleMobileMenu()" aria-label="Meny">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <div class="analysis-page">
+
+    <div class="page-header">
+      <h1>Holistisk hudanalys</h1>
+      <p>Ladda upp ett foto och få personliga rekommendationer kring hudvård, livsstil och välmående – baserat på en holistisk syn där huden ses som ett intelligent organ format av evolution.</p>
+    </div>
+
+    <div class="analysis-container">
+
+      <!-- Upload -->
+      <div class="analysis-upload" id="analysis-upload">
+        <div class="upload-zone" id="upload-zone">
+          <input type="file" id="photo-input" accept="image/*" capture="user" hidden>
+          <div class="upload-icon">
+            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/>
+              <circle cx="12" cy="13" r="4"/>
+            </svg>
+          </div>
+          <p class="upload-title">Ladda upp ett foto av ditt ansikte</p>
+          <p class="upload-hint">Klicka eller dra och släpp. Bra belysning och rent ansikte ger bäst resultat.</p>
+          <button class="btn btn-primary upload-btn" onclick="document.getElementById('photo-input').click()">Välj foto</button>
+        </div>
+
+        <div class="upload-preview" id="upload-preview" style="display:none;">
+          <img id="preview-img" alt="Ditt foto">
+          <div class="upload-preview-actions">
+            <button class="btn btn-outline" onclick="resetUpload()">Byt foto</button>
+            <button class="btn btn-primary" id="analyze-btn" onclick="startAnalysis()">Analysera min hud</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Loading -->
+      <div class="analysis-loading" id="analysis-loading" style="display:none;">
+        <div class="loading-spinner"></div>
+        <p>Analyserar din hud...</p>
+        <p class="loading-hint">Vi tittar på hudens balans, fukt, struktur och tecken som kan berätta om din livsstil.</p>
+        <p class="loading-fact" id="loading-fact" aria-live="polite"></p>
+      </div>
+
+      <!-- Results -->
+      <div class="analysis-results" id="analysis-results" style="display:none;">
+        <div class="results-header">
+          <h2>Din personliga analys</h2>
+          <button class="btn btn-outline" onclick="resetUpload()">Ny analys</button>
+        </div>
+        <div class="results-content" id="results-content"></div>
+        <div class="results-products" id="results-products">
+          <h3 class="section-title" style="margin-top:40px;">Rekommenderade produkter</h3>
+          <div class="products-grid" id="recommended-products"></div>
+        </div>
+      </div>
+
+      <!-- Disclaimer -->
+      <div class="analysis-disclaimer">
+        <p>Denna analys är inte medicinsk rådgivning. Vi fokuserar på holistisk hudvård och naturliga lösningar som stödjer hudens egna system. Vid allvarliga hudproblem, kontakta en dermatolog.</p>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="cart-overlay" onclick="toggleCart()"></div>
+  <aside class="cart-drawer">
+    <div class="cart-drawer-header">
+      <h2>Varukorg</h2>
+      <button class="cart-close" onclick="toggleCart()">&times;</button>
+    </div>
+    <div class="cart-items"></div>
+    <div class="cart-footer" style="display:none;">
+      <div class="cart-total">
+        <span>Totalt</span>
+        <span class="cart-total-amount"></span>
+      </div>
+      <a href="checkout.html" class="btn btn-primary" style="width:100%;text-align:center;display:block;">Till kassan</a>
+    </div>
+  </aside>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-col">
+        <h4>1753 Skincare</h4>
+        <p>Södra Skjutbanevägen 10<br>439 55, Åsa<br>Sverige</p>
+      </div>
+      <div class="footer-col">
+        <h4>Kontakt</h4>
+        <a href="tel:0732305521">0732 - 30 55 21</a>
+        <a href="mailto:hej@1753skincare.com">hej@1753skincare.com</a>
+      </div>
+      <div class="footer-col">
+        <h4>Navigera</h4>
+        <a href="index.html">Hem</a>
+        <a href="index.html#shop-section">Produkter</a>
+        <a href="about.html">Om oss</a>
+        <a href="contact.html">Kontakt</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      &copy; 2026 Floranie International AB
+    </div>
+  </footer>
+
+  <script src="animations.js"></script>
+  <script src="app.js"></script>
+  <script src="auth.js"></script>
+  <script src="analysis.js"></script>
+</body>
+</html>

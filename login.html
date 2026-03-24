@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Logga in – 1753 SKINCARE</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo">1753 Skincare</a>
+      <ul class="nav-links">
+        <li><a href="index.html">Produkter</a></li>
+        <li><a href="about.html">Om oss</a></li>
+        <li><a href="contact.html">Kontakt</a></li>
+        <li><button class="cart-btn" onclick="toggleCart()">Varukorg <span class="cart-count"></span></button></li>
+      </ul>
+      <button class="nav-hamburger" onclick="toggleMobileMenu()" aria-label="Meny">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <div class="auth-container">
+    <div class="auth-card">
+      <h1 class="auth-title">Logga in</h1>
+      <p class="auth-subtitle">Välkommen tillbaka till 1753 SKINCARE</p>
+
+      <form id="login-form" class="auth-form" novalidate>
+        <div class="auth-field">
+          <label for="login-email">E-post</label>
+          <input type="email" id="login-email" name="email" required autocomplete="email" placeholder="din@epost.se">
+        </div>
+        <div class="auth-field">
+          <label for="login-password">Lösenord</label>
+          <input type="password" id="login-password" name="password" required autocomplete="current-password" placeholder="Ange lösenord">
+        </div>
+        <button type="submit" class="btn btn-primary auth-submit">Logga in</button>
+        <a href="#" class="auth-forgot">Glömt lösenord?</a>
+      </form>
+
+      <div class="auth-divider"><span>eller</span></div>
+
+      <p class="auth-switch">Har du inget konto? <a href="register.html">Skapa konto</a></p>
+    </div>
+  </div>
+
+  <div class="cart-overlay" onclick="toggleCart()"></div>
+  <aside class="cart-drawer">
+    <div class="cart-drawer-header">
+      <h2>Varukorg</h2>
+      <button class="cart-close" onclick="toggleCart()">&times;</button>
+    </div>
+    <div class="cart-items"></div>
+    <div class="cart-footer" style="display:none;">
+      <div class="cart-total">
+        <span>Totalt</span>
+        <span class="cart-total-amount"></span>
+      </div>
+      <a href="checkout.html" class="btn btn-primary" style="width:100%;text-align:center;display:block;">Till kassan</a>
+    </div>
+  </aside>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-col">
+        <h4>1753 Skincare</h4>
+        <p>Södra Skjutbanevägen 10<br>439 55, Åsa<br>Sverige</p>
+      </div>
+      <div class="footer-col">
+        <h4>Kontakt</h4>
+        <a href="tel:0732305521">0732 - 30 55 21</a>
+        <a href="mailto:hej@1753skincare.com">hej@1753skincare.com</a>
+      </div>
+      <div class="footer-col">
+        <h4>Navigera</h4>
+        <a href="index.html">Produkter</a>
+        <a href="about.html">Om oss</a>
+        <a href="contact.html">Kontakt</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      &copy; 2026 Floranie International AB
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+  <script src="auth.js"></script>
+</body>
+</html>

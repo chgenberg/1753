@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="sv">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Kontakt – 1753 SKINCARE</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <nav class="nav">
+    <div class="nav-inner">
+      <a href="index.html" class="nav-logo">1753 Skincare</a>
+      <ul class="nav-links">
+        <li><a href="index.html">Produkter</a></li>
+        <li><a href="about.html">Om oss</a></li>
+        <li><a href="contact.html" class="active">Kontakt</a></li>
+        <li><button class="cart-btn" onclick="toggleCart()">Varukorg <span class="cart-count"></span></button></li>
+      </ul>
+      <button class="nav-hamburger" onclick="toggleMobileMenu()" aria-label="Meny">
+        <span></span><span></span><span></span>
+      </button>
+    </div>
+  </nav>
+
+  <div class="page-header">
+    <h1>Vi älskar när du hör av dig</h1>
+    <p>Om du har frågor, idéer eller tankar – tveka inte att kontakta oss. Vi återkommer till dig inom 24 timmar.</p>
+  </div>
+
+  <div class="contact-content">
+    <div class="contact-info">
+      <h2>Kontaktuppgifter</h2>
+      <p>
+        1753 SKINCARE<br>
+        Södra Skjutbanevägen 10<br>
+        439 55, Åsa<br>
+        Sverige
+      </p>
+      <p>
+        <a href="tel:0732305521">0732 - 30 55 21</a><br>
+        <a href="mailto:hej@1753skincare.com">hej@1753skincare.com</a>
+      </p>
+      <div class="hours">
+        <span>Måndag – Fredag: 08:00 – 18:00</span>
+        <span>Lördag: 10:00 – 14:00</span>
+        <span>Söndag: Stängt</span>
+      </div>
+    </div>
+
+    <div class="contact-form-wrapper">
+      <form class="contact-form" onsubmit="event.preventDefault(); showNotification('Tack för ditt meddelande! Vi återkommer snart.'); this.reset();">
+        <label for="name">Namn</label>
+        <input type="text" id="name" name="name" required>
+
+        <label for="email">E-post</label>
+        <input type="email" id="email" name="email" required>
+
+        <label for="message">Meddelande</label>
+        <textarea id="message" name="message" required></textarea>
+
+        <button type="submit" class="btn btn-primary">Skicka</button>
+      </form>
+    </div>
+  </div>
+
+  <div class="cart-overlay" onclick="toggleCart()"></div>
+  <aside class="cart-drawer">
+    <div class="cart-drawer-header">
+      <h2>Varukorg</h2>
+      <button class="cart-close" onclick="toggleCart()">&times;</button>
+    </div>
+    <div class="cart-items"></div>
+    <div class="cart-footer" style="display:none;">
+      <div class="cart-total">
+        <span>Totalt</span>
+        <span class="cart-total-amount"></span>
+      </div>
+      <button class="btn btn-primary" style="width:100%;text-align:center;">Till kassan</button>
+    </div>
+  </aside>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-col">
+        <h4>1753 Skincare</h4>
+        <p>Södra Skjutbanevägen 10<br>439 55, Åsa<br>Sverige</p>
+      </div>
+      <div class="footer-col">
+        <h4>Kontakt</h4>
+        <a href="tel:0732305521">0732 - 30 55 21</a>
+        <a href="mailto:hej@1753skincare.com">hej@1753skincare.com</a>
+      </div>
+      <div class="footer-col">
+        <h4>Navigera</h4>
+        <a href="index.html">Produkter</a>
+        <a href="about.html">Om oss</a>
+        <a href="contact.html">Kontakt</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      &copy; 2026 Floranie International AB
+    </div>
+  </footer>
+
+  <script src="app.js"></script>
+</body>
+</html>

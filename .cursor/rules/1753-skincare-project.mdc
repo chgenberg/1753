@@ -1,0 +1,171 @@
+---
+description: Huvudregel för 1753 SKINCARE webbplats. Definierar designsystem, varumärke, teknisk stack och kvalitetskrav.
+alwaysApply: true
+---
+
+# 1753 SKINCARE – Projektregel
+
+## Varumärke
+
+1753 SKINCARE är ett svenskt hudvårdsmärke som säljer CBD/CBG-baserade produkter. Tonen är ärlig, varm och rebellisk – aldrig klinisk eller korporativ. Skriv på svenska. Använd aldrig emojis.
+
+## Design-principer
+
+- **Apple-lik minimalism** – extrem renhet, stora radier, generösa marginaler, frosted glass-effekter
+- **Superminimalistisk** – varje element måste motivera sin existens
+- **Icke-AI-känsla** – undvik perfekt symmetri, generiska gradients, stockfoto-estetik
+- **Interaktivitet** – smooth scroll-animationer, hover-effekter med elevation, micro-interactions
+- **Fyra menypunkter**: Hem, Produkter, Om oss, Kontakt – inget mer (plus Mitt konto/Logga in)
+
+### Apple-designdetaljer
+- Stora border-radius (16px kort, 980px pill-knappar)
+- Backdrop-filter: blur(20px) på navigation
+- Box-shadow istället for borders (subtila, lätta skuggor)
+- Hover: scale(1.02) + shadow-elevation på kort
+- Transitions: 0.3s cubic-bezier(0.25, 0.1, 0.25, 1)
+- Typografi: stora fetstilta rubriker (2.8rem, 600-700 weight, -0.02em tracking), tunn brödtext
+- Input-fält: 12px radius, 48px höjd, focus med ring-shadow
+
+## Färgschema
+
+| Token | Hex | Användning |
+|---|---|---|
+| `--green` | `#108474` | CTA-knappar, accent, hover |
+| `--brown` | `#766a62` | Sekundärtext, etiketter |
+| `--dark` | `#1d1d1f` | Brödtext (Apple-mörk) |
+| `--dark-light` | `#515151` | Sekundär brödtext |
+| `--bg` | `#f5f5f7` | Ljus bakgrund (Apple-grå) |
+| `--white` | `#ffffff` | Huvudbakgrund |
+| `--gray` | `#e6e6e6` | Borders, dividers |
+| `--gold` | `#fcb237` | Stjärnor, betyg |
+
+## Typografi
+
+Systemfont-stack: `-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Helvetica, Arial, sans-serif`. Inga externa fonts. Storlekar i `rem`. Line-height 1.6 för brödtext.
+
+## Teknisk stack
+
+- Vanilla HTML/CSS/JS – ingen framework
+- All produktdata i `app.js` (PRODUCTS-arrayen)
+- Varukorg via `localStorage`
+- Produktbilder: Unsplash mockups (ersätts med riktiga bilder senare, originalURL:er sparade som `shopifyImage`)
+- Alla sidor: `index.html`, `product.html`, `about.html`, `contact.html`, `analysis.html`, `checkout.html`, `payment-success.html`, `payment-fail.html`, `login.html`, `register.html`, `dashboard.html`
+- Backend: Express-proxy (`server.js`) – hanterar API-nycklar + autentisering server-side
+- Beroenden: `package.json` (express, cors, dotenv, node-fetch, bcryptjs, jsonwebtoken)
+- Auth: JWT-baserad autentisering (token i localStorage, bcrypt-hashning)
+
+## Autentisering + Kunddashboard
+
+### Login/Registrering
+- `login.html` – Inloggning med e-post/lösenord
+- `register.html` – Registrering med namn, e-post, telefon, lösenord
+- `auth.js` – Frontend auth-klient (JWT-token, sessionhantering, formulärvalidering)
+- Backend auth-routes i `server.js` med bcrypt + JWT
+
+### Kunddashboard (8 vyer)
+- **Översikt** – Statistik, snabbåtgärder, rekommendationer
+- **Min hudresa** – Tidslinje med hudanalyser, poängutveckling
+- **Mina ordrar** – Orderlista med statusbadgar
+- **Min rutin** – Morgon/kvällsrutin, streak-räknare
+- **Förmåner** – Lojalitetsprogram (Brons/Silver/Guld/Platina), referral
+- **Prenumerationer** – Auto-leverans, frekvensval, besparingskalkylator
+- **Önskelista** – Sparade produkter
+- **Inställningar** – Profil, lösenord, notifikationer
+
+### Värdehöjande funktioner
+- Personaliserade rekommendationer baserat på köphistorik + hudanalys
+- "Beställ igen" – lägg senaste orderns produkter i varukorg
+- Rutinförslag baserat på hudtyp
+- Poängsystem: 1 kr = 1 poäng, nivåer ger rabatter
+- "Bjud in en vän – ni får båda 100 kr"
+- Prenumerationsbesparing visas tydligt
+
+## Integrationer
+
+### Fortnox (Bokföring)
+- REST API v3 (`https://api.fortnox.se/3/`)
+- OAuth 2.0 Bearer token
+- Klient: `integrations/fortnox.js` → proxy via `server.js`
+- Hanterar: kunder, ordrar, fakturor, artiklar, betalningar
+
+### Ongoing WMS (3PL Lager)
+- Goods Owner REST API
+- Basic Auth
+- Klient: `integrations/ongoing.js` → proxy via `server.js`
+- Hanterar: artiklar, lagersaldo, leveransordrar, fraktmetoder
+
+### Viva Wallet (Betalning)
+- Smart Checkout (redirect-flöde)
+- OAuth 2.0 Client Credentials
+- Klient: `integrations/vivawallet.js`
+- Flöde: skapa payment order → redirect → webhook → order i Fortnox + Ongoing
+
+### Konfiguration
+- `integrations/config.js` – endpoints och proxy-URL
+- `.env` – API-nycklar (ALDRIG committa)
+- `.env.example` – mall
+
+## AI Hudanalys
+
+- `analysis.html` + `analysis.js` – holistisk hudanalys med OpenAI Vision (gpt-4o)
+- Kunden laddar upp foto → får realtidsrekommendationer
+- API-anrop via server-side proxy (`POST /api/analysis`) – nyckel aldrig exponerad
+- System prompt: strikt holistisk, skeptisk till konventionell hudvård och modern livsstil
+- Rekommenderar livsstil (sömn, kost, stress, rörelse, tarm) + max 2-3 produkter
+- Analyshistorik sparas i kunddashboard
+
+## Kvalitetskrav
+
+1. Alla texter på korrekt svenska (å, ä, ö)
+2. Responsivt: mobil, tablet, desktop
+3. Inga console-errors
+4. Alla länkar och interaktioner ska fungera
+5. Smooth animationer (CSS transitions/animations, IntersectionObserver)
+6. Accessibility: semantisk HTML, aria-labels, tangentbordsnavigation
+7. Apple-lik designkvalitet genomgående
+
+## Produktdata
+
+All produktdata finns i `app.js` som `PRODUCTS`-arrayen. Det finns 9 produkter med id, namn, pris, ordinariepris, antal omdömen, bild-URL, kort beskrivning, lång beskrivning (HTML), ingredienser, storlek och garanti.
+
+## Orchestrator
+
+Vid större byggen, använd `skills/orchestrator-run/SKILL.md` protokollet. Agenter som `agents/workstream-sentry.md` och `agents/verifier.md` ska användas mellan steg för att granska och verifiera.
+
+## Kontinuerlig förbättring (4 agenter)
+
+Mål: världens mest interaktiva och säljande hudvårdssida.
+Aktivera med `/improve`, `/förbättra` eller `/loop`.
+
+**4 agenter i rotation:**
+
+| Agent | Roll | Läser/Skriver |
+|-------|------|--------------|
+| `agents/workstream-sentry.md` | Skannar ALLA 22 filer, hittar problem | Readonly |
+| `agents/improver.md` | Fixar allt + egna förbättringar | Läser + skriver |
+| `agents/verifier.md` | Verifierar fixar, testar alla flöden | Readonly |
+| `skills/continuous-improvement/SKILL.md` | Styr loopen, loggar, prioriterar | Orchestrator |
+
+**Cykeln:** `sentry (skanna) → improver (fixa) → verifier (verifiera) → logga → upprepa`
+
+**Prioritering per cykel:**
+- Cykel 1-2: Buggar, trasiga flöden
+- Cykel 3-4: Säljkraft (CTA:er, korsförsäljning, trust-signaler)
+- Cykel 5-6: Apple-design (konsekvent typografi, radier, skuggor, transitions)
+- Cykel 7-8: Interaktivitet (scroll-reveal, micro-interactions, animationer)
+- Cykel 9+: Perfektion (varje pixel, varje transition, varje interaction)
+
+**Stoppvillkor:** tre CLEAR-cykler i rad fran sentry + godkänt fran verifier.
+**Logg:** `.cursor/orchestrator/run/2026-03-24-1753-rebuild/IMPROVEMENT_LOG.md`
+
+**Snabbstart:**
+```
+/improve
+```
+
+## Referens
+
+- Designsystemet: `.cursor/orchestrator/run/2026-03-24-1753-rebuild/context/design-system.md`
+- Roadmap: `.cursor/orchestrator/run/2026-03-24-1753-rebuild/ROADMAP.md`
+- Orchestrator-protokoll: `.cursor/orchestrator/PROTOCOL.md`
+- Track-planer: `.cursor/orchestrator/run/2026-03-24-1753-rebuild/track-plans/`
