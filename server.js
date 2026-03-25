@@ -238,13 +238,13 @@ app.post("/api/dashboard/wishlist", authMiddleware, (req, res) => {
 // ---- PRODUCT CATALOGUE (server-side price source of truth) ----
 
 const PRODUCTS_MAP = {
-  "duo-ta-da":                  { name: "DUO-kit + TA-DA Serum", price: 1495, articleNumber: "4004" },
-  "ta-da-serum":                { name: "TA-DA Serum", price: 699, articleNumber: "1005" },
-  "duo-kit":                    { name: "DUO-kit (The ONE + I LOVE Facial Oil)", price: 1099, articleNumber: "1003" },
-  "i-love-facial-oil":          { name: "I LOVE Facial Oil", price: 849, articleNumber: "3001" },
-  "the-one-facial-oil":         { name: "The ONE Facial Oil", price: 649, articleNumber: "1001" },
-  "au-naturel-makeup-remover":  { name: "Au Naturel Makeup Remover", price: 399, articleNumber: "1004" },
-  "fungtastic-mushroom-extract":{ name: "Fungtastic Mushroom Extract", price: 399, articleNumber: "4001" }
+  "duo-ta-da":                  { name: "DUO-kit + TA-DA Serum", price: 1495, articleNumber: "4004", vatRate: 0.25 },
+  "ta-da-serum":                { name: "TA-DA Serum", price: 699, articleNumber: "1005", vatRate: 0.25 },
+  "duo-kit":                    { name: "DUO-kit (The ONE + I LOVE Facial Oil)", price: 1099, articleNumber: "1003", vatRate: 0.25 },
+  "i-love-facial-oil":          { name: "I LOVE Facial Oil", price: 849, articleNumber: "3001", vatRate: 0.25 },
+  "the-one-facial-oil":         { name: "The ONE Facial Oil", price: 649, articleNumber: "1001", vatRate: 0.25 },
+  "au-naturel-makeup-remover":  { name: "Au Naturel Makeup Remover", price: 399, articleNumber: "1004", vatRate: 0.25 },
+  "fungtastic-mushroom-extract":{ name: "Fungtastic Mushroom Extract", price: 399, articleNumber: "4001", vatRate: 0.12 }
 };
 
 const FREE_SHIPPING_THRESHOLD = 700;
@@ -358,7 +358,9 @@ async function fortnoxFetch(path, method, body, _retried) {
 async function ongoingFetch(path, method, body) {
   const fetch = (await import("node-fetch")).default;
   const baseUrl = process.env.ONGOING_BASE_URL;
-  const url = `${baseUrl}${path}`;
+  const goodsOwnerId = process.env.ONGOING_GOODS_OWNER_ID;
+  const separator = path.includes("?") ? "&" : "?";
+  const url = `${baseUrl}${path}${goodsOwnerId ? `${separator}goodsOwnerId=${goodsOwnerId}` : ""}`;
   const auth = Buffer.from(`${process.env.ONGOING_USERNAME}:${process.env.ONGOING_PASSWORD}`).toString("base64");
   const opts = {
     method: method || "GET",
@@ -370,8 +372,8 @@ async function ongoingFetch(path, method, body) {
   };
   if (body) opts.body = JSON.stringify(body);
   const res = await fetch(url, opts);
-  const data = await res.json();
-  if (!res.ok) throw { status: res.status, message: data?.message || "Ongoing API error" };
+  const data = await res.json().catch(() => null);
+  if (!res.ok) throw { status: res.status, message: data?.message || `Ongoing API error: ${res.status}` };
   return data;
 }
 
@@ -876,7 +878,8 @@ app.post("/api/orders/create", async (req, res) => {
         productId: item.id,
         name: product.name,
         quantity: item.qty || 1,
-        price: product.price
+        price: product.price,
+        vatRate: product.vatRate || 0.25
       };
     });
 
@@ -1034,19 +1037,26 @@ async function handleOrderCompletion(orderId) {
   // 2. Fortnox: create order
   if (fortnoxCustomerNumber) {
     try {
-      const orderRows = items.map(i => ({
-        ArticleNumber: i.articleNumber,
-        Description: i.name,
-        OrderedQuantity: i.quantity,
-        Price: i.price
-      }));
+      const orderRows = items.map(i => {
+        const vat = i.vatRate || 0.25;
+        const priceExVat = Math.round((i.price / (1 + vat)) * 100) / 100;
+        return {
+          ArticleNumber: i.articleNumber,
+          Description: i.name,
+          OrderedQuantity: i.quantity,
+          Price: priceExVat,
+          VAT: Math.round(vat * 100)
+        };
+      });
 
       if (order.shipping_cost > 0) {
+        const shippingExVat = Math.round((order.shipping_cost / 1.25) * 100) / 100;
         orderRows.push({
           ArticleNumber: "FRAKT",
           Description: "Frakt",
           OrderedQuantity: 1,
-          Price: order.shipping_cost
+          Price: shippingExVat,
+          VAT: 25
         });
       }
 
