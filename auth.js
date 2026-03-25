@@ -1,6 +1,9 @@
 /* auth.js – Frontend authentication for 1753 SKINCARE */
 
-const BACKEND_URL = "http://localhost:3001/api";
+const BACKEND_URL =
+  typeof INTEGRATION_CONFIG !== "undefined" && INTEGRATION_CONFIG.backendUrl
+    ? INTEGRATION_CONFIG.backendUrl
+    : "http://localhost:3001/api";
 const TOKEN_KEY = "auth_token_1753";
 const USER_KEY = "auth_user_1753";
 

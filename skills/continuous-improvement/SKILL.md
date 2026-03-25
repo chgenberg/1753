@@ -9,6 +9,14 @@ Mål: Göra sidan till **världens mest interaktiva och säljande hudvårdssida*
 Designstandard: **Apple-lik minimalism**.
 Metod: 4 agenter roterar i en oändlig cykel tills perfektion uppnås.
 
+## Självförbättring – lär av förra cykeln
+
+Loopen ska **inte börja om från noll** varje gång.
+
+1. **Innan Steg 1 (Sentry):** Läs **senaste** `### Kvarstår till nästa cykel` i `IMPROVEMENT_LOG.md` och filen **`LEARNINGS.md`** i samma run-mapp (`.cursor/orchestrator/run/2026-03-24-1753-rebuild/LEARNINGS.md`). Be Sentry uttryckligen ta hänsyn till dessa punkter i handoffen under *Kända problem från förra cykeln*.
+2. **Efter Steg 4 (Logga):** Lägg till en kort bullet-lista i **`LEARNINGS.md`** under en ny rubrik `## Cykel [N]` med: vad som visade sig viktigt, vad som återstår, en varning till nästa körning (t.ex. återkommande fallgropar).
+3. **Mål:** Varje cykel bygger på föregående – närmare **världens bästa** sajt utan att upprepa samma misstag.
+
 ## Aktivering
 
 **Chunkad körning (färre Provider-fel):** använd färdiga prompts och ny chatt mellan steg – se `.cursor/orchestrator/run/2026-03-24-1753-rebuild/SESSION_CHUNKS.md`. Validering i terminal: `./scripts/chunk-verify.sh`.
@@ -73,7 +81,7 @@ Handoff till Sentry – Cykel [N]:
   dashboard.js, analysis.js, server.js, integrations/*.js
 - Designstandard: Apple-lik minimalism (frosted glass, pill-knappar, stora radier,
   generösa marginaler, subtila skuggor, smooth transitions)
-- Mål: världens mest interaktiva och säljande hudvårdssida
+- Mål: världens mest **interaktiva** och säljande hudvårdssida; **minimalistiska ramar** och **snygg produktpresentation** (grid, produktsida, hero)
 - Fokus cykel [N]: [se prioritering nedan]
 - Kända problem fran förra cykeln: [lista eller "inga"]
 ```
@@ -88,7 +96,7 @@ Handoff till Improver – Cykel [N]:
 - Fixa ALLT sentry hittade
 - Sök dessutom efter EGNA förbättringar
 - Fokus denna cykel: [se prioritering nedan]
-- Mål: gör varje fil mer säljande, mer interaktiv, mer Apple-lik
+- Mål: gör varje fil mer säljande, **mer interaktiv**, mer Apple-lik; **produktpresentation** och **minimalistiska ramar** där det höjer kvaliteten
 ```
 
 Improver fixar allt och rapporterar vad som gjordes.
@@ -105,6 +113,7 @@ Handoff till Verifier – Cykel [N]:
 - Testa alla huvudflöden: startsida, produktsida, varukorg, kassa,
   login, register, dashboard (alla 8 vyer), hudanalys
 - Verifiera Apple-design: nav blur, pill-knappar, radier, shadows, transitions
+- Kontrollera produktbilder (`public/`), hero-bilder, och att presentation (ramar, hover) känns premium
 ```
 
 ### Steg 4 – LOGGA
@@ -137,9 +146,13 @@ Lägg till en entry i `.cursor/orchestrator/run/2026-03-24-1753-rebuild/IMPROVEM
 - [lista]
 ```
 
-### Steg 5 – UPPREPA
+### Steg 5 – LÄR (självförbättring)
 
-Gå tillbaka till Steg 1 med nästa cykels fokusområde.
+Uppdatera `LEARNINGS.md` med 3–8 punkter: vad cykeln lärde, vad som ska prioriteras härnäst, vad som **inte** ska upprepas.
+
+### Steg 6 – UPPREPA
+
+Gå tillbaka till Steg 1 med nästa cykels fokusområde (och med `Kvarstår` + `LEARNINGS` som input).
 
 ## Prioritering per cykel
 
@@ -202,11 +215,17 @@ Vid stopp: Skriv en komplett slutrapport med:
 ```
 /improve
 
-Starta kontinuerlig förbättringsloop. Kör cykeln:
-Sentry → Improver → Verifier → Logga → Upprepa.
+Starta kontinuerlig förbättringsloop. Läs först senaste Kvarstår i IMPROVEMENT_LOG.md och LEARNINGS.md.
+Kör: Sentry → Improver → Verifier → Logga → uppdatera LEARNINGS.md → Upprepa.
 
 Granska ALLA filer: 11 HTML, styles.css, 5 JS, server.js, 4 integrationer.
 Fokus: buggar först, sedan sälj, sedan Apple-design, sedan interaktivitet.
 Mål: världens mest interaktiva och säljande hudvårdssida.
 Fortsätt tills tre cykler i rad ger CLEAR.
 ```
+
+## Referens
+
+- **Självförbättring / minne:** `.cursor/orchestrator/run/2026-03-24-1753-rebuild/LEARNINGS.md`
+- **Historik per cykel:** samma mapp, `IMPROVEMENT_LOG.md`
+- **Chunkad körning:** `SESSION_CHUNKS.md` i samma mapp

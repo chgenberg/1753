@@ -3,6 +3,18 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Mitt konto – ordrar, hudresa, rutin, lojalitet och inställningar hos 1753 SKINCARE.">
+  <link rel="canonical" href="https://1753skincare.com/dashboard.html">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="sv_SE">
+  <meta property="og:title" content="Mitt konto – 1753 SKINCARE">
+  <meta property="og:description" content="Ordrar, hudanalyser, rutin, lojalitet och önskelista – samlad översikt i ditt konto.">
+  <meta property="og:url" content="https://1753skincare.com/dashboard.html">
+  <meta property="og:image" content="https://1753skincare.com/public/Products/1753desktop.png">
+  <meta property="og:image:alt" content="1753 SKINCARE">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Mitt konto – 1753 SKINCARE">
+  <meta name="twitter:description" content="Följ hudresan, ordrar och lojalitet – inloggat konto.">
   <title>Mitt konto – 1753 SKINCARE</title>
   <link rel="stylesheet" href="styles.css">
   <style>
@@ -969,22 +981,37 @@
 </head>
 <body>
 
-  <nav class="nav">
-    <div class="nav-inner">
-      <a href="index.html" class="nav-logo">1753 Skincare</a>
-      <ul class="nav-links">
-        <li><a href="index.html">Produkter</a></li>
-        <li><a href="about.html">Om oss</a></li>
-        <li><a href="contact.html">Kontakt</a></li>
-        <li><a href="dashboard.html" class="active">Mitt konto</a></li>
-        <li><button class="cart-btn" onclick="toggleCart()">Varukorg <span class="cart-count"></span></button></li>
-      </ul>
-      <button class="nav-hamburger" onclick="toggleMobileMenu()" aria-label="Meny">
-        <span></span><span></span><span></span>
-      </button>
-    </div>
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-logo"><a href="index.html"><img src="public/1753.png" alt="1753 SKINCARE" width="90" height="90"></a></div>
+    <ul class="sidebar-links">
+      <li><a href="index.html" class="sidebar-link" aria-label="Hem"><svg viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V9.5z"/></svg><span>Hem</span></a></li>
+      <li><a href="index.html#shop-section" class="sidebar-link" aria-label="Produkter"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span>Produkter</span></a></li>
+      <li><a href="about.html" class="sidebar-link" aria-label="Om oss"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"/></svg><span>Om oss</span></a></li>
+      <li><a href="contact.html" class="sidebar-link" aria-label="Kontakt"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg><span>Kontakt</span></a></li>
+    </ul>
+    <div class="sidebar-family"><img src="public/C %26 E 2.jpg" alt="Christopher och Ebba" width="36" height="36"><span>Familjen bakom</span></div>
   </nav>
 
+  <header class="topbar" id="topbar">
+    <button type="button" class="topbar-menu" onclick="toggleMobileMenu()" aria-label="Meny"><span></span><span></span><span></span></button>
+    <a href="index.html" class="topbar-logo"><img src="public/1753.png" alt="1753 SKINCARE" width="28" height="28"></a>
+    <div class="topbar-icons">
+      <a href="dashboard.html" class="topbar-icon" aria-label="Mitt konto"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></a>
+      <button type="button" class="topbar-icon" onclick="toggleCart()" aria-label="Varukorg"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg><span class="cart-count"></span></button>
+    </div>
+  </header>
+
+  <div class="mobile-nav-overlay" id="mobile-nav-overlay">
+    <button type="button" class="mobile-nav-close" onclick="toggleMobileMenu()" aria-label="Stäng meny">&times;</button>
+    <div class="mobile-nav-content">
+      <a href="index.html">Hem</a>
+      <a href="index.html#shop-section">Produkter</a>
+      <a href="about.html">Om oss</a>
+      <a href="contact.html">Kontakt</a>
+    </div>
+  </div>
+
+  <div class="main-content">
   <div class="dashboard-layout">
 
     <!-- SIDEBAR -->
@@ -1000,7 +1027,7 @@
       <ul class="sidebar-nav" id="sidebar-nav">
         <li><a href="#overview" class="active" data-view="overview">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-          Oversikt
+          Översikt
         </a></li>
         <li><a href="#skin" data-view="skin">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2z"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><circle cx="9" cy="10" r="1"/><circle cx="15" cy="10" r="1"/></svg>
@@ -1016,7 +1043,7 @@
         </a></li>
         <li><a href="#loyalty" data-view="loyalty">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>
-          Formaner
+          Förmåner
         </a></li>
         <li><a href="#subscriptions" data-view="subscriptions">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 014-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>
@@ -1024,14 +1051,14 @@
         </a></li>
         <li><a href="#wishlist" data-view="wishlist">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
-          Onskelista
+          Önskelista
         </a></li>
         <li>
           <div class="sidebar-divider"></div>
         </li>
         <li><a href="#settings" data-view="settings">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 010 2.83 2 2 0 01-2.83 0l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 01-4 0v-.09A1.65 1.65 0 009 19.4a1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 01-2.83-2.83l.06-.06A1.65 1.65 0 004.68 15a1.65 1.65 0 00-1.51-1H3a2 2 0 010-4h.09A1.65 1.65 0 004.6 9a1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 012.83-2.83l.06.06A1.65 1.65 0 009 4.68a1.65 1.65 0 001-1.51V3a2 2 0 014 0v.09a1.65 1.65 0 001 1.51 1.65 1.65 0 001.82-.33l.06-.06a2 2 0 012.83 2.83l-.06.06A1.65 1.65 0 0019.4 9a1.65 1.65 0 001.51 1H21a2 2 0 010 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg>
-          Installningar
+          Inställningar
         </a></li>
         <li><a href="#" id="logout-link">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><polyline points="16 17 21 12 16 7"/><line x1="21" y1="12" x2="9" y2="12"/></svg>
@@ -1046,13 +1073,13 @@
       <!-- OVERSIKT -->
       <section class="dashboard-view active" id="view-overview">
         <div class="view-header">
-          <h1 id="welcome-header">Valkomna tillbaka</h1>
-          <p>Har ar en overblick over ditt konto och din hudresa.</p>
+          <h1 id="welcome-header">Välkommen tillbaka</h1>
+          <p>Här är en överblick över ditt konto och din hudresa.</p>
         </div>
 
         <div class="stats-row" id="stats-row">
           <div class="stat-card">
-            <div class="stat-label">Hudpoang</div>
+            <div class="stat-label">Hudpoäng</div>
             <div class="stat-value" id="stat-skin-score">--</div>
             <div class="stat-sub">Senaste analys</div>
           </div>
@@ -1064,10 +1091,10 @@
           <div class="stat-card">
             <div class="stat-label">Sparade produkter</div>
             <div class="stat-value" id="stat-wishlist">0</div>
-            <div class="stat-sub">I onskelistan</div>
+            <div class="stat-sub">I önskelistan</div>
           </div>
           <div class="stat-card">
-            <div class="stat-label">Formanspoang</div>
+            <div class="stat-label">Förmånspoäng</div>
             <div class="stat-value" id="stat-points">0</div>
             <div class="stat-sub" id="stat-tier">Brons</div>
           </div>
@@ -1080,7 +1107,7 @@
           </a>
           <a href="#" class="quick-action" id="reorder-btn">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 014-4h14"/></svg>
-            Bestall igen
+            Beställ igen
           </a>
           <a href="index.html" class="quick-action">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
@@ -1094,7 +1121,7 @@
         </div>
 
         <div class="dash-section">
-          <h3 class="dash-section-title">Rekommenderat for dig</h3>
+          <h3 class="dash-section-title">Rekommenderat för dig</h3>
           <div class="dash-products-grid" id="recommended-products"></div>
         </div>
       </section>
@@ -1103,19 +1130,19 @@
       <section class="dashboard-view" id="view-skin">
         <div class="view-header">
           <h1>Min hudresa</h1>
-          <p>Folj din huds utveckling over tid med regelbundna analyser.</p>
+          <p>Följ din huds utveckling över tid med regelbundna analyser.</p>
         </div>
 
         <div id="skin-timeline"></div>
 
         <div style="margin-top: 32px;">
-          <a href="analysis.html" class="btn btn-primary">Gor ny analys</a>
+          <a href="analysis.html" class="btn btn-primary">Gör ny analys</a>
         </div>
 
         <div class="dash-section" style="margin-top: 40px;">
-          <h3 class="dash-section-title">Tips baserat pa din senaste analys</h3>
+          <h3 class="dash-section-title">Tips baserat på din senaste analys</h3>
           <div id="skin-tips">
-            <p style="font-size:0.88rem;color:var(--dark-light);">Gor en hudanalys for att fa personliga tips.</p>
+            <p style="font-size:0.88rem;color:var(--dark-light);">Gör en hudanalys för att få personliga tips.</p>
           </div>
         </div>
       </section>
@@ -1124,7 +1151,7 @@
       <section class="dashboard-view" id="view-orders">
         <div class="view-header">
           <h1>Mina ordrar</h1>
-          <p>Oversikt over alla dina bestallningar.</p>
+          <p>Översikt över alla dina beställningar.</p>
         </div>
         <div id="orders-list"></div>
       </section>
@@ -1133,7 +1160,7 @@
       <section class="dashboard-view" id="view-routine">
         <div class="view-header">
           <h1>Min rutin</h1>
-          <p>Din personliga hudvardsrutin baserad pa dina produkter.</p>
+          <p>Din personliga hudvårdsrutin baserad på dina produkter.</p>
         </div>
 
         <div class="routine-streak" id="routine-streak">
@@ -1147,55 +1174,55 @@
         </div>
 
         <div class="routine-block">
-          <h3>Kvallsrutin</h3>
+          <h3>Kvällsrutin</h3>
           <div id="evening-routine"></div>
         </div>
 
         <div style="margin-top: 24px;">
-          <button class="btn btn-outline" onclick="Dashboard.resetRoutine()">Aterstall dagens rutin</button>
+          <button class="btn btn-outline" onclick="Dashboard.resetRoutine()">Återställ dagens rutin</button>
         </div>
       </section>
 
-      <!-- FORMANER -->
+      <!-- FÖRMÅNER -->
       <section class="dashboard-view" id="view-loyalty">
         <div class="view-header">
-          <h1>Formaner</h1>
-          <p>Tjena poang pa varje kop och las upp exklusiva formaner.</p>
+          <h1>Förmåner</h1>
+          <p>Tjäna poäng på varje köp och lås upp exklusiva förmåner.</p>
         </div>
 
         <div class="loyalty-header" id="loyalty-header"></div>
         <div class="loyalty-progress" id="loyalty-progress"></div>
 
         <div class="dash-section loyalty-earn">
-          <h3 class="dash-section-title">Tjena poang</h3>
+          <h3 class="dash-section-title">Tjäna poäng</h3>
           <ul class="loyalty-earn-list">
             <li>
-              <span class="earn-points">1 poang / kr</span>
-              <span>For varje krona du handlar for</span>
+              <span class="earn-points">1 poäng / kr</span>
+              <span>För varje krona du handlar för</span>
             </li>
             <li>
               <span class="earn-points">+200</span>
-              <span>Nar du gor din forsta hudanalys</span>
+              <span>När du gör din första hudanalys</span>
             </li>
             <li>
               <span class="earn-points">+100</span>
-              <span>For varje van du bjuder in</span>
+              <span>För varje vän du bjuder in</span>
             </li>
             <li>
               <span class="earn-points">+50</span>
-              <span>Nar du skriver ett omdome</span>
+              <span>När du skriver ett omdöme</span>
             </li>
           </ul>
         </div>
 
         <div class="dash-section">
-          <h3 class="dash-section-title">Tillgangliga beloning</h3>
+          <h3 class="dash-section-title">Tillgängliga belöningar</h3>
           <div id="rewards-list"></div>
         </div>
 
         <div class="referral-box">
-          <h4>Bjud in en van</h4>
-          <p>Dela din kod med en van. Ni far bada 100 kr rabatt pa nasta bestallning.</p>
+          <h4>Bjud in en vän</h4>
+          <p>Dela din kod med en vän. Ni får båda 100 kr rabatt på nästa beställning.</p>
           <span class="referral-code" id="referral-code">---</span>
         </div>
       </section>
@@ -1209,19 +1236,19 @@
         <div id="subscriptions-list"></div>
       </section>
 
-      <!-- ONSKELISTA -->
+      <!-- ÖNSKELISTA -->
       <section class="dashboard-view" id="view-wishlist">
         <div class="view-header">
-          <h1>Onskelista</h1>
-          <p>Produkter du sparat for senare.</p>
+          <h1>Önskelista</h1>
+          <p>Produkter du sparat för senare.</p>
         </div>
         <div id="wishlist-grid"></div>
       </section>
 
-      <!-- INSTALLNINGAR -->
+      <!-- INSTÄLLNINGAR -->
       <section class="dashboard-view" id="view-settings">
         <div class="view-header">
-          <h1>Installningar</h1>
+          <h1>Inställningar</h1>
           <p>Hantera din profil och dina preferenser.</p>
         </div>
 
@@ -1245,14 +1272,14 @@
           </div>
 
           <div class="settings-section">
-            <h3>Byt losenord</h3>
+            <h3>Byt lösenord</h3>
             <div class="settings-row">
               <div class="settings-field">
-                <label for="settings-current-pw">Nuvarande losenord</label>
+                <label for="settings-current-pw">Nuvarande lösenord</label>
                 <input type="password" id="settings-current-pw" name="current_password" autocomplete="current-password">
               </div>
               <div class="settings-field">
-                <label for="settings-new-pw">Nytt losenord</label>
+                <label for="settings-new-pw">Nytt lösenord</label>
                 <input type="password" id="settings-new-pw" name="new_password" autocomplete="new-password">
               </div>
             </div>
@@ -1281,7 +1308,7 @@
             <div class="checkbox-group">
               <label class="checkbox-item">
                 <input type="checkbox" name="notify_orders" checked>
-                Orderbekraftelser och leveransuppdateringar
+                Orderbekräftelser och leveransuppdateringar
               </label>
               <label class="checkbox-item">
                 <input type="checkbox" name="notify_offers" checked>
@@ -1289,22 +1316,22 @@
               </label>
               <label class="checkbox-item">
                 <input type="checkbox" name="notify_routine">
-                Paminelser for hudvardsrutin
+                Påminnelser för hudvårdsrutin
               </label>
               <label class="checkbox-item">
                 <input type="checkbox" name="notify_analysis">
-                Paminelser for hudanalys
+                Påminnelser för hudanalys
               </label>
             </div>
           </div>
 
-          <button type="submit" class="btn btn-primary">Spara andringar</button>
+          <button type="submit" class="btn btn-primary">Spara ändringar</button>
         </form>
 
         <div class="settings-section" style="margin-top: 48px;">
           <div class="danger-zone">
-            <h4>Farozon</h4>
-            <p>Att ta bort ditt konto ar permanent och kan inte angras. All din data, inklusive orderhistorik och analysdata, raderas.</p>
+            <h4>Riskzon</h4>
+            <p>Att ta bort ditt konto är permanent och kan inte ångras. All din data, inklusive orderhistorik och analysdata, raderas.</p>
             <button type="button" class="btn-danger" id="delete-account-btn">Ta bort mitt konto</button>
           </div>
         </div>
@@ -1330,10 +1357,11 @@
   </aside>
 
   <footer class="footer">
+    <div class="footer-logo"><img src="public/1753.png" alt="1753 SKINCARE" width="44" height="44"></div>
     <div class="footer-inner">
       <div class="footer-col">
         <h4>1753 Skincare</h4>
-        <p>Sodra Skjutbanevagen 10<br>439 55, Asa<br>Sverige</p>
+        <p>Södra Skjutbanevägen 10<br>439 55, Åsa<br>Sverige</p>
       </div>
       <div class="footer-col">
         <h4>Kontakt</h4>
@@ -1342,7 +1370,8 @@
       </div>
       <div class="footer-col">
         <h4>Navigera</h4>
-        <a href="index.html">Produkter</a>
+        <a href="index.html">Hem</a>
+        <a href="index.html#shop-section">Produkter</a>
         <a href="about.html">Om oss</a>
         <a href="contact.html">Kontakt</a>
       </div>
@@ -1352,7 +1381,13 @@
     </div>
   </footer>
 
+  </div><!-- .main-content -->
+
+  <script src="animations.js"></script>
   <script src="app.js"></script>
+  <script src="integrations/config.js"></script>
+  <script src="auth.js"></script>
   <script src="dashboard.js"></script>
+<script src="chat-widget.js"></script>
 </body>
 </html>

@@ -8,8 +8,13 @@ const Dashboard = (() => {
 
   function getUser() {
     if (typeof AuthClient !== "undefined" && AuthClient.getUser) {
-      return AuthClient.getUser();
+      const u = AuthClient.getUser();
+      if (u) return u;
     }
+    try {
+      const raw = localStorage.getItem("auth_user_1753");
+      if (raw) return JSON.parse(raw);
+    } catch { /* */ }
     try {
       return JSON.parse(localStorage.getItem(AUTH_KEY));
     } catch {
@@ -20,6 +25,10 @@ const Dashboard = (() => {
   function checkAuth() {
     const user = getUser();
     if (!user) {
+      window.location.href = "login.html";
+      return null;
+    }
+    if (typeof AuthClient !== "undefined" && AuthClient.isLoggedIn && !AuthClient.isLoggedIn()) {
       window.location.href = "login.html";
       return null;
     }
@@ -91,7 +100,7 @@ const Dashboard = (() => {
 
     if (greeting) greeting.textContent = "Hej, " + (user.name || user.email || "").split(" ")[0];
     if (email) email.textContent = user.email || "";
-    if (welcome) welcome.textContent = "Valkomna tillbaka" + (user.name ? ", " + user.name.split(" ")[0] : "");
+    if (welcome) welcome.textContent = "Välkommen tillbaka" + (user.name ? ", " + user.name.split(" ")[0] : "");
   }
 
   // ---- STATS ----
@@ -188,8 +197,8 @@ const Dashboard = (() => {
       container.innerHTML = `
         <div class="empty-state">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M6 2L3 6v14a2 2 0 002 2h14a2 2 0 002-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 01-8 0"/></svg>
-          <h3>Du har inga ordrar annu</h3>
-          <p>Nar du gor din forsta bestallning visas den har.</p>
+          <h3>Du har inga ordrar ännu</h3>
+          <p>När du gör din första beställning visas den här.</p>
           <a href="index.html" class="btn btn-primary">Utforska produkter</a>
         </div>`;
       return;
@@ -214,7 +223,7 @@ const Dashboard = (() => {
           <div class="order-right">
             <div class="order-total">${order.total.toLocaleString("sv-SE")} kr</div>
             <span class="status-badge ${status.class}">${status.label}</span>
-            ${order.tracking ? `<div style="margin-top:6px;font-size:0.75rem;color:var(--brown);">Sparing: ${order.tracking}</div>` : ""}
+            ${order.tracking ? `<div style="margin-top:6px;font-size:0.75rem;color:var(--brown);">Spårning: ${order.tracking}</div>` : ""}
           </div>
         </div>`;
     }).join("");
@@ -235,8 +244,8 @@ const Dashboard = (() => {
       return [{
         date: new Date().toISOString().split("T")[0],
         score: 72,
-        summary: "Huden visar tecken pa uttorkning men god grundstruktur.",
-        tips: ["Oka vattenintag", "Anvand ansiktsolja morgon och kvall", "Undvik starka rengoring"]
+        summary: "Huden visar tecken på uttorkning men god grundstruktur.",
+        tips: ["Öka vattenintag", "Använd ansiktsolja morgon och kväll", "Undvik starka rengöring"]
       }];
     }
 
@@ -248,20 +257,20 @@ const Dashboard = (() => {
       {
         date: "2026-03-20",
         score: 78,
-        summary: "Forbattrad fuktbalans. Huden ar lugnare och jamnnare.",
-        tips: ["Fortsatt med nuvarande rutin", "Lagg till serum for extra fukt", "Se over somn och stressniva"]
+        summary: "Förbättrad fuktbalans. Huden är lugnare och jämnare.",
+        tips: ["Fortsätt med nuvarande rutin", "Lägg till serum för extra fukt", "Se över sömn och stressnivå"]
       },
       {
         date: "2026-02-15",
         score: 65,
-        summary: "Nagot torr hud med tendenser till rodnad. Hudbarriar behover starkas.",
-        tips: ["Borja med CBD-baserad ansiktsolja", "Undvik produkter med starka tensider", "Oka intag av omega-3"]
+        summary: "Något torr hud med tendenser till rodnad. Hudbarriären behöver stärkas.",
+        tips: ["Börja med CBD-baserad ansiktsolja", "Undvik produkter med starka tensider", "Öka intag av omega-3"]
       },
       {
         date: "2026-01-10",
         score: 58,
-        summary: "Forsta analysen. Torr och kanslig hud med nedsatt barriarfunktion.",
-        tips: ["Paborja en enkel hudvardsrutin", "Fokusera pa ateruppbyggnad av hudbarriar", "Minska stress"]
+        summary: "Första analysen. Torr och känslig hud med nedsatt barriärfunktion.",
+        tips: ["Påbörja en enkel hudvårdsrutin", "Fokusera på återuppbyggnad av hudbarriären", "Minska stress"]
       }
     ];
   }
@@ -277,7 +286,7 @@ const Dashboard = (() => {
         <div class="empty-state">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="10"/><path d="M8 14s1.5 2 4 2 4-2 4-2"/><circle cx="9" cy="10" r="1"/><circle cx="15" cy="10" r="1"/></svg>
           <h3>Ingen analys gjord annu</h3>
-          <p>Gor din forsta hudanalys for att borja folja din hudresa.</p>
+          <p>Gör din första hudanalys för att börja följa din hudresa.</p>
           <a href="analysis.html" class="btn btn-primary">Starta hudanalys</a>
         </div>`;
       return;
@@ -288,7 +297,7 @@ const Dashboard = (() => {
         <div class="timeline-dot"></div>
         <div class="timeline-date">${formatDate(entry.date)}</div>
         <div class="timeline-title">${entry.summary}</div>
-        ${entry.score ? `<span class="timeline-score">Hudpoang: ${entry.score}/100</span>` : ""}
+        ${entry.score ? `<span class="timeline-score">Hudpoäng: ${entry.score}/100</span>` : ""}
       </div>
     `).join("") + '</div>';
 
@@ -309,12 +318,12 @@ const Dashboard = (() => {
   function getDefaultRoutine() {
     return {
       morning: [
-        { id: "m1", text: "Skolj ansiktet med ljummet vatten", product: null, done: false },
+        { id: "m1", text: "Skölj ansiktet med ljummet vatten", product: null, done: false },
         { id: "m2", text: "Applicera 3-4 droppar The ONE Facial Oil", product: "the-one-facial-oil", done: false },
         { id: "m3", text: "Avsluta med 1-2 pump TA-DA Serum", product: "ta-da-serum", done: false }
       ],
       evening: [
-        { id: "e1", text: "Rengoring med Au Naturel Makeup Remover", product: "au-naturel-makeup-remover", done: false },
+        { id: "e1", text: "Rengöring med Au Naturel Makeup Remover", product: "au-naturel-makeup-remover", done: false },
         { id: "e2", text: "Applicera 3-4 droppar I LOVE Facial Oil", product: "i-love-facial-oil", done: false },
         { id: "e3", text: "Avsluta med 1-2 pump TA-DA Serum", product: "ta-da-serum", done: false },
         { id: "e4", text: "Ta 2 kapslar Fungtastic Mushroom Extract", product: "fungtastic-mushroom-extract", done: false }
@@ -418,7 +427,7 @@ const Dashboard = (() => {
     routine.evening.forEach(s => s.done = false);
     localStorage.setItem(ROUTINE_KEY, JSON.stringify(routine));
     renderRoutine();
-    showNotification("Dagens rutin aterstalls.");
+    showNotification("Dagens rutin återställs.");
   }
 
   // ---- LOYALTY ----
@@ -459,7 +468,7 @@ const Dashboard = (() => {
         <div class="loyalty-tier-badge ${tierClass}">${tier}</div>
         <div class="loyalty-info">
           <h3>${tier}-medlem</h3>
-          <p>${points.toLocaleString("sv-SE")} poang samlade</p>
+          <p>${points.toLocaleString("sv-SE")} poäng samlade</p>
         </div>`;
     }
 
@@ -473,7 +482,7 @@ const Dashboard = (() => {
         </div>
         <div class="progress-labels">
           <span>${currentTier.name}</span>
-          <span>${remaining > 0 ? remaining.toLocaleString("sv-SE") + " poang till " + nextTier.name : nextTier.name + " uppnatt!"}</span>
+          <span>${remaining > 0 ? remaining.toLocaleString("sv-SE") + " poäng till " + nextTier.name : nextTier.name + " uppnått!"}</span>
         </div>`;
     } else if (progressEl) {
       progressEl.innerHTML = `
@@ -482,7 +491,7 @@ const Dashboard = (() => {
         </div>
         <div class="progress-labels">
           <span>Platina</span>
-          <span>Hogsta nivaen uppnadd</span>
+          <span>Högsta nivån uppnådd</span>
         </div>`;
     }
 
@@ -501,29 +510,29 @@ const Dashboard = (() => {
     if (!container) return;
 
     const rewards = [
-      { name: "Gratis frakt pa nasta order", cost: 200, id: "free-shipping" },
-      { name: "10% rabatt pa valfri produkt", cost: 500, id: "discount-10" },
+      { name: "Gratis frakt på nästa order", cost: 200, id: "free-shipping" },
+      { name: "10% rabatt på valfri produkt", cost: 500, id: "discount-10" },
       { name: "Gratis TA-DA Serum (50 ml)", cost: 1500, id: "free-serum" },
       { name: "Gratis DUO-kit", cost: 3000, id: "free-duo" },
-      { name: "Privat hudvardsradgivning", cost: 5000, id: "consultation" }
+      { name: "Privat hudvårdsrådgivning", cost: 5000, id: "consultation" }
     ];
 
     container.innerHTML = rewards.map(r => `
       <div class="reward-card">
         <div>
           <div class="reward-name">${r.name}</div>
-          <div class="reward-cost">${r.cost.toLocaleString("sv-SE")} poang</div>
+          <div class="reward-cost">${r.cost.toLocaleString("sv-SE")} poäng</div>
         </div>
         <button class="btn-sm ${points >= r.cost ? "btn-sm-primary" : "btn-sm-outline"}"
           ${points < r.cost ? "disabled style=\"opacity:0.4;cursor:not-allowed;\"" : ""}
           onclick="Dashboard.redeemReward('${r.id}')">
-          ${points >= r.cost ? "Los in" : "Otillrackliga poang"}
+          ${points >= r.cost ? "Lös in" : "Otillräckliga poäng"}
         </button>
       </div>`).join("");
   }
 
   function redeemReward(rewardId) {
-    showNotification("Forman inlost! Du far en bekraftelse via e-post.");
+    showNotification("Förmån inlöst! Du får en bekräftelse via e-post.");
   }
 
   // ---- WISHLIST ----
@@ -543,7 +552,7 @@ const Dashboard = (() => {
     if (!list.includes(productId)) {
       list.push(productId);
       localStorage.setItem(WISHLIST_KEY, JSON.stringify(list));
-      showNotification("Tillagd i onskelistan");
+      showNotification("Tillagd i önskelistan");
     }
     if (currentView === "wishlist") renderWishlist();
     loadStats();
@@ -554,7 +563,7 @@ const Dashboard = (() => {
     localStorage.setItem(WISHLIST_KEY, JSON.stringify(list));
     if (currentView === "wishlist") renderWishlist();
     loadStats();
-    showNotification("Borttagen fran onskelistan");
+    showNotification("Borttagen från önskelistan");
   }
 
   function renderWishlist() {
@@ -567,8 +576,8 @@ const Dashboard = (() => {
       container.innerHTML = `
         <div class="empty-state">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>
-          <h3>Din onskelista ar tom</h3>
-          <p>Spara produkter du ar intresserad av for att hitta dem snabbt.</p>
+          <h3>Din önskelista är tom</h3>
+          <p>Spara produkter du är intresserad av för att hitta dem snabbt.</p>
           <a href="index.html" class="btn btn-primary">Utforska produkter</a>
         </div>`;
       return;
@@ -584,7 +593,7 @@ const Dashboard = (() => {
         <div class="dash-product-name">${p.name}</div>
         <div class="dash-product-price">${p.price.toLocaleString("sv-SE")} kr</div>
         <div class="dash-product-actions">
-          <button class="btn-sm btn-sm-primary" onclick="addToCart('${p.id}')">Lagg i varukorg</button>
+          <button class="btn-sm btn-sm-primary" onclick="addToCart('${p.id}')">Lägg i varukorg</button>
           <button class="btn-sm btn-sm-outline" onclick="Dashboard.removeFromWishlist('${p.id}')">Ta bort</button>
         </div>
       </div>
@@ -614,12 +623,12 @@ const Dashboard = (() => {
         <div class="empty-state">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="17 1 21 5 17 9"/><path d="M3 11V9a4 4 0 014-4h14"/><polyline points="7 23 3 19 7 15"/><path d="M21 13v2a4 4 0 01-4 4H3"/></svg>
           <h3>Inga aktiva prenumerationer</h3>
-          <p>Med en prenumeration far du dina favoritprodukter levererade automatiskt och sparar pengar.</p>
+          <p>Med en prenumeration får du dina favoritprodukter levererade automatiskt och sparar pengar.</p>
           <a href="index.html" class="btn btn-primary">Utforska produkter</a>
         </div>
         <div class="sub-savings">
           <h4>Visste du?</h4>
-          <p>Med en prenumeration sparar du upp till <strong>15%</strong> pa varje leverans, plus gratis frakt.</p>
+          <p>Med en prenumeration sparar du upp till <strong>15%</strong> på varje leverans, plus gratis frakt.</p>
         </div>`;
       return;
     }
@@ -636,10 +645,10 @@ const Dashboard = (() => {
             </div>
             <span class="status-badge status-delivered">Aktiv</span>
           </div>
-          <div class="sub-next">Nasta leverans: ${formatDate(sub.nextDelivery)}</div>
+          <div class="sub-next">Nästa leverans: ${formatDate(sub.nextDelivery)}</div>
           <div class="sub-actions">
             <button class="btn-sm btn-sm-outline" onclick="Dashboard.pauseSubscription('${sub.id}')">Pausa</button>
-            <button class="btn-sm btn-sm-outline" onclick="Dashboard.changeFrequency('${sub.id}')">Andra frekvens</button>
+            <button class="btn-sm btn-sm-outline" onclick="Dashboard.changeFrequency('${sub.id}')">Ändra frekvens</button>
             <button class="btn-sm btn-sm-outline" style="color:var(--alert);border-color:var(--alert);" onclick="Dashboard.cancelSubscription('${sub.id}')">Avsluta</button>
           </div>
         </div>`;
@@ -654,26 +663,26 @@ const Dashboard = (() => {
       container.innerHTML += `
         <div class="sub-savings">
           <h4>Du sparar med prenumeration</h4>
-          <div class="savings-amount">${totalSaved.toLocaleString("sv-SE")} kr/ar</div>
-          <p>Jamfort med att kopa engangskop till ordinarie pris.</p>
+          <div class="savings-amount">${totalSaved.toLocaleString("sv-SE")} kr/år</div>
+          <p>Jämfört med att köpa engångsköp till ordinarie pris.</p>
         </div>`;
     }
   }
 
   function pauseSubscription(id) {
-    showNotification("Prenumerationen ar pausad.");
+    showNotification("Prenumerationen är pausad.");
   }
 
   function changeFrequency(id) {
-    showNotification("Kontakta oss for att andra leveransfrekvens.");
+    showNotification("Kontakta oss för att ändra leveransfrekvens.");
   }
 
   function cancelSubscription(id) {
-    if (confirm("Ar du saker pa att du vill avsluta prenumerationen?")) {
+    if (confirm("Är du säker på att du vill avsluta prenumerationen?")) {
       const subs = getSubscriptions().filter(s => s.id !== id);
       localStorage.setItem(SUBS_KEY, JSON.stringify(subs));
       renderSubscriptions();
-      showNotification("Prenumerationen ar avslutad.");
+      showNotification("Prenumerationen är avslutad.");
     }
   }
 
@@ -700,7 +709,7 @@ const Dashboard = (() => {
       if (latestTips.includes("lugn") && (p.shortDesc.toLowerCase().includes("lugn") || p.shortDesc.toLowerCase().includes("cbg"))) {
         score += 2;
       }
-      if (latestTips.includes("rengoring") && p.shortDesc.toLowerCase().includes("rengoring")) {
+      if (latestTips.includes("rengöring") && p.shortDesc.toLowerCase().includes("rengöring")) {
         score += 2;
       }
       if (latestTips.includes("tarm") && p.shortDesc.toLowerCase().includes("svamp")) {
@@ -743,7 +752,7 @@ const Dashboard = (() => {
   function reorder() {
     const order = getLastOrder();
     if (!order) {
-      showNotification("Ingen tidigare order att bestalla om.");
+      showNotification("Ingen tidigare order att beställa om.");
       return;
     }
     order.items.forEach(item => {
@@ -789,7 +798,8 @@ const Dashboard = (() => {
 
       localStorage.setItem(AUTH_KEY, JSON.stringify(user));
       populateUserInfo(user);
-      showNotification("Profilen ar uppdaterad.");
+      localStorage.setItem("auth_user_1753", JSON.stringify(user));
+      showNotification("Profilen är uppdaterad.");
     });
   }
 
@@ -812,7 +822,9 @@ const Dashboard = (() => {
     if (!btn) return;
 
     btn.addEventListener("click", () => {
-      if (confirm("Ar du helt saker? All data raderas permanent.")) {
+      if (confirm("Är du helt säker? All data raderas permanent.")) {
+        localStorage.removeItem("auth_token_1753");
+        localStorage.removeItem("auth_user_1753");
         localStorage.removeItem(AUTH_KEY);
         localStorage.removeItem(ORDERS_KEY);
         localStorage.removeItem(SKIN_KEY);

@@ -14,8 +14,14 @@ alwaysApply: true
 - **Apple-lik minimalism** – extrem renhet, stora radier, generösa marginaler, frosted glass-effekter
 - **Superminimalistisk** – varje element måste motivera sin existens
 - **Icke-AI-känsla** – undvik perfekt symmetri, generiska gradients, stockfoto-estetik
-- **Interaktivitet** – smooth scroll-animationer, hover-effekter med elevation, micro-interactions
+- **Interaktivitet** – smooth scroll-animationer, hover-effekter med elevation, micro-interactions; målet är en **enormt interaktiv** upplevelse utan att det blir rörigt
 - **Fyra menypunkter**: Hem, Produkter, Om oss, Kontakt – inget mer (plus Mitt konto/Logga in)
+
+### Produktpresentation och minimalistiska ramar
+
+- **Produktbilder** ska presenteras i **snygga, minimalistiska ramar**: tydlig yta, luft, subtil skugga och/eller lätt inre kontur (box-shadow / inset), aldrig tunga ram-listor
+- **Grid och produktsida**: kort och detaljbild ska kännas som medveten **retail-presentationsdesign** (Apple Store-lik: ren yta, fokus på produkten)
+- **Hero på startsidan**: responsiv bild (`public/1753desktop.png` / `public/1753mobile.png`) med läsbar text ovanpå (gradient/scrim)
 
 ### Apple-designdetaljer
 - Stora border-radius (16px kort, 980px pill-knappar)
@@ -48,7 +54,7 @@ Systemfont-stack: `-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro 
 - Vanilla HTML/CSS/JS – ingen framework
 - All produktdata i `app.js` (PRODUCTS-arrayen)
 - Varukorg via `localStorage`
-- Produktbilder: Unsplash mockups (ersätts med riktiga bilder senare, originalURL:er sparade som `shopifyImage`)
+- **Bilder:** produktfiler under `public/Products/` (se `PRODUCTS` i `app.js`); Shopify-URL:er kan finnas kvar som `shopifyImage` för referens. Hero: `public/1753desktop.png`, `public/1753mobile.png`
 - Alla sidor: `index.html`, `product.html`, `about.html`, `contact.html`, `analysis.html`, `checkout.html`, `payment-success.html`, `payment-fail.html`, `login.html`, `register.html`, `dashboard.html`
 - Backend: Express-proxy (`server.js`) – hanterar API-nycklar + autentisering server-side
 - Beroenden: `package.json` (express, cors, dotenv, node-fetch, bcryptjs, jsonwebtoken)
@@ -156,7 +162,8 @@ Aktivera med `/improve`, `/förbättra` eller `/loop`.
 - Cykel 9+: Perfektion (varje pixel, varje transition, varje interaction)
 
 **Stoppvillkor:** tre CLEAR-cykler i rad fran sentry + godkänt fran verifier.
-**Logg:** `.cursor/orchestrator/run/2026-03-24-1753-rebuild/IMPROVEMENT_LOG.md`
+**Logg:** `.cursor/orchestrator/run/2026-03-24-1753-rebuild/IMPROVEMENT_LOG.md`  
+**Självförbättring mellan cykler:** `LEARNINGS.md` i samma mapp – korta lärdomar så nästa körning läser av historiken (se `skills/continuous-improvement/SKILL.md`).
 
 **Snabbstart:**
 ```

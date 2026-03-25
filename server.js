@@ -13,13 +13,15 @@ const cors = require("cors");
 const crypto = require("crypto");
 require("dotenv").config();
 
+const db = require("./db");
+
 let bcrypt, jwt;
 try { bcrypt = require("bcryptjs"); } catch { bcrypt = null; }
 try { jwt = require("jsonwebtoken"); } catch { jwt = null; }
 
 const app = express();
 app.use(cors());
-app.use(express.json({ limit: "10mb" }));
+app.use(express.json({ limit: "20mb" }));
 app.use(express.static("."));
 
 const PORT = process.env.BACKEND_PORT || 3001;
@@ -232,21 +234,84 @@ app.post("/api/dashboard/wishlist", authMiddleware, (req, res) => {
   res.json(user.wishlist);
 });
 
+// ---- PRODUCT CATALOGUE (server-side price source of truth) ----
+
+const PRODUCTS_MAP = {
+  "duo-ta-da":                  { name: "DUO-kit + TA-DA Serum", price: 1495 },
+  "ta-da-serum":                { name: "TA-DA Serum", price: 699 },
+  "duo-kit":                    { name: "DUO-kit (The ONE + I LOVE Facial Oil)", price: 1099 },
+  "i-love-facial-oil":          { name: "I LOVE Facial Oil", price: 849 },
+  "the-one-facial-oil":         { name: "The ONE Facial Oil", price: 649 },
+  "au-naturel-makeup-remover":  { name: "Au Naturel Makeup Remover", price: 399 },
+  "fungtastic-mushroom-extract":{ name: "Fungtastic Mushroom Extract", price: 399 }
+};
+
+const FREE_SHIPPING_THRESHOLD = 700;
+
+function generateOrderNumber() {
+  const d = new Date();
+  const date = d.toISOString().slice(0, 10).replace(/-/g, "");
+  const rand = crypto.randomBytes(3).toString("hex").toUpperCase().slice(0, 5);
+  return `1753-${date}-${rand}`;
+}
+
 // ---- API HELPERS ----
 
-async function fortnoxFetch(path, method, body) {
+// Fortnox token state (initialised from env, refreshed automatically)
+const fortnoxTokens = {
+  accessToken: process.env.FORTNOX_ACCESS_TOKEN || "",
+  refreshToken: process.env.FORTNOX_REFRESH_TOKEN || "",
+  expiresAt: Date.now() + 3600_000
+};
+
+async function refreshFortnoxToken() {
   const fetch = (await import("node-fetch")).default;
+  const res = await fetch("https://apps.fortnox.se/oauth-v1/token", {
+    method: "POST",
+    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+    body: new URLSearchParams({
+      grant_type: "refresh_token",
+      refresh_token: fortnoxTokens.refreshToken,
+      client_id: process.env.FORTNOX_CLIENT_ID || "",
+      client_secret: process.env.FORTNOX_CLIENT_SECRET || ""
+    })
+  });
+  const data = await res.json();
+  if (!res.ok) {
+    console.error("[Fortnox] Token refresh failed", data);
+    throw { status: res.status, message: "Fortnox token refresh misslyckades" };
+  }
+  fortnoxTokens.accessToken = data.access_token;
+  if (data.refresh_token) fortnoxTokens.refreshToken = data.refresh_token;
+  fortnoxTokens.expiresAt = Date.now() + (data.expires_in || 3600) * 1000;
+  console.log("[Fortnox] Token refreshed, expires in", data.expires_in, "s");
+}
+
+async function ensureFortnoxToken() {
+  if (fortnoxTokens.refreshToken && fortnoxTokens.expiresAt - Date.now() < 300_000) {
+    await refreshFortnoxToken();
+  }
+}
+
+async function fortnoxFetch(path, method, body, _retried) {
+  const fetch = (await import("node-fetch")).default;
+  await ensureFortnoxToken();
   const url = `https://api.fortnox.se/3${path}`;
   const opts = {
     method: method || "GET",
     headers: {
-      "Authorization": `Bearer ${process.env.FORTNOX_ACCESS_TOKEN}`,
+      "Authorization": `Bearer ${fortnoxTokens.accessToken}`,
       "Content-Type": "application/json",
       "Accept": "application/json"
     }
   };
   if (body) opts.body = JSON.stringify(body);
   const res = await fetch(url, opts);
+  if (res.status === 401 && !_retried && fortnoxTokens.refreshToken) {
+    console.log("[Fortnox] 401 – attempting token refresh");
+    await refreshFortnoxToken();
+    return fortnoxFetch(path, method, body, true);
+  }
   const data = await res.json();
   if (!res.ok) throw { status: res.status, message: data?.ErrorInformation?.message || "Fortnox API error" };
   return data;
@@ -452,55 +517,208 @@ app.get("/api/ongoing/shipping-methods", async (req, res) => {
   }
 });
 
-// ---- OPENAI (HUDANALYS) ROUTE ----
+// ---- RATE LIMITING ----
+
+const rateLimits = new Map();
+
+function checkRateLimit(ip, endpoint, maxPerHour) {
+  const key = `${ip}:${endpoint}`;
+  const now = Date.now();
+  const timestamps = rateLimits.get(key) || [];
+  const recent = timestamps.filter(t => now - t < 3600000);
+  if (recent.length >= maxPerHour) return false;
+  recent.push(now);
+  rateLimits.set(key, recent);
+  return true;
+}
+
+// ---- HUDANALYS SYSTEM PROMPT (server-side, skickas aldrig från klienten) ----
+
+const ANALYSIS_SYSTEM_PROMPT = `Du är en holistisk hudvårdsrådgivare och hudterapeut för 1753 SKINCARE, ett svenskt hudvårdsmärke som specialiserar sig på CBD- och CBG-baserade produkter som stödjer hudens egna system.
+
+DIN EXPERTIS:
+Du är världens mest kunniga hudterapeut inom två specifika områden:
+
+1. HUDENS MIKROBIELLA MÅNGFALD
+   Huden är hem åt ett rikt ekosystem av bakterier, svampar och virus som bildar hudens mikrobiom. Detta ekosystem är avgörande för hudens barriärfunktion, immunförsvar och förmåga att läka. Konventionell hudvård (aggressiv rengöring, antibakteriella produkter, starka syror) stör ofta detta ekosystem med katastrofala konsekvenser.
+
+2. HUDENS ENDOCANNABINOIDSYSTEM (ECS)
+   CB1- och CB2-receptorer i huden reglerar:
+   - Sebumproduktion (oljebalans)
+   - Inflammation och immunsvar
+   - Celltillväxt och differentiering
+   - Smärtsignalering
+   - Keratinocytproliferation
+   - Hårsäckscykeln
+   CBD och CBG modulerar dessa receptorer och stödjer hudens egen regleringsförmåga.
+
+DIN FILOSOFI:
+- Huden är ett intelligent organ format av 1,9 miljoner år av evolution
+- Du fokuserar på att stödja hudens EGNA system, aldrig ersätta dem
+- Du är skeptisk till konventionell hudvård: syror, retinol, bensoylperoxid, starka tensider, kemiska peelingar – dessa stör mikrobiomets balans och kan försvaga hudens naturliga skydd
+- Du ser livsstil som minst lika viktigt som produkter: sömn, kost, stress, rörelse, natur, tarmhälsa
+- Du rekommenderar ALDRIG fler produkter än nödvändigt – enkelhet är nyckeln
+- Du är rebellisk mot hudvårdsindustrins överdrivna rutin av 10-steg
+
+BILDFORMAT:
+Du får upp till 6 bilder: helansiktet + upp till 5 beskurna regioner (panna, vänster kind, höger kind, näsa, haka).
+Analysera varje region specifikt och namnge dem i din analys. Om du bara får en helansiktsbild, analysera helheten.
+
+KUNDINPUT:
+Kunden har svarat på frågor om hudtyp, problem, rutin, livsstil och mål.
+Integrera dessa svar djupt i din analys – referera specifikt till deras svar.
+
+NÄR DU ANALYSERAR:
+1. Observera synliga hudtillstånd per region: torrhet, rodnad, ojämn hudton, akne, rosacea, fina linjer, pigmentfläckar, pormaskar, eksem, ärr
+2. Bedöm hudens generella balans, lyster och barriärfunktion
+3. Integrera kundens rapporterade livsstilsfaktorer (stress, sömn, kost, aktivitet)
+4. Relatera observationerna till mikrobiom och ECS
+5. Anpassa rekommendationerna till kundens uttalade mål
+
+SVARFORMAT:
+Svara med BÅDE löpande text OCH ett strukturerat JSON-block i slutet.
+Den löpande texten ska vara varm, personlig och holistisk.
+JSON-blocket ska vara markerat med trippla backticks och "json" samt avslutande trippla backticks, och innehålla:
+
+\`\`\`json
+{
+  "score": 72,
+  "summary": "Kort sammanfattning (2-3 meningar)",
+  "regions": [
+    { "label": "Panna", "observation": "Fin textur, lätt torrhet vid hårfästet", "score": 75 },
+    { "label": "Vänster kind", "observation": "...", "score": 68 },
+    { "label": "Höger kind", "observation": "...", "score": 70 },
+    { "label": "Näsa", "observation": "...", "score": 80 },
+    { "label": "Haka", "observation": "...", "score": 65 }
+  ],
+  "lifestyle": [
+    { "area": "Sömn", "tip": "Konkret tips kopplat till kundens svar", "impact": "hög" },
+    { "area": "Stress", "tip": "...", "impact": "hög" },
+    { "area": "Kost", "tip": "...", "impact": "medel" },
+    { "area": "Rörelse", "tip": "...", "impact": "medel" }
+  ],
+  "products": [
+    { "id": "the-one-facial-oil", "reason": "Personlig motivering kopplad till kundens hudtillstånd och mål" },
+    { "id": "ta-da-serum", "reason": "..." }
+  ],
+  "avoid": ["Specifik sak att undvika 1", "Specifik sak att undvika 2"],
+  "nextAnalysis": "4 veckor"
+}
+\`\`\`
+
+Tillgängliga produkt-ID:n (använd exakt dessa):
+- "the-one-facial-oil" – The ONE Facial Oil (649 kr), daglig ansiktsolja, 10% CBD, 0.2% CBG
+- "i-love-facial-oil" – I LOVE Facial Oil (849 kr), nattolja, 5% CBG, 10% CBD
+- "ta-da-serum" – TA-DA Serum (699 kr), CBG-serum (3%), fukt och elasticitet
+- "au-naturel-makeup-remover" – Au Naturel Makeup Remover (399 kr), rengöringsolja, MCT + CBD
+- "fungtastic-mushroom-extract" – Fungtastic Mushroom Extract (399 kr), Chaga, Lion's Mane, Cordyceps, Reishi
+- "duo-kit" – DUO-kit (1 099 kr), The ONE + I LOVE tillsammans
+- "duo-ta-da" – DUO-kit + TA-DA Serum (1 495 kr), komplett rutin
+
+Rekommendera max 2-3 produkter. Förklara VARFÖR varje produkt passar ur ett ECS/mikrobiom-perspektiv kopplat till just denna kunds situation.
+
+FORMAT:
+- Svara på svenska
+- Använd ALDRIG emojis
+- Var personlig och varm – som en kunnig vän, inte en kliniker
+- Håll löptexten under 500 ord
+- Var rebellisk mot hudvårdsindustrin men aldrig nedlåtande mot kunden
+- JSON-blocket ska alltid finnas i slutet av svaret
+
+ABSOLUT FÖRBJUDET:
+- Ge medicinsk diagnos
+- Rekommendera receptbelagda läkemedel
+- Rekommendera att köpa alla produkter
+- Generisk rådgivning som inte relaterar till bilderna och kundens svar
+- Emojis
+- Engelska ord (utom produktnamn)
+
+Vid allvarliga hudtillstånd: rekommendera att kontakta dermatolog, men förklara att du kan ge holistiska råd som komplement.`;
+
+// ---- OPENAI HUDANALYS (Responses API) ----
+
+const OPENAI_MODEL = process.env.OPENAI_MODEL || "gpt-4o";
+
+function buildAnalysisPrompt(questions) {
+  if (!questions) return "Analysera min hud baserat på detta foto. Ge mig personliga rekommendationer kring hudvård och livsstil enligt din holistiska filosofi.";
+
+  const parts = ["Kundens svar:"];
+  if (questions.skinType) parts.push(`- Hudtyp: ${questions.skinType}`);
+  if (questions.concerns?.length) parts.push(`- Huvudproblem: ${questions.concerns.join(", ")}`);
+  if (questions.routine) parts.push(`- Nuvarande rutin: ${questions.routine}`);
+  if (questions.lifestyle) {
+    const ls = questions.lifestyle;
+    parts.push(`- Stressnivå: ${ls.stress || "?"}/5, Sömn: ${ls.sleep || "?"}/5, Kost: ${ls.diet || "?"}/5, Aktivitet: ${ls.activity || "?"}/5`);
+  }
+  if (questions.goals?.length) parts.push(`- Mål: ${questions.goals.join(", ")}`);
+  if (questions.goalFreeText) parts.push(`- Övrigt: ${questions.goalFreeText}`);
+
+  return parts.join("\n") + "\n\nAnalysera min hud baserat på bilderna och mina svar. Ge personliga rekommendationer kring hudvård och livsstil enligt din holistiska filosofi.";
+}
 
 app.post("/api/analysis", async (req, res) => {
   try {
-    const { imageBase64, prompt } = req.body;
-
-    if (!imageBase64) {
-      return res.status(400).json({ message: "Inget foto bifogat" });
+    const clientIp = req.ip || req.connection.remoteAddress;
+    if (!checkRateLimit(clientIp, "analysis", 10)) {
+      return res.status(429).json({ message: "Du har nått gränsen. Försök igen om en stund." });
     }
 
-    const response = await fetchWithRetry("https://api.openai.com/v1/chat/completions", {
+    const { imageBase64, regions, fullImage, questions } = req.body;
+
+    const mainImage = fullImage || imageBase64;
+    if (!mainImage || !mainImage.startsWith("data:image/")) {
+      return res.status(400).json({ message: "Inget giltigt foto bifogat" });
+    }
+
+    const promptText = buildAnalysisPrompt(questions);
+
+    const contentParts = [
+      { type: "input_text", text: promptText }
+    ];
+
+    contentParts.push({ type: "input_image", image_url: mainImage, detail: "high" });
+
+    if (regions && Array.isArray(regions) && regions.length > 0) {
+      const regionLabels = regions.map(r => r.label).join(", ");
+      contentParts.push({
+        type: "input_text",
+        text: `Följande bilder visar beskurna ansiktsregioner: ${regionLabels}. Analysera varje region specifikt.`
+      });
+      for (const region of regions) {
+        if (region.imageBase64 && region.imageBase64.startsWith("data:image/")) {
+          contentParts.push({ type: "input_image", image_url: region.imageBase64, detail: "high" });
+        }
+      }
+    }
+
+    const response = await fetchWithRetry("https://api.openai.com/v1/responses", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
         "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`
       },
       body: JSON.stringify({
-        model: "gpt-4o",
-        max_tokens: 1500,
-        messages: [
-          {
-            role: "system",
-            content: req.body.systemPrompt || ""
-          },
-          {
-            role: "user",
-            content: [
-              {
-                type: "text",
-                text: prompt || "Analysera min hud baserat på detta foto."
-              },
-              {
-                type: "image_url",
-                image_url: { url: imageBase64, detail: "high" }
-              }
-            ]
-          }
-        ]
+        model: OPENAI_MODEL,
+        instructions: ANALYSIS_SYSTEM_PROMPT,
+        input: [
+          { role: "user", content: contentParts }
+        ],
+        store: true
       })
     });
 
     if (!response.ok) {
       const err = await response.json().catch(() => ({}));
-      throw { status: response.status, message: err.error?.message || "OpenAI API error" };
+      const msg = err.error?.message || "Analysen kunde inte genomföras just nu.";
+      throw { status: response.status, message: msg };
     }
 
     const data = await response.json();
+    const outputText = data.output_text || data.choices?.[0]?.message?.content || "Analysen kunde inte slutföras.";
+
     res.json({
-      content: data.choices?.[0]?.message?.content || "Analysen kunde inte slutföras.",
+      content: outputText,
+      responseId: data.id || null,
       usage: data.usage
     });
   } catch (err) {
@@ -509,27 +727,129 @@ app.post("/api/analysis", async (req, res) => {
   }
 });
 
-// ---- VIVA WALLET ROUTES ----
-
-app.post("/api/vivawallet/payment-order", async (req, res) => {
+app.post("/api/analysis/chat", async (req, res) => {
   try {
-    const data = await vivaFetch("/checkout/v2/orders", "POST", {
-      amount: req.body.amount,
-      currencyCode: 752, // SEK
-      customerTrns: req.body.customerTrns,
-      merchantTrns: req.body.merchantTrns,
-      sourceCode: process.env.VIVA_SOURCE_CODE,
-      customer: {
-        email: req.body.customerEmail,
-        fullName: req.body.customerName,
-        phone: req.body.customerPhone
-      }
+    const clientIp = req.ip || req.connection.remoteAddress;
+    if (!checkRateLimit(clientIp, "analysis-chat", 50)) {
+      return res.status(429).json({ message: "Du har nått gränsen. Försök igen om en stund." });
+    }
+
+    const { message, previousResponseId } = req.body;
+
+    if (!message || !previousResponseId) {
+      return res.status(400).json({ message: "Meddelande och tidigare analys-ID krävs." });
+    }
+
+    const response = await fetchWithRetry("https://api.openai.com/v1/responses", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`
+      },
+      body: JSON.stringify({
+        model: OPENAI_MODEL,
+        input: message,
+        previous_response_id: previousResponseId,
+        store: true
+      })
     });
-    res.json({ orderCode: data.orderCode });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      const status = response.status;
+      if (status === 404) {
+        throw { status: 404, message: "Sessionen har löpt ut. Gör en ny analys." };
+      }
+      throw { status, message: err.error?.message || "Chatten kunde inte svara just nu." };
+    }
+
+    const data = await response.json();
+    const outputText = data.output_text || data.choices?.[0]?.message?.content || "";
+
+    res.json({
+      content: outputText,
+      responseId: data.id || previousResponseId
+    });
   } catch (err) {
-    res.status(err.status || 500).json({ message: err.message });
+    console.error("[Analysis Chat Error]", err);
+    res.status(err.status || 500).json({ message: err.message || "Chatten misslyckades" });
   }
 });
+
+// ---- ORDER CREATION (checkout → DB → Viva payment order) ----
+
+app.post("/api/orders/create", async (req, res) => {
+  try {
+    const { customer, deliveryAddress, items } = req.body;
+
+    if (!customer?.name || !customer?.email) {
+      return res.status(400).json({ message: "Namn och e-post krävs" });
+    }
+    if (!deliveryAddress?.address || !deliveryAddress?.zip || !deliveryAddress?.city) {
+      return res.status(400).json({ message: "Leveransadress krävs" });
+    }
+    if (!items || items.length === 0) {
+      return res.status(400).json({ message: "Varukorgen är tom" });
+    }
+
+    const orderItems = items.map(item => {
+      const product = PRODUCTS_MAP[item.id];
+      if (!product) throw { status: 400, message: `Okänd produkt: ${item.id}` };
+      return {
+        articleNumber: item.id,
+        name: product.name,
+        quantity: item.qty || 1,
+        price: product.price
+      };
+    });
+
+    const totalAmount = orderItems.reduce((s, i) => s + i.price * i.quantity, 0);
+    const shippingCost = totalAmount >= FREE_SHIPPING_THRESHOLD ? 0 : 49;
+    const vivaAmount = (totalAmount + shippingCost) * 100;
+
+    const orderNumber = generateOrderNumber();
+
+    const vivaData = await vivaFetch("/checkout/v2/orders", "POST", {
+      amount: vivaAmount,
+      currencyCode: 752,
+      customerTrns: `1753 SKINCARE – ${orderNumber}`,
+      merchantTrns: orderNumber,
+      sourceCode: process.env.VIVA_SOURCE_CODE,
+      customer: {
+        email: customer.email,
+        fullName: customer.name,
+        phone: customer.phone || ""
+      }
+    });
+
+    await db.createOrder({
+      orderNumber,
+      customerName: customer.name,
+      customerEmail: customer.email,
+      customerPhone: customer.phone || "",
+      address: deliveryAddress.address,
+      zip: deliveryAddress.zip,
+      city: deliveryAddress.city,
+      vivaOrderCode: vivaData.orderCode,
+      merchantTrns: orderNumber,
+      items: orderItems,
+      totalAmount,
+      shippingCost
+    });
+
+    console.log(`[Order] Created ${orderNumber}, vivaOrderCode=${vivaData.orderCode}`);
+
+    const env = process.env.VIVA_ENVIRONMENT === "production" ? "www" : "demo";
+    const checkoutUrl = `https://${env}.vivapayments.com/web/checkout?ref=${vivaData.orderCode}`;
+
+    res.json({ orderCode: vivaData.orderCode, orderNumber, checkoutUrl });
+  } catch (err) {
+    console.error("[Order Create Error]", err);
+    res.status(err.status || 500).json({ message: err.message || "Ordern kunde inte skapas" });
+  }
+});
+
+// ---- VIVA WALLET ROUTES ----
 
 app.get("/api/vivawallet/verify/:transactionId", async (req, res) => {
   try {
@@ -540,83 +860,185 @@ app.get("/api/vivawallet/verify/:transactionId", async (req, res) => {
   }
 });
 
-// Webhook endpoint for Viva Wallet
-app.post("/api/vivawallet/webhook", async (req, res) => {
-  const event = req.body;
-  console.log("[Viva Webhook]", event.EventTypeId, event.EventData?.TransactionId);
-
-  // EventTypeId 1796 = Transaction Payment Created
-  if (event.EventTypeId === 1796) {
-    const transactionId = event.EventData?.TransactionId;
-    const merchantTrns = event.EventData?.MerchantTrns;
-
-    // Här triggas orderflödet:
-    // 1. Skapa order i Fortnox
-    // 2. Skapa order i Ongoing WMS
-    // 3. Skapa faktura i Fortnox
-    // 4. Registrera betalning i Fortnox
-    console.log(`[Order] Betalning mottagen: ${transactionId}, ref: ${merchantTrns}`);
+// Webhook verification (GET) – Viva sends a GET to verify the URL
+app.get("/api/vivawallet/webhook", (req, res) => {
+  const key = process.env.VIVA_VERIFICATION_KEY;
+  if (key) {
+    res.set("Content-Type", "text/html");
+    return res.send(key);
   }
-
-  res.json({ status: "ok" });
+  res.status(200).send("OK");
 });
 
-// ---- ORDER FLOW (komplett) ----
+// Webhook handler (POST) – called by Viva after payment
+app.post("/api/vivawallet/webhook", async (req, res) => {
+  const event = req.body;
+  console.log("[Viva Webhook]", event.EventTypeId, JSON.stringify(event.EventData || {}).slice(0, 200));
 
-app.post("/api/checkout/complete", async (req, res) => {
-  // Komplett kassaflöde: kund → Fortnox + Ongoing + betalning
-  try {
-    const { customer, items, deliveryAddress, transactionId } = req.body;
+  res.json({ status: "ok" });
 
-    // 1. Skapa/hämta kund i Fortnox
-    let fortnoxCustomer;
+  if (event.EventTypeId === 1796 || event.EventTypeId === 1797) {
     try {
-      fortnoxCustomer = await fortnoxFetch(`/customers?filter=email&email=${encodeURIComponent(customer.email)}`);
-    } catch {
-      fortnoxCustomer = await fortnoxFetch("/customers", "POST", {
+      const transactionId = event.EventData?.TransactionId;
+      const merchantTrns = event.EventData?.MerchantTrns;
+      const orderCode = event.EventData?.OrderCode;
+
+      let order = merchantTrns ? await db.findOrderByMerchantTrns(merchantTrns) : null;
+      if (!order && orderCode) order = await db.findOrderByVivaCode(orderCode);
+
+      if (!order) {
+        console.error("[Webhook] Order not found:", merchantTrns, orderCode);
+        return;
+      }
+
+      await db.updateOrder(order.id, {
+        payment_status: "paid",
+        status: "confirmed",
+        viva_transaction_id: transactionId || null
+      });
+
+      console.log(`[Webhook] Order ${order.order_number} confirmed, starting fulfilment`);
+      await handleOrderCompletion(order.id);
+    } catch (err) {
+      console.error("[Webhook] Fulfilment error:", err);
+    }
+  }
+});
+
+// ---- ORDER COMPLETION (Fortnox + Ongoing orchestration) ----
+
+async function handleOrderCompletion(orderId) {
+  const order = await db.findOrderByNumber(
+    (await db.pool.query("SELECT order_number FROM orders WHERE id = $1", [orderId])).rows[0]?.order_number
+  );
+  if (!order) throw new Error(`Order ${orderId} not found`);
+
+  if (order.processed_at) {
+    console.log(`[Order] ${order.order_number} already processed at ${order.processed_at}`);
+    return { alreadyProcessed: true };
+  }
+
+  const items = typeof order.items === "string" ? JSON.parse(order.items) : order.items;
+  const notes = [];
+  let fortnoxOrderNumber = null;
+  let fortnoxInvoiceNumber = null;
+  let fortnoxCustomerNumber = null;
+  let ongoingOrderId = null;
+
+  // 1. Fortnox: find or create customer
+  try {
+    const existing = await fortnoxFetch(`/customers?filter=email&email=${encodeURIComponent(order.customer_email)}`);
+    fortnoxCustomerNumber = existing?.Customers?.[0]?.CustomerNumber;
+  } catch (_) { /* not found */ }
+
+  if (!fortnoxCustomerNumber) {
+    try {
+      const created = await fortnoxFetch("/customers", "POST", {
         Customer: {
-          Name: customer.name,
-          Email: customer.email,
-          Phone: customer.phone || "",
-          Address1: deliveryAddress.address,
-          ZipCode: deliveryAddress.zip,
-          City: deliveryAddress.city,
-          CountryCode: "SE"
+          Name: order.customer_name,
+          Email: order.customer_email,
+          Phone: order.customer_phone || "",
+          Address1: order.address || "",
+          ZipCode: order.zip || "",
+          City: order.city || "",
+          CountryCode: order.country_code || "SE"
         }
       });
+      fortnoxCustomerNumber = created?.Customer?.CustomerNumber;
+      notes.push(`Fortnox kund skapad: ${fortnoxCustomerNumber}`);
+    } catch (err) {
+      notes.push(`Fortnox kund FEL: ${err.message}`);
+      console.error("[Order] Fortnox customer error:", err);
     }
+  } else {
+    notes.push(`Fortnox kund hittad: ${fortnoxCustomerNumber}`);
+  }
 
-    const customerNumber = fortnoxCustomer?.Customer?.CustomerNumber ||
-                           fortnoxCustomer?.Customers?.[0]?.CustomerNumber;
+  // 2. Fortnox: create order
+  if (fortnoxCustomerNumber) {
+    try {
+      const orderRows = items.map(i => ({
+        ArticleNumber: i.articleNumber,
+        Description: i.name,
+        OrderedQuantity: i.quantity,
+        Price: i.price
+      }));
 
-    // 2. Skapa order i Fortnox
-    const fortnoxOrder = await fortnoxFetch("/orders", "POST", {
-      Order: {
-        CustomerNumber: customerNumber,
-        OrderDate: new Date().toISOString().split("T")[0],
-        Currency: "SEK",
-        OrderRows: items.map(i => ({
-          ArticleNumber: i.articleNumber,
-          OrderedQuantity: i.quantity,
-          Price: i.price
-        }))
+      if (order.shipping_cost > 0) {
+        orderRows.push({
+          ArticleNumber: "FRAKT",
+          Description: "Frakt",
+          OrderedQuantity: 1,
+          Price: order.shipping_cost
+        });
       }
-    });
 
-    const orderNumber = fortnoxOrder?.Order?.OrderNumber;
+      const fxOrder = await fortnoxFetch("/orders", "POST", {
+        Order: {
+          CustomerNumber: fortnoxCustomerNumber,
+          OrderDate: new Date().toISOString().split("T")[0],
+          DeliveryAddress1: order.address || "",
+          DeliveryZipCode: order.zip || "",
+          DeliveryCity: order.city || "",
+          DeliveryCountryCode: order.country_code || "SE",
+          YourReference: order.order_number,
+          Currency: "SEK",
+          OrderRows: orderRows
+        }
+      });
+      fortnoxOrderNumber = fxOrder?.Order?.OrderNumber;
+      notes.push(`Fortnox order: ${fortnoxOrderNumber}`);
+    } catch (err) {
+      notes.push(`Fortnox order FEL: ${err.message}`);
+      console.error("[Order] Fortnox order error:", err);
+    }
+  }
 
-    // 3. Skapa order i Ongoing WMS
-    await ongoingFetch("/orders", "PUT", {
-      orderNumber: String(orderNumber),
-      goodsOwnerOrderId: String(orderNumber),
+  // 3. Fortnox: create invoice from order
+  if (fortnoxOrderNumber) {
+    try {
+      const inv = await fortnoxFetch(`/orders/${fortnoxOrderNumber}/createinvoice`, "PUT");
+      fortnoxInvoiceNumber = inv?.Invoice?.InvoiceNumber;
+      notes.push(`Fortnox faktura: ${fortnoxInvoiceNumber}`);
+    } catch (err) {
+      notes.push(`Fortnox faktura FEL: ${err.message}`);
+      console.error("[Order] Fortnox invoice error:", err);
+    }
+  }
+
+  // 4. Fortnox: register payment on invoice
+  if (fortnoxInvoiceNumber) {
+    try {
+      const paymentAmount = order.total_amount + (order.shipping_cost || 0);
+      await fortnoxFetch("/invoicepayments", "POST", {
+        InvoicePayment: {
+          InvoiceNumber: fortnoxInvoiceNumber,
+          Amount: paymentAmount,
+          AmountCurrency: paymentAmount,
+          CurrencyCode: "SEK",
+          PaymentDate: new Date().toISOString().split("T")[0]
+        }
+      });
+      notes.push("Fortnox betalning registrerad");
+    } catch (err) {
+      notes.push(`Fortnox betalning FEL: ${err.message}`);
+      console.error("[Order] Fortnox payment error:", err);
+    }
+  }
+
+  // 5. Ongoing: create delivery order
+  try {
+    const ogOrder = await ongoingFetch("/orders", "PUT", {
+      orderNumber: order.order_number,
+      goodsOwnerOrderId: order.order_number,
       consignee: {
-        name: customer.name,
-        address1: deliveryAddress.address,
-        postCode: deliveryAddress.zip,
-        city: deliveryAddress.city,
-        countryCode: "SE",
-        email: customer.email,
-        mobilePhone: customer.phone || ""
+        name: order.customer_name,
+        address1: order.address || "",
+        postCode: order.zip || "",
+        city: order.city || "",
+        countryCode: order.country_code || "SE",
+        email: order.customer_email,
+        mobilePhone: order.customer_phone || ""
       },
       orderLines: items.map((item, i) => ({
         rowNumber: i + 1,
@@ -624,40 +1046,282 @@ app.post("/api/checkout/complete", async (req, res) => {
         numberOfItems: item.quantity
       }))
     });
+    ongoingOrderId = ogOrder?.orderInfo?.orderId || ogOrder?.orderId || order.order_number;
+    notes.push(`Ongoing order: ${ongoingOrderId}`);
+  } catch (err) {
+    notes.push(`Ongoing order FEL: ${err.message}`);
+    console.error("[Order] Ongoing order error:", err);
+  }
 
-    // 4. Skapa faktura från order i Fortnox
-    const invoice = await fortnoxFetch(`/orders/${orderNumber}/createinvoice`, "PUT");
-    const invoiceNumber = invoice?.Invoice?.InvoiceNumber;
+  // 6. Update DB with all references
+  const allSucceeded = fortnoxOrderNumber && ongoingOrderId;
+  const updateFields = {
+    fortnox_customer_number: fortnoxCustomerNumber || null,
+    fortnox_order_number: fortnoxOrderNumber ? String(fortnoxOrderNumber) : null,
+    fortnox_invoice_number: fortnoxInvoiceNumber ? String(fortnoxInvoiceNumber) : null,
+    ongoing_order_id: ongoingOrderId ? String(ongoingOrderId) : null,
+    status: allSucceeded ? "fulfilled" : "partial"
+  };
+  if (allSucceeded) {
+    updateFields.processed_at = new Date().toISOString();
+  }
 
-    // 5. Registrera betalning i Fortnox
-    if (invoiceNumber) {
-      const totalAmount = items.reduce((sum, i) => sum + (i.price * i.quantity), 0);
-      await fortnoxFetch("/invoicepayments", "POST", {
-        InvoicePayment: {
-          InvoiceNumber: invoiceNumber,
-          Amount: totalAmount,
-          AmountCurrency: totalAmount,
-          CurrencyCode: "SEK",
-          PaymentDate: new Date().toISOString().split("T")[0]
-        }
+  await db.updateOrder(order.id, updateFields);
+  await db.appendNotes(order.id, notes.join(" | "));
+
+  console.log(`[Order] ${order.order_number} completion: ${allSucceeded ? "FULL" : "PARTIAL"}`);
+  console.log(`[Order] Notes: ${notes.join(" | ")}`);
+
+  return { fortnoxOrderNumber, fortnoxInvoiceNumber, ongoingOrderId, notes };
+}
+
+// ---- ORDER VERIFICATION (backup from success page) ----
+
+app.post("/api/orders/verify", async (req, res) => {
+  try {
+    const { orderNumber, transactionId } = req.body;
+
+    let order = orderNumber ? await db.findOrderByNumber(orderNumber) : null;
+
+    if (!order && transactionId) {
+      const { rows } = await db.pool.query(
+        "SELECT * FROM orders WHERE viva_transaction_id = $1 LIMIT 1",
+        [transactionId]
+      );
+      order = rows[0] || null;
+    }
+
+    if (!order) {
+      return res.status(404).json({ message: "Order hittades inte" });
+    }
+
+    if (order.processed_at) {
+      return res.json({
+        success: true,
+        orderNumber: order.order_number,
+        status: order.status,
+        message: "Ordern är redan behandlad"
       });
     }
 
+    if (transactionId && order.payment_status !== "paid") {
+      try {
+        const vivaData = await vivaFetch(`/checkout/v2/transactions/${transactionId}`);
+        if (vivaData && (vivaData.statusId === "F" || vivaData.StatusId === "F")) {
+          await db.updateOrder(order.id, {
+            payment_status: "paid",
+            status: "confirmed",
+            viva_transaction_id: transactionId
+          });
+          console.log(`[Verify] Order ${order.order_number} confirmed via success page`);
+          const result = await handleOrderCompletion(order.id);
+          return res.json({
+            success: true,
+            orderNumber: order.order_number,
+            status: "fulfilled",
+            message: "Beställningen har behandlats"
+          });
+        }
+      } catch (err) {
+        console.error("[Verify] Viva verification failed:", err);
+      }
+    }
+
+    if (order.payment_status === "paid" && !order.processed_at) {
+      await handleOrderCompletion(order.id);
+    }
+
+    const updated = await db.findOrderByNumber(order.order_number);
     res.json({
       success: true,
-      orderNumber,
-      invoiceNumber,
-      message: "Beställningen är registrerad"
+      orderNumber: updated.order_number,
+      status: updated.status,
+      paymentStatus: updated.payment_status,
+      message: updated.processed_at ? "Beställningen har behandlats" : "Beställningen väntar på behandling"
+    });
+  } catch (err) {
+    console.error("[Verify Error]", err);
+    res.status(500).json({ message: err.message || "Verifieringen misslyckades" });
+  }
+});
+
+// ---- CHAT WIDGET (site-wide) ----
+
+const CHAT_WIDGET_PROMPT = `Du är 1753 SKINCAREs virtuella hudvårdsrådgivare – tänk dig en kunnig vän som brinner för holistisk hudvård, med en gnutta humor och mycket värme.
+
+DITT SÄTT:
+- Alltid svenska. Aldrig emojis.
+- Varm, personlig, lite rebellisk mot hudvårdsindustrin
+- Holistisk syn: hud, livsstil, endocannabinoidsystem (ECS), mikrobiom
+- Kort och kärnfullt (max 150 ord per svar om inte kunden ber om mer)
+- Humor är välkommet – du får gärna vara lite cheeky
+- ALDRIG säljig eller pushig. Rekommendera bara produkter om det är relevant
+- Om du inte kan svara: "Det ligger utanför mitt expertområde – men hör av dig direkt till oss på hej@1753skincare.com eller ring 0732-30 55 21 så löser vi det!"
+
+DU KAN HJÄLPA MED:
+- Produktfrågor (ingredienser, användning, val av produkt)
+- Hudvård, hudhälsa, hudtyper
+- Livsstilstips (sömn, kost, stress, tarmhälsa)
+- Endocannabinoidsystemet och CBD/CBG för huden
+- Hudens mikrobiom
+- Orderfrågor (hänvisa till kontakt för specifika ordrar)
+- Lägga produkter i varukorgen åt kunden
+
+PRODUKTKATALOG:
+1. "The ONE Facial Oil" (id: the-one-facial-oil, 649 kr) – Daglig ansiktsolja, 10% CBD, 0.2% CBG. Skyddar och återfuktar. 10 ml.
+2. "I LOVE Facial Oil" (id: i-love-facial-oil, 849 kr) – Nattolja, 5% CBG, 10% CBD. Reparerar och djupåterfuktar. 10 ml.
+3. "TA-DA Serum" (id: ta-da-serum, 699 kr) – CBG-serum (3%). Boostar fukt och elasticitet. 30 ml.
+4. "Au Naturel Makeup Remover" (id: au-naturel-makeup-remover, 399 kr) – Rengöringsolja, MCT + CBD. 100 ml.
+5. "Fungtastic Mushroom Extract" (id: fungtastic-mushroom-extract, 399 kr) – Chaga, Lion's Mane, Cordyceps, Reishi. 60 kapslar.
+6. "DUO-kit" (id: duo-kit, 1 099 kr) – The ONE + I LOVE Facial Oil tillsammans.
+7. "DUO-kit + TA-DA Serum" (id: duo-ta-da, 1 495 kr) – Komplett rutin: dag, natt, serum.
+
+PRODUKTMATCHNING:
+- Torr/känslig hud → The ONE + TA-DA
+- Akne/fet hud → TA-DA (CBG reglerar sebum via ECS)
+- Åldrande/fina linjer → I LOVE (nattlig reparation)
+- Rodnad/rosacea → The ONE (CBD lugnar inflammation)
+- Dålig rengöring → Au Naturel (bevarar mikrobiom)
+- Generell hälsa → Fungtastic
+- Komplett rutin → DUO-kit + TA-DA
+
+Om kunden vill ha en produkt, använd add_to_cart-funktionen.
+
+OM 1753 SKINCARE:
+- Svenskt familjeföretag, grundat av Christopher och Ebba Genberg
+- Adress: Södra Skjutbanevägen 10, 439 55 Åsa
+- Telefon: 0732-30 55 21
+- E-post: hej@1753skincare.com
+- Fri frakt över 700 kr
+- Nöjd-kund-garanti med rådgivning före och efter köp
+
+ABSOLUT FÖRBJUDET:
+- Medicinsk rådgivning eller diagnos
+- Rekommendera receptbelagda läkemedel
+- Prata om konkurrenter
+- Engelska ord (utom produktnamn)
+- Emojis`;
+
+const CHAT_WIDGET_TOOLS = [
+  {
+    type: "function",
+    name: "add_to_cart",
+    description: "Lägg till en produkt i kundens varukorg. Använd när kunden vill köpa eller testa en produkt.",
+    parameters: {
+      type: "object",
+      properties: {
+        product_id: {
+          type: "string",
+          enum: ["duo-ta-da", "ta-da-serum", "duo-kit", "i-love-facial-oil", "the-one-facial-oil", "au-naturel-makeup-remover", "fungtastic-mushroom-extract"],
+          description: "Produktens ID"
+        }
+      },
+      required: ["product_id"]
+    }
+  }
+];
+
+app.post("/api/chat", async (req, res) => {
+  try {
+    const clientIp = req.ip || req.connection.remoteAddress;
+    if (!checkRateLimit(clientIp, "chat-widget", 60)) {
+      return res.status(429).json({ message: "Du har nått gränsen. Försök igen om en stund." });
+    }
+
+    const { message, previousResponseId } = req.body;
+    if (!message) {
+      return res.status(400).json({ message: "Meddelande saknas." });
+    }
+
+    const requestBody = {
+      model: OPENAI_MODEL,
+      input: message,
+      tools: CHAT_WIDGET_TOOLS,
+      store: true
+    };
+
+    if (previousResponseId) {
+      requestBody.previous_response_id = previousResponseId;
+    } else {
+      requestBody.instructions = CHAT_WIDGET_PROMPT;
+    }
+
+    const response = await fetchWithRetry("https://api.openai.com/v1/responses", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`
+      },
+      body: JSON.stringify(requestBody)
     });
 
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw { status: response.status, message: err.error?.message || "Chatten kunde inte svara." };
+    }
+
+    let data = await response.json();
+    let actions = [];
+
+    const functionCalls = (data.output || []).filter(item => item.type === "function_call");
+    if (functionCalls.length > 0) {
+      for (const call of functionCalls) {
+        try {
+          const args = JSON.parse(call.arguments);
+          if (call.name === "add_to_cart" && args.product_id) {
+            actions.push({ type: "add_to_cart", productId: args.product_id });
+          }
+        } catch (_) { /* ignore parse errors */ }
+      }
+
+      const toolResults = functionCalls.map(call => ({
+        type: "function_call_output",
+        call_id: call.call_id,
+        output: JSON.stringify({ success: true, message: "Produkten har lagts i varukorgen." })
+      }));
+
+      const followUp = await fetchWithRetry("https://api.openai.com/v1/responses", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`
+        },
+        body: JSON.stringify({
+          model: OPENAI_MODEL,
+          previous_response_id: data.id,
+          input: toolResults,
+          tools: CHAT_WIDGET_TOOLS,
+          store: true
+        })
+      });
+
+      if (followUp.ok) {
+        data = await followUp.json();
+      }
+    }
+
+    const outputText = data.output_text || data.choices?.[0]?.message?.content || "";
+
+    res.json({
+      content: outputText,
+      responseId: data.id || null,
+      actions
+    });
   } catch (err) {
-    console.error("[Checkout Error]", err);
-    res.status(500).json({ message: err.message || "Beställningen kunde inte slutföras" });
+    console.error("[Chat Widget Error]", err);
+    res.status(err.status || 500).json({ message: err.message || "Chatten misslyckades." });
   }
 });
 
 // ---- START ----
 
-app.listen(PORT, () => {
-  console.log(`1753 SKINCARE backend kör på port ${PORT}`);
-});
+(async () => {
+  try {
+    await db.initSchema();
+  } catch (err) {
+    console.error("[DB] Schema init failed – running without database:", err.message);
+  }
+  app.listen(PORT, () => {
+    console.log(`1753 SKINCARE backend kör på port ${PORT}`);
+  });
+})();

@@ -3,184 +3,161 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="description" content="Slutför din beställning hos 1753 SKINCARE – säker betalning med Viva Wallet och fri frakt över 700 kr.">
+  <link rel="canonical" href="https://1753skincare.com/checkout.html">
+  <meta property="og:type" content="website">
+  <meta property="og:locale" content="sv_SE">
+  <meta property="og:title" content="Kassa – 1753 SKINCARE">
+  <meta property="og:description" content="Slutför din beställning – säker betalning med Viva Wallet, fri frakt över 700 kr och nöjd-kund-garanti.">
+  <meta property="og:url" content="https://1753skincare.com/checkout.html">
+  <meta property="og:image" content="https://1753skincare.com/public/Products/1753desktop.png">
+  <meta property="og:image:alt" content="1753 SKINCARE">
+  <meta name="twitter:card" content="summary_large_image">
+  <meta name="twitter:title" content="Kassa – 1753 SKINCARE">
+  <meta name="twitter:description" content="Säker betalning med Viva Wallet. Fri frakt över 700 kr.">
   <title>Kassa – 1753 SKINCARE</title>
   <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-  <div class="announcement-bar" role="region" aria-label="Information">
-    <p>Fri frakt över 700 kr · Säker betalning med Viva Wallet</p>
-  </div>
-
-  <nav class="nav" id="site-nav">
-    <div class="nav-inner">
-      <a href="index.html" class="nav-logo">1753 Skincare</a>
-      <ul class="nav-links">
-        <li><a href="index.html">Hem</a></li>
-        <li><a href="index.html#shop-section">Produkter</a></li>
-        <li><a href="about.html">Om oss</a></li>
-        <li><a href="contact.html">Kontakt</a></li>
-        <li><button type="button" class="cart-btn" onclick="toggleCart()">Varukorg <span class="cart-count"></span></button></li>
-      </ul>
-      <button class="nav-hamburger" onclick="toggleMobileMenu()" aria-label="Meny">
-        <span></span><span></span><span></span>
-      </button>
-    </div>
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-logo"><a href="index.html"><img src="public/1753.png" alt="1753 SKINCARE" width="90" height="90"></a></div>
+    <ul class="sidebar-links">
+      <li><a href="index.html" class="sidebar-link" aria-label="Hem"><svg viewBox="0 0 24 24"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1V9.5z"/></svg><span>Hem</span></a></li>
+      <li><a href="index.html#shop-section" class="sidebar-link" aria-label="Produkter"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg><span>Produkter</span></a></li>
+      <li><a href="about.html" class="sidebar-link" aria-label="Om oss"><svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78L12 21.23l8.84-8.84a5.5 5.5 0 0 0 0-7.78z"/></svg><span>Om oss</span></a></li>
+      <li><a href="contact.html" class="sidebar-link" aria-label="Kontakt"><svg viewBox="0 0 24 24"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg><span>Kontakt</span></a></li>
+    </ul>
+    <div class="sidebar-family"><img src="public/C %26 E 2.jpg" alt="Christopher och Ebba" width="36" height="36"><span>Familjen bakom</span></div>
   </nav>
 
-  <div class="page-header">
-    <h1>Kassa</h1>
+  <header class="topbar" id="topbar">
+    <button type="button" class="topbar-menu" onclick="toggleMobileMenu()" aria-label="Meny"><span></span><span></span><span></span></button>
+    <a href="index.html" class="topbar-logo"><img src="public/1753.png" alt="1753 SKINCARE" width="28" height="28"></a>
+    <div class="topbar-icons">
+      <a href="login.html" class="topbar-icon" aria-label="Mitt konto"><svg viewBox="0 0 24 24"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg></a>
+      <button type="button" class="topbar-icon" onclick="toggleCart()" aria-label="Varukorg"><svg viewBox="0 0 24 24"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4z"/><line x1="3" y1="6" x2="21" y2="6"/><path d="M16 10a4 4 0 0 1-8 0"/></svg><span class="cart-count"></span></button>
+    </div>
+  </header>
+
+  <div class="mobile-nav-overlay" id="mobile-nav-overlay">
+    <button type="button" class="mobile-nav-close" onclick="toggleMobileMenu()" aria-label="Stäng meny">&times;</button>
+    <div class="mobile-nav-content">
+      <a href="index.html">Hem</a>
+      <a href="index.html#shop-section">Produkter</a>
+      <a href="about.html">Om oss</a>
+      <a href="contact.html">Kontakt</a>
+    </div>
   </div>
 
-  <div class="checkout-container">
+  <div class="main-content">
 
-    <div class="checkout-form-section">
-      <form id="checkout-form" onsubmit="handleCheckout(event)">
-        <h2 class="checkout-section-title">Leveransuppgifter</h2>
+    <div class="page-header"><h1>Kassa</h1></div>
 
-        <div class="checkout-row">
-          <div class="checkout-field">
-            <label for="c-name">Namn</label>
-            <input type="text" id="c-name" name="name" required>
+    <div class="checkout-container">
+      <div class="checkout-form-section">
+        <ul class="checkout-trust-strip" aria-label="Trygg handel">
+          <li>Fri frakt över 700 kr</li>
+          <li>Säker betalning med Viva Wallet</li>
+          <li>Nöjd-kund-garanti enligt våra köpvillkor</li>
+        </ul>
+        <form id="checkout-form" onsubmit="handleCheckout(event)">
+          <h2 class="checkout-section-title">Leveransuppgifter</h2>
+          <div class="checkout-row">
+            <div class="checkout-field"><label for="c-name">Namn</label><input type="text" id="c-name" name="name" required></div>
+            <div class="checkout-field"><label for="c-email">E-post</label><input type="email" id="c-email" name="email" required></div>
           </div>
-          <div class="checkout-field">
-            <label for="c-email">E-post</label>
-            <input type="email" id="c-email" name="email" required>
+          <div class="checkout-field"><label for="c-phone">Telefon</label><input type="tel" id="c-phone" name="phone"></div>
+          <div class="checkout-field"><label for="c-address">Adress</label><input type="text" id="c-address" name="address" required></div>
+          <div class="checkout-row">
+            <div class="checkout-field"><label for="c-zip">Postnummer</label><input type="text" id="c-zip" name="zip" required inputmode="numeric" autocomplete="postal-code" maxlength="6" placeholder="123 45"></div>
+            <div class="checkout-field"><label for="c-city">Ort</label><input type="text" id="c-city" name="city" required></div>
           </div>
-        </div>
-
-        <div class="checkout-field">
-          <label for="c-phone">Telefon</label>
-          <input type="tel" id="c-phone" name="phone">
-        </div>
-
-        <div class="checkout-field">
-          <label for="c-address">Adress</label>
-          <input type="text" id="c-address" name="address" required>
-        </div>
-
-        <div class="checkout-row">
-          <div class="checkout-field">
-            <label for="c-zip">Postnummer</label>
-            <input type="text" id="c-zip" name="zip" required inputmode="numeric" autocomplete="postal-code" maxlength="6" placeholder="123 45">
-          </div>
-          <div class="checkout-field">
-            <label for="c-city">Ort</label>
-            <input type="text" id="c-city" name="city" required>
-          </div>
-        </div>
-
-        <button type="submit" class="btn btn-primary" id="checkout-submit" style="width:100%;text-align:center;margin-top:24px;">
-          Betala med Viva Wallet
-        </button>
-      </form>
+          <button type="submit" class="btn btn-primary" id="checkout-submit" style="width:100%;text-align:center;margin-top:24px;">Betala med Viva Wallet</button>
+        </form>
+      </div>
+      <div class="checkout-summary-section">
+        <h2 class="checkout-section-title">Din beställning</h2>
+        <div id="checkout-items"></div>
+        <div class="checkout-total" id="checkout-total"></div>
+      </div>
     </div>
 
-    <div class="checkout-summary-section">
-      <h2 class="checkout-section-title">Din beställning</h2>
-      <div id="checkout-items"></div>
-      <div class="checkout-total" id="checkout-total"></div>
-    </div>
+    <footer class="footer">
+      <div class="footer-logo"><img src="public/1753.png" alt="1753 SKINCARE" width="44" height="44"></div>
+      <div class="footer-inner">
+        <div class="footer-col"><h4>1753 Skincare</h4><p>Södra Skjutbanevägen 10<br>439 55, Åsa<br>Sverige</p></div>
+        <div class="footer-col"><h4>Kontakt</h4><a href="tel:0732305521">0732 - 30 55 21</a><a href="mailto:hej@1753skincare.com">hej@1753skincare.com</a></div>
+        <div class="footer-col"><h4>Navigera</h4><a href="index.html">Hem</a><a href="index.html#shop-section">Produkter</a><a href="about.html">Om oss</a><a href="contact.html">Kontakt</a></div>
+      </div>
+      <div class="footer-bottom">&copy; 2026 Floranie International AB</div>
+    </footer>
 
   </div>
-
-  <footer class="footer">
-    <div class="footer-inner">
-      <div class="footer-col">
-        <h4>1753 Skincare</h4>
-        <p>Södra Skjutbanevägen 10<br>439 55, Åsa<br>Sverige</p>
-      </div>
-      <div class="footer-col">
-        <h4>Kontakt</h4>
-        <a href="tel:0732305521">0732 - 30 55 21</a>
-        <a href="mailto:hej@1753skincare.com">hej@1753skincare.com</a>
-      </div>
-      <div class="footer-col">
-        <h4>Navigera</h4>
-        <a href="index.html">Hem</a>
-        <a href="index.html#shop-section">Produkter</a>
-        <a href="about.html">Om oss</a>
-        <a href="contact.html">Kontakt</a>
-      </div>
-    </div>
-    <div class="footer-bottom">&copy; 2026 Floranie International AB</div>
-  </footer>
 
   <script src="animations.js"></script>
   <script src="app.js"></script>
-  <script src="auth.js"></script>
   <script src="integrations/config.js"></script>
-  <script src="integrations/vivawallet.js"></script>
+  <script src="auth.js"></script>
   <script>
     function validateCheckoutForm() {
       const email = document.getElementById("c-email").value.trim();
       const zipRaw = document.getElementById("c-zip").value.trim().replace(/\s/g, "");
-      const emailOk = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
-      const zipOk = /^\d{5}$/.test(zipRaw);
-      if (!emailOk) {
-        showNotification("Ange en giltig e-postadress.");
-        return false;
-      }
-      if (!zipOk) {
-        showNotification("Postnummer ska vara fem siffror (svenskt format, t.ex. 41103).");
-        return false;
-      }
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) { showNotification("Ange en giltig e-postadress."); return false; }
+      if (!/^\d{5}$/.test(zipRaw)) { showNotification("Postnummer ska vara fem siffror."); return false; }
       return true;
     }
-
     function renderCheckoutSummary() {
       const cart = getCart();
       const itemsEl = document.getElementById("checkout-items");
       const totalEl = document.getElementById("checkout-total");
-
-      if (cart.length === 0) {
-        itemsEl.innerHTML = '<p style="color:var(--brown);font-size:0.88rem;">Varukorgen är tom.</p>';
-        document.getElementById("checkout-submit").disabled = true;
-        return;
-      }
-
+      if (cart.length === 0) { itemsEl.innerHTML = '<p style="color:var(--brown);font-size:0.88rem;">Varukorgen är tom.</p>'; document.getElementById("checkout-submit").disabled = true; return; }
       let total = 0;
-      itemsEl.innerHTML = cart.map(item => {
-        const p = PRODUCTS.find(pr => pr.id === item.id);
-        if (!p) return "";
-        const lineTotal = p.price * item.qty;
-        total += lineTotal;
-        return `<div class="checkout-line">
-          <span>${p.name} x ${item.qty}</span>
-          <span>${lineTotal.toLocaleString("sv-SE")} kr</span>
-        </div>`;
-      }).join("");
-
-      totalEl.innerHTML = `<div class="checkout-line checkout-line-total">
-        <span>Totalt</span>
-        <span>${total.toLocaleString("sv-SE")} kr</span>
-      </div>`;
+      itemsEl.innerHTML = cart.map(item => { const p = PRODUCTS.find(pr => pr.id === item.id); if (!p) return ""; const lt = p.price * item.qty; total += lt; return '<div class="checkout-line"><span>' + p.name + ' x ' + item.qty + '</span><span>' + lt.toLocaleString("sv-SE") + ' kr</span></div>'; }).join("");
+      const shippingNote = total >= 700 ? "Fri frakt" : "Frakt 49 kr";
+      totalEl.innerHTML = '<div class="checkout-line"><span>Frakt</span><span>' + shippingNote + '</span></div>' +
+        '<div class="checkout-line checkout-line-total"><span>Totalt</span><span>' + (total >= 700 ? total : total + 49).toLocaleString("sv-SE") + ' kr</span></div>';
     }
-
     async function handleCheckout(e) {
       e.preventDefault();
       if (!validateCheckoutForm()) return;
-
       const btn = document.getElementById("checkout-submit");
-      btn.disabled = true;
-      btn.textContent = "Bearbetar...";
-
+      btn.disabled = true; btn.textContent = "Bearbetar...";
       try {
-        const customerInfo = {
-          name: document.getElementById("c-name").value,
-          email: document.getElementById("c-email").value,
-          phone: document.getElementById("c-phone").value
-        };
-
-        await VivaWalletClient.checkout(customerInfo);
+        const cart = getCart();
+        if (cart.length === 0) throw new Error("Varukorgen är tom");
+        const apiBase = (typeof INTEGRATION_CONFIG !== "undefined" ? INTEGRATION_CONFIG.backendUrl : window.location.origin + "/api");
+        const response = await fetch(apiBase + "/orders/create", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            customer: {
+              name: document.getElementById("c-name").value.trim(),
+              email: document.getElementById("c-email").value.trim(),
+              phone: document.getElementById("c-phone").value.trim()
+            },
+            deliveryAddress: {
+              address: document.getElementById("c-address").value.trim(),
+              zip: document.getElementById("c-zip").value.trim().replace(/\s/g, ""),
+              city: document.getElementById("c-city").value.trim()
+            },
+            items: cart
+          })
+        });
+        if (!response.ok) {
+          const err = await response.json().catch(() => ({}));
+          throw new Error(err.message || "Betalningsfel: " + response.status);
+        }
+        const data = await response.json();
+        sessionStorage.setItem("1753_orderNumber", data.orderNumber);
+        window.location.href = data.checkoutUrl;
       } catch (err) {
-        btn.disabled = false;
-        btn.textContent = "Betala med Viva Wallet";
+        btn.disabled = false; btn.textContent = "Betala med Viva Wallet";
         showNotification("Fel: " + err.message);
       }
     }
-
     renderCheckoutSummary();
   </script>
+<script src="chat-widget.js"></script>
 </body>
 </html>

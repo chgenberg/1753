@@ -27,8 +27,8 @@
 
 const INTEGRATION_CONFIG = {
 
-  // Backend proxy – alla API-anrop går via denna
-  backendUrl: "http://localhost:3001/api",
+  // Backend proxy – dynamisk baserad på nuvarande domän (fungerar lokalt och på Railway)
+  backendUrl: (typeof window !== "undefined" ? window.location.origin : "http://localhost:3001") + "/api",
 
   fortnox: {
     // OAuth 2.0 – tokens hanteras server-side

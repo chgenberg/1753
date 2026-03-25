@@ -1,0 +1,157 @@
+================================================================================
+AGENT 1: FRONTEND UI – Hudanalys 2.0
+================================================================================
+
+ANSVAR
+------
+Omskriva analysis.html och analysis.js med ny UI-arkitektur: webcam, video,
+interaktiv chatt och Apple-lik design. Ingen data sparas.
+
+================================================================================
+1. SIDSTRUKTUR (analysis.html)
+================================================================================
+
+Tre logiska steg i ett flöde:
+
+  STEG 1 – Välj källa
+  ├── Uppladdningszon (drag-and-drop, bild + video)
+  ├── Webcam-knapp (öppnar live-kamera)
+  └── Privacy-meddelande
+
+  STEG 2 – Analys pågår
+  ├── Laddningsindikator med "andningsanimation"
+  ├── Roterande hudfakta
+  └── Förhandsvisning av uppladdad bild
+
+  STEG 3 – Resultat + Chatt
+  ├── Resultatpanel (sektioner: Hudanalys, Livsstilsråd, Produkter, Undvik)
+  ├── Rekommenderade produkter (kort med bild, namn, pris)
+  └── Chatt-interface (bubblor, textfält, skicka-knapp)
+
+================================================================================
+2. WEBCAM-INTEGRATION
+================================================================================
+
+Fil: analysis.js
+
+Funktioner:
+- openWebcam()       – navigator.mediaDevices.getUserMedia({ video: { facingMode: "user" } })
+- switchCamera()     – växla facingMode "user" / "environment" (mobil)
+- captureSnapshot()  – rita <video> till <canvas>, exportera som base64 JPEG
+- closeWebcam()      – stoppa alla tracks, dölja video-elementet
+
+UI-element i analysis.html:
+- <div class="webcam-container"> med <video autoplay playsinline muted>
+- Rund capture-knapp med pulsating-animation (CSS)
+- Knapp för att byta kamera (mobil)
+- Countdown-animation (3, 2, 1) innan snapshot
+
+Krav:
+- Be om kameratillstånd med tydligt svenskt meddelande vid nekad access
+- Stöd för both front- och bakkamera på mobil
+- Video-elementet ska ha border-radius: 24px och mjuk skugga
+- Snapshot ska konverteras till JPEG quality 0.85 för att begränsa storlek
+
+================================================================================
+3. BILD/VIDEO-UPPLADDNING
+================================================================================
+
+Fil: analysis.js
+
+Funktioner:
+- setupUploadZone()  – drag-and-drop + klick, accepterar image/* och video/*
+- handleImageFile()  – FileReader -> base64, visa förhandsvisning
+- handleVideoFile()  – skapa <video>, seekTo(1s), rita frame till canvas -> base64
+- resetUpload()      – rensa allt, återställ till steg 1
+
+Krav:
+- Maximal filstorlek: 15 MB (visa varning på svenska om överstigen)
+- Video: extrahera frame vid 1 sekund (undvik svart frame)
+- Base64-strängen lever enbart i en JS-variabel (uploadedImageBase64)
+- Förhandsvisning med "Byt foto" och "Analysera" knappar
+
+================================================================================
+4. RESULTATPANEL
+================================================================================
+
+Fil: analysis.js
+
+Funktion: displayResults(analysisText, responseId)
+
+- Parsa markdown-formaterat svar från GPT-5.3 till HTML-sektioner
+- Strukturerade rubriker (matchar promptens ## rubriker): Hudanalys, Livsstil,
+  Rekommenderade produkter, Undvik
+- Spara responseId för chatt-uppföljning
+- Stagger-fade-in animation per sektion (CSS-klass .result-section)
+- Produktkort: hämta från PRODUCTS-arrayen i app.js, matcha på namn/id
+
+================================================================================
+5. CHATT-INTERFACE
+================================================================================
+
+Fil: analysis.js
+
+Funktioner:
+- initChat(responseId)    – sätt upp chatt-UI, spara responseId
+- sendChatMessage(text)   – POST /api/analysis/chat med message + previousResponseId
+- appendMessage(role, text) – lägg till bubbla i chatt-historik
+- showTypingIndicator()   – visa "skriver..." med tre pulserande punkter
+- hideTypingIndicator()   – ta bort indikator
+
+UI-element:
+- <div class="chat-container">
+  ├── <div class="chat-messages"> (scrollbar)
+  │   ├── <div class="chat-bubble chat-bubble--assistant">
+  │   └── <div class="chat-bubble chat-bubble--user">
+  ├── <div class="chat-typing"> (tre punkter)
+  └── <form class="chat-input-form">
+      ├── <input type="text" class="chat-input" placeholder="Ställ en fråga om din hud...">
+      └── <button type="submit" class="chat-send-btn" aria-label="Skicka">→</button>
+
+Krav:
+- Första meddelandet i chatten: "Har du fler frågor om din hud? Jag finns här."
+- Max 50 meddelanden per session (räknare i JS)
+- Auto-scroll till botten vid nytt meddelande
+- Enter skickar, Shift+Enter ny rad
+- Chatthistorik lagras i sessionStorage (rensas vid stängning)
+- responseId uppdateras efter varje svar (senaste previous_response_id)
+
+================================================================================
+6. PRIVACY / INGEN DATA SPARAS
+================================================================================
+
+- uploadedImageBase64 = null efter analys (eller vid sidbyte)
+- Inga localStorage-anrop för bilddata
+- sessionStorage för chatt rensas automatiskt
+- Synligt meddelande: "Ditt foto sparas aldrig. Analysen sker i realtid och
+  försvinner när du lämnar sidan."
+- Kameratillstånd återkallas inte (browser hanterar), men tracks stoppas
+
+================================================================================
+7. DESKTOP-LAYOUT (tvådelad)
+================================================================================
+
+  +---------------------------+---------------------------+
+  |                           |                           |
+  |   VÄNSTER (sticky)        |   HÖGER (scroll)          |
+  |                           |                           |
+  |   Uppladdning / Webcam    |   Resultat                |
+  |   Förhandsvisning         |   Produktrekommendationer |
+  |                           |   Chatt                   |
+  |                           |                           |
+  +---------------------------+---------------------------+
+
+Mobil: en-kolumn, uppladdning överst, resultat + chatt under.
+
+================================================================================
+8. BEFINTLIGA BEROENDEN
+================================================================================
+
+- PRODUCTS från app.js (produktdata)
+- INTEGRATION_CONFIG från integrations/config.js (backendUrl)
+- toggleCart(), toggleMobileMenu() från app.js (navigation)
+- Sidebar, topbar, mobile-nav-overlay, cart-drawer (globala komponenter)
+
+SYSTEM_PROMPT skickas INTE från klienten – servern hanterar den.
+Klienten skickar: { imageBase64, prompt? } till POST /api/analysis
+Klienten skickar: { message, previousResponseId } till POST /api/analysis/chat

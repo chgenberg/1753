@@ -4,11 +4,12 @@ Det här ersätter **inte** auto-continue i Composer (finns inte). Det ger i st�
 
 ## Så kör du
 
-1. **Del 1** i en **ny** Composer/Agent-chatt. `@`-referera bara `agents/workstream-sentry.md` (eller klistra in prompten nedan utan massor av andra filer).
+1. **Del 1** i en **ny** Composer/Agent-chatt. `@`-referera bara `agents/workstream-sentry.md` (eller klistra in prompten nedan utan massor av andra filer). **Valfritt men rekommenderat:** öppna kort `LEARNINGS.md` och senaste `Kvarstår` i `IMPROVEMENT_LOG.md` och klistra in sammanfattning under ”Kända problem” i Del 1-prompten.
 2. När Sentry är klar: kopiera svaret, stäng eller lämna chatten.
 3. **Del 2** i **ny** chatt – klistra in Sentry-rapporten där det står `[SENTRY-RAPPORT]`.
 4. **Del 3** i **ny** chatt – klistra in Improver-rapporten.
 5. **Del 4** kan köras i samma chatt som Del 3 eller en ny – uppdatera `IMPROVEMENT_LOG.md`.
+6. **Del 5 (lärdomar):** uppdatera `LEARNINGS.md` med nya punkter för nästa cykel (se `skills/continuous-improvement/SKILL.md`, Steg 5 – Lär).
 
 **Mellan del 1→2 och 2→3 (valfritt):** kör automatiska kontroller i terminalen:
 
@@ -107,4 +108,5 @@ Använd datum och sammanfatta Sentry / Improver / Verifier från denna körning.
 
 - `skills/continuous-improvement/SKILL.md` – full loop och prioriteringstabell
 - `IMPROVEMENT_LOG.md` – historik
+- `LEARNINGS.md` – kort minne mellan cykler (självförbättring)
 - `agents/workstream-sentry.md`, `agents/improver.md`, `agents/verifier.md` – roller

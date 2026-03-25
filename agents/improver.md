@@ -86,6 +86,11 @@ Fixa ALLT. Börja med det som kostar mest pengar att inte fixa.
 - Inputs: 12px radius, 48px höjd, fokus med ring-shadow
 - Generös whitespace – låt varje element andas
 
+### 3b. PRODUKTPRESENTATION + MINIMALISTISKA RAMAR (säljkritiskt)
+- Produktbilder i **grid och på produktsida** ska ha en medveten **presentationsyta**: minimalistisk ram (subtil yttre/inre skugga), tydlig crop, fokus på förpackning/produkt
+- **Hero** och översta sektioner: ska kännas **premium och interaktiva** (t.ex. hero med bild, tydliga CTA, hover på kort)
+- Målet: **enorm interaktivitet** + **minimalistiska ramar** – aldrig rörigt, alltid luft och avsikt
+
 ### 4. INTERAKTIVITET (gör sidan levande)
 - Scroll-reveal animationer (IntersectionObserver fade-in)
 - Stagger-animationer på produktgridet
@@ -111,12 +116,12 @@ Fixa ALLT. Börja med det som kostar mest pengar att inte fixa.
 
 ## Arbetsmetod
 
-1. Läs sentrys rapport (om den finns)
+1. Läs sentrys rapport (om den finns). Om kontinuerlig loop används: läs även **`LEARNINGS.md`** och senaste **`Kvarstår`** i `IMPROVEMENT_LOG.md` så du bygger vidare istället för att göra om samma arbete.
 2. Gå igenom VARJE fil i tabellordning ovan
 3. För varje fil: läs hela → lista problem → fixa dem
 4. Efter varje fix: mentalt verifiera att inget annat bröts
 5. Fokusera på det som ger MEST värde (sälj + design) per tidsenhet
-6. Rapportera allt du gjort
+6. Rapportera allt du gjort (så nästa steg kan loggas i `LEARNINGS.md`)
 
 ## Regler
 
@@ -124,7 +129,7 @@ Fixa ALLT. Börja med det som kostar mest pengar att inte fixa.
 - All synlig text på korrekt svenska (å, ä, ö)
 - Följ Apple-designprinciperna strikt
 - Bryt ALDRIG befintlig funktion – testa mentalt
-- Varje ändring ska göra sidan mer säljande ELLER mer interaktiv ELLER mer Apple-lik
+- Varje ändring ska göra sidan mer säljande ELLER mer interaktiv ELLER mer Apple-lik; prioritera **snygg produktpresentation** och **tydlig interaktivitet** där det ökar konvertering
 - Inga onödiga kommentarer i koden – koden ska tala för sig själv
 
 ## Rapportformat

@@ -1,0 +1,82 @@
+---
+description: Bygger hudanalys 2.0 med GPT-5.3 vision, webcam, interaktiv chatt
+globs:
+  - analysis.html
+  - analysis.js
+  - server.js
+alwaysApply: false
+---
+
+# Hudanalys 2.0 – Byggguide för Composer 2.0
+
+Aktivera med `/build-analysis` eller `/bygg-hudanalys`.
+
+## Agentplaner
+
+Läs ALLA planfiler i ordning innan du börjar bygga:
+
+1. `agents/skin-analysis/01-frontend-ui.txt` – UI-arkitektur (HTML + JS)
+2. `agents/skin-analysis/02-backend-api.txt` – Server-endpoints (Express)
+3. `agents/skin-analysis/03-prompt-engineering.txt` – System prompt + chatt-persona
+4. `agents/skin-analysis/04-interaction-design.txt` – CSS + animationer
+5. `agents/skin-analysis/05-merge-instructions.txt` – Merge-ordning + verifiering
+
+## Byggordning
+
+Följ exakt denna ordning (beroenden):
+
+1. **server.js** – Backend först (endpoints måste finnas innan frontend testar)
+   - Ändra `express.json({ limit: "20mb" })`
+   - Lägg till `ANALYSIS_SYSTEM_PROMPT` som server-side konstant (från plan 03)
+   - Migrera `POST /api/analysis` från Chat Completions till Responses API
+   - Lägg till `POST /api/analysis/chat` (ny route)
+   - Lägg till rate limiting
+
+2. **analysis.js** – Frontend-logik
+   - Webcam-integration (getUserMedia, snapshot, kamerabyte)
+   - Bild/video-uppladdning (drag-drop, video frame extraction)
+   - Resultatvisning (markdown → HTML, stagger-animation)
+   - Chatt-klient (bubblor, typing indicator, previous_response_id)
+   - Ta bort gammal `ANALYSIS_SYSTEM_PROMPT` från klienten
+
+3. **analysis.html** – Ny HTML-struktur
+   - Behåll: sidebar, topbar, mobile-nav-overlay, cart-drawer, footer
+   - Byt ut: allt inuti `.analysis-page` / `.analysis-container`
+   - Ny layout: `.analysis-layout` med `.analysis-left` + `.analysis-right`
+
+4. **styles.css** – Nya CSS-sektioner
+   - Lägg till alla klasser från plan 04
+   - Ta bort gamla `.analysis-*` klasser som ersätts
+   - Verifiera inga krockar
+
+## Tekniska krav
+
+- **API:** OpenAI Responses API (`POST /v1/responses`) med `gpt-5.3-chat-latest`
+- **Chatt:** `previous_response_id` + `store: true` för multi-turn
+- **Ingen data sparas:** Bilder enbart i JS-variabler, chatt i sessionStorage
+- **System prompt:** Server-side konstant, ALDRIG från klienten
+- **Responsivt:** Tvådelad desktop, en-kolumn mobil
+- **Tillgänglighet:** aria-labels, focus-visible, prefers-reduced-motion
+
+## Överenskomna klassnamn
+
+Se plan 05 sektion 3 för fullständig lista. Kritiska:
+- `.analysis-layout`, `.analysis-left`, `.analysis-right`
+- `.webcam-container`, `.webcam-capture-btn`
+- `.chat-container`, `.chat-bubble--assistant`, `.chat-bubble--user`
+- `.chat-typing`, `.chat-input-form`, `.chat-send-btn`
+- `.privacy-notice`
+
+## Verifiering
+
+Efter bygget, kör verifieringschecklistan i plan 05 sektion 4.
+Kör sedan 4-agentloopen (Sentry → Improver → Verifier → Logga).
+
+## Designsystem
+
+Följ det befintliga designsystemet:
+- Färger: `--green` (#108474), `--brown` (#766a62), `--dark` (#1d1d1f), `--bg` (#f5f5f7)
+- Typografi: SF Pro system stack, stora rubriker (600-700 weight, -0.02em tracking)
+- Radier: 24px kort, 20px bubblor, 28px input, 12px mindre element
+- Transitions: 0.3s cubic-bezier(0.25, 0.1, 0.25, 1)
+- Skuggor: box-shadow istället för borders

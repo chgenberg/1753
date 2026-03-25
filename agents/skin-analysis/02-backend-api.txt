@@ -1,0 +1,206 @@
+================================================================================
+AGENT 2: BACKEND API – Hudanalys 2.0
+================================================================================
+
+ANSVAR
+------
+Uppdatera server.js med nya/migrerade endpoints för hudanalys och interaktiv
+chatt. Migrera från Chat Completions API till OpenAI Responses API med
+gpt-5.3-chat-latest.
+
+================================================================================
+1. MIGRERING: CHAT COMPLETIONS -> RESPONSES API
+================================================================================
+
+Befintlig route: POST /api/analysis (server.js rad 457-510)
+Nuvarande: POST https://api.openai.com/v1/chat/completions med gpt-4o
+Nytt:       POST https://api.openai.com/v1/responses med gpt-5.3-chat-latest
+
+Viktiga skillnader:
+- Endpoint: /v1/chat/completions -> /v1/responses
+- Input-format: messages[] -> input[] (kompatibelt array-format)
+- System prompt: messages[0].role:"system" -> instructions: "..."
+- Bild: image_url i content-array -> input_image i content-array
+- Svar: choices[0].message.content -> output_text (helper)
+- Nytt: response.id returneras (för previous_response_id i chatt)
+- Nytt: store: true aktiverar server-side konversationsminne hos OpenAI
+
+================================================================================
+2. ENDPOINT: POST /api/analysis (UPPDATERAD)
+================================================================================
+
+Request body:
+{
+  "imageBase64": "data:image/jpeg;base64,...",
+  "prompt": "Analysera min hud..." (valfritt, default finns)
+}
+
+Server-side logik:
+1. Validera att imageBase64 finns och börjar med "data:image/"
+2. Ladda ANALYSIS_SYSTEM_PROMPT från server-side konstant (ALDRIG från klienten)
+3. Anropa OpenAI Responses API:
+
+   POST https://api.openai.com/v1/responses
+   Headers: Authorization: Bearer $OPENAI_API_KEY, Content-Type: application/json
+   Body:
+   {
+     "model": "gpt-5.3-chat-latest",
+     "instructions": ANALYSIS_SYSTEM_PROMPT,
+     "input": [
+       {
+         "role": "user",
+         "content": [
+           { "type": "input_text", "text": prompt },
+           { "type": "input_image", "image_url": imageBase64 }
+         ]
+       }
+     ],
+     "store": true
+   }
+
+4. Returnera:
+   {
+     "content": response.output_text,
+     "responseId": response.id,
+     "usage": response.usage
+   }
+
+Felhantering:
+- 400 om imageBase64 saknas
+- 429 om rate limit nådd (se sektion 5)
+- 502 om OpenAI returnerar fel (vidarebefordra felmeddelande på svenska)
+
+================================================================================
+3. ENDPOINT: POST /api/analysis/chat (NY)
+================================================================================
+
+Request body:
+{
+  "message": "Kan du berätta mer om...",
+  "previousResponseId": "resp_abc123"
+}
+
+Server-side logik:
+1. Validera att message och previousResponseId finns
+2. Anropa OpenAI Responses API:
+
+   POST https://api.openai.com/v1/responses
+   Body:
+   {
+     "model": "gpt-5.3-chat-latest",
+     "input": message,
+     "previous_response_id": previousResponseId,
+     "store": true
+   }
+
+   OBS: instructions behöver INTE skickas igen – OpenAI behåller dem via
+   previous_response_id + store: true.
+
+3. Returnera:
+   {
+     "content": response.output_text,
+     "responseId": response.id
+   }
+
+Felhantering:
+- 400 om message eller previousResponseId saknas
+- 404 om previousResponseId inte finns hos OpenAI (sessionen kan ha löpt ut)
+- 429 om rate limit nådd
+- 502 om OpenAI returnerar fel
+
+================================================================================
+4. ENDPOINT: POST /api/analysis/video-frame (NY, VALFRI)
+================================================================================
+
+Denna endpoint är VALFRI – klienten extraherar frame client-side i första hand.
+Finns som fallback om client-side extraction misslyckas.
+
+Request body:
+{
+  "videoBase64": "data:video/mp4;base64,..."
+}
+
+Server-side logik:
+1. Spara temporär fil, extrahera frame med ffmpeg (om installerat)
+2. Alternativt: returnera felmeddelande och be klienten extrahera frame
+
+OBS: Denna endpoint är lägre prioritet. Fokusera på /api/analysis och
+/api/analysis/chat först.
+
+================================================================================
+5. RATE LIMITING
+================================================================================
+
+Implementation: enkel in-memory rate limiter (Map med IP -> timestamps)
+
+Begränsningar:
+- POST /api/analysis: max 10 anrop per timme per IP
+- POST /api/analysis/chat: max 50 anrop per timme per IP
+- Returnera 429 med svensk felmeddelande: "Du har nått gränsen. Försök igen om
+  en stund."
+
+Kod-skiss:
+  const rateLimits = new Map();
+
+  function checkRateLimit(ip, endpoint, maxPerHour) {
+    const key = `${ip}:${endpoint}`;
+    const now = Date.now();
+    const timestamps = rateLimits.get(key) || [];
+    const recent = timestamps.filter(t => now - t < 3600000);
+    if (recent.length >= maxPerHour) return false;
+    recent.push(now);
+    rateLimits.set(key, recent);
+    return true;
+  }
+
+================================================================================
+6. SYSTEM PROMPT (SERVER-SIDE KONSTANT)
+================================================================================
+
+Systemprompten definieras som en konstant i server.js (eller i en separat fil
+som importeras). Den skickas ALDRIG från klienten.
+
+Se Agent 3 (03-prompt-engineering.txt) för den fullständiga prompten.
+
+Plats i server.js:
+  const ANALYSIS_SYSTEM_PROMPT = `...`; // Definieras ovanför routes
+
+================================================================================
+7. BODY SIZE LIMIT
+================================================================================
+
+Nuvarande: express.json({ limit: "10mb" })
+Nytt:       express.json({ limit: "20mb" })
+
+Motivering: Högupplösningsbilder från webcam kan vara stora. 20 MB ger marginal
+utan att vara orimligt.
+
+================================================================================
+8. ENVIRONMENT VARIABLES
+================================================================================
+
+Inga nya nycklar behövs. Samma OPENAI_API_KEY som redan används.
+Modellnamnet (gpt-5.3-chat-latest) hårdkodas i server.js.
+
+Valfritt: Lägg till OPENAI_MODEL i .env.example för flexibilitet:
+  OPENAI_MODEL=gpt-5.3-chat-latest
+
+================================================================================
+9. FETCHWITRETRY – ANPASSA FÖR RESPONSES API
+================================================================================
+
+Befintlig fetchWithRetry() i server.js fungerar redan.
+Responses API returnerar samma HTTP-statuskoder (429, 500, etc.)
+Ingen ändring behövs i retry-logiken.
+
+================================================================================
+10. SAMMANFATTNING AV ÄNDRINGAR I server.js
+================================================================================
+
+1. Byt express.json limit: "10mb" -> "20mb"
+2. Lägg till ANALYSIS_SYSTEM_PROMPT som server-side konstant
+3. Uppdatera POST /api/analysis: Chat Completions -> Responses API
+4. Lägg till POST /api/analysis/chat (ny route)
+5. Lägg till rate limiting (checkRateLimit helper + middleware)
+6. (Valfritt) POST /api/analysis/video-frame
+7. (Valfritt) OPENAI_MODEL i .env.example

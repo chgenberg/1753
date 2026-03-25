@@ -52,7 +52,7 @@ generösa marginaler, subtila skuggor, smooth transitions.
 - Login/registrering som inte fungerar
 - Dashboard-vyer som inte visas eller kraschar
 - Checkout-flöde som inte går att slutföra
-- Bilder som inte laddar (Unsplash-URLer)
+- Bilder som inte laddar (`public/...` eller trasiga sökvägar)
 - Formulär utan validering eller med trasig submit
 - Server-routes som returnerar fel
 - Auth-tokens som inte skickas/verifieras korrekt
@@ -69,7 +69,13 @@ generösa marginaler, subtila skuggor, smooth transitions.
 - Saknade "urgency" eller "scarcity" signaler
 - Checkout utan trust-signaler (garanti, säker betalning)
 
-### 3. APPLE-DESIGN-BRISTER (högt, varumärkeskritiskt)
+### 3. PRODUKTPRESENTATION + INTERAKTIVITET (högt, sälj och varumärke)
+- Produktgrid eller produktsida utan tydlig, **minimalistisk ram** kring bilder (flat, billigt, ogenomtänkt)
+- Produktpresentation som känns generisk (dålig crop, ingen hover-lift, ingen visuell hierarki)
+- För lite **interaktivitet** (inga hover-states, inga micro-interactions, statiska ytor där kunden förväntar sig respons)
+- Hero eller översta fold utan säljande visuell hook (ingen hero-bild eller svag läsbarhet)
+
+### 4. APPLE-DESIGN-BRISTER (högt, varumärkeskritiskt)
 - Borders istället for subtila skuggor
 - Hårda hörn (radius < 12px) på kort och knappar
 - Saknad backdrop-filter: blur på nav
@@ -81,7 +87,7 @@ generösa marginaler, subtila skuggor, smooth transitions.
 - Inputs utan mjuka fokus-states (ring-shadow)
 - Footer som inte matchar Apple-estetik
 
-### 4. UX + INTERAKTIVITET (medel)
+### 5. UX + INTERAKTIVITET (medel)
 - Klickbara element utan hover-effekt
 - Saknade micro-interactions (knapptryck, cart-badge, transitions)
 - Sidor utan scroll-animationer (fade-in, reveal)
@@ -91,7 +97,7 @@ generösa marginaler, subtila skuggor, smooth transitions.
 - Saknade aria-labels, fokus-styles, tangentbordsnavigation
 - Formulär utan tydlig feedback (success, error)
 
-### 5. KOD-KVALITET (lägre)
+### 6. KOD-KVALITET (lägre)
 - Duplicerad CSS
 - Inline styles som borde vara klasser
 - Saknade error-handlers i fetch-anrop
@@ -108,6 +114,8 @@ Förvänta dig handoff med:
 3. Eventuella kända problem fran förra cykeln
 
 Om ingen handoff ges: granska ALLA filer i ordning ovan.
+
+**Självförbättring:** Om projektet använder kontinuerlig loop – läs innan du rapporterar: senaste `Kvarstår` i `IMPROVEMENT_LOG.md` och `LEARNINGS.md` under `.cursor/orchestrator/run/2026-03-24-1753-rebuild/` så att du inte duplicerar kända gap och kan föreslå nästa steg.
 
 ## Rapportformat
 

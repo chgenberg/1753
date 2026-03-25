@@ -1,0 +1,519 @@
+---
+description: "Hudanalys 3.0 -- 8-agent upgrade-protokoll for AI-hudanalysen. Aktiveras med /hudanalys-upgrade eller nar man arbetar med analysis-filer."
+globs: analysis.html, analysis.js
+alwaysApply: false
+---
+
+# Hudanalys 3.0 -- 8-agent upgrade-protokoll
+
+Kor agenterna sekventiellt. Varje agent levererar ett handoff-dokument till nasta.
+Alla agenter foljer 1753 SKINCAREs designsystem (Apple-minimalism, `--green`, `--brown`, `--dark`, stora radier, subtila skuggor, smooth transitions).
+
+Aktivera med `/hudanalys-upgrade`.
+
+## Nuvarande filer
+
+| Fil | Ansvar |
+|-----|--------|
+| `analysis.html` | HTML-struktur: upload-zon, webcam, preview, loading, resultat, chatt |
+| `analysis.js` | Klientlogik: upload, webcam, API-anrop, resultatrendering, chatt |
+| `server.js` | `POST /api/analysis` (Responses API + ANALYSIS_SYSTEM_PROMPT), `POST /api/analysis/chat` |
+| `styles.css` | All analysis-CSS (`.analysis-layout`, `.upload-zone`, `.chat-*`, etc.) |
+
+## Nuvarande begransningar att losa
+
+1. En enda helbild skickas till Vision -- ger vag/generisk analys
+2. Inget fragestallande till kunden -- AI:n gissar allt fran fotot
+3. Produktrekommendationer baseras pa nyckelordsmatchning i klienten, inte strukturerad AI-output
+4. Inga direkta "Lagg i varukorg"-knappar i resultatet
+5. Ingen koppling till kunddashboard eller hudresa
+
+---
+
+## Agent 1 -- Researcher (readonly)
+
+**Roll:** Kartlagg nulagets exakta implementation.
+**Model:** fast
+
+### Uppgifter
+
+1. Las `analysis.html`, `analysis.js`, `server.js` (rad 470-720), `styles.css` (analysis-sektioner)
+2. Dokumentera:
+   - Alla DOM-id:n och klasser i analysis.html
+   - Alla funktioner i analysis.js med signatur och beroenden
+   - API-endpoints: request/response-format
+   - ANALYSIS_SYSTEM_PROMPT: fullstandig text
+   - CSS-klasser som anvands for analys-UI
+3. Las OpenAI API-docs for multi-image input med Responses API (`input_image` kan forekomma flera ganger i samma message)
+4. Verifiera att `detail: "high"` stods i Responses API for battre bildkvalitet
+
+### Handoff
+
+Leverera ett dokument med:
+- Komplett funktionslista (namn, vad den gor, beroenden)
+- API-format (nuvarande request/response)
+- Lista over alla CSS-klasser
+- Bekraftat multi-image-stod i Responses API
+
+---
+
+## Agent 2 -- Face Region Architect
+
+**Roll:** Designa klient-side ansiktsbeskaning med MediaPipe Face Landmarker.
+**Model:** default
+
+### Teknisk spec
+
+**Bibliotek:** `@mediapipe/tasks-vision` via CDN
+```html
+<script src="https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision/vision_bundle.mjs" type="module"></script>
+```
+Alternativt: dynamisk import i analysis.js IIFE.
+
+**Modell:** `face_landmarker.task` fran MediaPipe (laddas asynkront vid forsta anvandning)
+
+**Initiering:**
+```javascript
+import { FaceLandmarker, FilesetResolver } from "@mediapipe/tasks-vision";
+const vision = await FilesetResolver.forVisionTasks(
+  "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision/wasm"
+);
+const landmarker = await FaceLandmarker.createFromOptions(vision, {
+  baseOptions: { modelAssetPath: "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task" },
+  runningMode: "IMAGE",
+  numFaces: 1
+});
+```
+
+**Landmark-index for hudregioner (478-punkt mesh):**
+
+| Region | Landmark-index (approximativa mittpunkter) | Beskrivning |
+|--------|---------------------------------------------|-------------|
+| Panna | 10, 67, 69, 104, 108, 151, 297, 299, 333, 337 | Ovre delen av ansiktet, ovanfor ogonbrynen |
+| Vanster kind | 50, 101, 116, 117, 118, 119, 123, 187, 205, 206 | Vanster kindområde under ogat |
+| Hoger kind | 280, 330, 345, 346, 347, 348, 352, 411, 425, 426 | Hoger kindområde under ogat |
+| Nasa | 1, 2, 4, 5, 6, 19, 94, 195, 197 | Nasryggen och naspetsen |
+| Haka | 152, 175, 176, 148, 149, 150, 377, 378, 379, 395, 396, 400 | Omradet under munnen till hakspetsen |
+
+**Beskärningslogik:**
+
+1. Kör `landmarker.detect(imageElement)` pa uppladdad bild eller webcam-snapshot
+2. For varje region: berakna bounding box fran landmarks (min/max x, min/max y)
+3. Expandera bounding box med 20% margin (for att fa med omgivande hud)
+4. Klipp ut via canvas (`drawImage` med source rect) till 300x300px JPEG (quality 0.85)
+5. Exportera som `{ label: "panna", imageBase64: "data:image/jpeg;base64,..." }`
+
+**Fallback:** Om `landmarker.detect()` returnerar 0 faces -> skicka hela bilden som en enda region med label "helansiktet"
+
+**UX under beskärning:**
+- Visa kort "Analyserar ansiktet..." med spinner (< 2 sekunder)
+- Visa INTE de beskurna regionerna for kunden (det ar backend-fokuserat)
+
+### Handoff
+
+Komplett JavaScript-specifikation for:
+- `initFaceLandmarker()` -- lazy-load vid forsta analys
+- `detectAndCropRegions(imageBase64)` -- returnerar `Promise<Array<{label, imageBase64}>>`
+- Fallback-logik
+- Minneshantering (rensa canvas-element)
+
+---
+
+## Agent 3 -- Questionnaire Designer
+
+**Roll:** Designa interaktivt 5-frags formulär.
+**Model:** fast
+
+### Fragor
+
+**F1: Hudtyp**
+- Label: "Hur skulle du beskriva din hudtyp?"
+- Typ: Single-select knappar (pill-form)
+- Alternativ: Torr, Normal, Blandad, Fet, Känslig
+- ID: `skinType`
+
+**F2: Huvudproblem**
+- Label: "Vad upplever du som ditt största hudproblem just nu?"
+- Typ: Multi-select chips (max 3)
+- Alternativ: Rodnad, Akne, Torrhet, Fina linjer, Pigmentfläckar, Ojämn hudton, Stora porer, Eksem, Inget specifikt
+- ID: `concerns`
+
+**F3: Nuvarande rutin**
+- Label: "Hur ser din nuvarande hudvårdsrutin ut?"
+- Typ: Single-select knappar
+- Alternativ: Ingen rutin, Enkel (1-2 steg), Medel (3-5 steg), Avancerad (6+ steg)
+- ID: `routine`
+
+**F4: Livsstilsfaktorer**
+- Label: "Hur påverkar dessa din vardag?"
+- Typ: 4 sliders (1-5)
+  - Stressnivå (1 = lugn, 5 = mycket stress)
+  - Sömnkvalitet (1 = dålig, 5 = utmärkt)
+  - Kost (1 = mycket bearbetat, 5 = mycket hälsosamt)
+  - Fysisk aktivitet (1 = stillasittande, 5 = mycket aktiv)
+- ID: `lifestyle`
+
+**F5: Mål**
+- Label: "Vad är ditt mål med hudvården?"
+- Typ: Multi-select chips (max 2) + fritext
+- Alternativ: Lugna huden, Återfukta, Anti-aging, Rena/klara upp, Glöd och lyster, Balansera oljeproduktion
+- Fritext: "Annat (beskriv)" (max 100 tecken)
+- ID: `goals`
+
+### UX-flow
+
+- Frågorna visas som en wizard med 5 steg i **hogra panelen** (`analysis-right`) medan bildbeskärning + API-anrop kor i bakgrunden
+- Varje steg: smooth slide-transition (translateX), progress-dots langst upp
+- Forsta fragan visas automatiskt nar analysen startar (efter klick pa "Analysera")
+- Svarsknapparna ar pill-formade, blir grona (`--green`) vid val
+- "Nästa"-knapp langst ner, inaktiv tills minst ett val gjorts
+- Sista fragan har "Klart!"-knapp -- nar bade fragor och AI-analys ar klara, visa resultat
+- Om AI-analysen tar langre: visa "Bearbetar din analys..." med spinner efter sista fragan
+
+### Datasammanstallning
+
+Svaren konverteras till en sträng som bifogas AI-prompten:
+```
+Kundens svar:
+- Hudtyp: Blandad
+- Huvudproblem: Rodnad, Torrhet
+- Nuvarande rutin: Enkel (1-2 steg)
+- Stressnivå: 4/5, Sömn: 3/5, Kost: 3/5, Aktivitet: 2/5
+- Mål: Lugna huden, Återfukta
+```
+
+### Handoff
+
+Fullstandig HTML-struktur for wizard, CSS-klassnamn, och JavaScript-logik for:
+- `showQuestion(step)` -- visa ratt fraga
+- `collectAnswers()` -- returnera sammanfattningsstrang
+- Progress-state-hantering
+
+---
+
+## Agent 4 -- API Architect
+
+**Roll:** Redesigna `POST /api/analysis` och ANALYSIS_SYSTEM_PROMPT.
+**Model:** default
+
+### Nytt request-format
+
+```json
+{
+  "regions": [
+    { "label": "panna", "imageBase64": "data:image/jpeg;base64,..." },
+    { "label": "vanster_kind", "imageBase64": "data:image/jpeg;base64,..." },
+    { "label": "hoger_kind", "imageBase64": "data:image/jpeg;base64,..." },
+    { "label": "nasa", "imageBase64": "data:image/jpeg;base64,..." },
+    { "label": "haka", "imageBase64": "data:image/jpeg;base64,..." }
+  ],
+  "fullImage": "data:image/jpeg;base64,...",
+  "questions": {
+    "skinType": "blandad",
+    "concerns": ["rodnad", "torrhet"],
+    "routine": "enkel",
+    "lifestyle": { "stress": 4, "sleep": 3, "diet": 3, "activity": 2 },
+    "goals": ["lugna", "aterfukta"],
+    "goalFreeText": ""
+  }
+}
+```
+
+### OpenAI Responses API -- multi-image anrop
+
+```javascript
+const input = [
+  {
+    role: "user",
+    content: [
+      { type: "input_text", text: buildPrompt(questions) },
+      // Hela ansiktet forst (for overblick)
+      { type: "input_image", image_url: fullImage, detail: "high" },
+      // Sedan varje region med label
+      ...regions.map(r => ({ type: "input_image", image_url: r.imageBase64, detail: "high" }))
+    ]
+  }
+];
+```
+
+Prompt-texten inkluderar: "Bilderna visar: 1) helansiktet, 2) pannan, 3) vanster kind, 4) hoger kind, 5) nasan, 6) hakan."
+
+### Uppdaterad ANALYSIS_SYSTEM_PROMPT
+
+Lagg till dessa instruktioner i prompten:
+
+```
+BILDFORMAT:
+Du far 6 bilder: helansiktet + 5 beskurna regioner (panna, vanster kind, hoger kind, nasa, haka).
+Analysera varje region specifikt och namngiv dem i din analys.
+
+KUNDINPUT:
+Kunden har svarat pa fragor om hudtyp, problem, rutin, livsstil och mal.
+Integrera dessa svar djupt i din analys -- referera specifikt till deras svar.
+
+SVARFORMAT:
+Svara med BADE lösningstext OCH en strukturerad JSON-block i slutet, markerad med ```json```:
+
+{
+  "score": 72,
+  "summary": "Kort sammanfattning (2-3 meningar)",
+  "regions": [
+    { "label": "panna", "observation": "Fin textur, latt torrhet vid harfastet", "score": 75 },
+    ...
+  ],
+  "lifestyle": [
+    { "area": "Somn", "tip": "...", "impact": "hog" },
+    ...
+  ],
+  "products": [
+    { "id": "the-one-facial-oil", "reason": "Personlig motivering kopplad till kundens hudtillstand" },
+    ...
+  ],
+  "avoid": ["Lista saker att undvika"],
+  "nextAnalysis": "Rekommenderat datum for nasta analys (t.ex. 4 veckor)"
+}
+```
+
+### Ny response-parser i frontend
+
+`parseAnalysisResponse(text)` -- extraherar JSON-blocket fran slutet av texten, returnerar `{ prose, structured }`.
+
+### Handoff
+
+Komplett implementation av:
+- Ny `POST /api/analysis` endpoint i `server.js`
+- Uppdaterad prompt med multi-image och frageintegration
+- Frontend-parser for JSON-extraktion
+- Bibehall `POST /api/analysis/chat` som det ar (fungerar via `previous_response_id`)
+
+---
+
+## Agent 5 -- Results UI Designer
+
+**Roll:** Designa resultatvyn med hudkarta, score, produktkort med CTA.
+**Model:** default
+
+### Nya UI-komponenter
+
+**1. Hudbalans-score (toppen av resultatet)**
+- Radial progress-cirkel (SVG, animated `stroke-dashoffset`)
+- Score 1-100 i mitten med stor siffra
+- Farg-gradient: rod (0-40), gul (41-70), gron (71-100) via `--green`
+- Text under: "Din hudbalans: Bra / Mycket bra / Behover uppmärksamhet"
+- CSS-klass: `.skin-score`, `.skin-score-circle`, `.skin-score-value`
+
+**2. Regionanalys-kort**
+- 5 kort i en grid (3 kolumner desktop, 2 mobil)
+- Varje kort: regionnamn, mini-score (cirkel), observation-text
+- Hover: elevation + shadow
+- CSS-klasser: `.region-card`, `.region-score`, `.region-text`
+
+**3. Livsstilsrekommendationer**
+- Ikon + rubrik + text per rad
+- Impact-badge: hog (gron), medel (gul), lag (gra)
+- CSS: `.lifestyle-tip`, `.impact-badge`
+
+**4. Produktkort med CTA**
+- Horisontellt kort: bild (vanster) + info (hoger)
+- Produktnamn, pris, personlig motivering (fran AI JSON)
+- "Lagg i varukorg"-knapp (gron, pill-form) som anropar `addToCart(productId)` och visar checkmark-animation
+- CSS: `.analysis-product-card`, `.analysis-product-img`, `.analysis-product-info`, `.analysis-product-cta`
+
+**5. Snabbåtgärder (under produktkort)**
+- "Lagg alla i varukorgen" -- gron knapp, lagger alla rekommenderade produkter
+- "Ga till kassan" -- outline-knapp, lankar till `checkout.html`
+- CSS: `.analysis-actions`
+
+**6. Nasta steg**
+- "Gor en ny analys om 4 veckor for att se din utveckling"
+- CTA: "Paminn mig" (samlar e-post via enkel input + knapp)
+- CSS: `.analysis-next-step`
+
+### Layout
+
+```
++------------------------------------------+
+| Din hudbalans: 72/100  [radial progress]  |
++------------------------------------------+
+| Sammanfattning (prosa)                    |
++------------------------------------------+
+| [Panna 75] [V.kind 68] [H.kind 70]      |
+| [Nasa 80]  [Haka 65]                     |
++------------------------------------------+
+| Livsstilsrekommendationer                |
+| - Somn (hog impact) ...                  |
+| - Stress (hog impact) ...                |
++------------------------------------------+
+| Rekommenderade produkter                 |
+| [Bild] The ONE ... [Lagg i varukorg]     |
+| [Bild] TA-DA ...  [Lagg i varukorg]     |
++------------------------------------------+
+| [Lagg alla i varukorgen] [Ga till kassan]|
++------------------------------------------+
+| Undvik: lista ...                        |
++------------------------------------------+
+| Gor en ny analys om 4 veckor [Paminn mig]|
++------------------------------------------+
+| Chatt: Stall foljdfragor                 |
++------------------------------------------+
+```
+
+### Handoff
+
+Fullstandig HTML + CSS-specifikation for alla komponenter ovan, inklusive:
+- Responsiva breakpoints (768px)
+- Stagger-animationer (fade-in med delay per sektion)
+- Alla CSS-variabler fran designsystemet
+
+---
+
+## Agent 6 -- Creative Features Agent
+
+**Roll:** Specificera unika extrafunktioner.
+**Model:** fast
+
+### Funktioner att implementera
+
+**1. Hudjournal-koppling**
+- Spara analysresultat (score, datum, rekommendationer) i `localStorage` under nyckel `1753_skin_journal`
+- Array av `{ date, score, regions, products, summary }`
+- Dashboard-sidan (`dashboard.html`) kan visa dessa under "Min hudresa"
+- Max 12 sparade analyser
+
+**2. Rutin-generator**
+- Baserat pa AI:ns produktrekommendationer, visa en ordnad morgon/kvallsrutin:
+  - Morgon: Au Naturel (rengoring) -> TA-DA Serum -> The ONE Facial Oil
+  - Kvall: Au Naturel (rengoring) -> I LOVE Facial Oil
+- Visa som en snygg tidslinje med produktbilder
+- "Spara min rutin"-knapp -> localStorage
+
+**3. Ingredient-spotlight**
+- Vid hover/klick pa produktkort i resultatet, visa en tooltip/popup:
+  - "Sa fungerar CBD for just din hud: [personlig text fran AI]"
+  - Kort ingredienslista
+- Anvand data fran AI:ns `products[].reason`
+
+**4. Social proof i kontext**
+- Under varje produktkort, visa 1-2 omdomen fran REVIEWS-arrayen i `app.js`
+- Filtrera pa omdomen som namner liknande hudproblem som kunden rapporterat
+- Fallback: visa hogst betygsatta omdomen
+
+**5. Delningsfunktion**
+- "Dela din analys" -- genererar en komprimerad sammanfattning (text-only, ingen bild)
+- Kopiera till urklipp med `navigator.clipboard.writeText()`
+- Knapp med kopieringsikon + "Kopierad!" feedback
+
+**6. Video multi-frame**
+- Om kunden laddar upp video: extrahera 3 frames (0.5s, 1.5s, 2.5s)
+- Skicka alla 3 som extra `input_image` till API:n for battre bedomning
+- Informera: "Vi analyserar flera vinklar fran din video"
+
+### Handoff
+
+Detaljerad spec per funktion med:
+- Datastruktur (localStorage-nyckel, format)
+- UI-placering i resultatvyn
+- JavaScript-funktionsnamn
+- CSS-klassnamn
+
+---
+
+## Agent 7 -- Implementer
+
+**Roll:** Bygga allt som agent 1-6 specificerat.
+**Model:** default
+
+### Filer att uppdatera
+
+1. **`analysis.html`**
+   - Lagg till MediaPipe CDN-script (type="module")
+   - Ny HTML-struktur for fragewizard i `.analysis-right`
+   - Ny HTML for resultat: score-cirkel, regionkort, produktkort med CTA, aktionsknappar
+   - Behall befintlig sidebar/topbar/footer
+
+2. **`analysis.js`**
+   - Behall IIFE-wrapping
+   - Lagg till: `initFaceLandmarker()`, `detectAndCropRegions()`, `showQuestion()`, `collectAnswers()`, `parseAnalysisResponse()`, `renderResults()`, `renderRegionCards()`, `renderProductCards()`, `addAllToCart()`, `saveToJournal()`, `generateRoutine()`
+   - Uppdatera `startAnalysis()`: crop regions + visa fragor parallellt + skicka allt till API
+   - Uppdatera `displayResults()`: anvand ny parser + renderResults
+   - Uppdatera `recommendProducts()`: anvand strukturerad JSON istallet for nyckelord
+
+3. **`server.js`**
+   - Uppdatera `POST /api/analysis`: hantera multi-region + fragor
+   - Uppdatera `ANALYSIS_SYSTEM_PROMPT` med multi-image och JSON-instruktioner
+   - Oka body-limit om nodvandigt (redan 20mb, bor racka for 6 bilder)
+   - Behall `POST /api/analysis/chat` oforandrad
+
+4. **`styles.css`**
+   - Nya klasser: `.skin-score`, `.region-card`, `.lifestyle-tip`, `.impact-badge`, `.analysis-product-card`, `.analysis-product-cta`, `.analysis-actions`, `.analysis-next-step`, `.question-wizard`, `.question-step`, `.question-pill`, `.question-slider`, `.progress-dots`
+   - Responsiva anpassningar (768px breakpoint)
+   - Animationer: radial-progress, stagger fade-in, pill-select, checkmark
+
+### Regler for implementer
+
+- Anvand korrekt svenska (a, a, o) i alla strangar
+- Folj Apple-designsystemet: `--green` for CTA, `--radius` (16px), `--shadow-hover`, `0.3s var(--ease)` transitions
+- Inga externa fonter -- systemfont-stack
+- Alla produktreferenser via globala `PRODUCTS` fran `app.js`
+- `addToCart()` ar redan global fran `app.js`
+- Testa att `node -c server.js` och `node -c analysis.js` (via Function wrapper) ger syntax OK
+
+---
+
+## Agent 8 -- Verifier (readonly)
+
+**Roll:** Verifiera implementationen utan att andra filer.
+**Model:** fast
+
+### Checklista
+
+1. **Syntax:** `node -c server.js`, validera inline JS i `analysis.html`
+2. **HTML-CSS-paritet:** Alla klasser i HTML finns i `styles.css`, inga orphaned klasser
+3. **JS-beroenden:** Alla `$("id")` matchar faktiska `id`-attribut i HTML
+4. **API-paritet:** Frontend skickar ratt format till `POST /api/analysis`, server forvantar ratt format
+5. **MediaPipe:** CDN-URL ar giltig, import-syntax ar korrekt
+6. **Produktdata:** Alla `product.id` i AI:ns JSON matchar `PRODUCTS`-arrayen i `app.js`
+7. **Responsivitet:** Alla nya klasser har mobil-breakpoint-stilar
+8. **Tillganglighet:** aria-labels pa knappar, fokus-states, tangentbordsnavigation
+9. **Svenska:** Inga saknade a/a/o i strangar
+10. **Varukorg:** `addToCart()` anropas med korrekt produkt-id
+
+### Rapportformat
+
+```
+## Verifier-rapport -- Hudanalys 3.0
+
+### Status: [GODKAND | BRISTER]
+
+### Godkant
+- [lista]
+
+### Brister (skickas tillbaka till Agent 7)
+- [fil:rad] Beskrivning + forvantad fix
+
+### Filer granskade
+- [lista]
+```
+
+Om BRISTER: Agent 7 fixar, sedan Agent 8 kor igen. Max 3 iterationer.
+
+---
+
+## Sekvensprotokoll
+
+```
+1. Researcher   -> handoff: nulagedokument
+2. Face Region  -> handoff: MediaPipe-spec + cropRegions()
+3. Questionnaire-> handoff: wizard HTML/CSS/JS-spec
+4. API Architect-> handoff: ny endpoint + prompt + parser
+5. Results UI   -> handoff: UI-komponenter HTML/CSS
+6. Creative     -> handoff: extrafunktioner-spec
+7. Implementer  -> BYGGER allt i analysis.html, analysis.js, server.js, styles.css
+8. Verifier     -> rapport -> om brister: tillbaka till 7 (max 3 varv)
+```
+
+Varje handoff sparas som en kommentar i agentens output sa att nasta agent har full kontext.
+
+## Stoppvillkor
+
+Klar nar Agent 8 rapporterar GODKAND efter att alla punkter i checklistan ar uppfyllda.

@@ -1,3 +1,4 @@
+/** Lokala produktbilder: public/Products/ (server.js servar projektroten) */
 const PRODUCTS = [
   {
     id: "duo-ta-da",
@@ -6,7 +7,7 @@ const PRODUCTS = [
     price: 1495,
     originalPrice: 1798,
     reviews: 173,
-    image: "https://images.unsplash.com/photo-1556228578-0d85b1a4d571?w=600&h=600&fit=crop&crop=center",
+    image: "public/Products/DUOTADA.png",
     shopifyImage: "https://www.1753skincare.com/cdn/shop/files/IMG_1034.jpg?width=600",
     shortDesc: "En komplett rutin för hud i balans. Innehåller The ONE Facial Oil, I LOVE Facial Oil och TA-DA Serum.",
     description: `<p>Det här är en hudvårdsrutin skapad för att stärka huden på djupet – inte tillfälligt förbättra ytan. DUO-kitet tillsammans med TA-DA Serum ger huden exakt det den behöver för att fungera bättre på egen hand.</p>
@@ -33,7 +34,7 @@ const PRODUCTS = [
     price: 699,
     originalPrice: null,
     reviews: 20,
-    image: "https://images.unsplash.com/photo-1611930022073-b7a4ba5fcccd?w=600&h=600&fit=crop&crop=center",
+    image: "public/Products/TA-DA.jpg",
     shopifyImage: "https://www.1753skincare.com/cdn/shop/files/1-Ta-Daserummforpackning.png?width=600",
     shortDesc: "CBG-berikat serum som boostar hudens naturliga fukt och låser in den för en strålande och frisk hy.",
     description: `<p>Torr hud är ett vanligt problem, särskilt i kallare klimat, men det behöver inte vara så. TA-DA Serum är speciellt framtaget för att boosta din huds naturliga fukt och låsa in den, så att du får en strålande och frisk hy.</p>
@@ -56,7 +57,7 @@ const PRODUCTS = [
     price: 1099,
     originalPrice: null,
     reviews: 136,
-    image: "https://images.unsplash.com/photo-1570194065650-d99fb4b38b17?w=600&h=600&fit=crop&crop=center",
+    image: "public/Products/DUO-kit.jpg",
     shopifyImage: "https://www.1753skincare.com/cdn/shop/files/2-facialoilduomedforpackning.png?width=600",
     shortDesc: "Två ansiktsoljor i ett kit. The ONE för morgonen, I LOVE för kvällen. Enkel och effektiv rutin för alla hudtyper.",
     description: `<p>Ge din hud det bästa av två världar med vårt DUO-kit! Detta kit innehåller våra fantastiska ansiktsoljor – The ONE Facial Oil och I LOVE Facial Oil – till ett mycket förmånligt pris.</p>
@@ -76,7 +77,7 @@ const PRODUCTS = [
     price: 849,
     originalPrice: null,
     reviews: 101,
-    image: "https://images.unsplash.com/photo-1608248543803-ba4f8c70ae0b?w=600&h=600&fit=crop&crop=center",
+    image: "public/Products/ILOVE.jpg",
     shopifyImage: "https://www.1753skincare.com/cdn/shop/files/3-Facialoilmforpackning.png?width=600",
     shortDesc: "Kraftfull ansiktsolja med 5% CBG och 10% CBD. Stödjer endocannabinoidsystemet för en balanserad, återfuktad hy.",
     description: `<p>Drömmer du om en hud som strålar av hälsa och självförtroende? I LOVE Facial Oil är här för att förvandla din hudvårdsrutin med en unik kombination av 5% CBG och 10% CBD.</p>
@@ -103,7 +104,7 @@ const PRODUCTS = [
     price: 649,
     originalPrice: null,
     reviews: 202,
-    image: "https://images.unsplash.com/photo-1598440947619-2c35fc9aa908?w=600&h=600&fit=crop&crop=center",
+    image: "public/Products/Theone.jpg",
     shopifyImage: "https://www.1753skincare.com/cdn/shop/files/4-Theonefacialoil.png?width=600",
     shortDesc: "Ansiktsolja med 10% CBD och 0,2% CBG. Mindre inflammationer, mer glow, djup återfuktning och högre elasticitet.",
     description: `<p>Drömmer du om en hy med mer elasticitet, fasthet, glow och lyster? Då är The ONE Facial Oil precis vad du behöver – oavsett hudtyp.</p>
@@ -130,7 +131,7 @@ const PRODUCTS = [
     price: 399,
     originalPrice: null,
     reviews: 83,
-    image: "https://images.unsplash.com/photo-1556228841-a3c527ebefe5?w=600&h=600&fit=crop&crop=center",
+    image: "public/Products/Makeup Remover.jpg",
     shopifyImage: "https://www.1753skincare.com/cdn/shop/files/6-Makeup-remover.png?width=600",
     shortDesc: "Rengöringsolja med MCT och CBD som varsamt avlägsnar smuts och makeup utan att skada hudens naturliga balans.",
     description: `<p>Vill du avlägsna smuts, luftföroreningar och makeup utan att skada din huds naturliga balans? Au Naturel Makeup Remover är lösningen du har letat efter.</p>
@@ -155,7 +156,7 @@ const PRODUCTS = [
     price: 399,
     originalPrice: null,
     reviews: 63,
-    image: "https://images.unsplash.com/photo-1584308666744-24d5c474f2ae?w=600&h=600&fit=crop&crop=center",
+    image: "public/Products/Fungtastic.jpg",
     shopifyImage: "https://www.1753skincare.com/cdn/shop/files/8-Fungtastic.png?width=600",
     shortDesc: "Svampextrakt med Chaga, Lion's Mane, Cordyceps och Reishi. Stödjer hälsan inifrån och hudens endocannabinoidsystem.",
     description: `<p>Fungtastic Mushroom Extract kombinerar fyra av naturens mest potenta medicinska svampar i en perfekt balans för att stödja ditt välbefinnande inifrån.</p>
@@ -172,52 +173,6 @@ const PRODUCTS = [
     sizes: ["60 kapslar"],
     guarantee: null
   },
-  {
-    id: "torr-hud-paketet",
-    category: "paket",
-    name: "TORR-HUD-paketet",
-    price: 1999,
-    originalPrice: 2995,
-    reviews: 3,
-    image: "https://images.unsplash.com/photo-1612817288484-6f916006741a?w=600&h=600&fit=crop&crop=center",
-    shopifyImage: "https://www.1753skincare.com/cdn/shop/files/BlackWeek2025.png?width=600",
-    shortDesc: "Komplett paket för torr hud. Innehåller Au Naturel Makeup Remover, DUO-kit, TA-DA Serum och 2x Fungtastic.",
-    description: `<p>Torr hud kan kännas stram, irriterad och sakna lyster. Vi har skapat ett särskilt paket för torr hud, fyllt med produkter som ger intensiv återfuktning.</p>
-<h3>Paketet innehåller</h3>
-<ul>
-<li>1 st Au Naturel Makeup Remover (värde 399 kr)</li>
-<li>1 st DUO-kit med The ONE och I LOVE Facial Oil (värde 1 099 kr)</li>
-<li>1 st TA-DA Serum (värde 699 kr)</li>
-<li>2 st Fungtastic (värde 798 kr)</li>
-</ul>
-<p>Räcker i ca 3 månader – och du får dessutom ett mejl med livsstilsrekommendationer för att ytterligare förbättra dina resultat.</p>`,
-    ingredients: null,
-    size: null,
-    guarantee: null
-  },
-  {
-    id: "rosacea-paketet",
-    category: "paket",
-    name: "ROSACEA-paketet",
-    price: 1999,
-    originalPrice: 2995,
-    reviews: 2,
-    image: "https://images.unsplash.com/photo-1571781926291-c477ebfd024b?w=600&h=600&fit=crop&crop=center",
-    shopifyImage: "https://www.1753skincare.com/cdn/shop/files/BlackWeek2025.png?width=600",
-    shortDesc: "Skonsam vård för känslig och reaktiv hud. Innehåller Au Naturel Makeup Remover, DUO-kit, TA-DA Serum och 2x Fungtastic.",
-    description: `<p>Rosacea kan vara en utmanande hudåkomma med rodnad, känslighet och ibland synliga blodkärl. Vi har skapat ett särskilt paket som hjälper dig att balansera och stärka huden.</p>
-<h3>Paketet innehåller</h3>
-<ul>
-<li>1 st Au Naturel Makeup Remover (värde 399 kr)</li>
-<li>1 st DUO-kit med The ONE och I LOVE Facial Oil (värde 1 099 kr)</li>
-<li>1 st TA-DA Serum (värde 699 kr)</li>
-<li>2 st Fungtastic (värde 798 kr)</li>
-</ul>
-<p>Räcker i ca 3 månader – och du får dessutom ett mejl med livsstilsrekommendationer för att ytterligare förbättra dina resultat.</p>`,
-    ingredients: null,
-    size: null,
-    guarantee: null
-  }
 ];
 
 // ---- CART ----
@@ -283,6 +238,11 @@ function getCartCount() {
   return getCart().reduce((sum, item) => sum + item.qty, 0);
 }
 
+const FREE_SHIPPING_THRESHOLD = 700;
+
+/** Samma bas-URL som i index.html OG/canonical – ändra vid annan produktionsdomän. */
+const SITE_ORIGIN = "https://1753skincare.com";
+
 // ---- UI ----
 
 function updateCartUI() {
@@ -309,25 +269,39 @@ function renderCartDrawer() {
 
   if (footerEl) footerEl.style.display = "";
 
-  itemsEl.innerHTML = cart.map(item => {
-    const product = PRODUCTS.find(p => p.id === item.id);
-    if (!product) return "";
-    return `
+  const total = getCartTotal();
+  const shipRemaining = Math.max(0, FREE_SHIPPING_THRESHOLD - total);
+  let shipHint = "";
+  if (shipRemaining > 0) {
+    shipHint =
+      `<p class="cart-shipping-hint" role="status">Handla för <strong>${shipRemaining.toLocaleString("sv-SE")} kr</strong> till för fri frakt (vid ${FREE_SHIPPING_THRESHOLD.toLocaleString("sv-SE")} kr).</p>`;
+  } else {
+    shipHint = `<p class="cart-shipping-hint cart-shipping-hint--ok" role="status">Du har fri frakt på denna order.</p>`;
+  }
+
+  itemsEl.innerHTML =
+    shipHint +
+    cart
+      .map(item => {
+        const product = PRODUCTS.find(p => p.id === item.id);
+        if (!product) return "";
+        return `
       <div class="cart-item">
         <div class="cart-item-img" style="background-image: url('${product.image}'); background-size: cover; background-position: center;"></div>
         <div class="cart-item-details">
           <h4>${product.name}</h4>
           <div class="cart-item-price">${product.price} kr</div>
           <div class="cart-item-qty">
-            <button onclick="updateQty('${product.id}', -1)">-</button>
+            <button type="button" onclick="updateQty('${product.id}', -1)">-</button>
             <span>${item.qty}</span>
-            <button onclick="updateQty('${product.id}', 1)">+</button>
+            <button type="button" onclick="updateQty('${product.id}', 1)">+</button>
           </div>
-          <button class="cart-item-remove" onclick="removeFromCart('${product.id}')">Ta bort</button>
+          <button type="button" class="cart-item-remove" onclick="removeFromCart('${product.id}')">Ta bort</button>
         </div>
       </div>
     `;
-  }).join("");
+      })
+      .join("");
 
   if (totalEl) {
     totalEl.textContent = getCartTotal().toLocaleString("sv-SE") + " kr";
@@ -362,8 +336,8 @@ function showNotification(msg) {
 }
 
 function toggleMobileMenu() {
-  const links = document.querySelector(".nav-links");
-  if (links) links.classList.toggle("open");
+  const overlay = document.getElementById("mobile-nav-overlay");
+  if (overlay) overlay.classList.toggle("open");
 }
 
 // ---- PRODUCTS GRID ----
@@ -389,17 +363,22 @@ function renderProductsGrid(containerId, productIds, options) {
     : getFilteredSortedProducts(opts.sort || "reviews-desc", opts.category || "all");
 
   container.innerHTML = products.map((p, i) => `
-    <a class="product-card reveal stagger-card" href="product.html?id=${p.id}" style="--stagger:${i}">
+    <a class="product-card stagger-card" href="product.html?id=${p.id}" style="--stagger:${i}">
       <div class="product-card-img">
         <img src="${p.image}" alt="${p.name}" loading="lazy">
-        ${p.originalPrice ? `<span class="price-badge" aria-label="Rabatt">Rabatt</span>` : ""}
-        <div class="product-card-overlay"><span>Visa produkt</span></div>
+        ${p.originalPrice ? `<span class="price-badge" aria-label="Rabatt">%</span>` : ""}
+        <div class="product-card-overlay">
+          <div class="product-card-overlay-name">${p.name}</div>
+          <div class="product-card-overlay-price">${p.price.toLocaleString("sv-SE")} kr</div>
+        </div>
       </div>
-      <h3>${p.name}</h3>
-      <div class="price">
-        ${p.price.toLocaleString("sv-SE")} kr${p.originalPrice ? `<span class="original">${p.originalPrice.toLocaleString("sv-SE")} kr</span>` : ""}
+      <div class="product-card-text">
+        <h3>${p.name}</h3>
+        <div class="price">
+          ${p.price.toLocaleString("sv-SE")} kr${p.originalPrice ? `<span class="original">${p.originalPrice.toLocaleString("sv-SE")} kr</span>` : ""}
+        </div>
+        <div class="reviews-count">${p.reviews} omdömen</div>
       </div>
-      <div class="reviews-count">${p.reviews} omdömen</div>
     </a>
   `).join("");
 
@@ -409,16 +388,29 @@ function renderProductsGrid(containerId, productIds, options) {
 }
 
 function initShopGrid(containerId) {
-  const sortEl = document.getElementById("shop-sort");
-  const catEl = document.getElementById("shop-filter");
+  let sortValue = "reviews-desc";
+  let catValue = "all";
+
+  const sortWrap = document.getElementById("shop-sort-wrap");
+  const catWrap = document.getElementById("shop-filter-wrap");
+
   const refresh = () => {
-    renderProductsGrid(containerId, null, {
-      sort: sortEl ? sortEl.value : "reviews-desc",
-      category: catEl ? catEl.value : "all"
-    });
+    renderProductsGrid(containerId, null, { sort: sortValue, category: catValue });
   };
-  if (sortEl) sortEl.addEventListener("change", refresh);
-  if (catEl) catEl.addEventListener("change", refresh);
+
+  if (sortWrap) {
+    sortWrap.addEventListener("change", (e) => {
+      sortValue = e.detail.value;
+      refresh();
+    });
+  }
+  if (catWrap) {
+    catWrap.addEventListener("change", (e) => {
+      catValue = e.detail.value;
+      refresh();
+    });
+  }
+
   refresh();
 }
 
@@ -434,6 +426,56 @@ function getRelatedProductIds(currentId, limit) {
 
 // ---- PRODUCT DETAIL ----
 
+function upsertMetaByName(name, content) {
+  let el = document.querySelector(`meta[name="${name}"]`);
+  if (!el) {
+    el = document.createElement("meta");
+    el.setAttribute("name", name);
+    document.head.appendChild(el);
+  }
+  el.setAttribute("content", content);
+}
+
+function upsertMetaByProperty(property, content) {
+  let el = document.querySelector(`meta[property="${property}"]`);
+  if (!el) {
+    el = document.createElement("meta");
+    el.setAttribute("property", property);
+    document.head.appendChild(el);
+  }
+  el.setAttribute("content", content);
+}
+
+function setProductPageMeta(product) {
+  const desc = (product.shortDesc || "")
+    .replace(/\s+/g, " ")
+    .trim()
+    .slice(0, 160);
+  const pageUrl = `${SITE_ORIGIN}/product.html?id=${encodeURIComponent(product.id)}`;
+  const absImage = `${SITE_ORIGIN}/${product.image.replace(/^\//, "")}`;
+
+  document.title = `${product.name} – 1753 SKINCARE`;
+  upsertMetaByName("description", desc);
+  upsertMetaByProperty("og:type", "website");
+  upsertMetaByProperty("og:locale", "sv_SE");
+  upsertMetaByProperty("og:title", `${product.name} – 1753 SKINCARE`);
+  upsertMetaByProperty("og:description", desc);
+  upsertMetaByProperty("og:url", pageUrl);
+  upsertMetaByProperty("og:image", absImage);
+  upsertMetaByProperty("og:image:alt", product.name);
+  upsertMetaByName("twitter:card", "summary_large_image");
+  upsertMetaByName("twitter:title", product.name);
+  upsertMetaByName("twitter:description", desc);
+
+  let canon = document.querySelector('link[rel="canonical"]');
+  if (!canon) {
+    canon = document.createElement("link");
+    canon.setAttribute("rel", "canonical");
+    document.head.appendChild(canon);
+  }
+  canon.setAttribute("href", pageUrl);
+}
+
 function renderProductDetail() {
   const params = new URLSearchParams(window.location.search);
   const id = params.get("id");
@@ -445,7 +487,7 @@ function renderProductDetail() {
     return;
   }
 
-  document.title = product.name + " – 1753 SKINCARE";
+  setProductPageMeta(product);
 
   const el = document.querySelector(".product-detail");
   el.innerHTML = `
@@ -456,10 +498,18 @@ function renderProductDetail() {
       </div>
       <div class="product-detail-info">
         <h1>${product.name}</h1>
-        <div class="reviews-summary">${product.reviews} omdömen</div>
+        <div class="reviews-summary">
+          <span class="product-stars" aria-hidden="true">★★★★★</span>
+          <span>${product.reviews.toLocaleString("sv-SE")} omdömen</span>
+        </div>
         <div class="price-row">
           ${product.price.toLocaleString("sv-SE")} kr${product.originalPrice ? `<span class="original">${product.originalPrice.toLocaleString("sv-SE")} kr</span>` : ""}
         </div>
+        <ul class="product-sell-points" aria-label="Varför kunder handlar hos oss">
+          <li>Fri frakt när du handlar för ${FREE_SHIPPING_THRESHOLD.toLocaleString("sv-SE")} kr eller mer</li>
+          <li>CBD/CBG och noggrant utvalda ingredienser – utvecklat för nordisk hud</li>
+          <li>Nöjd-kund-garanti med trygg rådgivning före och efter köp</li>
+        </ul>
         ${product.sizes ? `
           <div class="size-select">
             <label>Storlek</label>
@@ -496,11 +546,70 @@ function renderProductDetail() {
     </div>
     <section class="related-products-wrap section reveal" aria-labelledby="related-heading">
       <h2 id="related-heading" class="section-title">Du kanske också gillar</h2>
+      <p class="section-lede section-lede--related">Utvalt utifrån kategori och vad kunder ofta kombinerar i samma rutin.</p>
       <div class="products-grid" id="related-products"></div>
     </section>
   `;
 
   renderProductsGrid("related-products", getRelatedProductIds(product.id, 3));
+  renderReviewsSection(product);
+}
+
+// ---- REVIEWS MOCKUP ----
+
+const REVIEW_MOCKUPS = [
+  { name: "Anna L.", date: "2026-03-10", stars: 5, text: "Huden har aldrig känts bättre. Jag märkte skillnad redan efter en vecka. Lugn, återfuktad och full av lyster." },
+  { name: "Erik S.", date: "2026-02-28", stars: 5, text: "Skeptisk till CBD i hudvård först, men det här var något helt annat. Minimala ingredienser, maximal effekt." },
+  { name: "Maria K.", date: "2026-02-15", stars: 5, text: "Min rosacea har blivit så mycket bättre. För första gången på flera år känner jag mig bekväm utan makeup." },
+  { name: "Johan B.", date: "2026-01-22", stars: 4, text: "Riktigt bra olja. Tar tid att vänjas vid, men resultatet talar för sig självt. Huden är mjukare och friskare." },
+  { name: "Sofia H.", date: "2026-01-10", stars: 5, text: "Jag har provat allt. Dyra märken, billiga märken. Inget har gett min hud den här känslan av balans." },
+  { name: "Oscar M.", date: "2025-12-18", stars: 5, text: "Enkel rutin, tydliga resultat. Jag behöver ingenting annat. Min hud tackar mig varje morgon." },
+  { name: "Linnea R.", date: "2025-12-05", stars: 5, text: "Beställde först till mig själv, sedan till mamma, sedan till min syster. Alla är lika imponerade." },
+  { name: "Karl-Johan A.", date: "2025-11-20", stars: 4, text: "Bra produkter och fantastisk kundservice. Christopher svarade personligen på mina frågor. Det känns äkta." },
+  { name: "Emma W.", date: "2025-11-08", stars: 5, text: "TA-DA Serum är magiskt. Min torra vinterhud är förfluten. Fukt som faktiskt stannar kvar." },
+  { name: "Alexander P.", date: "2025-10-15", stars: 5, text: "Som man var jag osäker på ansiktsolja. Nu är det det enda jag använder. Enkel, effektiv, ingen konstig doft." }
+];
+
+function renderReviewsSection(product) {
+  const container = document.getElementById("reviews-section");
+  if (!container) return;
+
+  const totalReviews = product.reviews || 936;
+  const avgRating = 4.9;
+  const starsStr = "★".repeat(5);
+
+  container.innerHTML = `
+    <div class="reviews-summary-bar">
+      <span class="reviews-score">${avgRating}</span>
+      <span class="reviews-stars">${starsStr}</span>
+      <span class="reviews-count-label">${totalReviews.toLocaleString("sv-SE")} omdömen</span>
+    </div>
+    <div class="reviews-carousel-wrap">
+      <button type="button" class="reviews-scroll-btn reviews-scroll-btn--prev" aria-label="Föregående omdömen">
+        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+      </button>
+      <div class="reviews-carousel" id="reviews-carousel">
+        ${REVIEW_MOCKUPS.map(r => `
+          <div class="review-card">
+            <div class="review-card-stars">${"★".repeat(r.stars)}${"☆".repeat(5 - r.stars)}</div>
+            <p class="review-card-text">"${r.text}"</p>
+            <div class="review-card-author">${r.name} · ${r.date}</div>
+          </div>
+        `).join("")}
+      </div>
+      <button type="button" class="reviews-scroll-btn reviews-scroll-btn--next" aria-label="Nästa omdömen">
+        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+      </button>
+    </div>
+  `;
+
+  const carousel = document.getElementById("reviews-carousel");
+  const prev = container.querySelector(".reviews-scroll-btn--prev");
+  const next = container.querySelector(".reviews-scroll-btn--next");
+  if (carousel && prev && next) {
+    prev.addEventListener("click", () => carousel.scrollBy({ left: -320, behavior: "smooth" }));
+    next.addEventListener("click", () => carousel.scrollBy({ left: 320, behavior: "smooth" }));
+  }
 }
 
 // ---- INIT ----

@@ -54,6 +54,8 @@ Du ska kunna verifiera alla dessa:
 - Transitions: smooth (>= 0.2s, cubic-bezier)
 - Inputs: rundade, fokus med ring-shadow
 - Whitespace: generöst, andas
+- **Produktbilder:** minimalistiska ramar/presentation (skugga, inset-kontur) på grid och produktsida; inga trasiga bilder under `public/`
+- **Interaktivitet:** rimliga hover- och micro-interactions på kort och primära CTA; hero med responsiv bild där det är implementerat
 
 ## Verifieringsmetod
 

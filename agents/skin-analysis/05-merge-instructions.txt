@@ -1,0 +1,182 @@
+================================================================================
+AGENT 5: MERGE INSTRUCTIONS – Hudanalys 2.0
+================================================================================
+
+ANSVAR
+------
+Instruktioner för hur Composer 2.0 slår ihop alla 4 agentplaners arbete
+till fungerande kod. Denna fil används av Cursor-regeln
+.cursor/rules/skin-analysis-build.mdc
+
+================================================================================
+1. BYGGORDNING
+================================================================================
+
+Steg 1: Läs ALLA planfiler
+  - 01-frontend-ui.txt
+  - 02-backend-api.txt
+  - 03-prompt-engineering.txt
+  - 04-interaction-design.txt
+
+Steg 2: Uppdatera server.js
+  Varför först? Backend måste finnas innan frontend kan testas.
+  - Ändra express.json limit till "20mb"
+  - Lägg till ANALYSIS_SYSTEM_PROMPT (från 03-prompt-engineering.txt)
+  - Migrera POST /api/analysis till Responses API (från 02-backend-api.txt)
+  - Lägg till POST /api/analysis/chat (från 02-backend-api.txt)
+  - Lägg till rate limiting (från 02-backend-api.txt)
+
+Steg 3: Skriv om analysis.js
+  - Implementera alla funktioner från 01-frontend-ui.txt
+  - Webcam-integration, uppladdning, resultatvisning, chatt
+  - Anslut till nya endpoints (/api/analysis, /api/analysis/chat)
+  - Ta bort gammal ANALYSIS_SYSTEM_PROMPT från klienten
+
+Steg 4: Skriv om analysis.html
+  - Ny HTML-struktur från 01-frontend-ui.txt
+  - Behåll: sidebar, topbar, mobile-nav-overlay, cart-drawer, footer
+  - Byt ut: .analysis-container innehåll med ny layout
+
+Steg 5: Uppdatera styles.css
+  - Lägg till alla nya klasser från 04-interaction-design.txt
+  - Ta bort/ersätt gamla .analysis-* klasser som inte längre används
+  - Verifiera att nya klasser inte krockar med befintliga
+
+================================================================================
+2. BEROENDEN MELLAN AGENTER
+================================================================================
+
+  Agent 3 (prompt) ──► Agent 2 (backend)
+                        │
+                        ▼
+  Agent 1 (frontend) ◄─┤
+                        │
+  Agent 4 (design)  ◄───┘
+
+- Agent 2 behöver Agent 3:s system prompt
+- Agent 1 behöver Agent 2:s endpoints
+- Agent 4 behöver Agent 1:s HTML-struktur (klassnamn)
+- Agent 1 och 4 kan arbeta parallellt om klassnamn är överenskomna
+
+================================================================================
+3. ÖVERENSKOMNA KLASSNAMN
+================================================================================
+
+Dessa klassnamn MÅSTE användas konsistent mellan Agent 1 (HTML) och Agent 4 (CSS):
+
+Layout:
+  .analysis-layout, .analysis-left, .analysis-right
+
+Upload:
+  .upload-zone, .upload-zone.drag-over, .upload-preview, .upload-preview-actions
+
+Webcam:
+  .webcam-container, .webcam-capture-btn, .webcam-switch-btn, .webcam-countdown
+
+Loading:
+  .analysis-loading, .loading-spinner, .loading-fact, .loading-breathe
+
+Upload icons:
+  .upload-icon
+
+Results:
+  .analysis-results, .result-section, .analysis-heading, .analysis-text
+
+Chat:
+  .chat-container, .chat-header, .chat-messages
+  .chat-bubble, .chat-bubble--assistant, .chat-bubble--user
+  .chat-typing, .chat-input-form, .chat-input, .chat-send-btn
+
+Privacy:
+  .privacy-notice
+
+Steps:
+  .analysis-step, .analysis-step--hidden, .analysis-step--visible
+
+================================================================================
+4. VERIFIERING EFTER MERGE
+================================================================================
+
+Checklist (alla måste vara JA):
+
+FRONTEND:
+[ ] analysis.html renderar utan console-errors
+[ ] Uppladdning av bild fungerar (drag-and-drop + klick)
+[ ] Uppladdning av video extraherar frame
+[ ] Webcam öppnas och visar live-video
+[ ] Webcam-snapshot fungerar
+[ ] Kamerabyte fungerar på mobil
+[ ] "Analysera min hud"-knappen skickar till /api/analysis
+[ ] Resultat visas med stagger-animation
+[ ] Produktrekommendationer visas med korrekta bilder/priser
+[ ] Chatt-input finns och skickar meddelanden
+[ ] Chatt-bubblor renderas korrekt (användare vs terapeut)
+[ ] "Skriver..."-indikator visas under väntan
+[ ] Privacy-meddelande är synligt
+[ ] Layout är tvådelad på desktop, en-kolumn på mobil
+[ ] Inga bilder/data sparas i localStorage
+
+BACKEND:
+[ ] POST /api/analysis returnerar { content, responseId, usage }
+[ ] POST /api/analysis/chat returnerar { content, responseId }
+[ ] Rate limiting fungerar (429 efter gräns)
+[ ] System prompt skickas INTE från klienten
+[ ] Felmeddelanden är på svenska
+
+DESIGN:
+[ ] Typografi matchar designsystemet (SF Pro, --dark, --green)
+[ ] Border-radius konsekvent (24px kort, 20px bubblor, 28px input)
+[ ] Transitions mjuka (0.3s var(--ease))
+[ ] Hover-effekter på knappar och interaktiva element
+[ ] prefers-reduced-motion hanterad
+[ ] Responsivt: mobil, tablet, desktop
+
+PROMPT:
+[ ] Analyssvaret innehåller sektioner: Hudanalys, Livsstil, Produkter, Undvik
+[ ] Chatten svarar på svenska
+[ ] Chatten håller sig till mikrobiom och ECS
+[ ] Max 2-3 produkter rekommenderas
+[ ] Inga emojis i svaren
+[ ] Tonen är varm, inte klinisk
+
+================================================================================
+5. FILER SOM ÄNDRAS
+================================================================================
+
+UPPDATERAS:
+- server.js         – Nya endpoints, migrerad analysis-route, rate limiting
+- analysis.js       – Total omskrivning
+- analysis.html     – Total omskrivning av innehållet (behåll nav/footer)
+- styles.css        – Nya sektioner, ta bort gamla analysis-klasser
+
+SKAPAS INTE:
+- Inga nya HTML-filer
+- Inga nya JS-filer (allt i analysis.js)
+- Inga nya CSS-filer (allt i styles.css)
+
+ÄNDRAS INTE:
+- app.js            – PRODUCTS-arrayen används som referens, inte ändrad
+- index.html        – Separat Vimeo-hero-ändring
+- Övriga HTML-sidor
+- integrations/*
+- auth.js
+
+================================================================================
+6. ROLLBACK-PLAN
+================================================================================
+
+Om något går fel:
+1. analysis.html och analysis.js kan återställas oberoende
+2. server.js: nya routes är additiva (gamla routes påverkas inte)
+3. styles.css: nya klasser är additiva (prefixade med .analysis-*, .chat-*,
+   .webcam-*, .upload-*)
+
+================================================================================
+7. KÖR 4-AGENTLOOPEN EFTER MERGE
+================================================================================
+
+Efter merge, kör den befintliga improvement-loopen:
+1. Sentry – skanna analysis.html, analysis.js, server.js, styles.css
+2. Improver – fixa eventuella problem
+3. Verifier – verifiera mot checklistan ovan
+4. Logga resultat i IMPROVEMENT_LOG.md
