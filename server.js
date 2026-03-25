@@ -20,6 +20,7 @@ try { bcrypt = require("bcryptjs"); } catch { bcrypt = null; }
 try { jwt = require("jsonwebtoken"); } catch { jwt = null; }
 
 const app = express();
+app.set("trust proxy", 1);
 app.use(cors());
 app.use(express.json({ limit: "20mb" }));
 app.use(express.static("."));
@@ -1357,7 +1358,8 @@ app.get("/api/fortnox/auth", (req, res) => {
   const clientId = process.env.FORTNOX_CLIENT_ID;
   if (!clientId) return res.status(500).json({ message: "FORTNOX_CLIENT_ID saknas" });
 
-  const redirectUri = `${req.protocol}://${req.get("host")}/api/fortnox/callback`;
+  const proto = req.get("x-forwarded-proto") || req.protocol;
+  const redirectUri = `${proto}://${req.get("host")}/api/fortnox/callback`;
   const state = crypto.randomBytes(16).toString("hex");
 
   const authUrl = new URL("https://apps.fortnox.se/oauth-v1/auth");
@@ -1380,7 +1382,8 @@ app.get("/api/fortnox/callback", async (req, res) => {
 
   try {
     const fetch = (await import("node-fetch")).default;
-    const redirectUri = `${req.protocol}://${req.get("host")}/api/fortnox/callback`;
+    const proto = req.get("x-forwarded-proto") || req.protocol;
+    const redirectUri = `${proto}://${req.get("host")}/api/fortnox/callback`;
 
     const tokenRes = await fetch("https://apps.fortnox.se/oauth-v1/token", {
       method: "POST",
