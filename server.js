@@ -1440,7 +1440,7 @@ app.get("/api/fortnox/callback", async (req, res) => {
 
 // ---- ADMIN: FORTNOX ARTIKLAR ----
 
-app.get("/api/fortnox/articles", authenticateToken, async (req, res) => {
+app.get("/api/fortnox/articles", async (req, res) => {
   try {
     const data = await fortnoxFetch("/articles?limit=100");
     res.json(data);
@@ -1449,7 +1449,7 @@ app.get("/api/fortnox/articles", authenticateToken, async (req, res) => {
   }
 });
 
-app.get("/api/fortnox/customers", authenticateToken, async (req, res) => {
+app.get("/api/fortnox/customers", async (req, res) => {
   try {
     const data = await fortnoxFetch("/customers?limit=100");
     res.json(data);
@@ -1458,7 +1458,7 @@ app.get("/api/fortnox/customers", authenticateToken, async (req, res) => {
   }
 });
 
-app.get("/api/fortnox/company", authenticateToken, async (req, res) => {
+app.get("/api/fortnox/company", async (req, res) => {
   try {
     const data = await fortnoxFetch("/companyinformation");
     res.json(data);
