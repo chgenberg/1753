@@ -1351,6 +1351,122 @@ app.post("/api/chat", async (req, res) => {
   }
 });
 
+// ---- FORTNOX OAUTH FLOW ----
+
+app.get("/api/fortnox/auth", (req, res) => {
+  const clientId = process.env.FORTNOX_CLIENT_ID;
+  if (!clientId) return res.status(500).json({ message: "FORTNOX_CLIENT_ID saknas" });
+
+  const redirectUri = `${req.protocol}://${req.get("host")}/api/fortnox/callback`;
+  const state = crypto.randomBytes(16).toString("hex");
+
+  const authUrl = new URL("https://apps.fortnox.se/oauth-v1/auth");
+  authUrl.searchParams.set("client_id", clientId);
+  authUrl.searchParams.set("redirect_uri", redirectUri);
+  authUrl.searchParams.set("response_type", "code");
+  authUrl.searchParams.set("state", state);
+  authUrl.searchParams.set("scope", "bookkeeping invoice customer article order companyinformation");
+  authUrl.searchParams.set("access_type", "offline");
+
+  console.log("[Fortnox OAuth] Redirecting to:", authUrl.toString());
+  res.redirect(authUrl.toString());
+});
+
+app.get("/api/fortnox/callback", async (req, res) => {
+  const { code, error } = req.query;
+  if (error || !code) {
+    return res.status(400).send(`<h1>Fortnox-auktorisering misslyckades</h1><p>${error || "Ingen kod mottagen"}</p>`);
+  }
+
+  try {
+    const fetch = (await import("node-fetch")).default;
+    const redirectUri = `${req.protocol}://${req.get("host")}/api/fortnox/callback`;
+
+    const tokenRes = await fetch("https://apps.fortnox.se/oauth-v1/token", {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: new URLSearchParams({
+        grant_type: "authorization_code",
+        code,
+        redirect_uri: redirectUri,
+        client_id: process.env.FORTNOX_CLIENT_ID || "",
+        client_secret: process.env.FORTNOX_CLIENT_SECRET || ""
+      })
+    });
+
+    const tokenData = await tokenRes.json();
+    if (!tokenRes.ok) {
+      console.error("[Fortnox OAuth] Token exchange failed:", tokenData);
+      return res.status(400).send(`<h1>Token-utbyte misslyckades</h1><pre>${JSON.stringify(tokenData, null, 2)}</pre>`);
+    }
+
+    fortnoxTokens.accessToken = tokenData.access_token;
+    fortnoxTokens.refreshToken = tokenData.refresh_token || "";
+    fortnoxTokens.expiresAt = Date.now() + (tokenData.expires_in || 3600) * 1000;
+
+    console.log("[Fortnox OAuth] Tokens received! Access token expires in", tokenData.expires_in, "s");
+    console.log("[Fortnox OAuth] FORTNOX_ACCESS_TOKEN:", tokenData.access_token);
+    console.log("[Fortnox OAuth] FORTNOX_REFRESH_TOKEN:", tokenData.refresh_token);
+
+    res.send(`
+      <!DOCTYPE html>
+      <html lang="sv">
+      <head><meta charset="utf-8"><title>Fortnox – Ansluten</title>
+      <style>body{font-family:-apple-system,sans-serif;max-width:600px;margin:60px auto;padding:20px;color:#1d1d1f}
+      h1{color:#108474}code{background:#f5f5f7;padding:4px 8px;border-radius:6px;font-size:13px;word-break:break-all}
+      .token-box{background:#f5f5f7;padding:16px;border-radius:12px;margin:12px 0}
+      .label{font-weight:600;font-size:13px;color:#766a62;margin-bottom:4px}</style></head>
+      <body>
+        <h1>Fortnox ansluten!</h1>
+        <p>Tokens har hämtats och aktiverats i servern.</p>
+        <div class="token-box">
+          <div class="label">ACCESS_TOKEN</div>
+          <code>${tokenData.access_token}</code>
+        </div>
+        <div class="token-box">
+          <div class="label">REFRESH_TOKEN</div>
+          <code>${tokenData.refresh_token || "(ingen)"}</code>
+        </div>
+        <p><strong>Viktigt:</strong> Lägg in dessa som miljövariabler i Railway så de överlever omstarter:</p>
+        <pre>railway variables --set "FORTNOX_ACCESS_TOKEN=${tokenData.access_token}" --set "FORTNOX_REFRESH_TOKEN=${tokenData.refresh_token || ""}"</pre>
+        <p><a href="/">Tillbaka till startsidan</a></p>
+      </body></html>
+    `);
+  } catch (err) {
+    console.error("[Fortnox OAuth] Error:", err);
+    res.status(500).send(`<h1>Serverfel</h1><p>${err.message}</p>`);
+  }
+});
+
+// ---- ADMIN: FORTNOX ARTIKLAR ----
+
+app.get("/api/fortnox/articles", authenticateToken, async (req, res) => {
+  try {
+    const data = await fortnoxFetch("/articles?limit=100");
+    res.json(data);
+  } catch (err) {
+    res.status(err.status || 500).json({ message: err.message });
+  }
+});
+
+app.get("/api/fortnox/customers", authenticateToken, async (req, res) => {
+  try {
+    const data = await fortnoxFetch("/customers?limit=100");
+    res.json(data);
+  } catch (err) {
+    res.status(err.status || 500).json({ message: err.message });
+  }
+});
+
+app.get("/api/fortnox/company", authenticateToken, async (req, res) => {
+  try {
+    const data = await fortnoxFetch("/companyinformation");
+    res.json(data);
+  } catch (err) {
+    res.status(err.status || 500).json({ message: err.message });
+  }
+});
+
 // ---- START ----
 
 (async () => {
@@ -1363,5 +1479,7 @@ app.post("/api/chat", async (req, res) => {
     console.log(`1753 SKINCARE backend kör på port ${PORT}`);
     if (!process.env.OPENAI_API_KEY) console.warn("[WARN] OPENAI_API_KEY saknas – hudanalys och chatt fungerar inte!");
     else console.log("[OK] OPENAI_API_KEY konfigurerad");
+    if (!process.env.FORTNOX_ACCESS_TOKEN) console.log("[INFO] Fortnox ej ansluten – gå till /api/fortnox/auth för att auktorisera");
+    else console.log("[OK] Fortnox-tokens konfigurerade");
   });
 })();
