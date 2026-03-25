@@ -7,7 +7,7 @@ const PRODUCTS = [
     price: 1495,
     originalPrice: 1798,
     reviews: 173,
-    image: "public/Products/DUOTADA.png",
+    image: "public/Products/DUOTADA.webp",
     shopifyImage: "https://www.1753skincare.com/cdn/shop/files/IMG_1034.jpg?width=600",
     shortDesc: "En komplett rutin för hud i balans. Innehåller The ONE Facial Oil, I LOVE Facial Oil och TA-DA Serum.",
     description: `<p>Det här är en hudvårdsrutin skapad för att stärka huden på djupet – inte tillfälligt förbättra ytan. DUO-kitet tillsammans med TA-DA Serum ger huden exakt det den behöver för att fungera bättre på egen hand.</p>
@@ -34,7 +34,7 @@ const PRODUCTS = [
     price: 699,
     originalPrice: null,
     reviews: 20,
-    image: "public/Products/TA-DA.jpg",
+    image: "public/Products/TA-DA.webp",
     shopifyImage: "https://www.1753skincare.com/cdn/shop/files/1-Ta-Daserummforpackning.png?width=600",
     shortDesc: "CBG-berikat serum som boostar hudens naturliga fukt och låser in den för en strålande och frisk hy.",
     description: `<p>Torr hud är ett vanligt problem, särskilt i kallare klimat, men det behöver inte vara så. TA-DA Serum är speciellt framtaget för att boosta din huds naturliga fukt och låsa in den, så att du får en strålande och frisk hy.</p>
@@ -57,7 +57,7 @@ const PRODUCTS = [
     price: 1099,
     originalPrice: null,
     reviews: 136,
-    image: "public/Products/DUO-kit.jpg",
+    image: "public/Products/DUO-kit.webp",
     shopifyImage: "https://www.1753skincare.com/cdn/shop/files/2-facialoilduomedforpackning.png?width=600",
     shortDesc: "Två ansiktsoljor i ett kit. The ONE för morgonen, I LOVE för kvällen. Enkel och effektiv rutin för alla hudtyper.",
     description: `<p>Ge din hud det bästa av två världar med vårt DUO-kit! Detta kit innehåller våra fantastiska ansiktsoljor – The ONE Facial Oil och I LOVE Facial Oil – till ett mycket förmånligt pris.</p>
@@ -77,7 +77,7 @@ const PRODUCTS = [
     price: 849,
     originalPrice: null,
     reviews: 101,
-    image: "public/Products/ILOVE.jpg",
+    image: "public/Products/ILOVE.webp",
     shopifyImage: "https://www.1753skincare.com/cdn/shop/files/3-Facialoilmforpackning.png?width=600",
     shortDesc: "Kraftfull ansiktsolja med 5% CBG och 10% CBD. Stödjer endocannabinoidsystemet för en balanserad, återfuktad hy.",
     description: `<p>Drömmer du om en hud som strålar av hälsa och självförtroende? I LOVE Facial Oil är här för att förvandla din hudvårdsrutin med en unik kombination av 5% CBG och 10% CBD.</p>
@@ -104,7 +104,7 @@ const PRODUCTS = [
     price: 649,
     originalPrice: null,
     reviews: 202,
-    image: "public/Products/Theone.jpg",
+    image: "public/Products/Theone.webp",
     shopifyImage: "https://www.1753skincare.com/cdn/shop/files/4-Theonefacialoil.png?width=600",
     shortDesc: "Ansiktsolja med 10% CBD och 0,2% CBG. Mindre inflammationer, mer glow, djup återfuktning och högre elasticitet.",
     description: `<p>Drömmer du om en hy med mer elasticitet, fasthet, glow och lyster? Då är The ONE Facial Oil precis vad du behöver – oavsett hudtyp.</p>
@@ -131,7 +131,7 @@ const PRODUCTS = [
     price: 399,
     originalPrice: null,
     reviews: 83,
-    image: "public/Products/Makeup Remover.jpg",
+    image: "public/Products/Makeup Remover.webp",
     shopifyImage: "https://www.1753skincare.com/cdn/shop/files/6-Makeup-remover.png?width=600",
     shortDesc: "Rengöringsolja med MCT och CBD som varsamt avlägsnar smuts och makeup utan att skada hudens naturliga balans.",
     description: `<p>Vill du avlägsna smuts, luftföroreningar och makeup utan att skada din huds naturliga balans? Au Naturel Makeup Remover är lösningen du har letat efter.</p>
@@ -156,7 +156,7 @@ const PRODUCTS = [
     price: 399,
     originalPrice: null,
     reviews: 63,
-    image: "public/Products/Fungtastic.jpg",
+    image: "public/Products/Fungtastic.webp",
     shopifyImage: "https://www.1753skincare.com/cdn/shop/files/8-Fungtastic.png?width=600",
     shortDesc: "Svampextrakt med Chaga, Lion's Mane, Cordyceps och Reishi. Stödjer hälsan inifrån och hudens endocannabinoidsystem.",
     description: `<p>Fungtastic Mushroom Extract kombinerar fyra av naturens mest potenta medicinska svampar i en perfekt balans för att stödja ditt välbefinnande inifrån.</p>
