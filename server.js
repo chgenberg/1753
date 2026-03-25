@@ -24,7 +24,7 @@ app.use(cors());
 app.use(express.json({ limit: "20mb" }));
 app.use(express.static("."));
 
-const PORT = process.env.BACKEND_PORT || 3001;
+const PORT = process.env.PORT || process.env.BACKEND_PORT || 3001;
 const JWT_SECRET = process.env.JWT_SECRET || "1753skincare_dev_secret_change_in_production";
 
 async function fetchWithRetry(url, options, maxAttempts = 3) {
