@@ -1354,12 +1354,17 @@ app.post("/api/chat", async (req, res) => {
 
 // ---- FORTNOX OAUTH FLOW ----
 
+function getFortnoxRedirectUri(req) {
+  if (process.env.FORTNOX_REDIRECT_URI) return process.env.FORTNOX_REDIRECT_URI;
+  const proto = req.get("x-forwarded-proto") || req.protocol;
+  return `${proto}://${req.get("host")}/api/fortnox/callback`;
+}
+
 app.get("/api/fortnox/auth", (req, res) => {
   const clientId = process.env.FORTNOX_CLIENT_ID;
   if (!clientId) return res.status(500).json({ message: "FORTNOX_CLIENT_ID saknas" });
 
-  const proto = req.get("x-forwarded-proto") || req.protocol;
-  const redirectUri = `${proto}://${req.get("host")}/api/fortnox/callback`;
+  const redirectUri = getFortnoxRedirectUri(req);
   const state = crypto.randomBytes(16).toString("hex");
 
   const authUrl = new URL("https://apps.fortnox.se/oauth-v1/auth");
@@ -1382,8 +1387,7 @@ app.get("/api/fortnox/callback", async (req, res) => {
 
   try {
     const fetch = (await import("node-fetch")).default;
-    const proto = req.get("x-forwarded-proto") || req.protocol;
-    const redirectUri = `${proto}://${req.get("host")}/api/fortnox/callback`;
+    const redirectUri = getFortnoxRedirectUri(req);
 
     const tokenRes = await fetch("https://apps.fortnox.se/oauth-v1/token", {
       method: "POST",
