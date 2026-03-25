@@ -1372,7 +1372,7 @@ app.get("/api/fortnox/auth", (req, res) => {
   authUrl.searchParams.set("redirect_uri", redirectUri);
   authUrl.searchParams.set("response_type", "code");
   authUrl.searchParams.set("state", state);
-  authUrl.searchParams.set("scope", "bookkeeping invoice customer article order companyinformation");
+  authUrl.searchParams.set("scope", "companyinformation customer article order invoice");
   authUrl.searchParams.set("access_type", "offline");
 
   console.log("[Fortnox OAuth] Redirecting to:", authUrl.toString());
