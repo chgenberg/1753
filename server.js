@@ -1375,14 +1375,17 @@ app.get("/api/fortnox/auth", (req, res) => {
   authUrl.searchParams.set("scope", "companyinformation customer article order invoice");
   authUrl.searchParams.set("access_type", "offline");
 
-  console.log("[Fortnox OAuth] Redirecting to:", authUrl.toString());
+  console.log("[Fortnox OAuth] redirect_uri:", redirectUri);
+  console.log("[Fortnox OAuth] Full auth URL:", authUrl.toString());
   res.redirect(authUrl.toString());
 });
 
 app.get("/api/fortnox/callback", async (req, res) => {
-  const { code, error } = req.query;
+  console.log("[Fortnox OAuth] Callback query:", JSON.stringify(req.query));
+  const { code, error, error_description } = req.query;
   if (error || !code) {
-    return res.status(400).send(`<h1>Fortnox-auktorisering misslyckades</h1><p>${error || "Ingen kod mottagen"}</p>`);
+    const msg = error_description || error || "Ingen kod mottagen";
+    return res.status(400).send(`<h1>Fortnox-auktorisering misslyckades</h1><p>${msg}</p><pre>Query: ${JSON.stringify(req.query, null, 2)}</pre><p><a href="/api/fortnox/auth">Försök igen</a></p>`);
   }
 
   try {
