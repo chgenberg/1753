@@ -637,7 +637,7 @@ Vid allvarliga hudtillstånd: rekommendera att kontakta dermatolog, men förklar
 
 // ---- OPENAI HUDANALYS (Responses API) ----
 
-const OPENAI_MODEL = process.env.OPENAI_MODEL || "gpt-4o";
+const OPENAI_MODEL = process.env.OPENAI_MODEL || "gpt-4.1";
 
 function buildAnalysisPrompt(questions) {
   if (!questions) return "Analysera min hud baserat på detta foto. Ge mig personliga rekommendationer kring hudvård och livsstil enligt din holistiska filosofi.";
