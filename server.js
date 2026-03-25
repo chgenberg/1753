@@ -639,6 +639,30 @@ Vid allvarliga hudtillstånd: rekommendera att kontakta dermatolog, men förklar
 
 const OPENAI_MODEL = process.env.OPENAI_MODEL || "gpt-4.1";
 
+function extractOutputText(data) {
+  // 1. SDK-style helper (if present)
+  if (data.output_text) return data.output_text;
+
+  // 2. Responses API: parse output array
+  if (Array.isArray(data.output)) {
+    for (const item of data.output) {
+      if (item.type === "message" && Array.isArray(item.content)) {
+        const textParts = item.content
+          .filter(c => c.type === "output_text")
+          .map(c => c.text);
+        if (textParts.length > 0) return textParts.join("\n");
+      }
+    }
+  }
+
+  // 3. Chat Completions fallback
+  if (data.choices?.[0]?.message?.content) {
+    return data.choices[0].message.content;
+  }
+
+  return "";
+}
+
 function buildAnalysisPrompt(questions) {
   if (!questions) return "Analysera min hud baserat på detta foto. Ge mig personliga rekommendationer kring hudvård och livsstil enligt din holistiska filosofi.";
 
@@ -720,13 +744,15 @@ app.post("/api/analysis", async (req, res) => {
       throw { status: response.status, message: msg };
     }
 
-    console.log("[Analysis] Response keys:", Object.keys(data), "output_text length:", (data.output_text || "").length);
+    console.log("[Analysis] Response keys:", Object.keys(data));
 
-    const outputText = data.output_text || data.choices?.[0]?.message?.content || "";
+    const outputText = extractOutputText(data);
     if (!outputText) {
-      console.error("[Analysis] Empty output. Full response:", JSON.stringify(data).slice(0, 1000));
+      console.error("[Analysis] Empty output. Full response:", JSON.stringify(data).slice(0, 2000));
       throw { status: 500, message: "Analysen gav inget resultat. Försök igen." };
     }
+
+    console.log("[Analysis] Success, output length:", outputText.length);
 
     res.json({
       content: outputText,
@@ -776,7 +802,7 @@ app.post("/api/analysis/chat", async (req, res) => {
     }
 
     const data = await response.json();
-    const outputText = data.output_text || data.choices?.[0]?.message?.content || "";
+    const outputText = extractOutputText(data);
 
     res.json({
       content: outputText,
@@ -1312,7 +1338,7 @@ app.post("/api/chat", async (req, res) => {
       }
     }
 
-    const outputText = data.output_text || data.choices?.[0]?.message?.content || "";
+    const outputText = extractOutputText(data);
 
     res.json({
       content: outputText,
