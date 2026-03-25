@@ -265,6 +265,41 @@ const fortnoxTokens = {
   expiresAt: Date.now() + 3600_000
 };
 
+async function persistTokensToRailway(accessToken, refreshToken) {
+  const railwayToken = process.env.RAILWAY_API_TOKEN;
+  if (!railwayToken) return;
+
+  const projectId = process.env.RAILWAY_PROJECT_ID;
+  const environmentId = process.env.RAILWAY_ENVIRONMENT_ID;
+  const serviceId = process.env.RAILWAY_SERVICE_ID;
+  if (!projectId || !environmentId || !serviceId) return;
+
+  try {
+    const fetch = (await import("node-fetch")).default;
+    const variables = { FORTNOX_ACCESS_TOKEN: accessToken };
+    if (refreshToken) variables.FORTNOX_REFRESH_TOKEN = refreshToken;
+
+    await fetch("https://backboard.railway.com/graphql/v2", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${railwayToken}`
+      },
+      body: JSON.stringify({
+        query: `mutation($input: VariableCollectionUpsertInput!) {
+          variableCollectionUpsert(input: $input)
+        }`,
+        variables: {
+          input: { projectId, environmentId, serviceId, variables, replace: false }
+        }
+      })
+    });
+    console.log("[Railway] Fortnox tokens persisted to env vars");
+  } catch (err) {
+    console.warn("[Railway] Failed to persist tokens:", err.message);
+  }
+}
+
 async function refreshFortnoxToken() {
   const fetch = (await import("node-fetch")).default;
   const res = await fetch("https://apps.fortnox.se/oauth-v1/token", {
@@ -286,6 +321,8 @@ async function refreshFortnoxToken() {
   if (data.refresh_token) fortnoxTokens.refreshToken = data.refresh_token;
   fortnoxTokens.expiresAt = Date.now() + (data.expires_in || 3600) * 1000;
   console.log("[Fortnox] Token refreshed, expires in", data.expires_in, "s");
+
+  persistTokensToRailway(data.access_token, data.refresh_token).catch(() => {});
 }
 
 async function ensureFortnoxToken() {
@@ -1427,8 +1464,8 @@ app.get("/api/fortnox/callback", async (req, res) => {
     fortnoxTokens.expiresAt = Date.now() + (tokenData.expires_in || 3600) * 1000;
 
     console.log("[Fortnox OAuth] Tokens received! Access token expires in", tokenData.expires_in, "s");
-    console.log("[Fortnox OAuth] FORTNOX_ACCESS_TOKEN:", tokenData.access_token);
-    console.log("[Fortnox OAuth] FORTNOX_REFRESH_TOKEN:", tokenData.refresh_token);
+
+    persistTokensToRailway(tokenData.access_token, tokenData.refresh_token).catch(() => {});
 
     res.send(`
       <!DOCTYPE html>
