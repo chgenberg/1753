@@ -2,6 +2,7 @@
 const PRODUCTS = [
   {
     id: "duo-ta-da",
+    articleNumber: "4004",
     category: "kit",
     name: "DUO-kit + TA-DA Serum",
     price: 1495,
@@ -29,6 +30,7 @@ const PRODUCTS = [
   },
   {
     id: "ta-da-serum",
+    articleNumber: "1005",
     category: "serum",
     name: "TA-DA Serum",
     price: 699,
@@ -52,6 +54,7 @@ const PRODUCTS = [
   },
   {
     id: "duo-kit",
+    articleNumber: "1003",
     category: "kit",
     name: "DUO-kit (The ONE + I LOVE Facial Oil)",
     price: 1099,
@@ -72,6 +75,7 @@ const PRODUCTS = [
   },
   {
     id: "i-love-facial-oil",
+    articleNumber: "3001",
     category: "oil",
     name: "I LOVE Facial Oil",
     price: 849,
@@ -99,6 +103,7 @@ const PRODUCTS = [
   },
   {
     id: "the-one-facial-oil",
+    articleNumber: "1001",
     category: "oil",
     name: "The ONE Facial Oil",
     price: 649,
@@ -126,6 +131,7 @@ const PRODUCTS = [
   },
   {
     id: "au-naturel-makeup-remover",
+    articleNumber: "1004",
     category: "cleanser",
     name: "Au Naturel Makeup Remover",
     price: 399,
@@ -151,6 +157,7 @@ const PRODUCTS = [
   },
   {
     id: "fungtastic-mushroom-extract",
+    articleNumber: "4001",
     category: "supplement",
     name: "Fungtastic Mushroom Extract",
     price: 399,

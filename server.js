@@ -238,13 +238,13 @@ app.post("/api/dashboard/wishlist", authMiddleware, (req, res) => {
 // ---- PRODUCT CATALOGUE (server-side price source of truth) ----
 
 const PRODUCTS_MAP = {
-  "duo-ta-da":                  { name: "DUO-kit + TA-DA Serum", price: 1495 },
-  "ta-da-serum":                { name: "TA-DA Serum", price: 699 },
-  "duo-kit":                    { name: "DUO-kit (The ONE + I LOVE Facial Oil)", price: 1099 },
-  "i-love-facial-oil":          { name: "I LOVE Facial Oil", price: 849 },
-  "the-one-facial-oil":         { name: "The ONE Facial Oil", price: 649 },
-  "au-naturel-makeup-remover":  { name: "Au Naturel Makeup Remover", price: 399 },
-  "fungtastic-mushroom-extract":{ name: "Fungtastic Mushroom Extract", price: 399 }
+  "duo-ta-da":                  { name: "DUO-kit + TA-DA Serum", price: 1495, articleNumber: "4004" },
+  "ta-da-serum":                { name: "TA-DA Serum", price: 699, articleNumber: "1005" },
+  "duo-kit":                    { name: "DUO-kit (The ONE + I LOVE Facial Oil)", price: 1099, articleNumber: "1003" },
+  "i-love-facial-oil":          { name: "I LOVE Facial Oil", price: 849, articleNumber: "3001" },
+  "the-one-facial-oil":         { name: "The ONE Facial Oil", price: 649, articleNumber: "1001" },
+  "au-naturel-makeup-remover":  { name: "Au Naturel Makeup Remover", price: 399, articleNumber: "1004" },
+  "fungtastic-mushroom-extract":{ name: "Fungtastic Mushroom Extract", price: 399, articleNumber: "4001" }
 };
 
 const FREE_SHIPPING_THRESHOLD = 700;
@@ -835,7 +835,8 @@ app.post("/api/orders/create", async (req, res) => {
       const product = PRODUCTS_MAP[item.id];
       if (!product) throw { status: 400, message: `Okänd produkt: ${item.id}` };
       return {
-        articleNumber: item.id,
+        articleNumber: product.articleNumber || item.id,
+        productId: item.id,
         name: product.name,
         quantity: item.qty || 1,
         price: product.price
