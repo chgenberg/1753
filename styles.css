@@ -1260,26 +1260,29 @@ button {
 
 .polaroid {
   background: var(--white);
-  padding: 10px 10px 32px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.10);
-  border-radius: var(--radius);
+  padding: 10px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.10), inset 0 0 0 1px rgba(0, 0, 0, 0.04);
+  border-radius: 20px;
   display: inline-block;
-  transition: transform 0.3s var(--ease), box-shadow 0.3s var(--ease);
+  transition: transform 0.4s var(--ease), box-shadow 0.4s var(--ease);
+  overflow: hidden;
 }
 
 .polaroid:hover {
-  transform: rotate(0deg) scale(1.02) !important;
-  box-shadow: 0 16px 48px rgba(0, 0, 0, 0.14);
+  transform: rotate(0deg) scale(1.03) !important;
+  box-shadow: 0 20px 56px rgba(0, 0, 0, 0.15), inset 0 0 0 1px rgba(0, 0, 0, 0.04);
 }
 
 .polaroid img {
   width: 100%;
-  height: auto;
+  aspect-ratio: 1 / 1;
+  object-fit: cover;
   display: block;
+  border-radius: 14px;
 }
 
-.polaroid--tilt-left { transform: rotate(-2.5deg); }
-.polaroid--tilt-right { transform: rotate(1.8deg); }
+.polaroid--tilt-left { transform: rotate(-2deg); }
+.polaroid--tilt-right { transform: rotate(1.5deg); }
 
 /* ======================================================
    ABOUT PAGE
@@ -1339,8 +1342,9 @@ button {
 }
 
 .about-person .polaroid {
-  margin-bottom: 28px;
-  max-width: 280px;
+  margin: 0 auto 28px;
+  max-width: 320px;
+  width: 100%;
 }
 
 .about-person h2 {
