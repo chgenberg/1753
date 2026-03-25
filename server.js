@@ -1377,6 +1377,17 @@ app.get("/api/fortnox/auth", (req, res) => {
 
   console.log("[Fortnox OAuth] redirect_uri:", redirectUri);
   console.log("[Fortnox OAuth] Full auth URL:", authUrl.toString());
+
+  if (req.query.debug) {
+    return res.send(`<h1>Fortnox OAuth Debug</h1>
+      <p><strong>redirect_uri:</strong> ${redirectUri}</p>
+      <p><strong>client_id:</strong> ${clientId}</p>
+      <p><strong>scope:</strong> companyinformation customer article order invoice</p>
+      <p><strong>Full URL:</strong></p>
+      <pre style="word-break:break-all">${authUrl.toString()}</pre>
+      <p><a href="${authUrl.toString()}">Klicka här för att auktorisera</a></p>`);
+  }
+
   res.redirect(authUrl.toString());
 });
 
