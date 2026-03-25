@@ -672,11 +672,14 @@ app.post("/api/analysis", async (req, res) => {
 
     const promptText = buildAnalysisPrompt(questions);
 
-    const contentParts = [
-      { type: "input_text", text: promptText }
-    ];
+    if (!process.env.OPENAI_API_KEY) {
+      return res.status(500).json({ message: "OpenAI API-nyckel saknas i serverkonfigurationen." });
+    }
 
-    contentParts.push({ type: "input_image", image_url: mainImage, detail: "high" });
+    const contentParts = [
+      { type: "input_text", text: promptText },
+      { type: "input_image", image_url: mainImage }
+    ];
 
     if (regions && Array.isArray(regions) && regions.length > 0) {
       const regionLabels = regions.map(r => r.label).join(", ");
@@ -686,10 +689,12 @@ app.post("/api/analysis", async (req, res) => {
       });
       for (const region of regions) {
         if (region.imageBase64 && region.imageBase64.startsWith("data:image/")) {
-          contentParts.push({ type: "input_image", image_url: region.imageBase64, detail: "high" });
+          contentParts.push({ type: "input_image", image_url: region.imageBase64 });
         }
       }
     }
+
+    console.log(`[Analysis] Sending ${contentParts.filter(p => p.type === "input_image").length} image(s), model=${OPENAI_MODEL}`);
 
     const response = await fetchWithRetry("https://api.openai.com/v1/responses", {
       method: "POST",
@@ -707,14 +712,21 @@ app.post("/api/analysis", async (req, res) => {
       })
     });
 
+    const data = await response.json().catch(() => ({}));
+
     if (!response.ok) {
-      const err = await response.json().catch(() => ({}));
-      const msg = err.error?.message || "Analysen kunde inte genomföras just nu.";
+      console.error("[Analysis] OpenAI error:", response.status, JSON.stringify(data).slice(0, 500));
+      const msg = data.error?.message || "Analysen kunde inte genomföras just nu.";
       throw { status: response.status, message: msg };
     }
 
-    const data = await response.json();
-    const outputText = data.output_text || data.choices?.[0]?.message?.content || "Analysen kunde inte slutföras.";
+    console.log("[Analysis] Response keys:", Object.keys(data), "output_text length:", (data.output_text || "").length);
+
+    const outputText = data.output_text || data.choices?.[0]?.message?.content || "";
+    if (!outputText) {
+      console.error("[Analysis] Empty output. Full response:", JSON.stringify(data).slice(0, 1000));
+      throw { status: 500, message: "Analysen gav inget resultat. Försök igen." };
+    }
 
     res.json({
       content: outputText,
@@ -1323,5 +1335,7 @@ app.post("/api/chat", async (req, res) => {
   }
   app.listen(PORT, () => {
     console.log(`1753 SKINCARE backend kör på port ${PORT}`);
+    if (!process.env.OPENAI_API_KEY) console.warn("[WARN] OPENAI_API_KEY saknas – hudanalys och chatt fungerar inte!");
+    else console.log("[OK] OPENAI_API_KEY konfigurerad");
   });
 })();
