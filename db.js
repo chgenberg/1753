@@ -45,6 +45,21 @@ async function initSchema() {
     CREATE INDEX IF NOT EXISTS idx_orders_merchant_trns ON orders (merchant_trns);
     CREATE INDEX IF NOT EXISTS idx_orders_order_number  ON orders (order_number);
     CREATE INDEX IF NOT EXISTS idx_orders_viva_order_code ON orders (viva_order_code);
+
+    CREATE TABLE IF NOT EXISTS users (
+      id              UUID PRIMARY KEY,
+      name            VARCHAR(255) NOT NULL,
+      email           VARCHAR(255) UNIQUE NOT NULL,
+      phone           VARCHAR(50) DEFAULT '',
+      password_hash   TEXT NOT NULL,
+      loyalty_points  INTEGER DEFAULT 0,
+      tier            VARCHAR(20) DEFAULT 'Brons',
+      notifications   JSONB DEFAULT '{"email":true,"sms":false,"offers":true}',
+      created_at      TIMESTAMPTZ DEFAULT NOW(),
+      updated_at      TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_users_email ON users (email);
   `);
   console.log("[DB] Schema ready");
 }
@@ -118,6 +133,66 @@ async function appendNotes(id, text) {
   return rows[0] || null;
 }
 
+// ---- USER helpers ----
+
+async function createUser({ id, name, email, phone, passwordHash }) {
+  const { rows } = await pool.query(
+    `INSERT INTO users (id, name, email, phone, password_hash)
+     VALUES ($1,$2,$3,$4,$5)
+     RETURNING id, name, email, phone, loyalty_points, tier, notifications, created_at`,
+    [id, name, email.toLowerCase(), phone || "", passwordHash]
+  );
+  return rows[0];
+}
+
+async function findUserByEmail(email) {
+  const { rows } = await pool.query(
+    "SELECT * FROM users WHERE email = $1 LIMIT 1",
+    [email.toLowerCase()]
+  );
+  return rows[0] || null;
+}
+
+async function findUserById(id) {
+  const { rows } = await pool.query(
+    "SELECT * FROM users WHERE id = $1 LIMIT 1",
+    [id]
+  );
+  return rows[0] || null;
+}
+
+async function updateUser(id, fields) {
+  const keys = Object.keys(fields);
+  if (keys.length === 0) return null;
+  const setClauses = keys.map((k, i) => `${k} = $${i + 2}`);
+  setClauses.push("updated_at = NOW()");
+  const { rows } = await pool.query(
+    `UPDATE users SET ${setClauses.join(", ")} WHERE id = $1
+     RETURNING id, name, email, phone, loyalty_points, tier, notifications, created_at`,
+    [id, ...keys.map(k => fields[k])]
+  );
+  return rows[0] || null;
+}
+
+async function findOrdersByEmail(email) {
+  const { rows } = await pool.query(
+    `SELECT id, order_number, status, payment_status, items,
+            total_amount, shipping_cost, created_at
+     FROM orders WHERE customer_email = $1
+     ORDER BY created_at DESC`,
+    [email.toLowerCase()]
+  );
+  return rows;
+}
+
+async function countOrdersByEmail(email) {
+  const { rows } = await pool.query(
+    "SELECT COUNT(*) AS count FROM orders WHERE customer_email = $1 AND payment_status = 'paid'",
+    [email.toLowerCase()]
+  );
+  return parseInt(rows[0].count, 10);
+}
+
 module.exports = {
   pool,
   initSchema,
@@ -126,5 +201,11 @@ module.exports = {
   findOrderByNumber,
   findOrderByVivaCode,
   updateOrder,
-  appendNotes
+  appendNotes,
+  createUser,
+  findUserByEmail,
+  findUserById,
+  updateUser,
+  findOrdersByEmail,
+  countOrdersByEmail
 };

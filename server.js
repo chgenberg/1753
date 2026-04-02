@@ -21,7 +21,15 @@ try { jwt = require("jsonwebtoken"); } catch { jwt = null; }
 
 const app = express();
 app.set("trust proxy", 1);
-app.use(cors());
+app.use(cors({
+  origin: [
+    "http://localhost:3000",
+    "http://localhost:3001",
+    /\.up\.railway\.app$/,
+    /1753skincare\.com$/,
+  ],
+  credentials: true,
+}));
 app.use(express.json({ limit: "20mb" }));
 app.use(express.static("."));
 
@@ -49,13 +57,7 @@ async function fetchWithRetry(url, options, maxAttempts = 3) {
   throw lastErr || new Error("Nätverksfel");
 }
 
-// ---- USER STORE (in-memory, ersätt med databas i produktion) ----
-
-const users = [];
-
-function findUserByEmail(email) {
-  return users.find(u => u.email.toLowerCase() === email.toLowerCase());
-}
+// ---- USER STORE (PostgreSQL) ----
 
 function generateToken(user) {
   if (!jwt) {
@@ -95,6 +97,10 @@ function authMiddleware(req, res, next) {
 
 app.post("/api/auth/register", async (req, res) => {
   try {
+    const clientIp = req.ip || req.connection.remoteAddress;
+    if (!checkRateLimit(clientIp, "auth-register", 10)) {
+      return res.status(429).json({ message: "För många registreringsförsök. Försök igen om en stund." });
+    }
     const { name, email, phone, password } = req.body;
     if (!name || !email || !password) {
       return res.status(400).json({ message: "Namn, e-post och lösenord krävs" });
@@ -102,33 +108,22 @@ app.post("/api/auth/register", async (req, res) => {
     if (password.length < 6) {
       return res.status(400).json({ message: "Lösenordet måste vara minst 6 tecken" });
     }
-    if (findUserByEmail(email)) {
+    const existing = await db.findUserByEmail(email);
+    if (existing) {
       return res.status(409).json({ message: "E-postadressen är redan registrerad" });
     }
 
-    const hashedPassword = bcrypt ? await bcrypt.hash(password, 10) : password;
-    const user = {
+    const passwordHash = bcrypt ? await bcrypt.hash(password, 10) : password;
+    const user = await db.createUser({
       id: crypto.randomUUID(),
       name,
-      email: email.toLowerCase(),
+      email,
       phone: phone || "",
-      password: hashedPassword,
-      createdAt: new Date().toISOString(),
-      loyaltyPoints: 0,
-      tier: "Brons",
-      orders: [],
-      analyses: [],
-      wishlist: [],
-      subscriptions: [],
-      routine: null,
-      notifications: { email: true, sms: false, offers: true }
-    };
+      passwordHash
+    });
 
-    users.push(user);
     const token = generateToken(user);
-    const { password: _, ...safeUser } = user;
-
-    res.status(201).json({ token, user: safeUser });
+    res.status(201).json({ token, user });
   } catch (err) {
     res.status(500).json({ message: err.message || "Registreringen misslyckades" });
   }
@@ -136,56 +131,58 @@ app.post("/api/auth/register", async (req, res) => {
 
 app.post("/api/auth/login", async (req, res) => {
   try {
+    const clientIp = req.ip || req.connection.remoteAddress;
+    if (!checkRateLimit(clientIp, "auth-login", 20)) {
+      return res.status(429).json({ message: "För många inloggningsförsök. Försök igen om en stund." });
+    }
     const { email, password } = req.body;
     if (!email || !password) {
       return res.status(400).json({ message: "E-post och lösenord krävs" });
     }
 
-    const user = findUserByEmail(email);
+    const user = await db.findUserByEmail(email);
     if (!user) {
       return res.status(401).json({ message: "Fel e-post eller lösenord" });
     }
 
-    const valid = bcrypt ? await bcrypt.compare(password, user.password) : password === user.password;
+    const valid = bcrypt ? await bcrypt.compare(password, user.password_hash) : password === user.password_hash;
     if (!valid) {
       return res.status(401).json({ message: "Fel e-post eller lösenord" });
     }
 
     const token = generateToken(user);
-    const { password: _, ...safeUser } = user;
-
+    const { password_hash: _, ...safeUser } = user;
     res.json({ token, user: safeUser });
   } catch (err) {
     res.status(500).json({ message: err.message || "Inloggningen misslyckades" });
   }
 });
 
-app.get("/api/auth/profile", authMiddleware, (req, res) => {
-  const user = users.find(u => u.id === req.userId);
+app.get("/api/auth/profile", authMiddleware, async (req, res) => {
+  const user = await db.findUserById(req.userId);
   if (!user) return res.status(404).json({ message: "Användare hittades inte" });
-  const { password: _, ...safeUser } = user;
+  const { password_hash: _, ...safeUser } = user;
   res.json(safeUser);
 });
 
 app.put("/api/auth/profile", authMiddleware, async (req, res) => {
-  const user = users.find(u => u.id === req.userId);
-  if (!user) return res.status(404).json({ message: "Användare hittades inte" });
-
   const { name, phone, notifications } = req.body;
-  if (name) user.name = name;
-  if (phone !== undefined) user.phone = phone;
-  if (notifications) user.notifications = { ...user.notifications, ...notifications };
+  const fields = {};
+  if (name) fields.name = name;
+  if (phone !== undefined) fields.phone = phone;
+  if (notifications) fields.notifications = JSON.stringify(notifications);
 
-  const { password: _, ...safeUser } = user;
-  res.json(safeUser);
+  const user = await db.updateUser(req.userId, fields);
+  if (!user) return res.status(404).json({ message: "Användare hittades inte" });
+  res.json(user);
 });
 
 app.put("/api/auth/password", authMiddleware, async (req, res) => {
-  const user = users.find(u => u.id === req.userId);
+  const user = await db.findUserById(req.userId);
   if (!user) return res.status(404).json({ message: "Användare hittades inte" });
 
   const { currentPassword, newPassword } = req.body;
-  const valid = bcrypt ? await bcrypt.compare(currentPassword, user.password) : currentPassword === user.password;
+  const valid = bcrypt ? await bcrypt.compare(currentPassword, user.password_hash) : currentPassword === user.password_hash;
   if (!valid) {
     return res.status(401).json({ message: "Nuvarande lösenord är felaktigt" });
   }
@@ -193,46 +190,38 @@ app.put("/api/auth/password", authMiddleware, async (req, res) => {
     return res.status(400).json({ message: "Nytt lösenord måste vara minst 6 tecken" });
   }
 
-  user.password = bcrypt ? await bcrypt.hash(newPassword, 10) : newPassword;
+  const newHash = bcrypt ? await bcrypt.hash(newPassword, 10) : newPassword;
+  await db.updateUser(req.userId, { password_hash: newHash });
   res.json({ message: "Lösenordet har ändrats" });
 });
 
 // ---- DASHBOARD DATA ROUTES ----
 
-app.get("/api/dashboard/orders", authMiddleware, (req, res) => {
-  const user = users.find(u => u.id === req.userId);
-  if (!user) return res.status(404).json({ message: "Användare hittades inte" });
-  res.json(user.orders || []);
-});
-
-app.get("/api/dashboard/stats", authMiddleware, (req, res) => {
-  const user = users.find(u => u.id === req.userId);
-  if (!user) return res.status(404).json({ message: "Användare hittades inte" });
-
-  res.json({
-    loyaltyPoints: user.loyaltyPoints || 0,
-    tier: user.tier || "Brons",
-    orderCount: (user.orders || []).length,
-    analysisCount: (user.analyses || []).length,
-    wishlistCount: (user.wishlist || []).length,
-    memberSince: user.createdAt
-  });
-});
-
-app.post("/api/dashboard/wishlist", authMiddleware, (req, res) => {
-  const user = users.find(u => u.id === req.userId);
-  if (!user) return res.status(404).json({ message: "Användare hittades inte" });
-
-  const { productId, action } = req.body;
-  if (!user.wishlist) user.wishlist = [];
-
-  if (action === "add" && !user.wishlist.includes(productId)) {
-    user.wishlist.push(productId);
-  } else if (action === "remove") {
-    user.wishlist = user.wishlist.filter(id => id !== productId);
+app.get("/api/dashboard/orders", authMiddleware, async (req, res) => {
+  try {
+    const user = await db.findUserById(req.userId);
+    if (!user) return res.status(404).json({ message: "Användare hittades inte" });
+    const orders = await db.findOrdersByEmail(user.email);
+    res.json(orders);
+  } catch (err) {
+    res.status(500).json({ message: err.message || "Kunde inte hämta ordrar" });
   }
+});
 
-  res.json(user.wishlist);
+app.get("/api/dashboard/stats", authMiddleware, async (req, res) => {
+  try {
+    const user = await db.findUserById(req.userId);
+    if (!user) return res.status(404).json({ message: "Användare hittades inte" });
+    const orderCount = await db.countOrdersByEmail(user.email);
+    res.json({
+      loyaltyPoints: user.loyalty_points || 0,
+      tier: user.tier || "Brons",
+      orderCount,
+      memberSince: user.created_at
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message || "Kunde inte hämta statistik" });
+  }
 });
 
 // ---- PRODUCT CATALOGUE (server-side price source of truth) ----
@@ -247,7 +236,7 @@ const PRODUCTS_MAP = {
   "fungtastic-mushroom-extract":{ name: "Fungtastic Mushroom Extract", price: 399, articleNumber: "4001", vatRate: 0.12 }
 };
 
-const FREE_SHIPPING_THRESHOLD = 700;
+const FREE_SHIPPING_THRESHOLD = 0;
 
 function generateOrderNumber() {
   const d = new Date();
@@ -391,7 +380,10 @@ async function vivaGetToken() {
     })
   });
   const data = await res.json();
-  if (!res.ok) throw { status: res.status, message: "Viva auth error" };
+  if (!res.ok) {
+    console.error("[Viva Auth Error]", res.status, JSON.stringify(data));
+    throw { status: res.status, message: "Viva auth error" };
+  }
   return data.access_token;
 }
 
@@ -409,14 +401,25 @@ async function vivaFetch(path, method, body) {
   };
   if (body) opts.body = JSON.stringify(body);
   const res = await fetch(url, opts);
-  const data = await res.json();
-  if (!res.ok) throw { status: res.status, message: data?.message || "Viva API error" };
+  const data = await res.json().catch(() => null);
+  if (!res.ok) {
+    console.error("[Viva API Error]", res.status, url, JSON.stringify(data));
+    throw { status: res.status, message: data?.message || "Viva API error" };
+  }
   return data;
 }
 
 // ---- FORTNOX ROUTES ----
 
-app.post("/api/fortnox/customers", async (req, res) => {
+const ADMIN_KEY = process.env.ADMIN_API_KEY || "";
+function adminOnly(req, res, next) {
+  if (!ADMIN_KEY) return next();
+  const provided = req.headers["x-admin-key"] || req.query.adminKey;
+  if (provided === ADMIN_KEY) return next();
+  return res.status(403).json({ message: "Åtkomst nekad" });
+}
+
+app.post("/api/fortnox/customers", adminOnly, async (req, res) => {
   try {
     const data = await fortnoxFetch("/customers", "POST", req.body);
     res.json(data);
@@ -425,7 +428,7 @@ app.post("/api/fortnox/customers", async (req, res) => {
   }
 });
 
-app.get("/api/fortnox/customers/:id", async (req, res) => {
+app.get("/api/fortnox/customers/:id", adminOnly, async (req, res) => {
   try {
     const data = await fortnoxFetch(`/customers/${req.params.id}`);
     res.json(data);
@@ -434,7 +437,7 @@ app.get("/api/fortnox/customers/:id", async (req, res) => {
   }
 });
 
-app.post("/api/fortnox/orders", async (req, res) => {
+app.post("/api/fortnox/orders", adminOnly, async (req, res) => {
   try {
     const data = await fortnoxFetch("/orders", "POST", req.body);
     res.json(data);
@@ -443,7 +446,7 @@ app.post("/api/fortnox/orders", async (req, res) => {
   }
 });
 
-app.get("/api/fortnox/orders/:id", async (req, res) => {
+app.get("/api/fortnox/orders/:id", adminOnly, async (req, res) => {
   try {
     const data = await fortnoxFetch(`/orders/${req.params.id}`);
     res.json(data);
@@ -452,7 +455,7 @@ app.get("/api/fortnox/orders/:id", async (req, res) => {
   }
 });
 
-app.post("/api/fortnox/invoices", async (req, res) => {
+app.post("/api/fortnox/invoices", adminOnly, async (req, res) => {
   try {
     const data = await fortnoxFetch("/invoices", "POST", req.body);
     res.json(data);
@@ -461,7 +464,7 @@ app.post("/api/fortnox/invoices", async (req, res) => {
   }
 });
 
-app.post("/api/fortnox/articles/sync", async (req, res) => {
+app.post("/api/fortnox/articles/sync", adminOnly, async (req, res) => {
   try {
     const results = [];
     for (const article of req.body.articles) {
@@ -484,7 +487,7 @@ app.post("/api/fortnox/articles/sync", async (req, res) => {
   }
 });
 
-app.post("/api/fortnox/invoicepayments", async (req, res) => {
+app.post("/api/fortnox/invoicepayments", adminOnly, async (req, res) => {
   try {
     const data = await fortnoxFetch("/invoicepayments", "POST", req.body);
     res.json(data);
@@ -495,7 +498,7 @@ app.post("/api/fortnox/invoicepayments", async (req, res) => {
 
 // ---- ONGOING ROUTES ----
 
-app.get("/api/ongoing/stock", async (req, res) => {
+app.get("/api/ongoing/stock", adminOnly, async (req, res) => {
   try {
     const data = await ongoingFetch("/inventoryBalances");
     res.json(data);
@@ -504,7 +507,7 @@ app.get("/api/ongoing/stock", async (req, res) => {
   }
 });
 
-app.get("/api/ongoing/stock/:articleNumber", async (req, res) => {
+app.get("/api/ongoing/stock/:articleNumber", adminOnly, async (req, res) => {
   try {
     const data = await ongoingFetch(`/inventoryBalances?articleNumber=${req.params.articleNumber}`);
     res.json(data);
@@ -513,7 +516,7 @@ app.get("/api/ongoing/stock/:articleNumber", async (req, res) => {
   }
 });
 
-app.post("/api/ongoing/articles/sync", async (req, res) => {
+app.post("/api/ongoing/articles/sync", adminOnly, async (req, res) => {
   try {
     const results = [];
     for (const article of req.body.articles) {
@@ -530,7 +533,7 @@ app.post("/api/ongoing/articles/sync", async (req, res) => {
   }
 });
 
-app.post("/api/ongoing/orders", async (req, res) => {
+app.post("/api/ongoing/orders", adminOnly, async (req, res) => {
   try {
     const data = await ongoingFetch("/orders", "PUT", req.body);
     res.json(data);
@@ -539,7 +542,7 @@ app.post("/api/ongoing/orders", async (req, res) => {
   }
 });
 
-app.get("/api/ongoing/orders/:orderNumber", async (req, res) => {
+app.get("/api/ongoing/orders/:orderNumber", adminOnly, async (req, res) => {
   try {
     const data = await ongoingFetch(`/orders?goodsOwnerOrderId=${req.params.orderNumber}`);
     res.json(data);
@@ -548,7 +551,7 @@ app.get("/api/ongoing/orders/:orderNumber", async (req, res) => {
   }
 });
 
-app.get("/api/ongoing/shipping-methods", async (req, res) => {
+app.get("/api/ongoing/shipping-methods", adminOnly, async (req, res) => {
   try {
     const data = await ongoingFetch("/transporterContracts");
     res.json(data);
@@ -858,6 +861,10 @@ app.post("/api/analysis/chat", async (req, res) => {
 
 app.post("/api/orders/create", async (req, res) => {
   try {
+    const clientIp = req.ip || req.connection.remoteAddress;
+    if (!checkRateLimit(clientIp, "orders-create", 20)) {
+      return res.status(429).json({ message: "För många beställningar. Försök igen om en stund." });
+    }
     const { customer, deliveryAddress, items } = req.body;
 
     if (!customer?.name || !customer?.email) {
@@ -944,8 +951,7 @@ app.get("/api/vivawallet/verify/:transactionId", async (req, res) => {
 app.get("/api/vivawallet/webhook", (req, res) => {
   const key = process.env.VIVA_VERIFICATION_KEY;
   if (key) {
-    res.set("Content-Type", "text/html");
-    return res.send(key);
+    return res.json({ Key: key });
   }
   res.status(200).send("OK");
 });
@@ -954,6 +960,26 @@ app.get("/api/vivawallet/webhook", (req, res) => {
 app.post("/api/vivawallet/webhook", async (req, res) => {
   const event = req.body;
   console.log("[Viva Webhook]", event.EventTypeId, JSON.stringify(event.EventData || {}).slice(0, 200));
+
+  const vivaKey = process.env.VIVA_VERIFICATION_KEY;
+  if (vivaKey) {
+    const sig256 = req.headers["viva-signature-256"] || "";
+    const sig1 = req.headers["viva-signature"] || "";
+    const rawBody = JSON.stringify(req.body);
+    if (sig256) {
+      const expected = crypto.createHmac("sha256", vivaKey).update(rawBody).digest("hex");
+      if (sig256 !== expected) {
+        console.error("[Webhook] Invalid SHA-256 signature");
+        return res.status(403).json({ message: "Invalid signature" });
+      }
+    } else if (sig1) {
+      const expected = crypto.createHmac("sha1", vivaKey).update(rawBody).digest("hex");
+      if (sig1 !== expected) {
+        console.error("[Webhook] Invalid SHA-1 signature");
+        return res.status(403).json({ message: "Invalid signature" });
+      }
+    }
+  }
 
   res.json({ status: "ok" });
 
@@ -1000,7 +1026,6 @@ async function handleOrderCompletion(orderId) {
 
   const items = typeof order.items === "string" ? JSON.parse(order.items) : order.items;
   const notes = [];
-  let fortnoxOrderNumber = null;
   let fortnoxInvoiceNumber = null;
   let fortnoxCustomerNumber = null;
   let ongoingOrderId = null;
@@ -1017,7 +1042,7 @@ async function handleOrderCompletion(orderId) {
         Customer: {
           Name: order.customer_name,
           Email: order.customer_email,
-          Phone: order.customer_phone || "",
+          Phone1: order.customer_phone || "",
           Address1: order.address || "",
           ZipCode: order.zip || "",
           City: order.city || "",
@@ -1034,16 +1059,16 @@ async function handleOrderCompletion(orderId) {
     notes.push(`Fortnox kund hittad: ${fortnoxCustomerNumber}`);
   }
 
-  // 2. Fortnox: create order
+  // 2. Fortnox: create invoice directly (skip order step)
   if (fortnoxCustomerNumber) {
     try {
-      const orderRows = items.map(i => {
+      const invoiceRows = items.map(i => {
         const vat = i.vatRate || 0.25;
         const priceExVat = Math.round((i.price / (1 + vat)) * 100) / 100;
         return {
           ArticleNumber: i.articleNumber,
           Description: i.name,
-          OrderedQuantity: i.quantity,
+          DeliveredQuantity: i.quantity,
           Price: priceExVat,
           VAT: Math.round(vat * 100)
         };
@@ -1051,45 +1076,47 @@ async function handleOrderCompletion(orderId) {
 
       if (order.shipping_cost > 0) {
         const shippingExVat = Math.round((order.shipping_cost / 1.25) * 100) / 100;
-        orderRows.push({
+        invoiceRows.push({
           ArticleNumber: "FRAKT",
           Description: "Frakt",
-          OrderedQuantity: 1,
+          DeliveredQuantity: 1,
           Price: shippingExVat,
           VAT: 25
         });
       }
 
-      const fxOrder = await fortnoxFetch("/orders", "POST", {
-        Order: {
+      const today = new Date().toISOString().split("T")[0];
+      const fxInvoice = await fortnoxFetch("/invoices", "POST", {
+        Invoice: {
           CustomerNumber: fortnoxCustomerNumber,
-          OrderDate: new Date().toISOString().split("T")[0],
+          InvoiceDate: today,
+          DueDate: today,
           DeliveryAddress1: order.address || "",
           DeliveryZipCode: order.zip || "",
           DeliveryCity: order.city || "",
-          DeliveryCountryCode: order.country_code || "SE",
+          DeliveryCountry: "Sverige",
           YourReference: order.order_number,
           Currency: "SEK",
-          OrderRows: orderRows
+          InvoiceRows: invoiceRows,
+          Comments: `Webborder ${order.order_number} – betald via Viva Wallet`
         }
       });
-      fortnoxOrderNumber = fxOrder?.Order?.OrderNumber;
-      notes.push(`Fortnox order: ${fortnoxOrderNumber}`);
-    } catch (err) {
-      notes.push(`Fortnox order FEL: ${err.message}`);
-      console.error("[Order] Fortnox order error:", err);
-    }
-  }
-
-  // 3. Fortnox: create invoice from order
-  if (fortnoxOrderNumber) {
-    try {
-      const inv = await fortnoxFetch(`/orders/${fortnoxOrderNumber}/createinvoice`, "PUT");
-      fortnoxInvoiceNumber = inv?.Invoice?.InvoiceNumber;
+      fortnoxInvoiceNumber = fxInvoice?.Invoice?.DocumentNumber;
       notes.push(`Fortnox faktura: ${fortnoxInvoiceNumber}`);
     } catch (err) {
       notes.push(`Fortnox faktura FEL: ${err.message}`);
       console.error("[Order] Fortnox invoice error:", err);
+    }
+  }
+
+  // 3. Fortnox: bookkeep invoice so it becomes "sent"
+  if (fortnoxInvoiceNumber) {
+    try {
+      await fortnoxFetch(`/invoices/${fortnoxInvoiceNumber}/bookkeep`, "PUT");
+      notes.push("Fortnox faktura bokford");
+    } catch (err) {
+      notes.push(`Fortnox bokforing FEL: ${err.message}`);
+      console.error("[Order] Fortnox bookkeep error:", err);
     }
   }
 
@@ -1141,13 +1168,15 @@ async function handleOrderCompletion(orderId) {
   }
 
   // 6. Update DB with all references
-  const allSucceeded = fortnoxOrderNumber && ongoingOrderId;
+  const fortnoxDone = !!fortnoxInvoiceNumber;
+  const ongoingDone = !!ongoingOrderId;
+  const allSucceeded = fortnoxDone && ongoingDone;
   const updateFields = {
     fortnox_customer_number: fortnoxCustomerNumber || null,
-    fortnox_order_number: fortnoxOrderNumber ? String(fortnoxOrderNumber) : null,
+    fortnox_order_number: fortnoxInvoiceNumber ? String(fortnoxInvoiceNumber) : null,
     fortnox_invoice_number: fortnoxInvoiceNumber ? String(fortnoxInvoiceNumber) : null,
     ongoing_order_id: ongoingOrderId ? String(ongoingOrderId) : null,
-    status: allSucceeded ? "fulfilled" : "partial"
+    status: allSucceeded ? "fulfilled" : (fortnoxDone || ongoingDone ? "partial" : "pending")
   };
   if (allSucceeded) {
     updateFields.processed_at = new Date().toISOString();
@@ -1159,7 +1188,86 @@ async function handleOrderCompletion(orderId) {
   console.log(`[Order] ${order.order_number} completion: ${allSucceeded ? "FULL" : "PARTIAL"}`);
   console.log(`[Order] Notes: ${notes.join(" | ")}`);
 
-  return { fortnoxOrderNumber, fortnoxInvoiceNumber, ongoingOrderId, notes };
+  // 7. Send confirmation email
+  try {
+    await sendOrderConfirmation(order, items);
+    notes.push("Bekräftelsemail skickat");
+  } catch (err) {
+    notes.push(`Email FEL: ${err.message}`);
+    console.error("[Order] Email error:", err);
+  }
+
+  return { fortnoxInvoiceNumber, ongoingOrderId, notes };
+}
+
+// ---- ORDER CONFIRMATION EMAIL ----
+
+async function sendOrderConfirmation(order, items) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    console.log("[Email] RESEND_API_KEY not set, skipping");
+    return;
+  }
+
+  const { Resend } = require("resend");
+  const resend = new Resend(apiKey);
+
+  const fromEmail = process.env.EMAIL_FROM || "order@1753skincare.com";
+  const itemRows = items.map(i =>
+    `<tr>
+      <td style="padding:8px 0;border-bottom:1px solid #eee">${i.name}</td>
+      <td style="padding:8px 0;border-bottom:1px solid #eee;text-align:center">${i.quantity}</td>
+      <td style="padding:8px 0;border-bottom:1px solid #eee;text-align:right">${i.price.toLocaleString("sv-SE")} kr</td>
+    </tr>`
+  ).join("");
+
+  const total = items.reduce((s, i) => s + i.price * i.quantity, 0);
+
+  await resend.emails.send({
+    from: fromEmail,
+    to: order.customer_email,
+    subject: `Orderbekräftelse – ${order.order_number}`,
+    html: `
+      <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;max-width:560px;margin:0 auto;color:#1d1d1f">
+        <div style="text-align:center;padding:32px 0 24px">
+          <h1 style="font-size:24px;font-weight:700;margin:0">Tack för din beställning!</h1>
+        </div>
+        <p style="font-size:15px;line-height:1.6;color:#515151">
+          Hej ${order.customer_name}, vi har mottagit din betalning och din order behandlas nu.
+        </p>
+        <div style="background:#f5f5f7;border-radius:12px;padding:16px 20px;margin:20px 0">
+          <p style="margin:0;font-size:13px;color:#766a62">Ordernummer</p>
+          <p style="margin:4px 0 0;font-size:17px;font-weight:600">${order.order_number}</p>
+        </div>
+        <table style="width:100%;border-collapse:collapse;font-size:14px;margin:20px 0">
+          <thead>
+            <tr style="border-bottom:2px solid #1d1d1f">
+              <th style="text-align:left;padding:8px 0">Produkt</th>
+              <th style="text-align:center;padding:8px 0">Antal</th>
+              <th style="text-align:right;padding:8px 0">Pris</th>
+            </tr>
+          </thead>
+          <tbody>${itemRows}</tbody>
+          <tfoot>
+            <tr>
+              <td colspan="2" style="padding:12px 0;font-weight:700">Totalt</td>
+              <td style="padding:12px 0;text-align:right;font-weight:700">${total.toLocaleString("sv-SE")} kr</td>
+            </tr>
+          </tfoot>
+        </table>
+        <div style="background:#f5f5f7;border-radius:12px;padding:16px 20px;margin:20px 0">
+          <p style="margin:0;font-size:13px;color:#766a62">Leveransadress</p>
+          <p style="margin:4px 0 0;font-size:14px">${order.customer_name}<br>${order.address}<br>${order.zip} ${order.city}</p>
+        </div>
+        <p style="font-size:13px;color:#766a62;line-height:1.6;margin-top:32px;text-align:center">
+          1753 SKINCARE – Holistisk hudvård med CBD och CBG<br>
+          <a href="https://1753skincare.com" style="color:#108474">1753skincare.com</a>
+        </p>
+      </div>
+    `
+  });
+
+  console.log(`[Email] Confirmation sent to ${order.customer_email}`);
 }
 
 // ---- ORDER VERIFICATION (backup from success page) ----
@@ -1482,22 +1590,11 @@ app.get("/api/fortnox/callback", async (req, res) => {
       <html lang="sv">
       <head><meta charset="utf-8"><title>Fortnox – Ansluten</title>
       <style>body{font-family:-apple-system,sans-serif;max-width:600px;margin:60px auto;padding:20px;color:#1d1d1f}
-      h1{color:#108474}code{background:#f5f5f7;padding:4px 8px;border-radius:6px;font-size:13px;word-break:break-all}
-      .token-box{background:#f5f5f7;padding:16px;border-radius:12px;margin:12px 0}
-      .label{font-weight:600;font-size:13px;color:#766a62;margin-bottom:4px}</style></head>
+      h1{color:#108474}</style></head>
       <body>
         <h1>Fortnox ansluten!</h1>
-        <p>Tokens har hämtats och aktiverats i servern.</p>
-        <div class="token-box">
-          <div class="label">ACCESS_TOKEN</div>
-          <code>${tokenData.access_token}</code>
-        </div>
-        <div class="token-box">
-          <div class="label">REFRESH_TOKEN</div>
-          <code>${tokenData.refresh_token || "(ingen)"}</code>
-        </div>
-        <p><strong>Viktigt:</strong> Lägg in dessa som miljövariabler i Railway så de överlever omstarter:</p>
-        <pre>railway variables --set "FORTNOX_ACCESS_TOKEN=${tokenData.access_token}" --set "FORTNOX_REFRESH_TOKEN=${tokenData.refresh_token || ""}"</pre>
+        <p>Tokens har hämtats, aktiverats och sparats automatiskt.</p>
+        <p>Du kan stänga denna sida.</p>
         <p><a href="/">Tillbaka till startsidan</a></p>
       </body></html>
     `);
@@ -1509,7 +1606,7 @@ app.get("/api/fortnox/callback", async (req, res) => {
 
 // ---- ADMIN: FORTNOX ARTIKLAR ----
 
-app.get("/api/fortnox/articles", async (req, res) => {
+app.get("/api/fortnox/articles", adminOnly, async (req, res) => {
   try {
     const data = await fortnoxFetch("/articles?limit=100");
     res.json(data);
@@ -1518,7 +1615,7 @@ app.get("/api/fortnox/articles", async (req, res) => {
   }
 });
 
-app.get("/api/fortnox/customers", async (req, res) => {
+app.get("/api/fortnox/customers", adminOnly, async (req, res) => {
   try {
     const data = await fortnoxFetch("/customers?limit=100");
     res.json(data);
@@ -1527,12 +1624,23 @@ app.get("/api/fortnox/customers", async (req, res) => {
   }
 });
 
-app.get("/api/fortnox/company", async (req, res) => {
+app.get("/api/fortnox/company", adminOnly, async (req, res) => {
   try {
     const data = await fortnoxFetch("/companyinformation");
     res.json(data);
   } catch (err) {
     res.status(err.status || 500).json({ message: err.message });
+  }
+});
+
+// ---- HEALTH CHECK ----
+
+app.get("/health", async (req, res) => {
+  try {
+    await db.pool.query("SELECT 1");
+    res.json({ status: "ok", db: "connected", uptime: process.uptime() });
+  } catch {
+    res.status(503).json({ status: "degraded", db: "disconnected" });
   }
 });
 
