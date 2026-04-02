@@ -1,0 +1,22 @@
+Agent 05 – Prestanda
+====================
+Spår: next/image, bundle, tunga bilder, LCP
+Kodbasis: next.config.ts, product-card.tsx, page.tsx, lib/products.ts
+
+Senast granskad: 2026-04-02 (full audit)
+
+[Fynd – förbättringar]
+- next.config.ts: remotePatterns cdn.shopify.com – stäm med faktiska bild-URL:er
+  i lib/products.ts (om alla är lokala /public behövs inte remote).
+- page.tsx: hero/video-poster med priority på Image – bra för LCP-region.
+- product-card.tsx: ingen priority på startsidans grid – överväg priority för
+  första 1–2 korten för LCP.
+- lucide-react används brett – tree-shake fungerar per import; vid stor bundle,
+  granska importmönster.
+
+[Fynd – risker]
+- ProductCard laddar två fulla bilder per kort (hover) – medvetet; övervaka
+  total bildvikt på startsidan.
+
+[Kräver manuell test]
+- Lighthouse mobil på / och /produkter/[id].

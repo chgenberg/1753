@@ -1,0 +1,23 @@
+Agent 01 – Navigation och informationsarkitektur (IA)
+====================================================
+Spår: header, footer, deep links, 404, Mitt konto-flöden
+Kodbasis: frontend/src/components/header.tsx, footer.tsx, app/
+
+Senast granskad: 2026-04-02 (full audit)
+
+[Fynd – förbättringar]
+- Header (NAV_LINKS): Hem, Produkter, Om oss, Kontakt. Footer har samma plus
+  Hudanalys under "Navigera". Överväg Hudanalys i header/mobilmeny för jämn IA.
+- app/sitemap.ts listar statiska sidor + produkter men inte /kassa, /logga-in,
+  /registrera, /betalning/*. Det är ofta medvetet (noindex-liknande); dokumentera
+  om kassa/auth ska vara helt borta från sitemap eller om någon sida ska in.
+- Saknas app/not-found.tsx – okända URL:er ger Next.js standard-404 utan varumärke.
+- Mitt konto: useEffect redirect till /logga-in när !isLoggedIn; kort tom render
+  innan redirect (if (!isLoggedIn) return null) – förväntat men kan flasha.
+
+[Fynd – risker / buggar]
+- PDP (product-detail.tsx): ogiltigt id anropar notFound() – bra; utan egen
+  not-found.tsx blir upplevelsen generisk.
+
+[Kräver manuell test]
+- Klicka alla footer-länkar (Instagram, tel, mail) och jämför med produktion.

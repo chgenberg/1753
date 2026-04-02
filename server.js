@@ -245,6 +245,122 @@ function generateOrderNumber() {
   return `1753-${date}-${rand}`;
 }
 
+// ---- SUBSCRIPTION ROUTES ----
+
+app.post("/api/subscriptions/create", authMiddleware, async (req, res) => {
+  try {
+    const { productId, quantity } = req.body;
+    const product = PRODUCTS_MAP[productId];
+    if (!product) return res.status(400).json({ message: "Okänd produkt" });
+
+    const user = await db.findUserById(req.userId);
+    if (!user) return res.status(404).json({ message: "Användare hittades inte" });
+
+    const qty = quantity || 1;
+    const discountPercent = 15;
+    const originalPrice = product.price * qty;
+    const recurringPrice = Math.round(originalPrice * (1 - discountPercent / 100));
+    const vivaAmount = recurringPrice * 100;
+
+    const orderNumber = generateOrderNumber();
+
+    const vivaData = await vivaFetch("/checkout/v2/orders", "POST", {
+      amount: vivaAmount,
+      currencyCode: 752,
+      customerTrns: `1753 SKINCARE prenumeration – ${orderNumber}`,
+      merchantTrns: `SUB-${orderNumber}`,
+      sourceCode: process.env.VIVA_SOURCE_CODE,
+      allowRecurring: true,
+      customer: {
+        email: user.email,
+        fullName: user.name,
+        phone: user.phone || ""
+      }
+    });
+
+    await db.createSubscription({
+      userId: req.userId,
+      productId,
+      productName: product.name,
+      quantity: qty,
+      intervalDays: 60,
+      discountPercent,
+      originalPrice,
+      recurringPrice,
+      vivaInitialOrderCode: vivaData.orderCode
+    });
+
+    const env = process.env.VIVA_ENVIRONMENT === "production" ? "www" : "demo";
+    const checkoutUrl = `https://${env}.vivapayments.com/web/checkout?ref=${vivaData.orderCode}`;
+
+    console.log(`[Subscription] Created for ${user.email}, product=${productId}, vivaOrderCode=${vivaData.orderCode}`);
+    res.json({ orderCode: vivaData.orderCode, checkoutUrl });
+  } catch (err) {
+    console.error("[Subscription Create Error]", err);
+    res.status(err.status || 500).json({ message: err.message || "Prenumerationen kunde inte skapas" });
+  }
+});
+
+app.get("/api/subscriptions", authMiddleware, async (req, res) => {
+  try {
+    const subs = await db.findSubscriptionsByUser(req.userId);
+    res.json(subs);
+  } catch (err) {
+    res.status(500).json({ message: err.message || "Kunde inte hämta prenumerationer" });
+  }
+});
+
+app.put("/api/subscriptions/:id/pause", authMiddleware, async (req, res) => {
+  try {
+    const sub = await db.findSubscriptionById(parseInt(req.params.id, 10));
+    if (!sub || sub.user_id !== req.userId) return res.status(404).json({ message: "Prenumeration hittades inte" });
+    if (sub.status !== "active") return res.status(400).json({ message: "Kan bara pausa aktiva prenumerationer" });
+
+    const updated = await db.updateSubscription(sub.id, {
+      status: "paused",
+      paused_at: new Date().toISOString()
+    });
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ message: err.message || "Kunde inte pausa prenumerationen" });
+  }
+});
+
+app.put("/api/subscriptions/:id/resume", authMiddleware, async (req, res) => {
+  try {
+    const sub = await db.findSubscriptionById(parseInt(req.params.id, 10));
+    if (!sub || sub.user_id !== req.userId) return res.status(404).json({ message: "Prenumeration hittades inte" });
+    if (sub.status !== "paused") return res.status(400).json({ message: "Kan bara återuppta pausade prenumerationer" });
+
+    const nextCharge = new Date();
+    nextCharge.setDate(nextCharge.getDate() + sub.interval_days);
+
+    const updated = await db.updateSubscription(sub.id, {
+      status: "active",
+      paused_at: null,
+      next_charge_date: nextCharge.toISOString().split("T")[0]
+    });
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ message: err.message || "Kunde inte återuppta prenumerationen" });
+  }
+});
+
+app.delete("/api/subscriptions/:id", authMiddleware, async (req, res) => {
+  try {
+    const sub = await db.findSubscriptionById(parseInt(req.params.id, 10));
+    if (!sub || sub.user_id !== req.userId) return res.status(404).json({ message: "Prenumeration hittades inte" });
+
+    const updated = await db.updateSubscription(sub.id, {
+      status: "cancelled",
+      cancelled_at: new Date().toISOString()
+    });
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ message: err.message || "Kunde inte avbryta prenumerationen" });
+  }
+});
+
 // ---- API HELPERS ----
 
 // Fortnox token state (initialised from env, refreshed automatically)
@@ -989,6 +1105,24 @@ app.post("/api/vivawallet/webhook", async (req, res) => {
       const merchantTrns = event.EventData?.MerchantTrns;
       const orderCode = event.EventData?.OrderCode;
 
+      // Check if this is a subscription payment (merchantTrns starts with SUB-)
+      if (merchantTrns && merchantTrns.startsWith("SUB-")) {
+        const sub = orderCode ? await db.findSubscriptionByVivaCode(orderCode) : null;
+        if (sub) {
+          const nextCharge = new Date();
+          nextCharge.setDate(nextCharge.getDate() + sub.interval_days);
+          await db.updateSubscription(sub.id, {
+            status: "active",
+            viva_initial_tx_id: transactionId || null,
+            next_charge_date: nextCharge.toISOString().split("T")[0],
+            last_charge_date: new Date().toISOString().split("T")[0]
+          });
+          console.log(`[Webhook] Subscription ${sub.id} activated, next charge: ${nextCharge.toISOString().split("T")[0]}`);
+          return;
+        }
+        console.warn("[Webhook] Subscription not found for orderCode:", orderCode);
+      }
+
       let order = merchantTrns ? await db.findOrderByMerchantTrns(merchantTrns) : null;
       if (!order && orderCode) order = await db.findOrderByVivaCode(orderCode);
 
@@ -1644,6 +1778,119 @@ app.get("/health", async (req, res) => {
   }
 });
 
+// ---- RECURRING SUBSCRIPTION CHARGES (runs every 6 hours) ----
+
+const SIX_HOURS = 6 * 60 * 60 * 1000;
+
+async function processRecurringCharges() {
+  try {
+    const due = await db.findDueSubscriptions();
+    if (due.length === 0) return;
+    console.log(`[Recurring] ${due.length} subscription(s) due for charge`);
+
+    const fetch = (await import("node-fetch")).default;
+    const env = process.env.VIVA_ENVIRONMENT === "production" ? "" : "demo-";
+    const merchantId = process.env.VIVA_MERCHANT_ID;
+    const apiKey = process.env.VIVA_API_KEY;
+
+    if (!merchantId || !apiKey) {
+      console.error("[Recurring] VIVA_MERCHANT_ID / VIVA_API_KEY not set, skipping");
+      return;
+    }
+
+    const basicAuth = Buffer.from(`${merchantId}:${apiKey}`).toString("base64");
+
+    for (const sub of due) {
+      try {
+        if (!sub.viva_initial_tx_id) {
+          console.warn(`[Recurring] Sub ${sub.id} has no initial tx id, skipping`);
+          continue;
+        }
+
+        const vivaAmount = sub.recurring_price * 100;
+        const chargeUrl = `https://${env}api.vivapayments.com/api/transactions/${sub.viva_initial_tx_id}`;
+
+        const chargeRes = await fetch(chargeUrl, {
+          method: "POST",
+          headers: {
+            "Authorization": `Basic ${basicAuth}`,
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify({
+            amount: vivaAmount,
+            currencyCode: "752"
+          })
+        });
+
+        const chargeData = await chargeRes.json().catch(() => null);
+
+        if (!chargeRes.ok) {
+          console.error(`[Recurring] Charge failed for sub ${sub.id}:`, chargeData);
+          await db.updateSubscription(sub.id, { status: "payment_failed" });
+          await db.createSubscriptionCharge({
+            subscriptionId: sub.id,
+            amount: sub.recurring_price,
+            status: "failed"
+          });
+          continue;
+        }
+
+        const newTxId = chargeData?.TransactionId || chargeData?.transactionId;
+        const orderNumber = generateOrderNumber();
+
+        const newOrder = await db.createOrder({
+          orderNumber,
+          customerName: sub.product_name,
+          customerEmail: (await db.findUserById(sub.user_id))?.email || "",
+          customerPhone: "",
+          address: "",
+          zip: "",
+          city: "",
+          vivaOrderCode: null,
+          merchantTrns: `RSUB-${orderNumber}`,
+          items: [{ id: sub.product_id, name: sub.product_name, qty: sub.quantity, price: sub.recurring_price }],
+          totalAmount: sub.recurring_price,
+          shippingCost: 0
+        });
+
+        await db.updateOrder(newOrder.id, {
+          payment_status: "paid",
+          status: "confirmed",
+          viva_transaction_id: newTxId || null
+        });
+
+        await db.createSubscriptionCharge({
+          subscriptionId: sub.id,
+          orderId: newOrder.id,
+          vivaTxId: newTxId || null,
+          amount: sub.recurring_price,
+          status: "charged"
+        });
+
+        const nextCharge = new Date();
+        nextCharge.setDate(nextCharge.getDate() + sub.interval_days);
+
+        await db.updateSubscription(sub.id, {
+          next_charge_date: nextCharge.toISOString().split("T")[0],
+          last_charge_date: new Date().toISOString().split("T")[0]
+        });
+
+        console.log(`[Recurring] Sub ${sub.id} charged ${sub.recurring_price} kr, new order ${orderNumber}, next: ${nextCharge.toISOString().split("T")[0]}`);
+
+        try {
+          await handleOrderCompletion(newOrder.id);
+        } catch (err) {
+          console.error(`[Recurring] Fulfilment error for order ${orderNumber}:`, err.message);
+        }
+      } catch (err) {
+        console.error(`[Recurring] Error processing sub ${sub.id}:`, err);
+      }
+    }
+  } catch (err) {
+    console.error("[Recurring] Top-level error:", err);
+  }
+}
+
 // ---- START ----
 
 (async () => {
@@ -1658,5 +1905,9 @@ app.get("/health", async (req, res) => {
     else console.log("[OK] OPENAI_API_KEY konfigurerad");
     if (!process.env.FORTNOX_ACCESS_TOKEN) console.log("[INFO] Fortnox ej ansluten – gå till /api/fortnox/auth för att auktorisera");
     else console.log("[OK] Fortnox-tokens konfigurerade");
+
+    setInterval(processRecurringCharges, SIX_HOURS);
+    setTimeout(processRecurringCharges, 60_000);
+    console.log("[OK] Recurring subscription scheduler started (every 6h)");
   });
 })();

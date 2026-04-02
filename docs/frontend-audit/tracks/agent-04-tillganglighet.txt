@@ -1,0 +1,24 @@
+Agent 04 – Tillgänglighet
+=========================
+Spår: fokus, aria, tangentbord, formulär
+Kodbasis: header, cart-drawer, chat-widget, kassa, logga-in, registrera, ui/*
+
+Senast granskad: 2026-04-02 (full audit)
+
+[Fynd – förbättringar]
+- Header: aria-label på Mitt konto, Varukorg, hamburger, stäng meny – bra.
+- cart-drawer: aria-label "Stäng varukorg" – bra. Backdrop stänger vid klick –
+  saknas motsvarande för Escape (överväg).
+- logga-in/page.tsx: knapp för visa/dölj lösenord saknar aria-label (endast ikon).
+- product-detail.tsx: miniatyrknappar för bildval saknar aria-label / aria-pressed
+  för aktiv bild – skärmläsare får svårt att förstå syfte.
+- Mobilmeny (header): överväg fokusfälla och Escape; fokus tillbaka till trigger
+  vid stängning.
+- chat-widget: stäng-knapp saknar aria-label (endast X-ikon) – lägg aria-label
+  "Stäng chatt" (jämför header som har label på stäng).
+
+[Fynd – risker / buggar]
+- Ingen kritisk blocker hittad i kodgranskning; flera förbättringsmöjligheter.
+
+[Kräver manuell test]
+- Tab genom kassa, logga in, chatt med skärmläsare (VoiceOver/NVDA).

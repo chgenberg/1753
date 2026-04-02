@@ -106,7 +106,7 @@ const PRODUCTS = [
     articleNumber: "1001",
     category: "oil",
     name: "The ONE Facial Oil",
-    price: 649,
+    price: 5,
     originalPrice: null,
     reviews: 202,
     image: "public/Products/Theone.webp",

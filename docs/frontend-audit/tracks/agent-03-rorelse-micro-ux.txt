@@ -1,0 +1,21 @@
+Agent 03 – Rörelse och micro-UX
+===============================
+Spår: transitions, hover, prefers-reduced-motion, loading
+Kodbasis: globals.css, header.tsx, loading.tsx, product-card.tsx, page.tsx
+
+Senast granskad: 2026-04-02 (full audit)
+
+[Fynd – förbättringar]
+- globals.css: @media (prefers-reduced-motion: reduce) minskar animation/transition –
+  bra. MagneticLink i header använder fortfarande musstyrd translate – acceptabelt
+  men inte avstängt vid reduced motion (låg prioritet).
+- app/produkter/loading.tsx, mitt-konto/loading.tsx, produkter/[id]/loading.tsx
+  finns – bra skeleton-läge där det behövs.
+- ProductCard: dubbla bilder + hover – på touch saknas hover; första bild är
+  primär – ok.
+
+[Fynd – risker]
+- page.tsx VideoEmbed: Vimeo + postMessage "ended" – se manuell test Safari iOS.
+
+[Kräver manuell test]
+- Spela video på startsidan, verifiera att poster återkommer efter avslut.

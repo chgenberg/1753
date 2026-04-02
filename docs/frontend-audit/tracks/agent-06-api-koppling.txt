@@ -1,0 +1,25 @@
+Agent 06 – Koppling mot API
+===========================
+Spår: NEXT_PUBLIC_API_URL, auth, felmeddelanden
+Kodbasis: lib/api.ts, auth-provider.tsx, mitt-konto/page.tsx, kassa, betalning
+
+Senast granskad: 2026-04-02 (full audit)
+
+[Fynd – förbättringar / buggar]
+- lib/api.ts: bas-URL NEXT_PUBLIC_API_URL || http://localhost:3001/api – måste
+  sättas i produktion.
+- next.config rewrites /api/:path* till samma backend – klienten använder apiFetch
+  med absolut URL från env, inte relativ /api – dokumentera för team (CORS).
+- mitt-konto/page.tsx: authFetch("/dashboard/stats") och "/dashboard/orders" med
+  .catch(() => {}) – fel döljs; användare ser nollor/tom lista utan förklaring.
+  P0 ur användarperspekt.
+- kassa: apiFetch /orders/create visar fel i UI – bra.
+- betalning/lyckad: apiFetch /orders/verify med transactionId – bra fallback om
+  sessionStorage saknas.
+
+[Fynd – auth]
+- auth-provider: JWT exp via atob – ok för standard JWT; User.id som number –
+  aligna om backend byter typ.
+
+[Kräver manuell test]
+- Blockera /dashboard/* i devtools – bekräfta att felhantering behövs (nu tyst).

@@ -1,0 +1,28 @@
+1753 SKINCARE – Potentiella buggar och risker (frontend + gränsytor)
+====================================================================
+Syfte: Aggregerat från full audit 2026-04-02. Detalj: docs/frontend-audit/tracks/
+Skill: .cursor/skills/1753-frontend-audit-composer/SKILL.md
+
+[P0 – bekräftad risk i kod]
+- Dashboard API: tyst fel vid misslyckad stats/orders → felaktig tom/noll-state
+  (mitt-konto/page.tsx – se agent-06).
+
+[P1 – måste verifieras manuellt eller mot backend]
+- Order total_amount: delning med 100 – stäm mot backend (öre vs kronor) (agent-08).
+
+[P1 – miljö / integration]
+- Fel NEXT_PUBLIC_API_URL eller CORS i produktion → trasig checkout/API.
+- metadataBase/sitemap fast domän 1753skincare.com – uppdatera vid domänbyte.
+
+[P2 – edge / support]
+- sessionStorage ordernummer vid betalningsretur – edge cases (agent-08).
+- Privat läge rensar varukorg – förväntat beteende.
+
+[Kräver manuell test]
+- Safari iOS: Vimeo på startsidan, postMessage "ended" (agent-03).
+- Tab/ skärmläsare: kassa, inloggning, chatt (agent-04).
+- Lighthouse: LCP och bilder (agent-05).
+
+[Falska positiva / ej bugg]
+- Tom önskelista/prenumerationer utan backend – produktval.
+- GA endast efter samtycke – korrekt implementerat.

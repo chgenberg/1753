@@ -1,0 +1,23 @@
+Agent 07 – Copy och varumärke
+=============================
+Spår: svenska (åäö), ton enligt regel, inga AI-klischeer
+Kodbasis: app/* sidor, chat-widget, kassa, lib/products.ts
+
+Senast granskad: 2026-04-02 (full audit)
+
+[Fynd – förbättringar]
+- Ton på startsidan och om oss: varm, produktfokus – i linje med regel (spot-check).
+- registrera: "Bli en del av 1753-familjen" – personlig ton; ok om avsiktlig.
+- chat-widget: underrubrik "Hudvårdsrådgivare" – om backend är AI: lägg tydlig
+  disclaimer (ärlighet enligt varumärke).
+- kassa/page.tsx: placeholders förnamn/efternamn "Christopher" / "Genberg" –
+  byt till neutrala exempel om ni vill undvika inbyggd identitet i UI.
+- betalning/misslyckad: "problemet kvarstår" – korrekt svenska; överväg "kvarstår"
+  vs "består" beroende på stil (båda giltiga).
+
+[Fynd – risker]
+- Produktcopy i lib/products.ts – vid ändringar, säkerställ enhetlig svenska
+  (mått, enheter).
+
+[Kräver manuell test]
+- Läs igenom nya sektioner vid varje release (inga AI-klischeer i rubriker).

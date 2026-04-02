@@ -15,7 +15,7 @@ alwaysApply: true
 - **Superminimalistisk** – varje element måste motivera sin existens
 - **Icke-AI-känsla** – undvik perfekt symmetri, generiska gradients, stockfoto-estetik
 - **Interaktivitet** – smooth scroll-animationer, hover-effekter med elevation, micro-interactions; målet är en **enormt interaktiv** upplevelse utan att det blir rörigt
-- **Fyra menypunkter**: Hem, Produkter, Om oss, Kontakt – inget mer (plus Mitt konto/Logga in)
+- **Fyra menypunkter i header**: Hem, Produkter, Om oss, Kontakt – inget mer (plus Mitt konto/Logga in). Hudanalys exponeras medvetet **enbart i footer** (sekundär ingång, inte primär nav).
 
 ### Produktpresentation och minimalistiska ramar
 
@@ -47,7 +47,7 @@ alwaysApply: true
 
 ## Typografi
 
-Systemfont-stack: `-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Helvetica, Arial, sans-serif`. Inga externa fonts. Storlekar i `rem`. Line-height 1.6 för brödtext.
+Systemfont-stack som fallback: `-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro Text", "Segoe UI", Helvetica, Arial, sans-serif`. Next.js-frontenden (`frontend/`) använder **Inter** via `next/font/google` (medvetet val 2026-04-02 – optisk konsistens och variabelt stöd). Storlekar i `rem`. Line-height 1.6 för brödtext.
 
 ## Teknisk stack
 
@@ -59,6 +59,7 @@ Systemfont-stack: `-apple-system, BlinkMacSystemFont, "SF Pro Display", "SF Pro 
 - Backend: Express-proxy (`server.js`) – hanterar API-nycklar + autentisering server-side
 - Beroenden: `package.json` (express, cors, dotenv, node-fetch, bcryptjs, jsonwebtoken)
 - Auth: JWT-baserad autentisering (token i localStorage, bcrypt-hashning)
+- **Sitemap** (`frontend/src/app/sitemap.ts`): inkluderar startsida, produkter, om oss, kontakt, hudanalys, juridik. Kassa, logga-in, registrera, betalnings-sidor exkluderas medvetet (noindex-liknande).
 
 ## Autentisering + Kunddashboard
 

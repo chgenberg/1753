@@ -1,0 +1,30 @@
+Agent 08 – Edge cases
+=====================
+Spår: tom varukorg, utloggad, betalningsavbrott, långsam API
+Kodbasis: cart-provider, kassa, betalning/*, mitt-konto, hudanalys
+
+Senast granskad: 2026-04-02 (full audit)
+
+[Fynd – buggar / risker]
+- cart-provider: localStorage cart1753 – privat läge / rensning ger tom korg;
+  förväntat; dokumentera för support.
+- kassa: tom varukorg visar CTA mot /#produkter – ankare id=produkter på
+  page.tsx finns – ok.
+- betalning/lyckad: sessionStorage 1753_orderNumber + verify – ok. Stängd flik
+  före retur kan ge kort tid utan ordernummer tills verify svarar.
+- betalning/misslyckad: länkar till /kassa och /kontakt – ok.
+- mitt-konto: total_amount delas med 100 i OrdersView – VERIFIERA backend (öre
+  vs helt kronor i integer).
+- hudanalys: stor base64-payload till /analysis – långsam API kan ge dålig UX;
+  loading-steg finns delvis.
+
+[Fynd – verifierat]
+- kassa och hudanalys använder h-13 – Tailwind v4 i projektet genererar utility
+  (height: calc(var(--spacing) * 13)). Ingen felklass.
+
+[Kräver manuell test]
+- Avbryt betalning och landa på misslyckad-sida; kontrollera varukorg (clearCart
+  på lyckad-sida, inte på misslyckad – förväntat att korg finns kvar).
+
+[Falska positiva]
+- Tom önskelista/prenumerationer utan backend – produktval.

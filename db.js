@@ -60,6 +60,40 @@ async function initSchema() {
     );
 
     CREATE INDEX IF NOT EXISTS idx_users_email ON users (email);
+
+    CREATE TABLE IF NOT EXISTS subscriptions (
+      id                      SERIAL PRIMARY KEY,
+      user_id                 UUID REFERENCES users(id),
+      status                  VARCHAR(20) DEFAULT 'pending',
+      product_id              VARCHAR(50) NOT NULL,
+      product_name            VARCHAR(255) NOT NULL,
+      quantity                INTEGER DEFAULT 1,
+      interval_days           INTEGER DEFAULT 60,
+      discount_percent        INTEGER DEFAULT 15,
+      original_price          INTEGER NOT NULL,
+      recurring_price         INTEGER NOT NULL,
+      viva_initial_order_code BIGINT,
+      viva_initial_tx_id      VARCHAR(100),
+      next_charge_date        DATE,
+      last_charge_date        DATE,
+      paused_at               TIMESTAMPTZ,
+      cancelled_at            TIMESTAMPTZ,
+      created_at              TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_subscriptions_user ON subscriptions (user_id);
+    CREATE INDEX IF NOT EXISTS idx_subscriptions_status ON subscriptions (status);
+    CREATE INDEX IF NOT EXISTS idx_subscriptions_viva ON subscriptions (viva_initial_order_code);
+
+    CREATE TABLE IF NOT EXISTS subscription_charges (
+      id                SERIAL PRIMARY KEY,
+      subscription_id   INTEGER REFERENCES subscriptions(id),
+      order_id          INTEGER REFERENCES orders(id),
+      viva_tx_id        VARCHAR(100),
+      amount            INTEGER NOT NULL,
+      status            VARCHAR(20) DEFAULT 'pending',
+      charged_at        TIMESTAMPTZ DEFAULT NOW()
+    );
   `);
   console.log("[DB] Schema ready");
 }
@@ -193,6 +227,85 @@ async function countOrdersByEmail(email) {
   return parseInt(rows[0].count, 10);
 }
 
+// ---- SUBSCRIPTION helpers ----
+
+async function createSubscription({
+  userId, productId, productName, quantity,
+  intervalDays, discountPercent, originalPrice, recurringPrice,
+  vivaInitialOrderCode
+}) {
+  const { rows } = await pool.query(
+    `INSERT INTO subscriptions
+       (user_id, product_id, product_name, quantity,
+        interval_days, discount_percent, original_price, recurring_price,
+        viva_initial_order_code)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+     RETURNING *`,
+    [userId, productId, productName, quantity || 1,
+     intervalDays || 60, discountPercent || 15, originalPrice, recurringPrice,
+     vivaInitialOrderCode]
+  );
+  return rows[0];
+}
+
+async function findSubscriptionsByUser(userId) {
+  const { rows } = await pool.query(
+    `SELECT * FROM subscriptions WHERE user_id = $1
+     AND cancelled_at IS NULL ORDER BY created_at DESC`,
+    [userId]
+  );
+  return rows;
+}
+
+async function findSubscriptionById(id) {
+  const { rows } = await pool.query(
+    "SELECT * FROM subscriptions WHERE id = $1 LIMIT 1",
+    [id]
+  );
+  return rows[0] || null;
+}
+
+async function findSubscriptionByVivaCode(vivaOrderCode) {
+  const { rows } = await pool.query(
+    "SELECT * FROM subscriptions WHERE viva_initial_order_code = $1 LIMIT 1",
+    [vivaOrderCode]
+  );
+  return rows[0] || null;
+}
+
+async function updateSubscription(id, fields) {
+  const keys = Object.keys(fields);
+  if (keys.length === 0) return null;
+  const setClauses = keys.map((k, i) => `${k} = $${i + 2}`);
+  const { rows } = await pool.query(
+    `UPDATE subscriptions SET ${setClauses.join(", ")} WHERE id = $1 RETURNING *`,
+    [id, ...keys.map(k => fields[k])]
+  );
+  return rows[0] || null;
+}
+
+async function findDueSubscriptions() {
+  const { rows } = await pool.query(
+    `SELECT * FROM subscriptions
+     WHERE status = 'active'
+       AND next_charge_date <= CURRENT_DATE
+       AND cancelled_at IS NULL
+       AND paused_at IS NULL`
+  );
+  return rows;
+}
+
+async function createSubscriptionCharge({ subscriptionId, orderId, vivaTxId, amount, status }) {
+  const { rows } = await pool.query(
+    `INSERT INTO subscription_charges
+       (subscription_id, order_id, viva_tx_id, amount, status)
+     VALUES ($1,$2,$3,$4,$5)
+     RETURNING *`,
+    [subscriptionId, orderId || null, vivaTxId || null, amount, status || "pending"]
+  );
+  return rows[0];
+}
+
 module.exports = {
   pool,
   initSchema,
@@ -207,5 +320,12 @@ module.exports = {
   findUserById,
   updateUser,
   findOrdersByEmail,
-  countOrdersByEmail
+  countOrdersByEmail,
+  createSubscription,
+  findSubscriptionsByUser,
+  findSubscriptionById,
+  findSubscriptionByVivaCode,
+  updateSubscription,
+  findDueSubscriptions,
+  createSubscriptionCharge
 };

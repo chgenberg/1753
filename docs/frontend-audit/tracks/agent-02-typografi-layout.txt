@@ -1,0 +1,20 @@
+Agent 02 – Typografi och layout
+================================
+Spår: Tailwind tokens, kontrast, radavstånd, mobil breakpoints
+Kodbasis: globals.css, layout.tsx, komponenter
+
+Senast granskad: 2026-04-02 (full audit)
+
+[Fynd – förbättringar]
+- layout.tsx: Inter via next/font/google. Projektregel anger systemstack utan
+  externa fonts – antingen byt eller dokumentera Inter som aktivt val i designsystem.
+- globals.css @theme: brand-900–50 (brunt). Projektregel accent #108474 (grön) –
+  säkerställ att CTA/säljande moment använder grön konsekvent där regeln säger det.
+- Max-width 1280px i flera sidor – konsekvent grid; bra luft.
+
+[Fynd – risker]
+- .dark-variabler finns men ljusläge verkar primärt – om dark aldrig togglas är
+  det ok; undvik halvaktiverat dark.
+
+[Kräver manuell test]
+- Kontrast muted-foreground mot brand-50/100 på låg ljusstyrka.

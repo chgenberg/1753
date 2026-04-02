@@ -1,0 +1,31 @@
+1753 SKINCARE – Förbättringsåtgärder (frontend / UX)
+====================================================
+Syfte: Prioriterad lista efter full audit 2026-04-02 enligt agents/frontend-audit.md
+Detalj per spår: docs/frontend-audit/tracks/agent-01–08-*.txt
+
+[P0]
+- Mitt konto: visa fel när /dashboard/stats eller /dashboard/orders misslyckas
+  (idag tyst .catch – se agent-06).
+- Deploy: sätt NEXT_PUBLIC_API_URL korrekt och bygg om efter ändring.
+
+[P0 – redan bra i kod]
+- GA laddas bara efter cookie-samtycke "all" (analytics.tsx + cookie-banner).
+
+[P1]
+- Inför app/not-found.tsx med varumärke (agent-01).
+- IA: Hudanalys i footer men inte i header – välj konsekvent exponering (agent-01).
+- Tillgänglighet: aria-label på logga-in lösenords-toggle; PDP bildminiatyrer;
+  chatt stäng-knapp (agent-04).
+- Typografi: Inter vs systemstack i projektregel – beslut och ev. dokumentation
+  (agent-02). CTA-grön #108474 vs brand-900 – konsekvent säljdesign (agent-02).
+
+[P2]
+- Sitemap: dokumentera om /kassa och auth-sidor medvetet saknas (agent-01).
+- LCP: priority på första produktkorten på startsidan (agent-05).
+- Chat: AI-disclaimer om tillämpligt (agent-07). Neutrala placeholders i kassa
+  (agent-07).
+- MagneticLink + reduced motion – låg prioritet (agent-03).
+- Varukorg-drawer: Escape stänger – nice-to-have (agent-04).
+
+[Framtida]
+- Magic link, önskelista med API – oförändrat.

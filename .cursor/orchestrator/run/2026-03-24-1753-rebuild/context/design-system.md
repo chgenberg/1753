@@ -37,8 +37,15 @@ Guld:       #fcb237  (betyg, stjärnor)
 
 ## Typografi
 
+Next.js-frontenden använder **Inter** via `next/font/google` (medvetet val för
+optisk konsistens och variabelt stöd). Projektregel anger systemstack som
+fallback – Inter ersätter den i praktiken men fallback-stacken används om
+Google Fonts inte laddar.
+
 ```css
+/* Fallback / referens */
 font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif;
+/* I praktiken: var(--font-inter) via layout.tsx */
 ```
 
 | Element | Storlek | Vikt | Letter-spacing |
