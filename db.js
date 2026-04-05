@@ -94,6 +94,58 @@ async function initSchema() {
       status            VARCHAR(20) DEFAULT 'pending',
       charged_at        TIMESTAMPTZ DEFAULT NOW()
     );
+
+    CREATE TABLE IF NOT EXISTS subscribers (
+      id              SERIAL PRIMARY KEY,
+      email           VARCHAR(255) UNIQUE NOT NULL,
+      first_name      VARCHAR(255) DEFAULT '',
+      status          VARCHAR(20) DEFAULT 'active',
+      source          VARCHAR(50) DEFAULT 'footer',
+      gdpr_consent    BOOLEAN DEFAULT true,
+      unsubscribe_token VARCHAR(64) UNIQUE,
+      created_at      TIMESTAMPTZ DEFAULT NOW(),
+      unsubscribed_at TIMESTAMPTZ
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_subscribers_email ON subscribers (email);
+    CREATE INDEX IF NOT EXISTS idx_subscribers_status ON subscribers (status);
+
+    CREATE TABLE IF NOT EXISTS automation_flows (
+      id              SERIAL PRIMARY KEY,
+      slug            VARCHAR(50) UNIQUE NOT NULL,
+      name            VARCHAR(255) NOT NULL,
+      trigger_event   VARCHAR(50) NOT NULL,
+      steps           JSONB NOT NULL DEFAULT '[]',
+      active          BOOLEAN DEFAULT true,
+      created_at      TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS automation_queue (
+      id              SERIAL PRIMARY KEY,
+      subscriber_id   INTEGER REFERENCES subscribers(id) ON DELETE CASCADE,
+      flow_id         INTEGER REFERENCES automation_flows(id) ON DELETE CASCADE,
+      current_step    INTEGER DEFAULT 0,
+      status          VARCHAR(20) DEFAULT 'pending',
+      context         JSONB DEFAULT '{}',
+      next_send_at    TIMESTAMPTZ NOT NULL,
+      last_sent_at    TIMESTAMPTZ,
+      created_at      TIMESTAMPTZ DEFAULT NOW(),
+      completed_at    TIMESTAMPTZ
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_autoqueue_pending ON automation_queue (status, next_send_at)
+      WHERE status = 'pending';
+    CREATE INDEX IF NOT EXISTS idx_autoqueue_subscriber ON automation_queue (subscriber_id);
+
+    CREATE TABLE IF NOT EXISTS abandoned_carts (
+      id              SERIAL PRIMARY KEY,
+      email           VARCHAR(255) NOT NULL,
+      items           JSONB NOT NULL,
+      recovered       BOOLEAN DEFAULT false,
+      created_at      TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_abandoned_email ON abandoned_carts (email);
   `);
   console.log("[DB] Schema ready");
 }
@@ -306,6 +358,163 @@ async function createSubscriptionCharge({ subscriptionId, orderId, vivaTxId, amo
   return rows[0];
 }
 
+// ---- SUBSCRIBER helpers ----
+
+async function createSubscriber({ email, firstName, source, unsubscribeToken }) {
+  const { rows } = await pool.query(
+    `INSERT INTO subscribers (email, first_name, source, unsubscribe_token)
+     VALUES ($1, $2, $3, $4)
+     ON CONFLICT (email) DO UPDATE SET
+       status = CASE WHEN subscribers.status = 'unsubscribed' THEN 'active' ELSE subscribers.status END,
+       first_name = COALESCE(NULLIF($2, ''), subscribers.first_name),
+       unsubscribed_at = CASE WHEN subscribers.status = 'unsubscribed' THEN NULL ELSE subscribers.unsubscribed_at END
+     RETURNING *`,
+    [email.toLowerCase(), firstName || "", source || "footer", unsubscribeToken]
+  );
+  return rows[0];
+}
+
+async function findSubscriberByEmail(email) {
+  const { rows } = await pool.query(
+    "SELECT * FROM subscribers WHERE email = $1 LIMIT 1",
+    [email.toLowerCase()]
+  );
+  return rows[0] || null;
+}
+
+async function findSubscriberByToken(token) {
+  const { rows } = await pool.query(
+    "SELECT * FROM subscribers WHERE unsubscribe_token = $1 LIMIT 1",
+    [token]
+  );
+  return rows[0] || null;
+}
+
+async function unsubscribe(token) {
+  const { rows } = await pool.query(
+    `UPDATE subscribers SET status = 'unsubscribed', unsubscribed_at = NOW()
+     WHERE unsubscribe_token = $1 AND status = 'active' RETURNING *`,
+    [token]
+  );
+  return rows[0] || null;
+}
+
+async function findActiveSubscribers() {
+  const { rows } = await pool.query(
+    "SELECT * FROM subscribers WHERE status = 'active' ORDER BY created_at DESC"
+  );
+  return rows;
+}
+
+// ---- AUTOMATION FLOW helpers ----
+
+async function upsertFlow({ slug, name, triggerEvent, steps }) {
+  const { rows } = await pool.query(
+    `INSERT INTO automation_flows (slug, name, trigger_event, steps)
+     VALUES ($1, $2, $3, $4)
+     ON CONFLICT (slug) DO UPDATE SET
+       name = $2, trigger_event = $3, steps = $4
+     RETURNING *`,
+    [slug, name, triggerEvent, JSON.stringify(steps)]
+  );
+  return rows[0];
+}
+
+async function findFlowBySlug(slug) {
+  const { rows } = await pool.query(
+    "SELECT * FROM automation_flows WHERE slug = $1 AND active = true LIMIT 1",
+    [slug]
+  );
+  return rows[0] || null;
+}
+
+async function findFlowByTrigger(triggerEvent) {
+  const { rows } = await pool.query(
+    "SELECT * FROM automation_flows WHERE trigger_event = $1 AND active = true",
+    [triggerEvent]
+  );
+  return rows;
+}
+
+// ---- AUTOMATION QUEUE helpers ----
+
+async function enqueueAutomation({ subscriberId, flowId, context, nextSendAt }) {
+  const existing = await pool.query(
+    `SELECT id FROM automation_queue
+     WHERE subscriber_id = $1 AND flow_id = $2 AND status = 'pending'`,
+    [subscriberId, flowId]
+  );
+  if (existing.rows.length > 0) return existing.rows[0];
+
+  const { rows } = await pool.query(
+    `INSERT INTO automation_queue (subscriber_id, flow_id, context, next_send_at)
+     VALUES ($1, $2, $3, $4)
+     RETURNING *`,
+    [subscriberId, flowId, JSON.stringify(context || {}), nextSendAt || new Date()]
+  );
+  return rows[0];
+}
+
+async function findDueAutomations() {
+  const { rows } = await pool.query(
+    `SELECT aq.*, af.steps, af.slug AS flow_slug, af.name AS flow_name,
+            s.email, s.first_name, s.status AS subscriber_status, s.unsubscribe_token
+     FROM automation_queue aq
+     JOIN automation_flows af ON af.id = aq.flow_id
+     JOIN subscribers s ON s.id = aq.subscriber_id
+     WHERE aq.status = 'pending'
+       AND aq.next_send_at <= NOW()
+       AND s.status = 'active'
+     ORDER BY aq.next_send_at ASC
+     LIMIT 50`
+  );
+  return rows;
+}
+
+async function advanceAutomation(queueId, { nextStep, nextSendAt }) {
+  if (nextSendAt) {
+    await pool.query(
+      `UPDATE automation_queue
+       SET current_step = $2, next_send_at = $3, last_sent_at = NOW()
+       WHERE id = $1`,
+      [queueId, nextStep, nextSendAt]
+    );
+  } else {
+    await pool.query(
+      `UPDATE automation_queue
+       SET current_step = $2, status = 'completed', last_sent_at = NOW(), completed_at = NOW()
+       WHERE id = $1`,
+      [queueId, nextStep]
+    );
+  }
+}
+
+async function cancelAutomationsForSubscriber(subscriberId) {
+  await pool.query(
+    `UPDATE automation_queue SET status = 'cancelled'
+     WHERE subscriber_id = $1 AND status = 'pending'`,
+    [subscriberId]
+  );
+}
+
+// ---- ABANDONED CART helpers ----
+
+async function createAbandonedCart({ email, items }) {
+  const { rows } = await pool.query(
+    `INSERT INTO abandoned_carts (email, items) VALUES ($1, $2) RETURNING *`,
+    [email.toLowerCase(), JSON.stringify(items)]
+  );
+  return rows[0];
+}
+
+async function markCartRecovered(email) {
+  await pool.query(
+    `UPDATE abandoned_carts SET recovered = true
+     WHERE email = $1 AND recovered = false`,
+    [email.toLowerCase()]
+  );
+}
+
 module.exports = {
   pool,
   initSchema,
@@ -327,5 +536,19 @@ module.exports = {
   findSubscriptionByVivaCode,
   updateSubscription,
   findDueSubscriptions,
-  createSubscriptionCharge
+  createSubscriptionCharge,
+  createSubscriber,
+  findSubscriberByEmail,
+  findSubscriberByToken,
+  unsubscribe,
+  findActiveSubscribers,
+  upsertFlow,
+  findFlowBySlug,
+  findFlowByTrigger,
+  enqueueAutomation,
+  findDueAutomations,
+  advanceAutomation,
+  cancelAutomationsForSubscriber,
+  createAbandonedCart,
+  markCartRecovered
 };

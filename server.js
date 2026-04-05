@@ -243,7 +243,22 @@ const DISCOUNT_CODES = {
   test: {
     percent: 97,
     productIds: ["duo-kit"],
-    description: "97% rabatt på DUO-kit",
+    description: "97% rabatt pa DUO-kit",
+  },
+  valkomst10: {
+    percent: 10,
+    productIds: null,
+    description: "10% valkomstrabatt",
+  },
+  insider15: {
+    percent: 15,
+    productIds: null,
+    description: "15% Insider-rabatt",
+  },
+  komtillbaka5: {
+    percent: 5,
+    productIds: null,
+    description: "5% rabatt -- valkommen tillbaka",
   },
 };
 
@@ -1369,6 +1384,34 @@ async function handleOrderCompletion(orderId) {
     console.error("[Order] Email error:", err);
   }
 
+  // 8. Trigger post-purchase automation + mark abandoned cart as recovered
+  try {
+    const purchaseFlows = await db.findFlowByTrigger("purchase");
+    if (purchaseFlows.length > 0) {
+      let subscriber = await db.findSubscriberByEmail(order.customer_email);
+      if (!subscriber) {
+        const token = crypto.randomBytes(32).toString("hex");
+        subscriber = await db.createSubscriber({
+          email: order.customer_email,
+          firstName: order.customer_name?.split(" ")[0] || "",
+          source: "purchase",
+          unsubscribeToken: token
+        });
+      }
+      for (const flow of purchaseFlows) {
+        await db.enqueueAutomation({
+          subscriberId: subscriber.id, flowId: flow.id,
+          context: { firstName: subscriber.first_name, orderNumber: order.order_number },
+          nextSendAt: new Date(Date.now() + (flow.steps?.[0]?.delay_hours || 24) * 3600000)
+        });
+      }
+      notes.push("Post-purchase automation triggered");
+    }
+    await db.markCartRecovered(order.customer_email);
+  } catch (err) {
+    console.error("[Order] Automation trigger error:", err.message);
+  }
+
   return { fortnoxInvoiceNumber, ongoingOrderId, notes };
 }
 
@@ -1440,6 +1483,516 @@ async function sendOrderConfirmation(order, items) {
   });
 
   console.log(`[Email] Confirmation sent to ${order.customer_email}`);
+}
+
+// ---- EMAIL TEMPLATES (shared style) ----
+
+function emailWrapper(content, unsubscribeUrl) {
+  return `
+  <div style="font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Helvetica,Arial,sans-serif;max-width:560px;margin:0 auto;color:#1d1d1f;padding:0 16px">
+    <div style="text-align:center;padding:32px 0 8px">
+      <img src="https://www.1753skin.com/1753.webp" alt="1753 SKINCARE" width="48" height="48" style="border-radius:12px"/>
+    </div>
+    ${content}
+    <div style="margin-top:40px;padding-top:24px;border-top:1px solid #e6e6e6;text-align:center">
+      <p style="font-size:12px;color:#766a62;line-height:1.6;margin:0">
+        1753 SKINCARE -- Holistisk hudvard med CBD och CBG<br>
+        <a href="https://www.1753skin.com" style="color:#108474">www.1753skin.com</a>
+      </p>
+      ${unsubscribeUrl ? `<p style="margin-top:12px;font-size:11px"><a href="${unsubscribeUrl}" style="color:#999;text-decoration:underline">Avprenumerera</a></p>` : ""}
+    </div>
+  </div>`;
+}
+
+function greenButton(text, href) {
+  return `<div style="text-align:center;margin:28px 0">
+    <a href="${href}" style="display:inline-block;background:#108474;color:#fff;padding:14px 32px;border-radius:980px;font-size:15px;font-weight:600;text-decoration:none">${text}</a>
+  </div>`;
+}
+
+// ---- NEWSLETTER / SUBSCRIBER ROUTES ----
+
+app.post("/api/newsletter/subscribe", async (req, res) => {
+  try {
+    const { email, firstName } = req.body;
+    if (!email || !email.includes("@")) {
+      return res.status(400).json({ message: "Ange en giltig e-postadress" });
+    }
+
+    const clientIp = req.ip || req.connection.remoteAddress;
+    if (!checkRateLimit(clientIp, "newsletter", 10)) {
+      return res.status(429).json({ message: "For manga forsok. Vanta en stund." });
+    }
+
+    const token = crypto.randomBytes(32).toString("hex");
+    const subscriber = await db.createSubscriber({
+      email, firstName: firstName || "", source: "footer", unsubscribeToken: token
+    });
+
+    // Enqueue welcome flow
+    const welcomeFlows = await db.findFlowByTrigger("subscribe");
+    for (const flow of welcomeFlows) {
+      await db.enqueueAutomation({
+        subscriberId: subscriber.id, flowId: flow.id,
+        context: { firstName: subscriber.first_name },
+        nextSendAt: new Date()
+      });
+    }
+
+    console.log(`[Newsletter] ${email} subscribed (id=${subscriber.id})`);
+    res.json({ ok: true, message: "Tack! Du ar nu prenumerant." });
+  } catch (err) {
+    console.error("[Newsletter] Subscribe error:", err);
+    res.status(500).json({ message: "Nagonting gick fel. Forsok igen." });
+  }
+});
+
+app.get("/api/newsletter/unsubscribe/:token", async (req, res) => {
+  try {
+    const subscriber = await db.unsubscribe(req.params.token);
+    if (subscriber) {
+      await db.cancelAutomationsForSubscriber(subscriber.id);
+      console.log(`[Newsletter] ${subscriber.email} unsubscribed`);
+    }
+    res.redirect("https://www.1753skin.com/?unsubscribed=1");
+  } catch (err) {
+    console.error("[Newsletter] Unsubscribe error:", err);
+    res.redirect("https://www.1753skin.com/");
+  }
+});
+
+// ---- AUTOMATION EVENT ENDPOINT ----
+
+app.post("/api/automation/event", async (req, res) => {
+  try {
+    const { event, email, context } = req.body;
+    if (!event || !email) {
+      return res.status(400).json({ message: "event och email kravs" });
+    }
+
+    let subscriber = await db.findSubscriberByEmail(email);
+    if (!subscriber) {
+      const token = crypto.randomBytes(32).toString("hex");
+      subscriber = await db.createSubscriber({
+        email, firstName: context?.firstName || "", source: event, unsubscribeToken: token
+      });
+    }
+
+    if (subscriber.status !== "active") {
+      return res.json({ ok: true, message: "Subscriber inactive, skipping" });
+    }
+
+    const flows = await db.findFlowByTrigger(event);
+    for (const flow of flows) {
+      await db.enqueueAutomation({
+        subscriberId: subscriber.id, flowId: flow.id,
+        context: context || {},
+        nextSendAt: new Date()
+      });
+    }
+
+    // Handle cart_abandoned specifically
+    if (event === "cart_abandoned" && context?.items) {
+      await db.createAbandonedCart({ email, items: context.items });
+    }
+
+    // Mark cart as recovered on purchase
+    if (event === "purchase") {
+      await db.markCartRecovered(email);
+    }
+
+    res.json({ ok: true });
+  } catch (err) {
+    console.error("[Automation] Event error:", err);
+    res.status(500).json({ message: "Fel vid event-hantering" });
+  }
+});
+
+// ---- AUTOMATION ENGINE (processes queued emails) ----
+
+async function processAutomationQueue() {
+  try {
+    const due = await db.findDueAutomations();
+    if (due.length === 0) return;
+
+    const apiKey = process.env.RESEND_API_KEY;
+    if (!apiKey) {
+      console.log("[Automation] RESEND_API_KEY not set, skipping");
+      return;
+    }
+
+    const { Resend } = require("resend");
+    const resend = new Resend(apiKey);
+    const fromEmail = process.env.EMAIL_FROM || "hej@1753skincare.com";
+
+    for (const item of due) {
+      try {
+        if (item.subscriber_status !== "active") {
+          await db.advanceAutomation(item.id, { nextStep: item.current_step });
+          continue;
+        }
+
+        const steps = typeof item.steps === "string" ? JSON.parse(item.steps) : item.steps;
+        const step = steps[item.current_step];
+
+        if (!step) {
+          await db.advanceAutomation(item.id, { nextStep: item.current_step });
+          continue;
+        }
+
+        const baseUrl = process.env.BASE_URL || "https://api.1753skin.com";
+        const unsubUrl = `${baseUrl}/api/newsletter/unsubscribe/${item.unsubscribe_token}`;
+
+        const html = emailWrapper(
+          step.html
+            .replace(/\{\{firstName\}\}/g, item.first_name || "du")
+            .replace(/\{\{email\}\}/g, item.email)
+            .replace(/\{\{context\.(\w+)\}\}/g, (_, key) => {
+              const ctx = typeof item.context === "string" ? JSON.parse(item.context) : item.context;
+              return ctx[key] || "";
+            }),
+          unsubUrl
+        );
+
+        await resend.emails.send({
+          from: fromEmail,
+          to: item.email,
+          subject: step.subject.replace(/\{\{firstName\}\}/g, item.first_name || "du"),
+          html
+        });
+
+        const nextStepIdx = item.current_step + 1;
+        const nextStep = steps[nextStepIdx];
+        let nextSendAt = null;
+
+        if (nextStep) {
+          const delayMs = (nextStep.delay_hours || 0) * 60 * 60 * 1000;
+          nextSendAt = new Date(Date.now() + delayMs);
+        }
+
+        await db.advanceAutomation(item.id, { nextStep: nextStepIdx, nextSendAt });
+        console.log(`[Automation] Sent "${step.subject}" to ${item.email} (flow: ${item.flow_slug}, step ${item.current_step})`);
+      } catch (err) {
+        console.error(`[Automation] Error sending to ${item.email}:`, err.message);
+      }
+    }
+  } catch (err) {
+    console.error("[Automation] Queue processing error:", err);
+  }
+}
+
+// ---- BROADCAST ENDPOINT (admin) ----
+
+app.post("/api/newsletter/broadcast", async (req, res) => {
+  try {
+    const { subject, html, adminKey } = req.body;
+    const expectedKey = process.env.ADMIN_API_KEY || "1753-admin-key";
+    if (adminKey !== expectedKey) {
+      return res.status(403).json({ message: "Ogiltig admin-nyckel" });
+    }
+    if (!subject || !html) {
+      return res.status(400).json({ message: "subject och html kravs" });
+    }
+
+    const apiKey = process.env.RESEND_API_KEY;
+    if (!apiKey) return res.status(500).json({ message: "RESEND_API_KEY saknas" });
+
+    const { Resend } = require("resend");
+    const resend = new Resend(apiKey);
+    const fromEmail = process.env.EMAIL_FROM || "hej@1753skincare.com";
+
+    const subscribers = await db.findActiveSubscribers();
+    const baseUrl = process.env.BASE_URL || "https://api.1753skin.com";
+    let sent = 0;
+
+    for (const sub of subscribers) {
+      try {
+        const unsubUrl = `${baseUrl}/api/newsletter/unsubscribe/${sub.unsubscribe_token}`;
+        await resend.emails.send({
+          from: fromEmail,
+          to: sub.email,
+          subject,
+          html: emailWrapper(
+            html.replace(/\{\{firstName\}\}/g, sub.first_name || "du"),
+            unsubUrl
+          )
+        });
+        sent++;
+      } catch (err) {
+        console.error(`[Broadcast] Failed to send to ${sub.email}:`, err.message);
+      }
+    }
+
+    console.log(`[Broadcast] Sent "${subject}" to ${sent}/${subscribers.length} subscribers`);
+    res.json({ ok: true, sent, total: subscribers.length });
+  } catch (err) {
+    console.error("[Broadcast] Error:", err);
+    res.status(500).json({ message: "Broadcast misslyckades" });
+  }
+});
+
+// ---- SEED AUTOMATION FLOWS ----
+
+async function seedAutomationFlows() {
+  const siteUrl = "https://www.1753skin.com";
+
+  // Welcome flow (5 emails over 14 days)
+  await db.upsertFlow({
+    slug: "welcome",
+    name: "Valkomstserie",
+    triggerEvent: "subscribe",
+    steps: [
+      {
+        delay_hours: 0,
+        subject: "Valkommen till 1753 SKINCARE, {{firstName}}!",
+        html: `
+          <h2 style="font-size:22px;font-weight:700;margin:24px 0 12px">Valkommen till familjen!</h2>
+          <p style="font-size:15px;line-height:1.7;color:#515151">
+            Vi ar sa glada att du ar har. 1753 SKINCARE ar mer an hudvard -- det ar en filosofi.
+            Vi tror pa att jobba med kroppen, inte mot den. Vare produkter bygger pa CBD, CBG
+            och noga utvalda naturliga ingredienser.
+          </p>
+          <p style="font-size:15px;line-height:1.7;color:#515151">
+            Som tack for att du gatt med far du <strong>10% rabatt</strong> pa din forsta bestallning
+            med koden <strong style="color:#108474;font-size:17px">VALKOMST10</strong>.
+          </p>
+          ${greenButton("Utforska produkterna", siteUrl + "/produkter")}
+        `
+      },
+      {
+        delay_hours: 48,
+        subject: "Var filosofi -- hudvard som faktiskt fungerar",
+        html: `
+          <h2 style="font-size:22px;font-weight:700;margin:24px 0 12px">Holistisk hudvard</h2>
+          <p style="font-size:15px;line-height:1.7;color:#515151">
+            De flesta hudvardsprodukter loser symtom. Vi vill losa orsaken.
+          </p>
+          <p style="font-size:15px;line-height:1.7;color:#515151">
+            Vara CBD- och CBG-baserade oljor jobbar med hudens egna endocannabinoidsystem
+            for att atersta balans. Ingen onaturlig kemi, inga tomma loften.
+          </p>
+          <p style="font-size:15px;line-height:1.7;color:#515151">
+            Men produkter ar bara en del. Somn, kost, stresshantering och rorelse -- allt spelar
+            roll for din hud. Det ar darfor vi tar ett holistiskt grepp.
+          </p>
+          ${greenButton("Las mer om oss", siteUrl + "/om-oss")}
+        `
+      },
+      {
+        delay_hours: 72,
+        subject: "Vilken produkt passar dig?",
+        html: `
+          <h2 style="font-size:22px;font-weight:700;margin:24px 0 12px">Hitta din match</h2>
+          <p style="font-size:15px;line-height:1.7;color:#515151">
+            <strong>The ONE Facial Oil</strong> -- Var allround-olja. Perfekt om du vill borja enkelt
+            med en produkt som balanserar, aterFuktar och ger lyster. Funkar for alla hudtyper.
+          </p>
+          <p style="font-size:15px;line-height:1.7;color:#515151">
+            <strong>I LOVE Facial Oil</strong> -- Extra narig med CBG. Bast for torr eller mogen hud
+            som behover djupgaende aterfuktning.
+          </p>
+          <p style="font-size:15px;line-height:1.7;color:#515151">
+            <strong>DUO-kit</strong> -- Bada oljorna i ett kit. The ONE pa morgonen, I LOVE pa kvallen.
+            Var mest populara produkt.
+          </p>
+          <p style="font-size:15px;line-height:1.7;color:#515151">
+            Osaker? Prova var <strong>AI-hudanalys</strong> -- ladda upp ett foto och fa personliga rekommendationer.
+          </p>
+          ${greenButton("Gor hudanalys", siteUrl + "/hudanalys")}
+        `
+      },
+      {
+        delay_hours: 96,
+        subject: "\"Min hud har aldrig varit battre\"",
+        html: `
+          <h2 style="font-size:22px;font-weight:700;margin:24px 0 12px">Riktig feedback fran riktiga manniskor</h2>
+          <p style="font-size:15px;line-height:1.7;color:#515151">
+            Vi behover inte hitta pa berattelser. Vara kunder talar for sig sjalva.
+          </p>
+          <div style="background:#f5f5f7;border-radius:12px;padding:20px;margin:20px 0">
+            <p style="font-size:15px;line-height:1.7;color:#515151;font-style:italic;margin:0">
+              "Jag har provat allt -- dyr hudvard, billig hudvard, ingenting. The ONE ar den
+              enda produkten som verkligen gjort skillnad. Lugnar, balanserar, ger lyster."
+            </p>
+            <p style="font-size:13px;color:#766a62;margin:8px 0 0">-- Sandra, 34 ar</p>
+          </div>
+          <div style="background:#f5f5f7;border-radius:12px;padding:20px;margin:20px 0">
+            <p style="font-size:15px;line-height:1.7;color:#515151;font-style:italic;margin:0">
+              "DUO-kitet har blivit min morgon- och kvallsrutin. Sa enkelt, sa bra. Huden
+              ar mjukare och jamnare an nagonsin."
+            </p>
+            <p style="font-size:13px;color:#766a62;margin:8px 0 0">-- Mikael, 41 ar</p>
+          </div>
+          ${greenButton("Se alla produkter", siteUrl + "/produkter")}
+        `
+      },
+      {
+        delay_hours: 120,
+        subject: "Ditt exklusiva erbjudande vantar, {{firstName}}",
+        html: `
+          <h2 style="font-size:22px;font-weight:700;margin:24px 0 12px">Bara for dig</h2>
+          <p style="font-size:15px;line-height:1.7;color:#515151">
+            Du har foljt med oss i tva veckor nu -- tack for det! Vi hoppas att du lart dig
+            nagot nytt om holistisk hudvard.
+          </p>
+          <p style="font-size:15px;line-height:1.7;color:#515151">
+            Som tack vill vi ge dig ett exklusivt erbjudande:
+            <strong>fri frakt + 15% rabatt</strong> pa hela sortimentet.
+          </p>
+          <p style="font-size:17px;font-weight:700;color:#108474;text-align:center;margin:20px 0">
+            Kod: INSIDER15
+          </p>
+          <p style="font-size:13px;color:#766a62;text-align:center">
+            Giltig i 7 dagar. Kan inte kombineras med andra erbjudanden.
+          </p>
+          ${greenButton("Handla nu", siteUrl + "/produkter")}
+        `
+      }
+    ]
+  });
+
+  // Post-purchase flow (4 emails)
+  await db.upsertFlow({
+    slug: "post-purchase",
+    name: "Efter kop",
+    triggerEvent: "purchase",
+    steps: [
+      {
+        delay_hours: 24,
+        subject: "Tack for ditt kop, {{firstName}} -- har ar dina tips!",
+        html: `
+          <h2 style="font-size:22px;font-weight:700;margin:24px 0 12px">Sa far du bast resultat</h2>
+          <p style="font-size:15px;line-height:1.7;color:#515151">
+            Grattis till ditt kop! Har ar nagra tips for att fa ut maximalt av dina produkter:
+          </p>
+          <ul style="font-size:15px;line-height:2;color:#515151;padding-left:20px">
+            <li>Applicera pa ren, fuktad hud for bast absorption</li>
+            <li>2-3 droppar racker -- varma oljan mellan handflatorna forst</li>
+            <li>Ge huden tid -- CBD och CBG bygger effekt over tid (2-4 veckor)</li>
+            <li>Kombinera med bra somn och vatten for synergieffekt</li>
+          </ul>
+          ${greenButton("Las mer om vara ingredienser", siteUrl + "/om-oss")}
+        `
+      },
+      {
+        delay_hours: 168,
+        subject: "Din hudvardsrutin -- enklare an du tror",
+        html: `
+          <h2 style="font-size:22px;font-weight:700;margin:24px 0 12px">Morgon och kvall</h2>
+          <p style="font-size:15px;line-height:1.7;color:#515151">
+            En bra rutin behover inte vara komplicerad. Har ar vart forslag:
+          </p>
+          <div style="background:#f5f5f7;border-radius:12px;padding:20px;margin:16px 0">
+            <p style="font-size:13px;font-weight:700;color:#108474;margin:0">MORGON</p>
+            <p style="font-size:14px;line-height:1.7;color:#515151;margin:8px 0 0">
+              1. Skoljj ansiktet med ljummet vatten<br>
+              2. The ONE Facial Oil -- 2-3 droppar<br>
+              3. SPF (om du gar ut)
+            </p>
+          </div>
+          <div style="background:#f5f5f7;border-radius:12px;padding:20px;margin:16px 0">
+            <p style="font-size:13px;font-weight:700;color:#108474;margin:0">KVALL</p>
+            <p style="font-size:14px;line-height:1.7;color:#515151;margin:8px 0 0">
+              1. Au Naturel Makeup Remover<br>
+              2. I LOVE Facial Oil -- 3-4 droppar<br>
+              3. Sov gott!
+            </p>
+          </div>
+          ${greenButton("Se alla produkter", siteUrl + "/produkter")}
+        `
+      },
+      {
+        delay_hours: 504,
+        subject: "Hur mar din hud, {{firstName}}?",
+        html: `
+          <h2 style="font-size:22px;font-weight:700;margin:24px 0 12px">Vi vill hora fran dig</h2>
+          <p style="font-size:15px;line-height:1.7;color:#515151">
+            Det har nu gatt tre veckor sedan ditt kop. Forhoppningsvis borjar du se
+            skillnad -- CBD och CBG bygger effekt over tid.
+          </p>
+          <p style="font-size:15px;line-height:1.7;color:#515151">
+            Vill du se hur din hud utvecklas? Var AI-hudanalys ger dig en objektiv
+            bedomning och personliga rad.
+          </p>
+          ${greenButton("Gor en gratis hudanalys", siteUrl + "/hudanalys")}
+          <p style="font-size:14px;line-height:1.7;color:#515151;margin-top:16px">
+            Har du fragor? Svara pa detta mejl sa aterommer vi inom 24 timmar.
+          </p>
+        `
+      },
+      {
+        delay_hours: 1080,
+        subject: "Dags att fylla pa? Spara med prenumeration",
+        html: `
+          <h2 style="font-size:22px;font-weight:700;margin:24px 0 12px">Slipp att slockna</h2>
+          <p style="font-size:15px;line-height:1.7;color:#515151">
+            Beroende pa hur mycket du anvander borde det snart vara dags for paafyllning.
+          </p>
+          <p style="font-size:15px;line-height:1.7;color:#515151">
+            Med vara prenumeration far du <strong>15% rabatt</strong> pa varje leverans,
+            och du valjer sjalv intervall (30, 60 eller 90 dagar). Avbryt nar du vill.
+          </p>
+          ${greenButton("Bestall igen", siteUrl + "/produkter")}
+        `
+      }
+    ]
+  });
+
+  // Cart abandonment flow (3 emails)
+  await db.upsertFlow({
+    slug: "cart-abandoned",
+    name: "Overgiven varukorg",
+    triggerEvent: "cart_abandoned",
+    steps: [
+      {
+        delay_hours: 1,
+        subject: "Du glomde nagot i varukorgen",
+        html: `
+          <h2 style="font-size:22px;font-weight:700;margin:24px 0 12px">Din varukorg vantar</h2>
+          <p style="font-size:15px;line-height:1.7;color:#515151">
+            Vi sag att du var nara att slutfora din bestallning. Dina produkter
+            vantarfortfarande pa dig!
+          </p>
+          ${greenButton("Slutfor din bestallning", siteUrl + "/kassa")}
+          <p style="font-size:13px;color:#766a62;text-align:center">
+            Fri frakt pa ordrar over 700 kr.
+          </p>
+        `
+      },
+      {
+        delay_hours: 24,
+        subject: "Fortfarande intresserad? Fri frakt pa oss",
+        html: `
+          <h2 style="font-size:22px;font-weight:700;margin:24px 0 12px">Vi bjuder pa frakten</h2>
+          <p style="font-size:15px;line-height:1.7;color:#515151">
+            Vi vill gora det enkelt for dig. Slutfor din bestallning idag
+            sa star vi for fraktkostnaden -- oavsett ordervarde.
+          </p>
+          ${greenButton("Handla med fri frakt", siteUrl + "/kassa")}
+        `
+      },
+      {
+        delay_hours: 72,
+        subject: "Sista chansen -- 5% extra rabatt",
+        html: `
+          <h2 style="font-size:22px;font-weight:700;margin:24px 0 12px">Sista puff</h2>
+          <p style="font-size:15px;line-height:1.7;color:#515151">
+            Vi ger inte upp sa latt! Har ar <strong>5% extra rabatt</strong>
+            pa hela din varukorg. Anvand koden:
+          </p>
+          <p style="font-size:17px;font-weight:700;color:#108474;text-align:center;margin:20px 0">
+            KOMTILLBAKA5
+          </p>
+          ${greenButton("Slutfor ditt kop", siteUrl + "/kassa")}
+          <p style="font-size:13px;color:#766a62;text-align:center">
+            Erbjudandet ar giltigt i 48 timmar.
+          </p>
+        `
+      }
+    ]
+  });
+
+  console.log("[Automation] Flows seeded (welcome, post-purchase, cart-abandoned)");
 }
 
 // ---- ORDER VERIFICATION (backup from success page) ----
@@ -1934,6 +2487,7 @@ async function processRecurringCharges() {
 (async () => {
   try {
     await db.initSchema();
+    await seedAutomationFlows();
   } catch (err) {
     console.error("[DB] Schema init failed – running without database:", err.message);
   }
@@ -1947,5 +2501,9 @@ async function processRecurringCharges() {
     setInterval(processRecurringCharges, SIX_HOURS);
     setTimeout(processRecurringCharges, 60_000);
     console.log("[OK] Recurring subscription scheduler started (every 6h)");
+
+    setInterval(processAutomationQueue, 60_000);
+    setTimeout(processAutomationQueue, 30_000);
+    console.log("[OK] Email automation engine started (every 60s)");
   });
 })();
