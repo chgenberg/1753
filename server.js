@@ -238,6 +238,14 @@ const PRODUCTS_MAP = {
 
 const FREE_SHIPPING_THRESHOLD = 0;
 
+const DISCOUNT_CODES = {
+  test: {
+    percent: 97,
+    productIds: ["duo-kit"],
+    description: "97% rabatt på DUO-kit",
+  },
+};
+
 function generateOrderNumber() {
   const d = new Date();
   const date = d.toISOString().slice(0, 10).replace(/-/g, "");
@@ -973,6 +981,28 @@ app.post("/api/analysis/chat", async (req, res) => {
   }
 });
 
+// ---- DISCOUNT CODE VALIDATION ----
+
+app.post("/api/discount/validate", (req, res) => {
+  const { code, items } = req.body;
+  if (!code) return res.status(400).json({ message: "Ange en rabattkod" });
+
+  const discount = DISCOUNT_CODES[code.toLowerCase().trim()];
+  if (!discount) return res.status(404).json({ message: "Ogiltig rabattkod" });
+
+  const applicableItems = (items || []).filter(i => !discount.productIds || discount.productIds.includes(i.id));
+  if (applicableItems.length === 0) {
+    return res.status(400).json({ message: "Rabattkoden gäller inte för dessa produkter" });
+  }
+
+  res.json({
+    code: code.toLowerCase().trim(),
+    percent: discount.percent,
+    description: discount.description,
+    applicableProductIds: discount.productIds || null,
+  });
+});
+
 // ---- ORDER CREATION (checkout → DB → Viva payment order) ----
 
 app.post("/api/orders/create", async (req, res) => {
@@ -981,7 +1011,7 @@ app.post("/api/orders/create", async (req, res) => {
     if (!checkRateLimit(clientIp, "orders-create", 20)) {
       return res.status(429).json({ message: "För många beställningar. Försök igen om en stund." });
     }
-    const { customer, deliveryAddress, items } = req.body;
+    const { customer, deliveryAddress, items, discountCode } = req.body;
 
     if (!customer?.name || !customer?.email) {
       return res.status(400).json({ message: "Namn och e-post krävs" });
@@ -993,15 +1023,22 @@ app.post("/api/orders/create", async (req, res) => {
       return res.status(400).json({ message: "Varukorgen är tom" });
     }
 
+    const discount = discountCode ? DISCOUNT_CODES[discountCode.toLowerCase().trim()] : null;
+
     const orderItems = items.map(item => {
       const product = PRODUCTS_MAP[item.id];
       if (!product) throw { status: 400, message: `Okänd produkt: ${item.id}` };
+      let price = product.price;
+      if (discount && (!discount.productIds || discount.productIds.includes(item.id))) {
+        price = Math.round(price * (1 - discount.percent / 100));
+      }
       return {
         articleNumber: product.articleNumber || item.id,
         productId: item.id,
         name: product.name,
         quantity: item.qty || 1,
-        price: product.price,
+        price,
+        originalPrice: product.price,
         vatRate: product.vatRate || 0.25
       };
     });
