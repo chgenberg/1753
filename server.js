@@ -27,6 +27,7 @@ app.use(cors({
     "http://localhost:3001",
     /\.up\.railway\.app$/,
     /1753skincare\.com$/,
+    /1753skin\.com$/,
   ],
   credentials: true,
 }));
