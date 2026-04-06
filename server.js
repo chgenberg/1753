@@ -2437,6 +2437,25 @@ app.get("/health", async (req, res) => {
   }
 });
 
+// TEMPORARY integration diagnostics – remove after verification
+app.get("/api/integration-health", async (req, res) => {
+  const result = { fortnox: { status: "unknown" }, ongoing: { status: "unknown" }, timestamp: new Date().toISOString() };
+  try {
+    await ensureFortnoxToken();
+    const data = await fortnoxFetch("/companyinformation");
+    result.fortnox = { status: "ok", company: data?.CompanyInformation?.CompanyName || "connected", tokenExpiresIn: Math.round((fortnoxTokens.expiresAt - Date.now()) / 1000) + "s" };
+  } catch (err) {
+    result.fortnox = { status: "error", message: err.message || String(err) };
+  }
+  try {
+    const data = await ongoingFetch("/articles?articlesPerPage=1");
+    result.ongoing = { status: "ok", articlesFound: Array.isArray(data) ? data.length : "connected" };
+  } catch (err) {
+    result.ongoing = { status: "error", message: err.message || String(err) };
+  }
+  res.json(result);
+});
+
 // ---- RECURRING SUBSCRIPTION CHARGES (runs every 6 hours) ----
 
 const SIX_HOURS = 6 * 60 * 60 * 1000;
