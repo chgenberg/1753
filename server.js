@@ -31,7 +31,12 @@ app.use(cors({
   ],
   credentials: true,
 }));
-app.use(express.json({ limit: "20mb" }));
+app.use(express.json({
+  limit: "20mb",
+  verify: (req, res, buf) => {
+    req.rawBody = buf;
+  }
+}));
 app.use(express.static("."));
 
 const PORT = process.env.PORT || process.env.BACKEND_PORT || 3001;
@@ -527,6 +532,13 @@ async function vivaGetToken() {
   return data.access_token;
 }
 
+/** Viva returnerar orderCode som JSON-nummer; värden > MAX_SAFE_INTEGER korrumperas av JSON.parse. */
+function fixVivaOrderCodeFromRawJson(rawText, data) {
+  if (!data || typeof data !== "object") return;
+  const m = rawText.match(/"orderCode"\s*:\s*(\d+)/);
+  if (m) data.orderCode = m[1];
+}
+
 async function vivaFetch(path, method, body) {
   const fetch = (await import("node-fetch")).default;
   const env = process.env.VIVA_ENVIRONMENT === "production" ? "" : "demo-";
@@ -541,9 +553,16 @@ async function vivaFetch(path, method, body) {
   };
   if (body) opts.body = JSON.stringify(body);
   const res = await fetch(url, opts);
-  const data = await res.json().catch(() => null);
+  const rawText = await res.text();
+  let data = null;
+  try {
+    data = JSON.parse(rawText);
+  } catch {
+    data = null;
+  }
+  fixVivaOrderCodeFromRawJson(rawText, data);
   if (!res.ok) {
-    console.error("[Viva API Error]", res.status, url, JSON.stringify(data));
+    console.error("[Viva API Error]", res.status, url, rawText.slice(0, 800));
     throw { status: res.status, message: data?.message || "Viva API error" };
   }
   return data;
@@ -1128,13 +1147,19 @@ app.get("/api/vivawallet/webhook", (req, res) => {
 // Webhook handler (POST) – called by Viva after payment
 app.post("/api/vivawallet/webhook", async (req, res) => {
   const event = req.body;
+  const rawStr = req.rawBody ? req.rawBody.toString("utf8") : JSON.stringify(req.body);
+  // OrderCode i JSON kan vara > MAX_SAFE_INTEGER — återställ exakt siffersträng från rå body
+  if (event.EventData) {
+    const oc = rawStr.match(/"OrderCode"\s*:\s*(\d+)/);
+    if (oc) event.EventData.OrderCode = oc[1];
+  }
   console.log("[Viva Webhook]", event.EventTypeId, JSON.stringify(event.EventData || {}).slice(0, 200));
 
   const vivaKey = process.env.VIVA_VERIFICATION_KEY;
   if (vivaKey) {
     const sig256 = req.headers["viva-signature-256"] || "";
     const sig1 = req.headers["viva-signature"] || "";
-    const rawBody = JSON.stringify(req.body);
+    const rawBody = rawStr;
     if (sig256) {
       const expected = crypto.createHmac("sha256", vivaKey).update(rawBody).digest("hex");
       if (sig256 !== expected) {
