@@ -37,6 +37,34 @@ app.use(express.json({
     req.rawBody = buf;
   }
 }));
+
+/** Publik butiks-URL (Next.js). Viva-källkod kan fortfarande peka på *.railway.app – vi skickar vidare hit. */
+const PUBLIC_STORE_URL = (process.env.FRONTEND_URL || "https://www.1753skin.com").replace(/\/$/, "");
+
+app.get("/payment-fail.html", (req, res) => {
+  const qs = req.url.includes("?") ? req.url.slice(req.url.indexOf("?")) : "";
+  res.redirect(302, `${PUBLIC_STORE_URL}/betalning/misslyckad${qs}`);
+});
+
+app.get("/payment-success.html", (req, res) => {
+  const qs = req.url.includes("?") ? req.url.slice(req.url.indexOf("?")) : "";
+  res.redirect(302, `${PUBLIC_STORE_URL}/betalning/lyckad${qs}`);
+});
+
+app.use((req, res, next) => {
+  const host = req.get("host") || "";
+  const onBackendHost =
+    host.includes(".up.railway.app") || /^api\.1753skin\.com$/i.test(host);
+  if (
+    req.method === "GET" &&
+    onBackendHost &&
+    (req.path === "/" || req.path === "/index.html")
+  ) {
+    return res.redirect(302, `${PUBLIC_STORE_URL}/`);
+  }
+  next();
+});
+
 app.use(express.static("."));
 
 const PORT = process.env.PORT || process.env.BACKEND_PORT || 3001;
