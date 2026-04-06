@@ -424,7 +424,7 @@ app.delete("/api/subscriptions/:id", authMiddleware, async (req, res) => {
 const fortnoxTokens = {
   accessToken: process.env.FORTNOX_ACCESS_TOKEN || "",
   refreshToken: process.env.FORTNOX_REFRESH_TOKEN || "",
-  expiresAt: Date.now() + 3600_000
+  expiresAt: 0
 };
 
 async function persistTokensToRailway(accessToken, refreshToken) {
@@ -492,6 +492,30 @@ async function ensureFortnoxToken() {
     await refreshFortnoxToken();
   }
 }
+
+// Proactive refresh: keeps refresh token alive even without API traffic.
+// Fortnox refresh tokens expire after ~31 days if unused; this runs every 45 min.
+const FORTNOX_PROACTIVE_REFRESH_MS = 45 * 60 * 1000;
+setInterval(async () => {
+  if (!fortnoxTokens.refreshToken) return;
+  try {
+    await refreshFortnoxToken();
+    console.log("[Fortnox] Proactive token refresh succeeded");
+  } catch (err) {
+    console.error("[Fortnox] Proactive token refresh failed:", err.message || err);
+  }
+}, FORTNOX_PROACTIVE_REFRESH_MS);
+
+// Refresh once on startup to validate stored tokens
+setTimeout(async () => {
+  if (!fortnoxTokens.refreshToken) return;
+  try {
+    await refreshFortnoxToken();
+    console.log("[Fortnox] Startup token refresh succeeded");
+  } catch (err) {
+    console.error("[Fortnox] Startup token refresh failed – re-auth may be needed:", err.message || err);
+  }
+}, 5_000);
 
 async function fortnoxFetch(path, method, body, _retried) {
   const fetch = (await import("node-fetch")).default;
