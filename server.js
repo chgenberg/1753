@@ -1400,10 +1400,19 @@ async function handleOrderCompletion(orderId) {
   console.log(`[Order] ${order.order_number} completion: ${allSucceeded ? "FULL" : "PARTIAL"}`);
   console.log(`[Order] Notes: ${notes.join(" | ")}`);
 
-  // 7. Send confirmation email
+  const notesAfterFulfillment = notes.length;
+
+  // 7. Send confirmation email (kräver RESEND_API_KEY + verifierad avsändardomän i Resend)
   try {
-    await sendOrderConfirmation(order, items);
-    notes.push("Bekräftelsemail skickat");
+    const emailResult = await sendOrderConfirmation(order, items);
+    if (emailResult.sent) {
+      notes.push("Bekräftelsemail skickat (Resend)");
+    } else if (emailResult.skipReason === "no_api_key") {
+      notes.push("Bekräftelsemail ej skickat: RESEND_API_KEY saknas i backend");
+      console.warn(`[Order] ${order.order_number}: ingen orderbekräftelse via Resend – sätt RESEND_API_KEY`);
+    } else {
+      notes.push("Bekräftelsemail ej skickat (se logg)");
+    }
   } catch (err) {
     notes.push(`Email FEL: ${err.message}`);
     console.error("[Order] Email error:", err);
@@ -1437,16 +1446,21 @@ async function handleOrderCompletion(orderId) {
     console.error("[Order] Automation trigger error:", err.message);
   }
 
+  if (notes.length > notesAfterFulfillment) {
+    await db.appendNotes(order.id, notes.slice(notesAfterFulfillment).join(" | "));
+  }
+
   return { fortnoxInvoiceNumber, ongoingOrderId, notes };
 }
 
 // ---- ORDER CONFIRMATION EMAIL ----
 
+/** @returns {{ sent: boolean, skipReason?: string }} */
 async function sendOrderConfirmation(order, items) {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
-    console.log("[Email] RESEND_API_KEY not set, skipping");
-    return;
+    console.warn("[Email] RESEND_API_KEY not set – order confirmation email is NOT sent");
+    return { sent: false, skipReason: "no_api_key" };
   }
 
   const { Resend } = require("resend");
@@ -1508,6 +1522,7 @@ async function sendOrderConfirmation(order, items) {
   });
 
   console.log(`[Email] Confirmation sent to ${order.customer_email}`);
+  return { sent: true };
 }
 
 // ---- EMAIL TEMPLATES (shared style) ----
