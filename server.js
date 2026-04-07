@@ -306,7 +306,7 @@ function generateOrderNumber() {
 
 app.post("/api/subscriptions/create", authMiddleware, async (req, res) => {
   try {
-    const { productId, quantity } = req.body;
+    const { productId, quantity, intervalDays } = req.body;
     const product = PRODUCTS_MAP[productId];
     if (!product) return res.status(400).json({ message: "Okänd produkt" });
 
@@ -314,6 +314,8 @@ app.post("/api/subscriptions/create", authMiddleware, async (req, res) => {
     if (!user) return res.status(404).json({ message: "Användare hittades inte" });
 
     const qty = quantity || 1;
+    const allowedIntervals = [30, 60, 90];
+    const interval = allowedIntervals.includes(intervalDays) ? intervalDays : 60;
     const discountPercent = 15;
     const originalPrice = product.price * qty;
     const recurringPrice = Math.round(originalPrice * (1 - discountPercent / 100));
@@ -340,7 +342,7 @@ app.post("/api/subscriptions/create", authMiddleware, async (req, res) => {
       productId,
       productName: product.name,
       quantity: qty,
-      intervalDays: 60,
+      intervalDays: interval,
       discountPercent,
       originalPrice,
       recurringPrice,
@@ -1178,7 +1180,11 @@ app.put("/api/admin/subscriptions/:id", adminAuthMiddleware, async (req, res) =>
 
     let fields = {};
     if (action === "pause") fields = { status: "paused", paused_at: new Date().toISOString() };
-    else if (action === "resume") fields = { status: "active", paused_at: null };
+    else if (action === "resume") {
+      const nextCharge = new Date();
+      nextCharge.setDate(nextCharge.getDate() + (sub.interval_days || 60));
+      fields = { status: "active", paused_at: null, next_charge_date: nextCharge.toISOString().split("T")[0] };
+    }
     else if (action === "cancel") fields = { status: "cancelled", cancelled_at: new Date().toISOString() };
     else return res.status(400).json({ message: "Ogiltig åtgärd" });
 

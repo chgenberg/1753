@@ -487,7 +487,7 @@ function SubscriptionsView({ token }: { token: string }) {
     <div className="space-y-6">
       <h2 className="text-xl font-bold tracking-tight">Prenumerationer</h2>
       <p className="text-sm text-muted-foreground">
-        Spara 15% med auto-leverans var 60:e dag.
+        Spara 15% med automatisk leverans. Pausa eller avbryt nar som helst.
       </p>
 
       {activeSubs.length === 0 ? (
@@ -497,7 +497,7 @@ function SubscriptionsView({ token }: { token: string }) {
             <RefreshCcw className="mb-3 h-8 w-8 text-brand-700" />
             <h3 className="text-lg font-bold text-brand-900">Spara 15% med prenumeration</h3>
             <p className="mt-2 text-sm text-brand-600">
-              Välj en produkt att få levererad automatiskt var 60:e dag och spara 15% på varje leverans.
+              Valj en produkt att fa levererad automatiskt och spara 15% pa varje leverans. Du valjer intervall (30, 60 eller 90 dagar) vid kassan.
             </p>
             <a href="/produkter">
               <Button className="mt-5 rounded-xl">Välj produkter</Button>

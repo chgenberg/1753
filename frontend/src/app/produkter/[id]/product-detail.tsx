@@ -20,6 +20,8 @@ export default function ProductDetail({ id }: { id: string }) {
   const [qty, setQty] = useState(1);
   const [activeImg, setActiveImg] = useState(0);
   const [subscribing, setSubscribing] = useState(false);
+  const [subInterval, setSubInterval] = useState(60);
+  const [showSubOptions, setShowSubOptions] = useState(false);
   const { addItem } = useCart();
   const { showToast } = useToast();
   const { isLoggedIn, token } = useAuth();
@@ -163,30 +165,77 @@ export default function ProductDetail({ id }: { id: string }) {
                 </Button>
               </div>
 
-              <button
-                disabled={subscribing}
-                onClick={async () => {
-                  if (!isLoggedIn || !token) {
-                    window.location.href = "/logga-in";
-                    return;
-                  }
-                  setSubscribing(true);
-                  try {
-                    const res = await authFetch<{ checkoutUrl: string }>("/subscriptions/create", token, {
-                      method: "POST",
-                      body: JSON.stringify({ productId: product.id, quantity: qty }),
-                    });
-                    window.location.href = res.checkoutUrl;
-                  } catch {
-                    showToast("Kunde inte starta prenumeration", "error");
-                    setSubscribing(false);
-                  }
-                }}
-                className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border-2 border-brand-200 bg-brand-50/50 px-4 py-3 text-sm font-medium text-brand-900 transition-colors hover:bg-brand-100"
-              >
-                <RefreshCcw className="h-4 w-4" />
-                {subscribing ? "Startar prenumeration..." : `Prenumerera & spara 15% – ${Math.round(product.price * qty * 0.85).toLocaleString("sv-SE")} kr var 60:e dag`}
-              </button>
+              <div className="mt-3 overflow-hidden rounded-xl border-2 border-brand-200 bg-brand-50/30 transition-all">
+                <button
+                  type="button"
+                  onClick={() => setShowSubOptions(!showSubOptions)}
+                  className="flex w-full items-center justify-between px-4 py-3 text-sm font-medium text-brand-900 transition-colors hover:bg-brand-100/50"
+                >
+                  <span className="flex items-center gap-2">
+                    <RefreshCcw className="h-4 w-4" />
+                    Prenumerera &amp; spara 15%
+                  </span>
+                  <span className="text-brand-600">
+                    {Math.round(product.price * qty * 0.85).toLocaleString("sv-SE")} kr
+                  </span>
+                </button>
+
+                {showSubOptions && (
+                  <div className="border-t border-brand-200 bg-white px-4 py-4 space-y-4">
+                    <p className="text-xs text-brand-500">Valj leveransintervall:</p>
+                    <div className="flex gap-2">
+                      {[30, 60, 90].map((days) => (
+                        <button
+                          key={days}
+                          type="button"
+                          onClick={() => setSubInterval(days)}
+                          className={cn(
+                            "flex-1 rounded-lg border-2 px-3 py-2.5 text-center text-sm font-medium transition-all",
+                            subInterval === days
+                              ? "border-brand-900 bg-brand-900 text-white shadow-md"
+                              : "border-brand-200 text-brand-700 hover:border-brand-400"
+                          )}
+                        >
+                          {days} dagar
+                        </button>
+                      ))}
+                    </div>
+                    <button
+                      disabled={subscribing}
+                      onClick={async () => {
+                        if (!isLoggedIn || !token) {
+                          window.location.href = "/logga-in";
+                          return;
+                        }
+                        setSubscribing(true);
+                        try {
+                          const res = await authFetch<{ checkoutUrl: string }>("/subscriptions/create", token, {
+                            method: "POST",
+                            body: JSON.stringify({ productId: product.id, quantity: qty, intervalDays: subInterval }),
+                          });
+                          window.location.href = res.checkoutUrl;
+                        } catch {
+                          showToast("Kunde inte starta prenumeration", "error");
+                          setSubscribing(false);
+                        }
+                      }}
+                      className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand-900 px-4 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:bg-brand-800 active:scale-[0.98] disabled:opacity-60"
+                    >
+                      {subscribing ? (
+                        "Startar prenumeration..."
+                      ) : (
+                        <>
+                          Starta prenumeration &ndash;{" "}
+                          {Math.round(product.price * qty * 0.85).toLocaleString("sv-SE")} kr var {subInterval}:e dag
+                        </>
+                      )}
+                    </button>
+                    <p className="text-center text-[11px] text-brand-400">
+                      Avbryt nar som helst. Ingen bindningstid.
+                    </p>
+                  </div>
+                )}
+              </div>
 
               <div className="mt-8 flex flex-col gap-3">
                 <div className="flex items-center gap-3 text-sm text-brand-500">
