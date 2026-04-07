@@ -46,6 +46,8 @@ async function initSchema() {
     CREATE INDEX IF NOT EXISTS idx_orders_order_number  ON orders (order_number);
     CREATE INDEX IF NOT EXISTS idx_orders_viva_order_code ON orders (viva_order_code);
 
+    CREATE SEQUENCE IF NOT EXISTS ongoing_order_seq START WITH 10001;
+
     CREATE TABLE IF NOT EXISTS users (
       id              UUID PRIMARY KEY,
       name            VARCHAR(255) NOT NULL,
@@ -515,6 +517,11 @@ async function markCartRecovered(email) {
   );
 }
 
+async function nextOngoingOrderNumber() {
+  const { rows } = await pool.query("SELECT nextval('ongoing_order_seq') AS num");
+  return String(rows[0].num);
+}
+
 module.exports = {
   pool,
   initSchema,
@@ -550,5 +557,6 @@ module.exports = {
   advanceAutomation,
   cancelAutomationsForSubscriber,
   createAbandonedCart,
-  markCartRecovered
+  markCartRecovered,
+  nextOngoingOrderNumber
 };

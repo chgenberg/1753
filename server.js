@@ -1420,9 +1420,10 @@ async function handleOrderCompletion(orderId) {
 
   // 5. Ongoing: create delivery order (REST API uses PUT, consignee inline)
   try {
+    const ongoingSeqNumber = await db.nextOngoingOrderNumber();
     const deliveryDate = new Date(Date.now() + 3 * 86400000).toISOString().split("T")[0];
     const ogOrder = await ongoingFetch("/orders", "PUT", {
-      orderNumber: order.order_number,
+      orderNumber: ongoingSeqNumber,
       deliveryDate,
       referenceNumber: "1753 Skincare",
       orderRemark: `Webborder ${order.order_number} – ${order.customer_email}`,
