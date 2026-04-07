@@ -3,11 +3,15 @@
 import { useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Minus, Plus, ShoppingBag, Trash2, X } from "lucide-react";
-import { useCart } from "@/providers/cart-provider";
+import { Minus, Plus, RefreshCcw, ShoppingBag, Trash2, X } from "lucide-react";
+import { useCart, type CartItem } from "@/providers/cart-provider";
 import { PRODUCTS } from "@/lib/products";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+
+function productIdFromCartId(cartId: string) {
+  return cartId.replace(/__sub$/, "");
+}
 
 export function CartDrawer() {
   const { items, removeItem, updateQty, isOpen, closeCart, totalItems } =
@@ -24,13 +28,17 @@ export function CartDrawer() {
 
   const cartProducts = items
     .map((item) => {
-      const product = PRODUCTS.find((p) => p.id === item.id);
-      return product ? { ...product, qty: item.qty } : null;
+      const product = PRODUCTS.find((p) => p.id === productIdFromCartId(item.id));
+      return product ? { ...product, cartId: item.id, qty: item.qty, subscription: item.subscription } : null;
     })
-    .filter(Boolean) as (typeof PRODUCTS[number] & { qty: number })[];
+    .filter(Boolean) as (typeof PRODUCTS[number] & { cartId: string; qty: number; subscription?: CartItem["subscription"] })[];
 
-  const subtotal = cartProducts.reduce((s, p) => s + p.price * p.qty, 0);
+  const subtotal = cartProducts.reduce((s, p) => {
+    const unitPrice = p.subscription ? Math.round(p.price * 0.85) : p.price;
+    return s + unitPrice * p.qty;
+  }, 0);
   const freeShipping = subtotal >= 700;
+  const hasSubscription = cartProducts.some((p) => p.subscription);
 
   return (
     <>
@@ -79,64 +87,88 @@ export function CartDrawer() {
           <>
             <div className="flex-1 overflow-y-auto px-6 py-4">
               <div className="flex flex-col gap-4">
-                {cartProducts.map((product) => (
-                  <div
-                    key={product.id}
-                    className="flex gap-4 rounded-xl border border-border p-3"
-                  >
-                    <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-2xl bg-brand-50">
-                      <Image
-                        src={product.image}
-                        alt={product.name}
-                        fill
-                        className="object-cover"
-                        sizes="80px"
-                      />
-                    </div>
-                    <div className="flex flex-1 flex-col justify-between">
-                      <div>
-                        <p className="text-sm font-medium leading-tight">
-                          {product.name}
-                        </p>
-                        <p className="mt-0.5 text-sm text-muted-foreground">
-                          {product.price.toLocaleString("sv-SE")} kr
-                        </p>
+                {cartProducts.map((product) => {
+                  const unitPrice = product.subscription
+                    ? Math.round(product.price * 0.85)
+                    : product.price;
+                  return (
+                    <div
+                      key={product.cartId}
+                      className={cn(
+                        "flex gap-4 rounded-xl border p-3",
+                        product.subscription
+                          ? "border-brand-700/20 bg-brand-50/50"
+                          : "border-border"
+                      )}
+                    >
+                      <div className="relative h-20 w-20 flex-shrink-0 overflow-hidden rounded-2xl bg-brand-50">
+                        <Image
+                          src={product.image}
+                          alt={product.name}
+                          fill
+                          className="object-cover"
+                          sizes="80px"
+                        />
                       </div>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-2">
+                      <div className="flex flex-1 flex-col justify-between">
+                        <div>
+                          <p className="text-sm font-medium leading-tight">
+                            {product.name}
+                          </p>
+                          {product.subscription ? (
+                            <div className="mt-1 flex items-center gap-1.5">
+                              <span className="inline-flex items-center gap-1 rounded-md bg-brand-800 px-1.5 py-0.5 text-[10px] font-semibold text-white">
+                                <RefreshCcw className="h-2.5 w-2.5" />
+                                Var {product.subscription.intervalDays}:e dag
+                              </span>
+                              <span className="text-xs font-medium text-green-700">-15%</span>
+                            </div>
+                          ) : null}
+                          <p className="mt-0.5 text-sm text-muted-foreground">
+                            {unitPrice.toLocaleString("sv-SE")} kr
+                            {product.subscription && (
+                              <span className="ml-1.5 text-xs line-through text-brand-400">
+                                {product.price.toLocaleString("sv-SE")} kr
+                              </span>
+                            )}
+                          </p>
+                        </div>
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() =>
+                                updateQty(product.cartId, product.qty - 1)
+                              }
+                              aria-label="Minska antal"
+                              className="flex h-7 w-7 items-center justify-center rounded-full border border-border hover:bg-brand-50"
+                            >
+                              <Minus className="h-3 w-3" />
+                            </button>
+                            <span className="w-6 text-center text-sm font-medium">
+                              {product.qty}
+                            </span>
+                            <button
+                              onClick={() =>
+                                updateQty(product.cartId, product.qty + 1)
+                              }
+                              aria-label="Öka antal"
+                              className="flex h-7 w-7 items-center justify-center rounded-full border border-border hover:bg-brand-50"
+                            >
+                              <Plus className="h-3 w-3" />
+                            </button>
+                          </div>
                           <button
-                            onClick={() =>
-                              updateQty(product.id, product.qty - 1)
-                            }
-                            aria-label="Minska antal"
-                            className="flex h-7 w-7 items-center justify-center rounded-full border border-border hover:bg-brand-50"
+                            onClick={() => removeItem(product.cartId)}
+                            className="flex h-7 w-7 items-center justify-center rounded-full text-brand-400 hover:bg-red-50 hover:text-red-500"
+                            aria-label="Ta bort"
                           >
-                            <Minus className="h-3 w-3" />
-                          </button>
-                          <span className="w-6 text-center text-sm font-medium">
-                            {product.qty}
-                          </span>
-                          <button
-                            onClick={() =>
-                              updateQty(product.id, product.qty + 1)
-                            }
-                            aria-label="Öka antal"
-                            className="flex h-7 w-7 items-center justify-center rounded-full border border-border hover:bg-brand-50"
-                          >
-                            <Plus className="h-3 w-3" />
+                            <Trash2 className="h-3.5 w-3.5" />
                           </button>
                         </div>
-                        <button
-                          onClick={() => removeItem(product.id)}
-                          className="flex h-7 w-7 items-center justify-center rounded-full text-brand-400 hover:bg-red-50 hover:text-red-500"
-                          aria-label="Ta bort"
-                        >
-                          <Trash2 className="h-3.5 w-3.5" />
-                        </button>
                       </div>
                     </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
 

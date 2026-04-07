@@ -832,10 +832,8 @@ import { FaceLandmarker, FilesetResolver } from "https://cdn.jsdelivr.net/npm/@m
     const lower = analysisText.toLowerCase();
     const recommended = [];
 
-    if (lower.includes("the one") || lower.includes("daglig") || lower.includes("morgon"))
-      recommended.push("the-one-facial-oil");
-    if (lower.includes("i love") || lower.includes("natt") || lower.includes("kvall") || lower.includes("reparera"))
-      recommended.push("i-love-facial-oil");
+    if (lower.includes("the one") || lower.includes("i love") || lower.includes("daglig") || lower.includes("morgon") || lower.includes("natt") || lower.includes("kvall") || lower.includes("reparera"))
+      recommended.push("duo-kit");
     if (lower.includes("ta-da") || lower.includes("serum") || lower.includes("fukt"))
       recommended.push("ta-da-serum");
     if (lower.includes("rengor") || lower.includes("makeup") || lower.includes("au naturel"))
@@ -844,7 +842,7 @@ import { FaceLandmarker, FilesetResolver } from "https://cdn.jsdelivr.net/npm/@m
       recommended.push("fungtastic-mushroom-extract");
 
     if (recommended.length === 0) {
-      recommended.push("the-one-facial-oil", "ta-da-serum");
+      recommended.push("duo-kit", "ta-da-serum");
     }
 
     const unique = [...new Set(recommended)].slice(0, 3);
@@ -881,15 +879,13 @@ import { FaceLandmarker, FilesetResolver } from "https://cdn.jsdelivr.net/npm/@m
       morningSteps.push({ id: "au-naturel-makeup-remover", step: "Rengör varsamt" });
       eveningSteps.push({ id: "au-naturel-makeup-remover", step: "Rengör varsamt" });
     }
-    if (productIds.includes("the-one-facial-oil")) {
-      morningSteps.push({ id: "the-one-facial-oil", step: "3-4 droppar The ONE" });
+    if (productIds.includes("duo-kit") || productIds.includes("duo-ta-da")) {
+      morningSteps.push({ id: "duo-kit", step: "3-4 droppar The ONE Facial Oil" });
+      eveningSteps.push({ id: "duo-kit", step: "3-4 droppar I LOVE Facial Oil" });
     }
-    if (productIds.includes("ta-da-serum")) {
+    if (productIds.includes("ta-da-serum") || productIds.includes("duo-ta-da")) {
       morningSteps.push({ id: "ta-da-serum", step: "1-2 pump TA-DA Serum" });
       eveningSteps.push({ id: "ta-da-serum", step: "1-2 pump TA-DA Serum" });
-    }
-    if (productIds.includes("i-love-facial-oil")) {
-      eveningSteps.push({ id: "i-love-facial-oil", step: "3-4 droppar I LOVE" });
     }
 
     if (morningSteps.length === 0 && eveningSteps.length === 0) {

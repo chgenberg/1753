@@ -12,11 +12,14 @@ import {
 export interface CartItem {
   id: string;
   qty: number;
+  subscription?: {
+    intervalDays: number;
+  };
 }
 
 interface CartContextValue {
   items: CartItem[];
-  addItem: (id: string, qty?: number) => void;
+  addItem: (id: string, qty?: number, subscription?: { intervalDays: number }) => void;
   removeItem: (id: string) => void;
   updateQty: (id: string, qty: number) => void;
   clearCart: () => void;
@@ -59,15 +62,16 @@ export function CartProvider({ children }: { children: ReactNode }) {
     if (mounted) writeCart(items);
   }, [items, mounted]);
 
-  const addItem = useCallback((id: string, qty = 1) => {
+  const addItem = useCallback((id: string, qty = 1, subscription?: { intervalDays: number }) => {
+    const cartId = subscription ? `${id}__sub` : id;
     setItems((prev) => {
-      const existing = prev.find((i) => i.id === id);
+      const existing = prev.find((i) => i.id === cartId);
       if (existing) {
         return prev.map((i) =>
-          i.id === id ? { ...i, qty: i.qty + qty } : i
+          i.id === cartId ? { ...i, qty: i.qty + qty, subscription } : i
         );
       }
-      return [...prev, { id, qty }];
+      return [...prev, { id: cartId, qty, subscription }];
     });
     setIsOpen(true);
   }, []);

@@ -10,23 +10,22 @@ const PRODUCTS = [
     reviews: 173,
     image: "public/Products/DUOTADA.webp",
     shopifyImage: "https://www.1753skincare.com/cdn/shop/files/IMG_1034.jpg?width=600",
-    shortDesc: "En komplett rutin för hud i balans. Innehåller The ONE Facial Oil, I LOVE Facial Oil och TA-DA Serum.",
-    description: `<p>Det här är en hudvårdsrutin skapad för att stärka huden på djupet – inte tillfälligt förbättra ytan. DUO-kitet tillsammans med TA-DA Serum ger huden exakt det den behöver för att fungera bättre på egen hand.</p>
-<p>Tre produkter. Ett tydligt syfte. Lugnare hud, bättre motståndskraft och långsiktig hudhälsa.</p>
-<h3>Vad som gör rutinen unik</h3>
-<p>Produkterna är utvecklade för att samverka och stödja hudens egna system – särskilt endocannabinoidsystemet och den mikrobiella mångfalden. Två avgörande faktorer för hudens förmåga att återhämta sig, skydda sig och behålla balans över tid.</p>
-<h3>Produkterna i rutinen</h3>
-<ul>
-<li><strong>The ONE Facial Oil</strong> – En skyddande och näringsrik olja för daglig användning.</li>
-<li><strong>I LOVE Facial Oil</strong> – En lugnande nattolja som hjälper huden att återhämta sig.</li>
-<li><strong>TA-DA Serum</strong> – Ett unikt CBG-berikat serum som appliceras efter oljan.</li>
-</ul>
+    shortDesc: "Hela rutinen i ett. Tre produkter som stärker huden på djupet – inte bara förbättrar ytan.",
+    description: `<p>Det här är inte ytterligare en hudvårdsrutin. Det här är den enda du behöver.</p>
+<p>Tre produkter. Ett syfte: en hud som fungerar bättre på egen hand. Lugnare, starkare, mer motståndskraftig.</p>
+<h3>Varför den här rutinen funkar</h3>
+<p>Produkterna är utvecklade för att samverka med hudens egna system – särskilt endocannabinoidsystemet och den mikrobiella balansen.</p>
+<h3>Produkterna i kitet</h3>
+<p><strong>The ONE Facial Oil</strong> – Din dagliga olja. 10% CBD och 0,2% CBG som skyddar, återfuktar och stärker hudbarriären.</p>
+<p><strong>I LOVE Facial Oil</strong> – Kvällens återhämtning. 10% CBD och 5% CBG som lugnar, reparerar och djupåterfuktar.</p>
+<p><strong>TA-DA Serum</strong> – Boosten som förstärker allt. 3% CBG i ekologisk jojobaolja som appliceras efter oljan.</p>
 <h3>Så använder du rutinen</h3>
-<p><strong>Morgon:</strong> Skölj ansiktet med ljummet vatten. Applicera 3–4 droppar The ONE Facial Oil. Avsluta med 1–2 pump TA-DA Serum.</p>
-<p><strong>Kväll:</strong> Rengör huden varsamt. Applicera 3–4 droppar I LOVE Facial Oil. Avsluta med 1–2 pump TA-DA Serum.</p>`,
+<p><strong>Morgon:</strong> Skölj ansiktet med ljummet vatten. 3–4 droppar The ONE Facial Oil. 1–2 pump TA-DA Serum.</p>
+<p><strong>Kväll:</strong> Rengör huden varsamt. 3–4 droppar I LOVE Facial Oil. 1–2 pump TA-DA Serum.</p>
+<p><em>Serumet appliceras efter oljan – inte före.</em></p>`,
     ingredients: null,
     size: null,
-    guarantee: "100% nöjd-kund-garanti. Prova produkterna i 14 dagar. Är du inte nöjd får du pengarna tillbaka (du betalar endast returfrakten)."
+    guarantee: "Fri frakt. 14 dagars öppet köp."
   },
   {
     id: "ta-da-serum",
@@ -38,96 +37,44 @@ const PRODUCTS = [
     reviews: 20,
     image: "public/Products/TA-DA.webp",
     shopifyImage: "https://www.1753skincare.com/cdn/shop/files/1-Ta-Daserummforpackning.png?width=600",
-    shortDesc: "CBG-berikat serum som boostar hudens naturliga fukt och låser in den för en strålande och frisk hy.",
-    description: `<p>Torr hud är ett vanligt problem, särskilt i kallare klimat, men det behöver inte vara så. TA-DA Serum är speciellt framtaget för att boosta din huds naturliga fukt och låsa in den, så att du får en strålande och frisk hy.</p>
+    shortDesc: "CBG-berikat serum som låser in fukt och ger lyster. Din huds bästa kompis – oavsett årstid.",
+    description: `<p>Torr hud? Det behöver inte vara så. TA-DA Serum låser in fukt som faktiskt stannar kvar.</p>
 <h3>Kraften i CBG</h3>
-<p>I hjärtat av TA-DA Serum finns CBG (Cannabigerol), en kraftfull ingrediens från cannabisplantan. CBG samarbetar med hudens endocannabinoidsystem för att förbättra fuktbevaring och minska fuktförlust.</p>
-<h3>Fördelar</h3>
+<p>CBG (Cannabigerol) samarbetar med hudens eget endocannabinoidsystem. Resultatet? Bättre fuktbalans, mindre fuktförlust och en hud som trivs även i tuffa förhållanden.</p>
+<h3>Det här får du</h3>
 <ul>
-<li>Minskad risk för inflammation</li>
-<li>Djupt återfuktad hud</li>
+<li>Fukt som stannar – inte avdunstar</li>
+<li>Mindre inflammation och rodnad</li>
 <li>Förbättrad elasticitet och fasthet</li>
+<li>Synlig lyster redan efter första veckorna</li>
 </ul>`,
     ingredients: "Simmondsia chinensis (Jojoba) Seed Oil (ekologisk), Cannabigerol (CBG, 3% / 1500 mg)",
     size: "Glasflaska med pump – 50 ml",
-    guarantee: "100% nöjd-kund-garanti. Testa produkten i 14 dagar – om du inte är helt nöjd kan du returnera den för full återbetalning (minus frakt)."
+    guarantee: "Fri frakt. 14 dagars öppet köp."
   },
   {
     id: "duo-kit",
     articleNumber: "1003",
     category: "kit",
-    name: "DUO-kit (The ONE + I LOVE Facial Oil)",
+    name: "DUO-kit",
     price: 1099,
     originalPrice: null,
     reviews: 136,
     image: "public/Products/DUO-kit.webp",
     shopifyImage: "https://www.1753skincare.com/cdn/shop/files/2-facialoilduomedforpackning.png?width=600",
-    shortDesc: "Två ansiktsoljor i ett kit. The ONE för morgonen, I LOVE för kvällen. Enkel och effektiv rutin för alla hudtyper.",
-    description: `<p>Ge din hud det bästa av två världar med vårt DUO-kit! Detta kit innehåller våra fantastiska ansiktsoljor – The ONE Facial Oil och I LOVE Facial Oil – till ett mycket förmånligt pris.</p>
-<h3>Varför DUO-kitet?</h3>
-<p>Med detta kit får du en komplett hudvårdsrutin som är enkel och effektiv. The ONE Facial Oil används på morgonen för att skydda och återfukta, medan I LOVE Facial Oil appliceras på kvällen för att reparera och lugna.</p>
-<h3>Så använder du DUO-kitet</h3>
-<p><strong>Morgon:</strong> Applicera The ONE Facial Oil på ren hud för att starta dagen med återfuktning och skydd.</p>
-<p><strong>Kväll:</strong> Applicera I LOVE Facial Oil på ren hud för att låta huden återhämta sig över natten.</p>`,
+    shortDesc: "Två ansiktsoljor. En för morgonen, en för kvällen. Komplett hudvård som fungerar med din hud – inte mot den.",
+    description: `<p>En olja för dagen. En för natten. Mer behöver det inte vara.</p>
+<h3>The ONE Facial Oil – morgonen</h3>
+<p>10% CBD och 0,2% CBG. Skyddar hudbarriären, återfuktar på djupet och ger ett jämnt, friskt uttryck.</p>
+<h3>I LOVE Facial Oil – kvällen</h3>
+<p>10% CBD och 5% CBG. Lugnar, reparerar och djupåterfuktar medan du sover. Extra kraftfull för stressad eller känslig hud.</p>
+<h3>Så använder du kitet</h3>
+<p><strong>Morgon:</strong> 3–4 droppar The ONE Facial Oil på ren hud.</p>
+<p><strong>Kväll:</strong> 3–4 droppar I LOVE Facial Oil på ren hud.</p>
+<p><em>Tänk "The ONE I LOVE" för att komma ihåg ordningen.</em></p>`,
     ingredients: null,
     size: "2 x 10 ml glasflaskor med pipett",
-    guarantee: "100% nöjd-kund-garanti. Prova produkterna i 14 dagar, och om du inte är helt nöjd, skicka tillbaka dem – du står bara för returfrakten."
-  },
-  {
-    id: "i-love-facial-oil",
-    articleNumber: "3001",
-    category: "oil",
-    name: "I LOVE Facial Oil",
-    price: 849,
-    originalPrice: null,
-    reviews: 101,
-    image: "public/Products/ILOVE.webp",
-    shopifyImage: "https://www.1753skincare.com/cdn/shop/files/3-Facialoilmforpackning.png?width=600",
-    shortDesc: "Kraftfull ansiktsolja med 5% CBG och 10% CBD. Stödjer endocannabinoidsystemet för en balanserad, återfuktad hy.",
-    description: `<p>Drömmer du om en hud som strålar av hälsa och självförtroende? I LOVE Facial Oil är här för att förvandla din hudvårdsrutin med en unik kombination av 5% CBG och 10% CBD.</p>
-<h3>Vad kan du förvänta dig?</h3>
-<ul>
-<li>Mindre inflammationer – för en lugn och klar hud</li>
-<li>Mer glow – för en strålande och frisk lyster</li>
-<li>Djup återfuktning – för en mjuk och smidig känsla</li>
-<li>Högre elasticitet och fasthet – för en spänstig och ungdomlig hy</li>
-</ul>
-<h3>Användartips</h3>
-<p><strong>Morgon:</strong> Använd The ONE Facial Oil för att skydda och återfukta.</p>
-<p><strong>Kväll:</strong> Applicera I LOVE Facial Oil för att reparera och lugna.</p>
-<p>Tänk "The ONE I LOVE" för att enkelt komma ihåg ordningen.</p>`,
-    ingredients: "Caprylic/Capric Triglyceride, Cannabidiol (10% / 1000 mg), Cannabigerol (5% / 500 mg)",
-    size: "Glasflaska med pipett – 10 ml",
-    sizes: ["10 ml"],
-    guarantee: "100% nöjd-kund-garanti. Testa produkten i 14 dagar – om du inte är nöjd, skicka tillbaka den. Du står bara för returfrakten."
-  },
-  {
-    id: "the-one-facial-oil",
-    articleNumber: "1001",
-    category: "oil",
-    name: "The ONE Facial Oil",
-    price: 5,
-    originalPrice: null,
-    reviews: 202,
-    image: "public/Products/Theone.webp",
-    shopifyImage: "https://www.1753skincare.com/cdn/shop/files/4-Theonefacialoil.png?width=600",
-    shortDesc: "Ansiktsolja med 10% CBD och 0,2% CBG. Mindre inflammationer, mer glow, djup återfuktning och högre elasticitet.",
-    description: `<p>Drömmer du om en hy med mer elasticitet, fasthet, glow och lyster? Då är The ONE Facial Oil precis vad du behöver – oavsett hudtyp.</p>
-<h3>Vad kan du förvänta dig?</h3>
-<ul>
-<li>Mindre inflammationer – för en lugnare och klarare hud</li>
-<li>Mer glow – för en strålande och hälsosam lyster</li>
-<li>Mindre känslighet – för en starkare hudbarriär</li>
-<li>Djup återfuktning – för en mjuk och smidig känsla</li>
-<li>Högre elasticitet och fasthet – för en spänstig och ungdomlig hy</li>
-</ul>
-<h3>Användartips</h3>
-<p>För fet eller normal hud: Applicera 3–4 droppar på ansikte och hals.</p>
-<p>För torr hud: Applicera 4–10 droppar. Anpassa mängden efter vad din hud behöver.</p>`,
-    ingredients: "Caprylic/Capric Triglyceride, Cannabidiol (10% / 1000 mg), Cannabigerol (0,2% / 20 mg)",
-    size: "Glasflaska med pipett – 10 ml",
-    sizes: ["10 ml"],
-    guarantee: "100% nöjd-kund-garanti. Prova produkten i 14 dagar – är du inte helt nöjd kan du skicka tillbaka den. Du står endast för returfrakten."
+    guarantee: "Fri frakt. 14 dagars öppet köp."
   },
   {
     id: "au-naturel-makeup-remover",
@@ -139,21 +86,22 @@ const PRODUCTS = [
     reviews: 83,
     image: "public/Products/Makeup Remover.webp",
     shopifyImage: "https://www.1753skincare.com/cdn/shop/files/6-Makeup-remover.png?width=600",
-    shortDesc: "Rengöringsolja med MCT och CBD som varsamt avlägsnar smuts och makeup utan att skada hudens naturliga balans.",
-    description: `<p>Vill du avlägsna smuts, luftföroreningar och makeup utan att skada din huds naturliga balans? Au Naturel Makeup Remover är lösningen du har letat efter.</p>
-<h3>Fördelar</h3>
+    shortDesc: "Rengöringsolja med MCT och CBD. Tar bort allt – utan att röra hudens naturliga balans.",
+    description: `<p>De flesta rengöringsprodukter tar bort smuts men skadar huden i processen. Det här är inte en av dem.</p>
+<p>Au Naturel löser upp makeup, smuts och luftföroreningar – utan att störa hudens mikrobiom.</p>
+<h3>Det här får du</h3>
 <ul>
-<li>Enkel avlägsning av smuts, makeup och luftföroreningar</li>
-<li>Djupt återfuktad hud som känns mjuk och smidig</li>
+<li>Ren hud utan den strama känslan</li>
+<li>Djup återfuktning redan vid rengöring</li>
 <li>Ökad elasticitet och fasthet</li>
-<li>Skadar inte hudens mikrobiella mångfald eller endocannabinoidsystem</li>
+<li>Bevarad mikrobiell mångfald</li>
 </ul>
-<h3>Hur använder du den?</h3>
-<p>Applicera ett par droppar på ansiktet, massera in oljan och låt den lösa upp makeup och orenheter. Avlägsna sedan försiktigt med en varm, fuktig handduk eller bomullspad.</p>`,
+<h3>Så använder du den</h3>
+<p>Applicera några droppar på ansiktet. Massera in. Avlägsna med en varm, fuktig handduk eller bomullspad.</p>`,
     ingredients: "Caprylic/Capric Triglyceride (MCT), Cannabidiol (CBD, 0,2%)",
     size: "Glasflaska med pump – 100 ml",
     sizes: ["100 ml"],
-    guarantee: "100% nöjd-kund-garanti. Prova produkten i 14 dagar – om du inte är helt nöjd kan du returnera den för full återbetalning (minus frakt)."
+    guarantee: "Fri frakt. 14 dagars öppet köp."
   },
   {
     id: "fungtastic-mushroom-extract",
@@ -165,16 +113,16 @@ const PRODUCTS = [
     reviews: 63,
     image: "public/Products/Fungtastic.webp",
     shopifyImage: "https://www.1753skincare.com/cdn/shop/files/8-Fungtastic.png?width=600",
-    shortDesc: "Svampextrakt med Chaga, Lion's Mane, Cordyceps och Reishi. Stödjer hälsan inifrån och hudens endocannabinoidsystem.",
-    description: `<p>Fungtastic Mushroom Extract kombinerar fyra av naturens mest potenta medicinska svampar i en perfekt balans för att stödja ditt välbefinnande inifrån.</p>
-<h3>Fyra svampar – fyra fantastiska fördelar</h3>
+    shortDesc: "Fyra medicinska svampar i perfekt balans. Stöd för immunförsvar, fokus, energi och sömn – inifrån.",
+    description: `<p>Bra hud börjar inifrån. Fyra av naturens mest kraftfulla medicinska svampar – i perfekt balans.</p>
+<h3>Fyra svampar – fyra superkrafter</h3>
 <ul>
-<li><strong>Chaga (25%)</strong> – Stärker immunförsvaret med antioxidanter och Betulinic Acid</li>
-<li><strong>Lion's Mane (25%)</strong> – Boostar fokus och minne</li>
-<li><strong>Cordyceps (25%)</strong> – Ökar energi och prestation</li>
-<li><strong>Reishi (25%)</strong> – Främjar lugn och sömn</li>
+<li><strong>Chaga (25%)</strong> – Immunförsvarets bästa vän. Fullpackad med antioxidanter och Betulinic Acid.</li>
+<li><strong>Lion's Mane (25%)</strong> – Boostar fokus, minne och mental klarhet.</li>
+<li><strong>Cordyceps (25%)</strong> – Höjer uthållighet och fysisk prestation.</li>
+<li><strong>Reishi (25%)</strong> – Främjar avslappning och djupare sömn.</li>
 </ul>
-<p>De flesta upplever positiva effekter efter 2–4 veckors användning, även om det kan ta upp till 6 veckor för optimalt resultat.</p>`,
+<p>2 kapslar dagligen. De flesta känner skillnad efter 2–4 veckor.</p>`,
     ingredients: "Chaga (25%), Lion's Mane (25%), Cordyceps (25%), Reishi (25%) – 400 mg per kapsel (15:1 extrakt). Betaglukaner: minst 20%.",
     size: "60 kapslar",
     sizes: ["60 kapslar"],
@@ -515,7 +463,7 @@ function renderProductDetail() {
         <ul class="product-sell-points" aria-label="Varför kunder handlar hos oss">
           <li>Fri frakt när du handlar för ${FREE_SHIPPING_THRESHOLD.toLocaleString("sv-SE")} kr eller mer</li>
           <li>CBD/CBG och noggrant utvalda ingredienser – utvecklat för nordisk hud</li>
-          <li>Nöjd-kund-garanti med trygg rådgivning före och efter köp</li>
+          <li>14 dagars öppet köp – trygg handel med personlig rådgivning</li>
         </ul>
         ${product.sizes ? `
           <div class="size-select">
@@ -544,7 +492,7 @@ function renderProductDetail() {
           ` : ""}
           ${product.guarantee ? `
             <details>
-              <summary>Nöjd-kund-garanti</summary>
+              <summary>Köpvillkor</summary>
               <div class="meta-content">${product.guarantee}</div>
             </details>
           ` : ""}

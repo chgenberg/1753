@@ -176,7 +176,7 @@ const Dashboard = (() => {
         date: "2026-02-28",
         status: "delivered",
         items: [
-          { id: "the-one-facial-oil", name: "The ONE Facial Oil", qty: 2, price: 649 }
+          { id: "duo-kit", name: "DUO-kit", qty: 1, price: 1099 }
         ],
         total: 1298,
         tracking: "SE987654321"
@@ -319,12 +319,12 @@ const Dashboard = (() => {
     return {
       morning: [
         { id: "m1", text: "Skölj ansiktet med ljummet vatten", product: null, done: false },
-        { id: "m2", text: "Applicera 3-4 droppar The ONE Facial Oil", product: "the-one-facial-oil", done: false },
+        { id: "m2", text: "Applicera 3-4 droppar The ONE Facial Oil", product: "duo-kit", done: false },
         { id: "m3", text: "Avsluta med 1-2 pump TA-DA Serum", product: "ta-da-serum", done: false }
       ],
       evening: [
         { id: "e1", text: "Rengöring med Au Naturel Makeup Remover", product: "au-naturel-makeup-remover", done: false },
-        { id: "e2", text: "Applicera 3-4 droppar I LOVE Facial Oil", product: "i-love-facial-oil", done: false },
+        { id: "e2", text: "Applicera 3-4 droppar I LOVE Facial Oil", product: "duo-kit", done: false },
         { id: "e3", text: "Avsluta med 1-2 pump TA-DA Serum", product: "ta-da-serum", done: false },
         { id: "e4", text: "Ta 2 kapslar Fungtastic Mushroom Extract", product: "fungtastic-mushroom-extract", done: false }
       ]

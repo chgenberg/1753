@@ -349,7 +349,7 @@ export default function OrderDetailPage() {
               ) : (
                 <RotateCcw className="h-4 w-4" />
               )}
-              Forsok igen
+              Försök igen
             </button>
           )}
           <button

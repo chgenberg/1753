@@ -451,7 +451,7 @@ function SubscriptionsView({ token }: { token: string }) {
       const data = await authFetch<Subscription[]>("/subscriptions", token);
       setSubs(data);
     } catch {
-      showToast("Kunde inte hamta prenumerationer", "error");
+      showToast("Kunde inte hämta prenumerationer", "error");
     } finally {
       setLoading(false);
     }
@@ -464,19 +464,19 @@ function SubscriptionsView({ token }: { token: string }) {
   const handleAction = async (id: number, action: "pause" | "resume" | "cancel") => {
     try {
       if (action === "cancel") {
-        if (!window.confirm("Ar du saker pa att du vill avbryta prenumerationen?")) return;
+        if (!window.confirm("Är du säker på att du vill avbryta prenumerationen?")) return;
         await authFetch(`/subscriptions/${id}`, token, { method: "DELETE" });
         showToast("Prenumerationen har avbrutits", "success");
       } else if (action === "pause") {
         await authFetch(`/subscriptions/${id}/pause`, token, { method: "PUT" });
-        showToast("Prenumerationen ar pausad", "success");
+        showToast("Prenumerationen är pausad", "success");
       } else {
         await authFetch(`/subscriptions/${id}/resume`, token, { method: "PUT" });
-        showToast("Prenumerationen har aterupptagits", "success");
+        showToast("Prenumerationen har återupptagits", "success");
       }
       fetchSubs();
     } catch {
-      showToast("Nagot gick fel", "error");
+      showToast("Något gick fel", "error");
     }
   };
 
@@ -521,7 +521,7 @@ function SubscriptionsView({ token }: { token: string }) {
     <div className="space-y-6">
       <h2 className="text-xl font-bold tracking-tight">Prenumerationer</h2>
       <p className="text-sm text-muted-foreground">
-        Spara 15% med automatisk leverans. Andra antal, intervall eller avbryt nar som helst.
+        Spara 15% med automatisk leverans. Ändra antal, intervall eller avbryt när som helst.
       </p>
 
       {activeSubs.length === 0 ? (
@@ -531,10 +531,10 @@ function SubscriptionsView({ token }: { token: string }) {
             <RefreshCcw className="mb-3 h-8 w-8 text-brand-700" />
             <h3 className="text-lg font-bold text-brand-900">Spara 15% med prenumeration</h3>
             <p className="mt-2 text-sm text-brand-600">
-              Valj en produkt att fa levererad automatiskt och spara 15% pa varje leverans. Du valjer intervall (30, 60 eller 90 dagar) vid kassan.
+              Välj en produkt att få levererad automatiskt och spara 15% på varje leverans. Du väljer intervall (30, 60 eller 90 dagar) vid kassan.
             </p>
             <a href="/produkter">
-              <Button className="mt-5 rounded-xl">Valj produkter</Button>
+              <Button className="mt-5 rounded-xl">Välj produkter</Button>
             </a>
           </div>
         </div>
@@ -567,7 +567,7 @@ function SubscriptionsView({ token }: { token: string }) {
                   </div>
                   {sub.next_charge_date && sub.status === "active" && (
                     <p className="mt-2 text-xs text-muted-foreground">
-                      Nasta leverans: {new Date(sub.next_charge_date).toLocaleDateString("sv-SE", { day: "numeric", month: "long" })}
+                      Nästa leverans: {new Date(sub.next_charge_date).toLocaleDateString("sv-SE", { day: "numeric", month: "long" })}
                     </p>
                   )}
                 </div>
@@ -638,7 +638,7 @@ function SubscriptionsView({ token }: { token: string }) {
                       onClick={() => startEdit(sub)}
                       className="rounded-lg border border-brand-200 px-3 py-1.5 text-xs font-medium text-brand-900 transition-colors hover:bg-brand-50"
                     >
-                      Andra
+                      Ändra
                     </button>
                     {sub.status === "active" ? (
                       <button onClick={() => handleAction(sub.id, "pause")} className="rounded-lg border border-brand-200 px-3 py-1.5 text-xs font-medium text-brand-900 transition-colors hover:bg-brand-50">
@@ -646,7 +646,7 @@ function SubscriptionsView({ token }: { token: string }) {
                       </button>
                     ) : (
                       <button onClick={() => handleAction(sub.id, "resume")} className="rounded-lg border border-brand-200 px-3 py-1.5 text-xs font-medium text-brand-900 transition-colors hover:bg-brand-50">
-                        Ateruppta
+                        Återuppta
                       </button>
                     )}
                     <button onClick={() => handleAction(sub.id, "cancel")} className="rounded-lg px-3 py-1.5 text-xs font-medium text-red-600 transition-colors hover:bg-red-50">

@@ -10,8 +10,7 @@ import { ProductCard } from "@/components/product-card";
 import { SectionWrapper } from "@/components/section-wrapper";
 import { useCart } from "@/providers/cart-provider";
 import { useToast } from "@/components/notification";
-import { useAuth } from "@/providers/auth-provider";
-import { authFetch } from "@/lib/api";
+import { useRouter } from "next/navigation";
 import { getProduct, getRelatedProducts } from "@/lib/products";
 import { cn } from "@/lib/utils";
 
@@ -19,12 +18,11 @@ export default function ProductDetail({ id }: { id: string }) {
   const product = getProduct(id);
   const [qty, setQty] = useState(1);
   const [activeImg, setActiveImg] = useState(0);
-  const [subscribing, setSubscribing] = useState(false);
   const [subInterval, setSubInterval] = useState(60);
   const [showSubOptions, setShowSubOptions] = useState(false);
   const { addItem } = useCart();
   const { showToast } = useToast();
-  const { isLoggedIn, token } = useAuth();
+  const router = useRouter();
 
   if (!product) return notFound();
 
@@ -182,7 +180,7 @@ export default function ProductDetail({ id }: { id: string }) {
 
                 {showSubOptions && (
                   <div className="border-t border-brand-200 bg-white px-4 py-4 space-y-4">
-                    <p className="text-xs text-brand-500">Valj leveransintervall:</p>
+                    <p className="text-xs text-brand-500">Välj leveransintervall:</p>
                     <div className="flex gap-2">
                       {[30, 60, 90].map((days) => (
                         <button
@@ -201,37 +199,18 @@ export default function ProductDetail({ id }: { id: string }) {
                       ))}
                     </div>
                     <button
-                      disabled={subscribing}
-                      onClick={async () => {
-                        if (!isLoggedIn || !token) {
-                          window.location.href = "/logga-in";
-                          return;
-                        }
-                        setSubscribing(true);
-                        try {
-                          const res = await authFetch<{ checkoutUrl: string }>("/subscriptions/create", token, {
-                            method: "POST",
-                            body: JSON.stringify({ productId: product.id, quantity: qty, intervalDays: subInterval }),
-                          });
-                          window.location.href = res.checkoutUrl;
-                        } catch {
-                          showToast("Kunde inte starta prenumeration", "error");
-                          setSubscribing(false);
-                        }
+                      onClick={() => {
+                        addItem(product.id, qty, { intervalDays: subInterval });
+                        showToast(`${product.name} tillagd som prenumeration`, "success");
+                        router.push("/kassa");
                       }}
-                      className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand-900 px-4 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:bg-brand-800 active:scale-[0.98] disabled:opacity-60"
+                      className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand-900 px-4 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:bg-brand-800 active:scale-[0.98]"
                     >
-                      {subscribing ? (
-                        "Startar prenumeration..."
-                      ) : (
-                        <>
-                          Starta prenumeration &ndash;{" "}
-                          {Math.round(product.price * qty * 0.85).toLocaleString("sv-SE")} kr var {subInterval}:e dag
-                        </>
-                      )}
+                      Prenumerera &ndash;{" "}
+                      {Math.round(product.price * qty * 0.85).toLocaleString("sv-SE")} kr var {subInterval}:e dag
                     </button>
                     <p className="text-center text-[11px] text-brand-400">
-                      Avbryt nar som helst. Ingen bindningstid.
+                      Avbryt när som helst. Ingen bindningstid.
                     </p>
                   </div>
                 )}
@@ -247,6 +226,11 @@ export default function ProductDetail({ id }: { id: string }) {
                   <span>{product.guarantee}</span>
                 </div>
               </div>
+
+              <div
+                className="product-description mt-8 border-t border-brand-100 pt-6 text-[15px] leading-relaxed text-brand-600 [&_h3]:mt-6 [&_h3]:mb-2 [&_h3]:text-sm [&_h3]:font-bold [&_h3]:tracking-tight [&_h3]:text-brand-900 [&_p]:mb-3 [&_ul]:mb-3 [&_ul]:ml-4 [&_ul]:list-disc [&_ul]:space-y-1 [&_li]:text-brand-600 [&_em]:text-brand-500 [&_strong]:font-semibold [&_strong]:text-brand-800"
+                dangerouslySetInnerHTML={{ __html: product.description }}
+              />
 
               {product.ingredients && (
                 <div className="mt-8 border-t border-brand-100 pt-6">

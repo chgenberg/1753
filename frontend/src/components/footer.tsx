@@ -25,7 +25,7 @@ export function Footer() {
       setEmail("");
     } catch {
       setStatus("error");
-      setMsg("Kunde inte prenumerera. Forsok igen.");
+      setMsg("Kunde inte prenumerera. Försök igen.");
     }
   };
 
@@ -34,10 +34,10 @@ export function Footer() {
       <div className="mx-auto max-w-[1280px] px-6 py-20 md:px-10">
         <div className="mb-16 flex flex-col items-center text-center">
           <h3 className="text-lg font-bold tracking-tight text-brand-900">
-            Hudvardstips och exklusiva erbjudanden
+            Hudvårdstips och exklusiva erbjudanden
           </h3>
           <p className="mt-2 max-w-md text-sm text-brand-500">
-            Fa personliga rad, forhandsinfo om nyheter och rabatter direkt i din inkorg.
+            Få personliga råd, förhandsinfo om nyheter och rabatter direkt i din inkorg.
           </p>
           <form onSubmit={handleSubscribe} className="mt-5 flex w-full max-w-sm gap-2">
             <input
@@ -86,7 +86,7 @@ export function Footer() {
               </span>
             </div>
             <p className="mt-4 max-w-xs text-[13px] leading-relaxed text-brand-500">
-              Svensk hudvard med CBD och CBG. Utvecklad for nordisk hud.
+              Svensk hudvård med CBD och CBG. Utvecklad för nordisk hud.
             </p>
           </div>
 

@@ -3,11 +3,15 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, Check, Lock, ShieldCheck, Tag, Truck, X } from "lucide-react";
+import { ArrowLeft, Check, Lock, RefreshCcw, ShieldCheck, Tag, Truck, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { useCart } from "@/providers/cart-provider";
+import { useCart, type CartItem } from "@/providers/cart-provider";
 import { PRODUCTS } from "@/lib/products";
 import { apiFetch } from "@/lib/api";
+
+function productIdFromCartId(cartId: string) {
+  return cartId.replace(/__sub$/, "");
+}
 
 interface ActiveDiscount {
   code: string;
@@ -37,17 +41,24 @@ export default function CheckoutPage() {
 
   const cartProducts = items
     .map((item) => {
-      const product = PRODUCTS.find((p) => p.id === item.id);
-      return product ? { ...product, qty: item.qty } : null;
+      const product = PRODUCTS.find((p) => p.id === productIdFromCartId(item.id));
+      return product ? { ...product, cartId: item.id, qty: item.qty, subscription: item.subscription } : null;
     })
-    .filter(Boolean) as (typeof PRODUCTS[number] & { qty: number })[];
+    .filter(Boolean) as (typeof PRODUCTS[number] & { cartId: string; qty: number; subscription?: CartItem["subscription"] })[];
 
-  const subtotal = cartProducts.reduce((s, p) => s + p.price * p.qty, 0);
+  const hasSubscription = cartProducts.some((p) => p.subscription);
+
+  const subtotal = cartProducts.reduce((s, p) => {
+    const unitPrice = p.subscription ? Math.round(p.price * 0.85) : p.price;
+    return s + unitPrice * p.qty;
+  }, 0);
 
   const discountAmount = activeDiscount
     ? cartProducts.reduce((s, p) => {
-        if (!activeDiscount.applicableProductIds || activeDiscount.applicableProductIds.includes(p.id)) {
-          return s + Math.round(p.price * p.qty * (activeDiscount.percent / 100));
+        const realId = productIdFromCartId(p.cartId);
+        const unitPrice = p.subscription ? Math.round(p.price * 0.85) : p.price;
+        if (!activeDiscount.applicableProductIds || activeDiscount.applicableProductIds.includes(realId)) {
+          return s + Math.round(unitPrice * p.qty * (activeDiscount.percent / 100));
         }
         return s;
       }, 0)
@@ -66,7 +77,7 @@ export default function CheckoutPage() {
     try {
       const data = await apiFetch<ActiveDiscount>("/discount/validate", {
         method: "POST",
-        body: JSON.stringify({ code: discountInput, items: items.map((i) => ({ id: i.id, qty: i.qty })) }),
+        body: JSON.stringify({ code: discountInput, items: items.map((i) => ({ id: productIdFromCartId(i.id), qty: i.qty })) }),
       });
       setActiveDiscount(data);
       setDiscountInput("");
@@ -90,7 +101,7 @@ export default function CheckoutPage() {
         body: JSON.stringify({
           event: "cart_abandoned",
           email: form.email,
-          context: { firstName: form.firstname, items: items.map((i) => ({ id: i.id, qty: i.qty })) },
+          context: { firstName: form.firstname, items: items.map((i) => ({ id: productIdFromCartId(i.id), qty: i.qty })) },
         }),
       }).catch(() => {});
     }, 60_000);
@@ -137,7 +148,11 @@ export default function CheckoutPage() {
               zip: form.zip.replace(/\s/g, ""),
               city: form.city,
             },
-            items: items.map((i) => ({ id: i.id, qty: i.qty })),
+            items: items.map((i) => ({
+              id: productIdFromCartId(i.id),
+              qty: i.qty,
+              subscription: i.subscription || undefined,
+            })),
             discountCode: activeDiscount?.code || undefined,
           }),
         }
@@ -311,6 +326,27 @@ export default function CheckoutPage() {
               </div>
             </div>
 
+            {hasSubscription && (
+              <div className="rounded-xl border-2 border-brand-800/20 bg-brand-50/50 p-4 space-y-2">
+                <div className="flex items-center gap-2 text-sm font-semibold text-brand-900">
+                  <RefreshCcw className="h-4 w-4" />
+                  Prenumerationsvillkor
+                </div>
+                <ul className="space-y-1 text-xs leading-relaxed text-brand-600">
+                  {cartProducts
+                    .filter((p) => p.subscription)
+                    .map((p) => (
+                      <li key={p.cartId}>
+                        <strong>{p.name}</strong> levereras automatiskt var {p.subscription!.intervalDays}:e dag till 15% rabatt ({Math.round(p.price * 0.85).toLocaleString("sv-SE")} kr/st).
+                      </li>
+                    ))}
+                  <li>Första leveransen betalas nu. Efterföljande dras automatiskt.</li>
+                  <li>Du kan ändra intervall, pausa eller avbryta när som helst via Mitt konto.</li>
+                  <li>Ingen bindningstid.</li>
+                </ul>
+              </div>
+            )}
+
             <label className="flex items-start gap-3 cursor-pointer">
               <input
                 type="checkbox"
@@ -336,6 +372,7 @@ export default function CheckoutPage() {
                 >
                   integritetspolicyn
                 </Link>
+                {hasSubscription && " samt prenumerationsvillkoren ovan"}
               </span>
             </label>
 
@@ -377,28 +414,44 @@ export default function CheckoutPage() {
               Din beställning
             </h2>
             <div className="flex flex-col gap-4">
-              {cartProducts.map((p) => (
-                <div key={p.id} className="flex gap-3">
-                  <div className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-2xl bg-white ring-1 ring-inset ring-black/5">
-                    <Image
-                      src={p.image}
-                      alt={p.name}
-                      fill
-                      className="object-cover"
-                      sizes="64px"
-                    />
+              {cartProducts.map((p) => {
+                const unitPrice = p.subscription ? Math.round(p.price * 0.85) : p.price;
+                return (
+                  <div key={p.cartId} className="flex gap-3">
+                    <div className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-2xl bg-white ring-1 ring-inset ring-black/5">
+                      <Image
+                        src={p.image}
+                        alt={p.name}
+                        fill
+                        className="object-cover"
+                        sizes="64px"
+                      />
+                    </div>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium">{p.name}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {p.qty} st
+                      </p>
+                      {p.subscription && (
+                        <span className="mt-0.5 inline-flex items-center gap-1 rounded-md bg-brand-800 px-1.5 py-0.5 text-[10px] font-semibold text-white">
+                          <RefreshCcw className="h-2.5 w-2.5" />
+                          Var {p.subscription.intervalDays}:e dag
+                        </span>
+                      )}
+                    </div>
+                    <div className="text-right">
+                      <p className="text-sm font-medium">
+                        {(unitPrice * p.qty).toLocaleString("sv-SE")} kr
+                      </p>
+                      {p.subscription && (
+                        <p className="text-xs text-brand-400 line-through">
+                          {(p.price * p.qty).toLocaleString("sv-SE")} kr
+                        </p>
+                      )}
+                    </div>
                   </div>
-                  <div className="flex-1">
-                    <p className="text-sm font-medium">{p.name}</p>
-                    <p className="text-xs text-muted-foreground">
-                      {p.qty} st
-                    </p>
-                  </div>
-                  <p className="text-sm font-medium">
-                    {(p.price * p.qty).toLocaleString("sv-SE")} kr
-                  </p>
-                </div>
-              ))}
+                );
+              })}
             </div>
             <div className="mt-6 border-t border-border pt-4">
               {activeDiscount ? (

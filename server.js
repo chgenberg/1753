@@ -263,9 +263,7 @@ app.get("/api/dashboard/stats", authMiddleware, async (req, res) => {
 const PRODUCTS_MAP = {
   "duo-ta-da":                  { name: "DUO-kit + TA-DA Serum", price: 1495, articleNumber: "4004", vatRate: 0.25 },
   "ta-da-serum":                { name: "TA-DA Serum", price: 699, articleNumber: "1005", vatRate: 0.25 },
-  "duo-kit":                    { name: "DUO-kit (The ONE + I LOVE Facial Oil)", price: 1099, articleNumber: "1003", vatRate: 0.25 },
-  "i-love-facial-oil":          { name: "I LOVE Facial Oil", price: 849, articleNumber: "3001", vatRate: 0.25 },
-  "the-one-facial-oil":         { name: "The ONE Facial Oil", price: 649, articleNumber: "1001", vatRate: 0.25 },
+  "duo-kit":                    { name: "DUO-kit", price: 1099, articleNumber: "1003", vatRate: 0.25 },
   "au-naturel-makeup-remover":  { name: "Au Naturel Makeup Remover", price: 399, articleNumber: "1004", vatRate: 0.25 },
   "fungtastic-mushroom-extract":{ name: "Fungtastic Mushroom Extract", price: 399, articleNumber: "4001", vatRate: 0.12 }
 };
@@ -1357,7 +1355,7 @@ JSON-blocket ska vara markerat med trippla backticks och "json" samt avslutande 
     { "area": "Rörelse", "tip": "...", "impact": "medel" }
   ],
   "products": [
-    { "id": "the-one-facial-oil", "reason": "Personlig motivering kopplad till kundens hudtillstånd och mål" },
+    { "id": "duo-kit", "reason": "Personlig motivering kopplad till kundens hudtillstånd och mål" },
     { "id": "ta-da-serum", "reason": "..." }
   ],
   "avoid": ["Specifik sak att undvika 1", "Specifik sak att undvika 2"],
@@ -1366,13 +1364,11 @@ JSON-blocket ska vara markerat med trippla backticks och "json" samt avslutande 
 \`\`\`
 
 Tillgängliga produkt-ID:n (använd exakt dessa):
-- "the-one-facial-oil" – The ONE Facial Oil (649 kr), daglig ansiktsolja, 10% CBD, 0.2% CBG
-- "i-love-facial-oil" – I LOVE Facial Oil (849 kr), nattolja, 5% CBG, 10% CBD
 - "ta-da-serum" – TA-DA Serum (699 kr), CBG-serum (3%), fukt och elasticitet
 - "au-naturel-makeup-remover" – Au Naturel Makeup Remover (399 kr), rengöringsolja, MCT + CBD
 - "fungtastic-mushroom-extract" – Fungtastic Mushroom Extract (399 kr), Chaga, Lion's Mane, Cordyceps, Reishi
-- "duo-kit" – DUO-kit (1 099 kr), The ONE + I LOVE tillsammans
-- "duo-ta-da" – DUO-kit + TA-DA Serum (1 495 kr), komplett rutin
+- "duo-kit" – DUO-kit (1 099 kr), The ONE Facial Oil (morgon) + I LOVE Facial Oil (kväll)
+- "duo-ta-da" – DUO-kit + TA-DA Serum (1 495 kr), komplett rutin med oljor och serum
 
 Rekommendera max 2-3 produkter. Förklara VARFÖR varje produkt passar ur ett ECS/mikrobiom-perspektiv kopplat till just denna kunds situation.
 
@@ -2712,19 +2708,17 @@ DU KAN HJÄLPA MED:
 - Lägga produkter i varukorgen åt kunden
 
 PRODUKTKATALOG:
-1. "The ONE Facial Oil" (id: the-one-facial-oil, 649 kr) – Daglig ansiktsolja, 10% CBD, 0.2% CBG. Skyddar och återfuktar. 10 ml.
-2. "I LOVE Facial Oil" (id: i-love-facial-oil, 849 kr) – Nattolja, 5% CBG, 10% CBD. Reparerar och djupåterfuktar. 10 ml.
+1. "DUO-kit" (id: duo-kit, 1 099 kr) – The ONE Facial Oil (morgon, 10% CBD, 0.2% CBG) + I LOVE Facial Oil (kväll, 10% CBD, 5% CBG). 2 x 10 ml.
+2. "DUO-kit + TA-DA Serum" (id: duo-ta-da, 1 495 kr) – Komplett rutin: DUO-kit + TA-DA Serum.
 3. "TA-DA Serum" (id: ta-da-serum, 699 kr) – CBG-serum (3%). Boostar fukt och elasticitet. 30 ml.
 4. "Au Naturel Makeup Remover" (id: au-naturel-makeup-remover, 399 kr) – Rengöringsolja, MCT + CBD. 100 ml.
 5. "Fungtastic Mushroom Extract" (id: fungtastic-mushroom-extract, 399 kr) – Chaga, Lion's Mane, Cordyceps, Reishi. 60 kapslar.
-6. "DUO-kit" (id: duo-kit, 1 099 kr) – The ONE + I LOVE Facial Oil tillsammans.
-7. "DUO-kit + TA-DA Serum" (id: duo-ta-da, 1 495 kr) – Komplett rutin: dag, natt, serum.
 
 PRODUKTMATCHNING:
-- Torr/känslig hud → The ONE + TA-DA
+- Torr/känslig hud → DUO-kit + TA-DA
 - Akne/fet hud → TA-DA (CBG reglerar sebum via ECS)
-- Åldrande/fina linjer → I LOVE (nattlig reparation)
-- Rodnad/rosacea → The ONE (CBD lugnar inflammation)
+- Åldrande/fina linjer → DUO-kit (nattlig reparation med I LOVE)
+- Rodnad/rosacea → DUO-kit (CBD lugnar inflammation)
 - Dålig rengöring → Au Naturel (bevarar mikrobiom)
 - Generell hälsa → Fungtastic
 - Komplett rutin → DUO-kit + TA-DA
@@ -2756,7 +2750,7 @@ const CHAT_WIDGET_TOOLS = [
       properties: {
         product_id: {
           type: "string",
-          enum: ["duo-ta-da", "ta-da-serum", "duo-kit", "i-love-facial-oil", "the-one-facial-oil", "au-naturel-makeup-remover", "fungtastic-mushroom-extract"],
+          enum: ["duo-ta-da", "ta-da-serum", "duo-kit", "au-naturel-makeup-remover", "fungtastic-mushroom-extract"],
           description: "Produktens ID"
         }
       },

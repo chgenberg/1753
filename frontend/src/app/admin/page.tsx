@@ -76,7 +76,7 @@ function formatShortDate(date: string): string {
 }
 
 const STATUS_LABELS: Record<string, string> = {
-  pending: "Vantande",
+  pending: "Väntande",
   fulfilled: "Levererad",
   partial: "Delvis",
   returned: "Returnerad",
@@ -171,15 +171,15 @@ function PieTooltip({ active, payload }: { active?: boolean; payload?: Array<{ n
 }
 
 const PRIMARY_KPIS: { key: keyof Stats; label: string; icon: LucideIcon; isCurrency: boolean }[] = [
-  { key: "revenue_today", label: "Intakter idag", icon: TrendingUp, isCurrency: true },
+  { key: "revenue_today", label: "Intäkter idag", icon: TrendingUp, isCurrency: true },
   { key: "orders_today", label: "Ordrar idag", icon: ShoppingBag, isCurrency: false },
-  { key: "revenue_month", label: "Intakter denna manad", icon: CalendarDays, isCurrency: true },
-  { key: "orders_month", label: "Ordrar denna manad", icon: BarChart3, isCurrency: false },
+  { key: "revenue_month", label: "Intäkter denna månad", icon: CalendarDays, isCurrency: true },
+  { key: "orders_month", label: "Ordrar denna månad", icon: BarChart3, isCurrency: false },
 ];
 
 const SECONDARY_KPIS: { key: keyof Stats; label: string; icon: LucideIcon; isCurrency: boolean }[] = [
-  { key: "total_revenue", label: "Totala intakter", icon: CreditCard, isCurrency: true },
-  { key: "avg_order_value", label: "Snittordervarde", icon: TrendingUp, isCurrency: true },
+  { key: "total_revenue", label: "Totala intäkter", icon: CreditCard, isCurrency: true },
+  { key: "avg_order_value", label: "Snittordervärde", icon: TrendingUp, isCurrency: true },
   { key: "unique_customers", label: "Unika kunder", icon: Users, isCurrency: false },
   { key: "active_subscriptions", label: "Aktiva prenumerationer", icon: Repeat, isCurrency: false },
   { key: "active_subscribers", label: "Nyhetsbrevsprenumeranter", icon: Mail, isCurrency: false },
@@ -204,7 +204,7 @@ export default function AdminOverviewPage() {
         const data = await authFetch<Stats>("/admin/stats", token!);
         if (!cancelled) setStats(data);
       } catch (err) {
-        if (!cancelled) setError(err instanceof Error ? err.message : "Kunde inte hamta statistik");
+        if (!cancelled) setError(err instanceof Error ? err.message : "Kunde inte hämta statistik");
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -272,8 +272,8 @@ export default function AdminOverviewPage() {
     <div className="space-y-8">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-semibold tracking-tight text-[#1d1d1f]">Oversikt</h1>
-          <p className="mt-1 text-sm text-[#515151]">Valkomstpanel for 1753 SKINCARE</p>
+          <h1 className="text-2xl font-semibold tracking-tight text-[#1d1d1f]">Översikt</h1>
+          <p className="mt-1 text-sm text-[#515151]">Välkomstpanel för 1753 SKINCARE</p>
         </div>
         <button
           onClick={handleExportStats}
@@ -301,7 +301,7 @@ export default function AdminOverviewPage() {
         <div className="lg:col-span-2 rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/[0.04]">
           <div className="flex items-center justify-between mb-6">
             <div>
-              <h2 className="text-lg font-semibold text-[#1d1d1f]">Intakter</h2>
+              <h2 className="text-lg font-semibold text-[#1d1d1f]">Intäkter</h2>
               <p className="text-xs text-[#515151]">Daglig utveckling</p>
             </div>
             <div className="flex gap-1 rounded-lg bg-[#f5f5f7] p-1">
@@ -364,7 +364,7 @@ export default function AdminOverviewPage() {
         {/* Status distribution */}
         <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/[0.04]">
           <h2 className="text-lg font-semibold text-[#1d1d1f] mb-1">Orderstatus</h2>
-          <p className="text-xs text-[#515151] mb-6">Fordelning</p>
+          <p className="text-xs text-[#515151] mb-6">Fördelning</p>
           {chartLoading ? (
             <div className="flex items-center justify-center h-[250px]">
               <div className="h-40 w-40 animate-pulse rounded-full bg-[#f5f5f7]" />
@@ -453,7 +453,7 @@ export default function AdminOverviewPage() {
         {/* Top products */}
         <div className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-black/[0.04]">
           <h2 className="text-lg font-semibold text-[#1d1d1f] mb-1">Toppprodukter</h2>
-          <p className="text-xs text-[#515151] mb-6">Mest salda</p>
+          <p className="text-xs text-[#515151] mb-6">Mest sålda</p>
           {chartLoading ? (
             <div className="space-y-4">
               {Array.from({ length: 5 }).map((_, i) => (
@@ -465,7 +465,7 @@ export default function AdminOverviewPage() {
               ))}
             </div>
           ) : topProducts.length === 0 ? (
-            <p className="text-sm text-[#515151] py-8 text-center">Ingen data annu</p>
+            <p className="text-sm text-[#515151] py-8 text-center">Ingen data ännu</p>
           ) : (
             <div className="space-y-3">
               {topProducts.map((product, i) => {
