@@ -510,60 +510,64 @@ function renderProductDetail() {
   renderReviewsSection(product);
 }
 
-// ---- REVIEWS MOCKUP ----
+// ---- REVIEWS (API) ----
 
-const REVIEW_MOCKUPS = [
-  { name: "Anna L.", date: "2026-03-10", stars: 5, text: "Huden har aldrig känts bättre. Jag märkte skillnad redan efter en vecka. Lugn, återfuktad och full av lyster." },
-  { name: "Erik S.", date: "2026-02-28", stars: 5, text: "Skeptisk till CBD i hudvård först, men det här var något helt annat. Minimala ingredienser, maximal effekt." },
-  { name: "Maria K.", date: "2026-02-15", stars: 5, text: "Min rosacea har blivit så mycket bättre. För första gången på flera år känner jag mig bekväm utan makeup." },
-  { name: "Johan B.", date: "2026-01-22", stars: 4, text: "Riktigt bra olja. Tar tid att vänjas vid, men resultatet talar för sig självt. Huden är mjukare och friskare." },
-  { name: "Sofia H.", date: "2026-01-10", stars: 5, text: "Jag har provat allt. Dyra märken, billiga märken. Inget har gett min hud den här känslan av balans." },
-  { name: "Oscar M.", date: "2025-12-18", stars: 5, text: "Enkel rutin, tydliga resultat. Jag behöver ingenting annat. Min hud tackar mig varje morgon." },
-  { name: "Linnea R.", date: "2025-12-05", stars: 5, text: "Beställde först till mig själv, sedan till mamma, sedan till min syster. Alla är lika imponerade." },
-  { name: "Karl-Johan A.", date: "2025-11-20", stars: 4, text: "Bra produkter och fantastisk kundservice. Christopher svarade personligen på mina frågor. Det känns äkta." },
-  { name: "Emma W.", date: "2025-11-08", stars: 5, text: "TA-DA Serum är magiskt. Min torra vinterhud är förfluten. Fukt som faktiskt stannar kvar." },
-  { name: "Alexander P.", date: "2025-10-15", stars: 5, text: "Som man var jag osäker på ansiktsolja. Nu är det det enda jag använder. Enkel, effektiv, ingen konstig doft." }
-];
-
-function renderReviewsSection(product) {
+async function renderReviewsSection(product) {
   const container = document.getElementById("reviews-section");
   if (!container) return;
 
-  const totalReviews = product.reviews || 936;
-  const avgRating = 4.9;
-  const starsStr = "★".repeat(5);
+  try {
+    const apiBase = window.location.hostname === "localhost" ? "http://localhost:3001/api" : "/api";
+    const resp = await fetch(`${apiBase}/reviews/${product.id}?limit=10&offset=0`);
+    if (!resp.ok) throw new Error("fetch failed");
+    const { reviews, stats } = await resp.json();
 
-  container.innerHTML = `
-    <div class="reviews-summary-bar">
-      <span class="reviews-score">${avgRating}</span>
-      <span class="reviews-stars">${starsStr}</span>
-      <span class="reviews-count-label">${totalReviews.toLocaleString("sv-SE")} omdömen</span>
-    </div>
-    <div class="reviews-carousel-wrap">
-      <button type="button" class="reviews-scroll-btn reviews-scroll-btn--prev" aria-label="Föregående omdömen">
-        <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
-      </button>
-      <div class="reviews-carousel" id="reviews-carousel">
-        ${REVIEW_MOCKUPS.map(r => `
-          <div class="review-card">
-            <div class="review-card-stars">${"★".repeat(r.stars)}${"☆".repeat(5 - r.stars)}</div>
-            <p class="review-card-text">"${r.text}"</p>
-            <div class="review-card-author">${r.name} · ${r.date}</div>
-          </div>
-        `).join("")}
+    if (!stats || stats.count === 0) {
+      container.innerHTML = "";
+      return;
+    }
+
+    const starsHtml = (n) => "★".repeat(n) + "☆".repeat(5 - n);
+
+    container.innerHTML = `
+      <div class="reviews-summary-bar">
+        <span class="reviews-score">${stats.avg}</span>
+        <span class="reviews-stars">${starsHtml(Math.round(stats.avg))}</span>
+        <span class="reviews-count-label">${stats.count.toLocaleString("sv-SE")} omdömen</span>
       </div>
-      <button type="button" class="reviews-scroll-btn reviews-scroll-btn--next" aria-label="Nästa omdömen">
-        <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
-      </button>
-    </div>
-  `;
+      <div class="reviews-carousel-wrap">
+        <button type="button" class="reviews-scroll-btn reviews-scroll-btn--prev" aria-label="Föregående omdömen">
+          <svg viewBox="0 0 24 24"><polyline points="15 18 9 12 15 6"/></svg>
+        </button>
+        <div class="reviews-carousel" id="reviews-carousel">
+          ${reviews.map(r => {
+            const date = r.review_date ? new Date(r.review_date).toLocaleDateString("sv-SE") : "";
+            const loc = r.location ? ` · ${r.location}` : "";
+            return `
+            <div class="review-card">
+              <div class="review-card-stars">${starsHtml(r.rating)}</div>
+              ${r.title ? `<h4 class="review-card-title">${r.title}</h4>` : ""}
+              <p class="review-card-text">"${r.body}"</p>
+              ${r.reply ? `<div class="review-card-reply"><strong>Svar från 1753:</strong> ${r.reply}</div>` : ""}
+              <div class="review-card-author">${r.reviewer_name}${loc}${date ? ` · ${date}` : ""}</div>
+            </div>`;
+          }).join("")}
+        </div>
+        <button type="button" class="reviews-scroll-btn reviews-scroll-btn--next" aria-label="Nästa omdömen">
+          <svg viewBox="0 0 24 24"><polyline points="9 18 15 12 9 6"/></svg>
+        </button>
+      </div>
+    `;
 
-  const carousel = document.getElementById("reviews-carousel");
-  const prev = container.querySelector(".reviews-scroll-btn--prev");
-  const next = container.querySelector(".reviews-scroll-btn--next");
-  if (carousel && prev && next) {
-    prev.addEventListener("click", () => carousel.scrollBy({ left: -320, behavior: "smooth" }));
-    next.addEventListener("click", () => carousel.scrollBy({ left: 320, behavior: "smooth" }));
+    const carousel = document.getElementById("reviews-carousel");
+    const prev = container.querySelector(".reviews-scroll-btn--prev");
+    const next = container.querySelector(".reviews-scroll-btn--next");
+    if (carousel && prev && next) {
+      prev.addEventListener("click", () => carousel.scrollBy({ left: -320, behavior: "smooth" }));
+      next.addEventListener("click", () => carousel.scrollBy({ left: 320, behavior: "smooth" }));
+    }
+  } catch (err) {
+    container.innerHTML = "";
   }
 }
 

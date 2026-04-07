@@ -3117,6 +3117,53 @@ async function processRecurringCharges() {
   }
 }
 
+// ---- WIN-BACK CHECKER ----
+
+async function checkWinbackEligibility() {
+  try {
+    const winbackFlows = await db.findFlowByTrigger("win_back");
+    if (winbackFlows.length === 0) return;
+
+    const cutoffDate = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString();
+    const { rows: candidates } = await db.pool.query(`
+      SELECT customer_email, MAX(customer_name) as customer_name, MAX(created_at) as last_order
+      FROM orders
+      WHERE payment_status = 'paid' AND created_at < $1
+      GROUP BY customer_email
+      HAVING MAX(created_at) < $1
+    `, [cutoffDate]);
+
+    let queued = 0;
+    for (const c of candidates) {
+      let subscriber = await db.findSubscriberByEmail(c.customer_email);
+      if (!subscriber) continue;
+      if (subscriber.status !== "active") continue;
+
+      const alreadyQueued = await db.pool.query(
+        `SELECT 1 FROM automation_queue aq
+         JOIN automation_flows af ON af.id = aq.flow_id
+         WHERE aq.subscriber_id = $1 AND af.trigger_event = 'win_back' AND aq.status IN ('pending','active')
+         LIMIT 1`,
+        [subscriber.id]
+      );
+      if (alreadyQueued.rows.length > 0) continue;
+
+      for (const flow of winbackFlows) {
+        await db.enqueueAutomation({
+          subscriberId: subscriber.id, flowId: flow.id,
+          context: { firstName: subscriber.first_name },
+          nextSendAt: new Date()
+        });
+      }
+      queued++;
+    }
+
+    if (queued > 0) console.log(`[Win-back] Queued ${queued} customers for win-back`);
+  } catch (err) {
+    console.error("[Win-back] Error:", err.message);
+  }
+}
+
 // ---- START ----
 
 (async () => {

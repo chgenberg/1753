@@ -1,16 +1,18 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, Minus, Plus, RefreshCcw, Shield, Star, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/product-card";
+import { ReviewsSection } from "@/components/reviews-section";
 import { SectionWrapper } from "@/components/section-wrapper";
 import { useCart } from "@/providers/cart-provider";
 import { useToast } from "@/components/notification";
 import { useRouter } from "next/navigation";
+import { apiFetch } from "@/lib/api";
 import { getProduct, getRelatedProducts } from "@/lib/products";
 import { cn } from "@/lib/utils";
 
@@ -23,6 +25,14 @@ export default function ProductDetail({ id }: { id: string }) {
   const { addItem } = useCart();
   const { showToast } = useToast();
   const router = useRouter();
+
+  const [reviewStats, setReviewStats] = useState<{ count: number; avg: number } | null>(null);
+
+  useEffect(() => {
+    apiFetch<{ stats: { count: number; avg: number } }>(`/reviews/${id}?limit=1&offset=0`)
+      .then(d => setReviewStats(d.stats))
+      .catch(() => {});
+  }, [id]);
 
   if (!product) return notFound();
 
@@ -96,15 +106,18 @@ export default function ProductDetail({ id }: { id: string }) {
             <div className="flex flex-col justify-center">
               <div className="mb-2 flex items-center gap-2">
                 <div className="flex">
-                  {[...Array(5)].map((_, i) => (
-                    <Star
-                      key={i}
-                      className="h-4 w-4 fill-amber-400 text-amber-400"
-                    />
-                  ))}
+                  {[...Array(5)].map((_, i) => {
+                    const avg = reviewStats?.avg ?? 5;
+                    return (
+                      <Star
+                        key={i}
+                        className={cn("h-4 w-4", i < Math.round(avg) ? "fill-amber-400 text-amber-400" : "fill-brand-100 text-brand-100")}
+                      />
+                    );
+                  })}
                 </div>
                 <span className="text-sm text-brand-500">
-                  {product.reviews} omdömen
+                  {reviewStats ? `${reviewStats.count.toLocaleString("sv-SE")} omdömen` : `${product.reviews} omdömen`}
                 </span>
               </div>
 
@@ -246,6 +259,8 @@ export default function ProductDetail({ id }: { id: string }) {
           </div>
         </div>
       </section>
+
+      <ReviewsSection productId={id} />
 
       {related.length > 0 && (
         <SectionWrapper alt>

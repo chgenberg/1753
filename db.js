@@ -177,6 +177,23 @@ async function initSchema() {
     );
 
     CREATE INDEX IF NOT EXISTS idx_abandoned_email ON abandoned_carts (email);
+
+    CREATE TABLE IF NOT EXISTS reviews (
+      id              SERIAL PRIMARY KEY,
+      product_id      VARCHAR(50) NOT NULL,
+      reviewer_name   VARCHAR(255) NOT NULL,
+      rating          INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
+      title           VARCHAR(500) DEFAULT '',
+      body            TEXT DEFAULT '',
+      reply           TEXT DEFAULT '',
+      verified        BOOLEAN DEFAULT false,
+      review_date     TIMESTAMPTZ,
+      location        VARCHAR(255) DEFAULT '',
+      created_at      TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_reviews_product ON reviews (product_id);
+    CREATE INDEX IF NOT EXISTS idx_reviews_rating ON reviews (product_id, rating);
   `);
   console.log("[DB] Schema ready");
 }
@@ -870,6 +887,64 @@ async function adminNewsletterStats() {
   };
 }
 
+// ---- REVIEWS ----
+
+async function createReview({ product_id, reviewer_name, rating, title, body, reply, verified, review_date, location }) {
+  const { rows } = await pool.query(
+    `INSERT INTO reviews (product_id, reviewer_name, rating, title, body, reply, verified, review_date, location)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+     ON CONFLICT DO NOTHING
+     RETURNING *`,
+    [product_id, reviewer_name, rating, title || '', body || '', reply || '', verified || false, review_date || null, location || '']
+  );
+  return rows[0];
+}
+
+async function findReviewsByProduct(productId, limit = 10, offset = 0) {
+  const { rows } = await pool.query(
+    `SELECT id, product_id, reviewer_name, rating, title, body, reply, verified, review_date, location
+     FROM reviews WHERE product_id = $1
+     ORDER BY review_date DESC NULLS LAST
+     LIMIT $2 OFFSET $3`,
+    [productId, limit, offset]
+  );
+  return rows;
+}
+
+async function getReviewStats(productId) {
+  const { rows } = await pool.query(
+    `SELECT
+       COUNT(*)::int AS count,
+       COALESCE(ROUND(AVG(rating)::numeric, 1), 0) AS avg,
+       COUNT(*) FILTER (WHERE rating = 1)::int AS r1,
+       COUNT(*) FILTER (WHERE rating = 2)::int AS r2,
+       COUNT(*) FILTER (WHERE rating = 3)::int AS r3,
+       COUNT(*) FILTER (WHERE rating = 4)::int AS r4,
+       COUNT(*) FILTER (WHERE rating = 5)::int AS r5
+     FROM reviews WHERE product_id = $1`,
+    [productId]
+  );
+  const r = rows[0];
+  return { count: r.count, avg: parseFloat(r.avg), distribution: [r.r1, r.r2, r.r3, r.r4, r.r5] };
+}
+
+async function getAllReviewStats() {
+  const { rows } = await pool.query(
+    `SELECT product_id,
+       COUNT(*)::int AS count,
+       COALESCE(ROUND(AVG(rating)::numeric, 1), 0) AS avg
+     FROM reviews GROUP BY product_id`
+  );
+  const map = {};
+  for (const r of rows) map[r.product_id] = { count: r.count, avg: parseFloat(r.avg) };
+  return map;
+}
+
+async function countReviews() {
+  const { rows } = await pool.query(`SELECT COUNT(*)::int AS count FROM reviews`);
+  return rows[0].count;
+}
+
 module.exports = {
   pool,
   initSchema,
@@ -925,5 +1000,10 @@ module.exports = {
   adminListSubscribers,
   adminNewsletterStats,
   adminChartData,
-  adminTopProducts
+  adminTopProducts,
+  createReview,
+  findReviewsByProduct,
+  getReviewStats,
+  getAllReviewStats,
+  countReviews
 };
