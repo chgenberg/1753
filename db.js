@@ -194,6 +194,41 @@ async function initSchema() {
 
     CREATE INDEX IF NOT EXISTS idx_reviews_product ON reviews (product_id);
     CREATE INDEX IF NOT EXISTS idx_reviews_rating ON reviews (product_id, rating);
+
+    CREATE TABLE IF NOT EXISTS wishlists (
+      id              SERIAL PRIMARY KEY,
+      user_id         INTEGER NOT NULL,
+      product_id      VARCHAR(50) NOT NULL,
+      created_at      TIMESTAMPTZ DEFAULT NOW(),
+      UNIQUE(user_id, product_id)
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_wishlists_user ON wishlists (user_id);
+
+    CREATE TABLE IF NOT EXISTS skin_analyses (
+      id              SERIAL PRIMARY KEY,
+      user_id         INTEGER NOT NULL,
+      score           INTEGER,
+      summary         TEXT DEFAULT '',
+      recommendations JSONB DEFAULT '[]',
+      full_response   TEXT DEFAULT '',
+      created_at      TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_skin_analyses_user ON skin_analyses (user_id);
+
+    CREATE TABLE IF NOT EXISTS addresses (
+      id              SERIAL PRIMARY KEY,
+      user_id         INTEGER NOT NULL,
+      label           VARCHAR(100) DEFAULT 'Hem',
+      address         VARCHAR(255) NOT NULL,
+      zip             VARCHAR(10) NOT NULL,
+      city            VARCHAR(100) NOT NULL,
+      is_default      BOOLEAN DEFAULT false,
+      created_at      TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_addresses_user ON addresses (user_id);
   `);
   console.log("[DB] Schema ready");
 }
@@ -945,6 +980,126 @@ async function countReviews() {
   return rows[0].count;
 }
 
+// ---- WISHLISTS ----
+
+async function getWishlist(userId) {
+  const { rows } = await pool.query(
+    "SELECT product_id, created_at FROM wishlists WHERE user_id = $1 ORDER BY created_at DESC",
+    [userId]
+  );
+  return rows;
+}
+
+async function addToWishlist(userId, productId) {
+  const { rows } = await pool.query(
+    `INSERT INTO wishlists (user_id, product_id) VALUES ($1, $2)
+     ON CONFLICT (user_id, product_id) DO NOTHING RETURNING *`,
+    [userId, productId]
+  );
+  return rows[0];
+}
+
+async function removeFromWishlist(userId, productId) {
+  const { rowCount } = await pool.query(
+    "DELETE FROM wishlists WHERE user_id = $1 AND product_id = $2",
+    [userId, productId]
+  );
+  return rowCount > 0;
+}
+
+// ---- SKIN ANALYSES ----
+
+async function saveSkinAnalysis({ userId, score, summary, recommendations, fullResponse }) {
+  const { rows } = await pool.query(
+    `INSERT INTO skin_analyses (user_id, score, summary, recommendations, full_response)
+     VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+    [userId, score || null, summary || "", JSON.stringify(recommendations || []), fullResponse || ""]
+  );
+  return rows[0];
+}
+
+async function getSkinAnalyses(userId) {
+  const { rows } = await pool.query(
+    "SELECT id, score, summary, recommendations, created_at FROM skin_analyses WHERE user_id = $1 ORDER BY created_at DESC",
+    [userId]
+  );
+  return rows;
+}
+
+// ---- ADDRESSES ----
+
+async function getAddresses(userId) {
+  const { rows } = await pool.query(
+    "SELECT * FROM addresses WHERE user_id = $1 ORDER BY is_default DESC, created_at DESC",
+    [userId]
+  );
+  return rows;
+}
+
+async function createAddress({ userId, label, address, zip, city, isDefault }) {
+  if (isDefault) {
+    await pool.query("UPDATE addresses SET is_default = false WHERE user_id = $1", [userId]);
+  }
+  const { rows } = await pool.query(
+    `INSERT INTO addresses (user_id, label, address, zip, city, is_default)
+     VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+    [userId, label || "Hem", address, zip, city, isDefault || false]
+  );
+  return rows[0];
+}
+
+async function updateAddress(id, userId, fields) {
+  if (fields.is_default) {
+    await pool.query("UPDATE addresses SET is_default = false WHERE user_id = $1", [userId]);
+  }
+  const sets = [];
+  const vals = [];
+  let idx = 1;
+  for (const [key, val] of Object.entries(fields)) {
+    sets.push(`${key} = $${idx++}`);
+    vals.push(val);
+  }
+  if (sets.length === 0) return null;
+  vals.push(id, userId);
+  const { rows } = await pool.query(
+    `UPDATE addresses SET ${sets.join(", ")} WHERE id = $${idx} AND user_id = $${idx + 1} RETURNING *`,
+    vals
+  );
+  return rows[0];
+}
+
+async function deleteAddress(id, userId) {
+  const { rowCount } = await pool.query("DELETE FROM addresses WHERE id = $1 AND user_id = $2", [id, userId]);
+  return rowCount > 0;
+}
+
+// ---- LOYALTY ----
+
+async function addLoyaltyPoints(userId, points) {
+  const { rows } = await pool.query(
+    `UPDATE users SET loyalty_points = COALESCE(loyalty_points, 0) + $1 WHERE id = $2 RETURNING loyalty_points, tier`,
+    [points, userId]
+  );
+  if (rows.length === 0) return null;
+  const user = rows[0];
+  let newTier = "Brons";
+  if (user.loyalty_points >= 10000) newTier = "Platina";
+  else if (user.loyalty_points >= 5000) newTier = "Guld";
+  else if (user.loyalty_points >= 2000) newTier = "Silver";
+  if (newTier !== user.tier) {
+    await pool.query("UPDATE users SET tier = $1 WHERE id = $2", [newTier, userId]);
+  }
+  return { loyaltyPoints: user.loyalty_points, tier: newTier };
+}
+
+async function deductLoyaltyPoints(userId, points) {
+  const { rows } = await pool.query(
+    `UPDATE users SET loyalty_points = GREATEST(0, COALESCE(loyalty_points, 0) - $1) WHERE id = $2 RETURNING loyalty_points`,
+    [points, userId]
+  );
+  return rows[0]?.loyalty_points ?? 0;
+}
+
 async function adminListReviews({ limit = 20, offset = 0, productId, rating, search } = {}) {
   let where = [];
   let params = [];
@@ -1047,5 +1202,16 @@ module.exports = {
   countReviews,
   adminListReviews,
   updateReview,
-  deleteReview
+  deleteReview,
+  getWishlist,
+  addToWishlist,
+  removeFromWishlist,
+  saveSkinAnalysis,
+  getSkinAnalyses,
+  getAddresses,
+  createAddress,
+  updateAddress,
+  deleteAddress,
+  addLoyaltyPoints,
+  deductLoyaltyPoints
 };

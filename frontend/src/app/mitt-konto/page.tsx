@@ -9,23 +9,29 @@ import {
   Heart,
   LayoutDashboard,
   LogOut,
+  MapPin,
   Package,
   RefreshCcw,
   Settings,
+  ShoppingBag,
   Star,
   Sparkles,
+  Trash2,
   TrendingUp,
   User,
   Loader2,
   Save,
   Minus,
   Plus,
+  X,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/providers/auth-provider";
+import { useCart } from "@/providers/cart-provider";
 import { authFetch } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/notification";
+import { PRODUCTS } from "@/lib/products";
 
 type View =
   | "oversikt"
@@ -55,6 +61,35 @@ interface Order {
   created_at: string;
 }
 
+interface SkinAnalysis {
+  id: number;
+  score: number | null;
+  summary: string;
+  recommendations: string[];
+  created_at: string;
+}
+
+interface Address {
+  id: number;
+  label: string;
+  address: string;
+  zip: string;
+  city: string;
+  is_default: boolean;
+}
+
+interface WishlistItem {
+  product_id: string;
+  created_at: string;
+}
+
+interface Recommendation {
+  id: string;
+  name: string;
+  shortDesc: string;
+  price: number;
+}
+
 const SIDEBAR_ITEMS: { id: View; label: string; icon: typeof LayoutDashboard }[] = [
   { id: "oversikt", label: "Översikt", icon: LayoutDashboard },
   { id: "hudresa", label: "Min hudresa", icon: TrendingUp },
@@ -74,6 +109,20 @@ const STATUS_LABELS: Record<string, { label: string; className: string }> = {
   paid: { label: "Betald", className: "bg-green-50 text-green-700" },
 };
 
+const TIER_THRESHOLDS: Record<string, { next: string; points: number }> = {
+  Brons: { next: "Silver", points: 2000 },
+  Silver: { next: "Guld", points: 5000 },
+  Guld: { next: "Platina", points: 10000 },
+  Platina: { next: "", points: 10000 },
+};
+
+const TIER_DISCOUNTS: Record<string, number> = {
+  Brons: 0,
+  Silver: 5,
+  Guld: 8,
+  Platina: 12,
+};
+
 function ErrorBanner({ message }: { message: string }) {
   return (
     <div className="rounded-xl bg-red-50 px-5 py-4 text-sm text-red-700">
@@ -82,14 +131,38 @@ function ErrorBanner({ message }: { message: string }) {
   );
 }
 
-const TIER_THRESHOLDS: Record<string, { next: string; points: number }> = {
-  Brons: { next: "Silver", points: 2000 },
-  Silver: { next: "Guld", points: 5000 },
-  Guld: { next: "Platina", points: 10000 },
-  Platina: { next: "", points: 10000 },
-};
+function relativeDate(dateStr: string): string {
+  const now = new Date();
+  const then = new Date(dateStr);
+  const diffMs = now.getTime() - then.getTime();
+  const diffDays = Math.floor(diffMs / 86400000);
+  if (diffDays === 0) return "Idag";
+  if (diffDays === 1) return "Igår";
+  if (diffDays < 7) return `${diffDays} dagar sedan`;
+  if (diffDays < 30) return `${Math.floor(diffDays / 7)} veckor sedan`;
+  return new Date(dateStr).toLocaleDateString("sv-SE", { year: "numeric", month: "long", day: "numeric" });
+}
 
-function OverviewView({ stats, loading, error, userName }: { stats: DashboardStats | null; loading: boolean; error: string; userName: string }) {
+/* ─────────────────── OVERVIEW ─────────────────── */
+
+function OverviewView({
+  stats,
+  loading,
+  error,
+  userName,
+  recommendations,
+  recsLoading,
+}: {
+  stats: DashboardStats | null;
+  loading: boolean;
+  error: string;
+  userName: string;
+  recommendations: Recommendation[];
+  recsLoading: boolean;
+}) {
+  const { addItem } = useCart();
+  const { showToast } = useToast();
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -103,6 +176,7 @@ function OverviewView({ stats, loading, error, userName }: { stats: DashboardSta
   const info = TIER_THRESHOLDS[tier] || TIER_THRESHOLDS.Brons;
   const progress = tier === "Platina" ? 100 : Math.min(100, Math.round((points / info.points) * 100));
   const remaining = Math.max(0, info.points - points);
+  const discount = TIER_DISCOUNTS[tier] || 0;
 
   return (
     <div className="space-y-8">
@@ -114,6 +188,7 @@ function OverviewView({ stats, loading, error, userName }: { stats: DashboardSta
         </h2>
         <p className="mt-1 text-sm text-muted-foreground">
           {tier}-medlem &middot; {points.toLocaleString("sv-SE")} poäng
+          {discount > 0 && <> &middot; {discount}% rabatt</>}
         </p>
         {info.next && (
           <div className="mt-4 max-w-md">
@@ -161,6 +236,37 @@ function OverviewView({ stats, loading, error, userName }: { stats: DashboardSta
         </div>
       </div>
 
+      {!recsLoading && recommendations.length > 0 && (
+        <div className="space-y-4">
+          <h3 className="text-base font-bold tracking-tight">Rekommenderat för dig</h3>
+          <div className="grid gap-3 sm:grid-cols-3">
+            {recommendations.map((rec) => {
+              const prod = PRODUCTS.find((p) => p.id === rec.id);
+              return (
+                <div key={rec.id} className="flex flex-col justify-between rounded-xl border border-border bg-white p-4 transition-all hover:shadow-md">
+                  <div>
+                    <p className="text-sm font-bold">{rec.name}</p>
+                    <p className="mt-1 text-xs text-muted-foreground line-clamp-2">{rec.shortDesc}</p>
+                  </div>
+                  <div className="mt-3 flex items-center justify-between">
+                    <span className="text-sm font-bold">{rec.price.toLocaleString("sv-SE")} kr</span>
+                    <button
+                      onClick={() => {
+                        addItem(prod?.id || rec.id, 1);
+                        showToast(`${rec.name} tillagd`, "success");
+                      }}
+                      className="rounded-lg bg-brand-900 px-3 py-1.5 text-xs font-medium text-white transition-colors hover:bg-brand-800"
+                    >
+                      Lägg i varukorg
+                    </button>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
       <div className="flex flex-wrap gap-3">
         <a href="/produkter" className="rounded-xl border border-brand-200 px-4 py-2.5 text-sm font-medium text-brand-900 transition-colors hover:bg-brand-50">
           Gör en ny beställning
@@ -173,49 +279,131 @@ function OverviewView({ stats, loading, error, userName }: { stats: DashboardSta
   );
 }
 
-function SkinJourneyView() {
+/* ─────────────────── SKIN JOURNEY ─────────────────── */
+
+function SkinJourneyView({ token }: { token: string }) {
+  const [analyses, setAnalyses] = useState<SkinAnalysis[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    authFetch<SkinAnalysis[]>("/skin-analyses", token)
+      .then(setAnalyses)
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, [token]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="h-6 w-6 animate-spin text-brand-400" />
+      </div>
+    );
+  }
+
+  if (analyses.length === 0) {
+    return (
+      <div className="space-y-6">
+        <h2 className="text-xl font-bold tracking-tight">Min hudresa</h2>
+        <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-brand-50 to-brand-100/50 p-8 md:p-12">
+          <div className="absolute -right-8 -top-8 h-40 w-40 rounded-full bg-brand-200/30" />
+          <div className="absolute -bottom-12 -left-6 h-32 w-32 rounded-full bg-brand-200/20" />
+          <div className="relative z-10 max-w-md">
+            <BarChart3 className="mb-4 h-8 w-8 text-brand-700" />
+            <h3 className="text-xl font-bold tracking-tight text-brand-900">
+              Starta din hudresa
+            </h3>
+            <p className="mt-2 text-sm leading-relaxed text-brand-600">
+              Gör en AI-driven hudanalys och få personliga rekommendationer.
+              Vi spårar din utveckling över tid så att du kan se konkreta resultat.
+            </p>
+            <a href="/hudanalys">
+              <Button className="mt-6 h-12 rounded-xl px-8">
+                Gör din första hudanalys
+              </Button>
+            </a>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  const scores = analyses.filter((a) => a.score !== null).map((a) => a.score as number);
+  const latestScore = scores[0] ?? null;
+  const oldestScore = scores.length > 1 ? scores[scores.length - 1] : null;
+  const diff = latestScore !== null && oldestScore !== null ? latestScore - oldestScore : null;
+
   return (
     <div className="space-y-6">
       <h2 className="text-xl font-bold tracking-tight">Min hudresa</h2>
       <p className="text-sm text-muted-foreground">
-        Följ din utveckling och se hur din hud förbättras över tid.
+        {analyses.length} {analyses.length === 1 ? "analys" : "analyser"} genomförda
       </p>
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-brand-50 to-brand-100/50 p-8 md:p-12">
-        <div className="absolute -right-8 -top-8 h-40 w-40 rounded-full bg-brand-200/30" />
-        <div className="absolute -bottom-12 -left-6 h-32 w-32 rounded-full bg-brand-200/20" />
-        <div className="relative z-10 max-w-md">
-          <BarChart3 className="mb-4 h-8 w-8 text-brand-700" />
-          <h3 className="text-xl font-bold tracking-tight text-brand-900">
-            Starta din hudresa
-          </h3>
-          <p className="mt-2 text-sm leading-relaxed text-brand-600">
-            Gör en AI-driven hudanalys och få personliga rekommendationer. 
-            Vi spårar din utveckling över tid så att du kan se konkreta resultat.
-          </p>
-          <a href="/hudanalys">
-            <Button className="mt-6 h-12 rounded-xl px-8">
-              Gör din första hudanalys
-            </Button>
-          </a>
+
+      {latestScore !== null && (
+        <div className="flex items-center gap-6">
+          <div className="rounded-xl bg-brand-50 p-6 text-center">
+            <p className="text-3xl font-bold text-brand-900">{latestScore}</p>
+            <p className="text-xs text-brand-600">Senaste poäng</p>
+          </div>
+          {diff !== null && diff !== 0 && (
+            <div className={cn("rounded-xl p-6 text-center", diff > 0 ? "bg-green-50" : "bg-red-50")}>
+              <p className={cn("text-3xl font-bold", diff > 0 ? "text-green-700" : "text-red-700")}>
+                {diff > 0 ? "+" : ""}{diff}
+              </p>
+              <p className={cn("text-xs", diff > 0 ? "text-green-600" : "text-red-600")}>Förändring</p>
+            </div>
+          )}
         </div>
+      )}
+
+      <div className="space-y-4">
+        {analyses.map((a, idx) => (
+          <div key={a.id} className="relative flex gap-4 pb-2">
+            {idx < analyses.length - 1 && (
+              <div className="absolute left-[11px] top-7 h-full w-0.5 bg-brand-100" />
+            )}
+            <div className="relative z-10 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border-2 border-brand-900 bg-white">
+              <div className="h-2 w-2 rounded-full bg-brand-900" />
+            </div>
+            <div className="flex-1 rounded-xl border border-border bg-white p-4 transition-all hover:shadow-sm">
+              <div className="flex items-center justify-between">
+                <p className="text-sm font-bold">
+                  {a.score !== null && <span className="mr-2 text-brand-700">{a.score} poäng</span>}
+                  {new Date(a.created_at).toLocaleDateString("sv-SE", { year: "numeric", month: "long", day: "numeric" })}
+                </p>
+                <span className="text-xs text-muted-foreground">{relativeDate(a.created_at)}</span>
+              </div>
+              {a.summary && (
+                <p className="mt-2 text-sm text-brand-600">{a.summary}</p>
+              )}
+            </div>
+          </div>
+        ))}
       </div>
+
+      <a href="/hudanalys">
+        <Button className="mt-4 rounded-xl">Gör en ny analys</Button>
+      </a>
     </div>
   );
 }
 
-function relativeDate(dateStr: string): string {
-  const now = new Date();
-  const then = new Date(dateStr);
-  const diffMs = now.getTime() - then.getTime();
-  const diffDays = Math.floor(diffMs / 86400000);
-  if (diffDays === 0) return "Idag";
-  if (diffDays === 1) return "Igår";
-  if (diffDays < 7) return `${diffDays} dagar sedan`;
-  if (diffDays < 30) return `${Math.floor(diffDays / 7)} veckor sedan`;
-  return new Date(dateStr).toLocaleDateString("sv-SE", { year: "numeric", month: "long", day: "numeric" });
-}
+/* ─────────────────── ORDERS + REORDER ─────────────────── */
 
 function OrdersView({ orders, loading, error }: { orders: Order[]; loading: boolean; error: string }) {
+  const { addItems } = useCart();
+  const { showToast } = useToast();
+
+  const handleReorder = (order: Order) => {
+    const items = (order.items || []).map((item) => ({
+      id: item.id,
+      qty: item.qty || 1,
+    }));
+    if (items.length === 0) return;
+    addItems(items);
+    showToast("Produkterna har lagts i varukorgen", "success");
+  };
+
   if (loading) {
     return (
       <div className="flex items-center justify-center py-20">
@@ -229,10 +417,11 @@ function OrdersView({ orders, loading, error }: { orders: Order[]; loading: bool
       <h2 className="text-xl font-bold tracking-tight">Mina ordrar</h2>
       {error && <ErrorBanner message={error} />}
       {!error && orders.length === 0 ? (
-        <div className="rounded-xl border border-border p-6 text-center">
-          <Package className="mx-auto mb-3 h-10 w-10 text-brand-300" />
-          <p className="text-sm text-muted-foreground">
-            Inga ordrar ännu. Dags att utforska vårt sortiment?
+        <div className="rounded-xl border border-border p-8 text-center">
+          <ShoppingBag className="mx-auto mb-3 h-12 w-12 text-brand-200" />
+          <p className="text-base font-medium text-brand-900">Inga ordrar ännu</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Dags att utforska vårt sortiment?
           </p>
           <a href="/produkter">
             <Button className="mt-4 rounded-xl">Se produkter</Button>
@@ -246,7 +435,7 @@ function OrdersView({ orders, loading, error }: { orders: Order[]; loading: bool
             return (
               <div
                 key={order.id}
-                className="group rounded-xl border border-border bg-white p-5 shadow-sm transition-all duration-300 hover:scale-[1.01] hover:shadow-md"
+                className="group rounded-xl border border-border bg-white p-5 shadow-sm transition-all duration-300 hover:shadow-md"
               >
                 <div className="flex flex-wrap items-center justify-between gap-2">
                   <div>
@@ -264,7 +453,6 @@ function OrdersView({ orders, loading, error }: { orders: Order[]; loading: bool
                     <span className={cn("rounded-full px-2.5 py-0.5 text-[11px] font-medium", status.className)}>
                       {status.label}
                     </span>
-                    <svg className="h-4 w-4 text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}><path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" /></svg>
                   </div>
                 </div>
                 <div className="mt-3 space-y-1.5">
@@ -277,7 +465,14 @@ function OrdersView({ orders, loading, error }: { orders: Order[]; loading: bool
                     </p>
                   ))}
                 </div>
-                <div className="mt-3 border-t border-brand-100 pt-3 text-right">
+                <div className="mt-3 flex items-center justify-between border-t border-brand-100 pt-3">
+                  <button
+                    onClick={() => handleReorder(order)}
+                    className="flex items-center gap-1.5 rounded-lg border border-brand-200 px-3 py-1.5 text-xs font-medium text-brand-900 transition-colors hover:bg-brand-50"
+                  >
+                    <RefreshCcw className="h-3 w-3" />
+                    Beställ igen
+                  </button>
                   <p className="text-sm font-bold">
                     {((order.total_amount || 0) / 100).toLocaleString("sv-SE")} kr
                   </p>
@@ -290,6 +485,8 @@ function OrdersView({ orders, loading, error }: { orders: Order[]; loading: bool
     </div>
   );
 }
+
+/* ─────────────────── ROUTINE ─────────────────── */
 
 function RoutineStep({ step, product, isLast }: { step: string; product: string; isLast?: boolean }) {
   return (
@@ -359,17 +556,42 @@ function RoutineView() {
   );
 }
 
-function BenefitsView({ tier, points }: { tier: string; points: number }) {
+/* ─────────────────── BENEFITS + REDEEM ─────────────────── */
+
+function BenefitsView({ tier, points, token, onPointsUpdate }: { tier: string; points: number; token: string; onPointsUpdate: (pts: number) => void }) {
+  const { showToast } = useToast();
+  const [redeeming, setRedeeming] = useState(false);
+  const [redeemAmount, setRedeemAmount] = useState(100);
+  const [lastCode, setLastCode] = useState<{ code: string; discountKr: number } | null>(null);
+
   const tiers = [
     { name: "Brons", threshold: 0, discount: "0%" },
     { name: "Silver", threshold: 2000, discount: "5%" },
-    { name: "Guld", threshold: 5000, discount: "10%" },
-    { name: "Platina", threshold: 10000, discount: "15%" },
+    { name: "Guld", threshold: 5000, discount: "8%" },
+    { name: "Platina", threshold: 10000, discount: "12%" },
   ];
 
   const currentIdx = tiers.findIndex((t) => t.name === tier);
   const nextTier = currentIdx < tiers.length - 1 ? tiers[currentIdx + 1] : null;
   const remaining = nextTier ? Math.max(0, nextTier.threshold - points) : 0;
+
+  const handleRedeem = async () => {
+    setRedeeming(true);
+    try {
+      const result = await authFetch<{ code: string; discountKr: number; remainingPoints: number }>(
+        "/loyalty/redeem",
+        token,
+        { method: "POST", body: JSON.stringify({ points: redeemAmount }) }
+      );
+      setLastCode({ code: result.code, discountKr: result.discountKr });
+      onPointsUpdate(result.remainingPoints);
+      showToast(`Rabattkod skapad: ${result.code} (-${result.discountKr} kr)`, "success");
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : "Kunde inte lösa in poäng", "error");
+    } finally {
+      setRedeeming(false);
+    }
+  };
 
   return (
     <div className="space-y-8">
@@ -415,13 +637,46 @@ function BenefitsView({ tier, points }: { tier: string; points: number }) {
         <div className="rounded-xl bg-brand-50 p-5">
           <p className="text-sm font-medium text-brand-900">Du har nått högsta nivån!</p>
           <p className="mt-1 text-sm text-brand-600">
-            Platina-medlem med 15% rabatt på alla köp.
+            Platina-medlem med 12% rabatt på alla köp.
           </p>
+        </div>
+      )}
+
+      {points >= 100 && (
+        <div className="rounded-xl border border-border p-5 space-y-4">
+          <h3 className="text-base font-bold">Lös in poäng</h3>
+          <p className="text-sm text-muted-foreground">
+            100 poäng = 10 kr rabatt. Du har {points.toLocaleString("sv-SE")} poäng.
+          </p>
+          <div className="flex items-center gap-3">
+            <select
+              value={redeemAmount}
+              onChange={(e) => setRedeemAmount(parseInt(e.target.value))}
+              className="rounded-xl border border-input bg-background px-4 py-2.5 text-sm shadow-sm focus-visible:ring-1 focus-visible:ring-ring focus:outline-none"
+            >
+              {[100, 200, 500, 1000].filter((v) => v <= points).map((v) => (
+                <option key={v} value={v}>{v} poäng ({v / 10} kr)</option>
+              ))}
+            </select>
+            <Button onClick={handleRedeem} disabled={redeeming} className="rounded-xl">
+              {redeeming && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Lös in
+            </Button>
+          </div>
+          {lastCode && (
+            <div className="rounded-lg bg-green-50 p-4">
+              <p className="text-sm font-bold text-green-800">Din rabattkod</p>
+              <p className="mt-1 font-mono text-lg font-bold text-green-900">{lastCode.code}</p>
+              <p className="mt-1 text-xs text-green-600">-{lastCode.discountKr} kr vid kassan</p>
+            </div>
+          )}
         </div>
       )}
     </div>
   );
 }
+
+/* ─────────────────── SUBSCRIPTIONS ─────────────────── */
 
 interface Subscription {
   id: number;
@@ -486,9 +741,7 @@ function SubscriptionsView({ token }: { token: string }) {
     setEditInterval(sub.interval_days);
   };
 
-  const cancelEdit = () => {
-    setEditingId(null);
-  };
+  const cancelEdit = () => setEditingId(null);
 
   const saveEdit = async (id: number) => {
     setSaving(true);
@@ -531,7 +784,7 @@ function SubscriptionsView({ token }: { token: string }) {
             <RefreshCcw className="mb-3 h-8 w-8 text-brand-700" />
             <h3 className="text-lg font-bold text-brand-900">Spara 15% med prenumeration</h3>
             <p className="mt-2 text-sm text-brand-600">
-              Välj en produkt att få levererad automatiskt och spara 15% på varje leverans. Du väljer intervall (30, 60 eller 90 dagar) vid kassan.
+              Välj en produkt att få levererad automatiskt och spara 15% på varje leverans.
             </p>
             <a href="/produkter">
               <Button className="mt-5 rounded-xl">Välj produkter</Button>
@@ -577,19 +830,11 @@ function SubscriptionsView({ token }: { token: string }) {
                     <div>
                       <label className="mb-1.5 block text-xs font-medium text-brand-700">Antal</label>
                       <div className="flex items-center gap-2">
-                        <button
-                          type="button"
-                          onClick={() => setEditQty(Math.max(1, editQty - 1))}
-                          className="flex h-9 w-9 items-center justify-center rounded-lg border border-brand-200 bg-white text-brand-700 hover:bg-brand-50"
-                        >
+                        <button type="button" onClick={() => setEditQty(Math.max(1, editQty - 1))} className="flex h-9 w-9 items-center justify-center rounded-lg border border-brand-200 bg-white text-brand-700 hover:bg-brand-50">
                           <Minus className="h-3.5 w-3.5" />
                         </button>
                         <span className="w-8 text-center text-sm font-bold">{editQty}</span>
-                        <button
-                          type="button"
-                          onClick={() => setEditQty(Math.min(10, editQty + 1))}
-                          className="flex h-9 w-9 items-center justify-center rounded-lg border border-brand-200 bg-white text-brand-700 hover:bg-brand-50"
-                        >
+                        <button type="button" onClick={() => setEditQty(Math.min(10, editQty + 1))} className="flex h-9 w-9 items-center justify-center rounded-lg border border-brand-200 bg-white text-brand-700 hover:bg-brand-50">
                           <Plus className="h-3.5 w-3.5" />
                         </button>
                       </div>
@@ -615,29 +860,18 @@ function SubscriptionsView({ token }: { token: string }) {
                       </div>
                     </div>
                     <div className="flex gap-2 pt-1">
-                      <Button
-                        onClick={() => saveEdit(sub.id)}
-                        disabled={saving}
-                        className="rounded-lg text-xs"
-                        size="sm"
-                      >
+                      <Button onClick={() => saveEdit(sub.id)} disabled={saving} className="rounded-lg text-xs" size="sm">
                         {saving ? <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" /> : <Save className="mr-1.5 h-3.5 w-3.5" />}
                         Spara
                       </Button>
-                      <button
-                        onClick={cancelEdit}
-                        className="rounded-lg border border-brand-200 px-3 py-1.5 text-xs font-medium text-brand-700 hover:bg-white"
-                      >
+                      <button onClick={cancelEdit} className="rounded-lg border border-brand-200 px-3 py-1.5 text-xs font-medium text-brand-700 hover:bg-white">
                         Avbryt
                       </button>
                     </div>
                   </div>
                 ) : (
                   <div className="border-t border-border px-5 py-3 flex flex-wrap gap-2">
-                    <button
-                      onClick={() => startEdit(sub)}
-                      className="rounded-lg border border-brand-200 px-3 py-1.5 text-xs font-medium text-brand-900 transition-colors hover:bg-brand-50"
-                    >
+                    <button onClick={() => startEdit(sub)} className="rounded-lg border border-brand-200 px-3 py-1.5 text-xs font-medium text-brand-900 transition-colors hover:bg-brand-50">
                       Ändra
                     </button>
                     {sub.status === "active" ? (
@@ -663,22 +897,101 @@ function SubscriptionsView({ token }: { token: string }) {
   );
 }
 
-function WishlistView() {
+/* ─────────────────── WISHLIST ─────────────────── */
+
+function WishlistView({ token }: { token: string }) {
+  const [items, setItems] = useState<WishlistItem[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { addItem } = useCart();
+  const { showToast } = useToast();
+
+  const fetchWishlist = useCallback(async () => {
+    try {
+      const data = await authFetch<WishlistItem[]>("/wishlist", token);
+      setItems(data);
+    } catch {
+      /* ignore */
+    } finally {
+      setLoading(false);
+    }
+  }, [token]);
+
+  useEffect(() => {
+    fetchWishlist();
+  }, [fetchWishlist]);
+
+  const handleRemove = async (productId: string) => {
+    try {
+      await authFetch(`/wishlist/${productId}`, token, { method: "DELETE" });
+      setItems((prev) => prev.filter((i) => i.product_id !== productId));
+      showToast("Borttagen från önskelistan", "success");
+    } catch {
+      showToast("Kunde inte ta bort", "error");
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <Loader2 className="h-6 w-6 animate-spin text-brand-400" />
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <h2 className="text-xl font-bold tracking-tight">Önskelista</h2>
-      <div className="rounded-xl border border-border p-6 text-center">
-        <Heart className="mx-auto mb-3 h-10 w-10 text-brand-300" />
-        <p className="text-sm text-muted-foreground">
-          Din önskelista är tom. Spara produkter du vill ha koll på.
-        </p>
-        <a href="/produkter">
-          <Button className="mt-4 rounded-xl">Se produkter</Button>
-        </a>
-      </div>
+      {items.length === 0 ? (
+        <div className="rounded-xl border border-border p-8 text-center">
+          <Heart className="mx-auto mb-3 h-12 w-12 text-brand-200" />
+          <p className="text-base font-medium text-brand-900">Din önskelista är tom</p>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Tryck på hjärtat på produkter du vill spara.
+          </p>
+          <a href="/produkter">
+            <Button className="mt-4 rounded-xl">Se produkter</Button>
+          </a>
+        </div>
+      ) : (
+        <div className="grid gap-4 sm:grid-cols-2">
+          {items.map((item) => {
+            const product = PRODUCTS.find((p) => p.id === item.product_id);
+            if (!product) return null;
+            return (
+              <div key={item.product_id} className="flex items-center gap-4 rounded-xl border border-border bg-white p-4 transition-all hover:shadow-sm">
+                <a href={`/produkter/${product.id}`} className="flex-1">
+                  <p className="text-sm font-bold">{product.name}</p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">{product.shortDesc}</p>
+                  <p className="mt-1 text-sm font-bold">{product.price.toLocaleString("sv-SE")} kr</p>
+                </a>
+                <div className="flex flex-col gap-2">
+                  <button
+                    onClick={() => {
+                      addItem(product.id, 1);
+                      showToast(`${product.name} tillagd i varukorgen`, "success");
+                    }}
+                    className="rounded-lg bg-brand-900 px-3 py-1.5 text-xs font-medium text-white hover:bg-brand-800"
+                  >
+                    Lägg i varukorg
+                  </button>
+                  <button
+                    onClick={() => handleRemove(item.product_id)}
+                    className="flex items-center justify-center gap-1 rounded-lg px-3 py-1.5 text-xs font-medium text-red-500 hover:bg-red-50"
+                  >
+                    <Trash2 className="h-3 w-3" />
+                    Ta bort
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }
+
+/* ─────────────────── SETTINGS + ADDRESSES ─────────────────── */
 
 function SettingsView({ token }: { token: string }) {
   const { user } = useAuth();
@@ -691,12 +1004,25 @@ function SettingsView({ token }: { token: string }) {
   const [newPw, setNewPw] = useState("");
   const [pwSaving, setPwSaving] = useState(false);
 
+  const [addresses, setAddresses] = useState<Address[]>([]);
+  const [addrLoading, setAddrLoading] = useState(true);
+  const [showAddrForm, setShowAddrForm] = useState(false);
+  const [addrForm, setAddrForm] = useState({ label: "Hem", address: "", zip: "", city: "", isDefault: false });
+  const [addrSaving, setAddrSaving] = useState(false);
+
   useEffect(() => {
     if (user) {
       setName(user.name);
       setPhone(user.phone ?? "");
     }
   }, [user]);
+
+  useEffect(() => {
+    authFetch<Address[]>("/addresses", token)
+      .then(setAddresses)
+      .catch(() => {})
+      .finally(() => setAddrLoading(false));
+  }, [token]);
 
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -728,6 +1054,38 @@ function SettingsView({ token }: { token: string }) {
       showToast(err instanceof Error ? err.message : "Kunde inte ändra lösenord", "error");
     }
     setPwSaving(false);
+  };
+
+  const handleSaveAddress = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setAddrSaving(true);
+    try {
+      const result = await authFetch<Address>("/addresses", token, {
+        method: "POST",
+        body: JSON.stringify(addrForm),
+      });
+      setAddresses((prev) =>
+        addrForm.isDefault
+          ? [result, ...prev.map((a) => ({ ...a, is_default: false }))]
+          : [...prev, result]
+      );
+      setShowAddrForm(false);
+      setAddrForm({ label: "Hem", address: "", zip: "", city: "", isDefault: false });
+      showToast("Adress sparad", "success");
+    } catch (err) {
+      showToast(err instanceof Error ? err.message : "Kunde inte spara adress", "error");
+    }
+    setAddrSaving(false);
+  };
+
+  const handleDeleteAddress = async (id: number) => {
+    try {
+      await authFetch(`/addresses/${id}`, token, { method: "DELETE" });
+      setAddresses((prev) => prev.filter((a) => a.id !== id));
+      showToast("Adress borttagen", "success");
+    } catch {
+      showToast("Kunde inte ta bort adress", "error");
+    }
   };
 
   const initials = (user?.name || "U")
@@ -809,9 +1167,114 @@ function SettingsView({ token }: { token: string }) {
           Byt lösenord
         </Button>
       </form>
+
+      <div className="space-y-4 rounded-xl border border-border p-6">
+        <div className="flex items-center justify-between">
+          <h3 className="text-base font-bold">Adressbok</h3>
+          <button
+            onClick={() => setShowAddrForm(!showAddrForm)}
+            className="flex items-center gap-1 rounded-lg border border-brand-200 px-3 py-1.5 text-xs font-medium text-brand-900 hover:bg-brand-50"
+          >
+            {showAddrForm ? <X className="h-3 w-3" /> : <Plus className="h-3 w-3" />}
+            {showAddrForm ? "Stäng" : "Lägg till"}
+          </button>
+        </div>
+
+        {showAddrForm && (
+          <form onSubmit={handleSaveAddress} className="space-y-3 rounded-lg bg-brand-50/50 p-4">
+            <div className="grid gap-3 sm:grid-cols-2">
+              <div>
+                <label className="mb-1 block text-xs font-medium">Etikett</label>
+                <input
+                  type="text"
+                  value={addrForm.label}
+                  onChange={(e) => setAddrForm({ ...addrForm, label: e.target.value })}
+                  placeholder="Hem, Jobb..."
+                  className="w-full rounded-lg border border-input bg-white px-3 py-2 text-sm focus-visible:ring-1 focus-visible:ring-ring focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium">Adress</label>
+                <input
+                  type="text"
+                  value={addrForm.address}
+                  onChange={(e) => setAddrForm({ ...addrForm, address: e.target.value })}
+                  required
+                  className="w-full rounded-lg border border-input bg-white px-3 py-2 text-sm focus-visible:ring-1 focus-visible:ring-ring focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium">Postnummer</label>
+                <input
+                  type="text"
+                  value={addrForm.zip}
+                  onChange={(e) => setAddrForm({ ...addrForm, zip: e.target.value })}
+                  required
+                  className="w-full rounded-lg border border-input bg-white px-3 py-2 text-sm focus-visible:ring-1 focus-visible:ring-ring focus:outline-none"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-xs font-medium">Stad</label>
+                <input
+                  type="text"
+                  value={addrForm.city}
+                  onChange={(e) => setAddrForm({ ...addrForm, city: e.target.value })}
+                  required
+                  className="w-full rounded-lg border border-input bg-white px-3 py-2 text-sm focus-visible:ring-1 focus-visible:ring-ring focus:outline-none"
+                />
+              </div>
+            </div>
+            <label className="flex items-center gap-2 text-xs">
+              <input
+                type="checkbox"
+                checked={addrForm.isDefault}
+                onChange={(e) => setAddrForm({ ...addrForm, isDefault: e.target.checked })}
+                className="rounded border-brand-300"
+              />
+              Standardadress
+            </label>
+            <Button type="submit" disabled={addrSaving} size="sm" className="rounded-lg text-xs">
+              {addrSaving && <Loader2 className="mr-1.5 h-3.5 w-3.5 animate-spin" />}
+              Spara adress
+            </Button>
+          </form>
+        )}
+
+        {addrLoading ? (
+          <div className="flex justify-center py-6">
+            <Loader2 className="h-5 w-5 animate-spin text-brand-400" />
+          </div>
+        ) : addresses.length === 0 ? (
+          <p className="py-4 text-center text-sm text-muted-foreground">Inga sparade adresser.</p>
+        ) : (
+          <div className="space-y-2">
+            {addresses.map((addr) => (
+              <div key={addr.id} className="flex items-center justify-between rounded-lg border border-border bg-white px-4 py-3">
+                <div className="flex items-center gap-3">
+                  <MapPin className="h-4 w-4 text-brand-400" />
+                  <div>
+                    <p className="text-sm font-medium">
+                      {addr.label}
+                      {addr.is_default && (
+                        <span className="ml-2 rounded-full bg-brand-100 px-2 py-0.5 text-[10px] font-medium text-brand-700">Standard</span>
+                      )}
+                    </p>
+                    <p className="text-xs text-muted-foreground">{addr.address}, {addr.zip} {addr.city}</p>
+                  </div>
+                </div>
+                <button onClick={() => handleDeleteAddress(addr.id)} className="text-red-400 hover:text-red-600">
+                  <Trash2 className="h-4 w-4" />
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
+
+/* ─────────────────── MAIN PAGE ─────────────────── */
 
 export default function DashboardPage() {
   const { user, token, isLoggedIn, logout } = useAuth();
@@ -821,8 +1284,10 @@ export default function DashboardPage() {
 
   const [stats, setStats] = useState<DashboardStats | null>(null);
   const [orders, setOrders] = useState<Order[]>([]);
+  const [recommendations, setRecommendations] = useState<Recommendation[]>([]);
   const [loadingStats, setLoadingStats] = useState(true);
   const [loadingOrders, setLoadingOrders] = useState(true);
+  const [loadingRecs, setLoadingRecs] = useState(true);
   const [errorStats, setErrorStats] = useState("");
   const [errorOrders, setErrorOrders] = useState("");
 
@@ -843,26 +1308,44 @@ export default function DashboardPage() {
       .then(setOrders)
       .catch(() => setErrorOrders("Kunde inte ladda ordrar. Försök igen senare."))
       .finally(() => setLoadingOrders(false));
+
+    authFetch<Recommendation[]>("/recommendations", token)
+      .then(setRecommendations)
+      .catch(() => {})
+      .finally(() => setLoadingRecs(false));
   }, [token]);
+
+  const handlePointsUpdate = (newPoints: number) => {
+    setStats((prev) => prev ? { ...prev, loyaltyPoints: newPoints } : prev);
+  };
 
   if (!isLoggedIn) return null;
 
   function renderView() {
     switch (activeView) {
       case "oversikt":
-        return <OverviewView stats={stats} loading={loadingStats} error={errorStats} userName={user?.name ?? ""} />;
+        return (
+          <OverviewView
+            stats={stats}
+            loading={loadingStats}
+            error={errorStats}
+            userName={user?.name ?? ""}
+            recommendations={recommendations}
+            recsLoading={loadingRecs}
+          />
+        );
       case "hudresa":
-        return <SkinJourneyView />;
+        return <SkinJourneyView token={token!} />;
       case "ordrar":
         return <OrdersView orders={orders} loading={loadingOrders} error={errorOrders} />;
       case "rutin":
         return <RoutineView />;
       case "formaner":
-        return <BenefitsView tier={stats?.tier ?? "Brons"} points={stats?.loyaltyPoints ?? 0} />;
+        return <BenefitsView tier={stats?.tier ?? "Brons"} points={stats?.loyaltyPoints ?? 0} token={token!} onPointsUpdate={handlePointsUpdate} />;
       case "prenumerationer":
         return <SubscriptionsView token={token!} />;
       case "onskelista":
-        return <WishlistView />;
+        return <WishlistView token={token!} />;
       case "installningar":
         return <SettingsView token={token!} />;
       default:
@@ -954,7 +1437,7 @@ export default function DashboardPage() {
             <User className="h-4 w-4" />
             Meny
           </button>
-          <div className="mx-auto max-w-4xl">
+          <div className="mx-auto max-w-4xl" key={activeView} style={{ animation: "var(--animate-fade-in)" }}>
             {renderView()}
           </div>
         </div>

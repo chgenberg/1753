@@ -4,15 +4,16 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Minus, Plus, RefreshCcw, Shield, Star, Truck } from "lucide-react";
+import { ArrowLeft, Heart, Minus, Plus, RefreshCcw, Shield, Star, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/product-card";
 import { ReviewsSection } from "@/components/reviews-section";
 import { SectionWrapper } from "@/components/section-wrapper";
 import { useCart } from "@/providers/cart-provider";
+import { useAuth } from "@/providers/auth-provider";
 import { useToast } from "@/components/notification";
 import { useRouter } from "next/navigation";
-import { apiFetch } from "@/lib/api";
+import { apiFetch, authFetch } from "@/lib/api";
 import { getProduct, getRelatedProducts } from "@/lib/products";
 import { cn } from "@/lib/utils";
 
@@ -23,8 +24,10 @@ export default function ProductDetail({ id }: { id: string }) {
   const [subInterval, setSubInterval] = useState(60);
   const [showSubOptions, setShowSubOptions] = useState(false);
   const { addItem } = useCart();
+  const { token, isLoggedIn } = useAuth();
   const { showToast } = useToast();
   const router = useRouter();
+  const [wishlisted, setWishlisted] = useState(false);
 
   const [reviewStats, setReviewStats] = useState<{ count: number; avg: number } | null>(null);
 
@@ -33,6 +36,33 @@ export default function ProductDetail({ id }: { id: string }) {
       .then(d => setReviewStats(d.stats))
       .catch(() => {});
   }, [id]);
+
+  useEffect(() => {
+    if (!isLoggedIn || !token) return;
+    authFetch<{ product_id: string }[]>("/wishlist", token)
+      .then((items) => setWishlisted(items.some((i) => i.product_id === id)))
+      .catch(() => {});
+  }, [isLoggedIn, token, id]);
+
+  const toggleWishlist = async () => {
+    if (!isLoggedIn || !token) {
+      router.push("/logga-in");
+      return;
+    }
+    try {
+      if (wishlisted) {
+        await authFetch(`/wishlist/${id}`, token, { method: "DELETE" });
+        setWishlisted(false);
+        showToast("Borttagen från önskelistan", "success");
+      } else {
+        await authFetch("/wishlist", token, { method: "POST", body: JSON.stringify({ productId: id }) });
+        setWishlisted(true);
+        showToast("Tillagd i önskelistan", "success");
+      }
+    } catch {
+      showToast("Något gick fel", "error");
+    }
+  };
 
   if (!product) return notFound();
 
@@ -121,9 +151,18 @@ export default function ProductDetail({ id }: { id: string }) {
                 </span>
               </div>
 
-              <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
-                {product.name}
-              </h1>
+              <div className="flex items-start justify-between gap-3">
+                <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
+                  {product.name}
+                </h1>
+                <button
+                  onClick={toggleWishlist}
+                  aria-label={wishlisted ? "Ta bort från önskelista" : "Lägg till i önskelista"}
+                  className="mt-1 flex-shrink-0 rounded-full p-2 transition-all hover:bg-brand-50"
+                >
+                  <Heart className={cn("h-6 w-6 transition-colors", wishlisted ? "fill-red-500 text-red-500" : "text-brand-300")} />
+                </button>
+              </div>
 
               <p className="mt-3 text-base leading-relaxed text-brand-500">
                 {product.shortDesc}

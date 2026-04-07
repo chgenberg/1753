@@ -2232,6 +2232,139 @@ app.delete("/api/admin/reviews/:id", adminAuthMiddleware, async (req, res) => {
   } catch (err) { res.status(500).json({ message: err.message }); }
 });
 
+// ---- WISHLIST ROUTES ----
+
+app.get("/api/wishlist", authMiddleware, async (req, res) => {
+  try {
+    const items = await db.getWishlist(req.user.id);
+    res.json(items);
+  } catch (err) { res.status(500).json({ message: err.message }); }
+});
+
+app.post("/api/wishlist", authMiddleware, async (req, res) => {
+  try {
+    const { productId } = req.body;
+    if (!productId) return res.status(400).json({ message: "productId krävs" });
+    await db.addToWishlist(req.user.id, productId);
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ message: err.message }); }
+});
+
+app.delete("/api/wishlist/:productId", authMiddleware, async (req, res) => {
+  try {
+    await db.removeFromWishlist(req.user.id, req.params.productId);
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ message: err.message }); }
+});
+
+// ---- SKIN ANALYSIS SAVE/LIST ----
+
+app.post("/api/skin-analyses", authMiddleware, async (req, res) => {
+  try {
+    const { score, summary, recommendations, fullResponse } = req.body;
+    const result = await db.saveSkinAnalysis({
+      userId: req.user.id,
+      score,
+      summary,
+      recommendations,
+      fullResponse,
+    });
+    res.json(result);
+  } catch (err) { res.status(500).json({ message: err.message }); }
+});
+
+app.get("/api/skin-analyses", authMiddleware, async (req, res) => {
+  try {
+    const analyses = await db.getSkinAnalyses(req.user.id);
+    res.json(analyses);
+  } catch (err) { res.status(500).json({ message: err.message }); }
+});
+
+// ---- ADDRESS ROUTES ----
+
+app.get("/api/addresses", authMiddleware, async (req, res) => {
+  try {
+    const addresses = await db.getAddresses(req.user.id);
+    res.json(addresses);
+  } catch (err) { res.status(500).json({ message: err.message }); }
+});
+
+app.post("/api/addresses", authMiddleware, async (req, res) => {
+  try {
+    const { label, address, zip, city, isDefault } = req.body;
+    if (!address || !zip || !city) return res.status(400).json({ message: "Adress, postnummer och stad krävs" });
+    const result = await db.createAddress({ userId: req.user.id, label, address, zip, city, isDefault });
+    res.json(result);
+  } catch (err) { res.status(500).json({ message: err.message }); }
+});
+
+app.put("/api/addresses/:id", authMiddleware, async (req, res) => {
+  try {
+    const fields = {};
+    for (const key of ["label", "address", "zip", "city", "is_default"]) {
+      if (req.body[key] !== undefined) fields[key] = req.body[key];
+    }
+    const result = await db.updateAddress(parseInt(req.params.id), req.user.id, fields);
+    if (!result) return res.status(404).json({ message: "Adress hittades inte" });
+    res.json(result);
+  } catch (err) { res.status(500).json({ message: err.message }); }
+});
+
+app.delete("/api/addresses/:id", authMiddleware, async (req, res) => {
+  try {
+    const ok = await db.deleteAddress(parseInt(req.params.id), req.user.id);
+    if (!ok) return res.status(404).json({ message: "Adress hittades inte" });
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ message: err.message }); }
+});
+
+// ---- LOYALTY ROUTES ----
+
+app.post("/api/loyalty/redeem", authMiddleware, async (req, res) => {
+  try {
+    const { points } = req.body;
+    const amount = parseInt(points);
+    if (!amount || amount < 100) return res.status(400).json({ message: "Minst 100 poäng krävs" });
+    if (amount % 100 !== 0) return res.status(400).json({ message: "Poäng måste vara i steg om 100" });
+
+    const user = await db.findUserByEmail(req.user.email);
+    if (!user || (user.loyalty_points || 0) < amount) {
+      return res.status(400).json({ message: "Inte tillräckligt med poäng" });
+    }
+
+    const remaining = await db.deductLoyaltyPoints(user.id, amount);
+    const discountKr = Math.round(amount / 10);
+    const code = `LOYAL${discountKr}-${Date.now().toString(36).toUpperCase()}`;
+
+    res.json({ code, discountKr, remainingPoints: remaining });
+  } catch (err) { res.status(500).json({ message: err.message }); }
+});
+
+// ---- RECOMMENDATIONS ----
+
+app.get("/api/recommendations", authMiddleware, async (req, res) => {
+  try {
+    const orders = await db.listOrders({ limit: 100, offset: 0 });
+    const userOrders = orders.rows.filter(o => o.customer_email === req.user.email && o.payment_status === "paid");
+    const boughtIds = new Set();
+    for (const o of userOrders) {
+      const items = typeof o.items === "string" ? JSON.parse(o.items) : (o.items || []);
+      for (const item of items) boughtIds.add(item.id || item.articleNumber);
+    }
+
+    const allProducts = [
+      { id: "duo-kit", name: "DUO-kit: The ONE + I LOVE", shortDesc: "Komplett ansiktsoljekit", price: 1098 },
+      { id: "duo-ta-da", name: "DUO + TA-DA Serum", shortDesc: "Oljor + serum i ett paket", price: 1647 },
+      { id: "ta-da-serum", name: "TA-DA Serum", shortDesc: "CBD/CBG-boostserum", price: 549 },
+      { id: "au-naturel", name: "Au Naturel Makeup Remover", shortDesc: "Naturlig rengöring", price: 349 },
+      { id: "lip-balm", name: "Le Baume Lip Balm", shortDesc: "Återfuktande läppbalsam", price: 149 },
+    ];
+
+    const recommendations = allProducts.filter(p => !boughtIds.has(p.id)).slice(0, 3);
+    res.json(recommendations);
+  } catch (err) { res.status(500).json({ message: err.message }); }
+});
+
 // ---- NEWSLETTER / SUBSCRIBER ROUTES ----
 
 app.post("/api/newsletter/subscribe", async (req, res) => {

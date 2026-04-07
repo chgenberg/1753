@@ -20,6 +20,7 @@ export interface CartItem {
 interface CartContextValue {
   items: CartItem[];
   addItem: (id: string, qty?: number, subscription?: { intervalDays: number }) => void;
+  addItems: (items: { id: string; qty: number }[]) => void;
   removeItem: (id: string) => void;
   updateQty: (id: string, qty: number) => void;
   clearCart: () => void;
@@ -76,6 +77,22 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setIsOpen(true);
   }, []);
 
+  const addItems = useCallback((newItems: { id: string; qty: number }[]) => {
+    setItems((prev) => {
+      let updated = [...prev];
+      for (const ni of newItems) {
+        const existing = updated.find((i) => i.id === ni.id);
+        if (existing) {
+          updated = updated.map((i) => i.id === ni.id ? { ...i, qty: i.qty + ni.qty } : i);
+        } else {
+          updated.push({ id: ni.id, qty: ni.qty });
+        }
+      }
+      return updated;
+    });
+    setIsOpen(true);
+  }, []);
+
   const removeItem = useCallback((id: string) => {
     setItems((prev) => prev.filter((i) => i.id !== id));
   }, []);
@@ -101,6 +118,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       value={{
         items,
         addItem,
+        addItems,
         removeItem,
         updateQty,
         clearCart,

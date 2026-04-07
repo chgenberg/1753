@@ -2,8 +2,11 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { Star } from "lucide-react";
+import { Heart, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useWishlist } from "@/hooks/use-wishlist";
+import { useToast } from "@/components/notification";
+import { useRouter } from "next/navigation";
 import type { Product } from "@/lib/products";
 
 export function ProductCard({
@@ -15,11 +18,29 @@ export function ProductCard({
   className?: string;
   priority?: boolean;
 }) {
+  const { isWishlisted, toggle, isLoggedIn } = useWishlist();
+  const { showToast } = useToast();
+  const router = useRouter();
+  const inWishlist = isWishlisted(product.id);
+
+  const handleWishlistClick = async (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    if (!isLoggedIn) {
+      router.push("/logga-in");
+      return;
+    }
+    const ok = await toggle(product.id);
+    if (ok) {
+      showToast(inWishlist ? "Borttagen från önskelistan" : "Tillagd i önskelistan", "success");
+    }
+  };
+
   return (
     <Link
       href={`/produkter/${product.id}`}
       className={cn(
-        "group block overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-brand-100/80 transition-all duration-300 hover:shadow-xl hover:shadow-brand-900/5 hover:ring-brand-200",
+        "group relative block overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-brand-100/80 transition-all duration-300 hover:shadow-xl hover:shadow-brand-900/5 hover:ring-brand-200",
         className
       )}
     >
@@ -46,6 +67,13 @@ export function ProductCard({
             {(product.originalPrice - product.price).toLocaleString("sv-SE")} kr
           </span>
         )}
+        <button
+          onClick={handleWishlistClick}
+          aria-label={inWishlist ? "Ta bort från önskelista" : "Lägg till i önskelista"}
+          className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white/80 shadow-sm backdrop-blur-sm transition-all hover:bg-white hover:shadow-md"
+        >
+          <Heart className={cn("h-4 w-4 transition-colors", inWishlist ? "fill-red-500 text-red-500" : "text-brand-400")} />
+        </button>
       </div>
       <div className="p-4 pb-5">
         <div className="mb-2 flex items-center gap-1.5">
