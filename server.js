@@ -816,6 +816,61 @@ app.get("/api/admin/stats", adminAuthMiddleware, async (req, res) => {
   }
 });
 
+app.get("/api/admin/stats/chart", adminAuthMiddleware, async (req, res) => {
+  try {
+    const days = Math.min(parseInt(req.query.days) || 30, 90);
+    const chartData = await db.adminChartData(days);
+    res.json(chartData);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+app.get("/api/admin/stats/top-products", adminAuthMiddleware, async (req, res) => {
+  try {
+    const topProducts = await db.adminTopProducts();
+    res.json(topProducts);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+app.get("/api/admin/orders/export", adminAuthMiddleware, async (req, res) => {
+  try {
+    const { status, search } = req.query;
+    const data = await db.adminListOrders({ page: 1, perPage: 10000, status, search });
+    const header = "Order,Kund,E-post,Belopp,Frakt,Status,Betalning,Fortnox,Ongoing,Datum\n";
+    const rows = data.orders.map(o =>
+      [o.order_number, `"${(o.customer_name||'').replace(/"/g,'""')}"`, o.customer_email,
+       o.total_amount, o.shipping_cost, o.status, o.payment_status,
+       o.fortnox_invoice_number||'', o.ongoing_order_id||'',
+       new Date(o.created_at).toISOString().split("T")[0]].join(",")
+    ).join("\n");
+    res.setHeader("Content-Type", "text/csv; charset=utf-8");
+    res.setHeader("Content-Disposition", `attachment; filename=ordrar-${new Date().toISOString().split("T")[0]}.csv`);
+    res.send("\uFEFF" + header + rows);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+app.get("/api/admin/customers/export", adminAuthMiddleware, async (req, res) => {
+  try {
+    const data = await db.adminListCustomers({ page: 1, perPage: 10000 });
+    const header = "Namn,E-post,Telefon,Antal ordrar,Totalt spenderat,Senaste order\n";
+    const rows = data.customers.map(c =>
+      [`"${(c.customer_name||'').replace(/"/g,'""')}"`, c.customer_email, c.customer_phone||'',
+       c.order_count, c.total_spent,
+       new Date(c.last_order).toISOString().split("T")[0]].join(",")
+    ).join("\n");
+    res.setHeader("Content-Type", "text/csv; charset=utf-8");
+    res.setHeader("Content-Disposition", `attachment; filename=kunder-${new Date().toISOString().split("T")[0]}.csv`);
+    res.send("\uFEFF" + header + rows);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // ---- ADMIN: ORDERS ----
 
 app.get("/api/admin/orders", adminAuthMiddleware, async (req, res) => {

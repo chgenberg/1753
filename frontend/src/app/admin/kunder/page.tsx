@@ -11,6 +11,7 @@ import {
   ChevronUp,
   Users,
   Loader2,
+  Download,
 } from "lucide-react";
 
 interface Customer {
@@ -197,15 +198,37 @@ export default function AdminCustomersPage() {
           </p>
         </div>
 
-        <div className="relative w-full sm:w-80">
-          <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#766a62]" />
-          <input
-            type="text"
-            placeholder="Sök namn, e-post eller telefon..."
-            value={searchInput}
-            onChange={(e) => setSearchInput(e.target.value)}
-            className="w-full rounded-xl border border-[#e6e6e6] bg-white py-2.5 pl-10 pr-4 text-sm shadow-sm transition-shadow placeholder:text-[#766a62] focus:outline-none focus:ring-2 focus:ring-[#108474]/20 focus:border-[#108474]"
-          />
+        <div className="flex items-center gap-3">
+          <div className="relative w-full sm:w-80">
+            <Search className="absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-[#766a62]" />
+            <input
+              type="text"
+              placeholder="Sök namn, e-post eller telefon..."
+              value={searchInput}
+              onChange={(e) => setSearchInput(e.target.value)}
+              className="w-full rounded-xl border border-[#e6e6e6] bg-white py-2.5 pl-10 pr-4 text-sm shadow-sm transition-shadow placeholder:text-[#766a62] focus:outline-none focus:ring-2 focus:ring-[#108474]/20 focus:border-[#108474]"
+            />
+          </div>
+          <button
+            onClick={async () => {
+              if (!token) return;
+              try {
+                const apiUrl = process.env.NEXT_PUBLIC_API_URL || (typeof window !== "undefined" && window.location.hostname !== "localhost" ? "https://api.1753skin.com/api" : "http://localhost:3001/api");
+                const res = await fetch(`${apiUrl}/admin/customers/export`, { headers: { Authorization: `Bearer ${token}` } });
+                const blob = await res.blob();
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = `kunder-${new Date().toISOString().split("T")[0]}.csv`;
+                a.click();
+                URL.revokeObjectURL(url);
+              } catch { /* silent */ }
+            }}
+            className="inline-flex flex-shrink-0 items-center gap-2 rounded-xl bg-[#108474] px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:bg-[#0d6d60] hover:shadow-md active:scale-[0.98]"
+          >
+            <Download className="h-4 w-4" />
+            <span className="hidden sm:inline">Exportera CSV</span>
+          </button>
         </div>
       </div>
 

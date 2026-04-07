@@ -622,6 +622,66 @@ async function adminGetStats() {
   };
 }
 
+async function adminChartData(days = 30) {
+  const revenueByDay = await pool.query(`
+    SELECT DATE(created_at) AS date,
+           COUNT(*) AS orders,
+           COALESCE(SUM(total_amount + shipping_cost), 0) AS revenue
+    FROM orders
+    WHERE payment_status = 'paid'
+      AND created_at >= NOW() - MAKE_INTERVAL(days => $1)
+    GROUP BY DATE(created_at)
+    ORDER BY date ASC
+  `, [days]);
+
+  const statusDist = await pool.query(`
+    SELECT status, COUNT(*) AS count
+    FROM orders
+    WHERE payment_status = 'paid'
+    GROUP BY status
+  `);
+
+  const allDates = [];
+  const today = new Date();
+  for (let i = days - 1; i >= 0; i--) {
+    const d = new Date(today);
+    d.setDate(d.getDate() - i);
+    allDates.push(d.toISOString().split("T")[0]);
+  }
+
+  const dataMap = {};
+  for (const row of revenueByDay.rows) {
+    const dateStr = new Date(row.date).toISOString().split("T")[0];
+    dataMap[dateStr] = { revenue: parseInt(row.revenue), orders: parseInt(row.orders) };
+  }
+
+  const daily = allDates.map(d => ({
+    date: d,
+    revenue: dataMap[d]?.revenue || 0,
+    orders: dataMap[d]?.orders || 0
+  }));
+
+  return {
+    daily,
+    statusDistribution: statusDist.rows.map(r => ({ name: r.status, value: parseInt(r.count) }))
+  };
+}
+
+async function adminTopProducts(limit = 10) {
+  const { rows } = await pool.query(`
+    SELECT item->>'id' AS product_id,
+           item->>'name' AS product_name,
+           SUM((item->>'quantity')::int) AS total_sold,
+           SUM((item->>'price')::int * (item->>'quantity')::int) AS total_revenue
+    FROM orders, jsonb_array_elements(items) AS item
+    WHERE payment_status = 'paid'
+    GROUP BY item->>'id', item->>'name'
+    ORDER BY total_sold DESC
+    LIMIT $1
+  `, [limit]);
+  return rows;
+}
+
 async function adminListCustomers({ page = 1, perPage = 25, search }) {
   const conditions = [];
   const params = [];
@@ -863,5 +923,7 @@ module.exports = {
   findReturnsByOrder,
   adminListSubscriptions,
   adminListSubscribers,
-  adminNewsletterStats
+  adminNewsletterStats,
+  adminChartData,
+  adminTopProducts
 };

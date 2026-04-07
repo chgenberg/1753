@@ -4,7 +4,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/providers/auth-provider";
 import { authFetch } from "@/lib/api";
-import { Search, ChevronLeft, ChevronRight, Package } from "lucide-react";
+import { Search, ChevronLeft, ChevronRight, Package, Download } from "lucide-react";
 
 interface Order {
   id: number;
@@ -153,6 +153,29 @@ export default function OrdersPage() {
             {total} {total === 1 ? "order" : "ordrar"} totalt
           </p>
         </div>
+        <button
+          onClick={async () => {
+            if (!token) return;
+            try {
+              const apiUrl = process.env.NEXT_PUBLIC_API_URL || (typeof window !== "undefined" && window.location.hostname !== "localhost" ? "https://api.1753skin.com/api" : "http://localhost:3001/api");
+              const params = new URLSearchParams();
+              if (status) params.set("status", status);
+              if (debouncedSearch) params.set("search", debouncedSearch);
+              const res = await fetch(`${apiUrl}/admin/orders/export?${params}`, { headers: { Authorization: `Bearer ${token}` } });
+              const blob = await res.blob();
+              const url = URL.createObjectURL(blob);
+              const a = document.createElement("a");
+              a.href = url;
+              a.download = `ordrar-${new Date().toISOString().split("T")[0]}.csv`;
+              a.click();
+              URL.revokeObjectURL(url);
+            } catch { /* silent */ }
+          }}
+          className="inline-flex items-center gap-2 rounded-xl bg-[#108474] px-4 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:bg-[#0d6d60] hover:shadow-md active:scale-[0.98]"
+        >
+          <Download className="h-4 w-4" />
+          Exportera CSV
+        </button>
       </div>
 
       {/* Filters */}
