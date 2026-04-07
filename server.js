@@ -785,6 +785,391 @@ app.get("/api/ongoing/shipping-methods", adminOnly, async (req, res) => {
   }
 });
 
+// ---- ADMIN AUTH MIDDLEWARE ----
+
+async function adminAuthMiddleware(req, res, next) {
+  const header = req.headers.authorization;
+  if (!header || !header.startsWith("Bearer ")) {
+    return res.status(401).json({ message: "Ej inloggad" });
+  }
+  const payload = verifyToken(header.split(" ")[1]);
+  if (!payload) {
+    return res.status(401).json({ message: "Ogiltig eller utgången session" });
+  }
+  const role = await db.findUserRole(payload.id);
+  if (role !== "admin") {
+    return res.status(403).json({ message: "Adminbehörighet krävs" });
+  }
+  req.userId = payload.id;
+  req.userEmail = payload.email;
+  next();
+}
+
+// ---- ADMIN: STATS ----
+
+app.get("/api/admin/stats", adminAuthMiddleware, async (req, res) => {
+  try {
+    const stats = await db.adminGetStats();
+    res.json(stats);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// ---- ADMIN: ORDERS ----
+
+app.get("/api/admin/orders", adminAuthMiddleware, async (req, res) => {
+  try {
+    const { page, status, search } = req.query;
+    const data = await db.adminListOrders({
+      page: parseInt(page) || 1,
+      status: status || undefined,
+      search: search || undefined
+    });
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+app.get("/api/admin/orders/:id", adminAuthMiddleware, async (req, res) => {
+  try {
+    const order = await db.adminGetOrder(parseInt(req.params.id));
+    if (!order) return res.status(404).json({ message: "Order hittades inte" });
+    const returns = await db.findReturnsByOrder(order.id);
+    res.json({ ...order, returns });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+app.put("/api/admin/orders/:id/status", adminAuthMiddleware, async (req, res) => {
+  try {
+    const { status } = req.body;
+    const updated = await db.updateOrder(parseInt(req.params.id), { status });
+    if (!updated) return res.status(404).json({ message: "Order hittades inte" });
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+app.post("/api/admin/orders/:id/retry", adminAuthMiddleware, async (req, res) => {
+  try {
+    const result = await handleOrderCompletion(parseInt(req.params.id));
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// ---- ADMIN: RETURNS ----
+
+app.post("/api/admin/orders/:id/return", adminAuthMiddleware, async (req, res) => {
+  try {
+    const order = await db.adminGetOrder(parseInt(req.params.id));
+    if (!order) return res.status(404).json({ message: "Order hittades inte" });
+
+    const { items, refundAmount, reason } = req.body;
+    if (!items || items.length === 0) return res.status(400).json({ message: "Inga artiklar att returnera" });
+
+    const notes = [];
+    let fortnoxCreditNumber = null;
+    let ongoingReturnId = null;
+
+    // Fortnox: create credit invoice
+    if (order.fortnox_invoice_number) {
+      try {
+        const creditRows = items.map((item, i) => ({
+          ArticleNumber: item.articleNumber,
+          Description: item.name || `Retur rad ${i + 1}`,
+          DeliveredQuantity: item.quantity,
+          Price: -(Math.abs(item.price || 0)),
+          VAT: item.vatRate ? Math.round(item.vatRate * 100) : 25
+        }));
+
+        const today = new Date().toISOString().split("T")[0];
+        const creditInvoice = await fortnoxFetch("/invoices", "POST", {
+          Invoice: {
+            CustomerNumber: order.fortnox_customer_number,
+            InvoiceDate: today,
+            DueDate: today,
+            Currency: "SEK",
+            InvoiceRows: creditRows,
+            Comments: `Kreditfaktura för order ${order.order_number} – ${reason || "Retur"}`,
+            CreditInvoiceReference: order.fortnox_invoice_number
+          }
+        });
+        fortnoxCreditNumber = creditInvoice?.Invoice?.DocumentNumber;
+        if (fortnoxCreditNumber) {
+          await fortnoxFetch(`/invoices/${fortnoxCreditNumber}/bookkeep`, "PUT").catch(() => {});
+          notes.push(`Fortnox kreditfaktura: ${fortnoxCreditNumber}`);
+        }
+      } catch (err) {
+        notes.push(`Fortnox kredit FEL: ${err.message}`);
+        console.error("[Return] Fortnox credit error:", err);
+      }
+    }
+
+    // Ongoing: create return order
+    try {
+      const returnSeqNumber = await db.nextOngoingOrderNumber();
+      const ogReturn = await ongoingFetch("/orders", "PUT", {
+        orderNumber: `RET-${returnSeqNumber}`,
+        deliveryDate: new Date().toISOString().split("T")[0],
+        referenceNumber: `Retur ${order.order_number}`,
+        orderRemark: reason || "Kundretur",
+        orderType: { code: "Return", name: "Retur" },
+        consignee: {
+          customerNumber: order.customer_email,
+          name: order.customer_name,
+          address1: order.address || "",
+          postCode: order.zip || "",
+          city: order.city || "",
+          countryCode: order.country_code || "SE"
+        },
+        orderLines: items.map((item, i) => ({
+          rowNumber: String(i + 1),
+          articleNumber: item.articleNumber,
+          numberOfItems: item.quantity,
+          comment: `Retur: ${item.name || item.articleNumber}`,
+          shouldBePicked: true
+        }))
+      });
+      ongoingReturnId = ogReturn?.orderId || ogReturn?.orderInfo?.orderId;
+      notes.push(`Ongoing retur: ${ongoingReturnId}`);
+    } catch (err) {
+      notes.push(`Ongoing retur FEL: ${err.message}`);
+      console.error("[Return] Ongoing return error:", err);
+    }
+
+    const orderItems = typeof order.items === "string" ? JSON.parse(order.items) : order.items;
+    const allReturned = items.length >= orderItems.length;
+    const newStatus = allReturned ? "returned" : "partially_returned";
+
+    const returnRecord = await db.createReturn({
+      orderId: order.id, items, refundAmount: refundAmount || 0,
+      reason, fortnoxCreditNumber: fortnoxCreditNumber ? String(fortnoxCreditNumber) : null,
+      ongoingReturnId: ongoingReturnId ? String(ongoingReturnId) : null,
+      status: (fortnoxCreditNumber || ongoingReturnId) ? "processed" : "pending"
+    });
+
+    await db.updateOrder(order.id, { status: newStatus });
+    await db.appendNotes(order.id, `RETUR: ${notes.join(" | ")}`);
+
+    res.json({ return: returnRecord, notes });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// ---- ADMIN: DISCOUNT CODES ----
+
+app.get("/api/admin/discounts", adminAuthMiddleware, async (req, res) => {
+  try {
+    const codes = await db.listDiscountCodes();
+    res.json(codes);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+app.post("/api/admin/discounts", adminAuthMiddleware, async (req, res) => {
+  try {
+    const code = await db.createDiscountCode(req.body);
+    res.json(code);
+  } catch (err) {
+    if (err.code === "23505") return res.status(409).json({ message: "Koden finns redan" });
+    res.status(500).json({ message: err.message });
+  }
+});
+
+app.put("/api/admin/discounts/:code", adminAuthMiddleware, async (req, res) => {
+  try {
+    const updated = await db.updateDiscountCode(req.params.code, req.body);
+    if (!updated) return res.status(404).json({ message: "Rabattkod hittades inte" });
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+app.delete("/api/admin/discounts/:code", adminAuthMiddleware, async (req, res) => {
+  try {
+    const deleted = await db.deleteDiscountCode(req.params.code);
+    if (!deleted) return res.status(404).json({ message: "Rabattkod hittades inte" });
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// ---- ADMIN: PRODUCTS ----
+
+app.get("/api/admin/products", adminAuthMiddleware, async (req, res) => {
+  try {
+    const products = Object.entries(PRODUCTS_MAP).map(([id, p]) => ({ id, ...p }));
+    let stockData = [];
+    try {
+      stockData = await ongoingFetch("/inventoryBalances");
+    } catch (_) {}
+
+    const enriched = products.map(p => {
+      const stock = Array.isArray(stockData)
+        ? stockData.find(s => String(s.articleNumber || s.articleSystemId) === p.articleNumber)
+        : null;
+      return { ...p, stock: stock?.numberOfItems ?? stock?.inStockNumberOfItems ?? null };
+    });
+
+    res.json(enriched);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+app.put("/api/admin/products/:id", adminAuthMiddleware, async (req, res) => {
+  try {
+    const product = PRODUCTS_MAP[req.params.id];
+    if (!product) return res.status(404).json({ message: "Produkt hittades inte" });
+
+    const { price, name } = req.body;
+    if (price !== undefined) product.price = price;
+    if (name !== undefined) product.name = name;
+
+    if (product.articleNumber) {
+      try {
+        await fortnoxFetch(`/articles/${product.articleNumber}`, "PUT", {
+          Article: {
+            Description: product.name,
+            SalesPrice: product.price
+          }
+        });
+      } catch (err) {
+        console.warn("[Admin] Fortnox article update failed:", err.message);
+      }
+    }
+
+    res.json({ id: req.params.id, ...product });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+app.post("/api/admin/products/sync", adminAuthMiddleware, async (req, res) => {
+  try {
+    const results = [];
+    for (const [id, product] of Object.entries(PRODUCTS_MAP)) {
+      try {
+        await ongoingFetch("/articles", "PUT", {
+          articleNumber: product.articleNumber,
+          articleName: product.name,
+          unitCode: "St"
+        });
+        results.push({ id, status: "synced" });
+      } catch (err) {
+        results.push({ id, status: "error", error: err.message });
+      }
+    }
+    res.json({ results });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// ---- ADMIN: CUSTOMERS ----
+
+app.get("/api/admin/customers", adminAuthMiddleware, async (req, res) => {
+  try {
+    const { page, search } = req.query;
+    const data = await db.adminListCustomers({
+      page: parseInt(page) || 1,
+      search: search || undefined
+    });
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+app.get("/api/admin/customers/:email", adminAuthMiddleware, async (req, res) => {
+  try {
+    const data = await db.adminGetCustomer(req.params.email);
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// ---- ADMIN: SUBSCRIPTIONS ----
+
+app.get("/api/admin/subscriptions", adminAuthMiddleware, async (req, res) => {
+  try {
+    const { page, status } = req.query;
+    const data = await db.adminListSubscriptions({
+      page: parseInt(page) || 1,
+      status: status || undefined
+    });
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+app.put("/api/admin/subscriptions/:id", adminAuthMiddleware, async (req, res) => {
+  try {
+    const { action } = req.body;
+    const sub = await db.findSubscriptionById(parseInt(req.params.id));
+    if (!sub) return res.status(404).json({ message: "Prenumeration hittades inte" });
+
+    let fields = {};
+    if (action === "pause") fields = { status: "paused", paused_at: new Date().toISOString() };
+    else if (action === "resume") fields = { status: "active", paused_at: null };
+    else if (action === "cancel") fields = { status: "cancelled", cancelled_at: new Date().toISOString() };
+    else return res.status(400).json({ message: "Ogiltig åtgärd" });
+
+    const updated = await db.updateSubscription(sub.id, fields);
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// ---- ADMIN: NEWSLETTER ----
+
+app.get("/api/admin/newsletter/stats", adminAuthMiddleware, async (req, res) => {
+  try {
+    const stats = await db.adminNewsletterStats();
+    res.json(stats);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+app.get("/api/admin/newsletter/subscribers", adminAuthMiddleware, async (req, res) => {
+  try {
+    const { page, status } = req.query;
+    const data = await db.adminListSubscribers({
+      page: parseInt(page) || 1,
+      status: status || undefined
+    });
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// ---- ADMIN: AUTH CHECK ----
+
+app.get("/api/admin/me", adminAuthMiddleware, async (req, res) => {
+  try {
+    const user = await db.findUserById(req.userId);
+    if (!user) return res.status(404).json({ message: "Användare hittades inte" });
+    res.json({ id: user.id, name: user.name, email: user.email, role: user.role || "customer" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // ---- RATE LIMITING ----
 
 const rateLimits = new Map();
@@ -1084,11 +1469,30 @@ app.post("/api/analysis/chat", async (req, res) => {
 
 // ---- DISCOUNT CODE VALIDATION ----
 
-app.post("/api/discount/validate", (req, res) => {
+app.post("/api/discount/validate", async (req, res) => {
   const { code, items } = req.body;
   if (!code) return res.status(400).json({ message: "Ange en rabattkod" });
 
-  const discount = DISCOUNT_CODES[code.toLowerCase().trim()];
+  const key = code.toLowerCase().trim();
+  let discount = DISCOUNT_CODES[key];
+
+  if (!discount) {
+    const dbCode = await db.findDiscountCode(key);
+    if (dbCode && dbCode.active) {
+      const now = new Date();
+      if (dbCode.valid_from && new Date(dbCode.valid_from) > now) { discount = null; }
+      else if (dbCode.valid_until && new Date(dbCode.valid_until) < now) { discount = null; }
+      else if (dbCode.max_uses && dbCode.used_count >= dbCode.max_uses) { discount = null; }
+      else {
+        discount = {
+          percent: dbCode.percent,
+          productIds: dbCode.product_ids,
+          description: dbCode.description
+        };
+      }
+    }
+  }
+
   if (!discount) return res.status(404).json({ message: "Ogiltig rabattkod" });
 
   const applicableItems = (items || []).filter(i => !discount.productIds || discount.productIds.includes(i.id));
@@ -1097,7 +1501,7 @@ app.post("/api/discount/validate", (req, res) => {
   }
 
   res.json({
-    code: code.toLowerCase().trim(),
+    code: key,
     percent: discount.percent,
     description: discount.description,
     applicableProductIds: discount.productIds || null,

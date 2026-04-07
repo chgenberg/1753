@@ -54,6 +54,7 @@ async function initSchema() {
       email           VARCHAR(255) UNIQUE NOT NULL,
       phone           VARCHAR(50) DEFAULT '',
       password_hash   TEXT NOT NULL,
+      role            VARCHAR(20) DEFAULT 'customer',
       loyalty_points  INTEGER DEFAULT 0,
       tier            VARCHAR(20) DEFAULT 'Brons',
       notifications   JSONB DEFAULT '{"email":true,"sms":false,"offers":true}',
@@ -61,7 +62,35 @@ async function initSchema() {
       updated_at      TIMESTAMPTZ DEFAULT NOW()
     );
 
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS role VARCHAR(20) DEFAULT 'customer';
+
     CREATE INDEX IF NOT EXISTS idx_users_email ON users (email);
+
+    CREATE TABLE IF NOT EXISTS discount_codes (
+      id              SERIAL PRIMARY KEY,
+      code            VARCHAR(50) UNIQUE NOT NULL,
+      percent         INTEGER NOT NULL,
+      description     VARCHAR(255) DEFAULT '',
+      product_ids     JSONB,
+      max_uses        INTEGER,
+      used_count      INTEGER DEFAULT 0,
+      valid_from      TIMESTAMPTZ,
+      valid_until     TIMESTAMPTZ,
+      active          BOOLEAN DEFAULT true,
+      created_at      TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    CREATE TABLE IF NOT EXISTS returns (
+      id                    SERIAL PRIMARY KEY,
+      order_id              INTEGER REFERENCES orders(id),
+      items                 JSONB NOT NULL,
+      refund_amount         INTEGER NOT NULL,
+      reason                TEXT DEFAULT '',
+      fortnox_credit_number VARCHAR(50),
+      ongoing_return_id     VARCHAR(50),
+      status                VARCHAR(20) DEFAULT 'pending',
+      created_at            TIMESTAMPTZ DEFAULT NOW()
+    );
 
     CREATE TABLE IF NOT EXISTS subscriptions (
       id                      SERIAL PRIMARY KEY,
@@ -522,6 +551,265 @@ async function nextOngoingOrderNumber() {
   return String(rows[0].num);
 }
 
+// ---- ADMIN helpers ----
+
+async function findUserRole(userId) {
+  const { rows } = await pool.query("SELECT role FROM users WHERE id = $1", [userId]);
+  return rows[0]?.role || "customer";
+}
+
+async function adminListOrders({ page = 1, perPage = 25, status, search }) {
+  const conditions = [];
+  const params = [];
+  let idx = 1;
+
+  if (status) {
+    conditions.push(`status = $${idx++}`);
+    params.push(status);
+  }
+  if (search) {
+    conditions.push(`(order_number ILIKE $${idx} OR customer_name ILIKE $${idx} OR customer_email ILIKE $${idx})`);
+    params.push(`%${search}%`);
+    idx++;
+  }
+
+  const where = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
+  const offset = (page - 1) * perPage;
+
+  const countRes = await pool.query(`SELECT COUNT(*) AS total FROM orders ${where}`, params);
+  const total = parseInt(countRes.rows[0].total, 10);
+
+  const dataRes = await pool.query(
+    `SELECT * FROM orders ${where} ORDER BY created_at DESC LIMIT $${idx++} OFFSET $${idx++}`,
+    [...params, perPage, offset]
+  );
+
+  return { orders: dataRes.rows, total, page, perPage };
+}
+
+async function adminGetOrder(id) {
+  const { rows } = await pool.query("SELECT * FROM orders WHERE id = $1", [id]);
+  return rows[0] || null;
+}
+
+async function adminGetStats() {
+  const res = await pool.query(`
+    SELECT
+      COUNT(*) AS total_orders,
+      COALESCE(SUM(total_amount + shipping_cost), 0) AS total_revenue,
+      COALESCE(AVG(total_amount + shipping_cost), 0) AS avg_order_value,
+      COUNT(CASE WHEN status = 'fulfilled' THEN 1 END) AS fulfilled_orders,
+      COUNT(CASE WHEN status = 'pending' THEN 1 END) AS pending_orders,
+      COUNT(CASE WHEN status = 'partial' THEN 1 END) AS partial_orders,
+      COUNT(CASE WHEN created_at >= NOW() - INTERVAL '24 hours' THEN 1 END) AS orders_today,
+      COALESCE(SUM(CASE WHEN created_at >= NOW() - INTERVAL '24 hours' THEN total_amount + shipping_cost END), 0) AS revenue_today,
+      COUNT(CASE WHEN created_at >= NOW() - INTERVAL '7 days' THEN 1 END) AS orders_week,
+      COALESCE(SUM(CASE WHEN created_at >= NOW() - INTERVAL '7 days' THEN total_amount + shipping_cost END), 0) AS revenue_week,
+      COUNT(CASE WHEN created_at >= NOW() - INTERVAL '30 days' THEN 1 END) AS orders_month,
+      COALESCE(SUM(CASE WHEN created_at >= NOW() - INTERVAL '30 days' THEN total_amount + shipping_cost END), 0) AS revenue_month
+    FROM orders WHERE payment_status = 'paid'
+  `);
+
+  const customerCount = await pool.query("SELECT COUNT(DISTINCT customer_email) AS count FROM orders WHERE payment_status = 'paid'");
+  const subCount = await pool.query("SELECT COUNT(*) AS count FROM subscriptions WHERE status = 'active' AND cancelled_at IS NULL");
+  const subscriberCount = await pool.query("SELECT COUNT(*) AS count FROM subscribers WHERE status = 'active'");
+
+  return {
+    ...res.rows[0],
+    unique_customers: parseInt(customerCount.rows[0].count, 10),
+    active_subscriptions: parseInt(subCount.rows[0].count, 10),
+    active_subscribers: parseInt(subscriberCount.rows[0].count, 10)
+  };
+}
+
+async function adminListCustomers({ page = 1, perPage = 25, search }) {
+  const conditions = [];
+  const params = [];
+  let idx = 1;
+
+  if (search) {
+    conditions.push(`(customer_email ILIKE $${idx} OR customer_name ILIKE $${idx})`);
+    params.push(`%${search}%`);
+    idx++;
+  }
+
+  const where = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
+  const offset = (page - 1) * perPage;
+
+  const countRes = await pool.query(
+    `SELECT COUNT(DISTINCT customer_email) AS total FROM orders ${where}`, params
+  );
+  const total = parseInt(countRes.rows[0].total, 10);
+
+  const dataRes = await pool.query(
+    `SELECT customer_email, customer_name, customer_phone,
+            COUNT(*) AS order_count,
+            SUM(total_amount + shipping_cost) AS total_spent,
+            MAX(created_at) AS last_order,
+            MIN(created_at) AS first_order
+     FROM orders ${where}
+     GROUP BY customer_email, customer_name, customer_phone
+     ORDER BY last_order DESC
+     LIMIT $${idx++} OFFSET $${idx++}`,
+    [...params, perPage, offset]
+  );
+
+  return { customers: dataRes.rows, total, page, perPage };
+}
+
+async function adminGetCustomer(email) {
+  const orders = await pool.query(
+    "SELECT * FROM orders WHERE customer_email = $1 ORDER BY created_at DESC",
+    [email.toLowerCase()]
+  );
+  const subs = await pool.query(
+    `SELECT s.* FROM subscriptions s
+     JOIN users u ON u.id = s.user_id
+     WHERE u.email = $1 ORDER BY s.created_at DESC`,
+    [email.toLowerCase()]
+  );
+  return { orders: orders.rows, subscriptions: subs.rows };
+}
+
+// ---- DISCOUNT CODE helpers ----
+
+async function listDiscountCodes() {
+  const { rows } = await pool.query("SELECT * FROM discount_codes ORDER BY created_at DESC");
+  return rows;
+}
+
+async function findDiscountCode(code) {
+  const { rows } = await pool.query(
+    "SELECT * FROM discount_codes WHERE code = $1 LIMIT 1",
+    [code.toLowerCase()]
+  );
+  return rows[0] || null;
+}
+
+async function createDiscountCode({ code, percent, description, productIds, maxUses, validFrom, validUntil }) {
+  const { rows } = await pool.query(
+    `INSERT INTO discount_codes (code, percent, description, product_ids, max_uses, valid_from, valid_until)
+     VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+    [code.toLowerCase(), percent, description || "", productIds ? JSON.stringify(productIds) : null,
+     maxUses || null, validFrom || null, validUntil || null]
+  );
+  return rows[0];
+}
+
+async function updateDiscountCode(code, fields) {
+  const allowed = ["percent", "description", "product_ids", "max_uses", "valid_from", "valid_until", "active"];
+  const keys = Object.keys(fields).filter(k => allowed.includes(k));
+  if (keys.length === 0) return null;
+  const setClauses = keys.map((k, i) => `${k} = $${i + 2}`);
+  const values = keys.map(k => k === "product_ids" && fields[k] ? JSON.stringify(fields[k]) : fields[k]);
+  const { rows } = await pool.query(
+    `UPDATE discount_codes SET ${setClauses.join(", ")} WHERE code = $1 RETURNING *`,
+    [code.toLowerCase(), ...values]
+  );
+  return rows[0] || null;
+}
+
+async function deleteDiscountCode(code) {
+  const { rowCount } = await pool.query("DELETE FROM discount_codes WHERE code = $1", [code.toLowerCase()]);
+  return rowCount > 0;
+}
+
+async function incrementDiscountUsage(code) {
+  await pool.query(
+    "UPDATE discount_codes SET used_count = used_count + 1 WHERE code = $1",
+    [code.toLowerCase()]
+  );
+}
+
+// ---- RETURN helpers ----
+
+async function createReturn({ orderId, items, refundAmount, reason, fortnoxCreditNumber, ongoingReturnId, status }) {
+  const { rows } = await pool.query(
+    `INSERT INTO returns (order_id, items, refund_amount, reason, fortnox_credit_number, ongoing_return_id, status)
+     VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+    [orderId, JSON.stringify(items), refundAmount, reason || "",
+     fortnoxCreditNumber || null, ongoingReturnId || null, status || "pending"]
+  );
+  return rows[0];
+}
+
+async function findReturnsByOrder(orderId) {
+  const { rows } = await pool.query("SELECT * FROM returns WHERE order_id = $1 ORDER BY created_at DESC", [orderId]);
+  return rows;
+}
+
+async function adminListSubscriptions({ status, page = 1, perPage = 25 }) {
+  const conditions = [];
+  const params = [];
+  let idx = 1;
+
+  if (status) {
+    conditions.push(`s.status = $${idx++}`);
+    params.push(status);
+  }
+
+  const where = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
+  const offset = (page - 1) * perPage;
+
+  const countRes = await pool.query(`SELECT COUNT(*) AS total FROM subscriptions s ${where}`, params);
+  const total = parseInt(countRes.rows[0].total, 10);
+
+  const dataRes = await pool.query(
+    `SELECT s.*, u.name AS user_name, u.email AS user_email
+     FROM subscriptions s
+     LEFT JOIN users u ON u.id = s.user_id
+     ${where}
+     ORDER BY s.created_at DESC
+     LIMIT $${idx++} OFFSET $${idx++}`,
+    [...params, perPage, offset]
+  );
+
+  return { subscriptions: dataRes.rows, total, page, perPage };
+}
+
+async function adminListSubscribers({ status, page = 1, perPage = 25 }) {
+  const conditions = [];
+  const params = [];
+  let idx = 1;
+
+  if (status) {
+    conditions.push(`status = $${idx++}`);
+    params.push(status);
+  }
+
+  const where = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
+  const offset = (page - 1) * perPage;
+
+  const countRes = await pool.query(`SELECT COUNT(*) AS total FROM subscribers ${where}`, params);
+  const total = parseInt(countRes.rows[0].total, 10);
+
+  const dataRes = await pool.query(
+    `SELECT * FROM subscribers ${where} ORDER BY created_at DESC LIMIT $${idx++} OFFSET $${idx++}`,
+    [...params, perPage, offset]
+  );
+
+  return { subscribers: dataRes.rows, total, page, perPage };
+}
+
+async function adminNewsletterStats() {
+  const subRes = await pool.query(`
+    SELECT
+      COUNT(*) AS total,
+      COUNT(CASE WHEN status = 'active' THEN 1 END) AS active,
+      COUNT(CASE WHEN status = 'unsubscribed' THEN 1 END) AS unsubscribed
+    FROM subscribers
+  `);
+  const flowRes = await pool.query("SELECT * FROM automation_flows ORDER BY created_at DESC");
+  const queueRes = await pool.query(`
+    SELECT status, COUNT(*) AS count FROM automation_queue GROUP BY status
+  `);
+  return {
+    subscribers: subRes.rows[0],
+    flows: flowRes.rows,
+    queue: queueRes.rows
+  };
+}
+
 module.exports = {
   pool,
   initSchema,
@@ -558,5 +846,22 @@ module.exports = {
   cancelAutomationsForSubscriber,
   createAbandonedCart,
   markCartRecovered,
-  nextOngoingOrderNumber
+  nextOngoingOrderNumber,
+  findUserRole,
+  adminListOrders,
+  adminGetOrder,
+  adminGetStats,
+  adminListCustomers,
+  adminGetCustomer,
+  listDiscountCodes,
+  findDiscountCode,
+  createDiscountCode,
+  updateDiscountCode,
+  deleteDiscountCode,
+  incrementDiscountUsage,
+  createReturn,
+  findReturnsByOrder,
+  adminListSubscriptions,
+  adminListSubscribers,
+  adminNewsletterStats
 };
