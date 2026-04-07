@@ -25,7 +25,7 @@ export const PRODUCTS: Product[] = [
     name: "DUO-kit + TA-DA Serum",
     price: 1495,
     originalPrice: 2197,
-    reviews: 89,
+    reviews: 238,
     image: "/New_Products/DUO+TA-DA.jpg",
     imageAlt: "/New_Products/DUO+TA-DAWoman.jpg",
     shortDesc:
@@ -59,7 +59,7 @@ export const PRODUCTS: Product[] = [
     name: "TA-DA Serum",
     price: 699,
     originalPrice: null,
-    reviews: 156,
+    reviews: 20,
     image: "/New_Products/TA-DA.jpg",
     imageAlt: "/New_Products/TA-DAWoman.jpg",
     shortDesc:
@@ -99,7 +99,7 @@ export const PRODUCTS: Product[] = [
     name: "DUO-kit",
     price: 1099,
     originalPrice: 1498,
-    reviews: 204,
+    reviews: 515,
     image: "/New_Products/DUO.jpg",
     imageAlt: "/New_Products/DUOwoman.jpg",
     shortDesc:
@@ -142,7 +142,7 @@ export const PRODUCTS: Product[] = [
     name: "Au Naturel Makeup Remover",
     price: 399,
     originalPrice: null,
-    reviews: 134,
+    reviews: 83,
     image: "/New_Products/MR.jpg",
     imageAlt: "/New_Products/MRwoman.jpg",
     shortDesc:
@@ -179,7 +179,7 @@ export const PRODUCTS: Product[] = [
     name: "Fungtastic Mushroom Extract",
     price: 399,
     originalPrice: null,
-    reviews: 67,
+    reviews: 63,
     image: "/New_Products/Fungtastic.jpg",
     imageAlt: "/New_Products/Fungtasticwoman.jpg",
     shortDesc:

@@ -49,7 +49,7 @@ const FEATURES = [
 const TRUST_ITEMS = [
   { icon: Truck, text: "Fri frakt över 700 kr" },
   { icon: Shield, text: "14 dagars öppet köp" },
-  { icon: Star, text: "4.8 av 5 i omdömen" },
+  { icon: Star, text: "4.6 av 5 i omdömen" },
 ];
 
 interface ReviewSnippet {
@@ -123,7 +123,7 @@ function ReviewCarousel() {
               {[1, 2, 3, 4, 5].map(i => (
                 <Star key={i} className="h-4 w-4 fill-amber-400 text-amber-400" />
               ))}
-              <span className="ml-2 text-sm font-semibold text-brand-900">4.8</span>
+              <span className="ml-2 text-sm font-semibold text-brand-900">4.6</span>
               <span className="text-sm text-brand-400">baserat på 919 omdömen</span>
             </div>
             <h2 className="mt-2 text-2xl font-bold tracking-tight text-brand-900 md:text-3xl">
