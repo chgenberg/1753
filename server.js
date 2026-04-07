@@ -405,6 +405,51 @@ app.put("/api/subscriptions/:id/resume", authMiddleware, async (req, res) => {
   }
 });
 
+app.put("/api/subscriptions/:id", authMiddleware, async (req, res) => {
+  try {
+    const sub = await db.findSubscriptionById(parseInt(req.params.id, 10));
+    if (!sub || sub.user_id !== req.userId) return res.status(404).json({ message: "Prenumeration hittades inte" });
+    if (sub.status === "cancelled") return res.status(400).json({ message: "Kan inte ändra avbruten prenumeration" });
+
+    const { quantity, intervalDays } = req.body;
+    const fields = {};
+
+    if (quantity !== undefined) {
+      const qty = Math.max(1, Math.min(10, parseInt(quantity)));
+      const product = Object.values(PRODUCTS_MAP).find(p => p.articleNumber === sub.product_id) ||
+                       Object.entries(PRODUCTS_MAP).find(([k]) => k === sub.product_id)?.[1];
+      const unitPrice = product?.price || Math.round(sub.original_price / sub.quantity);
+      const discountPercent = sub.discount_percent || 15;
+      fields.quantity = qty;
+      fields.original_price = unitPrice * qty;
+      fields.recurring_price = Math.round(unitPrice * qty * (1 - discountPercent / 100));
+    }
+
+    if (intervalDays !== undefined) {
+      const allowedIntervals = [30, 60, 90];
+      if (!allowedIntervals.includes(intervalDays)) {
+        return res.status(400).json({ message: "Ogiltigt intervall. Välj 30, 60 eller 90 dagar." });
+      }
+      fields.interval_days = intervalDays;
+      if (sub.status === "active" && sub.next_charge_date) {
+        const lastCharge = sub.last_charge_date ? new Date(sub.last_charge_date) : new Date();
+        const nextCharge = new Date(lastCharge);
+        nextCharge.setDate(nextCharge.getDate() + intervalDays);
+        fields.next_charge_date = nextCharge.toISOString().split("T")[0];
+      }
+    }
+
+    if (Object.keys(fields).length === 0) {
+      return res.status(400).json({ message: "Inget att ändra" });
+    }
+
+    const updated = await db.updateSubscription(sub.id, fields);
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ message: err.message || "Kunde inte uppdatera prenumerationen" });
+  }
+});
+
 app.delete("/api/subscriptions/:id", authMiddleware, async (req, res) => {
   try {
     const sub = await db.findSubscriptionById(parseInt(req.params.id, 10));
