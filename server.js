@@ -449,14 +449,14 @@ async function persistTokensToRailway(accessToken, refreshToken) {
       },
       body: JSON.stringify({
         query: `mutation($input: VariableCollectionUpsertInput!) {
-          variableCollectionUpsert(input: $input)
+          variableCollectionUpsert(input: $input, skipDeploys: true)
         }`,
         variables: {
           input: { projectId, environmentId, serviceId, variables, replace: false }
         }
       })
     });
-    console.log("[Railway] Fortnox tokens persisted to env vars");
+    console.log("[Railway] Fortnox tokens persisted (skipDeploys)");
   } catch (err) {
     console.warn("[Railway] Failed to persist tokens:", err.message);
   }
@@ -548,6 +548,11 @@ async function ongoingFetch(path, method, body) {
   const separator = path.includes("?") ? "&" : "?";
   const url = `${baseUrl}${path}${goodsOwnerId ? `${separator}goodsOwnerId=${goodsOwnerId}` : ""}`;
   const auth = Buffer.from(`${process.env.ONGOING_USERNAME}:${process.env.ONGOING_PASSWORD}`).toString("base64");
+
+  if (body && goodsOwnerId && !body.goodsOwnerId) {
+    body.goodsOwnerId = parseInt(goodsOwnerId, 10);
+  }
+
   const opts = {
     method: method || "GET",
     headers: {
@@ -732,7 +737,16 @@ app.post("/api/ongoing/articles/sync", adminOnly, async (req, res) => {
     const results = [];
     for (const article of req.body.articles) {
       try {
-        const data = await ongoingFetch("/articles", "PUT", article);
+        const payload = {
+          articleNumber: article.articleNumber,
+          articleName: article.articleName || article.name,
+          unitCode: article.unitCode || "St",
+          weight: article.weight || 0,
+          ...(article.barCode && { barCodeInfo: { barCode: article.barCode } }),
+          ...(article.purchasePrice && { purchasePrice: article.purchasePrice }),
+          ...(article.stockValuationPrice && { stockValuationPrice: article.stockValuationPrice })
+        };
+        const data = await ongoingFetch("/articles", "PUT", payload);
         results.push({ id: article.articleNumber, action: "synced", data });
       } catch (err) {
         results.push({ id: article.articleNumber, action: "error", error: err.message });
@@ -1404,27 +1418,34 @@ async function handleOrderCompletion(orderId) {
     }
   }
 
-  // 5. Ongoing: create delivery order
+  // 5. Ongoing: create delivery order (REST API uses PUT, consignee inline)
   try {
+    const deliveryDate = new Date(Date.now() + 3 * 86400000).toISOString().split("T")[0];
     const ogOrder = await ongoingFetch("/orders", "PUT", {
       orderNumber: order.order_number,
-      goodsOwnerOrderId: order.order_number,
+      deliveryDate,
+      referenceNumber: "1753 Skincare",
+      orderRemark: `Webborder ${order.order_number} – ${order.customer_email}`,
+      orderType: { code: "B2C", name: "B2C" },
       consignee: {
+        customerNumber: order.customer_email,
         name: order.customer_name,
         address1: order.address || "",
         postCode: order.zip || "",
         city: order.city || "",
-        countryCode: order.country_code || "SE",
-        email: order.customer_email,
-        mobilePhone: order.customer_phone || ""
+        countryCode: order.country_code || "SE"
       },
+      emailNotification: { toBeNotified: true, value: order.customer_email },
+      smsNotification: { toBeNotified: !!order.customer_phone, value: order.customer_phone || "" },
       orderLines: items.map((item, i) => ({
-        rowNumber: i + 1,
+        rowNumber: String(i + 1),
         articleNumber: item.articleNumber,
-        numberOfItems: item.quantity
+        numberOfItems: item.quantity,
+        comment: item.name,
+        shouldBePicked: true
       }))
     });
-    ongoingOrderId = ogOrder?.orderInfo?.orderId || ogOrder?.orderId || order.order_number;
+    ongoingOrderId = ogOrder?.orderId || ogOrder?.orderInfo?.orderId || order.order_number;
     notes.push(`Ongoing order: ${ongoingOrderId}`);
   } catch (err) {
     notes.push(`Ongoing order FEL: ${err.message}`);
