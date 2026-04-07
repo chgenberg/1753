@@ -945,6 +945,45 @@ async function countReviews() {
   return rows[0].count;
 }
 
+async function adminListReviews({ limit = 20, offset = 0, productId, rating, search } = {}) {
+  let where = [];
+  let params = [];
+  let idx = 1;
+  if (productId) { where.push(`product_id = $${idx++}`); params.push(productId); }
+  if (rating) { where.push(`rating = $${idx++}`); params.push(parseInt(rating)); }
+  if (search) { where.push(`(reviewer_name ILIKE $${idx} OR title ILIKE $${idx} OR body ILIKE $${idx})`); params.push(`%${search}%`); idx++; }
+  const whereClause = where.length > 0 ? `WHERE ${where.join(" AND ")}` : "";
+
+  const countRes = await pool.query(`SELECT COUNT(*)::int AS total FROM reviews ${whereClause}`, params);
+  const { rows } = await pool.query(
+    `SELECT * FROM reviews ${whereClause} ORDER BY review_date DESC NULLS LAST LIMIT $${idx} OFFSET $${idx + 1}`,
+    [...params, limit, offset]
+  );
+  return { reviews: rows, total: countRes.rows[0].total };
+}
+
+async function updateReview(id, fields) {
+  const sets = [];
+  const vals = [];
+  let idx = 1;
+  for (const [key, val] of Object.entries(fields)) {
+    sets.push(`${key} = $${idx++}`);
+    vals.push(val);
+  }
+  if (sets.length === 0) return null;
+  vals.push(id);
+  const { rows } = await pool.query(
+    `UPDATE reviews SET ${sets.join(", ")} WHERE id = $${idx} RETURNING *`,
+    vals
+  );
+  return rows[0];
+}
+
+async function deleteReview(id) {
+  const { rowCount } = await pool.query("DELETE FROM reviews WHERE id = $1", [id]);
+  return rowCount > 0;
+}
+
 module.exports = {
   pool,
   initSchema,
@@ -1005,5 +1044,8 @@ module.exports = {
   findReviewsByProduct,
   getReviewStats,
   getAllReviewStats,
-  countReviews
+  countReviews,
+  adminListReviews,
+  updateReview,
+  deleteReview
 };

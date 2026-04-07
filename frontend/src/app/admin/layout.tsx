@@ -13,6 +13,7 @@ import {
   Users,
   Repeat,
   Mail,
+  MessageSquare,
   Menu,
   X,
   LogOut,
@@ -32,6 +33,7 @@ const NAV_ITEMS = [
   { href: "/admin/produkter", label: "Produkter", icon: Package },
   { href: "/admin/kunder", label: "Kunder", icon: Users },
   { href: "/admin/prenumerationer", label: "Prenumerationer", icon: Repeat },
+  { href: "/admin/recensioner", label: "Recensioner", icon: MessageSquare },
   { href: "/admin/nyhetsbrev", label: "Nyhetsbrev", icon: Mail },
 ];
 

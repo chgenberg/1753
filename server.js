@@ -2130,6 +2130,108 @@ function greenButton(text, href) {
   </div>`;
 }
 
+// ---- REVIEWS API (public) ----
+
+app.get("/api/reviews/stats/all", async (req, res) => {
+  try { res.json(await db.getAllReviewStats()); }
+  catch (err) { res.status(500).json({ message: "Kunde inte hämta statistik" }); }
+});
+
+app.get("/api/reviews/:productId", async (req, res) => {
+  try {
+    const limit = Math.min(parseInt(req.query.limit) || 10, 50);
+    const offset = parseInt(req.query.offset) || 0;
+    const [reviews, stats] = await Promise.all([
+      db.findReviewsByProduct(req.params.productId, limit, offset),
+      db.getReviewStats(req.params.productId),
+    ]);
+    res.json({ reviews, stats });
+  } catch (err) { res.status(500).json({ message: "Kunde inte hämta recensioner" }); }
+});
+
+app.get("/api/reviews/verify-token/:token", async (req, res) => {
+  try {
+    const decoded = require("jsonwebtoken").verify(req.params.token, JWT_SECRET);
+    if (decoded.purpose !== "review") return res.status(400).json({ message: "Ogiltig token" });
+    res.json({
+      customerName: decoded.customerName,
+      customerEmail: decoded.customerEmail,
+      orderNumber: decoded.orderNumber,
+      products: decoded.products,
+    });
+  } catch { res.status(400).json({ message: "Länken har gått ut eller är ogiltig" }); }
+});
+
+app.post("/api/reviews", async (req, res) => {
+  try {
+    const { token, productId, rating, title, body } = req.body;
+    if (!token || !productId || !rating) return res.status(400).json({ message: "Saknar obligatoriska fält" });
+    let decoded;
+    try {
+      decoded = require("jsonwebtoken").verify(token, JWT_SECRET);
+      if (decoded.purpose !== "review") throw new Error();
+    } catch { return res.status(400).json({ message: "Länken har gått ut eller är ogiltig" }); }
+
+    const existing = await db.pool.query(
+      "SELECT id FROM reviews WHERE product_id = $1 AND reviewer_name = $2 AND rating = $3 AND body = $4 LIMIT 1",
+      [productId, decoded.customerName, rating, body || ""]
+    );
+    if (existing.rows.length > 0) return res.status(409).json({ message: "Du har redan lämnat ett omdöme för denna produkt" });
+
+    const review = await db.createReview({
+      product_id: productId,
+      reviewer_name: decoded.customerName,
+      rating: Math.min(5, Math.max(1, parseInt(rating))),
+      title: title || "", body: body || "", reply: "",
+      verified: true, review_date: new Date().toISOString(), location: "",
+    });
+    res.json({ success: true, review });
+  } catch (err) { res.status(500).json({ message: "Kunde inte spara omdömet" }); }
+});
+
+// ---- REVIEWS API (admin) ----
+
+app.get("/api/admin/reviews", adminAuthMiddleware, async (req, res) => {
+  try {
+    const { limit, offset, productId, rating, search } = req.query;
+    const data = await db.adminListReviews({
+      limit: parseInt(limit) || 20,
+      offset: parseInt(offset) || 0,
+      productId: productId || undefined,
+      rating: rating || undefined,
+      search: search || undefined,
+    });
+    res.json(data);
+  } catch (err) { res.status(500).json({ message: err.message }); }
+});
+
+app.get("/api/admin/reviews/stats", adminAuthMiddleware, async (req, res) => {
+  try {
+    const [allStats, totalCount] = await Promise.all([
+      db.getAllReviewStats(),
+      db.countReviews(),
+    ]);
+    res.json({ totalCount, perProduct: allStats });
+  } catch (err) { res.status(500).json({ message: err.message }); }
+});
+
+app.put("/api/admin/reviews/:id/reply", adminAuthMiddleware, async (req, res) => {
+  try {
+    const { reply } = req.body;
+    const updated = await db.updateReview(parseInt(req.params.id), { reply: reply || "" });
+    if (!updated) return res.status(404).json({ message: "Recension hittades inte" });
+    res.json(updated);
+  } catch (err) { res.status(500).json({ message: err.message }); }
+});
+
+app.delete("/api/admin/reviews/:id", adminAuthMiddleware, async (req, res) => {
+  try {
+    const deleted = await db.deleteReview(parseInt(req.params.id));
+    if (!deleted) return res.status(404).json({ message: "Recension hittades inte" });
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ message: err.message }); }
+});
+
 // ---- NEWSLETTER / SUBSCRIBER ROUTES ----
 
 app.post("/api/newsletter/subscribe", async (req, res) => {
