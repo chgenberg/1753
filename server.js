@@ -3009,17 +3009,33 @@ async function processRecurringCharges() {
         const newTxId = chargeData?.TransactionId || chargeData?.transactionId;
         const orderNumber = generateOrderNumber();
 
+        const user = await db.findUserById(sub.user_id);
+        const lastOrder = user ? (await db.pool.query(
+          "SELECT address, zip, city, country_code, customer_phone FROM orders WHERE customer_email = $1 AND address IS NOT NULL AND address != '' ORDER BY created_at DESC LIMIT 1",
+          [user.email]
+        )).rows[0] : null;
+
+        const product = Object.values(PRODUCTS_MAP).find(p => p.articleNumber === sub.product_id) ||
+                         Object.entries(PRODUCTS_MAP).find(([k]) => k === sub.product_id)?.[1];
+
         const newOrder = await db.createOrder({
           orderNumber,
-          customerName: sub.product_name,
-          customerEmail: (await db.findUserById(sub.user_id))?.email || "",
-          customerPhone: "",
-          address: "",
-          zip: "",
-          city: "",
+          customerName: user?.name || sub.product_name,
+          customerEmail: user?.email || "",
+          customerPhone: user?.phone || lastOrder?.customer_phone || "",
+          address: lastOrder?.address || "",
+          zip: lastOrder?.zip || "",
+          city: lastOrder?.city || "",
           vivaOrderCode: null,
           merchantTrns: `RSUB-${orderNumber}`,
-          items: [{ id: sub.product_id, name: sub.product_name, qty: sub.quantity, price: sub.recurring_price }],
+          items: [{
+            id: sub.product_id,
+            name: sub.product_name,
+            qty: sub.quantity,
+            price: sub.recurring_price,
+            articleNumber: product?.articleNumber || sub.product_id,
+            vatRate: product?.vatRate || 0.25
+          }],
           totalAmount: sub.recurring_price,
           shippingCost: 0
         });
