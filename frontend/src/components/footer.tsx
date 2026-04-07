@@ -126,11 +126,11 @@ export function Footer() {
                 0732 - 30 55 21
               </a>
               <a
-                href="mailto:hej@1753skincare.com"
+                href="mailto:christopher@1753skincare.com"
                 className="flex items-center gap-2 text-sm text-brand-600 transition-colors hover:text-brand-900"
               >
                 <Mail className="h-3.5 w-3.5" />
-                hej@1753skincare.com
+                christopher@1753skincare.com
               </a>
               <a
                 href="https://instagram.com/1753skincare"

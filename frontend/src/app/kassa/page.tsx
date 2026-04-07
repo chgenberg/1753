@@ -240,7 +240,7 @@ export default function CheckoutPage() {
                   setForm((p) => ({ ...p, email: e.target.value }))
                 }
                 className="w-full rounded-xl border border-input bg-background px-4 py-3 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring focus:outline-none"
-                placeholder="hej@1753skincare.com"
+                placeholder="christopher@1753skincare.com"
               />
             </div>
 
