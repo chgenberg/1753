@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { Star, CheckCircle2, ChevronDown, MessageSquare } from "lucide-react";
+import { Star, CheckCircle2, ChevronDown, ChevronUp } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 import { cn } from "@/lib/utils";
 
@@ -62,6 +62,7 @@ function DistributionBar({ star, count, total }: { star: number; count: number; 
 
 function ReviewCard({ review }: { review: Review }) {
   const [expanded, setExpanded] = useState(false);
+  const [showReply, setShowReply] = useState(false);
   const needsTruncation = review.body.length > 200;
   const displayBody = needsTruncation && !expanded ? review.body.slice(0, 200) + "..." : review.body;
 
@@ -71,7 +72,7 @@ function ReviewCard({ review }: { review: Review }) {
 
   return (
     <div className="group rounded-2xl border border-brand-100 bg-white p-5 transition-all duration-300 hover:shadow-md hover:shadow-brand-900/5">
-      <div className="mb-2 flex items-center justify-between">
+      <div className="mb-3 flex items-center justify-between">
         <Stars rating={review.rating} />
         {review.verified && (
           <span className="flex items-center gap-1 text-[11px] font-medium text-emerald-600">
@@ -82,7 +83,7 @@ function ReviewCard({ review }: { review: Review }) {
       </div>
 
       {review.title && (
-        <h4 className="mb-1 text-sm font-semibold text-brand-900">{review.title}</h4>
+        <h4 className="mb-1.5 text-[14px] font-semibold text-brand-900">{review.title}</h4>
       )}
 
       {review.body && (
@@ -99,20 +100,50 @@ function ReviewCard({ review }: { review: Review }) {
         </p>
       )}
 
+      {/* Reply toggle */}
       {review.reply && (
-        <div className="mt-3 rounded-xl border-l-2 border-emerald-500 bg-brand-50/50 py-2.5 pl-3.5 pr-3">
-          <div className="mb-1 flex items-center gap-1.5 text-[11px] font-semibold text-brand-800">
-            <MessageSquare className="h-3 w-3" />
+        <div className="mt-3">
+          <button
+            onClick={() => setShowReply(!showReply)}
+            className="flex items-center gap-1.5 text-[11px] font-medium text-brand-400 transition-colors hover:text-brand-600"
+          >
+            <ChevronUp
+              className={cn(
+                "h-3 w-3 transition-transform duration-200",
+                showReply ? "rotate-0" : "rotate-180"
+              )}
+            />
             Svar från 1753 SKINCARE
+          </button>
+
+          <div
+            className={cn(
+              "overflow-hidden transition-all duration-300 ease-out",
+              showReply ? "mt-2.5 max-h-96 opacity-100" : "max-h-0 opacity-0"
+            )}
+          >
+            <div className="rounded-xl bg-brand-50/60 px-4 py-3">
+              <p className="text-[12px] leading-relaxed text-brand-600">{review.reply}</p>
+            </div>
           </div>
-          <p className="text-[12px] leading-relaxed text-brand-600">{review.reply}</p>
         </div>
       )}
 
-      <div className="mt-3 flex items-center gap-2 text-[11px] text-brand-400">
+      {/* Author info */}
+      <div className="mt-3 flex items-center gap-1.5 text-[11px] text-brand-400">
         <span className="font-medium text-brand-500">{review.reviewer_name}</span>
-        {review.location && <span>{review.location}</span>}
-        {date && <span>{date}</span>}
+        {review.location && (
+          <>
+            <span className="text-brand-200">&middot;</span>
+            <span>{review.location}</span>
+          </>
+        )}
+        {date && (
+          <>
+            <span className="text-brand-200">&middot;</span>
+            <span>{date}</span>
+          </>
+        )}
       </div>
     </div>
   );
@@ -167,18 +198,20 @@ export function ReviewsSection({ productId }: { productId: string }) {
         </h2>
 
         {/* Stats summary */}
-        <div className="mt-6 flex flex-col gap-8 sm:flex-row sm:items-start sm:gap-12">
+        <div className="mt-8 flex flex-col gap-8 sm:flex-row sm:items-start sm:gap-14">
           <div className="flex flex-col items-center sm:items-start">
             <div className="text-5xl font-bold tracking-tight text-brand-900">
               {stats.avg.toFixed(1)}
             </div>
-            <Stars rating={Math.round(stats.avg)} size="lg" />
-            <p className="mt-1 text-sm text-brand-500">
+            <div className="mt-1">
+              <Stars rating={Math.round(stats.avg)} size="lg" />
+            </div>
+            <p className="mt-1.5 text-sm text-brand-400">
               Baserat på {stats.count.toLocaleString("sv-SE")} omdömen
             </p>
           </div>
 
-          <div className="flex-1 space-y-1.5 sm:max-w-xs">
+          <div className="flex-1 space-y-2 sm:max-w-xs">
             {[5, 4, 3, 2, 1].map((star) => (
               <DistributionBar
                 key={star}
@@ -199,14 +232,14 @@ export function ReviewsSection({ productId }: { productId: string }) {
 
         {/* Load more */}
         {hasMore && (
-          <div className="mt-8 flex justify-center">
+          <div className="mt-10 flex justify-center">
             <button
               onClick={loadMore}
               disabled={loadingMore}
-              className="flex items-center gap-2 rounded-full border border-brand-200 px-6 py-2.5 text-sm font-medium text-brand-700 transition-all hover:border-brand-400 hover:bg-brand-50 disabled:opacity-50"
+              className="flex items-center gap-2 rounded-full border border-brand-200 px-7 py-3 text-sm font-medium text-brand-600 transition-all hover:border-brand-400 hover:bg-brand-50 disabled:opacity-50"
             >
               {loadingMore ? (
-                <div className="h-4 w-4 animate-spin rounded-full border-2 border-brand-200 border-t-brand-700" />
+                <div className="h-4 w-4 animate-spin rounded-full border-2 border-brand-200 border-t-brand-600" />
               ) : (
                 <ChevronDown className="h-4 w-4" />
               )}
