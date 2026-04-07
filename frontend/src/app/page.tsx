@@ -115,9 +115,9 @@ function ReviewCarousel() {
   if (reviews.length === 0) return null;
 
   return (
-    <section className="py-12 md:py-16">
+    <section className="py-6 md:py-10">
       <div className="mx-auto max-w-[1280px] px-6 md:px-10">
-        <div className="mb-8 flex items-end justify-between">
+        <div className="mb-6 flex items-end justify-between">
           <div>
             <div className="flex items-center gap-1">
               {[1, 2, 3, 4, 5].map(i => (
@@ -151,7 +151,7 @@ function ReviewCarousel() {
 
       <div
         ref={scrollRef}
-        className="flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth px-6 pb-4 md:px-10 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
+        className="flex snap-x snap-mandatory gap-4 overflow-x-auto scroll-smooth px-6 pb-2 md:px-10 [-ms-overflow-style:none] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
         style={{ paddingLeft: "max(1.5rem, calc((100vw - 1280px) / 2 + 1.5rem))" }}
       >
         {reviews.map((r) => (
@@ -243,7 +243,7 @@ export default function HomePage() {
   return (
     <>
       {/* Hero */}
-      <section className="py-12 md:py-20 lg:py-28">
+      <section className="py-10 md:py-16 lg:py-20">
         <div className="mx-auto max-w-[1280px] px-6 md:px-10">
           <div className="flex flex-col-reverse items-center gap-10 md:flex-row md:gap-16 lg:gap-20">
             <div className="flex-1 text-center md:text-left">
@@ -288,7 +288,7 @@ export default function HomePage() {
       <ReviewCarousel />
 
       {/* Products (moved above features) */}
-      <SectionWrapper>
+      <SectionWrapper className="!py-10 md:!py-14">
         <div id="produkter" className="-mt-20 pt-20" />
         <div className="mb-12 text-center">
           <h2 className="text-3xl font-bold tracking-tight text-brand-900">
