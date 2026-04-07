@@ -2263,14 +2263,13 @@ async function processAutomationQueue() {
         const baseUrl = process.env.BASE_URL || "https://api.1753skin.com";
         const unsubUrl = `${baseUrl}/api/newsletter/unsubscribe/${item.unsubscribe_token}`;
 
+        const ctx = typeof item.context === "string" ? JSON.parse(item.context) : (item.context || {});
         const html = emailWrapper(
           step.html
             .replace(/\{\{firstName\}\}/g, item.first_name || "du")
             .replace(/\{\{email\}\}/g, item.email)
-            .replace(/\{\{context\.(\w+)\}\}/g, (_, key) => {
-              const ctx = typeof item.context === "string" ? JSON.parse(item.context) : item.context;
-              return ctx[key] || "";
-            }),
+            .replace(/\{\{reviewToken\}\}/g, ctx.reviewToken || "")
+            .replace(/\{\{context\.(\w+)\}\}/g, (_, key) => ctx[key] || ""),
           unsubUrl
         );
 
