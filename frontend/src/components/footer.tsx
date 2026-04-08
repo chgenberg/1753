@@ -8,7 +8,7 @@ import { apiFetch } from "@/lib/api";
 import { useLocale } from "@/providers/locale-provider";
 
 export function Footer() {
-  const { t, path } = useLocale();
+  const { t, path, locale } = useLocale();
   const [email, setEmail] = useState("");
   const [status, setStatus] = useState<"idle" | "loading" | "success" | "error">("idle");
   const [msg, setMsg] = useState("");
@@ -31,6 +31,7 @@ export function Footer() {
     }
   };
 
+  const guidePath = locale === "sv" ? "/sv/guide/cbd-hudvard" : "/en/guide/cbd-skincare";
   const navLinks = [
     { href: path("home"), label: t("header.navHome") },
     { href: path("products"), label: t("header.navProducts") },
@@ -38,6 +39,7 @@ export function Footer() {
     { href: path("contact"), label: t("header.navContact") },
     { href: path("skinAnalysis"), label: t("footer.navAnalysis") },
     { href: path("loyalty"), label: t("loyaltyPage.navLabel") },
+    { href: guidePath, label: t("footer.navGuide") },
   ];
 
   return (

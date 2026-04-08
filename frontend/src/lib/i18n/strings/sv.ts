@@ -32,6 +32,7 @@ const bundle = {
     tagline: "Svensk hudvård med CBD och CBG. Utvecklad för nordisk hud.",
     navTitle: "Navigera",
     navAnalysis: "Hudanalys",
+    navGuide: "Hudvårdsguide",
     contactTitle: "Kontakt",
     addressTitle: "Adress",
     addressLines: "Södra Skjutbanevägen 10\n439 55 Åsa\nSverige",

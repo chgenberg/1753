@@ -33,6 +33,7 @@ export const en: Messages = {
     tagline: "Swedish skincare with CBD and CBG. Developed for Nordic skin.",
     navTitle: "Navigate",
     navAnalysis: "Skin analysis",
+    navGuide: "Skincare guide",
     contactTitle: "Contact",
     addressTitle: "Address",
     addressLines: "Sodra Skjutbanevagen 10\n439 55 Asa\nSweden",

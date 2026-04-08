@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import { PRODUCTS } from "@/lib/products";
 import { localizePath, type AppRoute } from "@/lib/i18n/navigation";
 import { locales } from "@/lib/i18n/types";
+import { ALL_LANDING_PAGES } from "@/lib/seo";
 
 const BASE = "https://www.1753skin.com";
 
@@ -39,6 +40,21 @@ export default function sitemap(): MetadataRoute.Sitemap {
         priority: 0.8,
       });
     }
+  }
+
+  for (const page of ALL_LANDING_PAGES) {
+    out.push({
+      url: `${BASE}/sv/guide/${page.svSlug}`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.6,
+    });
+    out.push({
+      url: `${BASE}/en/guide/${page.enSlug}`,
+      lastModified: now,
+      changeFrequency: "monthly",
+      priority: 0.6,
+    });
   }
 
   return out;
