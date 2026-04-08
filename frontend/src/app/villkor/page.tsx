@@ -43,8 +43,8 @@ export default function TermsPage() {
             </h2>
             <p>
               Betalning sker via Viva Wallet med stöd för kort (Visa,
-              Mastercard) och andra tillgängliga betalmetoder. Betalningen
-              dras i samband med köpet.
+              Mastercard), Swish och andra tillgängliga betalmetoder.
+              Betalningen dras i samband med köpet.
             </p>
           </section>
 
@@ -53,7 +53,7 @@ export default function TermsPage() {
               4. Leverans
             </h2>
             <p>
-              Vi skickar alla ordrar via vårt lagersamarbete med Logit. Normal
+              Vi skickar alla ordrar med Postnord Varubrev. Normal
               leveranstid är 2–5 arbetsdagar inom Sverige. Fri frakt vid köp
               över 700 kr; i övrigt tillkommer en fraktavgift på 49 kr.
             </p>

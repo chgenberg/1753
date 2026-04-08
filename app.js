@@ -108,7 +108,7 @@ const PRODUCTS = [
     articleNumber: "4001",
     category: "supplement",
     name: "Fungtastic Mushroom Extract",
-    price: 399,
+    price: 377,
     originalPrice: null,
     reviews: 63,
     image: "public/Products/Fungtastic.webp",

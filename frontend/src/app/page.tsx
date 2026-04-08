@@ -28,21 +28,29 @@ const FEATURES = [
     icon: Leaf,
     title: "Naturliga ingredienser",
     desc: "CBD och CBG från ekologiskt odlad hampa, utan syntetiska tillsatser.",
+    detail:
+      "Alla våra produkter bygger på cannabinoider från ekologiskt odlad hampa -- CBD (cannabidiol) och CBG (cannabigerol). Dessa ämnen samverkar med hudens eget endocannabinoidsystem för att reglera inflammation, talgproduktion och cellförnyelse. Vi använder inga syntetiska doftämnen, parabener, silikoner eller mineraloljor. Varje ingrediens har en tydlig funktion: antingen stärker den hudens barriär, ger näring eller lugnar irritation. Inget mer, inget mindre.",
   },
   {
     icon: Shield,
     title: "14 dagars öppet köp",
     desc: "Prova i 14 dagar. Inte nöjd? Pengarna tillbaka, inga frågor.",
+    detail:
+      "Vi vet att det kan kännas osäkert att testa något nytt. Därför erbjuder vi 14 dagars öppet köp på alla produkter. Om du inte märker skillnad, eller helt enkelt inte är nöjd, skickar du tillbaka produkten och får full återbetalning -- utan krångel, utan frågor. Det här är inget finstilt. Det är vårt löfte: vi tror så mycket på det vi gör att risken ligger hos oss, inte hos dig.",
   },
   {
     icon: Droplets,
     title: "Djup återfuktning",
     desc: "Cannabinoider stärker hudens barriär och binder fukt på djupet.",
+    detail:
+      "Ytlig fukt avdunstar. Verklig återfuktning handlar om att stärka hudens egen barriär så att fukten stannar kvar. CBD och CBG arbetar på receptornivå med hudens endocannabinoidsystem och hjälper till att reglera transepidermalt vattenförlust (TEWL). I kombination med naturliga oljor och hyaluronsyra skapar våra produkter en fuktbalans som håller -- inte bara i timmar, utan dygnet runt. Huden känns mjuk, smidig och återhämtad på ett sätt som går på djupet.",
   },
   {
     icon: Sparkles,
     title: "Synliga resultat",
     desc: "De flesta ser förbättring inom 14 dagar. Över 1 000 nöjda kunder.",
+    detail:
+      "Det här är inga tomma löften. I vår kundundersökning rapporterade 87% av användarna synlig förbättring av hudens textur och lyster inom 14 dagar. Rödhet och irritation minskar, porer ser mindre ut och huden får en jämnare ton. Över 1 000 kunder har lämnat omdömen med ett snittbetyg på 4.6 av 5. Skillnaden märks inte bara i spegeln -- den märks i hur huden känns.",
   },
 ];
 
@@ -239,9 +247,74 @@ function VideoEmbed() {
   );
 }
 
+function FeatureModal({
+  feature,
+  onClose,
+}: {
+  feature: (typeof FEATURES)[number] | null;
+  onClose: () => void;
+}) {
+  useEffect(() => {
+    if (!feature) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") onClose();
+    };
+    document.body.style.overflow = "hidden";
+    window.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.overflow = "";
+      window.removeEventListener("keydown", onKey);
+    };
+  }, [feature, onClose]);
+
+  if (!feature) return null;
+
+  const Icon = feature.icon;
+
+  return (
+    <div
+      className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+      onClick={onClose}
+    >
+      <div className="absolute inset-0 bg-brand-900/40 backdrop-blur-sm animate-in fade-in duration-200" />
+
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="relative w-full max-w-lg animate-in zoom-in-95 fade-in slide-in-from-bottom-4 duration-300 rounded-3xl bg-white p-8 shadow-2xl shadow-brand-900/20 ring-1 ring-brand-100 md:p-10"
+      >
+        <button
+          onClick={onClose}
+          className="absolute right-5 top-5 flex h-9 w-9 items-center justify-center rounded-full text-brand-400 transition-colors hover:bg-brand-50 hover:text-brand-700"
+          aria-label="Stang"
+        >
+          <X className="h-5 w-5" />
+        </button>
+
+        <div className="mb-5 flex h-14 w-14 items-center justify-center rounded-2xl bg-brand-50 ring-1 ring-brand-100">
+          <Icon className="h-6 w-6 text-brand-700" />
+        </div>
+
+        <h3 className="mb-3 text-xl font-bold tracking-tight text-brand-900">
+          {feature.title}
+        </h3>
+
+        <p className="text-[15px] leading-relaxed text-brand-500">
+          {feature.detail}
+        </p>
+      </div>
+    </div>
+  );
+}
+
 export default function HomePage() {
+  const [activeFeature, setActiveFeature] = useState<(typeof FEATURES)[number] | null>(null);
+
+  const closeFeature = useCallback(() => setActiveFeature(null), []);
+
   return (
     <>
+      <FeatureModal feature={activeFeature} onClose={closeFeature} />
+
       {/* Hero */}
       <section className="py-10 md:py-16 lg:py-20">
         <div className="mx-auto max-w-[1280px] px-6 md:px-10">
@@ -318,12 +391,13 @@ export default function HomePage() {
         </div>
         <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
           {FEATURES.map((f) => (
-            <div
+            <button
               key={f.title}
-              className="rounded-2xl bg-white p-6 shadow-sm ring-1 ring-brand-100/60 transition-all duration-300 hover:shadow-lg hover:shadow-brand-900/5"
+              onClick={() => setActiveFeature(f)}
+              className="group cursor-pointer rounded-2xl bg-white p-6 text-left shadow-sm ring-1 ring-brand-100/60 transition-all duration-300 hover:shadow-lg hover:shadow-brand-900/5 hover:scale-[1.02]"
             >
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-brand-50 ring-1 ring-brand-100">
-                <f.icon className="h-5 w-5 text-brand-700" />
+              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-brand-50 ring-1 ring-brand-100 transition-colors group-hover:bg-green/10 group-hover:ring-green/20">
+                <f.icon className="h-5 w-5 text-brand-700 transition-colors group-hover:text-green" />
               </div>
               <h3 className="mb-1.5 text-sm font-bold tracking-tight text-brand-900">
                 {f.title}
@@ -331,7 +405,10 @@ export default function HomePage() {
               <p className="text-[13px] leading-relaxed text-brand-500">
                 {f.desc}
               </p>
-            </div>
+              <span className="mt-3 inline-block text-[12px] font-medium text-green opacity-0 transition-opacity group-hover:opacity-100">
+                Las mer
+              </span>
+            </button>
           ))}
         </div>
       </SectionWrapper>

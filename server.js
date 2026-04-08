@@ -331,7 +331,7 @@ app.post("/api/subscriptions/create", authMiddleware, async (req, res) => {
       customer: {
         email: user.email,
         fullName: user.name,
-        phone: user.phone || ""
+        phone: (user.phone || "").replace(/^0/, "")
       }
     });
 

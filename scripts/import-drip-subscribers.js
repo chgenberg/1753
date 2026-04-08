@@ -2,24 +2,18 @@
 /**
  * import-drip-subscribers.js
  *
- * Imports subscribers from a Drip CSV export into the subscribers table.
- * Handles active/unsubscribed status and deduplication (upsert).
+ * Batch-imports subscribers from a Drip CSV export into the subscribers table.
+ * Uses multi-row INSERT with ON CONFLICT for speed (~12k rows in seconds).
  *
  * Usage:
  *   DATABASE_URL="postgres://..." node scripts/import-drip-subscribers.js path/to/drip-export.csv
- *   node scripts/import-drip-subscribers.js path/to/drip-export.csv  (uses .env)
- *
- * Expected CSV columns (Drip export format):
- *   email, first_name (or name), status, created_at, tags, ...
- *
- * The script auto-detects column names and handles common Drip formats.
  */
 
 require("dotenv").config();
 const fs = require("fs");
 const path = require("path");
 const crypto = require("crypto");
-const db = require("../db");
+const { Pool } = require("pg");
 
 const csvPath = process.argv[2];
 if (!csvPath) {
@@ -33,23 +27,12 @@ if (!fs.existsSync(fullPath)) {
   process.exit(1);
 }
 
-function parseCSV(text) {
-  const lines = text.split(/\r?\n/).filter((l) => l.trim());
-  if (lines.length < 2) return [];
-
-  const headers = parseCSVLine(lines[0]).map((h) => h.toLowerCase().trim());
-  const rows = [];
-
-  for (let i = 1; i < lines.length; i++) {
-    const values = parseCSVLine(lines[i]);
-    const row = {};
-    headers.forEach((h, idx) => {
-      row[h] = (values[idx] || "").trim();
-    });
-    rows.push(row);
-  }
-  return rows;
-}
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: process.env.DATABASE_URL?.includes("localhost")
+    ? false
+    : { rejectUnauthorized: false },
+});
 
 function parseCSVLine(line) {
   const fields = [];
@@ -76,91 +59,89 @@ function parseCSVLine(line) {
   return fields;
 }
 
-function detectColumns(headers) {
-  const emailCol = headers.find((h) => /^e-?mail/.test(h)) || "email";
-  const nameCol = headers.find((h) => /first.?name/i.test(h))
-    || headers.find((h) => /^name$/i.test(h))
-    || "first_name";
-  const statusCol = headers.find((h) => /status/i.test(h)) || "status";
-  const tagsCol = headers.find((h) => /tags/i.test(h)) || "tags";
-
-  return { emailCol, nameCol, statusCol, tagsCol };
-}
-
 async function main() {
-  console.log("=== Drip-prenumerant-import ===\n");
+  console.log("=== Drip-prenumerant-import (batch) ===\n");
 
   const text = fs.readFileSync(fullPath, "utf-8");
-  const rows = parseCSV(text);
-  console.log(`Läste ${rows.length} rader från ${path.basename(fullPath)}\n`);
-
-  if (rows.length === 0) {
+  const lines = text.split(/\r?\n/).filter((l) => l.trim());
+  if (lines.length < 2) {
     console.log("Inga rader att importera.");
     process.exit(0);
   }
 
-  const headers = Object.keys(rows[0]);
-  const { emailCol, nameCol, statusCol, tagsCol } = detectColumns(headers);
-  console.log(`Kolumner: email="${emailCol}", namn="${nameCol}", status="${statusCol}", taggar="${tagsCol}"\n`);
+  const headers = parseCSVLine(lines[0]).map((h) => h.toLowerCase().trim());
+  const emailIdx = headers.indexOf("email");
+  const nameIdx = headers.findIndex((h) => /first.?name/i.test(h));
+  const statusIdx = headers.indexOf("status");
 
-  let imported = 0;
-  let skipped = 0;
-  let unsubscribed = 0;
-  let errors = 0;
+  console.log(`Rader: ${lines.length - 1}`);
+  console.log(`Kolumner: email=${emailIdx}, first_name=${nameIdx}, status=${statusIdx}\n`);
 
-  for (const row of rows) {
-    const email = (row[emailCol] || "").toLowerCase().trim();
+  const rows = [];
+  let skippedNoEmail = 0;
+
+  for (let i = 1; i < lines.length; i++) {
+    const vals = parseCSVLine(lines[i]);
+    const email = (vals[emailIdx] || "").toLowerCase().trim();
     if (!email || !email.includes("@")) {
-      skipped++;
+      skippedNoEmail++;
       continue;
     }
 
-    const firstName = row[nameCol] || "";
-    const status = (row[statusCol] || "active").toLowerCase();
-    const isUnsubscribed = status.includes("unsub") || status.includes("removed") || status === "inactive";
+    const firstName = nameIdx >= 0 ? (vals[nameIdx] || "").trim().split(" ")[0] : "";
+    const rawStatus = (vals[statusIdx] || "active").toLowerCase();
+    const isUnsub = rawStatus.includes("unsub") || rawStatus.includes("removed") || rawStatus === "inactive";
 
-    try {
-      const unsubscribeToken = crypto.randomBytes(32).toString("hex");
-
-      const existing = await db.findSubscriberByEmail(email);
-
-      if (existing) {
-        if (isUnsubscribed && existing.status === "active") {
-          await db.unsubscribe(existing.unsubscribe_token);
-          unsubscribed++;
-        } else {
-          skipped++;
-        }
-        continue;
-      }
-
-      await db.createSubscriber({
-        email,
-        firstName: firstName.split(" ")[0],
-        source: "drip-import",
-        unsubscribeToken,
-      });
-
-      if (isUnsubscribed) {
-        const sub = await db.findSubscriberByEmail(email);
-        if (sub) await db.unsubscribe(sub.unsubscribe_token);
-        unsubscribed++;
-      } else {
-        imported++;
-      }
-    } catch (err) {
-      console.error(`  Fel för ${email}: ${err.message}`);
-      errors++;
-    }
+    rows.push({
+      email,
+      first_name: firstName,
+      status: isUnsub ? "unsubscribed" : "active",
+      source: "drip-import",
+      unsubscribe_token: crypto.randomBytes(32).toString("hex"),
+    });
   }
 
-  console.log("\n--- Resultat ---");
-  console.log(`Importerade (aktiva): ${imported}`);
-  console.log(`Avprenumererade:      ${unsubscribed}`);
-  console.log(`Överhoppade:          ${skipped}`);
-  console.log(`Fel:                  ${errors}`);
-  console.log(`Totalt bearbetade:    ${rows.length}`);
+  console.log(`Giltiga e-poster: ${rows.length}`);
+  console.log(`Utan e-post (hoppades over): ${skippedNoEmail}\n`);
 
+  const BATCH_SIZE = 500;
+  let inserted = 0;
+  let unchanged = 0;
+
+  for (let i = 0; i < rows.length; i += BATCH_SIZE) {
+    const batch = rows.slice(i, i + BATCH_SIZE);
+
+    const values = [];
+    const params = [];
+    let paramIdx = 1;
+
+    for (const row of batch) {
+      values.push(`($${paramIdx}, $${paramIdx + 1}, $${paramIdx + 2}, $${paramIdx + 3}, $${paramIdx + 4})`);
+      params.push(row.email, row.first_name, row.status, row.source, row.unsubscribe_token);
+      paramIdx += 5;
+    }
+
+    const sql = `
+      INSERT INTO subscribers (email, first_name, status, source, unsubscribe_token)
+      VALUES ${values.join(", ")}
+      ON CONFLICT (email) DO NOTHING
+    `;
+
+    const result = await pool.query(sql, params);
+    inserted += result.rowCount;
+    unchanged += batch.length - result.rowCount;
+
+    const pct = Math.min(100, Math.round(((i + batch.length) / rows.length) * 100));
+    process.stdout.write(`\r  Batch ${Math.floor(i / BATCH_SIZE) + 1}/${Math.ceil(rows.length / BATCH_SIZE)} — ${pct}% klar`);
+  }
+
+  console.log("\n\n--- Resultat ---");
+  console.log(`Nya prenumeranter:    ${inserted}`);
+  console.log(`Redan existerande:    ${unchanged}`);
+  console.log(`Utan e-post:          ${skippedNoEmail}`);
+  console.log(`Totalt i CSV:         ${lines.length - 1}`);
+
+  await pool.end();
   process.exit(0);
 }
 

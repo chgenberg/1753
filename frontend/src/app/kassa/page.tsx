@@ -221,7 +221,7 @@ export default function CheckoutPage() {
                     setForm((p) => ({ ...p, firstname: e.target.value }))
                   }
                   className="w-full rounded-xl border border-input bg-background px-4 py-3 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring focus:outline-none"
-                  placeholder="Ditt förnamn"
+                  placeholder="Förnamn"
                 />
               </div>
               <div>
@@ -237,7 +237,7 @@ export default function CheckoutPage() {
                     setForm((p) => ({ ...p, lastname: e.target.value }))
                   }
                   className="w-full rounded-xl border border-input bg-background px-4 py-3 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring focus:outline-none"
-                  placeholder="Ditt efternamn"
+                  placeholder="Efternamn"
                 />
               </div>
             </div>
@@ -255,7 +255,7 @@ export default function CheckoutPage() {
                   setForm((p) => ({ ...p, email: e.target.value }))
                 }
                 className="w-full rounded-xl border border-input bg-background px-4 py-3 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring focus:outline-none"
-                placeholder="christopher@1753skincare.com"
+                placeholder="E-postadress"
               />
             </div>
 
@@ -270,7 +270,7 @@ export default function CheckoutPage() {
                 value={form.phone}
                 onChange={(e) => handlePhoneChange(e.target.value)}
                 className="w-full rounded-xl border border-input bg-background px-4 py-3 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring focus:outline-none"
-                placeholder="0732-305 521"
+                placeholder="Mobilnummer"
               />
             </div>
 
@@ -287,7 +287,7 @@ export default function CheckoutPage() {
                   setForm((p) => ({ ...p, address: e.target.value }))
                 }
                 className="w-full rounded-xl border border-input bg-background px-4 py-3 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring focus:outline-none"
-                placeholder="Södra Skjutbanevägen 10"
+                placeholder="Gatuadress"
               />
             </div>
 
@@ -305,7 +305,7 @@ export default function CheckoutPage() {
                     setForm((p) => ({ ...p, zip: e.target.value }))
                   }
                   className="w-full rounded-xl border border-input bg-background px-4 py-3 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring focus:outline-none"
-                  placeholder="439 55"
+                  placeholder="Postnummer"
                 />
               </div>
               <div>
@@ -321,13 +321,13 @@ export default function CheckoutPage() {
                     setForm((p) => ({ ...p, city: e.target.value }))
                   }
                   className="w-full rounded-xl border border-input bg-background px-4 py-3 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring focus:outline-none"
-                  placeholder="Åsa"
+                  placeholder="Ort"
                 />
               </div>
             </div>
 
             {hasSubscription && (
-              <div className="rounded-xl border-2 border-brand-800/20 bg-brand-50/50 p-4 space-y-2">
+              <div id="prenumerationsvillkor" className="rounded-xl border-2 border-brand-800/20 bg-brand-50/50 p-4 space-y-2">
                 <div className="flex items-center gap-2 text-sm font-semibold text-brand-900">
                   <RefreshCcw className="h-4 w-4" />
                   Prenumerationsvillkor
@@ -372,7 +372,21 @@ export default function CheckoutPage() {
                 >
                   integritetspolicyn
                 </Link>
-                {hasSubscription && " samt prenumerationsvillkoren ovan"}
+                {hasSubscription && (
+                  <>
+                    {" "}samt{" "}
+                    <a
+                      href="#prenumerationsvillkor"
+                      className="font-medium text-brand-900 underline underline-offset-2"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        document.getElementById("prenumerationsvillkor")?.scrollIntoView({ behavior: "smooth", block: "center" });
+                      }}
+                    >
+                      prenumerationsvillkoren
+                    </a>
+                  </>
+                )}
               </span>
             </label>
 

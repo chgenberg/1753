@@ -1,6 +1,6 @@
 {
-  "issueCounter": 1,
-  "lastGeneratedAt": "2026-04-08T07:10:23.739Z",
+  "issueCounter": 2,
+  "lastGeneratedAt": "2026-04-08T08:02:58.438Z",
   "history": [
     {
       "issue": 1,
@@ -9,6 +9,14 @@
       "subject": "Avsnitt 1: huden är inte trasig",
       "sourcesCount": 4,
       "generatedAt": "2026-04-08T07:10:23.739Z"
+    },
+    {
+      "issue": 2,
+      "type": "value",
+      "chapterId": 2,
+      "subject": "Avsnitt 2: huden lever, lyssna på den",
+      "sourcesCount": 3,
+      "generatedAt": "2026-04-08T08:02:58.438Z"
     }
   ]
 }
