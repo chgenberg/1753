@@ -229,6 +229,22 @@ async function initSchema() {
     );
 
     CREATE INDEX IF NOT EXISTS idx_addresses_user ON addresses (user_id);
+
+    CREATE TABLE IF NOT EXISTS newsletter_drafts (
+      id              SERIAL PRIMARY KEY,
+      issue_number    INTEGER NOT NULL,
+      type            VARCHAR(20) NOT NULL DEFAULT 'value',
+      subject         VARCHAR(255) NOT NULL,
+      preheader       VARCHAR(255) DEFAULT '',
+      html_body       TEXT NOT NULL,
+      sources         JSONB DEFAULT '[]',
+      segment_title   VARCHAR(255) DEFAULT '',
+      status          VARCHAR(20) DEFAULT 'draft',
+      approved_at     TIMESTAMPTZ,
+      sent_at         TIMESTAMPTZ,
+      sent_count      INTEGER DEFAULT 0,
+      created_at      TIMESTAMPTZ DEFAULT NOW()
+    );
   `);
   console.log("[DB] Schema ready");
 }
@@ -1139,6 +1155,51 @@ async function deleteReview(id) {
   return rowCount > 0;
 }
 
+// ---- NEWSLETTER DRAFT helpers ----
+
+async function createNewsletterDraft({ issueNumber, type, subject, preheader, htmlBody, sources, segmentTitle }) {
+  const { rows } = await pool.query(
+    `INSERT INTO newsletter_drafts (issue_number, type, subject, preheader, html_body, sources, segment_title)
+     VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
+    [issueNumber, type, subject, preheader || "", htmlBody, JSON.stringify(sources || []), segmentTitle || ""]
+  );
+  return rows[0];
+}
+
+async function getNewsletterDraft(id) {
+  const { rows } = await pool.query("SELECT * FROM newsletter_drafts WHERE id = $1", [id]);
+  return rows[0] || null;
+}
+
+async function listNewsletterDrafts({ status, limit = 20 } = {}) {
+  let q = "SELECT * FROM newsletter_drafts";
+  const params = [];
+  if (status) {
+    q += " WHERE status = $1";
+    params.push(status);
+  }
+  q += " ORDER BY created_at DESC LIMIT $" + (params.length + 1);
+  params.push(limit);
+  const { rows } = await pool.query(q, params);
+  return rows;
+}
+
+async function approveNewsletterDraft(id) {
+  const { rows } = await pool.query(
+    `UPDATE newsletter_drafts SET status = 'approved', approved_at = NOW() WHERE id = $1 AND status = 'draft' RETURNING *`,
+    [id]
+  );
+  return rows[0] || null;
+}
+
+async function markNewsletterSent(id, sentCount) {
+  const { rows } = await pool.query(
+    `UPDATE newsletter_drafts SET status = 'sent', sent_at = NOW(), sent_count = $2 WHERE id = $1 RETURNING *`,
+    [id, sentCount]
+  );
+  return rows[0] || null;
+}
+
 module.exports = {
   pool,
   initSchema,
@@ -1213,5 +1274,10 @@ module.exports = {
   updateAddress,
   deleteAddress,
   addLoyaltyPoints,
-  deductLoyaltyPoints
+  deductLoyaltyPoints,
+  createNewsletterDraft,
+  getNewsletterDraft,
+  listNewsletterDrafts,
+  approveNewsletterDraft,
+  markNewsletterSent
 };

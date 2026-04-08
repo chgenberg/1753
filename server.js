@@ -2552,7 +2552,7 @@ app.post("/api/newsletter/generate", async (req, res) => {
 
     res.json({ ok: true, message: "Generering startad", dryRun });
 
-    execFile("node", args, { env: process.env, timeout: 120_000 }, (err, stdout, stderr) => {
+    execFile("node", [scriptPath], { env: process.env, timeout: 120_000 }, (err, stdout, stderr) => {
       if (err) {
         console.error("[Newsletter] Generering misslyckades:", err.message);
         if (stderr) console.error(stderr);

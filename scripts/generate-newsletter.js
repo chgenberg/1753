@@ -305,27 +305,34 @@ Svara ENBART med JSON:
     return;
   }
 
-  // Send via broadcast endpoint
-  console.log("\nSkickar via broadcast-endpoint...");
+  // Save as draft via API (requires approval before sending)
+  console.log("\nSparar utkast...");
   const fetch = (await import("node-fetch")).default;
-  const broadcastRes = await fetch(`${BACKEND_URL}/api/newsletter/broadcast`, {
+  const draftRes = await fetch(`${BACKEND_URL}/api/newsletter/drafts`, {
     method: "POST",
-    headers: { "Content-Type": "application/json" },
+    headers: {
+      "Content-Type": "application/json",
+      "x-admin-key": ADMIN_API_KEY,
+    },
     body: JSON.stringify({
+      issueNumber: issueNum,
+      type,
       subject: newsletter.subject,
-      html: fullHtml,
-      adminKey: ADMIN_API_KEY,
+      preheader: newsletter.preheader || "",
+      htmlBody: fullHtml,
+      sources: newsletter.sources || [],
+      segmentTitle: segment.title,
     }),
   });
 
-  if (!broadcastRes.ok) {
-    const errText = await broadcastRes.text();
-    console.error(`Broadcast misslyckades (${broadcastRes.status}): ${errText}`);
+  if (!draftRes.ok) {
+    const errText = await draftRes.text();
+    console.error(`Kunde inte spara utkast (${draftRes.status}): ${errText}`);
     process.exit(1);
   }
 
-  const result = await broadcastRes.json();
-  console.log(`Klart! Skickade till ${result.sent} prenumeranter.`);
+  const draft = await draftRes.json();
+  console.log(`Utkast #${draft.id} sparat. Väntar på godkännande i admin-dashboarden.`);
 }
 
 main().catch((err) => {
