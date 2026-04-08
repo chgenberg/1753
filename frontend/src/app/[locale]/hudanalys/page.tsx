@@ -18,15 +18,12 @@ interface AnalysisResult {
   productIds: string[];
 }
 
-async function ensureDataImageUrl(url: string): Promise<string> {
-  if (url.startsWith("data:image/")) return url;
-  const res = await fetch(url);
-  const blob = await res.blob();
+function readFileAsDataUrl(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const fr = new FileReader();
     fr.onload = () => resolve(String(fr.result));
     fr.onerror = () => reject(new Error("Could not read image"));
-    fr.readAsDataURL(blob);
+    fr.readAsDataURL(file);
   });
 }
 
@@ -41,9 +38,9 @@ export default function AnalysisPage() {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [useCamera, setUseCamera] = useState(false);
 
-  const handleFile = useCallback((file: File) => {
-    const url = URL.createObjectURL(file);
-    setPreviewUrl(url);
+  const handleFile = useCallback(async (file: File) => {
+    const dataUrl = await readFileAsDataUrl(file);
+    setPreviewUrl(dataUrl);
     setStep("upload");
   }, []);
 
@@ -82,10 +79,9 @@ export default function AnalysisPage() {
     setError("");
 
     try {
-      const image = await ensureDataImageUrl(previewUrl);
       const data = await apiFetch<AnalysisResult>("/analysis", {
         method: "POST",
-        body: JSON.stringify({ image, locale }),
+        body: JSON.stringify({ image: previewUrl, locale }),
       });
       setResult(data);
       setStep("result");
