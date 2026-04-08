@@ -2535,6 +2535,37 @@ async function processAutomationQueue() {
   }
 }
 
+// ---- NEWSLETTER GENERATE ENDPOINT (cron-job.org trigger) ----
+
+app.post("/api/newsletter/generate", async (req, res) => {
+  try {
+    const adminKey = req.body.adminKey || req.headers["x-admin-key"];
+    const expectedKey = process.env.ADMIN_API_KEY || "1753-admin-key";
+    if (adminKey !== expectedKey) {
+      return res.status(403).json({ message: "Ogiltig admin-nyckel" });
+    }
+
+    const dryRun = req.body.dryRun === true;
+    const { execFile } = require("child_process");
+    const scriptPath = require("path").join(__dirname, "scripts", "generate-newsletter.js");
+    const args = dryRun ? [scriptPath, "--dry-run"] : [scriptPath];
+
+    res.json({ ok: true, message: "Generering startad", dryRun });
+
+    execFile("node", args, { env: process.env, timeout: 120_000 }, (err, stdout, stderr) => {
+      if (err) {
+        console.error("[Newsletter] Generering misslyckades:", err.message);
+        if (stderr) console.error(stderr);
+      } else {
+        console.log("[Newsletter] Generering klar:", stdout.trim().split("\n").pop());
+      }
+    });
+  } catch (err) {
+    console.error("[Newsletter] Generate error:", err);
+    res.status(500).json({ message: "Kunde inte starta generering" });
+  }
+});
+
 // ---- BROADCAST ENDPOINT (admin) ----
 
 app.post("/api/newsletter/broadcast", async (req, res) => {
