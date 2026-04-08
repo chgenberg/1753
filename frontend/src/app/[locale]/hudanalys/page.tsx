@@ -2,7 +2,7 @@
 
 import { useCallback, useRef, useState } from "react";
 import Image from "next/image";
-import { Camera, Loader2, Upload, Sparkles, ArrowRight } from "lucide-react";
+import { Camera, Loader2, Upload, Sparkles } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/product-card";
 import { SectionWrapper } from "@/components/section-wrapper";
@@ -12,10 +12,10 @@ import { useLocale } from "@/providers/locale-provider";
 
 type Step = "intro" | "upload" | "analyzing" | "result";
 
-interface AnalysisResult {
-  analysis: string;
-  recommendations: string[];
-  productIds: string[];
+interface AnalysisResponse {
+  content: string;
+  responseId: string | null;
+  usage?: Record<string, unknown>;
 }
 
 function readFileAsDataUrl(file: File): Promise<string> {
@@ -28,11 +28,11 @@ function readFileAsDataUrl(file: File): Promise<string> {
 }
 
 export default function AnalysisPage() {
-  const { t, locale } = useLocale();
+  const { t } = useLocale();
   const a = (key: string) => t(`analysisPage.${key}`);
   const [step, setStep] = useState<Step>("intro");
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
-  const [result, setResult] = useState<AnalysisResult | null>(null);
+  const [result, setResult] = useState<AnalysisResponse | null>(null);
   const [error, setError] = useState("");
   const fileRef = useRef<HTMLInputElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -79,9 +79,9 @@ export default function AnalysisPage() {
     setError("");
 
     try {
-      const data = await apiFetch<AnalysisResult>("/analysis", {
+      const data = await apiFetch<AnalysisResponse>("/analysis", {
         method: "POST",
-        body: JSON.stringify({ image: previewUrl, locale }),
+        body: JSON.stringify({ imageBase64: previewUrl }),
       });
       setResult(data);
       setStep("result");
@@ -89,11 +89,9 @@ export default function AnalysisPage() {
       setError(t("analysisPage.analysisError"));
       setStep("upload");
     }
-  }, [previewUrl, t, locale]);
+  }, [previewUrl, t]);
 
-  const recommendedProducts = result?.productIds
-    ? PRODUCTS.filter((p) => result.productIds.includes(p.id))
-    : [];
+  const recommendedProducts = PRODUCTS.slice(0, 3);
 
   return (
     <>
@@ -229,28 +227,9 @@ export default function AnalysisPage() {
               <div className="mt-8 rounded-2xl border border-border p-6 md:p-8">
                 <div
                   className="prose prose-sm max-w-none text-muted-foreground"
-                  dangerouslySetInnerHTML={{ __html: result.analysis }}
+                  dangerouslySetInnerHTML={{ __html: result.content }}
                 />
               </div>
-
-              {result.recommendations.length > 0 && (
-                <div className="mt-8">
-                  <h3 className="mb-4 text-lg font-bold tracking-tight">
-                    {a("recommendationsTitle")}
-                  </h3>
-                  <ul className="space-y-3">
-                    {result.recommendations.map((rec, i) => (
-                      <li
-                        key={i}
-                        className="flex items-start gap-3 rounded-xl bg-brand-50/40 p-4 text-sm leading-relaxed"
-                      >
-                        <ArrowRight className="mt-0.5 h-4 w-4 flex-shrink-0 text-brand-700" />
-                        {rec}
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
             </div>
           )}
         </div>
