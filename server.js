@@ -220,8 +220,8 @@ app.put("/api/auth/password", authMiddleware, async (req, res) => {
   if (!valid) {
     return res.status(401).json({ message: "Nuvarande lösenord är felaktigt" });
   }
-  if (!newPassword || newPassword.length < 6) {
-    return res.status(400).json({ message: "Nytt lösenord måste vara minst 6 tecken" });
+  if (!newPassword || newPassword.length < 6 || !/\d/.test(newPassword)) {
+    return res.status(400).json({ message: "Nytt lösenord måste vara minst 6 tecken och innehålla minst en siffra" });
   }
 
   const newHash = bcrypt ? await bcrypt.hash(newPassword, 10) : newPassword;

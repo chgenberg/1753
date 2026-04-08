@@ -3,6 +3,7 @@ import { Inter } from "next/font/google";
 import "./globals.css";
 import { CartProvider } from "@/providers/cart-provider";
 import { AuthProvider } from "@/providers/auth-provider";
+import { TopBanner } from "@/components/top-banner";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { CartDrawer } from "@/components/cart-drawer";
@@ -62,6 +63,7 @@ export default function RootLayout({
         <AuthProvider>
           <CartProvider>
             <Toaster>
+              <TopBanner />
               <Header />
               <main className="flex-1">{children}</main>
               <Footer />

@@ -26,8 +26,8 @@ export default function RegisterPage() {
     e.preventDefault();
     setError("");
 
-    if (form.password.length < 6) {
-      setError("Lösenordet måste vara minst 6 tecken.");
+    if (form.password.length < 6 || !/\d/.test(form.password)) {
+      setError("Lösenordet måste vara minst 6 tecken och innehålla minst en siffra.");
       return;
     }
     if (form.password !== form.confirm) {
@@ -158,7 +158,7 @@ export default function RegisterPage() {
                       setForm((p) => ({ ...p, password: e.target.value }))
                     }
                     className="w-full rounded-xl border border-input bg-background px-4 py-3 pr-12 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring focus:outline-none"
-                    placeholder="Minst 6 tecken"
+                    placeholder="Minst 6 tecken, inkl. en siffra"
                   />
                   <button
                     type="button"

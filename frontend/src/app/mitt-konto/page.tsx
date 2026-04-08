@@ -220,6 +220,41 @@ function OverviewView({
           <p className="text-3xl font-bold tracking-tight">{points.toLocaleString("sv-SE")}</p>
           <p className="text-sm text-brand-600">Poäng</p>
         </div>
+      </div>
+
+      <div className="rounded-xl border border-border bg-white p-5">
+        <h3 className="mb-3 text-sm font-bold text-brand-900">Lojalitetsnivåer</h3>
+        <div className="grid grid-cols-2 gap-2 sm:grid-cols-4">
+          {([
+            { name: "Brons", threshold: "0", perk: "Grundnivå" },
+            { name: "Silver", threshold: "2 000", perk: "5% rabatt" },
+            { name: "Guld", threshold: "5 000", perk: "8% rabatt" },
+            { name: "Platina", threshold: "10 000", perk: "12% rabatt" },
+          ] as const).map((t) => {
+            const isActive = t.name === tier;
+            return (
+              <div
+                key={t.name}
+                className={cn(
+                  "rounded-lg px-3.5 py-3 transition-all",
+                  isActive
+                    ? "bg-brand-900 text-white ring-2 ring-brand-900 ring-offset-2"
+                    : "bg-brand-50 text-brand-700"
+                )}
+              >
+                <p className={cn("text-xs font-bold", isActive ? "text-white" : "text-brand-900")}>{t.name}</p>
+                <p className={cn("mt-0.5 text-[11px]", isActive ? "text-white/80" : "text-brand-500")}>{t.perk}</p>
+                <p className={cn("mt-1 text-[10px]", isActive ? "text-white/60" : "text-brand-400")}>{t.threshold} poäng</p>
+              </div>
+            );
+          })}
+        </div>
+        <p className="mt-3 text-xs text-muted-foreground">
+          1 kr = 1 poäng. Rabatten gäller alla köp. Poäng kan även lösas in som rabattkoder under Förmåner.
+        </p>
+      </div>
+
+      <div className="grid gap-4 sm:grid-cols-2">
         <div className="rounded-xl border border-border bg-white p-5">
           <Gift className="mb-2 h-4 w-4 text-brand-400" />
           <p className="text-lg font-bold">{tier}</p>
@@ -1041,6 +1076,10 @@ function SettingsView({ token }: { token: string }) {
 
   const handleChangePassword = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (newPw.length < 6 || !/\d/.test(newPw)) {
+      showToast("Lösenordet måste vara minst 6 tecken och innehålla minst en siffra.", "error");
+      return;
+    }
     setPwSaving(true);
     try {
       await authFetch("/auth/password", token, {
@@ -1158,10 +1197,12 @@ function SettingsView({ token }: { token: string }) {
               onChange={(e) => setNewPw(e.target.value)}
               required
               minLength={6}
+              placeholder="Minst 6 tecken, inkl. en siffra"
               className="w-full rounded-xl border border-input bg-background px-4 py-3 text-sm shadow-sm focus-visible:ring-1 focus-visible:ring-ring focus:outline-none"
             />
           </div>
         </div>
+        <p className="text-xs text-muted-foreground">Minst 6 tecken och minst en siffra.</p>
         <Button type="submit" variant="outline" disabled={pwSaving} className="rounded-xl active:scale-[0.98]">
           {pwSaving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
           Byt lösenord
