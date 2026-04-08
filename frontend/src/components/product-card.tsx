@@ -8,6 +8,8 @@ import { useWishlist } from "@/hooks/use-wishlist";
 import { useToast } from "@/components/notification";
 import { useRouter } from "next/navigation";
 import type { Product } from "@/lib/products";
+import { productDisplayName, productShortDesc } from "@/lib/products";
+import { useLocale } from "@/providers/locale-provider";
 
 export function ProductCard({
   product,
@@ -21,24 +23,33 @@ export function ProductCard({
   const { isWishlisted, toggle, isLoggedIn } = useWishlist();
   const { showToast } = useToast();
   const router = useRouter();
+  const { path, t, locale } = useLocale();
   const inWishlist = isWishlisted(product.id);
+  const name = productDisplayName(product, locale);
+  const shortDesc = productShortDesc(product, locale);
+  const loc = locale === "en" ? "en-GB" : "sv-SE";
 
   const handleWishlistClick = async (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
     if (!isLoggedIn) {
-      router.push("/logga-in");
+      router.push(path("login"));
       return;
     }
     const ok = await toggle(product.id);
     if (ok) {
-      showToast(inWishlist ? "Borttagen från önskelistan" : "Tillagd i önskelistan", "success");
+      showToast(
+        inWishlist ? t("productCard.wishlistToastRemoved") : t("productCard.wishlistToastAdded"),
+        "success"
+      );
     }
   };
 
+  const href = path("product", { productId: product.id });
+
   return (
     <Link
-      href={`/produkter/${product.id}`}
+      href={href}
       className={cn(
         "group relative block overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-brand-100/80 transition-all duration-300 hover:shadow-xl hover:shadow-brand-900/5 hover:ring-brand-200",
         className
@@ -47,7 +58,7 @@ export function ProductCard({
       <div className="relative aspect-[4/5] overflow-hidden bg-brand-50">
         <Image
           src={product.image}
-          alt={product.name}
+          alt={name}
           fill
           priority={priority}
           className="object-cover transition-all duration-700 ease-out group-hover:opacity-0 group-hover:scale-[1.03]"
@@ -55,7 +66,7 @@ export function ProductCard({
         />
         <Image
           src={product.imageAlt}
-          alt={`${product.name} – lifestyle`}
+          alt={`${name}${t("productDetail.lifestyleAltSuffix")}`}
           fill
           className="object-cover opacity-0 transition-all duration-700 ease-out group-hover:opacity-100 group-hover:scale-[1.03]"
           sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
@@ -63,13 +74,14 @@ export function ProductCard({
         <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-black/5" />
         {product.originalPrice && (
           <span className="absolute left-3 top-3 rounded-full bg-brand-800 px-3 py-1 text-[11px] font-semibold text-white shadow-lg">
-            Spara{" "}
-            {(product.originalPrice - product.price).toLocaleString("sv-SE")} kr
+            {t("productCard.save")}{" "}
+            {(product.originalPrice - product.price).toLocaleString(loc)}{" "}
+            {t("productCard.currency")}
           </span>
         )}
         <button
           onClick={handleWishlistClick}
-          aria-label={inWishlist ? "Ta bort från önskelista" : "Lägg till i önskelista"}
+          aria-label={inWishlist ? t("productCard.wishlistRemove") : t("productCard.wishlistAdd")}
           className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white/80 shadow-sm backdrop-blur-sm transition-all hover:bg-white hover:shadow-md"
         >
           <Heart className={cn("h-4 w-4 transition-colors", inWishlist ? "fill-red-500 text-red-500" : "text-brand-400")} />
@@ -90,18 +102,18 @@ export function ProductCard({
           </span>
         </div>
         <h3 className="text-sm font-semibold tracking-tight text-brand-900">
-          {product.name}
+          {name}
         </h3>
         <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-brand-500">
-          {product.shortDesc}
+          {shortDesc}
         </p>
         <div className="mt-3 flex items-center gap-2">
           <span className="text-base font-bold text-brand-900">
-            {product.price.toLocaleString("sv-SE")} kr
+            {product.price.toLocaleString(loc)} {t("productCard.currency")}
           </span>
           {product.originalPrice && (
             <span className="text-xs font-medium text-brand-500 line-through">
-              {product.originalPrice.toLocaleString("sv-SE")} kr
+              {product.originalPrice.toLocaleString(loc)} {t("productCard.currency")}
             </span>
           )}
         </div>

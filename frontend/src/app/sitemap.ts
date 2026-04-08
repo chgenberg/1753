@@ -1,25 +1,45 @@
 import type { MetadataRoute } from "next";
 import { PRODUCTS } from "@/lib/products";
+import { localizePath, type AppRoute } from "@/lib/i18n/navigation";
+import { locales } from "@/lib/i18n/types";
 
-const BASE = "https://1753skincare.com";
+const BASE = "https://www.1753skin.com";
+
+const PUBLIC_ROUTES: AppRoute[] = [
+  "home",
+  "products",
+  "about",
+  "contact",
+  "skinAnalysis",
+  "terms",
+  "privacy",
+  "loyalty",
+];
 
 export default function sitemap(): MetadataRoute.Sitemap {
-  const staticPages: MetadataRoute.Sitemap = [
-    { url: BASE, lastModified: new Date(), changeFrequency: "weekly", priority: 1 },
-    { url: `${BASE}/produkter`, lastModified: new Date(), changeFrequency: "weekly", priority: 0.9 },
-    { url: `${BASE}/om-oss`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.7 },
-    { url: `${BASE}/kontakt`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.6 },
-    { url: `${BASE}/hudanalys`, lastModified: new Date(), changeFrequency: "monthly", priority: 0.7 },
-    { url: `${BASE}/integritetspolicy`, lastModified: new Date(), changeFrequency: "yearly", priority: 0.3 },
-    { url: `${BASE}/villkor`, lastModified: new Date(), changeFrequency: "yearly", priority: 0.3 },
-  ];
+  const out: MetadataRoute.Sitemap = [];
+  const now = new Date();
 
-  const productPages: MetadataRoute.Sitemap = PRODUCTS.map((p) => ({
-    url: `${BASE}/produkter/${p.id}`,
-    lastModified: new Date(),
-    changeFrequency: "weekly" as const,
-    priority: 0.8,
-  }));
+  for (const locale of locales) {
+    for (const route of PUBLIC_ROUTES) {
+      const path = localizePath(locale, route);
+      out.push({
+        url: `${BASE}${path}`,
+        lastModified: now,
+        changeFrequency: route === "home" || route === "products" ? "weekly" : "monthly",
+        priority: route === "home" ? 1 : route === "products" ? 0.9 : 0.7,
+      });
+    }
 
-  return [...staticPages, ...productPages];
+    for (const p of PRODUCTS) {
+      out.push({
+        url: `${BASE}${localizePath(locale, "product", { productId: p.id })}`,
+        lastModified: now,
+        changeFrequency: "weekly",
+        priority: 0.8,
+      });
+    }
+  }
+
+  return out;
 }

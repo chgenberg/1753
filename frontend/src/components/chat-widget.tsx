@@ -1,170 +1,402 @@
 "use client";
 
-import { useCallback, useRef, useState } from "react";
-import { MessageCircle, Send, X } from "lucide-react";
-import { apiFetch } from "@/lib/api";
-import { cn } from "@/lib/utils";
+import Link from "next/link";
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useRef,
+  useState,
+  type FormEvent,
+} from "react";
+import { API_URL } from "@/lib/api";
+import { getProduct, productDisplayName } from "@/lib/products";
+import { useCart } from "@/providers/cart-provider";
+import { useLocale } from "@/providers/locale-provider";
 
-interface Message {
-  role: "user" | "assistant";
-  content: string;
+const MAX_MESSAGES = 40;
+
+type ChatRow =
+  | { key: string; kind: "user"; text: string }
+  | { key: string; kind: "assistant"; html: string }
+  | { key: string; kind: "product"; productId: string };
+
+type ChatAction = { type: "add_to_cart"; productId: string };
+
+type ChatResponse = {
+  content?: string;
+  responseId?: string | null;
+  actions?: ChatAction[];
+};
+
+function formatMarkdown(text: string): string {
+  return text
+    .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
+    .replace(/^- (.+)$/gm, "<li>$1</li>")
+    .replace(/(<li>[\s\S]*?<\/li>)/g, (m) =>
+      m.startsWith("<ul>") ? m : "<ul>" + m + "</ul>"
+    )
+    .replace(/\n\n/g, "</p><p>")
+    .replace(/\n/g, "<br>")
+    .replace(/^/, "<p>")
+    .replace(/$/, "</p>");
 }
 
 export function ChatWidget() {
-  const [isOpen, setIsOpen] = useState(false);
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [responseId, setResponseId] = useState<string | null>(null);
-  const messagesEnd = useRef<HTMLDivElement>(null);
+  const id = useId();
+  const { t, path, locale, messages } = useLocale();
+  const { addItem } = useCart();
+  const loc = locale === "en" ? "en-GB" : "sv-SE";
+  const cur = t("productCard.currency");
 
-  const scrollToBottom = useCallback(() => {
-    setTimeout(() => messagesEnd.current?.scrollIntoView({ behavior: "smooth" }), 100);
-  }, []);
+  const [isOpen, setIsOpen] = useState(false);
+  const [tipsOpen, setTipsOpen] = useState(false);
+  const [rows, setRows] = useState<ChatRow[]>([]);
+  const [typing, setTyping] = useState(false);
+  const [input, setInput] = useState("");
+  const [responseId, setResponseId] = useState<string | null>(null);
+
+  const bubbleCountRef = useRef(0);
+  const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const localeRef = useRef(locale);
+
+  useEffect(() => {
+    if (localeRef.current === locale) return;
+    localeRef.current = locale;
+    setRows([]);
+    setResponseId(null);
+    bubbleCountRef.current = 0;
+    setTipsOpen(false);
+    setInput("");
+    setTyping(false);
+  }, [locale]);
+
+  const scrollToEnd = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToEnd();
+  }, [rows, typing, isOpen]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    setRows((prev) => {
+      if (prev.length > 0) return prev;
+      bubbleCountRef.current = 1;
+      return [
+        {
+          key: `${id}-welcome`,
+          kind: "assistant",
+          html: formatMarkdown(messages.chatWidget.welcome),
+        },
+      ];
+    });
+  }, [isOpen, id, messages.chatWidget.welcome]);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key !== "Escape") return;
+      if (tipsOpen) {
+        setTipsOpen(false);
+        return;
+      }
+      setIsOpen(false);
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [isOpen, tipsOpen]);
+
+  const appendAssistant = useCallback((text: string) => {
+    bubbleCountRef.current += 1;
+    setRows((r) => [
+      ...r,
+      {
+        key: `${id}-a-${Date.now()}-${Math.random()}`,
+        kind: "assistant",
+        html: formatMarkdown(text),
+      },
+    ]);
+  }, [id]);
 
   const sendMessage = useCallback(
     async (text: string) => {
-      if (!text.trim() || loading) return;
-      const userMsg: Message = { role: "user", content: text.trim() };
-      setMessages((prev) => [...prev, userMsg]);
+      const trimmed = text.trim();
+      if (!trimmed) return;
+
+      if (bubbleCountRef.current >= MAX_MESSAGES) {
+        appendAssistant(messages.chatWidget.maxMessages);
+        return;
+      }
+
+      bubbleCountRef.current += 1;
+      setRows((r) => [
+        ...r,
+        {
+          key: `${id}-u-${Date.now()}-${Math.random()}`,
+          kind: "user",
+          text: trimmed,
+        },
+      ]);
       setInput("");
-      setLoading(true);
-      scrollToBottom();
+      setTyping(true);
 
       try {
-        const data = await apiFetch<{
-          reply: string;
-          responseId?: string;
-          actions?: { type: string; productId?: string }[];
-        }>("/chat", {
+        const res = await fetch(`${API_URL}/chat`, {
           method: "POST",
+          headers: { "Content-Type": "application/json" },
           body: JSON.stringify({
-            message: text.trim(),
+            message: trimmed,
             previousResponseId: responseId,
           }),
         });
 
+        setTyping(false);
+
+        if (!res.ok) {
+          const err = (await res.json().catch(() => ({}))) as { message?: string };
+          throw new Error(err.message || "Chat error");
+        }
+
+        const data = (await res.json()) as ChatResponse;
         if (data.responseId) setResponseId(data.responseId);
 
-        setMessages((prev) => [
-          ...prev,
-          { role: "assistant", content: data.reply },
-        ]);
+        if (data.actions?.length) {
+          for (const action of data.actions) {
+            if (action.type === "add_to_cart" && action.productId) {
+              addItem(action.productId);
+              setRows((r) => [
+                ...r,
+                {
+                  key: `${id}-p-${action.productId}-${Date.now()}`,
+                  kind: "product",
+                  productId: action.productId,
+                },
+              ]);
+            }
+          }
+        }
+
+        if (data.content) {
+          appendAssistant(data.content);
+        }
       } catch {
-        setMessages((prev) => [
-          ...prev,
-          {
-            role: "assistant",
-            content:
-              "Ursäkta, något gick fel. Försök igen eller kontakta oss på hej@1753skincare.com.",
-          },
-        ]);
-      } finally {
-        setLoading(false);
-        scrollToBottom();
+        setTyping(false);
+        appendAssistant(messages.chatWidget.error);
       }
     },
-    [loading, responseId, scrollToBottom]
+    [
+      addItem,
+      appendAssistant,
+      id,
+      messages.chatWidget.error,
+      messages.chatWidget.maxMessages,
+      responseId,
+      locale,
+    ]
   );
 
+  const onSubmit = (e: FormEvent) => {
+    e.preventDefault();
+    void sendMessage(input);
+  };
+
+  const tips = messages.chatWidget.tips;
+
   return (
-    <>
+    <div id="cw">
       <button
-        onClick={() => setIsOpen(true)}
-        className={cn(
-          "fixed bottom-6 right-6 z-[60] flex h-14 w-14 items-center justify-center rounded-full bg-brand-900 text-white shadow-xl transition-all hover:scale-105 hover:shadow-2xl",
-          isOpen && "hidden"
-        )}
-        aria-label="Öppna chatt"
+        type="button"
+        className={`cw-trigger ${isOpen ? "cw-trigger--open" : ""}`}
+        aria-label={isOpen ? messages.chatWidget.closeChat : messages.chatWidget.openChat}
+        aria-expanded={isOpen}
+        onClick={() => setIsOpen((o) => !o)}
       >
-        <MessageCircle className="h-6 w-6" />
+        <svg
+          className="cw-trigger-icon cw-trigger-icon--chat"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden
+        >
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+        </svg>
+        <svg
+          className="cw-trigger-icon cw-trigger-icon--close"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          aria-hidden
+        >
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
+        </svg>
       </button>
 
-      {isOpen && (
-        <>
-          <div
-            className="fixed inset-0 z-[70] bg-black/20 backdrop-blur-sm md:hidden"
-            onClick={() => setIsOpen(false)}
-          />
-          <div className="fixed bottom-6 right-6 z-[80] flex h-[500px] w-[380px] max-w-[calc(100vw-2rem)] flex-col overflow-hidden rounded-2xl border border-border bg-background shadow-2xl max-md:inset-x-4 max-md:bottom-4 max-md:right-auto max-md:w-auto">
-            <div className="flex items-center justify-between border-b border-border px-5 py-4">
+      <button
+        type="button"
+        className={`cw-backdrop ${isOpen ? "cw-backdrop--open" : ""}`}
+        aria-hidden
+        tabIndex={-1}
+        onClick={() => setIsOpen(false)}
+      />
+
+      <div
+        className={`cw-modal ${isOpen ? "cw-modal--open" : ""}`}
+        role="dialog"
+        aria-modal="true"
+        aria-label={messages.chatWidget.dialogLabel}
+        hidden={!isOpen}
+      >
+        <div className="cw-modal-inner">
+          <div className="cw-header">
+            <div className="cw-header-left">
+              <div className="cw-avatar">1753</div>
               <div>
-                <p className="text-sm font-bold">1753 SKINCARE</p>
-                <p className="text-xs text-muted-foreground">
-                  Hudvårdsrådgivare &middot; Svar kan vara AI-genererade
-                </p>
+                <div className="cw-header-title">{messages.chatWidget.title}</div>
+                <div className="cw-header-sub">{messages.chatWidget.subtitle}</div>
               </div>
+            </div>
+            <button
+              type="button"
+              className="cw-close"
+              aria-label={messages.chatWidget.closeChat}
+              onClick={() => setIsOpen(false)}
+            >
+              &times;
+            </button>
+          </div>
+
+          <div className="cw-messages" aria-live="polite">
+            {rows.map((row) => {
+              if (row.kind === "user") {
+                return (
+                  <div key={row.key} className="cw-bubble cw-bubble--user">
+                    {row.text}
+                  </div>
+                );
+              }
+              if (row.kind === "assistant") {
+                return (
+                  <div
+                    key={row.key}
+                    className="cw-bubble cw-bubble--assistant"
+                    dangerouslySetInnerHTML={{ __html: row.html }}
+                  />
+                );
+              }
+              const p = getProduct(row.productId);
+              if (!p) return null;
+              const name = productDisplayName(p, locale);
+              return (
+                <div key={row.key} className="cw-product-card">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={p.image} alt={name} loading="lazy" />
+                  <div className="cw-product-info">
+                    <div className="cw-product-name">{name}</div>
+                    <div className="cw-product-price">
+                      {p.price.toLocaleString(loc)} {cur}
+                    </div>
+                  </div>
+                  <Link href={path("product", { productId: row.productId })} className="cw-product-link">
+                    {messages.chatWidget.viewProduct}
+                  </Link>
+                </div>
+              );
+            })}
+            {typing ? (
+              <div className="cw-typing" aria-hidden>
+                <span />
+                <span />
+                <span />
+              </div>
+            ) : null}
+            <div ref={messagesEndRef} />
+          </div>
+
+          <div className={`cw-tips-overlay ${tipsOpen ? "cw-tips-overlay--open" : ""}`}>
+            <div className="cw-tips-header">
+              <span className="cw-tips-title">{messages.chatWidget.tipsTitle}</span>
               <button
-                onClick={() => setIsOpen(false)}
-                className="flex h-8 w-8 items-center justify-center rounded-full hover:bg-brand-50"
-                aria-label="Stäng chatt"
+                type="button"
+                className="cw-tips-close"
+                aria-label={messages.chatWidget.closeTips}
+                onClick={() => setTipsOpen(false)}
               >
-                <X className="h-4 w-4" />
+                &times;
               </button>
             </div>
-
-            <div className="flex-1 overflow-y-auto px-4 py-4">
-              {messages.length === 0 && (
-                <div className="flex flex-col items-center justify-center gap-3 pt-12 text-center">
-                  <MessageCircle className="h-10 w-10 text-brand-300" />
-                  <p className="text-sm text-muted-foreground">
-                    Hej! Hur kan jag hjälpa dig med din hudvård idag?
-                  </p>
-                </div>
-              )}
-              {messages.map((msg, i) => (
-                <div
-                  key={i}
-                  className={cn(
-                    "mb-3 max-w-[85%] rounded-2xl px-4 py-2.5 text-sm leading-relaxed",
-                    msg.role === "user"
-                      ? "ml-auto bg-brand-900 text-white"
-                      : "bg-brand-50 text-brand-900"
-                  )}
-                >
-                  {msg.content}
-                </div>
-              ))}
-              {loading && (
-                <div className="mb-3 max-w-[85%] rounded-2xl bg-brand-50 px-4 py-3">
-                  <div className="flex gap-1.5">
-                    <span className="h-2 w-2 animate-pulse rounded-full bg-brand-400" />
-                    <span className="h-2 w-2 animate-pulse rounded-full bg-brand-400 [animation-delay:150ms]" />
-                    <span className="h-2 w-2 animate-pulse rounded-full bg-brand-400 [animation-delay:300ms]" />
-                  </div>
-                </div>
-              )}
-              <div ref={messagesEnd} />
-            </div>
-
-            <form
-              onSubmit={(e) => {
-                e.preventDefault();
-                sendMessage(input);
-              }}
-              className="border-t border-border px-4 py-3"
-            >
-              <div className="flex items-center gap-2">
-                <input
-                  type="text"
-                  value={input}
-                  onChange={(e) => setInput(e.target.value)}
-                  placeholder="Skriv ditt meddelande..."
-                  className="flex-1 rounded-xl border border-input bg-background px-4 py-2.5 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring focus:outline-none"
-                />
+            <div className="cw-tips-grid">
+              {tips.map((tip) => (
                 <button
-                  type="submit"
-                  disabled={!input.trim() || loading}
-                  className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-900 text-white transition-all hover:bg-brand-800 disabled:opacity-40"
-                  aria-label="Skicka"
+                  key={tip}
+                  type="button"
+                  className="cw-tip"
+                  onClick={() => {
+                    setTipsOpen(false);
+                    void sendMessage(tip);
+                  }}
                 >
-                  <Send className="h-4 w-4" />
+                  {tip}
                 </button>
-              </div>
-            </form>
+              ))}
+            </div>
           </div>
-        </>
-      )}
-    </>
+
+          <form className="cw-form" autoComplete="off" onSubmit={onSubmit}>
+            <button
+              type="button"
+              className="cw-tips-btn"
+              aria-label={messages.chatWidget.showTips}
+              onClick={() => setTipsOpen((o) => !o)}
+            >
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden
+              >
+                <circle cx="12" cy="12" r="10" />
+                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3" />
+                <line x1="12" y1="17" x2="12.01" y2="17" />
+              </svg>
+            </button>
+            <input
+              type="text"
+              className="cw-input"
+              placeholder={messages.chatWidget.placeholder}
+              maxLength={500}
+              aria-label={messages.chatWidget.placeholder}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+            />
+            <button type="submit" className="cw-send" aria-label={messages.chatWidget.send}>
+              <svg
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                aria-hidden
+              >
+                <line x1="22" y1="2" x2="11" y2="13" />
+                <polygon points="22 2 15 22 11 13 2 9 22 2" />
+              </svg>
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
   );
 }

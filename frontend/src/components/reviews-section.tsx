@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { Star, CheckCircle2, ChevronDown, ChevronUp } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 import { cn } from "@/lib/utils";
+import { useLocale } from "@/providers/locale-provider";
 
 interface Review {
   id: number;
@@ -60,14 +61,22 @@ function DistributionBar({ star, count, total }: { star: number; count: number; 
   );
 }
 
-function ReviewCard({ review }: { review: Review }) {
+function ReviewCard({
+  review,
+  loc,
+  t,
+}: {
+  review: Review;
+  loc: string;
+  t: (key: string, vars?: Record<string, string | number>) => string;
+}) {
   const [expanded, setExpanded] = useState(false);
   const [showReply, setShowReply] = useState(false);
   const needsTruncation = review.body.length > 200;
   const displayBody = needsTruncation && !expanded ? review.body.slice(0, 200) + "..." : review.body;
 
   const date = review.review_date
-    ? new Date(review.review_date).toLocaleDateString("sv-SE", { year: "numeric", month: "short", day: "numeric" })
+    ? new Date(review.review_date).toLocaleDateString(loc, { year: "numeric", month: "short", day: "numeric" })
     : null;
 
   return (
@@ -77,7 +86,7 @@ function ReviewCard({ review }: { review: Review }) {
         {review.verified && (
           <span className="flex items-center gap-1 text-[11px] font-medium text-emerald-600">
             <CheckCircle2 className="h-3 w-3" />
-            Verifierat köp
+            {t("reviewsUi.verifiedPurchase")}
           </span>
         )}
       </div>
@@ -94,7 +103,7 @@ function ReviewCard({ review }: { review: Review }) {
               onClick={() => setExpanded(true)}
               className="ml-1 font-medium text-brand-900 hover:underline"
             >
-              Läs mer
+              {t("reviewsUi.readMore")}
             </button>
           )}
         </p>
@@ -113,7 +122,7 @@ function ReviewCard({ review }: { review: Review }) {
                 showReply ? "rotate-0" : "rotate-180"
               )}
             />
-            Svar från 1753 SKINCARE
+            {t("reviewsUi.replyFrom")}
           </button>
 
           <div
@@ -150,6 +159,8 @@ function ReviewCard({ review }: { review: Review }) {
 }
 
 export function ReviewsSection({ productId }: { productId: string }) {
+  const { t, locale } = useLocale();
+  const loc = locale === "en" ? "en-GB" : "sv-SE";
   const [reviews, setReviews] = useState<Review[]>([]);
   const [stats, setStats] = useState<ReviewStats | null>(null);
   const [loading, setLoading] = useState(true);
@@ -194,7 +205,7 @@ export function ReviewsSection({ productId }: { productId: string }) {
     <section className="mt-16 border-t border-brand-100 pt-12">
       <div className="mx-auto max-w-[1280px] px-6 md:px-10">
         <h2 className="text-2xl font-bold tracking-tight text-brand-900 md:text-3xl">
-          Omdömen
+          {t("reviewsUi.title")}
         </h2>
 
         {/* Stats summary */}
@@ -207,7 +218,7 @@ export function ReviewsSection({ productId }: { productId: string }) {
               <Stars rating={Math.round(stats.avg)} size="lg" />
             </div>
             <p className="mt-1.5 text-sm text-brand-400">
-              Baserat på {stats.count.toLocaleString("sv-SE")} omdömen
+              {t("reviewsUi.basedOn", { count: stats.count.toLocaleString(loc) })}
             </p>
           </div>
 
@@ -226,7 +237,7 @@ export function ReviewsSection({ productId }: { productId: string }) {
         {/* Review cards */}
         <div className="mt-10 grid gap-4 sm:grid-cols-2">
           {reviews.map((review) => (
-            <ReviewCard key={review.id} review={review} />
+            <ReviewCard key={review.id} review={review} loc={loc} t={t} />
           ))}
         </div>
 
@@ -243,7 +254,7 @@ export function ReviewsSection({ productId }: { productId: string }) {
               ) : (
                 <ChevronDown className="h-4 w-4" />
               )}
-              Visa fler omdömen
+              {t("reviewsUi.loadMore")}
             </button>
           </div>
         )}

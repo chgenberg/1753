@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { useLocale } from "@/providers/locale-provider";
 
 const CONSENT_KEY = "1753_cookie_consent";
 
@@ -14,6 +15,7 @@ export function getConsent(): ConsentValue {
 }
 
 export function CookieBanner() {
+  const { t, path } = useLocale();
   const [visible, setVisible] = useState(false);
 
   useEffect(() => {
@@ -35,14 +37,12 @@ export function CookieBanner() {
     <div className="fixed inset-x-0 bottom-0 z-[60] p-4 md:p-6">
       <div className="mx-auto flex max-w-xl flex-col gap-4 rounded-2xl border border-brand-100 bg-white/95 p-5 shadow-2xl shadow-brand-900/10 backdrop-blur-lg sm:flex-row sm:items-center sm:gap-6">
         <p className="flex-1 text-sm leading-relaxed text-brand-600">
-          Vi använder cookies och lokal lagring för varukorg och inloggning.
-          Med ditt samtycke samlar vi även in anonymiserad besöksstatistik.
-          Läs mer i vår{" "}
+          {t("cookieBanner.text")}{" "}
           <Link
-            href="/integritetspolicy"
+            href={path("privacy")}
             className="font-medium text-brand-900 underline underline-offset-2"
           >
-            integritetspolicy
+            {t("cookieBanner.privacyLink")}
           </Link>
           .
         </p>
@@ -53,14 +53,10 @@ export function CookieBanner() {
             className="rounded-xl"
             onClick={() => accept("necessary")}
           >
-            Bara nödvändiga
+            {t("cookieBanner.necessary")}
           </Button>
-          <Button
-            size="sm"
-            className="rounded-xl"
-            onClick={() => accept("all")}
-          >
-            Acceptera alla
+          <Button size="sm" className="rounded-xl" onClick={() => accept("all")}>
+            {t("cookieBanner.acceptAll")}
           </Button>
         </div>
       </div>

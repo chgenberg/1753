@@ -1366,7 +1366,7 @@ JSON-blocket ska vara markerat med trippla backticks och "json" samt avslutande 
 Tillgängliga produkt-ID:n (använd exakt dessa):
 - "ta-da-serum" – TA-DA Serum (699 kr), CBG-serum (3%), fukt och elasticitet
 - "au-naturel-makeup-remover" – Au Naturel Makeup Remover (399 kr), rengöringsolja, MCT + CBD
-- "fungtastic-mushroom-extract" – Fungtastic Mushroom Extract (399 kr), Chaga, Lion's Mane, Cordyceps, Reishi
+- "fungtastic-mushroom-extract" – Fungtastic Mushroom Extract (377 kr), Chaga, Lion's Mane, Cordyceps, Reishi
 - "duo-kit" – DUO-kit (1 099 kr), The ONE Facial Oil (morgon) + I LOVE Facial Oil (kväll)
 - "duo-ta-da" – DUO-kit + TA-DA Serum (1 495 kr), komplett rutin med oljor och serum
 

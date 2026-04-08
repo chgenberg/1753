@@ -5,8 +5,22 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
-      disallow: ["/api/", "/mitt-konto/", "/kassa/", "/betalning/"],
+      disallow: [
+        "/api/",
+        "/sv/mitt-konto",
+        "/en/my-account",
+        "/sv/kassa",
+        "/en/checkout",
+        "/sv/betalning/",
+        "/en/payment/",
+        "/sv/logga-in",
+        "/sv/registrera",
+        "/en/login",
+        "/en/register",
+        "/sv/skriv-omdome",
+        "/en/write-review",
+      ],
     },
-    sitemap: "https://1753skincare.com/sitemap.xml",
+    sitemap: "https://www.1753skin.com/sitemap.xml",
   };
 }

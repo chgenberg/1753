@@ -107,10 +107,17 @@ async function initSchema() {
       viva_initial_tx_id      VARCHAR(100),
       next_charge_date        DATE,
       last_charge_date        DATE,
+      customer_email          VARCHAR(255),
+      customer_name           VARCHAR(255),
+      order_number            VARCHAR(50),
       paused_at               TIMESTAMPTZ,
       cancelled_at            TIMESTAMPTZ,
       created_at              TIMESTAMPTZ DEFAULT NOW()
     );
+
+    ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS customer_email VARCHAR(255);
+    ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS customer_name VARCHAR(255);
+    ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS order_number VARCHAR(50);
 
     CREATE INDEX IF NOT EXISTS idx_subscriptions_user ON subscriptions (user_id);
     CREATE INDEX IF NOT EXISTS idx_subscriptions_status ON subscriptions (status);
@@ -383,18 +390,18 @@ async function countOrdersByEmail(email) {
 async function createSubscription({
   userId, productId, productName, quantity,
   intervalDays, discountPercent, originalPrice, recurringPrice,
-  vivaInitialOrderCode
+  vivaInitialOrderCode, customerEmail, customerName, orderNumber
 }) {
   const { rows } = await pool.query(
     `INSERT INTO subscriptions
        (user_id, product_id, product_name, quantity,
         interval_days, discount_percent, original_price, recurring_price,
-        viva_initial_order_code)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+        viva_initial_order_code, customer_email, customer_name, order_number)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
      RETURNING *`,
     [userId, productId, productName, quantity || 1,
      intervalDays || 60, discountPercent || 15, originalPrice, recurringPrice,
-     vivaInitialOrderCode]
+     vivaInitialOrderCode, customerEmail || null, customerName || null, orderNumber || null]
   );
   return rows[0];
 }
@@ -422,6 +429,14 @@ async function findSubscriptionByVivaCode(vivaOrderCode) {
     [vivaOrderCode]
   );
   return rows[0] || null;
+}
+
+async function findSubscriptionsByVivaCode(vivaOrderCode) {
+  const { rows } = await pool.query(
+    "SELECT * FROM subscriptions WHERE viva_initial_order_code = $1",
+    [vivaOrderCode]
+  );
+  return rows;
 }
 
 async function updateSubscription(id, fields) {
@@ -1219,6 +1234,7 @@ module.exports = {
   findSubscriptionsByUser,
   findSubscriptionById,
   findSubscriptionByVivaCode,
+  findSubscriptionsByVivaCode,
   updateSubscription,
   findDueSubscriptions,
   createSubscriptionCharge,

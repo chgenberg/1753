@@ -6,6 +6,7 @@ import { Dialog as DialogPrimitive } from "@base-ui/react/dialog"
 import { cn } from "@/lib/utils"
 import { Button } from "@/components/ui/button"
 import { XIcon } from "lucide-react"
+import { useLocaleOptional } from "@/providers/locale-provider"
 
 function Dialog({ ...props }: DialogPrimitive.Root.Props) {
   return <DialogPrimitive.Root data-slot="dialog" {...props} />
@@ -47,6 +48,9 @@ function DialogContent({
 }: DialogPrimitive.Popup.Props & {
   showCloseButton?: boolean
 }) {
+  const loc = useLocaleOptional()
+  const closeLabel = loc?.t("common.close") ?? "Close"
+
   return (
     <DialogPortal>
       <DialogOverlay />
@@ -72,7 +76,7 @@ function DialogContent({
           >
             <XIcon
             />
-            <span className="sr-only">Stäng</span>
+            <span className="sr-only">{closeLabel}</span>
           </DialogPrimitive.Close>
         )}
       </DialogPrimitive.Popup>
@@ -98,6 +102,9 @@ function DialogFooter({
 }: React.ComponentProps<"div"> & {
   showCloseButton?: boolean
 }) {
+  const loc = useLocaleOptional()
+  const closeLabel = loc?.t("common.close") ?? "Close"
+
   return (
     <div
       data-slot="dialog-footer"
@@ -110,7 +117,7 @@ function DialogFooter({
       {children}
       {showCloseButton && (
         <DialogPrimitive.Close render={<Button variant="outline" />}>
-          Stäng
+          {closeLabel}
         </DialogPrimitive.Close>
       )}
     </div>

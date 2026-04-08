@@ -7,13 +7,7 @@ import { ShoppingBag, User, X } from "lucide-react";
 import { useCart } from "@/providers/cart-provider";
 import { useAuth } from "@/providers/auth-provider";
 import { cn } from "@/lib/utils";
-
-const NAV_LINKS = [
-  { href: "/", label: "Hem" },
-  { href: "/produkter", label: "Produkter" },
-  { href: "/om-oss", label: "Om oss" },
-  { href: "/kontakt", label: "Kontakt" },
-];
+import { useLocale } from "@/providers/locale-provider";
 
 function usePrefersReducedMotion() {
   const [reduced, setReduced] = useState(false);
@@ -40,15 +34,18 @@ function MagneticLink({
   const [offset, setOffset] = useState({ x: 0, y: 0 });
   const reducedMotion = usePrefersReducedMotion();
 
-  const handleMove = useCallback((e: React.MouseEvent) => {
-    if (reducedMotion) return;
-    const el = ref.current;
-    if (!el) return;
-    const rect = el.getBoundingClientRect();
-    const x = e.clientX - rect.left - rect.width / 2;
-    const y = e.clientY - rect.top - rect.height / 2;
-    setOffset({ x: x * 0.15, y: y * 0.2 });
-  }, [reducedMotion]);
+  const handleMove = useCallback(
+    (e: React.MouseEvent) => {
+      if (reducedMotion) return;
+      const el = ref.current;
+      if (!el) return;
+      const rect = el.getBoundingClientRect();
+      const x = e.clientX - rect.left - rect.width / 2;
+      const y = e.clientY - rect.top - rect.height / 2;
+      setOffset({ x: x * 0.15, y: y * 0.2 });
+    },
+    [reducedMotion]
+  );
 
   return (
     <Link
@@ -73,8 +70,18 @@ function MagneticLink({
 export function Header() {
   const { totalItems, toggleCart } = useCart();
   const { isLoggedIn } = useAuth();
+  const { t, path, locale } = useLocale();
   const [progress, setProgress] = useState(0);
   const [mobileOpen, setMobileOpen] = useState(false);
+
+  const nav = [
+    { href: path("home"), label: t("header.navHome") },
+    { href: path("products"), label: t("header.navProducts") },
+    { href: path("about"), label: t("header.navAbout") },
+    { href: path("contact"), label: t("header.navContact") },
+  ];
+
+  const accountHref = isLoggedIn ? path("account") : path("login");
 
   useEffect(() => {
     const onScroll = () => {
@@ -105,9 +112,33 @@ export function Header() {
     return () => window.removeEventListener("keydown", onKey);
   }, [mobileOpen]);
 
+  const otherLocale = locale === "sv" ? "en" : "sv";
+  const langHref = `/${otherLocale}`;
+
+  const FlagSE = (
+    <svg viewBox="0 0 32 32" className="h-5 w-5 rounded-full" aria-hidden="true">
+      <circle cx="16" cy="16" r="16" fill="#006AA7" />
+      <rect x="0" y="13" width="32" height="6" fill="#FECC02" />
+      <rect x="10" y="0" width="6" height="32" fill="#FECC02" />
+    </svg>
+  );
+
+  const FlagGB = (
+    <svg viewBox="0 0 32 32" className="h-5 w-5 rounded-full" aria-hidden="true">
+      <circle cx="16" cy="16" r="16" fill="#012169" />
+      <path d="M4 4l24 24M28 4L4 28" stroke="#fff" strokeWidth="4" />
+      <path d="M4 4l24 24M28 4L4 28" stroke="#C8102E" strokeWidth="2" />
+      <rect x="0" y="13" width="32" height="6" fill="#fff" />
+      <rect x="13" y="0" width="6" height="32" fill="#fff" />
+      <rect x="0" y="14" width="32" height="4" fill="#C8102E" />
+      <rect x="14" y="0" width="4" height="32" fill="#C8102E" />
+    </svg>
+  );
+
+  const targetFlag = otherLocale === "sv" ? FlagSE : FlagGB;
+
   return (
     <>
-      {/* Scroll progress bar */}
       <div
         className="fixed top-0 left-0 z-[60] h-[2px] bg-brand-700 transition-all duration-150"
         style={{ width: `${progress}%` }}
@@ -115,20 +146,18 @@ export function Header() {
 
       <header className="sticky top-0 z-50 h-16 border-b border-brand-100 bg-white">
         <div className="mx-auto flex h-full max-w-[1280px] items-center justify-between px-6 md:px-10">
-          {/* Logo */}
-          <Link href="/" className="flex-shrink-0">
+          <Link href={path("home")} className="flex-shrink-0">
             <Image
               src="/1753.webp"
-              alt="1753 SKINCARE"
+              alt={t("header.logoAlt")}
               width={48}
               height={48}
               priority
             />
           </Link>
 
-          {/* Desktop nav */}
           <nav className="hidden items-center gap-10 md:flex">
-            {NAV_LINKS.map((link) => (
+            {nav.map((link) => (
               <MagneticLink
                 key={link.href}
                 href={link.href}
@@ -139,12 +168,22 @@ export function Header() {
             ))}
           </nav>
 
-          {/* Right side icons */}
           <div className="flex items-center gap-1">
             <Link
-              href={isLoggedIn ? "/mitt-konto" : "/logga-in"}
+              href={langHref}
+              className="group relative flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-brand-50"
+              aria-label={t("header.langSwitch")}
+              title={t("header.langSwitch")}
+            >
+              <span className="overflow-hidden rounded-full ring-1 ring-brand-200/60 transition-all duration-300 group-hover:ring-brand-400 group-hover:shadow-sm">
+                {targetFlag}
+              </span>
+            </Link>
+
+            <Link
+              href={accountHref}
               className="flex h-10 w-10 items-center justify-center rounded-full text-brand-900 transition-colors hover:bg-brand-50"
-              aria-label="Mitt konto"
+              aria-label={t("header.accountAria")}
             >
               <User className="h-[18px] w-[18px]" />
             </Link>
@@ -152,7 +191,7 @@ export function Header() {
             <button
               onClick={toggleCart}
               className="relative flex h-10 w-10 items-center justify-center rounded-full text-brand-900 transition-colors hover:bg-brand-50"
-              aria-label="Varukorg"
+              aria-label={t("header.cartAria")}
             >
               <ShoppingBag className="h-[18px] w-[18px]" />
               {totalItems > 0 && (
@@ -162,11 +201,10 @@ export function Header() {
               )}
             </button>
 
-            {/* Hamburger */}
             <button
               onClick={() => setMobileOpen(true)}
               className="flex h-10 w-10 flex-col items-center justify-center gap-[5px] rounded-full transition-colors hover:bg-brand-50 md:hidden"
-              aria-label="Öppna meny"
+              aria-label={t("header.openMenuAria")}
             >
               <span className="block h-[1.5px] w-[18px] bg-brand-900" />
               <span className="block h-[1.5px] w-[18px] bg-brand-900" />
@@ -176,21 +214,20 @@ export function Header() {
         </div>
       </header>
 
-      {/* Mobile menu overlay */}
       {mobileOpen && (
         <div className="fixed inset-0 z-[70] flex flex-col bg-white">
           <div className="flex items-center justify-between border-b border-brand-100 px-6 py-5">
-            <Image src="/1753.webp" alt="1753 SKINCARE" width={48} height={48} />
+            <Image src="/1753.webp" alt={t("header.logoAlt")} width={48} height={48} />
             <button
               onClick={() => setMobileOpen(false)}
               className="flex h-10 w-10 items-center justify-center rounded-full bg-brand-50 text-brand-900 hover:bg-brand-100"
-              aria-label="Stäng meny"
+              aria-label={t("header.closeMenuAria")}
             >
               <X className="h-5 w-5" />
             </button>
           </div>
           <nav className="flex flex-1 flex-col items-center justify-center gap-6">
-            {NAV_LINKS.map((link, i) => (
+            {nav.map((link, i) => (
               <Link
                 key={link.href}
                 href={link.href}
@@ -201,15 +238,25 @@ export function Header() {
                 {link.label}
               </Link>
             ))}
+            <Link
+              href={langHref}
+              onClick={() => setMobileOpen(false)}
+              className="flex items-center gap-2.5 text-sm font-semibold uppercase tracking-wider text-brand-600"
+            >
+              <span className="overflow-hidden rounded-full ring-1 ring-brand-200/60">
+                {targetFlag}
+              </span>
+              {t("header.langSwitch")}
+            </Link>
             <div className="mt-6 h-px w-16 bg-brand-200" />
             <Link
-              href={isLoggedIn ? "/mitt-konto" : "/logga-in"}
+              href={accountHref}
               onClick={() => setMobileOpen(false)}
               className="flex items-center gap-2 text-sm font-medium text-brand-500 opacity-0 animate-fade-in"
-              style={{ animationDelay: `${NAV_LINKS.length * 80}ms` }}
+              style={{ animationDelay: `${nav.length * 80}ms` }}
             >
               <User className="h-4 w-4" />
-              {isLoggedIn ? "Mitt konto" : "Logga in"}
+              {isLoggedIn ? t("header.account") : t("header.login")}
             </Link>
           </nav>
         </div>
