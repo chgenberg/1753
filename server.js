@@ -3523,6 +3523,7 @@ async function processRecurringCharges() {
         }
 
         const vivaAmount = sub.recurring_price * 100;
+        const subCurrency = sub.currency || "SEK";
         const chargeUrl = `https://${env}api.vivapayments.com/api/transactions/${sub.viva_initial_tx_id}`;
 
         const chargeRes = await fetch(chargeUrl, {
@@ -3533,7 +3534,7 @@ async function processRecurringCharges() {
           },
           body: JSON.stringify({
             amount: vivaAmount,
-            currencyCode: "752"
+            currencyCode: String(VIVA_CURRENCY_CODE[subCurrency] || 752)
           })
         });
 
