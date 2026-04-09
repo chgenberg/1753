@@ -348,7 +348,7 @@ async function updateOrder(id, fields) {
 async function appendNotes(id, text) {
   const { rows } = await pool.query(
     `UPDATE orders
-     SET internal_notes = internal_notes || $2, updated_at = NOW()
+     SET internal_notes = COALESCE(internal_notes, '') || $2, updated_at = NOW()
      WHERE id = $1 RETURNING *`,
     [id, text + "\n"]
   );

@@ -972,12 +972,26 @@ app.post("/api/admin/orders/:id/retry", adminAuthMiddleware, async (req, res) =>
 // ---- ADMIN: RETURNS ----
 
 app.post("/api/admin/orders/:id/return", adminAuthMiddleware, async (req, res) => {
+  console.log(`[Return] Creating return for order ${req.params.id}`);
   try {
     const order = await db.adminGetOrder(parseInt(req.params.id));
     if (!order) return res.status(404).json({ message: "Order hittades inte" });
 
     const { items, refundAmount, reason } = req.body;
+    console.log(`[Return] Items: ${JSON.stringify(items)}, refund: ${refundAmount}, reason: ${reason}`);
     if (!items || items.length === 0) return res.status(400).json({ message: "Inga artiklar att returnera" });
+
+    const orderItems = typeof order.items === "string" ? JSON.parse(order.items) : (order.items || []);
+
+    const enrichedItems = items.map(item => {
+      const match = orderItems.find(oi => oi.articleNumber === item.articleNumber);
+      return {
+        ...item,
+        name: item.name || match?.name || item.articleNumber,
+        price: item.price ?? match?.price ?? 0,
+        vatRate: item.vatRate ?? match?.vatRate ?? 0.25
+      };
+    });
 
     const notes = [];
     let fortnoxCreditNumber = null;
@@ -986,30 +1000,20 @@ app.post("/api/admin/orders/:id/return", adminAuthMiddleware, async (req, res) =
     // Fortnox: create credit invoice
     if (order.fortnox_invoice_number) {
       try {
-        const creditRows = items.map((item, i) => ({
-          ArticleNumber: item.articleNumber,
-          Description: item.name || `Retur rad ${i + 1}`,
-          DeliveredQuantity: item.quantity,
-          Price: -(Math.abs(item.price || 0)),
-          VAT: item.vatRate ? Math.round(item.vatRate * 100) : 25
-        }));
+        const creditRes = await fortnoxFetch(
+          `/invoices/${order.fortnox_invoice_number}/credit`,
+          "PUT"
+        );
+        fortnoxCreditNumber =
+          creditRes?.Invoice?.DocumentNumber ??
+          creditRes?.DocumentNumber ??
+          null;
 
-        const today = new Date().toISOString().split("T")[0];
-        const creditInvoice = await fortnoxFetch("/invoices", "POST", {
-          Invoice: {
-            CustomerNumber: order.fortnox_customer_number,
-            InvoiceDate: today,
-            DueDate: today,
-            Currency: "SEK",
-            InvoiceRows: creditRows,
-            Comments: `Kreditfaktura för order ${order.order_number} – ${reason || "Retur"}`,
-            CreditInvoiceReference: order.fortnox_invoice_number
-          }
-        });
-        fortnoxCreditNumber = creditInvoice?.Invoice?.DocumentNumber;
         if (fortnoxCreditNumber) {
           await fortnoxFetch(`/invoices/${fortnoxCreditNumber}/bookkeep`, "PUT").catch(() => {});
           notes.push(`Fortnox kreditfaktura: ${fortnoxCreditNumber}`);
+        } else {
+          notes.push("Fortnox kredit: svar saknade dokumentnummer");
         }
       } catch (err) {
         notes.push(`Fortnox kredit FEL: ${err.message}`);
@@ -1034,7 +1038,7 @@ app.post("/api/admin/orders/:id/return", adminAuthMiddleware, async (req, res) =
           city: order.city || "",
           countryCode: order.country_code || "SE"
         },
-        orderLines: items.map((item, i) => ({
+        orderLines: enrichedItems.map((item, i) => ({
           rowNumber: String(i + 1),
           articleNumber: item.articleNumber,
           numberOfItems: item.quantity,
@@ -1049,12 +1053,12 @@ app.post("/api/admin/orders/:id/return", adminAuthMiddleware, async (req, res) =
       console.error("[Return] Ongoing return error:", err);
     }
 
-    const orderItems = typeof order.items === "string" ? JSON.parse(order.items) : order.items;
     const allReturned = items.length >= orderItems.length;
     const newStatus = allReturned ? "returned" : "partially_returned";
 
+    console.log(`[Return] Creating DB record: orderId=${order.id}, refund=${refundAmount}, status=${newStatus}`);
     const returnRecord = await db.createReturn({
-      orderId: order.id, items, refundAmount: refundAmount || 0,
+      orderId: order.id, items: enrichedItems, refundAmount: refundAmount || 0,
       reason, fortnoxCreditNumber: fortnoxCreditNumber ? String(fortnoxCreditNumber) : null,
       ongoingReturnId: ongoingReturnId ? String(ongoingReturnId) : null,
       status: (fortnoxCreditNumber || ongoingReturnId) ? "processed" : "pending"
@@ -1063,9 +1067,11 @@ app.post("/api/admin/orders/:id/return", adminAuthMiddleware, async (req, res) =
     await db.updateOrder(order.id, { status: newStatus });
     await db.appendNotes(order.id, `RETUR: ${notes.join(" | ")}`);
 
+    console.log(`[Return] Success: return #${returnRecord.id}`);
     res.json({ return: returnRecord, notes });
   } catch (err) {
-    res.status(500).json({ message: err.message });
+    console.error("[Return] Fatal error:", err);
+    res.status(500).json({ message: err.message || "Ett oväntat fel uppstod vid returskapande" });
   }
 });
 
