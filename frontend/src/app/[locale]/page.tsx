@@ -9,7 +9,6 @@ import {
   ChevronRight,
   Droplets,
   Leaf,
-  Play,
   Shield,
   Sparkles,
   Star,
@@ -207,9 +206,8 @@ function VideoTab({ onClick }: { onClick: () => void }) {
       className="fixed right-0 top-1/2 z-50 -translate-y-1/2 cursor-pointer"
       aria-label={t("home.playVideo")}
     >
-      <div className="flex items-center gap-2 rounded-l-xl bg-brand-900/90 py-3 pl-3 pr-2 shadow-lg shadow-brand-900/20 backdrop-blur-sm transition-all duration-300 hover:bg-brand-900 hover:pr-4 hover:shadow-xl">
-        <Play className="h-3.5 w-3.5 flex-shrink-0 fill-white text-white" />
-        <span className="whitespace-nowrap text-[11px] font-semibold uppercase tracking-widest text-white [writing-mode:vertical-lr] rotate-180">
+      <div className="rounded-l-lg bg-brand-900/90 py-2 pl-1.5 pr-1 shadow-lg shadow-brand-900/20 backdrop-blur-sm transition-all duration-300 hover:bg-brand-900 hover:pl-2 hover:shadow-xl">
+        <span className="block whitespace-nowrap text-[10px] font-semibold uppercase tracking-[0.12em] text-white [writing-mode:vertical-lr] rotate-180">
           {t("home.watchVideoTab")}
         </span>
       </div>
