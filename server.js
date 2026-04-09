@@ -2675,6 +2675,119 @@ function greenButton(text, href) {
   </div>`;
 }
 
+// ---- REVIEW AUTO-REPLY (GPT-5.4) ----
+
+const REVIEW_REPLY_PROMPT = `Du skriver svar på kundrecensioner för 1753 SKINCARE. Du är Christopher.
+
+REGLER:
+- Skriv på svenska
+- Korta svar (2-4 meningar)
+- Personligt, varmt och kärleksfullt
+- Nämn kundens namn (förnamnet)
+- Referera gärna till produkten de recenserat
+- Aldrig emojis
+- Aldrig generiskt -- varje svar ska kännas unikt
+- Aldrig "Vi uppskattar din feedback" eller liknande korporativa fraser
+- Signera alltid med: / Christopher, 1753 SKINCARE
+
+FÖR 4-5 STJÄRNOR:
+- Uttryck genuin glädje och tacksamhet
+- Lyft gärna något specifikt kunden nämnde
+- Kort uppmuntran att fortsätta
+
+FÖR 1-3 STJÄRNOR:
+- Visa empati och förståelse
+- Be om ursäkt om något gått fel
+- Erbjud hjälp: "Hör av dig direkt till oss på info@1753skin.com eller 0732-30 55 21 så löser vi det"
+- Var aldrig defensiv`;
+
+async function generateReviewReply(reviewerName, rating, title, body, productName) {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) return "";
+
+  const userMessage = `Skriv ett svar på denna recension:
+
+Produkt: ${productName}
+Kund: ${reviewerName}
+Betyg: ${rating}/5
+Rubrik: ${title || "(ingen)"}
+Omdöme: ${body || "(inget)"}`;
+
+  try {
+    const res = await fetchWithRetry("https://api.openai.com/v1/responses", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${apiKey}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        model: EMAIL_AI_MODEL,
+        instructions: REVIEW_REPLY_PROMPT,
+        input: userMessage
+      })
+    });
+    const data = await res.json();
+    return extractOutputText(data) || "";
+  } catch (err) {
+    console.error("[ReviewAI] GPT generation failed:", err.message);
+    return "";
+  }
+}
+
+async function processReviewReply(review, productName, reviewerName) {
+  const rating = review.rating;
+  const reply = await generateReviewReply(
+    reviewerName, rating, review.title, review.body, productName
+  );
+
+  if (!reply) {
+    console.warn(`[ReviewAI] No reply generated for review #${review.id}`);
+    return;
+  }
+
+  if (rating >= 4) {
+    await db.updateReview(review.id, { reply });
+    console.log(`[ReviewAI] Auto-replied to ${rating}-star review #${review.id} from ${reviewerName}`);
+  } else {
+    await db.updateReview(review.id, { reply: `[UTKAST] ${reply}` });
+    console.log(`[ReviewAI] Draft reply for ${rating}-star review #${review.id}, notifying admin`);
+
+    // Notify admin
+    try {
+      const apiKey = process.env.RESEND_API_KEY;
+      if (apiKey) {
+        const { Resend } = require("resend");
+        const resend = new Resend(apiKey);
+        const fromAddr = process.env.EMAIL_FROM || "info@1753skin.com";
+        await resend.emails.send({
+          from: `1753 SKINCARE <${fromAddr}>`,
+          to: "christopher@1753skincare.com",
+          subject: `Ny recension: ${rating} stjärnor från ${reviewerName}`,
+          html: `
+            <h3>Ny recension kräver ditt svar</h3>
+            <p><strong>Produkt:</strong> ${productName}</p>
+            <p><strong>Kund:</strong> ${reviewerName}</p>
+            <p><strong>Betyg:</strong> ${"★".repeat(rating)}${"☆".repeat(5 - rating)}</p>
+            ${review.title ? `<p><strong>Rubrik:</strong> ${review.title}</p>` : ""}
+            <p><strong>Omdöme:</strong></p>
+            <blockquote style="border-left:3px solid #108474;padding-left:12px;color:#515151;">${review.body || "(inget omdöme)"}</blockquote>
+            <hr/>
+            <p><strong>AI-förslag på svar:</strong></p>
+            <blockquote style="border-left:3px solid #766a62;padding-left:12px;color:#1d1d1f;">${reply.replace(/\n/g, "<br>")}</blockquote>
+            <p style="margin-top:16px;">
+              <a href="https://www.1753skin.com/admin/recensioner" style="background:#108474;color:#fff;padding:10px 20px;border-radius:12px;text-decoration:none;font-weight:600;">
+                Granska i admin
+              </a>
+            </p>
+          `
+        });
+      }
+    } catch (err) {
+      console.error("[ReviewAI] Notification failed:", err.message);
+    }
+  }
+}
+
 // ---- REVIEWS API (public) ----
 
 app.get("/api/reviews/stats/all", async (req, res) => {
@@ -2723,13 +2836,23 @@ app.post("/api/reviews", async (req, res) => {
     );
     if (existing.rows.length > 0) return res.status(409).json({ message: "Du har redan lämnat ett omdöme för denna produkt" });
 
+    const parsedRating = Math.min(5, Math.max(1, parseInt(rating)));
     const review = await db.createReview({
       product_id: productId,
       reviewer_name: decoded.customerName,
-      rating: Math.min(5, Math.max(1, parseInt(rating))),
+      rating: parsedRating,
       title: title || "", body: body || "", reply: "",
       verified: true, review_date: new Date().toISOString(), location: "",
     });
+
+    // Auto-reply for 4-5 stars, notify admin for 1-3 stars
+    if (review) {
+      const productName = PRODUCTS_MAP[productId]?.name || productId;
+      processReviewReply(review, productName, decoded.customerName).catch(err =>
+        console.error("[ReviewAI] Error:", err.message)
+      );
+    }
+
     res.json({ success: true, review });
   } catch (err) { res.status(500).json({ message: "Kunde inte spara omdömet" }); }
 });

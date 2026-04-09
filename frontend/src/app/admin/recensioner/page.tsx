@@ -115,7 +115,7 @@ export default function AdminRecensionerPage() {
 
   function openReply(review: Review) {
     setReplyingId(review.id);
-    setReplyText(review.reply || "");
+    setReplyText((review.reply || "").replace(/^\[UTKAST\]\s*/, ""));
   }
 
   const totalPages = Math.ceil(total / PAGE_SIZE);
@@ -224,9 +224,13 @@ export default function AdminRecensionerPage() {
                   )}
 
                   {review.reply && replyingId !== review.id && (
-                    <div className="mt-3 rounded-xl border-l-2 border-emerald-500 bg-[#f5f5f7] py-2.5 pl-3.5 pr-3">
-                      <p className="text-[11px] font-semibold text-[#1d1d1f] mb-1">Ditt svar:</p>
-                      <p className="text-xs text-[#515151] leading-relaxed">{review.reply}</p>
+                    <div className={`mt-3 rounded-xl border-l-2 py-2.5 pl-3.5 pr-3 ${review.reply.startsWith("[UTKAST]") ? "border-amber-400 bg-amber-50/60" : "border-emerald-500 bg-[#f5f5f7]"}`}>
+                      <p className="text-[11px] font-semibold text-[#1d1d1f] mb-1">
+                        {review.reply.startsWith("[UTKAST]") ? "AI-utkast (väntar på godkännande):" : "Ditt svar:"}
+                      </p>
+                      <p className="text-xs text-[#515151] leading-relaxed">
+                        {review.reply.replace(/^\[UTKAST\]\s*/, "")}
+                      </p>
                     </div>
                   )}
 
