@@ -75,6 +75,135 @@ function formatDate(iso: string | null) {
   });
 }
 
+const INPUT_CLASS =
+  "w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm shadow-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#108474]/30 focus:border-[#108474] transition-colors";
+const LABEL_CLASS = "block text-sm font-medium text-gray-700 mb-1";
+
+function DiscountFormFields({
+  form,
+  setForm,
+  onSubmit,
+  submitting,
+  submitLabel,
+  onCancel,
+}: {
+  form: DiscountForm;
+  setForm: (fn: (prev: DiscountForm) => DiscountForm) => void;
+  onSubmit: (e: React.FormEvent) => void;
+  submitting: boolean;
+  submitLabel: string;
+  onCancel: () => void;
+}) {
+  return (
+    <form onSubmit={onSubmit} className="rounded-2xl border border-gray-100 bg-gray-50/60 p-6 space-y-4">
+      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+        <div>
+          <label className={LABEL_CLASS}>Kod *</label>
+          <input
+            type="text"
+            required
+            value={form.code}
+            onChange={(e) => setForm((p) => ({ ...p, code: e.target.value }))}
+            className={INPUT_CLASS}
+            placeholder="T.ex. SOMMAR25"
+          />
+        </div>
+        <div>
+          <label className={LABEL_CLASS}>Rabatt % *</label>
+          <input
+            type="number"
+            required
+            min={1}
+            max={100}
+            value={form.percent}
+            onChange={(e) =>
+              setForm((p) => ({
+                ...p,
+                percent: e.target.value === "" ? "" : Number(e.target.value),
+              }))
+            }
+            className={INPUT_CLASS}
+            placeholder="25"
+          />
+        </div>
+        <div>
+          <label className={LABEL_CLASS}>Beskrivning</label>
+          <input
+            type="text"
+            value={form.description}
+            onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))}
+            className={INPUT_CLASS}
+            placeholder="Sommarrea 2026"
+          />
+        </div>
+        <div>
+          <label className={LABEL_CLASS}>Produkt-ID:n</label>
+          <input
+            type="text"
+            value={form.productIds}
+            onChange={(e) => setForm((p) => ({ ...p, productIds: e.target.value }))}
+            className={INPUT_CLASS}
+            placeholder="Lämna tomt för alla produkter"
+          />
+          <p className="mt-1 text-xs text-gray-400">Komma-separerade. Lämna tomt för alla produkter.</p>
+        </div>
+        <div>
+          <label className={LABEL_CLASS}>Max användningar</label>
+          <input
+            type="number"
+            min={1}
+            value={form.maxUses}
+            onChange={(e) =>
+              setForm((p) => ({
+                ...p,
+                maxUses: e.target.value === "" ? "" : Number(e.target.value),
+              }))
+            }
+            className={INPUT_CLASS}
+            placeholder="Obegränsat"
+          />
+        </div>
+      </div>
+      <div className="grid gap-4 sm:grid-cols-2">
+        <div>
+          <label className={LABEL_CLASS}>Giltig från</label>
+          <input
+            type="datetime-local"
+            value={form.validFrom}
+            onChange={(e) => setForm((p) => ({ ...p, validFrom: e.target.value }))}
+            className={INPUT_CLASS}
+          />
+        </div>
+        <div>
+          <label className={LABEL_CLASS}>Giltig till</label>
+          <input
+            type="datetime-local"
+            value={form.validUntil}
+            onChange={(e) => setForm((p) => ({ ...p, validUntil: e.target.value }))}
+            className={INPUT_CLASS}
+          />
+        </div>
+      </div>
+      <div className="flex gap-3 pt-2">
+        <button
+          type="submit"
+          disabled={submitting}
+          className="rounded-xl bg-[#108474] px-6 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:bg-[#0d6e61] active:scale-[0.98] disabled:opacity-50"
+        >
+          {submitting ? "Sparar..." : submitLabel}
+        </button>
+        <button
+          type="button"
+          onClick={onCancel}
+          className="rounded-xl border border-gray-200 bg-white px-6 py-2.5 text-sm font-medium text-gray-600 shadow-sm transition-colors hover:bg-gray-50"
+        >
+          Avbryt
+        </button>
+      </div>
+    </form>
+  );
+}
+
 export default function DiscountCodesPage() {
   const { token } = useAuth();
   const [discounts, setDiscounts] = useState<Discount[]>([]);
@@ -181,135 +310,6 @@ export default function DiscountCodesPage() {
       flash("error", err instanceof Error ? err.message : "Kunde inte ändra status");
     }
   };
-
-  const inputClass =
-    "w-full rounded-xl border border-gray-200 bg-white px-4 py-2.5 text-sm shadow-sm placeholder:text-gray-400 focus:outline-none focus:ring-2 focus:ring-[#108474]/30 focus:border-[#108474] transition-colors";
-  const labelClass = "block text-sm font-medium text-gray-700 mb-1";
-
-  function DiscountFormFields({
-    form,
-    setForm,
-    onSubmit,
-    submitting,
-    submitLabel,
-    onCancel,
-  }: {
-    form: DiscountForm;
-    setForm: (fn: (prev: DiscountForm) => DiscountForm) => void;
-    onSubmit: (e: React.FormEvent) => void;
-    submitting: boolean;
-    submitLabel: string;
-    onCancel: () => void;
-  }) {
-    return (
-      <form onSubmit={onSubmit} className="rounded-2xl border border-gray-100 bg-gray-50/60 p-6 space-y-4">
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          <div>
-            <label className={labelClass}>Kod *</label>
-            <input
-              type="text"
-              required
-              value={form.code}
-              onChange={(e) => setForm((p) => ({ ...p, code: e.target.value }))}
-              className={inputClass}
-              placeholder="T.ex. SOMMAR25"
-            />
-          </div>
-          <div>
-            <label className={labelClass}>Rabatt % *</label>
-            <input
-              type="number"
-              required
-              min={1}
-              max={100}
-              value={form.percent}
-              onChange={(e) =>
-                setForm((p) => ({
-                  ...p,
-                  percent: e.target.value === "" ? "" : Number(e.target.value),
-                }))
-              }
-              className={inputClass}
-              placeholder="25"
-            />
-          </div>
-          <div>
-            <label className={labelClass}>Beskrivning</label>
-            <input
-              type="text"
-              value={form.description}
-              onChange={(e) => setForm((p) => ({ ...p, description: e.target.value }))}
-              className={inputClass}
-              placeholder="Sommarrea 2026"
-            />
-          </div>
-          <div>
-            <label className={labelClass}>Produkt-ID:n</label>
-            <input
-              type="text"
-              value={form.productIds}
-              onChange={(e) => setForm((p) => ({ ...p, productIds: e.target.value }))}
-              className={inputClass}
-              placeholder="Lämna tomt för alla produkter"
-            />
-            <p className="mt-1 text-xs text-gray-400">Komma-separerade. Lämna tomt för alla produkter.</p>
-          </div>
-          <div>
-            <label className={labelClass}>Max användningar</label>
-            <input
-              type="number"
-              min={1}
-              value={form.maxUses}
-              onChange={(e) =>
-                setForm((p) => ({
-                  ...p,
-                  maxUses: e.target.value === "" ? "" : Number(e.target.value),
-                }))
-              }
-              className={inputClass}
-              placeholder="Obegränsat"
-            />
-          </div>
-        </div>
-        <div className="grid gap-4 sm:grid-cols-2">
-          <div>
-            <label className={labelClass}>Giltig från</label>
-            <input
-              type="datetime-local"
-              value={form.validFrom}
-              onChange={(e) => setForm((p) => ({ ...p, validFrom: e.target.value }))}
-              className={inputClass}
-            />
-          </div>
-          <div>
-            <label className={labelClass}>Giltig till</label>
-            <input
-              type="datetime-local"
-              value={form.validUntil}
-              onChange={(e) => setForm((p) => ({ ...p, validUntil: e.target.value }))}
-              className={inputClass}
-            />
-          </div>
-        </div>
-        <div className="flex gap-3 pt-2">
-          <button
-            type="submit"
-            disabled={submitting}
-            className="rounded-xl bg-[#108474] px-6 py-2.5 text-sm font-medium text-white shadow-sm transition-all hover:bg-[#0d6e61] active:scale-[0.98] disabled:opacity-50"
-          >
-            {submitting ? "Sparar..." : submitLabel}
-          </button>
-          <button
-            type="button"
-            onClick={onCancel}
-            className="rounded-xl border border-gray-200 bg-white px-6 py-2.5 text-sm font-medium text-gray-600 shadow-sm transition-colors hover:bg-gray-50"
-          >
-            Avbryt
-          </button>
-        </div>
-      </form>
-    );
-  }
 
   if (loading) {
     return (
