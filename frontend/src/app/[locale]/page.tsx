@@ -292,8 +292,8 @@ export default function HomePage() {
       <section className="py-10 md:py-16 lg:py-20">
         <div className="mx-auto max-w-[1280px] px-6 md:px-10">
           <div className="grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-8">
-            {/* Text box – same 1:1 aspect as image */}
-            <div className="relative flex aspect-square flex-col justify-center rounded-3xl bg-[#f5f5f7] p-8 shadow-lg shadow-brand-900/5 ring-1 ring-brand-100/60 md:p-12 lg:p-16">
+            {/* Text box – same 1:1 aspect as image (order-2 on mobile so image stacks above) */}
+            <div className="relative order-2 flex aspect-square flex-col justify-center rounded-3xl bg-[#f5f5f7] p-8 shadow-lg shadow-brand-900/5 ring-1 ring-brand-100/60 md:order-1 md:p-12 lg:p-16">
               <h1 className="text-4xl font-bold tracking-tight text-brand-900 md:text-5xl lg:text-[3.5rem] lg:leading-[1.08]">
                 {t("home.heroLine1")}
                 <br />
@@ -325,8 +325,8 @@ export default function HomePage() {
               </div>
             </div>
 
-            {/* Image box – 1:1 aspect */}
-            <div className="relative aspect-square overflow-hidden rounded-3xl shadow-lg shadow-brand-900/5 ring-1 ring-brand-100/60">
+            {/* Image box – 1:1 aspect (order-1 on mobile: hero image above text) */}
+            <div className="relative order-1 aspect-square overflow-hidden rounded-3xl shadow-lg shadow-brand-900/5 ring-1 ring-brand-100/60 md:order-2">
               <Image
                 src="/Bakgrund_hero_2.jpg"
                 alt={t("home.heroImageAlt")}
@@ -341,8 +341,6 @@ export default function HomePage() {
         </div>
       </section>
 
-      <ReviewCarousel />
-
       <SectionWrapper className="!py-10 md:!py-14">
         <div id="produkter" className="-mt-20 pt-20" />
         <div className="mb-12 text-center">
@@ -356,6 +354,8 @@ export default function HomePage() {
           ))}
         </div>
       </SectionWrapper>
+
+      <ReviewCarousel />
 
       <SectionWrapper alt>
         <div className="mb-12 text-center">
