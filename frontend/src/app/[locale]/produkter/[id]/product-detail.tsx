@@ -233,10 +233,6 @@ export default function ProductDetail({ id }: { id: string }) {
                   className="flex-1"
                   onClick={() => {
                     addItem(product.id, qty);
-                    showToast(
-                      t("productDetail.addedToCart", { name: displayName }),
-                      "success"
-                    );
                   }}
                 >
                   {t("productDetail.addToCart")}
@@ -281,10 +277,6 @@ export default function ProductDetail({ id }: { id: string }) {
                     <button
                       onClick={() => {
                         addItem(product.id, qty, { intervalDays: subInterval });
-                        showToast(
-                          t("productDetail.addedSubscription", { name: displayName }),
-                          "success"
-                        );
                         router.push(path("checkout"));
                       }}
                       className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand-900 px-4 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:bg-brand-800 active:scale-[0.98]"
