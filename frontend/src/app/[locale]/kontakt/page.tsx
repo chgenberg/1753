@@ -63,10 +63,10 @@ export default function ContactPage() {
               <div>
                 <p className="text-sm font-medium">{p("emailLabel")}</p>
                 <a
-                  href="mailto:christopher@1753skincare.com"
+                  href="mailto:info@1753skin.com"
                   className="text-sm text-muted-foreground hover:text-brand-900"
                 >
-                  christopher@1753skincare.com
+                  info@1753skin.com
                 </a>
               </div>
             </div>

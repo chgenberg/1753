@@ -640,9 +640,9 @@ const bundle = {
     welcome:
       "Hej! Välkomna till 1753 SKINCARE. Vad kan jag hjälpa dig med idag? Jag kan svara på frågor om våra produkter, hudvård, livsstil – eller lägga något direkt i din varukorg.",
     maxMessages:
-      "Vi har pratat ett tag nu! För fler frågor, kontakta oss på christopher@1753skincare.com eller ring 0732-30 55 21.",
+      "Vi har pratat ett tag nu! För fler frågor, kontakta oss på info@1753skin.com eller ring 0732-30 55 21.",
     error:
-      "Oj, något gick fel. Försök igen eller kontakta oss på christopher@1753skincare.com.",
+      "Oj, något gick fel. Försök igen eller kontakta oss på info@1753skin.com.",
     viewProduct: "Visa",
     tips: [
       "Vilken produkt passar bäst för torr hud?",

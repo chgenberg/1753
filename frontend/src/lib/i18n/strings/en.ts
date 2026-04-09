@@ -642,9 +642,9 @@ export const en: Messages = {
     welcome:
       "Hi! Welcome to 1753 SKINCARE. What can I help you with today? I can answer questions about our products, skincare, lifestyle – or add something straight to your bag.",
     maxMessages:
-      "We’ve been chatting for a while! For more help, email christopher@1753skincare.com or call +46 732 30 55 21.",
+      "We’ve been chatting for a while! For more help, email info@1753skin.com or call +46 732 30 55 21.",
     error:
-      "Something went wrong. Please try again or contact christopher@1753skincare.com.",
+      "Something went wrong. Please try again or contact info@1753skin.com.",
     viewProduct: "View",
     tips: [
       "Which product is best for dry skin?",

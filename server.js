@@ -2493,7 +2493,7 @@ async function processAutomationQueue() {
 
     const { Resend } = require("resend");
     const resend = new Resend(apiKey);
-    const fromEmail = process.env.EMAIL_FROM || "christopher@1753skincare.com";
+    const fromEmail = process.env.EMAIL_FROM || "info@1753skin.com";
 
     for (const item of due) {
       try {
@@ -2599,7 +2599,7 @@ app.post("/api/newsletter/broadcast", async (req, res) => {
 
     const { Resend } = require("resend");
     const resend = new Resend(apiKey);
-    const fromEmail = process.env.EMAIL_FROM || "christopher@1753skincare.com";
+    const fromEmail = process.env.EMAIL_FROM || "info@1753skin.com";
 
     const subscribers = await db.findActiveSubscribers();
     const baseUrl = process.env.BASE_URL || "https://api.1753skin.com";
@@ -2997,7 +2997,7 @@ DITT SÄTT:
 - Kort och kärnfullt (max 150 ord per svar om inte kunden ber om mer)
 - Humor är välkommet – du får gärna vara lite cheeky
 - ALDRIG säljig eller pushig. Rekommendera bara produkter om det är relevant
-- Om du inte kan svara: "Det ligger utanför mitt expertområde – men hör av dig direkt till oss på christopher@1753skincare.com eller ring 0732-30 55 21 så löser vi det!"
+- Om du inte kan svara: "Det ligger utanför mitt expertområde – men hör av dig direkt till oss på info@1753skin.com eller ring 0732-30 55 21 så löser vi det!"
 
 DU KAN HJÄLPA MED:
 - Produktfrågor (ingredienser, användning, val av produkt) – enligt VERIFIERADE listan
@@ -3037,7 +3037,7 @@ OM 1753 SKINCARE:
 - Svenskt familjeföretag, grundat av Christopher och Ebba Genberg
 - Adress: Södra Skjutbanevägen 10, 439 55 Åsa
 - Telefon: 0732-30 55 21
-- E-post: christopher@1753skincare.com
+- E-post: info@1753skin.com
 - Fri frakt över 700 kr
 - Nöjd-kund-garanti med rådgivning före och efter köp
 

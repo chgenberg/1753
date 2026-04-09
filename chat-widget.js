@@ -180,7 +180,7 @@
   async function sendMessage(text) {
     if (!text.trim()) return;
     if (messageCount >= MAX_MESSAGES) {
-      appendMessage("assistant", "Vi har pratat ett tag nu! För fler frågor, kontakta oss på christopher@1753skincare.com eller ring 0732-30 55 21.");
+      appendMessage("assistant", "Vi har pratat ett tag nu! För fler frågor, kontakta oss på info@1753skin.com eller ring 0732-30 55 21.");
       return;
     }
 
@@ -227,7 +227,7 @@
 
     } catch (err) {
       hideTyping();
-      appendMessage("assistant", "Oj, något gick fel. Försök igen eller kontakta oss på christopher@1753skincare.com.");
+      appendMessage("assistant", "Oj, något gick fel. Försök igen eller kontakta oss på info@1753skin.com.");
     }
   }
 
