@@ -110,6 +110,7 @@ const bundle = {
     subscribeSave: "Prenumerera & spara 15%",
     intervalEvery: "Var",
     intervalDay: "dag",
+    addToCart: "Lägg i varukorg",
   },
   common: {
     loading: "Laddar...",

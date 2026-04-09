@@ -111,6 +111,7 @@ export const en: Messages = {
     subscribeSave: "Subscribe & save 15%",
     intervalEvery: "Every",
     intervalDay: "days",
+    addToCart: "Add to cart",
   },
   common: {
     loading: "Loading...",

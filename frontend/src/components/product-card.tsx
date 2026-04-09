@@ -1,10 +1,12 @@
 "use client";
 
+import { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { Heart, Star } from "lucide-react";
+import { Heart, Plus, Check, Star } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useWishlist } from "@/hooks/use-wishlist";
+import { useCart } from "@/providers/cart-provider";
 import { useToast } from "@/components/notification";
 import { useRouter } from "next/navigation";
 import type { Product } from "@/lib/products";
@@ -22,6 +24,7 @@ export function ProductCard({
   priority?: boolean;
 }) {
   const { isWishlisted, toggle, isLoggedIn } = useWishlist();
+  const { addItem, openCart } = useCart();
   const { showToast } = useToast();
   const router = useRouter();
   const { path, t, locale } = useLocale();
@@ -30,6 +33,7 @@ export function ProductCard({
   const shortDesc = productShortDesc(product, locale);
   const price = productPrice(product, locale);
   const origPrice = productOriginalPrice(product, locale);
+  const [justAdded, setJustAdded] = useState(false);
 
   const handleWishlistClick = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -45,6 +49,15 @@ export function ProductCard({
         "success"
       );
     }
+  };
+
+  const handleAddToCart = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    addItem(product.id);
+    openCart();
+    setJustAdded(true);
+    setTimeout(() => setJustAdded(false), 1200);
   };
 
   const href = path("product", { productId: product.id });
@@ -108,15 +121,33 @@ export function ProductCard({
         <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-brand-500">
           {shortDesc}
         </p>
-        <div className="mt-3 flex items-center gap-2">
-          <span className="text-base font-bold text-brand-900">
-            {formatPrice(price, locale)}
-          </span>
-          {origPrice && (
-            <span className="text-xs font-medium text-brand-500 line-through">
-              {formatPrice(origPrice, locale)}
+        <div className="mt-3 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <span className="text-base font-bold text-brand-900">
+              {formatPrice(price, locale)}
             </span>
-          )}
+            {origPrice && (
+              <span className="text-xs font-medium text-brand-500 line-through">
+                {formatPrice(origPrice, locale)}
+              </span>
+            )}
+          </div>
+          <button
+            onClick={handleAddToCart}
+            aria-label={t("productCard.addToCart")}
+            className={cn(
+              "flex h-9 w-9 items-center justify-center rounded-full shadow-sm transition-all duration-300 active:scale-90",
+              justAdded
+                ? "bg-[#108474] text-white shadow-[#108474]/25"
+                : "bg-brand-50 text-brand-700 hover:bg-[#108474] hover:text-white hover:shadow-md hover:shadow-[#108474]/20"
+            )}
+          >
+            {justAdded ? (
+              <Check className="h-4 w-4 animate-in zoom-in-50 duration-200" />
+            ) : (
+              <Plus className="h-4 w-4" />
+            )}
+          </button>
         </div>
       </div>
     </Link>
