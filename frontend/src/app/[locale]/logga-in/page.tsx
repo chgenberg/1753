@@ -26,8 +26,8 @@ export default function LoginPage() {
     setLoading(true);
 
     try {
-      await login(email, password);
-      router.push(path("account"));
+      const user = await login(email, password);
+      router.push(user?.role === "admin" ? "/admin" : path("account"));
     } catch (err: unknown) {
       setError(err instanceof Error ? err.message : ex("errorGeneric"));
     } finally {
