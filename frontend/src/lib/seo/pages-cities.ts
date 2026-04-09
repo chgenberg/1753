@@ -35,10 +35,10 @@ export const CITY_PAGES: LandingPage[] = [
     },
     en: {
       metaTitle: "Skincare Stockholm – CBD-based skincare | 1753 SKINCARE",
-      metaDescription: "Natural CBD skincare for Stockholm. Order online with free shipping over 700 SEK. Protect your skin from urban stress and harsh Swedish winters.",
+      metaDescription: "Natural CBD skincare for Stockholm. Order online with free shipping over €60. Protect your skin from urban stress and harsh Swedish winters.",
       kicker: "Skincare in Stockholm",
       h1: "Natural skincare for Stockholm",
-      lead: "Stockholm skin has it rough. Exhaust fumes along Sveavägen, bone-dry winter air off Lake Mälaren, and heated office air nine months a year. Your skin deserves better than aggressive products that make the problem worse. Order online – free shipping over 700 SEK, straight to your door in Stockholm.",
+      lead: "Stockholm skin has it rough. Exhaust fumes along Sveavägen, bone-dry winter air off Lake Mälaren, and heated office air nine months a year. Your skin deserves better than aggressive products that make the problem worse. Order online – free shipping over €60, straight to your door in Stockholm.",
       problemTitle: "What Stockholm does to your skin",
       problemBody: "<p>Living in Stockholm means your skin faces a unique combination of stressors. Urban air pollution – traffic exhaust, subway particles, heated indoor air – attacks your skin barrier day after day. Stockholm's subway system has some of Europe's highest levels of airborne iron particles, which oxidize on the skin and drive inflammatory processes.</p><p>Winters are long and dry. Temperatures can swing from minus fifteen outside to twenty-five degrees indoors, and the rapid shift between cold and heat puts enormous stress on the skin. Stockholm's tap water also has moderate hardness – calcium levels that can dry out and irritate sensitive skin over time.</p><p>Add the typical Stockholm stress – the commute, the deadlines, the constant connectivity – and you have a perfect storm for skin issues. Stress raises cortisol levels, which in turn drives oil production and inflammation. Your skin tells the story your lifestyle won't.</p>",
       tipsTitle: "Skincare tips for Stockholmers",
@@ -50,15 +50,15 @@ export const CITY_PAGES: LandingPage[] = [
         { title: "Protect your face when cycling", body: "Stockholm is a cycling city, but wind and cold dry out your skin fast. Apply a protective oil before getting on your bike – especially from October to April." }
       ],
       solutionTitle: "CBD skincare delivered to your door in Stockholm",
-      solutionBody: "<p>You don't need to run around Biblioteksgatan chasing skincare products. 1753 SKINCARE ships directly to you in Stockholm – from our warehouse in Åsa outside Gothenburg, with free shipping on orders over 700 SEK.</p><p>Our DUO-kit with The ONE and I LOVE gives your Stockholm skin the balance it desperately needs. CBD and CBG work with your skin's own endocannabinoid system to calm inflammation, strengthen the barrier, and counteract oxidative stress from city life. TA-DA Serum with concentrated CBG is perfect for the extra dry winter months. And Au Naturel Makeup Remover cleans away the day's dirt and particles without further stressing the skin.</p><p>Natural, honest skincare that works – whether you live in Södermalm, Vasastan, or out in Nacka.</p>",
+      solutionBody: "<p>You don't need to run around Biblioteksgatan chasing skincare products. 1753 SKINCARE ships directly to you in Stockholm – from our warehouse in Åsa outside Gothenburg, with free shipping on orders over €60.</p><p>Our DUO-kit with The ONE and I LOVE gives your Stockholm skin the balance it desperately needs. CBD and CBG work with your skin's own endocannabinoid system to calm inflammation, strengthen the barrier, and counteract oxidative stress from city life. TA-DA Serum with concentrated CBG is perfect for the extra dry winter months. And Au Naturel Makeup Remover cleans away the day's dirt and particles without further stressing the skin.</p><p>Natural, honest skincare that works – whether you live in Södermalm, Vasastan, or out in Nacka.</p>",
       faq: [
-        { q: "Do you ship to Stockholm?", a: "Absolutely. We ship from Åsa outside Gothenburg and most orders reach Stockholm within 1–2 business days. Free shipping on orders over 700 SEK." },
+        { q: "Do you ship to Stockholm?", a: "Absolutely. We ship from Åsa outside Gothenburg and most orders reach Stockholm within 1–2 business days. Free shipping on orders over €60." },
         { q: "Where can I buy CBD skincare in Stockholm?", a: "You can order our full range at 1753skin.com. We sell directly to you online – no middlemen, no store markups. Conveniently delivered to your door." },
         { q: "Does CBD skincare help against pollution damage?", a: "Yes, CBD has documented antioxidant properties that help the skin handle oxidative stress from pollution. It doesn't replace sunscreen or cleansing, but strengthens your skin's own resilience." },
         { q: "Which product is best for Stockholm's dry winters?", a: "The DUO-kit provides a solid base with two oils that strengthen the barrier. Add TA-DA Serum during the coldest months for extra protection against dry indoor air and freezing temperatures." }
       ],
       ctaTitle: "Give your Stockholm skin what it deserves",
-      ctaSub: "Natural CBD skincare to your door. Free shipping over 700 SEK."
+      ctaSub: "Natural CBD skincare to your door. Free shipping over €60."
     }
   },
   {
@@ -95,10 +95,10 @@ export const CITY_PAGES: LandingPage[] = [
     },
     en: {
       metaTitle: "Skincare Gothenburg – CBD-based skincare | 1753 SKINCARE",
-      metaDescription: "Natural CBD skincare from Åsa, just outside Gothenburg. Free shipping over 700 SEK. Protect your skin from the Gothenburg rain and ocean air.",
+      metaDescription: "Natural CBD skincare from Åsa, just outside Gothenburg. Free shipping over €60. Protect your skin from the Gothenburg rain and ocean air.",
       kicker: "Skincare in Gothenburg",
       h1: "Natural skincare for Gothenburg",
-      lead: "We know what it's like – we live just outside the city ourselves. The rain, the ocean wind, the grey November days. Gothenburg's climate tests your skin in ways Stockholmers will never understand. Order online – free shipping over 700 SEK, and we're just a short delivery away in Åsa.",
+      lead: "We know what it's like – we live just outside the city ourselves. The rain, the ocean wind, the grey November days. Gothenburg's climate tests your skin in ways Stockholmers will never understand. Order online – free shipping over €60, and we're just a short delivery away in Åsa.",
       problemTitle: "What Gothenburg does to your skin",
       problemBody: "<p>Gothenburg's oceanic climate is unique in Sweden. The moist sea air from the Skagerrak carries salt that settles on the skin and can disrupt its natural pH balance. The rain – yes, the famous rain – means the skin rarely gets real sun exposure for vitamin D production, while being constantly exposed to moisture and wind.</p><p>Paradoxically, the humid outdoor air leads many to underestimate dry skin. Indoors, it's a different story: heated apartments in Majorna and Linnéstaden have air just as dry as anywhere in Sweden during winter. The skin faces a constant wet-dry-wet cycle that weakens the barrier.</p><p>Gothenburg is also a port city with industry, and air quality varies. Particles from the Göta river area and harbor operations stress the skin, especially if you live or work in the center. Add the west coast lifestyle – outdoors in all weather, often with wind in your face – and you understand why Gothenburg skin needs extra care.</p>",
       tipsTitle: "Skincare tips for Gothenburgers",
@@ -110,15 +110,15 @@ export const CITY_PAGES: LandingPage[] = [
         { title: "Take regular saunas", body: "Gothenburgers love their saunas, and it's great for the skin – sweating opens pores and purifies. But always follow up with moisturizing, or you'll lose more moisture than you gain." }
       ],
       solutionTitle: "CBD skincare from your neighbors in Åsa",
-      solutionBody: "<p>We at 1753 SKINCARE live and work in Åsa, just south of Gothenburg. We know exactly what the Gothenburg climate does to skin – we live in it every day. Our products are developed with exactly this reality in mind.</p><p>The DUO-kit with The ONE and I LOVE gives your skin the balance that Gothenburg's climate constantly disrupts. CBD and CBG strengthen the skin barrier against wind, salt, and humidity fluctuations. Fungtastic Mushroom Extract with adaptogenic mushrooms strengthens the immune system from within – extra important in a city where the sun hides half the year.</p><p>Order at 1753skin.com – we ship from Åsa and most Gothenburg deliveries arrive the next day. Free shipping on orders over 700 SEK. Locally made, direct to you.</p>",
+      solutionBody: "<p>We at 1753 SKINCARE live and work in Åsa, just south of Gothenburg. We know exactly what the Gothenburg climate does to skin – we live in it every day. Our products are developed with exactly this reality in mind.</p><p>The DUO-kit with The ONE and I LOVE gives your skin the balance that Gothenburg's climate constantly disrupts. CBD and CBG strengthen the skin barrier against wind, salt, and humidity fluctuations. Fungtastic Mushroom Extract with adaptogenic mushrooms strengthens the immune system from within – extra important in a city where the sun hides half the year.</p><p>Order at 1753skin.com – we ship from Åsa and most Gothenburg deliveries arrive the next day. Free shipping on orders over €60. Locally made, direct to you.</p>",
       faq: [
-        { q: "Do you ship to Gothenburg?", a: "We're based in Åsa, just outside Gothenburg – so yes, definitely. Most orders reach you within 1 business day. Free shipping over 700 SEK." },
+        { q: "Do you ship to Gothenburg?", a: "We're based in Åsa, just outside Gothenburg – so yes, definitely. Most orders reach you within 1 business day. Free shipping over €60." },
         { q: "Where can I buy CBD skincare in Gothenburg?", a: "Easiest and best through 1753skin.com. We sell directly from Åsa without middlemen, and you'll get our products faster than from any physical store." },
         { q: "Does CBD skincare help against weather and wind?", a: "Yes, CBD strengthens the skin barrier and helps the skin handle external stressors like wind, salt, and temperature changes. It doesn't protect like a physical barrier, but makes your skin more resilient." },
         { q: "Do you make your products in Gothenburg?", a: "We're based in Åsa, just south of Gothenburg. Products are developed and distributed from here – it's west coast skincare for west coast conditions." }
       ],
       ctaTitle: "Gothenburg's climate demands Gothenburg skincare",
-      ctaSub: "From Åsa to your door – natural CBD skincare that understands your climate. Free shipping over 700 SEK."
+      ctaSub: "From Åsa to your door – natural CBD skincare that understands your climate. Free shipping over €60."
     }
   },
   {
@@ -154,10 +154,10 @@ export const CITY_PAGES: LandingPage[] = [
     },
     en: {
       metaTitle: "Skincare Malmö – CBD-based skincare | 1753 SKINCARE",
-      metaDescription: "Natural CBD skincare for Malmö. Order online with free shipping over 700 SEK. Protect your skin from Öresund winds and hard water.",
+      metaDescription: "Natural CBD skincare for Malmö. Order online with free shipping over €60. Protect your skin from Öresund winds and hard water.",
       kicker: "Skincare in Malmö",
       h1: "Natural skincare for Malmö",
-      lead: "Malmö presents a special challenge for your skin: the never-ending Öresund winds, Sweden's hardest tap water, and a rapidly evolving urban environment. Your skin needs support that understands your conditions. Order online – free shipping over 700 SEK.",
+      lead: "Malmö presents a special challenge for your skin: the never-ending Öresund winds, Sweden's hardest tap water, and a rapidly evolving urban environment. Your skin needs support that understands your conditions. Order online – free shipping over €60.",
       problemTitle: "What Malmö does to your skin",
       problemBody: "<p>Malmö has the hardest tap water in Sweden. The calcium isn't dangerous to drink, but it dries out the skin when washing, leaves a film that clogs pores, and weakens the skin barrier over time. If you have sensitive skin in Malmö, tap water might be one of the biggest culprits without you even knowing.</p><p>The city's position by the Öresund strait means constant wind. Not the romantic kind of sea breeze, but a persistent, drying wind that sucks moisture from the skin – especially in winter. Malmö has more windy days per year than most Swedish cities, and your skin notices.</p><p>As Sweden's third largest city, Malmö also has its share of urban stress: traffic pollution, fast pace, and the multicultural food scene that offers amazing cuisine but also potential triggers for inflamed skin. Balancing enjoyment and skincare is an art that Malmö residents need to master.</p>",
       tipsTitle: "Skincare tips for Malmö residents",
@@ -168,15 +168,15 @@ export const CITY_PAGES: LandingPage[] = [
         { title: "Enjoy Malmö's food rainbow wisely", body: "Malmö's food diversity is fantastic – but spicy food, dairy, and sugar can trigger skin inflammation. Enjoy mindfully and complement with anti-inflammatory foods." }
       ],
       solutionTitle: "CBD skincare delivered to your door in Malmö",
-      solutionBody: "<p>From Åsa outside Gothenburg to your door in Malmö – 1753 SKINCARE delivers natural CBD skincare that actually works against Malmö's unique skin challenges. Free shipping on orders over 700 SEK.</p><p>Our DUO-kit with The ONE and I LOVE strengthens the skin barrier that Malmö's hard water and wind constantly break down. CBD and CBG work with your skin's own system to balance moisture and inflammation. Au Naturel Makeup Remover with MCT oil cleanses deeply without worsening the dryness already caused by hard water. TA-DA Serum with concentrated CBG provides extra relief during the windiest periods.</p><p>The beauty of ordering online is that you skip the hassle – products come to you, whether you live in Möllevången, Limhamn, or Rosengård.</p>",
+      solutionBody: "<p>From Åsa outside Gothenburg to your door in Malmö – 1753 SKINCARE delivers natural CBD skincare that actually works against Malmö's unique skin challenges. Free shipping on orders over €60.</p><p>Our DUO-kit with The ONE and I LOVE strengthens the skin barrier that Malmö's hard water and wind constantly break down. CBD and CBG work with your skin's own system to balance moisture and inflammation. Au Naturel Makeup Remover with MCT oil cleanses deeply without worsening the dryness already caused by hard water. TA-DA Serum with concentrated CBG provides extra relief during the windiest periods.</p><p>The beauty of ordering online is that you skip the hassle – products come to you, whether you live in Möllevången, Limhamn, or Rosengård.</p>",
       faq: [
-        { q: "Do you ship to Malmö?", a: "Yes, we ship from Åsa outside Gothenburg. Most orders reach Malmö within 1–2 business days. Free shipping on orders over 700 SEK." },
+        { q: "Do you ship to Malmö?", a: "Yes, we ship from Åsa outside Gothenburg. Most orders reach Malmö within 1–2 business days. Free shipping on orders over €60." },
         { q: "Where can I buy CBD skincare in Malmö?", a: "Order directly at 1753skin.com – we sell without middlemen and deliver to your door in Malmö. Easier and cheaper than physical stores." },
         { q: "Does CBD skincare help with hard water?", a: "CBD strengthens the skin barrier that hard water weakens. It doesn't neutralize the calcium, but helps the skin handle the stress better and maintain its moisture balance." },
         { q: "Can I use your products if I have sensitive skin?", a: "Absolutely. Our products are free from perfume, parabens, and other common irritants. CBD also has calming properties that make it especially suitable for sensitive and reactive skin." }
       ],
       ctaTitle: "Malmö skin deserves Malmö-adapted skincare",
-      ctaSub: "Natural CBD skincare that strengthens your skin against wind and hard water. Free shipping over 700 SEK."
+      ctaSub: "Natural CBD skincare that strengthens your skin against wind and hard water. Free shipping over €60."
     }
   },
   {
@@ -212,10 +212,10 @@ export const CITY_PAGES: LandingPage[] = [
     },
     en: {
       metaTitle: "Skincare Uppsala – CBD-based skincare | 1753 SKINCARE",
-      metaDescription: "Natural CBD skincare for Uppsala. Order online with free shipping over 700 SEK. Science-backed skincare for the conscious Uppsala resident.",
+      metaDescription: "Natural CBD skincare for Uppsala. Order online with free shipping over €60. Science-backed skincare for the conscious Uppsala resident.",
       kicker: "Skincare in Uppsala",
       h1: "Natural skincare for Uppsala",
-      lead: "Uppsala is a city that thinks – and your skin deserves the same thoughtfulness. The Fyris river moisture, cold inland winters, and hectic exam periods leave their mark. Order online – free shipping over 700 SEK, delivered straight to Flogsta or the villa quarter.",
+      lead: "Uppsala is a city that thinks – and your skin deserves the same thoughtfulness. The Fyris river moisture, cold inland winters, and hectic exam periods leave their mark. Order online – free shipping over €60, delivered straight to Flogsta or the villa quarter.",
       problemTitle: "What Uppsala does to your skin",
       problemBody: "<p>Uppsala has a typical inland climate with cold, dry winters and relatively warm summers. The temperature differences between seasons are vast – from minus twenty in January to plus thirty in July. The skin has to handle both extremes, and it wears on the barrier. The dry winter air combined with heated lecture halls and libraries leaves skin dehydrated and dull.</p><p>Uppsala's tap water has medium to high hardness, contributing to dryness and irritation from daily washing. The Fyris river and surrounding clay plains also create a special microclimate effect – humid air that makes the cold bite extra hard.</p><p>For Uppsala's large student population, specific skin challenges emerge: sleep deprivation during exams, stress-related breakouts, tight budgets leading to cheap and aggressive products, and a lifestyle that doesn't always prioritize skincare. Stress is skin's worst enemy, and exam stress is in a league of its own.</p>",
       tipsTitle: "Skincare tips for Uppsala residents",
@@ -226,15 +226,15 @@ export const CITY_PAGES: LandingPage[] = [
         { title: "Eat like a conscious Uppsala resident", body: "Uppsala's food scene with local producers and the market hall gives you access to omega-3-rich fish, organic vegetables, and fermented foods. Invest in your plate." }
       ],
       solutionTitle: "CBD skincare delivered to your door in Uppsala",
-      solutionBody: "<p>We know Uppsala residents are critical and discerning – you want products that deliver on their promises. 1753 SKINCARE is built on science, not marketing fluff. CBD and CBG interact with the skin's endocannabinoid system, and the research base grows every year.</p><p>The DUO-kit gives you the foundation that Uppsala's inland climate demands – two oils that strengthen the barrier and balance moisture. Fungtastic Mushroom Extract with adaptogenic mushrooms helps the body manage stress from within, perfect if you live in the epicenter of exam stress. TA-DA Serum with CBG provides extra support during winter's driest periods.</p><p>Order at 1753skin.com – we ship from Åsa outside Gothenburg, and delivery reaches Uppsala within 1–2 business days. Free shipping over 700 SEK.</p>",
+      solutionBody: "<p>We know Uppsala residents are critical and discerning – you want products that deliver on their promises. 1753 SKINCARE is built on science, not marketing fluff. CBD and CBG interact with the skin's endocannabinoid system, and the research base grows every year.</p><p>The DUO-kit gives you the foundation that Uppsala's inland climate demands – two oils that strengthen the barrier and balance moisture. Fungtastic Mushroom Extract with adaptogenic mushrooms helps the body manage stress from within, perfect if you live in the epicenter of exam stress. TA-DA Serum with CBG provides extra support during winter's driest periods.</p><p>Order at 1753skin.com – we ship from Åsa outside Gothenburg, and delivery reaches Uppsala within 1–2 business days. Free shipping over €60.</p>",
       faq: [
-        { q: "Do you ship to Uppsala?", a: "Yes, we ship from Åsa outside Gothenburg and most orders reach Uppsala within 1–2 business days. Free shipping on orders over 700 SEK." },
+        { q: "Do you ship to Uppsala?", a: "Yes, we ship from Åsa outside Gothenburg and most orders reach Uppsala within 1–2 business days. Free shipping on orders over €60." },
         { q: "Where can I buy CBD skincare in Uppsala?", a: "Order directly at 1753skin.com. We sell online without middlemen – giving you the best price and fast delivery right to your door." },
         { q: "Is there research behind CBD skincare?", a: "Yes, and it's growing. Studies show CBD has anti-inflammatory, antioxidant, and sebostatic properties. The skin's endocannabinoid system is an active research area – fittingly enough for a university city like Uppsala." },
         { q: "Do your products work for students on a tight budget?", a: "The DUO-kit gives you two products that cover most needs. It costs more per purchase but lasts for months and replaces several cheaper products that often do more harm than good." }
       ],
       ctaTitle: "Smart skincare for a smart city",
-      ctaSub: "Science-backed CBD skincare to your door in Uppsala. Free shipping over 700 SEK."
+      ctaSub: "Science-backed CBD skincare to your door in Uppsala. Free shipping over €60."
     }
   },
   {
@@ -269,10 +269,10 @@ export const CITY_PAGES: LandingPage[] = [
     },
     en: {
       metaTitle: "Skincare Linköping – CBD-based skincare | 1753 SKINCARE",
-      metaDescription: "Natural CBD skincare for Linköping. Order online with free shipping over 700 SEK. Protect your skin against harsh inland winters.",
+      metaDescription: "Natural CBD skincare for Linköping. Order online with free shipping over €60. Protect your skin against harsh inland winters.",
       kicker: "Skincare in Linköping",
       h1: "Natural skincare for Linköping",
-      lead: "Linköping is a tech city with eyes on the future – but your skin lives in the present, with cold Östergötland winters, dry office air, and stressful innovation projects. Give it support that matches your ambition. Free shipping over 700 SEK.",
+      lead: "Linköping is a tech city with eyes on the future – but your skin lives in the present, with cold Östergötland winters, dry office air, and stressful innovation projects. Give it support that matches your ambition. Free shipping over €60.",
       problemTitle: "What Linköping does to your skin",
       problemBody: "<p>Östergötland's inland climate gives Linköping cold, dry winters and warm summers with large temperature swings. Winters can be bitterly cold with temperatures below minus fifteen, and the dry air sucks moisture from the skin. In summer, temperatures can rise above thirty degrees, and the rapid transitions between seasons give skin little time to adapt.</p><p>Linköping is a distinctly knowledge and tech city with Saab, FOI, and the university as major employers. This means many spend long days indoors in front of screens, in climate-controlled offices with dry air and blue light. Screen time affects sleep, which in turn affects the skin's recovery.</p><p>The Stångån river and surrounding Östergötland plains create a microclimate with humid air that makes the cold feel rawer than the temperature suggests. This combination of raw outdoor cold and dry indoor heat is especially tough on the skin barrier.</p>",
       tipsTitle: "Skincare tips for Linköping residents",
@@ -283,14 +283,14 @@ export const CITY_PAGES: LandingPage[] = [
         { title: "Prioritize winter skincare", body: "Linköping's winters demand extra care. Switch to richer products from October to March and protect skin with oil before heading into the cold." }
       ],
       solutionTitle: "CBD skincare delivered to Linköping",
-      solutionBody: "<p>The tech city deserves the latest technology in skincare. CBD-based skincare represents the next generation – products that work with the skin's own endocannabinoid system instead of forcing results with aggressive chemicals.</p><p>The DUO-kit with The ONE and I LOVE gives your skin the balance that Linköping's dry office air and cold winters demand. TA-DA Serum with concentrated CBG works as a booster layer during the most demanding periods.</p><p>Order at 1753skin.com – we ship from Åsa outside Gothenburg with free shipping on orders over 700 SEK. Most deliveries reach Linköping within 1–2 business days.</p>",
+      solutionBody: "<p>The tech city deserves the latest technology in skincare. CBD-based skincare represents the next generation – products that work with the skin's own endocannabinoid system instead of forcing results with aggressive chemicals.</p><p>The DUO-kit with The ONE and I LOVE gives your skin the balance that Linköping's dry office air and cold winters demand. TA-DA Serum with concentrated CBG works as a booster layer during the most demanding periods.</p><p>Order at 1753skin.com – we ship from Åsa outside Gothenburg with free shipping on orders over €60. Most deliveries reach Linköping within 1–2 business days.</p>",
       faq: [
-        { q: "Do you ship to Linköping?", a: "Yes, we ship from Åsa outside Gothenburg and most orders reach Linköping within 1–2 business days. Free shipping over 700 SEK." },
+        { q: "Do you ship to Linköping?", a: "Yes, we ship from Åsa outside Gothenburg and most orders reach Linköping within 1–2 business days. Free shipping over €60." },
         { q: "Where can I buy CBD skincare in Linköping?", a: "Order directly at 1753skin.com – we deliver to your door in Linköping without middlemen." },
         { q: "Is CBD skincare good for dry skin?", a: "Yes, CBD strengthens the skin barrier and helps the skin retain moisture. Our oils also provide direct nourishment to skin dried out by inland climate and office air." }
       ],
       ctaTitle: "Future skincare for a future city",
-      ctaSub: "CBD skincare that works with your skin, not against it. Free shipping over 700 SEK to Linköping."
+      ctaSub: "CBD skincare that works with your skin, not against it. Free shipping over €60 to Linköping."
     }
   },
   {
@@ -325,10 +325,10 @@ export const CITY_PAGES: LandingPage[] = [
     },
     en: {
       metaTitle: "Skincare Västerås – CBD-based skincare | 1753 SKINCARE",
-      metaDescription: "Natural CBD skincare for Västerås. Order online with free shipping over 700 SEK. Protect your skin from the Lake Mälaren climate.",
+      metaDescription: "Natural CBD skincare for Västerås. Order online with free shipping over €60. Protect your skin from the Lake Mälaren climate.",
       kicker: "Skincare in Västerås",
       h1: "Natural skincare for Västerås",
-      lead: "Västerås by Lake Mälaren – summer paradise and winter challenge. Damp autumns, freezing winters, and the constant Stockholm commute test your skin. Order natural CBD skincare online – free shipping over 700 SEK.",
+      lead: "Västerås by Lake Mälaren – summer paradise and winter challenge. Damp autumns, freezing winters, and the constant Stockholm commute test your skin. Order natural CBD skincare online – free shipping over €60.",
       problemTitle: "What Västerås does to your skin",
       problemBody: "<p>Västerås's Lake Mälaren climate creates a special skin environment. The lake regulates temperature somewhat but also contributes moisture that makes autumns and winters raw and penetrating. The combination of humidity and cold is especially tough on the skin barrier – the moisture makes the cold bite deeper than the thermometer suggests.</p><p>Many Västerås residents commute to Stockholm, meaning daily exposure to dry train air, temperature shifts between stations and offices, and the extra stress that commuting brings. The skin faces a constant cycle of different environments it never quite adapts to.</p><p>Västerås's industrial tradition with ABB and other major companies means a significant portion of the population works in office environments with climate systems that dry out the air. The lunch walk along Svartån provides fresh air, but in winter most go directly from office to car – and the skin never gets the break it needs.</p>",
       tipsTitle: "Skincare tips for Västerås residents",
@@ -339,14 +339,14 @@ export const CITY_PAGES: LandingPage[] = [
         { title: "Adapt to the Mälaren climate", body: "Autumn's humidity and winter's cold demand richer products. Switch to more barrier-strengthening skincare from September and keep it through April." }
       ],
       solutionTitle: "CBD skincare delivered to Västerås",
-      solutionBody: "<p>From Åsa outside Gothenburg to your door in Västerås – 1753 SKINCARE delivers natural CBD skincare that strengthens your skin against Lake Mälaren's climate demands. Free shipping on orders over 700 SEK.</p><p>The DUO-kit with The ONE and I LOVE gives your skin the protection and balance that the raw Mälaren climate requires. CBD and CBG strengthen the skin barrier and counteract inflammation caused by temperature shifts and dry indoor air. Au Naturel Makeup Remover cleanses gently after a long commuting day without further stressing the skin.</p><p>Order at 1753skin.com – delivery to Västerås within 1–2 business days.</p>",
+      solutionBody: "<p>From Åsa outside Gothenburg to your door in Västerås – 1753 SKINCARE delivers natural CBD skincare that strengthens your skin against Lake Mälaren's climate demands. Free shipping on orders over €60.</p><p>The DUO-kit with The ONE and I LOVE gives your skin the protection and balance that the raw Mälaren climate requires. CBD and CBG strengthen the skin barrier and counteract inflammation caused by temperature shifts and dry indoor air. Au Naturel Makeup Remover cleanses gently after a long commuting day without further stressing the skin.</p><p>Order at 1753skin.com – delivery to Västerås within 1–2 business days.</p>",
       faq: [
-        { q: "Do you ship to Västerås?", a: "Yes, we ship from Åsa outside Gothenburg. Most orders reach Västerås within 1–2 business days. Free shipping over 700 SEK." },
+        { q: "Do you ship to Västerås?", a: "Yes, we ship from Åsa outside Gothenburg. Most orders reach Västerås within 1–2 business days. Free shipping over €60." },
         { q: "Where can I buy CBD skincare in Västerås?", a: "Order directly at 1753skin.com – we deliver to your door without middlemen or store markups." },
         { q: "Does CBD skincare help with raw cold?", a: "CBD strengthens the skin barrier and helps it retain moisture even during extreme temperature shifts. It works as an inner shield that complements outer protective layers." }
       ],
       ctaTitle: "Västerås skin deserves better",
-      ctaSub: "Natural CBD skincare that strengthens your skin against the Mälaren climate. Free shipping over 700 SEK."
+      ctaSub: "Natural CBD skincare that strengthens your skin against the Mälaren climate. Free shipping over €60."
     }
   },
   {
@@ -381,10 +381,10 @@ export const CITY_PAGES: LandingPage[] = [
     },
     en: {
       metaTitle: "Skincare Örebro – CBD-based skincare | 1753 SKINCARE",
-      metaDescription: "Natural CBD skincare for Örebro. Order online with free shipping over 700 SEK. Strengthen your skin against the Närke plains cold.",
+      metaDescription: "Natural CBD skincare for Örebro. Order online with free shipping over €60. Strengthen your skin against the Närke plains cold.",
       kicker: "Skincare in Örebro",
       h1: "Natural skincare for Örebro",
-      lead: "In the middle of Sweden, in the heart of Närke – Örebro has an inland climate that really tests the skin. Cold winters, warm summers, and the typical plains air. Your skin needs support that understands the conditions. Free shipping over 700 SEK.",
+      lead: "In the middle of Sweden, in the heart of Närke – Örebro has an inland climate that really tests the skin. Cold winters, warm summers, and the typical plains air. Your skin needs support that understands the conditions. Free shipping over €60.",
       problemTitle: "What Örebro does to your skin",
       problemBody: "<p>Örebro sits in the heart of the Närke plain, and the climate shows it. Inland air is drier than at the coast, and temperature differences between summer and winter are vast. Winters with temperatures below minus twenty are not uncommon, and the cold, dry air penetrates every pore and drains moisture.</p><p>The Svartån river running through the city creates a beautiful cityscape but also contributes to damp fog during autumn and spring – a raw, cold moisture that makes the chill settle in your bones and your skin. Lake Hjälmaren south of the city amplifies this effect.</p><p>As a mid-sized Swedish city, Örebro offers a mix of city life and proximity to nature. Many commute by car, meaning heated car air that dries out the skin, combined with the rapid shift between warm car and cold outdoors. Work-life stress often shows in the skin – breakouts, dryness, uneven tone – but the connection is rarely made.</p>",
       tipsTitle: "Skincare tips for Örebro residents",
@@ -395,14 +395,14 @@ export const CITY_PAGES: LandingPage[] = [
         { title: "Support your body's stress management", body: "Adaptogenic supplements like medicinal mushrooms can help the body handle everyday stress better, which directly impacts skin health and radiance." }
       ],
       solutionTitle: "CBD skincare delivered to Örebro",
-      solutionBody: "<p>1753 SKINCARE delivers natural CBD skincare directly to your door in Örebro. From Åsa outside Gothenburg to the Närke plains – free shipping on orders over 700 SEK.</p><p>The DUO-kit with The ONE and I LOVE gives your skin the nourishment and protection that Örebro's inland climate demands. CBD and CBG strengthen the barrier and balance skin moisture from within. Fungtastic Mushroom Extract with adaptogenic mushrooms helps the body manage stress – the invisible enemy that shows on the skin. Au Naturel Makeup Remover ends the day with gentle cleansing that doesn't worsen dryness.</p><p>Order at 1753skin.com – most deliveries reach Örebro within 1–2 business days.</p>",
+      solutionBody: "<p>1753 SKINCARE delivers natural CBD skincare directly to your door in Örebro. From Åsa outside Gothenburg to the Närke plains – free shipping on orders over €60.</p><p>The DUO-kit with The ONE and I LOVE gives your skin the nourishment and protection that Örebro's inland climate demands. CBD and CBG strengthen the barrier and balance skin moisture from within. Fungtastic Mushroom Extract with adaptogenic mushrooms helps the body manage stress – the invisible enemy that shows on the skin. Au Naturel Makeup Remover ends the day with gentle cleansing that doesn't worsen dryness.</p><p>Order at 1753skin.com – most deliveries reach Örebro within 1–2 business days.</p>",
       faq: [
-        { q: "Do you ship to Örebro?", a: "Yes, we ship from Åsa outside Gothenburg and most orders reach Örebro within 1–2 business days. Free shipping over 700 SEK." },
+        { q: "Do you ship to Örebro?", a: "Yes, we ship from Åsa outside Gothenburg and most orders reach Örebro within 1–2 business days. Free shipping over €60." },
         { q: "Where can I buy CBD skincare in Örebro?", a: "Order at 1753skin.com – we sell directly online and deliver to you without middlemen." },
         { q: "What do adaptogenic mushrooms do for the skin?", a: "Adaptogens like reishi and lion's mane help the body handle stress more effectively. Since stress is one of the biggest drivers of skin issues, the effect often shows in the skin – calmer, more even, more resilient." }
       ],
       ctaTitle: "Give your skin Örebro-adapted support",
-      ctaSub: "Natural CBD skincare that strengthens your skin against inland climate challenges. Free shipping over 700 SEK."
+      ctaSub: "Natural CBD skincare that strengthens your skin against inland climate challenges. Free shipping over €60."
     }
   },
   {
@@ -437,10 +437,10 @@ export const CITY_PAGES: LandingPage[] = [
     },
     en: {
       metaTitle: "Skincare Norrköping – CBD-based skincare | 1753 SKINCARE",
-      metaDescription: "Natural CBD skincare for Norrköping. Order online with free shipping over 700 SEK. Protect your skin from coastal moisture and inland cold.",
+      metaDescription: "Natural CBD skincare for Norrköping. Order online with free shipping over €60. Protect your skin from coastal moisture and inland cold.",
       kicker: "Skincare in Norrköping",
       h1: "Natural skincare for Norrköping",
-      lead: "Norrköping is a city in renewal – and maybe it's time to renew your skincare routine too. Bråviken's moisture, Östergötland winters, and a changing lifestyle leave their mark. Free shipping over 700 SEK, straight to your door.",
+      lead: "Norrköping is a city in renewal – and maybe it's time to renew your skincare routine too. Bråviken's moisture, Östergötland winters, and a changing lifestyle leave their mark. Free shipping over €60, straight to your door.",
       problemTitle: "What Norrköping does to your skin",
       problemBody: "<p>Norrköping at the inner end of Bråviken bay has a climate shaped by both coastal moisture and inland cold. Bråviken adds humidity and fog, especially during autumn and winter, making the cold penetrating. The Motala river running through the industrial landscape creates a microclimate with humid, cool conditions that can surprise those expecting typical inland weather.</p><p>Norrköping's industrial heritage lingers in air quality, even though the city has made enormous progress. The harbor and remaining industry contribute particles that stress the skin, especially in central areas and the Industrial Landscape. Wind from Bråviken carries salt and moisture that can disrupt the skin's pH balance.</p><p>Many Norrköping residents commute – to Linköping, Stockholm, or within the municipality – and the daily route between heated car, dry office air, and cold outdoor air is a barrier breaker. The skin never properly acclimatizes, and the result shows: dryness, redness, uneven skin tone.</p>",
       tipsTitle: "Skincare tips for Norrköping residents",
@@ -451,14 +451,14 @@ export const CITY_PAGES: LandingPage[] = [
         { title: "Invest in the evening routine", body: "Your skin repairs at night. A simple evening routine with gentle cleansing and protective oil does more for your skin than expensive treatments." }
       ],
       solutionTitle: "CBD skincare delivered to Norrköping",
-      solutionBody: "<p>1753 SKINCARE delivers natural CBD skincare directly to your door in Norrköping. Free shipping on orders over 700 SEK – we ship from Åsa outside Gothenburg.</p><p>The DUO-kit with The ONE and I LOVE gives your skin the barrier strengthening that Bråviken's moisture and cold demand. CBD and CBG work with the skin's own system to balance moisture, reduce inflammation, and build resilience. TA-DA Serum with CBG provides an extra boost during the toughest winter periods. Au Naturel Makeup Remover cleanses away the day's particles and dirt with MCT oil, without compromising the barrier.</p><p>Order at 1753skin.com – most deliveries reach Norrköping within 1–2 business days.</p>",
+      solutionBody: "<p>1753 SKINCARE delivers natural CBD skincare directly to your door in Norrköping. Free shipping on orders over €60 – we ship from Åsa outside Gothenburg.</p><p>The DUO-kit with The ONE and I LOVE gives your skin the barrier strengthening that Bråviken's moisture and cold demand. CBD and CBG work with the skin's own system to balance moisture, reduce inflammation, and build resilience. TA-DA Serum with CBG provides an extra boost during the toughest winter periods. Au Naturel Makeup Remover cleanses away the day's particles and dirt with MCT oil, without compromising the barrier.</p><p>Order at 1753skin.com – most deliveries reach Norrköping within 1–2 business days.</p>",
       faq: [
-        { q: "Do you ship to Norrköping?", a: "Yes, we ship from Åsa outside Gothenburg and most orders reach Norrköping within 1–2 business days. Free shipping over 700 SEK." },
+        { q: "Do you ship to Norrköping?", a: "Yes, we ship from Åsa outside Gothenburg and most orders reach Norrköping within 1–2 business days. Free shipping over €60." },
         { q: "Where can I buy CBD skincare in Norrköping?", a: "Order directly at 1753skin.com – we deliver to you in Norrköping without middlemen. Easy and fast." },
         { q: "Does CBD help with redness and irritation?", a: "Yes, CBD has documented anti-inflammatory properties that calm redness and irritation. It's not a quick fix, but over time most people experience noticeably calmer, more even skin." }
       ],
       ctaTitle: "Give your skin a fresh start in Norrköping",
-      ctaSub: "CBD skincare that works with your skin. Free shipping over 700 SEK to Norrköping."
+      ctaSub: "CBD skincare that works with your skin. Free shipping over €60 to Norrköping."
     }
   },
   {
@@ -495,10 +495,10 @@ export const CITY_PAGES: LandingPage[] = [
     },
     en: {
       metaTitle: "Skincare Helsingborg – CBD-based skincare | 1753 SKINCARE",
-      metaDescription: "Natural CBD skincare for Helsingborg. Order online with free shipping over 700 SEK. Protect your skin from Öresund winds.",
+      metaDescription: "Natural CBD skincare for Helsingborg. Order online with free shipping over €60. Protect your skin from Öresund winds.",
       kicker: "Skincare in Helsingborg",
       h1: "Natural skincare for Helsingborg",
-      lead: "Helsingborg at the narrowest point of the Öresund strait – here the sea wind's salt hits the skin at full force. Skåne's mild but wind-battered climate places unique demands on skincare. Order online – free shipping over 700 SEK.",
+      lead: "Helsingborg at the narrowest point of the Öresund strait – here the sea wind's salt hits the skin at full force. Skåne's mild but wind-battered climate places unique demands on skincare. Order online – free shipping over €60.",
       problemTitle: "What Helsingborg does to your skin",
       problemBody: "<p>Helsingborg has one of Sweden's most wind-exposed locations. The Öresund strait is only four kilometers wide here, and the wind tunnels through with an intensity few other Swedish cities experience. The sea wind's salt settles on the skin, dries it out, and can disrupt the natural pH balance. The face is especially exposed – cheeks, forehead, and nose take a beating every day.</p><p>Skåne's climate is milder than the rest of Sweden, with shorter and less cold winters. But it's compensated by constant wind and high humidity that creates a damp cold that creeps under clothing and into the skin. Helsingborg also has relatively hard tap water – not as extreme as Malmö, but enough to affect sensitive skin negatively.</p><p>The city has an active outdoor culture – walks along Tropical Beach, training at Ättekulla, runs by Pålsjö. All in sea air and wind. It's wonderful for the soul but requires proper skin support afterward.</p>",
       tipsTitle: "Skincare tips for Helsingborg residents",
@@ -510,15 +510,15 @@ export const CITY_PAGES: LandingPage[] = [
         { title: "Support immunity during dark months", body: "Helsingborg's autumn and winter offer limited sun exposure. Vitamin D and adaptogenic supplements support both immunity and skin from within." }
       ],
       solutionTitle: "CBD skincare delivered to Helsingborg",
-      solutionBody: "<p>From Åsa outside Gothenburg to your door in Helsingborg – we understand coastal climate. 1753 SKINCARE delivers natural CBD skincare that strengthens your skin against the Öresund wind's demands. Free shipping on orders over 700 SEK.</p><p>The DUO-kit with The ONE and I LOVE gives your skin the barrier strengthening that wind-exposed Helsingborg requires. CBD and CBG balance and protect. TA-DA Serum with concentrated CBG works as intensive care during the windiest periods. Fungtastic Mushroom Extract supports immunity during the dark Scanian winter months.</p><p>Order at 1753skin.com – most deliveries reach Helsingborg within 1–2 business days.</p>",
+      solutionBody: "<p>From Åsa outside Gothenburg to your door in Helsingborg – we understand coastal climate. 1753 SKINCARE delivers natural CBD skincare that strengthens your skin against the Öresund wind's demands. Free shipping on orders over €60.</p><p>The DUO-kit with The ONE and I LOVE gives your skin the barrier strengthening that wind-exposed Helsingborg requires. CBD and CBG balance and protect. TA-DA Serum with concentrated CBG works as intensive care during the windiest periods. Fungtastic Mushroom Extract supports immunity during the dark Scanian winter months.</p><p>Order at 1753skin.com – most deliveries reach Helsingborg within 1–2 business days.</p>",
       faq: [
-        { q: "Do you ship to Helsingborg?", a: "Yes, we ship from Åsa outside Gothenburg. Most orders reach Helsingborg within 1–2 business days. Free shipping over 700 SEK." },
+        { q: "Do you ship to Helsingborg?", a: "Yes, we ship from Åsa outside Gothenburg. Most orders reach Helsingborg within 1–2 business days. Free shipping over €60." },
         { q: "Where can I buy CBD skincare in Helsingborg?", a: "Order directly at 1753skin.com – conveniently delivered to your door in Helsingborg without middlemen." },
         { q: "Does CBD help wind-dried skin?", a: "Yes, CBD strengthens the skin barrier and helps the skin retain moisture despite wind exposure. It doesn't repair damage directly, but makes the skin more resilient against future stress." },
         { q: "Can I order from Denmark too?", a: "Currently we deliver within Sweden. But with Helsingborg-Helsingør just a ferry ride away, we hope to offer Danish delivery in the future." }
       ],
       ctaTitle: "Protect your skin from the Öresund wind",
-      ctaSub: "Natural CBD skincare that strengthens your barrier. Free shipping over 700 SEK to Helsingborg."
+      ctaSub: "Natural CBD skincare that strengthens your barrier. Free shipping over €60 to Helsingborg."
     }
   },
   {
@@ -554,10 +554,10 @@ export const CITY_PAGES: LandingPage[] = [
     },
     en: {
       metaTitle: "Skincare Jönköping – CBD-based skincare | 1753 SKINCARE",
-      metaDescription: "Natural CBD skincare for Jönköping. Order online with free shipping over 700 SEK. Protect your skin from Lake Vättern's climate.",
+      metaDescription: "Natural CBD skincare for Jönköping. Order online with free shipping over €60. Protect your skin from Lake Vättern's climate.",
       kicker: "Skincare in Jönköping",
       h1: "Natural skincare for Jönköping",
-      lead: "Jönköping at the southern tip of Lake Vättern – a city where Småland stubbornness meets nature's forces. Vättern winds, cold inland winters, and the high altitude give your skin unique challenges. Free shipping over 700 SEK.",
+      lead: "Jönköping at the southern tip of Lake Vättern – a city where Småland stubbornness meets nature's forces. Vättern winds, cold inland winters, and the high altitude give your skin unique challenges. Free shipping over €60.",
       problemTitle: "What Jönköping does to your skin",
       problemBody: "<p>Jönköping's location at the southern end of Lake Vättern creates a microclimate that differs from surrounding Småland. Vättern, one of Europe's largest and deepest lakes, cools the air and creates local wind conditions that can be surprisingly strong. The lake's enormous water volume means it rarely freezes, and the constant evaporation adds moisture to the air – a cold, raw humidity that differs from typical inland dryness.</p><p>Jönköping also sits on the Småland highlands, about 300 meters above sea level. The higher altitude means stronger UV radiation and drier air, despite the proximity to Vättern. Winters are genuinely cold with stable sub-zero temperatures, and the transition between seasons can be abrupt.</p><p>Småland's entrepreneurial spirit means many work hard and long, often in manufacturing and office environments. Stress levels are high in Scandinavia's most entrepreneurial region, and it shows in the skin – dryness, breakouts, and a fatigue that no concealer in the world can hide.</p>",
       tipsTitle: "Skincare tips for Jönköping residents",
@@ -568,15 +568,15 @@ export const CITY_PAGES: LandingPage[] = [
         { title: "Invest in the evening routine", body: "After a long day of Småland entrepreneurship, your skin needs recovery. A simple evening routine with gentle cleansing and nourishing oil works wonders." }
       ],
       solutionTitle: "CBD skincare delivered to Jönköping",
-      solutionBody: "<p>1753 SKINCARE delivers natural CBD skincare directly to your door in Jönköping. From Åsa outside Gothenburg – free shipping on orders over 700 SEK.</p><p>The DUO-kit with The ONE and I LOVE gives your skin the nourishment that the Vättern climate and Småland winter cold demand. CBD and CBG strengthen the skin barrier and balance inflammatory processes. Au Naturel Makeup Remover with MCT oil cleanses gently after a day in Jönköping's mixed climate. Fungtastic Mushroom Extract supports the body from within – for those who push hard and need to help the body keep up.</p><p>Order at 1753skin.com – most deliveries reach Jönköping within 1–2 business days.</p>",
+      solutionBody: "<p>1753 SKINCARE delivers natural CBD skincare directly to your door in Jönköping. From Åsa outside Gothenburg – free shipping on orders over €60.</p><p>The DUO-kit with The ONE and I LOVE gives your skin the nourishment that the Vättern climate and Småland winter cold demand. CBD and CBG strengthen the skin barrier and balance inflammatory processes. Au Naturel Makeup Remover with MCT oil cleanses gently after a day in Jönköping's mixed climate. Fungtastic Mushroom Extract supports the body from within – for those who push hard and need to help the body keep up.</p><p>Order at 1753skin.com – most deliveries reach Jönköping within 1–2 business days.</p>",
       faq: [
-        { q: "Do you ship to Jönköping?", a: "Yes, we ship from Åsa outside Gothenburg and most orders reach Jönköping within 1–2 business days. Free shipping over 700 SEK." },
+        { q: "Do you ship to Jönköping?", a: "Yes, we ship from Åsa outside Gothenburg and most orders reach Jönköping within 1–2 business days. Free shipping over €60." },
         { q: "Where can I buy CBD skincare in Jönköping?", a: "Easiest through 1753skin.com – we deliver directly to your door without middlemen or store markups." },
         { q: "What does CBD do for cold-exposed skin?", a: "CBD strengthens the skin barrier and helps the skin retain moisture and elasticity despite cold. It reduces inflammation and repairs damage caused by temperature shifts." },
         { q: "Can I use your products year-round?", a: "Absolutely. Our products are formulated to work in all seasons. Adjust the amount by season – a bit more in winter, a bit less in summer." }
       ],
       ctaTitle: "Småland stubbornness deserves Småland skincare",
-      ctaSub: "Natural CBD skincare that lasts as long as your workday. Free shipping over 700 SEK."
+      ctaSub: "Natural CBD skincare that lasts as long as your workday. Free shipping over €60."
     }
   },
   {
@@ -613,10 +613,10 @@ export const CITY_PAGES: LandingPage[] = [
     },
     en: {
       metaTitle: "Skincare Umeå – CBD-based skincare | 1753 SKINCARE",
-      metaDescription: "Natural CBD skincare for Umeå. Order online with free shipping over 700 SEK. Protect your skin from subarctic cold and polar night.",
+      metaDescription: "Natural CBD skincare for Umeå. Order online with free shipping over €60. Protect your skin from subarctic cold and polar night.",
       kicker: "Skincare in Umeå",
       h1: "Natural skincare for Umeå",
-      lead: "Umeå – European Capital of Culture that happens to be in one of Sweden's toughest climates for skin. Minus thirty in winter, midnight sun in summer, and everything in between. Your skin needs extreme care, not standard solutions. Free shipping over 700 SEK.",
+      lead: "Umeå – European Capital of Culture that happens to be in one of Sweden's toughest climates for skin. Minus thirty in winter, midnight sun in summer, and everything in between. Your skin needs extreme care, not standard solutions. Free shipping over €60.",
       problemTitle: "What Umeå does to your skin",
       problemBody: "<p>Umeå has a subarctic climate that places extreme demands on the skin. Winters are long – from November to March, the skin lives with temperatures that regularly drop below minus twenty, sometimes below minus thirty. The cold air holds almost no moisture at all, and the dry winter air literally sucks moisture from the skin. The skin's barrier function is pushed to its absolute limit.</p><p>The polar night means weeks with minimal sun exposure, leading to vitamin D deficiency that affects the skin's immune function and renewal cycle. Skin becomes pale, thin, and vulnerable. Meanwhile, the midnight sun in summer means extreme round-the-clock UV exposure for skin that isn't accustomed to it.</p><p>Indoor climate in Umeå is also extreme. Heated apartments and university buildings have humidity that can drop below 10 percent in winter – that's drier than the Sahara desert. Skin dries, cracks, and itches. And for Umeå's large student population, exam stress, sleep deprivation, and tight budgets are piled on top.</p>",
       tipsTitle: "Skincare tips for Umeå residents",
@@ -628,15 +628,15 @@ export const CITY_PAGES: LandingPage[] = [
         { title: "Protect skin from river winds", body: "The wind tunnel effect along the Ume river can turn cold into extreme cold. Protect your face with a scarf and apply extra oil before walks along the water." }
       ],
       solutionTitle: "CBD skincare that handles Umeå's climate",
-      solutionBody: "<p>At 1753 SKINCARE, we understand that Umeå skin lives under extreme conditions. Our products are formulated to strengthen the skin barrier – not just patch it up. CBD and CBG work with the skin's own endocannabinoid system to repair, protect, and balance, regardless of what the thermometer reads.</p><p>The DUO-kit + TA-DA Serum combination is our recommendation for Umeå. You get three products that together provide maximum barrier strengthening: The ONE and I LOVE as your daily base, and TA-DA Serum with concentrated CBG for extra intensive care during the worst cold snaps. Fungtastic Mushroom Extract supports immunity during the dark months.</p><p>We ship from Åsa outside Gothenburg with free shipping on orders over 700 SEK. Most deliveries reach Umeå within 2–3 business days.</p>",
+      solutionBody: "<p>At 1753 SKINCARE, we understand that Umeå skin lives under extreme conditions. Our products are formulated to strengthen the skin barrier – not just patch it up. CBD and CBG work with the skin's own endocannabinoid system to repair, protect, and balance, regardless of what the thermometer reads.</p><p>The DUO-kit + TA-DA Serum combination is our recommendation for Umeå. You get three products that together provide maximum barrier strengthening: The ONE and I LOVE as your daily base, and TA-DA Serum with concentrated CBG for extra intensive care during the worst cold snaps. Fungtastic Mushroom Extract supports immunity during the dark months.</p><p>We ship from Åsa outside Gothenburg with free shipping on orders over €60. Most deliveries reach Umeå within 2–3 business days.</p>",
       faq: [
-        { q: "Do you ship to Umeå?", a: "Yes, we deliver throughout Sweden. From Åsa outside Gothenburg, most orders reach Umeå within 2–3 business days. Free shipping on orders over 700 SEK." },
+        { q: "Do you ship to Umeå?", a: "Yes, we deliver throughout Sweden. From Åsa outside Gothenburg, most orders reach Umeå within 2–3 business days. Free shipping on orders over €60." },
         { q: "Where can I buy CBD skincare in Umeå?", a: "Order directly at 1753skin.com. We deliver to your door – easiest and fastest in a city without physical CBD skincare stores." },
         { q: "Can your oils handle extreme cold?", a: "Yes, our oils are stable well below zero degrees. Store them at room temperature at home, and apply generously before heading out – they create a protective barrier." },
         { q: "Should I use more product in winter?", a: "Yes. In Umeå's extreme winter climate, the skin needs more protection. Apply an extra layer of The ONE or I LOVE during the coldest periods, and add TA-DA Serum for intensive care." }
       ],
       ctaTitle: "Extreme cold demands extreme skincare",
-      ctaSub: "CBD skincare that strengthens your barrier against Umeå's climate. Free shipping over 700 SEK."
+      ctaSub: "CBD skincare that strengthens your barrier against Umeå's climate. Free shipping over €60."
     }
   },
   {
@@ -672,10 +672,10 @@ export const CITY_PAGES: LandingPage[] = [
     },
     en: {
       metaTitle: "Skincare Lund – CBD-based skincare | 1753 SKINCARE",
-      metaDescription: "Natural CBD skincare for Lund. Order online with free shipping over 700 SEK. Science-backed skincare for Sweden's research capital.",
+      metaDescription: "Natural CBD skincare for Lund. Order online with free shipping over €60. Science-backed skincare for Sweden's research capital.",
       kicker: "Skincare in Lund",
       h1: "Natural skincare for Lund",
-      lead: "Lund – the knowledge city researching the future. Your skin deserves the same scientific thoughtfulness. Skåne's windy climate, hard water, and student life demands more than standard. Free shipping over 700 SEK.",
+      lead: "Lund – the knowledge city researching the future. Your skin deserves the same scientific thoughtfulness. Skåne's windy climate, hard water, and student life demands more than standard. Free shipping over €60.",
       problemTitle: "What Lund does to your skin",
       problemBody: "<p>Lund shares many of Skåne's climate challenges – wind, relatively mild but humid climate, and hard tap water. But as a university city, Lund has its own unique skin challenges. The city's 50,000 students often live in a cocktail of stress, sleep deprivation, tight budgets, and fast food that leaves marks on the skin.</p><p>The Scanian water in Lund has high calcium content, which slowly breaks down the skin barrier through daily washing. The effect isn't immediate, but after weeks and months, many experience dry, irritated, and reactive skin without being able to point to the cause. Calcium deposits on the skin can also clog pores and worsen acne.</p><p>Lund's compact city center means most people cycle – great for fitness but exposing the face to wind, particles, and temperature shifts daily. The Scanian autumn wind blows straight in from the southwest, carrying moisture from the Öresund strait that makes the cold penetrating.</p>",
       tipsTitle: "Skincare tips for Lund residents",
@@ -686,15 +686,15 @@ export const CITY_PAGES: LandingPage[] = [
         { title: "Explore Skåneleden", body: "Skåne's hiking trails around Lund give you fresh air and stress relief. Nature is the best medicine for the cortisol-driven stress skin that affects so many students." }
       ],
       solutionTitle: "CBD skincare delivered to Lund",
-      solutionBody: "<p>In a city that lives by research and knowledge, skincare should build on the same foundation. CBD skincare isn't fluff – these are products that work with the skin's endocannabinoid system, a system that research increasingly highlights as central to skin health.</p><p>The DUO-kit with The ONE and I LOVE gives your Lund apartment skin the barrier strengthening that Scanian water and climate demand. TA-DA Serum with concentrated CBG works as intensive care during stressful periods – exam weeks, deadlines, the dark winter months.</p><p>Order at 1753skin.com – we ship from Åsa outside Gothenburg. Free shipping on orders over 700 SEK, delivery to Lund within 1–2 business days.</p>",
+      solutionBody: "<p>In a city that lives by research and knowledge, skincare should build on the same foundation. CBD skincare isn't fluff – these are products that work with the skin's endocannabinoid system, a system that research increasingly highlights as central to skin health.</p><p>The DUO-kit with The ONE and I LOVE gives your Lund apartment skin the barrier strengthening that Scanian water and climate demand. TA-DA Serum with concentrated CBG works as intensive care during stressful periods – exam weeks, deadlines, the dark winter months.</p><p>Order at 1753skin.com – we ship from Åsa outside Gothenburg. Free shipping on orders over €60, delivery to Lund within 1–2 business days.</p>",
       faq: [
-        { q: "Do you ship to Lund?", a: "Yes, we ship from Åsa outside Gothenburg and most orders reach Lund within 1–2 business days. Free shipping over 700 SEK." },
+        { q: "Do you ship to Lund?", a: "Yes, we ship from Åsa outside Gothenburg and most orders reach Lund within 1–2 business days. Free shipping over €60." },
         { q: "Where can I buy CBD skincare in Lund?", a: "Order directly at 1753skin.com. We sell online without middlemen – conveniently delivered to your student corridor or villa." },
         { q: "Is there scientific support for CBD in skincare?", a: "Yes, the research is growing. Studies show anti-inflammatory, antioxidant, and sebostatic properties. Lund University is at the forefront of cannabinoid research – ask your nearest researcher." },
-        { q: "Do your products fit a student budget?", a: "The DUO-kit costs 1,099 SEK and lasts several months. Per day, it's cheaper than a coffee at Lundagård – and does more for your skin." }
+        { q: "Do your products fit a student budget?", a: "The DUO-kit costs \u20AC95 and lasts several months. Per day, it's cheaper than a coffee at Lundagård – and does more for your skin." }
       ],
       ctaTitle: "The research speaks – CBD works",
-      ctaSub: "Science-backed skincare to your door in Lund. Free shipping over 700 SEK."
+      ctaSub: "Science-backed skincare to your door in Lund. Free shipping over €60."
     }
   },
   {
@@ -730,10 +730,10 @@ export const CITY_PAGES: LandingPage[] = [
     },
     en: {
       metaTitle: "Skincare Borås – CBD-based skincare | 1753 SKINCARE",
-      metaDescription: "Natural CBD skincare for Borås. Order online with free shipping over 700 SEK. Protect your skin from Sweden's rain capital climate.",
+      metaDescription: "Natural CBD skincare for Borås. Order online with free shipping over €60. Protect your skin from Sweden's rain capital climate.",
       kicker: "Skincare in Borås",
       h1: "Natural skincare for Borås",
-      lead: "Borås – Sweden's rain capital. If you live here, you already know your skin has it tough. But it doesn't have to be that way. Natural CBD skincare that understands your conditions – delivered from your neighbors in Åsa. Free shipping over 700 SEK.",
+      lead: "Borås – Sweden's rain capital. If you live here, you already know your skin has it tough. But it doesn't have to be that way. Natural CBD skincare that understands your conditions – delivered from your neighbors in Åsa. Free shipping over €60.",
       problemTitle: "What Borås does to your skin",
       problemBody: "<p>Borås isn't just jokingly called Sweden's rainiest city – it's fact. The city's location in the Sjuhärad region, nestled between hills and lakes, creates a microclimate that traps moisture. Annual precipitation is among the highest in Sweden, meaning your skin lives in a constantly humid outdoor environment – but paradoxically extremely dry indoors during the heating season.</p><p>The constant moisture can trick you into thinking your skin is hydrated. But external humidity isn't the same as the skin barrier's own moisture retention. Many in Borås have dehydrated skin without knowing it – the surface feels moist but the barrier is weakened and leaks moisture from within.</p><p>Borås's textile tradition lives on through the Swedish School of Textiles and an active fashion industry, and many think more about what they wear ON their skin (clothes) than how the skin underneath feels. The combination of rainy commutes, constant temperature shifts between outdoors and indoors, and the stress of an active professional life means Borås skin needs more conscious care than it often gets.</p>",
       tipsTitle: "Skincare tips for Borås residents",
@@ -744,15 +744,15 @@ export const CITY_PAGES: LandingPage[] = [
         { title: "Invest in barrier strengthening", body: "In Borås's humid climate, skincare is more about strengthening the barrier than adding moisture. Oils that lock in and protect are more important than water-based products that evaporate." }
       ],
       solutionTitle: "CBD skincare from your neighbors",
-      solutionBody: "<p>We live in Åsa, just a short drive from Borås. We know how the Sjuhärad climate works – the rain, the moisture, the rapid shifts between outdoors and indoors. 1753 SKINCARE is created with exactly this reality in mind.</p><p>The DUO-kit with The ONE and I LOVE gives your skin the barrier strengthening that rain and humidity demand. CBD and CBG work with the skin's own system to lock in moisture and strengthen protective function from within. Au Naturel Makeup Remover cleanses gently after a rainy day without worsening barrier weakness. TA-DA Serum with CBG provides extra support during the greyest periods.</p><p>Order at 1753skin.com – free shipping on orders over 700 SEK, and delivery from Åsa reaches Borås the next day.</p>",
+      solutionBody: "<p>We live in Åsa, just a short drive from Borås. We know how the Sjuhärad climate works – the rain, the moisture, the rapid shifts between outdoors and indoors. 1753 SKINCARE is created with exactly this reality in mind.</p><p>The DUO-kit with The ONE and I LOVE gives your skin the barrier strengthening that rain and humidity demand. CBD and CBG work with the skin's own system to lock in moisture and strengthen protective function from within. Au Naturel Makeup Remover cleanses gently after a rainy day without worsening barrier weakness. TA-DA Serum with CBG provides extra support during the greyest periods.</p><p>Order at 1753skin.com – free shipping on orders over €60, and delivery from Åsa reaches Borås the next day.</p>",
       faq: [
-        { q: "Do you ship to Borås?", a: "We're based in Åsa, just south of Gothenburg and close to Borås. Most orders reach you the next business day. Free shipping over 700 SEK." },
+        { q: "Do you ship to Borås?", a: "We're based in Åsa, just south of Gothenburg and close to Borås. Most orders reach you the next business day. Free shipping over €60." },
         { q: "Where can I buy CBD skincare in Borås?", a: "Order at 1753skin.com – fastest and easiest, directly from us in Åsa without middlemen." },
         { q: "Does my skin need moisture when it's already humid outside?", a: "Yes. External air humidity and the skin's own moisture retention are completely different things. The skin needs its own fatty acids and barrier protection – rain doesn't deliver that." },
         { q: "Which product is best for a humid climate?", a: "The DUO-kit provides the barrier strengthening that humid climates demand. The oils lock in the skin's moisture without adding water-based moisture that evaporates." }
       ],
       ctaTitle: "Borås rain demands Borås skincare",
-      ctaSub: "Barrier-strengthening CBD skincare from your neighbors in Åsa. Free shipping over 700 SEK."
+      ctaSub: "Barrier-strengthening CBD skincare from your neighbors in Åsa. Free shipping over €60."
     }
   },
   {
@@ -789,10 +789,10 @@ export const CITY_PAGES: LandingPage[] = [
     },
     en: {
       metaTitle: "Skincare Sundsvall – CBD-based skincare | 1753 SKINCARE",
-      metaDescription: "Natural CBD skincare for Sundsvall. Order online with free shipping over 700 SEK. Strengthen your skin against Norrland winters.",
+      metaDescription: "Natural CBD skincare for Sundsvall. Order online with free shipping over €60. Strengthen your skin against Norrland winters.",
       kicker: "Skincare in Sundsvall",
       h1: "Natural skincare for Sundsvall",
-      lead: "Sundsvall – the stone city by the sea, in the heart of Norrland. Long winters, a short but intense summer, and skin that struggles half the year. You deserve products that handle your conditions. Free shipping over 700 SEK.",
+      lead: "Sundsvall – the stone city by the sea, in the heart of Norrland. Long winters, a short but intense summer, and skin that struggles half the year. You deserve products that handle your conditions. Free shipping over €60.",
       problemTitle: "What Sundsvall does to your skin",
       problemBody: "<p>Sundsvall has a unique location by the Bothnian Sea, framed by the North and South City Mountains. This creates a microclimate that can surprise – temperature inversions in winter trap cold air in the valley and temperatures can drop dramatically. Sundsvall has recorded some of Sweden's lowest temperatures for a coastal location.</p><p>Winters are long and cold, with temperatures regularly reaching minus twenty and sometimes minus thirty. The dry winter air holds minimal moisture, and the skin dries out quickly. Meanwhile, heated homes and offices create extremely dry indoor air – a double dehydration effect that wears on the skin barrier.</p><p>Summer in Sundsvall is short but can be intense, with long bright days and surprisingly strong sun. Skin that has spent six months in dry, cold air is suddenly exposed to UV radiation it's not prepared for. The transition is brutal, and many experience skin problems right at the seasonal shifts.</p>",
       tipsTitle: "Skincare tips for Sundsvall residents",
@@ -804,15 +804,15 @@ export const CITY_PAGES: LandingPage[] = [
         { title: "Protect your face by the sea", body: "The Bothnian Sea wind along Sundsvall's coast is cold and raw. A protective oil as a barrier before heading to the coast locks in moisture and shuts out the cold." }
       ],
       solutionTitle: "CBD skincare delivered to Sundsvall",
-      solutionBody: "<p>1753 SKINCARE delivers natural CBD skincare that handles Sundsvall's tough conditions. From Åsa outside Gothenburg to your door – free shipping on orders over 700 SEK.</p><p>Our strongest recommendation for Sundsvall is the DUO-kit + TA-DA Serum combination. You get three products that together provide maximum barrier strengthening for Norrland winters: The ONE and I LOVE as your daily base, and TA-DA Serum with CBG for intensive care during cold snaps. Fungtastic Mushroom Extract strengthens immunity during the dark months.</p><p>Order at 1753skin.com – most deliveries reach Sundsvall within 2 business days.</p>",
+      solutionBody: "<p>1753 SKINCARE delivers natural CBD skincare that handles Sundsvall's tough conditions. From Åsa outside Gothenburg to your door – free shipping on orders over €60.</p><p>Our strongest recommendation for Sundsvall is the DUO-kit + TA-DA Serum combination. You get three products that together provide maximum barrier strengthening for Norrland winters: The ONE and I LOVE as your daily base, and TA-DA Serum with CBG for intensive care during cold snaps. Fungtastic Mushroom Extract strengthens immunity during the dark months.</p><p>Order at 1753skin.com – most deliveries reach Sundsvall within 2 business days.</p>",
       faq: [
-        { q: "Do you ship to Sundsvall?", a: "Yes, we deliver throughout Sweden. Most orders from Åsa reach Sundsvall within 2 business days. Free shipping on orders over 700 SEK." },
+        { q: "Do you ship to Sundsvall?", a: "Yes, we deliver throughout Sweden. Most orders from Åsa reach Sundsvall within 2 business days. Free shipping on orders over €60." },
         { q: "Where can I buy CBD skincare in Sundsvall?", a: "Order directly at 1753skin.com – we deliver to your door in Sundsvall without middlemen." },
         { q: "Do I need different products for summer and winter?", a: "Our products work year-round, but adjust the amount. Winter in Sundsvall: generous with oil, double layers if needed. Summer: a thinner application is sufficient." },
         { q: "Can your products handle cold shipping?", a: "Yes, our oils withstand cold without losing quality. If the package is cold on arrival, let it reach room temperature before use." }
       ],
       ctaTitle: "Norrland skin demands Norrland-strength skincare",
-      ctaSub: "CBD skincare that strengthens your barrier against Sundsvall's climate. Free shipping over 700 SEK."
+      ctaSub: "CBD skincare that strengthens your barrier against Sundsvall's climate. Free shipping over €60."
     }
   },
   {
@@ -848,10 +848,10 @@ export const CITY_PAGES: LandingPage[] = [
     },
     en: {
       metaTitle: "Skincare Gävle – CBD-based skincare | 1753 SKINCARE",
-      metaDescription: "Natural CBD skincare for Gävle. Order online with free shipping over 700 SEK. Strengthen your skin against the gateway to Norrland.",
+      metaDescription: "Natural CBD skincare for Gävle. Order online with free shipping over €60. Strengthen your skin against the gateway to Norrland.",
       kicker: "Skincare in Gävle",
       h1: "Natural skincare for Gävle",
-      lead: "Gävle – the gateway to Norrland, where central Sweden meets the real winter. The Gavleån moisture, Bothnian Sea winds, and winters that truly test your skin. Give it the support it deserves. Free shipping over 700 SEK.",
+      lead: "Gävle – the gateway to Norrland, where central Sweden meets the real winter. The Gavleån moisture, Bothnian Sea winds, and winters that truly test your skin. Give it the support it deserves. Free shipping over €60.",
       problemTitle: "What Gävle does to your skin",
       problemBody: "<p>Gävle sits at the border between central Sweden and Norrland, and the climate reflects that position – cold enough to be challenging, but not so extreme that everyone automatically adapts. Winters are long with temperatures regularly reaching minus fifteen to minus twenty, and the Gavleån river running through the city adds raw moisture that makes the cold penetrating.</p><p>The proximity to the Bothnian Sea gives Gävle a wind that carries salt and moisture. Along the coast, at Bönan and Engeltofta, the sea wind can be strong and drying. But in the city center, sheltered by buildings, you barely notice it – until you wonder why your skin is so dry despite barely being outdoors.</p><p>Gävle has a mix of old industrial tradition and modern service sector. Many commute, either locally or south toward Stockholm, and the daily route through different climate zones – home, car, train, office – gives the skin a carousel of temperature and humidity it never quite gets used to. Coffee culture is strong in Gävle (Gevalia, of course), but caffeine dehydrates – and it shows in the skin.</p>",
       tipsTitle: "Skincare tips for Gävle residents",
@@ -862,15 +862,15 @@ export const CITY_PAGES: LandingPage[] = [
         { title: "Support immunity during dark months", body: "Gävle's winter half gives limited sun exposure. Vitamin D and adaptogenic supplements support immunity and skin health during the darkest months." }
       ],
       solutionTitle: "CBD skincare delivered to Gävle",
-      solutionBody: "<p>1753 SKINCARE delivers natural CBD skincare directly to your door in Gävle. Free shipping on orders over 700 SEK – we ship from Åsa outside Gothenburg.</p><p>The DUO-kit with The ONE and I LOVE gives your skin the foundation it needs to handle Gävle's climate. CBD and CBG strengthen the barrier and balance moisture and inflammation. TA-DA Serum with concentrated CBG works as a booster during the coldest months. Fungtastic Mushroom Extract supports immunity during winter's dark periods – for Gävle residents who want to care for their skin from the inside out.</p><p>Order at 1753skin.com – most deliveries reach Gävle within 1–2 business days.</p>",
+      solutionBody: "<p>1753 SKINCARE delivers natural CBD skincare directly to your door in Gävle. Free shipping on orders over €60 – we ship from Åsa outside Gothenburg.</p><p>The DUO-kit with The ONE and I LOVE gives your skin the foundation it needs to handle Gävle's climate. CBD and CBG strengthen the barrier and balance moisture and inflammation. TA-DA Serum with concentrated CBG works as a booster during the coldest months. Fungtastic Mushroom Extract supports immunity during winter's dark periods – for Gävle residents who want to care for their skin from the inside out.</p><p>Order at 1753skin.com – most deliveries reach Gävle within 1–2 business days.</p>",
       faq: [
-        { q: "Do you ship to Gävle?", a: "Yes, we ship from Åsa outside Gothenburg and most orders reach Gävle within 1–2 business days. Free shipping over 700 SEK." },
+        { q: "Do you ship to Gävle?", a: "Yes, we ship from Åsa outside Gothenburg and most orders reach Gävle within 1–2 business days. Free shipping over €60." },
         { q: "Where can I buy CBD skincare in Gävle?", a: "Order directly at 1753skin.com – we deliver to your door in Gävle. No store needed." },
         { q: "Does CBD help with winter-dry skin?", a: "Yes, CBD strengthens the skin barrier and helps the skin retain moisture despite cold, dry air. Our oils also provide a protective layer that reduces moisture loss." },
         { q: "Can I order as a gift?", a: "Absolutely. All orders ship in discreet, attractive packaging that works perfectly as a gift. Perfect Christmas present for a Gävle resident with dry winter skin." }
       ],
       ctaTitle: "Gateway to Norrland skin deserves real skincare",
-      ctaSub: "CBD skincare that strengthens your barrier against Gävle's climate. Free shipping over 700 SEK."
+      ctaSub: "CBD skincare that strengthens your barrier against Gävle's climate. Free shipping over €60."
     }
   },
 ];

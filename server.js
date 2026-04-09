@@ -263,14 +263,16 @@ app.get("/api/dashboard/stats", authMiddleware, async (req, res) => {
 // ---- PRODUCT CATALOGUE (server-side price source of truth) ----
 
 const PRODUCTS_MAP = {
-  "duo-ta-da":                  { name: "DUO-kit + TA-DA Serum", price: 1495, articleNumber: "4004", vatRate: 0.25 },
-  "ta-da-serum":                { name: "TA-DA Serum", price: 699, articleNumber: "1005", vatRate: 0.25 },
-  "duo-kit":                    { name: "DUO-kit", price: 1099, articleNumber: "1003", vatRate: 0.25 },
-  "au-naturel-makeup-remover":  { name: "Au Naturel Makeup Remover", price: 399, articleNumber: "1004", vatRate: 0.25 },
-  "fungtastic-mushroom-extract":{ name: "Fungtastic Mushroom Extract", price: 399, articleNumber: "4001", vatRate: 0.12 }
+  "duo-ta-da":                  { name: "DUO-kit + TA-DA Serum", price: 1495, priceEur: 129, articleNumber: "4004", vatRate: 0.25 },
+  "ta-da-serum":                { name: "TA-DA Serum", price: 699, priceEur: 59, articleNumber: "1005", vatRate: 0.25 },
+  "duo-kit":                    { name: "DUO-kit", price: 1099, priceEur: 95, articleNumber: "1003", vatRate: 0.25 },
+  "au-naturel-makeup-remover":  { name: "Au Naturel Makeup Remover", price: 399, priceEur: 34, articleNumber: "1004", vatRate: 0.25 },
+  "fungtastic-mushroom-extract":{ name: "Fungtastic Mushroom Extract", price: 399, priceEur: 32, articleNumber: "4001", vatRate: 0.12 }
 };
 
 const FREE_SHIPPING_THRESHOLD = 0;
+const SHIPPING_COST = { SEK: 49, EUR: 5 };
+const VIVA_CURRENCY_CODE = { SEK: 752, EUR: 978 };
 
 const DISCOUNT_CODES = {
   test: {
@@ -306,7 +308,8 @@ function generateOrderNumber() {
 
 app.post("/api/subscriptions/create", authMiddleware, async (req, res) => {
   try {
-    const { productId, quantity, intervalDays } = req.body;
+    const { productId, quantity, intervalDays, currency: reqCurrency } = req.body;
+    const currency = reqCurrency === "EUR" ? "EUR" : "SEK";
     const product = PRODUCTS_MAP[productId];
     if (!product) return res.status(400).json({ message: "Okänd produkt" });
 
@@ -317,7 +320,8 @@ app.post("/api/subscriptions/create", authMiddleware, async (req, res) => {
     const allowedIntervals = [30, 60, 90];
     const interval = allowedIntervals.includes(intervalDays) ? intervalDays : 60;
     const discountPercent = 15;
-    const originalPrice = product.price * qty;
+    const basePrice = currency === "EUR" ? (product.priceEur || product.price) : product.price;
+    const originalPrice = basePrice * qty;
     const recurringPrice = Math.round(originalPrice * (1 - discountPercent / 100));
     const vivaAmount = recurringPrice * 100;
 
@@ -325,7 +329,7 @@ app.post("/api/subscriptions/create", authMiddleware, async (req, res) => {
 
     const vivaData = await vivaFetch("/checkout/v2/orders", "POST", {
       amount: vivaAmount,
-      currencyCode: 752,
+      currencyCode: VIVA_CURRENCY_CODE[currency],
       customerTrns: `1753 SKINCARE prenumeration – ${orderNumber}`,
       merchantTrns: `SUB-${orderNumber}`,
       sourceCode: process.env.VIVA_SOURCE_CODE,
@@ -1620,7 +1624,8 @@ app.post("/api/orders/create", async (req, res) => {
     if (!checkRateLimit(clientIp, "orders-create", 20)) {
       return res.status(429).json({ message: "För många beställningar. Försök igen om en stund." });
     }
-    const { customer, deliveryAddress, items, discountCode } = req.body;
+    const { customer, deliveryAddress, items, discountCode, currency: reqCurrency } = req.body;
+    const currency = reqCurrency === "EUR" ? "EUR" : "SEK";
 
     if (!customer?.name || !customer?.email) {
       return res.status(400).json({ message: "Namn och e-post krävs" });
@@ -1645,7 +1650,8 @@ app.post("/api/orders/create", async (req, res) => {
     const orderItems = items.map(item => {
       const product = PRODUCTS_MAP[item.id];
       if (!product) throw { status: 400, message: `Okänd produkt: ${item.id}` };
-      let price = product.price;
+      let price = currency === "EUR" ? (product.priceEur || product.price) : product.price;
+      const originalPrice = price;
       if (discount && (!discount.productIds || discount.productIds.includes(item.id))) {
         price = Math.round(price * (1 - discount.percent / 100));
       }
@@ -1655,20 +1661,21 @@ app.post("/api/orders/create", async (req, res) => {
         name: product.name,
         quantity: item.qty || 1,
         price,
-        originalPrice: product.price,
+        originalPrice,
         vatRate: product.vatRate || 0.25
       };
     });
 
     const totalAmount = orderItems.reduce((s, i) => s + i.price * i.quantity, 0);
-    const shippingCost = totalAmount >= FREE_SHIPPING_THRESHOLD ? 0 : 49;
+    const shippingAmount = currency === "EUR" ? SHIPPING_COST.EUR : SHIPPING_COST.SEK;
+    const shippingCost = totalAmount >= FREE_SHIPPING_THRESHOLD ? 0 : shippingAmount;
     const vivaAmount = (totalAmount + shippingCost) * 100;
 
     const orderNumber = generateOrderNumber();
 
     const vivaOrderBody = {
       amount: vivaAmount,
-      currencyCode: 752,
+      currencyCode: VIVA_CURRENCY_CODE[currency],
       customerTrns: `1753 SKINCARE – ${orderNumber}`,
       merchantTrns: orderNumber,
       sourceCode: process.env.VIVA_SOURCE_CODE,
@@ -1696,10 +1703,11 @@ app.post("/api/orders/create", async (req, res) => {
       merchantTrns: orderNumber,
       items: orderItems,
       totalAmount,
-      shippingCost
+      shippingCost,
+      currency
     });
 
-    console.log(`[Order] Created ${orderNumber}, vivaOrderCode=${vivaData.orderCode}`);
+    console.log(`[Order] Created ${orderNumber} (${currency}), vivaOrderCode=${vivaData.orderCode}`);
 
     const env = process.env.VIVA_ENVIRONMENT === "production" ? "www" : "demo";
     const checkoutUrl = `https://${env}.vivapayments.com/web/checkout?ref=${vivaData.orderCode}`;

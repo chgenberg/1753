@@ -7,7 +7,9 @@ export interface Product {
   name: string;
   nameEn?: string;
   price: number;
+  priceEur: number;
   originalPrice: number | null;
+  originalPriceEur: number | null;
   reviews: number;
   image: string;
   imageAlt: string;
@@ -34,7 +36,9 @@ export const PRODUCTS: Product[] = [
     name: "DUO-kit + TA-DA Serum",
     nameEn: "DUO kit + TA-DA Serum",
     price: 1495,
+    priceEur: 129,
     originalPrice: 2197,
+    originalPriceEur: 189,
     reviews: 238,
     image: "/New_Products/DUO+TA-DA.jpg",
     imageAlt: "/New_Products/DUO+TA-DAWoman.jpg",
@@ -88,7 +92,9 @@ export const PRODUCTS: Product[] = [
     name: "TA-DA Serum",
     nameEn: "TA-DA Serum",
     price: 699,
+    priceEur: 59,
     originalPrice: null,
+    originalPriceEur: null,
     reviews: 20,
     image: "/New_Products/TA-DA.jpg",
     imageAlt: "/New_Products/TA-DAWoman.jpg",
@@ -155,7 +161,9 @@ export const PRODUCTS: Product[] = [
     name: "DUO-kit",
     nameEn: "DUO kit",
     price: 1099,
+    priceEur: 95,
     originalPrice: 1498,
+    originalPriceEur: 129,
     reviews: 515,
     image: "/New_Products/DUO.jpg",
     imageAlt: "/New_Products/DUOwoman.jpg",
@@ -228,7 +236,9 @@ export const PRODUCTS: Product[] = [
     name: "Au Naturel Makeup Remover",
     nameEn: "Au Naturel Makeup Remover",
     price: 399,
+    priceEur: 34,
     originalPrice: null,
+    originalPriceEur: null,
     reviews: 83,
     image: "/New_Products/MR.jpg",
     imageAlt: "/New_Products/MRwoman.jpg",
@@ -288,7 +298,9 @@ export const PRODUCTS: Product[] = [
     name: "Fungtastic Mushroom Extract",
     nameEn: "Fungtastic Mushroom Extract",
     price: 377,
+    priceEur: 32,
     originalPrice: null,
+    originalPriceEur: null,
     reviews: 63,
     image: "/New_Products/Fungtastic.jpg",
     imageAlt: "/New_Products/Fungtasticwoman.jpg",
@@ -386,4 +398,12 @@ export function productGuarantee(p: Product, locale: Locale): string {
 export function productSize(p: Product, locale: Locale): string | null {
   if (locale === "en" && p.sizeEn != null && p.sizeEn !== "") return p.sizeEn;
   return p.size;
+}
+
+export function productPrice(p: Product, locale: Locale): number {
+  return locale === "en" ? p.priceEur : p.price;
+}
+
+export function productOriginalPrice(p: Product, locale: Locale): number | null {
+  return locale === "en" ? p.originalPriceEur : p.originalPrice;
 }

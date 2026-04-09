@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
-import { getProduct, PRODUCTS, productDisplayName, productShortDesc } from "@/lib/products";
+import { getProduct, PRODUCTS, productDisplayName, productShortDesc, productPrice } from "@/lib/products";
+import { getCurrency } from "@/lib/currency";
 import ProductDetail from "./product-detail";
 import { getMessages } from "@/lib/i18n/messages";
 import { localizePath } from "@/lib/i18n/navigation";
@@ -53,8 +54,8 @@ export default async function ProductPage({ params }: Props) {
       brand: { "@type": "Brand", name: "1753 SKINCARE" },
       offers: {
         "@type": "Offer",
-        price: product.price,
-        priceCurrency: "SEK",
+        price: productPrice(product, l),
+        priceCurrency: getCurrency(l),
         availability: "https://schema.org/InStock",
         url: `${SITE_ORIGIN}${path}`,
       },

@@ -5,7 +5,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { Minus, Plus, RefreshCcw, ShoppingBag, Trash2, X } from "lucide-react";
 import { useCart, type CartItem } from "@/providers/cart-provider";
-import { PRODUCTS, productDisplayName } from "@/lib/products";
+import { PRODUCTS, productDisplayName, productPrice } from "@/lib/products";
+import { formatPrice } from "@/lib/currency";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useLocale } from "@/providers/locale-provider";
@@ -17,8 +18,6 @@ function productIdFromCartId(cartId: string) {
 export function CartDrawer() {
   const { items, removeItem, updateQty, isOpen, closeCart, totalItems } = useCart();
   const { t, path, locale } = useLocale();
-  const loc = locale === "en" ? "en-GB" : "sv-SE";
-  const currency = t("productCard.currency");
 
   useEffect(() => {
     if (!isOpen) return;
@@ -37,7 +36,8 @@ export function CartDrawer() {
     .filter(Boolean) as (typeof PRODUCTS[number] & { cartId: string; qty: number; subscription?: CartItem["subscription"] })[];
 
   const subtotal = cartProducts.reduce((s, p) => {
-    const unitPrice = p.subscription ? Math.round(p.price * 0.85) : p.price;
+    const base = productPrice(p, locale);
+    const unitPrice = p.subscription ? Math.round(base * 0.85) : base;
     return s + unitPrice * p.qty;
   }, 0);
   const hasSubscription = cartProducts.some((p) => p.subscription);
@@ -97,9 +97,10 @@ export function CartDrawer() {
             <div className="flex-1 overflow-y-auto px-6 py-4">
               <div className="flex flex-col gap-4">
                 {cartProducts.map((product) => {
+                  const base = productPrice(product, locale);
                   const unitPrice = product.subscription
-                    ? Math.round(product.price * 0.85)
-                    : product.price;
+                    ? Math.round(base * 0.85)
+                    : base;
                   const displayName = productDisplayName(product, locale);
                   return (
                     <div
@@ -135,10 +136,10 @@ export function CartDrawer() {
                             </div>
                           ) : null}
                           <p className="mt-0.5 text-sm text-muted-foreground">
-                            {unitPrice.toLocaleString(loc)} {currency}
+                            {formatPrice(unitPrice, locale)}
                             {product.subscription && (
                               <span className="ml-1.5 text-xs line-through text-brand-400">
-                                {product.price.toLocaleString(loc)} {currency}
+                                {formatPrice(base, locale)}
                               </span>
                             )}
                           </p>
@@ -189,7 +190,7 @@ export function CartDrawer() {
               <div className="mb-4 flex items-center justify-between">
                 <span className="text-sm font-medium">{t("cartDrawer.total")}</span>
                 <span className="text-lg font-bold">
-                  {subtotal.toLocaleString(loc)} {currency}
+                  {formatPrice(subtotal, locale)}
                 </span>
               </div>
               <Link href={path("checkout")} onClick={closeCart}>

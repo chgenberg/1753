@@ -23,14 +23,16 @@ import {
   productIngredients,
   productShortDesc,
   productSize,
+  productPrice,
+  productOriginalPrice,
 } from "@/lib/products";
+import { formatPrice } from "@/lib/currency";
 import { cn } from "@/lib/utils";
 import { useLocale } from "@/providers/locale-provider";
 
 export default function ProductDetail({ id }: { id: string }) {
   const { t, path, locale } = useLocale();
   const loc = locale === "en" ? "en-GB" : "sv-SE";
-  const cur = t("productCard.currency");
   const product = getProduct(id);
   const [qty, setQty] = useState(1);
   const [activeImg, setActiveImg] = useState(0);
@@ -87,8 +89,10 @@ export default function ProductDetail({ id }: { id: string }) {
     { src: product.image, alt: pname },
     { src: product.imageAlt, alt: `${pname}${t("productDetail.lifestyleAltSuffix")}` },
   ];
-  const saveAmount = product.originalPrice
-    ? (product.originalPrice - product.price).toLocaleString(loc)
+  const price = productPrice(product, locale);
+  const origPrice = productOriginalPrice(product, locale);
+  const saveAmount = origPrice
+    ? formatPrice(origPrice - price, locale)
     : "";
   const ingredients = productIngredients(product, locale);
   const descHtml = productDescriptionHtml(product, locale);
@@ -194,11 +198,11 @@ export default function ProductDetail({ id }: { id: string }) {
 
               <div className="mt-6 flex items-center gap-3">
                 <span className="text-2xl font-bold">
-                  {product.price.toLocaleString(loc)} {cur}
+                  {formatPrice(price, locale)}
                 </span>
-                {product.originalPrice && (
+                {origPrice && (
                   <span className="text-lg text-brand-500 line-through">
-                    {product.originalPrice.toLocaleString(loc)} {cur}
+                    {formatPrice(origPrice, locale)}
                   </span>
                 )}
               </div>
@@ -251,7 +255,7 @@ export default function ProductDetail({ id }: { id: string }) {
                     {t("productCard.subscribeSave")}
                   </span>
                   <span className="text-brand-600">
-                    {Math.round(product.price * qty * 0.85).toLocaleString(loc)} {cur}
+                    {formatPrice(Math.round(price * qty * 0.85), locale)}
                   </span>
                 </button>
 
@@ -287,7 +291,7 @@ export default function ProductDetail({ id }: { id: string }) {
                       className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand-900 px-4 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:bg-brand-800 active:scale-[0.98]"
                     >
                       {t("productDetail.subscribeCta", {
-                        price: Math.round(product.price * qty * 0.85).toLocaleString(loc),
+                        price: formatPrice(Math.round(price * qty * 0.85), locale),
                         interval: String(subInterval),
                       })}
                     </button>

@@ -201,13 +201,13 @@ const bundle = {
     subscriptionTermsBody:
       "Vid prenumeration sparas ditt kort för framtida leveranser med 15% rabatt. Du kan pausa eller avsluta din prenumeration när som helst under Mitt konto.",
     subscriptionHeadingShort: "Prenumerationsvillkor",
-    subBulletAuto: "levereras automatiskt var {interval}:e dag till 15% rabatt ({price} kr/st).",
+    subBulletAuto: "levereras automatiskt var {interval}:e dag till 15% rabatt ({price}/st).",
     subBulletFirst: "Första leveransen betalas nu. Efterföljande dras automatiskt.",
     subBulletAccount: "Du kan ändra intervall, pausa eller avbryta när som helst via Mitt konto.",
     subBulletNoBinding: "Ingen bindningstid.",
     subscriptionCardOnly:
       "Prenumeration kräver betalning med kort – automatiska dragningar går inte med Swish. På nästa sida visas bara kort och andra metoder som stödjer återkommande betalning.",
-    payWithTotal: "Betala {amount} kr",
+    payWithTotal: "Betala {amount}",
     secureHint: "Säker betalning",
     shippingPaidAmount: "Frakt 49 kr",
     qtyUnit: "st",
@@ -359,7 +359,7 @@ const bundle = {
   },
   productDetail: {
     backToProducts: "Tillbaka till produkter",
-    saveBadge: "Spara {amount} kr",
+    saveBadge: "Spara {amount}",
     reviewsLabel: "omdömen",
     showImage: "Visa bild {n}: {alt}",
     decQty: "Minska antal",
@@ -369,7 +369,7 @@ const bundle = {
     subscribeSave: "Prenumerera och spara 15%",
     chooseInterval: "Välj leveransintervall:",
     days: "dagar",
-    subscribeCta: "Prenumerera – {price} kr var {interval}:e dag",
+    subscribeCta: "Prenumerera – {price} var {interval}:e dag",
     addedSubscription: "{name} tillagd som prenumeration",
     subDisclaimer: "Avbryt när som helst. Ingen bindningstid.",
     freeShippingHint: "Fri frakt över 700 kr",
@@ -547,7 +547,7 @@ const bundle = {
     benefitsLead: "Varje krona du handlar för ger 1 poäng. Högre nivå = bättre rabatter.",
     nextGoal: "Ditt nästa mål",
     nextGoalText:
-      "Handla för {amount} kr till för att nå {tier} och få {discount} rabatt på alla köp.",
+      "Handla för {amount} till för att nå {tier} och få {discount} rabatt på alla köp.",
     tierMaxTitle: "Du har nått högsta nivån!",
     tierMaxBody: "Platina-medlem med 12% rabatt på alla köp.",
     redeemTitle: "Lös in poäng",

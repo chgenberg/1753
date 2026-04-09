@@ -15,7 +15,7 @@ export const LEGAL_TERMS_EN: LegalDoc = {
     },
     {
       h: "2. Prices",
-      html: `<p>All prices are in Swedish kronor (SEK) including VAT. We may change prices without prior notice; orders already placed are not affected.</p>`,
+      html: `<p>All prices include VAT. Prices are shown in SEK for Swedish visitors and EUR for international visitors. We may change prices without prior notice; orders already placed are not affected.</p>`,
     },
     {
       h: "3. Payment",
@@ -23,7 +23,7 @@ export const LEGAL_TERMS_EN: LegalDoc = {
     },
     {
       h: "4. Delivery",
-      html: `<p>We ship all orders with PostNord Varubrev. Normal delivery time is 2–5 business days within Sweden. Free shipping on orders over 700 SEK; otherwise a shipping fee of 49 SEK applies.</p>`,
+      html: `<p>We ship all orders with PostNord Varubrev. Normal delivery time is 2–5 business days within Sweden and 5–10 business days for EU deliveries. Free shipping on orders over 700 SEK / \u20AC60; otherwise a shipping fee of 49 SEK / \u20AC5 applies.</p>`,
     },
     {
       h: "5. Right of withdrawal",

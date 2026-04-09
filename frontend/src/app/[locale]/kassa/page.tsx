@@ -6,7 +6,8 @@ import Link from "next/link";
 import { ArrowLeft, Check, CreditCard, Gift, Lock, RefreshCcw, ShieldCheck, Tag, Truck, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart, type CartItem } from "@/providers/cart-provider";
-import { PRODUCTS, productDisplayName } from "@/lib/products";
+import { PRODUCTS, productDisplayName, productPrice } from "@/lib/products";
+import { formatPrice, getCurrency, getShippingCost } from "@/lib/currency";
 import { apiFetch } from "@/lib/api";
 import { useLocale } from "@/providers/locale-provider";
 
@@ -23,8 +24,7 @@ interface ActiveDiscount {
 
 export default function CheckoutPage() {
   const { t, path, locale, homeHash } = useLocale();
-  const loc = locale === "en" ? "en-GB" : "sv-SE";
-  const cur = t("productCard.currency");
+  const currency = getCurrency(locale);
   const { items } = useCart();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -53,14 +53,16 @@ export default function CheckoutPage() {
   const hasSubscription = cartProducts.some((p) => p.subscription);
 
   const subtotal = cartProducts.reduce((s, p) => {
-    const unitPrice = p.subscription ? Math.round(p.price * 0.85) : p.price;
+    const base = productPrice(p, locale);
+    const unitPrice = p.subscription ? Math.round(base * 0.85) : base;
     return s + unitPrice * p.qty;
   }, 0);
 
   const discountAmount = activeDiscount
     ? cartProducts.reduce((s, p) => {
         const realId = productIdFromCartId(p.cartId);
-        const unitPrice = p.subscription ? Math.round(p.price * 0.85) : p.price;
+        const base = productPrice(p, locale);
+        const unitPrice = p.subscription ? Math.round(base * 0.85) : base;
         if (!activeDiscount.applicableProductIds || activeDiscount.applicableProductIds.includes(realId)) {
           return s + Math.round(unitPrice * p.qty * (activeDiscount.percent / 100));
         }
@@ -71,7 +73,7 @@ export default function CheckoutPage() {
   const discountedSubtotal = subtotal - discountAmount;
   const FREE_SHIPPING_THRESHOLD = 0;
   const freeShipping = discountedSubtotal >= FREE_SHIPPING_THRESHOLD;
-  const shipping = freeShipping ? 0 : 49;
+  const shipping = freeShipping ? 0 : getShippingCost(locale);
   const total = discountedSubtotal + shipping;
 
   const handleApplyDiscount = async () => {
@@ -158,6 +160,7 @@ export default function CheckoutPage() {
               subscription: i.subscription || undefined,
             })),
             discountCode: activeDiscount?.code || undefined,
+            currency,
           }),
         }
       );
@@ -342,13 +345,14 @@ export default function CheckoutPage() {
                     .map((p) => {
                       const name = productDisplayName(p, locale);
                       const interval = p.subscription!.intervalDays;
-                      const unit = Math.round(p.price * 0.85);
+                      const base = productPrice(p, locale);
+                      const unit = Math.round(base * 0.85);
                       return (
                         <li key={p.cartId}>
                           <strong>{name}</strong>{" "}
                           {t("checkout.subBulletAuto", {
                             interval: String(interval),
-                            price: unit.toLocaleString(loc),
+                            price: formatPrice(unit, locale),
                           })}
                         </li>
                       );
@@ -417,7 +421,7 @@ export default function CheckoutPage() {
               ) : (
                 <>
                   <Lock className="mr-2 h-4 w-4" />
-                  {t("checkout.payWithTotal", { amount: total.toLocaleString(loc) })}
+                  {t("checkout.payWithTotal", { amount: formatPrice(total, locale) })}
                 </>
               )}
             </Button>
@@ -440,7 +444,8 @@ export default function CheckoutPage() {
             </h2>
             <div className="flex flex-col gap-4">
               {cartProducts.map((p) => {
-                const unitPrice = p.subscription ? Math.round(p.price * 0.85) : p.price;
+                const base = productPrice(p, locale);
+                const unitPrice = p.subscription ? Math.round(base * 0.85) : base;
                 return (
                   <div key={p.cartId} className="flex gap-3">
                     <div className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-2xl bg-white ring-1 ring-inset ring-black/5">
@@ -468,11 +473,11 @@ export default function CheckoutPage() {
                     </div>
                     <div className="text-right">
                       <p className="text-sm font-medium">
-                        {(unitPrice * p.qty).toLocaleString(loc)} {cur}
+                        {formatPrice(unitPrice * p.qty, locale)}
                       </p>
                       {p.subscription && (
                         <p className="text-xs text-brand-400 line-through">
-                          {(p.price * p.qty).toLocaleString(loc)} {cur}
+                          {formatPrice(base * p.qty, locale)}
                         </p>
                       )}
                     </div>
@@ -536,16 +541,12 @@ export default function CheckoutPage() {
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">{t("checkout.subtotal")}</span>
-                  <span>
-                    {subtotal.toLocaleString(loc)} {cur}
-                  </span>
+                  <span>{formatPrice(subtotal, locale)}</span>
                 </div>
                 {discountAmount > 0 && (
                   <div className="flex justify-between text-sm text-green-700">
                     <span>{t("checkout.discount")}</span>
-                    <span>
-                      -{discountAmount.toLocaleString(loc)} {cur}
-                    </span>
+                    <span>-{formatPrice(discountAmount, locale)}</span>
                   </div>
                 )}
                 <div className="flex justify-between text-sm">
@@ -556,9 +557,7 @@ export default function CheckoutPage() {
                 </div>
                 <div className="flex justify-between border-t border-border pt-2 text-base font-bold">
                   <span>{t("checkout.total")}</span>
-                  <span>
-                    {total.toLocaleString(loc)} {cur}
-                  </span>
+                  <span>{formatPrice(total, locale)}</span>
                 </div>
               </div>
 
@@ -569,7 +568,7 @@ export default function CheckoutPage() {
                 <Gift className="mt-0.5 h-4 w-4 shrink-0 text-brand-700 group-hover:text-green" />
                 <div className="text-xs leading-relaxed text-brand-600">
                   <span className="font-semibold text-brand-900">{t("checkout.loyaltyTitle")}</span>{" "}
-                  {t("checkout.loyaltyDesc", { points: total.toLocaleString(loc) })}
+                  {t("checkout.loyaltyDesc", { points: String(total) })}
                 </div>
               </Link>
             </div>

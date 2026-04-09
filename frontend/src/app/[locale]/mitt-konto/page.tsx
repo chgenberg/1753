@@ -38,7 +38,9 @@ import {
   getProduct,
   productDisplayName,
   productShortDesc,
+  productPrice,
 } from "@/lib/products";
+import { formatPrice } from "@/lib/currency";
 
 type View =
   | "oversikt"
@@ -203,7 +205,6 @@ function OverviewView({
   const d = (key: string, vars?: Record<string, string | number>) => t(`accountDash.${key}`, vars);
   const { addItem } = useCart();
   const { showToast } = useToast();
-  const cur = t("productCard.currency");
 
   if (loading) {
     return (
@@ -342,7 +343,7 @@ function OverviewView({
                   </div>
                   <div className="mt-3 flex items-center justify-between">
                     <span className="text-sm font-bold">
-                      {rec.price.toLocaleString(loc)} {cur}
+                      {formatPrice(prod ? productPrice(prod, locale) : rec.price, locale)}
                     </span>
                     <button
                       type="button"
@@ -504,7 +505,6 @@ function OrdersView({ orders, loading, error }: { orders: Order[]; loading: bool
   const { t, path, locale } = useLocale();
   const loc = locale === "en" ? "en-GB" : "sv-SE";
   const d = (key: string, vars?: Record<string, string | number>) => t(`accountDash.${key}`, vars);
-  const cur = t("productCard.currency");
   const { addItems } = useCart();
   const { showToast } = useToast();
 
@@ -582,7 +582,7 @@ function OrdersView({ orders, loading, error }: { orders: Order[]; loading: bool
                     <p key={i} className="text-sm text-brand-600">
                       {item.qty}x {item.name || item.id}{" "}
                       <span className="text-brand-500">
-                        {((item.price || 0) * item.qty).toLocaleString(loc)} {cur}
+                        {formatPrice((item.price || 0) * item.qty, locale)}
                       </span>
                     </p>
                   ))}
@@ -597,7 +597,7 @@ function OrdersView({ orders, loading, error }: { orders: Order[]; loading: bool
                     {d("reorder")}
                   </button>
                   <p className="text-sm font-bold">
-                    {((order.total_amount || 0) / 100).toLocaleString(loc)} {cur}
+                    {formatPrice((order.total_amount || 0) / 100, locale)}
                   </p>
                 </div>
               </div>
@@ -779,7 +779,7 @@ function BenefitsView({
           <p className="text-sm font-medium text-brand-900">{d("nextGoal")}</p>
           <p className="mt-1 text-sm text-brand-600">
             {d("nextGoalText", {
-              amount: remaining.toLocaleString(loc),
+              amount: formatPrice(remaining, locale),
               tier: t(`account.tier.${nextTier.name}`),
               discount: `${nextDiscountPct}%`,
             })}
@@ -851,7 +851,6 @@ function SubscriptionsView({ token }: { token: string }) {
   const { t, path, locale } = useLocale();
   const loc = locale === "en" ? "en-GB" : "sv-SE";
   const d = (key: string, vars?: Record<string, string | number>) => t(`accountDash.${key}`, vars);
-  const cur = t("productCard.currency");
   const daysWord = t("productDetail.days");
   const { showToast } = useToast();
   const [subs, setSubs] = useState<Subscription[]>([]);
@@ -974,10 +973,10 @@ function SubscriptionsView({ token }: { token: string }) {
                   </div>
                   <div className="mt-3 flex items-baseline gap-2">
                     <span className="text-lg font-bold">
-                      {sub.recurring_price.toLocaleString(loc)} {cur}
+                      {formatPrice(sub.recurring_price, locale)}
                     </span>
                     <span className="text-sm text-muted-foreground line-through">
-                      {sub.original_price.toLocaleString(loc)} {cur}
+                      {formatPrice(sub.original_price, locale)}
                     </span>
                     <span className="rounded bg-green-50 px-1.5 py-0.5 text-[11px] font-medium text-green-700">
                       -{sub.discount_percent}%
@@ -1110,7 +1109,6 @@ function WishlistView({ token }: { token: string }) {
   const { t, path, locale } = useLocale();
   const loc = locale === "en" ? "en-GB" : "sv-SE";
   const d = (key: string, vars?: Record<string, string | number>) => t(`accountDash.${key}`, vars);
-  const cur = t("productCard.currency");
   const [items, setItems] = useState<WishlistItem[]>([]);
   const [loading, setLoading] = useState(true);
   const { addItem } = useCart();
@@ -1177,7 +1175,7 @@ function WishlistView({ token }: { token: string }) {
                   <p className="text-sm font-bold">{name}</p>
                   <p className="mt-0.5 text-xs text-muted-foreground">{short}</p>
                   <p className="mt-1 text-sm font-bold">
-                    {product.price.toLocaleString(loc)} {cur}
+                    {formatPrice(productPrice(product, locale), locale)}
                   </p>
                 </a>
                 <div className="flex flex-col gap-2">

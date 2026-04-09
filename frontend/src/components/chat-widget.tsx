@@ -10,7 +10,8 @@ import {
   type FormEvent,
 } from "react";
 import { API_URL } from "@/lib/api";
-import { getProduct, productDisplayName } from "@/lib/products";
+import { getProduct, productDisplayName, productPrice } from "@/lib/products";
+import { formatPrice } from "@/lib/currency";
 import { useCart } from "@/providers/cart-provider";
 import { useLocale } from "@/providers/locale-provider";
 
@@ -46,8 +47,6 @@ export function ChatWidget() {
   const id = useId();
   const { t, path, locale, messages } = useLocale();
   const { addItem } = useCart();
-  const loc = locale === "en" ? "en-GB" : "sv-SE";
-  const cur = t("productCard.currency");
 
   const [isOpen, setIsOpen] = useState(false);
   const [tipsOpen, setTipsOpen] = useState(false);
@@ -302,7 +301,7 @@ export function ChatWidget() {
                   <div className="cw-product-info">
                     <div className="cw-product-name">{name}</div>
                     <div className="cw-product-price">
-                      {p.price.toLocaleString(loc)} {cur}
+                      {formatPrice(productPrice(p, locale), locale)}
                     </div>
                   </div>
                   <Link href={path("product", { productId: row.productId })} className="cw-product-link">

@@ -8,7 +8,8 @@ import { useWishlist } from "@/hooks/use-wishlist";
 import { useToast } from "@/components/notification";
 import { useRouter } from "next/navigation";
 import type { Product } from "@/lib/products";
-import { productDisplayName, productShortDesc } from "@/lib/products";
+import { productDisplayName, productShortDesc, productPrice, productOriginalPrice } from "@/lib/products";
+import { formatPrice } from "@/lib/currency";
 import { useLocale } from "@/providers/locale-provider";
 
 export function ProductCard({
@@ -27,7 +28,8 @@ export function ProductCard({
   const inWishlist = isWishlisted(product.id);
   const name = productDisplayName(product, locale);
   const shortDesc = productShortDesc(product, locale);
-  const loc = locale === "en" ? "en-GB" : "sv-SE";
+  const price = productPrice(product, locale);
+  const origPrice = productOriginalPrice(product, locale);
 
   const handleWishlistClick = async (e: React.MouseEvent) => {
     e.preventDefault();
@@ -72,11 +74,10 @@ export function ProductCard({
           sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
         />
         <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-black/5" />
-        {product.originalPrice && (
+        {origPrice && (
           <span className="absolute left-3 top-3 rounded-full bg-brand-800 px-3 py-1 text-[11px] font-semibold text-white shadow-lg">
             {t("productCard.save")}{" "}
-            {(product.originalPrice - product.price).toLocaleString(loc)}{" "}
-            {t("productCard.currency")}
+            {formatPrice(origPrice - price, locale)}
           </span>
         )}
         <button
@@ -109,11 +110,11 @@ export function ProductCard({
         </p>
         <div className="mt-3 flex items-center gap-2">
           <span className="text-base font-bold text-brand-900">
-            {product.price.toLocaleString(loc)} {t("productCard.currency")}
+            {formatPrice(price, locale)}
           </span>
-          {product.originalPrice && (
+          {origPrice && (
             <span className="text-xs font-medium text-brand-500 line-through">
-              {product.originalPrice.toLocaleString(loc)} {t("productCard.currency")}
+              {formatPrice(origPrice, locale)}
             </span>
           )}
         </div>
