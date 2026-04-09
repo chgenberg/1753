@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, Check, CreditCard, Lock, RefreshCcw, ShieldCheck, Tag, Truck, X } from "lucide-react";
+import { ArrowLeft, Check, CreditCard, Gift, Lock, RefreshCcw, ShieldCheck, Tag, Truck, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart, type CartItem } from "@/providers/cart-provider";
 import { PRODUCTS, productDisplayName } from "@/lib/products";
@@ -561,6 +561,17 @@ export default function CheckoutPage() {
                   </span>
                 </div>
               </div>
+
+              <Link
+                href={path("loyalty")}
+                className="mt-5 flex items-start gap-3 rounded-xl bg-brand-900/[0.04] p-3.5 transition-colors hover:bg-brand-900/[0.08] group"
+              >
+                <Gift className="mt-0.5 h-4 w-4 shrink-0 text-brand-700 group-hover:text-green" />
+                <div className="text-xs leading-relaxed text-brand-600">
+                  <span className="font-semibold text-brand-900">{t("checkout.loyaltyTitle")}</span>{" "}
+                  {t("checkout.loyaltyDesc", { points: total.toLocaleString(loc) })}
+                </div>
+              </Link>
             </div>
           </aside>
         </div>

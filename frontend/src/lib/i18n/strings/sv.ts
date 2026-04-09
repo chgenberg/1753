@@ -213,6 +213,8 @@ const bundle = {
     qtyUnit: "st",
     orderAsideTitle: "Din beställning",
     removeDiscountAria: "Ta bort rabattkod",
+    loyaltyTitle: "Tjäna poäng!",
+    loyaltyDesc: "Den här ordern ger dig {points} poäng i vårt lojalitetsprogram. Samla poäng och lås upp rabatter.",
   },
   paymentSuccess: {
     title: "Tack för din beställning!",

@@ -215,6 +215,8 @@ export const en: Messages = {
     qtyUnit: "pcs",
     orderAsideTitle: "Your order",
     removeDiscountAria: "Remove discount code",
+    loyaltyTitle: "Earn points!",
+    loyaltyDesc: "This order earns you {points} points in our loyalty programme. Collect points and unlock discounts.",
   },
   paymentSuccess: {
     title: "Thank you for your order!",
