@@ -27,8 +27,8 @@ interface OrderItem {
 
 interface Return {
   id: number;
-  credit_number: string | null;
-  return_order_id: number | null;
+  fortnox_credit_number: string | null;
+  ongoing_return_id: string | null;
   status: string;
   reason: string;
   refund_amount: number;
@@ -44,15 +44,15 @@ interface OrderDetail {
   customer_name: string;
   customer_email: string;
   customer_phone: string;
-  customer_address: string;
-  customer_zip: string;
-  customer_city: string;
+  address: string;
+  zip: string;
+  city: string;
   total_amount: number;
   shipping_cost: number;
   created_at: string;
   fortnox_invoice_number: string | null;
-  ongoing_order_id: number | null;
-  notes: string | null;
+  ongoing_order_id: string | null;
+  internal_notes: string | null;
   items: OrderItem[];
   returns: Return[];
 }
@@ -66,8 +66,12 @@ interface ReturnItemInput {
 }
 
 interface ReturnResult {
-  credit_number: string | null;
-  return_order_id: number | null;
+  return: {
+    id: number;
+    fortnox_credit_number: string | null;
+    ongoing_return_id: string | null;
+  };
+  notes: string[];
 }
 
 const STATUS_CONFIG: Record<string, { label: string; bg: string; text: string }> = {
@@ -267,7 +271,7 @@ export default function OrderDetailPage() {
           body: JSON.stringify({
             items: selectedItems,
             reason: returnReason,
-            refund_amount: Number(refundAmount),
+            refundAmount: Number(refundAmount),
           }),
         },
       );
@@ -395,13 +399,13 @@ export default function OrderDetailPage() {
                 <span className="text-sm text-[#1d1d1f]">{order.customer_phone}</span>
               </div>
             )}
-            {order.customer_address && (
+            {order.address && (
               <div className="flex items-start gap-3">
                 <MapPin className="mt-0.5 h-4 w-4 text-[#515151]" />
                 <div className="text-sm text-[#1d1d1f]">
-                  <p>{order.customer_address}</p>
+                  <p>{order.address}</p>
                   <p>
-                    {order.customer_zip} {order.customer_city}
+                    {order.zip} {order.city}
                   </p>
                 </div>
               </div>
@@ -502,7 +506,7 @@ export default function OrderDetailPage() {
           Interna anteckningar
         </h2>
         <p className="text-sm text-[#1d1d1f] whitespace-pre-wrap">
-          {order.notes || "Inga anteckningar"}
+          {order.internal_notes || "Inga anteckningar"}
         </p>
       </div>
 
@@ -522,9 +526,9 @@ export default function OrderDetailPage() {
                   <div>
                     <p className="text-sm font-medium text-[#1d1d1f]">
                       Retur #{ret.id}
-                      {ret.credit_number && (
+                      {ret.fortnox_credit_number && (
                         <span className="ml-2 text-[#515151]">
-                          Kreditnr: {ret.credit_number}
+                          Kreditnr: {ret.fortnox_credit_number}
                         </span>
                       )}
                     </p>
@@ -561,14 +565,14 @@ export default function OrderDetailPage() {
               <p className="text-sm font-medium text-emerald-800">
                 Returen har skapats
               </p>
-              {returnResult.credit_number && (
+              {returnResult.return?.fortnox_credit_number && (
                 <p className="mt-1 text-sm text-emerald-700">
-                  Kreditfaktura: {returnResult.credit_number}
+                  Kreditfaktura: {returnResult.return.fortnox_credit_number}
                 </p>
               )}
-              {returnResult.return_order_id && (
+              {returnResult.return?.ongoing_return_id && (
                 <p className="mt-1 text-sm text-emerald-700">
-                  Returorder-ID: {returnResult.return_order_id}
+                  Returorder-ID: {returnResult.return.ongoing_return_id}
                 </p>
               )}
             </div>

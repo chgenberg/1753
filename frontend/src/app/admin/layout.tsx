@@ -14,6 +14,7 @@ import {
   Repeat,
   Mail,
   MessageSquare,
+  Inbox,
   Menu,
   X,
   LogOut,
@@ -28,6 +29,7 @@ interface AdminUser {
 
 const NAV_ITEMS = [
   { href: "/admin", label: "Översikt", icon: LayoutDashboard },
+  { href: "/admin/inkorg", label: "Inkorg", icon: Inbox },
   { href: "/admin/ordrar", label: "Ordrar", icon: ShoppingBag },
   { href: "/admin/rabattkoder", label: "Rabattkoder", icon: Tag },
   { href: "/admin/produkter", label: "Produkter", icon: Package },

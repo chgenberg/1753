@@ -27,17 +27,15 @@ interface NewsletterStats {
 interface Flow {
   id: number | string;
   name: string;
-  trigger: string;
-  steps: number;
+  slug: string;
+  trigger_event: string;
+  steps: unknown[] | null;
   active: boolean;
 }
 
 interface QueueStatus {
-  id: number | string;
-  name: string;
-  pending: number;
-  sent: number;
-  failed: number;
+  status: string;
+  count: string | number;
 }
 
 interface Subscriber {
@@ -213,7 +211,7 @@ export default function AdminNewsletterPage() {
                             {flow.name}
                           </p>
                           <p className="mt-0.5 text-xs text-[#766a62]">
-                            {flow.trigger}
+                            {flow.trigger_event}
                           </p>
                         </div>
                       </div>
@@ -228,8 +226,7 @@ export default function AdminNewsletterPage() {
                       </span>
                     </div>
                     <p className="mt-3 text-xs text-[#515151]">
-                      {flow.steps} {flow.steps === 1 ? "steg" : "steg"} i
-                      flödet
+                      {Array.isArray(flow.steps) ? flow.steps.length : 0} steg i flödet
                     </p>
                   </div>
                 ))}
@@ -241,50 +238,21 @@ export default function AdminNewsletterPage() {
           {stats.queue.length > 0 && (
             <div className="space-y-3">
               <h2 className="text-lg font-semibold tracking-tight text-[#1d1d1f]">
-                Sändningskö
+                Automationskö
               </h2>
-              <div className="rounded-2xl bg-white shadow-sm ring-1 ring-[#e6e6e6]">
-                <div className="overflow-x-auto">
-                  <table className="w-full text-sm">
-                    <thead>
-                      <tr className="border-b border-[#e6e6e6] text-left">
-                        <th className="px-5 py-3 font-medium text-[#766a62]">
-                          Namn
-                        </th>
-                        <th className="px-5 py-3 text-right font-medium text-[#766a62]">
-                          Väntande
-                        </th>
-                        <th className="px-5 py-3 text-right font-medium text-[#766a62]">
-                          Skickade
-                        </th>
-                        <th className="px-5 py-3 text-right font-medium text-[#766a62]">
-                          Misslyckade
-                        </th>
-                      </tr>
-                    </thead>
-                    <tbody>
-                      {stats.queue.map((q) => (
-                        <tr
-                          key={q.id}
-                          className="border-b border-[#e6e6e6] last:border-b-0"
-                        >
-                          <td className="px-5 py-3 font-medium text-[#1d1d1f]">
-                            {q.name}
-                          </td>
-                          <td className="px-5 py-3 text-right tabular-nums text-amber-600">
-                            {q.pending}
-                          </td>
-                          <td className="px-5 py-3 text-right tabular-nums text-emerald-600">
-                            {q.sent}
-                          </td>
-                          <td className="px-5 py-3 text-right tabular-nums text-red-600">
-                            {q.failed}
-                          </td>
-                        </tr>
-                      ))}
-                    </tbody>
-                  </table>
-                </div>
+              <div className="grid gap-3 sm:grid-cols-3">
+                {stats.queue.map((q) => {
+                  const label = q.status === "pending" ? "Väntande" : q.status === "sent" ? "Skickade" : q.status === "failed" ? "Misslyckade" : q.status;
+                  const color = q.status === "sent" ? "text-emerald-600" : q.status === "failed" ? "text-red-600" : "text-amber-600";
+                  return (
+                    <div key={q.status} className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-[#e6e6e6]">
+                      <p className="text-xs font-medium text-[#766a62]">{label}</p>
+                      <p className={`text-2xl font-bold tabular-nums tracking-tight ${color}`}>
+                        {Number(q.count).toLocaleString("sv-SE")}
+                      </p>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}

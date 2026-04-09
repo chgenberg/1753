@@ -30,23 +30,19 @@ export const LEGAL_TERMS_EN: LegalDoc = {
       html: `<p>Under the Distance Contracts Act you have 14 days to withdraw from the purchase after you receive your order. Products must be unused and in original packaging. Contact us at <a href="mailto:hej@1753skincare.com" class="font-medium text-brand-900 underline underline-offset-2">hej@1753skincare.com</a> to start a return.</p>`,
     },
     {
-      h: "6. Satisfaction guarantee",
-      html: `<p>Beyond the statutory right of withdrawal, we offer a 14-day satisfaction guarantee. If you are not happy with the result after using the products for 14 days, we refund the full purchase amount. Contact us and we will arrange it.</p>`,
-    },
-    {
-      h: "7. Complaints",
+      h: "6. Complaints",
       html: `<p>If you receive a damaged or incorrect product, you are entitled to make a complaint under the Swedish Consumer Sales Act. Contact us within a reasonable time after discovering the issue.</p>`,
     },
     {
-      h: "8. Personal data",
+      h: "7. Personal data",
       html: `<p>We process your personal data in line with our <a href="{{privacyPath}}" class="font-medium text-brand-900 underline underline-offset-2">privacy policy</a>.</p>`,
     },
     {
-      h: "9. Disputes",
+      h: "8. Disputes",
       html: `<p>Disputes should first be resolved by mutual agreement. If we cannot agree, you may turn to the Swedish National Board for Consumer Disputes (ARN) or a general court. Swedish law applies.</p>`,
     },
     {
-      h: "10. Contact",
+      h: "9. Contact",
       html: `<p>Floranie International AB<br />Sodra Skjutbanevagen 10, 439 55 Asa, Sweden<br /><a href="mailto:hej@1753skincare.com" class="font-medium text-brand-900 underline underline-offset-2">hej@1753skincare.com</a><br /><a href="tel:0732305521" class="font-medium text-brand-900 underline underline-offset-2">0732-30 55 21</a></p>`,
     },
   ],

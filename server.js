@@ -2265,6 +2265,294 @@ async function sendPasswordSetupEmail(email, name, resetToken) {
   return { sent: true };
 }
 
+// ---- AI EMAIL ASSISTANT ----
+
+const EMAIL_AI_MODEL = "gpt-5.4";
+
+const EMAIL_SYSTEM_PROMPT = `Du är 1753 SKINCAREs kundtjänst-assistent. Du skriver mejlsvar åt teamet.
+
+DITT UPPDRAG:
+- Skriv ett vänligt, personligt och professionellt mejlsvar på kundens meddelande
+- Svara på det språk kunden skriver (svenska eller engelska)
+- Tonen: varm, ärlig, lite rebellisk men alltid hjälpsam. Aldrig korporativ eller klinisk
+- Använd ALDRIG emojis
+- Signera alltid med:
+
+Varma hälsningar,
+Christopher & teamet
+1753 SKINCARE
+info@1753skin.com | 0732-30 55 21
+
+KUNSKAP:
+- 1753 SKINCARE är ett svenskt familjeföretag grundat av Christopher och Ebba Genberg
+- Adress: Södra Skjutbanevägen 10, 439 55 Åsa
+- Fri frakt (0 kr)
+- Produkter: CBD/CBG-baserad hudvård (ansiktsoljor, serum, makeup remover, svamptillskott)
+- Prenumeration ger 15% rabatt
+- Vi har AI-driven hudanalys på sajten (gratis)
+- Hemsida: www.1753skin.com
+
+PRODUKTER:
+1. DUO-kit + TA-DA Serum (1 495 kr) – The ONE + I LOVE ansiktsoljor + TA-DA Serum
+2. TA-DA Serum (699 kr, 30 ml) – CBG 3% i ekologisk jojobaolja
+3. DUO-kit (1 099 kr) – The ONE (10% CBD) + I LOVE (10% CBD, 5% CBG) ansiktsoljor
+4. Au Naturel Makeup Remover (399 kr, 100 ml) – MCT-olja + CBD
+5. Fungtastic Mushroom Extract (399 kr, 60 kapslar) – Chaga, Lion's Mane, Cordyceps, Reishi
+
+REGLER:
+- Om kunden frågar om specifik order: ange ordernummer och status om du har kontexten, annars be om ordernummer
+- Ge aldrig medicinsk rådgivning
+- Gör inga löften om resultat – formulera försiktigt ("många upplever", "de flesta märker skillnad")
+- Om du saknar info för att svara korrekt: skriv ett vänligt svar som förklarar att teamet kollar upp det och återkommer
+- Var generös med att hjälpa men aldrig säljig eller pushig`;
+
+async function generateEmailDraft(customerEmail, customerName, subject, bodyText, customerContext) {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) return "";
+
+  let contextBlock = "";
+  if (customerContext) {
+    if (customerContext.orders?.length) {
+      contextBlock += `\n\nKUNDENS ORDERHISTORIK:\n${customerContext.orders.map(o => `- ${o.order_number}: ${o.status}, ${o.total_amount} kr (${new Date(o.created_at).toLocaleDateString("sv-SE")})`).join("\n")}`;
+    }
+    if (customerContext.subscriptions?.length) {
+      contextBlock += `\n\nKUNDENS PRENUMERATIONER:\n${customerContext.subscriptions.map(s => `- ${s.product_name}: ${s.status}, var ${s.interval_days}:e dag, ${s.recurring_price} kr`).join("\n")}`;
+    }
+    if (customerContext.loyaltyPoints) {
+      contextBlock += `\n\nLOJALITETSPOÄNG: ${customerContext.loyaltyPoints} (${customerContext.tier})`;
+    }
+  }
+
+  const userMessage = `Skriv ett mejlsvar till denna kund:
+
+Från: ${customerName} <${customerEmail}>
+Ämne: ${subject}
+
+Meddelande:
+${bodyText}
+${contextBlock}`;
+
+  try {
+    const res = await fetchWithRetry("https://api.openai.com/v1/responses", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${apiKey}`,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify({
+        model: EMAIL_AI_MODEL,
+        instructions: EMAIL_SYSTEM_PROMPT,
+        input: userMessage
+      })
+    });
+
+    const data = await res.json();
+    return extractOutputText(data) || "";
+  } catch (err) {
+    console.error("[EmailAI] GPT draft generation failed:", err.message);
+    return "";
+  }
+}
+
+async function fetchCustomerContext(email) {
+  const context = {};
+  try {
+    const user = await db.findUserByEmail(email);
+    if (user) {
+      context.name = user.name;
+      context.loyaltyPoints = user.loyalty_points;
+      context.tier = user.tier;
+      const orders = await db.findOrdersByEmail(email);
+      if (orders?.length) context.orders = orders.slice(0, 10);
+      const subs = await db.findSubscriptionsByUser(user.id);
+      if (subs?.length) context.subscriptions = subs;
+    }
+  } catch (err) {
+    console.error("[EmailAI] Context fetch error:", err.message);
+  }
+  return context;
+}
+
+async function sendAdminNotification(fromEmail, fromName, subject) {
+  try {
+    const apiKey = process.env.RESEND_API_KEY;
+    if (!apiKey) return;
+    const { Resend } = require("resend");
+    const resend = new Resend(apiKey);
+    const fromAddr = process.env.EMAIL_FROM || "info@1753skin.com";
+
+    await resend.emails.send({
+      from: `1753 SKINCARE <${fromAddr}>`,
+      to: "christopher@1753skincare.com",
+      subject: `Nytt kundmeddelande: ${subject}`,
+      html: `
+        <h3>Nytt inkommande meddelande</h3>
+        <p><strong>Från:</strong> ${fromName || "Okänt"} &lt;${fromEmail}&gt;</p>
+        <p><strong>Ämne:</strong> ${subject}</p>
+        <p>Ett AI-genererat svarsutkast väntar på godkännande i <a href="https://www.1753skin.com/admin/inkorg">admin-panelen</a>.</p>
+      `
+    });
+  } catch (err) {
+    console.error("[EmailAI] Notification send failed:", err.message);
+  }
+}
+
+// Resend Inbound Webhook – receives forwarded emails
+app.post("/api/email/inbound", async (req, res) => {
+  try {
+    const payload = req.body;
+    const fromEmail = payload.from || payload.From || "";
+    const fromName = payload.from_name || payload.FromName || "";
+    const subject = payload.subject || payload.Subject || "(inget ämne)";
+    const bodyText = payload.text || payload.TextBody || payload.text_body || "";
+    const bodyHtml = payload.html || payload.HtmlBody || payload.html_body || "";
+
+    if (!fromEmail) {
+      return res.status(400).json({ message: "No sender email" });
+    }
+
+    console.log(`[EmailAI] Inbound from ${fromEmail}: "${subject}"`);
+
+    const customerContext = await fetchCustomerContext(fromEmail);
+    const aiDraft = await generateEmailDraft(fromEmail, fromName, subject, bodyText, customerContext);
+
+    const conversation = await db.createEmailConversation({
+      fromEmail,
+      fromName,
+      subject,
+      bodyText,
+      bodyHtml,
+      aiDraft,
+      category: "general",
+      customerContext
+    });
+
+    await sendAdminNotification(fromEmail, fromName, subject);
+
+    console.log(`[EmailAI] Conversation #${conversation.id} created with AI draft`);
+    res.json({ ok: true, id: conversation.id });
+  } catch (err) {
+    console.error("[EmailAI] Inbound error:", err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Also hook into contact form → generate AI draft
+app.post("/api/email/from-contact", async (req, res) => {
+  try {
+    const { name, email, message } = req.body;
+    if (!email || !message) return res.status(400).json({ message: "Email and message required" });
+
+    const customerContext = await fetchCustomerContext(email);
+    const aiDraft = await generateEmailDraft(email, name, "Kontaktformulär", message, customerContext);
+
+    const conversation = await db.createEmailConversation({
+      fromEmail: email,
+      fromName: name,
+      subject: "Kontaktformulär",
+      bodyText: message,
+      aiDraft,
+      category: "contact_form",
+      customerContext
+    });
+
+    await sendAdminNotification(email, name, "Kontaktformulär");
+    res.json({ ok: true, id: conversation.id });
+  } catch (err) {
+    console.error("[EmailAI] Contact form error:", err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Admin: List email conversations
+app.get("/api/admin/inbox", adminAuthMiddleware, async (req, res) => {
+  try {
+    const { status, page } = req.query;
+    const data = await db.listEmailConversations({
+      status: status || undefined,
+      page: parseInt(page) || 1
+    });
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Admin: Get single conversation
+app.get("/api/admin/inbox/:id", adminAuthMiddleware, async (req, res) => {
+  try {
+    const conv = await db.getEmailConversation(req.params.id);
+    if (!conv) return res.status(404).json({ message: "Hittades inte" });
+    res.json(conv);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Admin: Regenerate AI draft
+app.post("/api/admin/inbox/:id/regenerate", adminAuthMiddleware, async (req, res) => {
+  try {
+    const conv = await db.getEmailConversation(req.params.id);
+    if (!conv) return res.status(404).json({ message: "Hittades inte" });
+
+    const customerContext = await fetchCustomerContext(conv.from_email);
+    const aiDraft = await generateEmailDraft(conv.from_email, conv.from_name, conv.subject, conv.body_text, customerContext);
+
+    await db.updateEmailConversation(conv.id, { ai_draft: aiDraft });
+    res.json({ ok: true, aiDraft });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Admin: Approve and send reply
+app.post("/api/admin/inbox/:id/send", adminAuthMiddleware, async (req, res) => {
+  try {
+    const conv = await db.getEmailConversation(req.params.id);
+    if (!conv) return res.status(404).json({ message: "Hittades inte" });
+
+    const { reply } = req.body;
+    if (!reply) return res.status(400).json({ message: "Svar krävs" });
+
+    const apiKey = process.env.RESEND_API_KEY;
+    if (!apiKey) return res.status(500).json({ message: "RESEND_API_KEY saknas" });
+
+    const { Resend } = require("resend");
+    const resend = new Resend(apiKey);
+    const fromAddr = process.env.EMAIL_FROM || "info@1753skin.com";
+
+    await resend.emails.send({
+      from: `1753 SKINCARE <${fromAddr}>`,
+      to: conv.from_email,
+      replyTo: "info@1753skin.com",
+      subject: `Re: ${conv.subject}`,
+      html: reply.replace(/\n/g, "<br>")
+    });
+
+    await db.updateEmailConversation(conv.id, {
+      admin_reply: reply,
+      status: "sent",
+      sent_at: new Date().toISOString()
+    });
+
+    console.log(`[EmailAI] Reply sent to ${conv.from_email} for conversation #${conv.id}`);
+    res.json({ ok: true });
+  } catch (err) {
+    console.error("[EmailAI] Send error:", err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Admin: Dismiss/archive conversation
+app.post("/api/admin/inbox/:id/dismiss", adminAuthMiddleware, async (req, res) => {
+  try {
+    await db.updateEmailConversation(req.params.id, { status: "dismissed" });
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // ---- CONTACT FORM ----
 
 app.post("/api/contact", async (req, res) => {
@@ -2303,6 +2591,20 @@ app.post("/api/contact", async (req, res) => {
     });
 
     console.log(`[Contact] Message from ${email} (${name}) forwarded to info@1753skin.com`);
+
+    // Generate AI draft in background
+    (async () => {
+      try {
+        const customerContext = await fetchCustomerContext(email);
+        const aiDraft = await generateEmailDraft(email, name, "Kontaktformulär", message, customerContext);
+        await db.createEmailConversation({
+          fromEmail: email, fromName: name, subject: "Kontaktformulär",
+          bodyText: message, aiDraft, category: "contact_form", customerContext
+        });
+        await sendAdminNotification(email, name, "Kontaktformulär");
+      } catch (err) { console.error("[Contact] AI draft error:", err.message); }
+    })();
+
     res.json({ ok: true });
   } catch (err) {
     console.error("[Contact] Error:", err);

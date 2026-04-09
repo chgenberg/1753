@@ -30,23 +30,19 @@ export const LEGAL_TERMS_SV: LegalDoc = {
       html: `<p>Enligt distansavtalslagen har du 14 dagars ångerrätt från det att du mottagit din beställning. Produkterna ska vara oanvända och i originalförpackning. Kontakta oss på <a href="mailto:hej@1753skincare.com" class="font-medium text-brand-900 underline underline-offset-2">hej@1753skincare.com</a> för att påbörja en retur.</p>`,
     },
     {
-      h: "6. Nöjd-kund-garanti",
-      html: `<p>Utöver lagstadgad ångerrätt erbjuder vi en 14 dagars nöjd-kund-garanti. Om du inte är nöjd med resultatet efter att ha använt produkterna i 14 dagar, återbetalar vi hela köpesumman. Kontakta oss så ordnar vi det.</p>`,
-    },
-    {
-      h: "7. Reklamation",
+      h: "6. Reklamation",
       html: `<p>Om du har mottagit en skadad eller felaktig produkt har du rätt till reklamation enligt konsumentköplagen. Kontakta oss inom rimlig tid efter att du upptäckt felet.</p>`,
     },
     {
-      h: "8. Personuppgifter",
+      h: "7. Personuppgifter",
       html: `<p>Vi hanterar dina personuppgifter i enlighet med vår <a href="{{privacyPath}}" class="font-medium text-brand-900 underline underline-offset-2">integritetspolicy</a>.</p>`,
     },
     {
-      h: "9. Tvist",
+      h: "8. Tvist",
       html: `<p>Tvister ska i första hand lösas i samförstånd. Om vi inte kan komma överens kan du vända dig till Allmänna reklamationsnämnden (ARN) eller till allmän domstol. Svensk lag tillämpas.</p>`,
     },
     {
-      h: "10. Kontakt",
+      h: "9. Kontakt",
       html: `<p>Floranie International AB<br />Södra Skjutbanevägen 10, 439 55 Åsa<br /><a href="mailto:hej@1753skincare.com" class="font-medium text-brand-900 underline underline-offset-2">hej@1753skincare.com</a><br /><a href="tel:0732305521" class="font-medium text-brand-900 underline underline-offset-2">0732-30 55 21</a></p>`,
     },
   ],

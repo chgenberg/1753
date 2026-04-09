@@ -18,6 +18,7 @@ function productIdFromCartId(cartId: string) {
 interface ActiveDiscount {
   code: string;
   percent: number;
+  fixedAmount?: number;
   description: string;
   applicableProductIds: string[] | null;
 }
@@ -33,6 +34,7 @@ export default function CheckoutPage() {
   const [discountError, setDiscountError] = useState("");
   const [discountLoading, setDiscountLoading] = useState(false);
   const [activeDiscount, setActiveDiscount] = useState<ActiveDiscount | null>(null);
+  const [createAccount, setCreateAccount] = useState(false);
   const [form, setForm] = useState({
     firstname: "",
     lastname: "",
@@ -59,15 +61,17 @@ export default function CheckoutPage() {
   }, 0);
 
   const discountAmount = activeDiscount
-    ? cartProducts.reduce((s, p) => {
-        const realId = productIdFromCartId(p.cartId);
-        const base = productPrice(p, locale);
-        const unitPrice = p.subscription ? Math.round(base * 0.85) : base;
-        if (!activeDiscount.applicableProductIds || activeDiscount.applicableProductIds.includes(realId)) {
-          return s + Math.round(unitPrice * p.qty * (activeDiscount.percent / 100));
-        }
-        return s;
-      }, 0)
+    ? activeDiscount.fixedAmount
+      ? activeDiscount.fixedAmount
+      : cartProducts.reduce((s, p) => {
+          const realId = productIdFromCartId(p.cartId);
+          const base = productPrice(p, locale);
+          const unitPrice = p.subscription ? Math.round(base * 0.85) : base;
+          if (!activeDiscount.applicableProductIds || activeDiscount.applicableProductIds.includes(realId)) {
+            return s + Math.round(unitPrice * p.qty * (activeDiscount.percent / 100));
+          }
+          return s;
+        }, 0)
     : 0;
 
   const discountedSubtotal = subtotal - discountAmount;
@@ -161,6 +165,7 @@ export default function CheckoutPage() {
             })),
             discountCode: activeDiscount?.code || undefined,
             currency,
+            createAccount: createAccount || undefined,
           }),
         }
       );
@@ -396,6 +401,23 @@ export default function CheckoutPage() {
                   </>
                 )}
               </span>
+            </label>
+
+            <label className="flex items-start gap-3 cursor-pointer rounded-xl border border-brand-100 bg-brand-50/40 px-4 py-3 transition-colors hover:bg-brand-50/70">
+              <input
+                type="checkbox"
+                checked={createAccount}
+                onChange={(e) => setCreateAccount(e.target.checked)}
+                className="mt-0.5 h-4 w-4 rounded border-brand-300 accent-brand-900"
+              />
+              <div>
+                <span className="text-sm font-medium leading-relaxed text-brand-900">
+                  {t("checkout.createAccountLabel")}
+                </span>
+                <p className="mt-0.5 text-xs leading-relaxed text-brand-500">
+                  {t("checkout.createAccountHint")}
+                </p>
+              </div>
             </label>
 
             {error && (

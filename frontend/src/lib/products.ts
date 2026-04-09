@@ -81,8 +81,8 @@ export const PRODUCTS: Product[] = [
     ingredients: null,
     size: null,
     guarantee:
-      "Fri frakt. 14 dagars öppet köp.",
-    guaranteeEn: "Free shipping. 14-day satisfaction guarantee.",
+      "Fri frakt.",
+    guaranteeEn: "Free shipping.",
     vatRate: 0.25,
   },
   {
@@ -150,8 +150,8 @@ export const PRODUCTS: Product[] = [
     sizeEn: "30 ml",
     sizes: ["30 ml"],
     guarantee:
-      "Fri frakt. 14 dagars öppet köp.",
-    guaranteeEn: "Free shipping. 14-day satisfaction guarantee.",
+      "Fri frakt.",
+    guaranteeEn: "Free shipping.",
     vatRate: 0.25,
   },
   {
@@ -225,8 +225,8 @@ export const PRODUCTS: Product[] = [
     size: "2 x 10 ml glasflaskor med pipett",
     sizeEn: "2 × 10 ml glass bottles with dropper",
     guarantee:
-      "Fri frakt. 14 dagars öppet köp.",
-    guaranteeEn: "Free shipping. 14-day satisfaction guarantee.",
+      "Fri frakt.",
+    guaranteeEn: "Free shipping.",
     vatRate: 0.25,
   },
   {
@@ -287,8 +287,8 @@ export const PRODUCTS: Product[] = [
     sizeEn: "100 ml",
     sizes: ["100 ml"],
     guarantee:
-      "Fri frakt. 14 dagars öppet köp.",
-    guaranteeEn: "Free shipping. 14-day satisfaction guarantee.",
+      "Fri frakt.",
+    guaranteeEn: "Free shipping.",
     vatRate: 0.25,
   },
   {
@@ -352,8 +352,8 @@ export const PRODUCTS: Product[] = [
     sizeEn: "60 capsules",
     sizes: ["60 kapslar"],
     guarantee:
-      "Fri frakt. 14 dagars öppet köp.",
-    guaranteeEn: "Free shipping. 14-day satisfaction guarantee.",
+      "Fri frakt.",
+    guaranteeEn: "Free shipping.",
     vatRate: 0.12,
   },
 ];

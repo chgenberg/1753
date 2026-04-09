@@ -25,7 +25,7 @@ const PRODUCTS = [
 <p><em>Serumet appliceras efter oljan – inte före.</em></p>`,
     ingredients: null,
     size: null,
-    guarantee: "Fri frakt. 14 dagars öppet köp."
+    guarantee: "Fri frakt."
   },
   {
     id: "ta-da-serum",
@@ -50,7 +50,7 @@ const PRODUCTS = [
 </ul>`,
     ingredients: "Simmondsia chinensis (Jojoba) Seed Oil (ekologisk), Cannabigerol (CBG, 3% / 1500 mg)",
     size: "Glasflaska med pump – 50 ml",
-    guarantee: "Fri frakt. 14 dagars öppet köp."
+    guarantee: "Fri frakt."
   },
   {
     id: "duo-kit",
@@ -74,7 +74,7 @@ const PRODUCTS = [
 <p><em>Tänk "The ONE I LOVE" för att komma ihåg ordningen.</em></p>`,
     ingredients: null,
     size: "2 x 10 ml glasflaskor med pipett",
-    guarantee: "Fri frakt. 14 dagars öppet köp."
+    guarantee: "Fri frakt."
   },
   {
     id: "au-naturel-makeup-remover",
@@ -101,7 +101,7 @@ const PRODUCTS = [
     ingredients: "Caprylic/Capric Triglyceride (MCT), Cannabidiol (CBD, 0,2%)",
     size: "Glasflaska med pump – 100 ml",
     sizes: ["100 ml"],
-    guarantee: "Fri frakt. 14 dagars öppet köp."
+    guarantee: "Fri frakt."
   },
   {
     id: "fungtastic-mushroom-extract",
@@ -463,7 +463,7 @@ function renderProductDetail() {
         <ul class="product-sell-points" aria-label="Varför kunder handlar hos oss">
           <li>Fri frakt när du handlar för ${FREE_SHIPPING_THRESHOLD.toLocaleString("sv-SE")} kr eller mer</li>
           <li>CBD/CBG och noggrant utvalda ingredienser – utvecklat för nordisk hud</li>
-          <li>14 dagars öppet köp – trygg handel med personlig rådgivning</li>
+          <li>Naturliga ingredienser utan syntetiska tillsatser</li>
         </ul>
         ${product.sizes ? `
           <div class="size-select">

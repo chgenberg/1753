@@ -35,9 +35,10 @@ interface CustomerOrder {
   id: number;
   order_number: string;
   status: string;
-  total: number;
+  total_amount: number;
+  shipping_cost: number;
   created_at: string;
-  items: { product_name: string; quantity: number; price: number }[];
+  items: { name: string; quantity: number; price: number }[];
 }
 
 interface CustomerSubscription {
@@ -400,7 +401,7 @@ function CustomerRow({
                                     key={idx}
                                     className="text-xs text-[#766a62]"
                                   >
-                                    {item.quantity}x {item.product_name} –{" "}
+                                    {item.quantity}x {item.name} –{" "}
                                     {formatSEK(item.price * item.quantity)}
                                   </li>
                                 ))}
@@ -414,7 +415,7 @@ function CustomerRow({
                               {statusLabel(o.status)}
                             </span>
                             <p className="mt-1 text-sm font-medium tabular-nums text-[#1d1d1f]">
-                              {formatSEK(o.total)}
+                              {formatSEK(o.total_amount + (o.shipping_cost || 0))}
                             </p>
                           </div>
                         </div>

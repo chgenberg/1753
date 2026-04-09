@@ -63,13 +63,16 @@ async function initSchema() {
     );
 
     ALTER TABLE users ADD COLUMN IF NOT EXISTS role VARCHAR(20) DEFAULT 'customer';
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS password_reset_token VARCHAR(128);
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS password_reset_expires TIMESTAMPTZ;
 
     CREATE INDEX IF NOT EXISTS idx_users_email ON users (email);
 
     CREATE TABLE IF NOT EXISTS discount_codes (
       id              SERIAL PRIMARY KEY,
       code            VARCHAR(50) UNIQUE NOT NULL,
-      percent         INTEGER NOT NULL,
+      percent         INTEGER NOT NULL DEFAULT 0,
+      fixed_amount    INTEGER DEFAULT 0,
       description     VARCHAR(255) DEFAULT '',
       product_ids     JSONB,
       max_uses        INTEGER,
@@ -79,6 +82,11 @@ async function initSchema() {
       active          BOOLEAN DEFAULT true,
       created_at      TIMESTAMPTZ DEFAULT NOW()
     );
+
+    ALTER TABLE discount_codes ADD COLUMN IF NOT EXISTS fixed_amount INTEGER DEFAULT 0;
+
+    ALTER TABLE orders ADD COLUMN IF NOT EXISTS user_id UUID REFERENCES users(id);
+    CREATE INDEX IF NOT EXISTS idx_orders_user_id ON orders (user_id);
 
     CREATE TABLE IF NOT EXISTS returns (
       id                    SERIAL PRIMARY KEY,
@@ -240,6 +248,24 @@ async function initSchema() {
 
     CREATE INDEX IF NOT EXISTS idx_addresses_user ON addresses (user_id);
 
+    CREATE TABLE IF NOT EXISTS email_conversations (
+      id              SERIAL PRIMARY KEY,
+      from_email      VARCHAR(255) NOT NULL,
+      from_name       VARCHAR(255) DEFAULT '',
+      subject         VARCHAR(500) NOT NULL,
+      body_text       TEXT NOT NULL,
+      body_html       TEXT DEFAULT '',
+      ai_draft        TEXT DEFAULT '',
+      status          VARCHAR(20) DEFAULT 'pending',
+      category        VARCHAR(50) DEFAULT 'general',
+      customer_context JSONB DEFAULT '{}',
+      admin_reply     TEXT DEFAULT '',
+      sent_at         TIMESTAMPTZ,
+      created_at      TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_email_conv_status ON email_conversations (status);
+
     CREATE TABLE IF NOT EXISTS newsletter_drafts (
       id              SERIAL PRIMARY KEY,
       issue_number    INTEGER NOT NULL,
@@ -264,18 +290,19 @@ async function initSchema() {
 async function createOrder({
   orderNumber, customerName, customerEmail, customerPhone,
   address, zip, city, vivaOrderCode, merchantTrns,
-  items, totalAmount, shippingCost, currency
+  items, totalAmount, shippingCost, currency, userId
 }) {
   const { rows } = await pool.query(
     `INSERT INTO orders
        (order_number, customer_name, customer_email, customer_phone,
         address, zip, city, viva_order_code, merchant_trns,
-        items, total_amount, shipping_cost, currency)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
+        items, total_amount, shipping_cost, currency, user_id)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
      RETURNING *`,
     [orderNumber, customerName, customerEmail, customerPhone || null,
      address, zip, city, vivaOrderCode, merchantTrns,
-     JSON.stringify(items), totalAmount, shippingCost || 0, currency || "SEK"]
+     JSON.stringify(items), totalAmount, shippingCost || 0, currency || "SEK",
+     userId || null]
   );
   return rows[0];
 }
@@ -832,11 +859,12 @@ async function findDiscountCode(code) {
   return rows[0] || null;
 }
 
-async function createDiscountCode({ code, percent, description, productIds, maxUses, validFrom, validUntil }) {
+async function createDiscountCode({ code, percent, fixedAmount, description, productIds, maxUses, validFrom, validUntil }) {
   const { rows } = await pool.query(
-    `INSERT INTO discount_codes (code, percent, description, product_ids, max_uses, valid_from, valid_until)
-     VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING *`,
-    [code.toLowerCase(), percent, description || "", productIds ? JSON.stringify(productIds) : null,
+    `INSERT INTO discount_codes (code, percent, fixed_amount, description, product_ids, max_uses, valid_from, valid_until)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING *`,
+    [code.toLowerCase(), percent || 0, fixedAmount || 0, description || "",
+     productIds ? JSON.stringify(productIds) : null,
      maxUses || null, validFrom || null, validUntil || null]
   );
   return rows[0];
@@ -1128,10 +1156,19 @@ async function addLoyaltyPoints(userId, points) {
 
 async function deductLoyaltyPoints(userId, points) {
   const { rows } = await pool.query(
-    `UPDATE users SET loyalty_points = GREATEST(0, COALESCE(loyalty_points, 0) - $1) WHERE id = $2 RETURNING loyalty_points`,
+    `UPDATE users SET loyalty_points = GREATEST(0, COALESCE(loyalty_points, 0) - $1) WHERE id = $2 RETURNING loyalty_points, tier`,
     [points, userId]
   );
-  return rows[0]?.loyalty_points ?? 0;
+  if (rows.length === 0) return 0;
+  const user = rows[0];
+  let newTier = "Brons";
+  if (user.loyalty_points >= 10000) newTier = "Platina";
+  else if (user.loyalty_points >= 5000) newTier = "Guld";
+  else if (user.loyalty_points >= 2000) newTier = "Silver";
+  if (newTier !== user.tier) {
+    await pool.query("UPDATE users SET tier = $1 WHERE id = $2", [newTier, userId]);
+  }
+  return user.loyalty_points;
 }
 
 async function adminListReviews({ limit = 20, offset = 0, productId, rating, search } = {}) {
@@ -1218,6 +1255,53 @@ async function markNewsletterSent(id, sentCount) {
   return rows[0] || null;
 }
 
+// ---- EMAIL CONVERSATIONS ----
+
+async function createEmailConversation({ fromEmail, fromName, subject, bodyText, bodyHtml, aiDraft, category, customerContext }) {
+  const { rows } = await pool.query(
+    `INSERT INTO email_conversations (from_email, from_name, subject, body_text, body_html, ai_draft, category, customer_context)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8) RETURNING *`,
+    [fromEmail, fromName || "", subject, bodyText, bodyHtml || "", aiDraft || "", category || "general", JSON.stringify(customerContext || {})]
+  );
+  return rows[0];
+}
+
+async function listEmailConversations({ status, page = 1, perPage = 25 }) {
+  const conditions = [];
+  const params = [];
+  let idx = 1;
+  if (status) { conditions.push(`status = $${idx++}`); params.push(status); }
+  const where = conditions.length ? `WHERE ${conditions.join(" AND ")}` : "";
+  const offset = (page - 1) * perPage;
+
+  const countRes = await pool.query(`SELECT COUNT(*) AS total FROM email_conversations ${where}`, params);
+  const total = parseInt(countRes.rows[0].total, 10);
+
+  const dataRes = await pool.query(
+    `SELECT * FROM email_conversations ${where} ORDER BY created_at DESC LIMIT $${idx++} OFFSET $${idx++}`,
+    [...params, perPage, offset]
+  );
+  return { conversations: dataRes.rows, total, page, perPage };
+}
+
+async function getEmailConversation(id) {
+  const { rows } = await pool.query("SELECT * FROM email_conversations WHERE id = $1", [id]);
+  return rows[0] || null;
+}
+
+async function updateEmailConversation(id, fields) {
+  const sets = [];
+  const params = [];
+  let idx = 1;
+  for (const [key, val] of Object.entries(fields)) {
+    sets.push(`${key} = $${idx++}`);
+    params.push(val);
+  }
+  if (sets.length === 0) return;
+  params.push(id);
+  await pool.query(`UPDATE email_conversations SET ${sets.join(", ")} WHERE id = $${idx}`, params);
+}
+
 module.exports = {
   pool,
   initSchema,
@@ -1298,5 +1382,9 @@ module.exports = {
   getNewsletterDraft,
   listNewsletterDrafts,
   approveNewsletterDraft,
-  markNewsletterSent
+  markNewsletterSent,
+  createEmailConversation,
+  listEmailConversations,
+  getEmailConversation,
+  updateEmailConversation
 };

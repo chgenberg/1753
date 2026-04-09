@@ -17,7 +17,8 @@ export type AppRoute =
   | "writeReview"
   | "paymentSuccess"
   | "paymentFailed"
-  | "loyalty";
+  | "loyalty"
+  | "setPassword";
 
 const SV_SEGMENT: Record<AppRoute, string> = {
   home: "",
@@ -36,6 +37,7 @@ const SV_SEGMENT: Record<AppRoute, string> = {
   paymentSuccess: "betalning/lyckad",
   paymentFailed: "betalning/misslyckad",
   loyalty: "lojalitetsprogram",
+  setPassword: "valj-losenord",
 };
 
 /** English public URLs (middleware rewrites to Swedish folder names under /en/) */
@@ -56,6 +58,7 @@ const EN_SEGMENT: Record<AppRoute, string> = {
   paymentSuccess: "payment/success",
   paymentFailed: "payment/failed",
   loyalty: "loyalty",
+  setPassword: "set-password",
 };
 
 export function localizePath(

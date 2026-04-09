@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Heart, Minus, Plus, RefreshCcw, Shield, Star, Truck } from "lucide-react";
+import { ArrowLeft, Heart, Minus, Plus, RefreshCcw, Star, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/product-card";
 import { ReviewsSection } from "@/components/reviews-section";
@@ -19,7 +19,6 @@ import {
   getRelatedProducts,
   productDescriptionHtml,
   productDisplayName,
-  productGuarantee,
   productIngredients,
   productShortDesc,
   productSize,
@@ -306,10 +305,6 @@ export default function ProductDetail({ id }: { id: string }) {
                 <div className="flex items-center gap-3 text-sm text-brand-500">
                   <Truck className="h-4 w-4" />
                   <span>{t("productDetail.freeShippingHint")}</span>
-                </div>
-                <div className="flex items-center gap-3 text-sm text-brand-500">
-                  <Shield className="h-4 w-4" />
-                  <span>{productGuarantee(product, locale)}</span>
                 </div>
               </div>
 

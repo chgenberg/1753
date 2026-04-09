@@ -31,6 +31,7 @@ function rewriteEnPretty(pathname: string, request: NextRequest): NextResponse |
     ["/en/payment/success", "/en/betalning/lyckad"],
     ["/en/payment/failed", "/en/betalning/misslyckad"],
     ["/en/loyalty", "/en/lojalitetsprogram"],
+    ["/en/set-password", "/en/valj-losenord"],
   ];
 
   for (const [from, to] of map) {
