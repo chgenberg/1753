@@ -24,7 +24,7 @@ import { apiFetch } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { useLocale } from "@/providers/locale-provider";
 
-const FEATURE_ICONS: LucideIcon[] = [Leaf, Shield, Droplets, Sparkles];
+const FEATURE_ICONS: LucideIcon[] = [Leaf, Droplets, Sparkles];
 
 interface ReviewSnippet {
   id: number;
@@ -362,7 +362,7 @@ export default function HomePage() {
           <h2 className="text-3xl font-bold tracking-tight text-brand-900">{t("home.whyTitle")}</h2>
           <p className="mx-auto mt-3 max-w-md text-base leading-relaxed text-brand-500">{t("home.whySub")}</p>
         </div>
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
           {features.map((f) => (
             <button
               key={f.title}
