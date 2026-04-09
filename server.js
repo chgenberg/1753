@@ -1672,6 +1672,10 @@ app.post("/api/orders/create", async (req, res) => {
       if (!product) throw { status: 400, message: `Okänd produkt: ${item.id}` };
       let price = currency === "EUR" ? (product.priceEur || product.price) : product.price;
       const originalPrice = price;
+      const isSubscription = item.subscription && typeof item.subscription === "object" && typeof item.subscription.intervalDays === "number";
+      if (isSubscription) {
+        price = Math.round(price * 0.85);
+      }
       if (discount && (!discount.productIds || discount.productIds.includes(item.id))) {
         if (discount.percent) {
           price = Math.round(price * (1 - discount.percent / 100));
