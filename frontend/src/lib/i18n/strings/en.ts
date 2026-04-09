@@ -207,6 +207,8 @@ export const en: Messages = {
     subBulletFirst: "The first shipment is paid now. Later charges run automatically.",
     subBulletAccount: "You can change interval, pause or cancel anytime in My account.",
     subBulletNoBinding: "No lock-in period.",
+    subscriptionCardOnly:
+      "Subscriptions require card payment – automatic charges are not available with Swish. On the next page you will only see card and other methods that support recurring payments.",
     payWithTotal: "Pay {amount} SEK",
     secureHint: "Secure payment",
     shippingPaidAmount: "Shipping 49 SEK",

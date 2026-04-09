@@ -205,6 +205,8 @@ const bundle = {
     subBulletFirst: "Första leveransen betalas nu. Efterföljande dras automatiskt.",
     subBulletAccount: "Du kan ändra intervall, pausa eller avbryta när som helst via Mitt konto.",
     subBulletNoBinding: "Ingen bindningstid.",
+    subscriptionCardOnly:
+      "Prenumeration kräver betalning med kort – automatiska dragningar går inte med Swish. På nästa sida visas bara kort och andra metoder som stödjer återkommande betalning.",
     payWithTotal: "Betala {amount} kr",
     secureHint: "Säker betalning",
     shippingPaidAmount: "Frakt 49 kr",

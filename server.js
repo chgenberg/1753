@@ -1632,6 +1632,14 @@ app.post("/api/orders/create", async (req, res) => {
       return res.status(400).json({ message: "Varukorgen är tom" });
     }
 
+    const hasSubscription = items.some(
+      (i) =>
+        i &&
+        i.subscription &&
+        typeof i.subscription === "object" &&
+        typeof i.subscription.intervalDays === "number"
+    );
+
     const discount = discountCode ? DISCOUNT_CODES[discountCode.toLowerCase().trim()] : null;
 
     const orderItems = items.map(item => {
@@ -1658,7 +1666,7 @@ app.post("/api/orders/create", async (req, res) => {
 
     const orderNumber = generateOrderNumber();
 
-    const vivaData = await vivaFetch("/checkout/v2/orders", "POST", {
+    const vivaOrderBody = {
       amount: vivaAmount,
       currencyCode: 752,
       customerTrns: `1753 SKINCARE – ${orderNumber}`,
@@ -1669,7 +1677,12 @@ app.post("/api/orders/create", async (req, res) => {
         fullName: customer.name,
         phone: customer.phone || ""
       }
-    });
+    };
+    if (hasSubscription) {
+      vivaOrderBody.allowRecurring = true;
+    }
+
+    const vivaData = await vivaFetch("/checkout/v2/orders", "POST", vivaOrderBody);
 
     await db.createOrder({
       orderNumber,

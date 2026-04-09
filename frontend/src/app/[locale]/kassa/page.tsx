@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, Check, Lock, RefreshCcw, ShieldCheck, Tag, Truck, X } from "lucide-react";
+import { ArrowLeft, Check, CreditCard, Lock, RefreshCcw, ShieldCheck, Tag, Truck, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart, type CartItem } from "@/providers/cart-provider";
 import { PRODUCTS, productDisplayName } from "@/lib/products";
@@ -398,6 +398,13 @@ export default function CheckoutPage() {
               <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
                 {error}
               </p>
+            )}
+
+            {hasSubscription && (
+              <div className="flex gap-3 rounded-xl border border-brand-200 bg-white px-4 py-3 text-sm leading-relaxed text-brand-700 shadow-sm ring-1 ring-brand-100/80">
+                <CreditCard className="mt-0.5 h-5 w-5 shrink-0 text-brand-900" aria-hidden />
+                <p>{t("checkout.subscriptionCardOnly")}</p>
+              </div>
             )}
 
             <Button
