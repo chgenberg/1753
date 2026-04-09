@@ -85,12 +85,16 @@ export default function ProductsAdminPage() {
     setSyncing(true);
     setSyncResult(null);
     try {
-      const res = await authFetch<{ message?: string; synced?: number }>(
+      const res = await authFetch<{ results: { id: string; status: string }[] }>(
         "/admin/products/sync",
         token,
         { method: "POST" }
       );
-      const info = res.message ?? `${res.synced ?? 0} produkter synkade`;
+      const synced = res.results?.filter((r) => r.status === "synced").length ?? 0;
+      const errors = res.results?.filter((r) => r.status === "error").length ?? 0;
+      const info = errors > 0
+        ? `${synced} produkter synkade, ${errors} fel`
+        : `${synced} produkter synkade`;
       setSyncResult(info);
       flash("success", info);
       await fetchProducts();
@@ -280,7 +284,7 @@ export default function ProductsAdminPage() {
                     <td className="px-5 py-3.5 text-gray-700 tabular-nums">
                       {p.price.toLocaleString("sv-SE")}
                     </td>
-                    <td className="px-5 py-3.5 text-gray-500">{p.vatRate}%</td>
+                    <td className="px-5 py-3.5 text-gray-500">{Math.round(p.vatRate * 100)}%</td>
                     <td className="px-5 py-3.5">{stockBadge(p.stock)}</td>
                     <td className="px-5 py-3.5 text-right">
                       <button

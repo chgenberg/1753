@@ -267,7 +267,7 @@ const PRODUCTS_MAP = {
   "ta-da-serum":                { name: "TA-DA Serum", price: 699, priceEur: 59, articleNumber: "1005", vatRate: 0.25 },
   "duo-kit":                    { name: "DUO-kit", price: 1099, priceEur: 95, articleNumber: "1003", vatRate: 0.25 },
   "au-naturel-makeup-remover":  { name: "Au Naturel Makeup Remover", price: 399, priceEur: 34, articleNumber: "1004", vatRate: 0.25 },
-  "fungtastic-mushroom-extract":{ name: "Fungtastic Mushroom Extract", price: 399, priceEur: 32, articleNumber: "4001", vatRate: 0.12 }
+  "fungtastic-mushroom-extract":{ name: "Fungtastic Mushroom Extract", price: 399, priceEur: 32, articleNumber: "4001", vatRate: 0.06 }
 };
 
 const FREE_SHIPPING_THRESHOLD = 0;
@@ -1593,7 +1593,8 @@ app.post("/api/discount/validate", async (req, res) => {
       else if (dbCode.max_uses && dbCode.used_count >= dbCode.max_uses) { discount = null; }
       else {
         discount = {
-          percent: dbCode.percent,
+          percent: dbCode.percent || 0,
+          fixedAmount: dbCode.fixed_amount || 0,
           productIds: dbCode.product_ids,
           description: dbCode.description
         };
@@ -1610,7 +1611,8 @@ app.post("/api/discount/validate", async (req, res) => {
 
   res.json({
     code: key,
-    percent: discount.percent,
+    percent: discount.percent || 0,
+    fixedAmount: discount.fixedAmount || 0,
     description: discount.description,
     applicableProductIds: discount.productIds || null,
   });
@@ -1624,7 +1626,7 @@ app.post("/api/orders/create", async (req, res) => {
     if (!checkRateLimit(clientIp, "orders-create", 20)) {
       return res.status(429).json({ message: "För många beställningar. Försök igen om en stund." });
     }
-    const { customer, deliveryAddress, items, discountCode, currency: reqCurrency } = req.body;
+    const { customer, deliveryAddress, items, discountCode, currency: reqCurrency, createAccount } = req.body;
     const currency = reqCurrency === "EUR" ? "EUR" : "SEK";
 
     if (!customer?.name || !customer?.email) {
@@ -1645,7 +1647,25 @@ app.post("/api/orders/create", async (req, res) => {
         typeof i.subscription.intervalDays === "number"
     );
 
-    const discount = discountCode ? DISCOUNT_CODES[discountCode.toLowerCase().trim()] : null;
+    let discount = discountCode ? DISCOUNT_CODES[discountCode.toLowerCase().trim()] : null;
+    if (!discount && discountCode) {
+      const dbCode = await db.findDiscountCode(discountCode);
+      if (dbCode && dbCode.active) {
+        const now = new Date();
+        const valid = (!dbCode.valid_from || new Date(dbCode.valid_from) <= now)
+          && (!dbCode.valid_until || new Date(dbCode.valid_until) >= now)
+          && (!dbCode.max_uses || dbCode.used_count < dbCode.max_uses);
+        if (valid) {
+          discount = {
+            percent: dbCode.percent || 0,
+            fixedAmount: dbCode.fixed_amount || 0,
+            productIds: dbCode.product_ids,
+            description: dbCode.description
+          };
+          await db.incrementDiscountUsage(discountCode);
+        }
+      }
+    }
 
     const orderItems = items.map(item => {
       const product = PRODUCTS_MAP[item.id];
@@ -1653,7 +1673,9 @@ app.post("/api/orders/create", async (req, res) => {
       let price = currency === "EUR" ? (product.priceEur || product.price) : product.price;
       const originalPrice = price;
       if (discount && (!discount.productIds || discount.productIds.includes(item.id))) {
-        price = Math.round(price * (1 - discount.percent / 100));
+        if (discount.percent) {
+          price = Math.round(price * (1 - discount.percent / 100));
+        }
       }
       return {
         articleNumber: product.articleNumber || item.id,
@@ -1666,12 +1688,49 @@ app.post("/api/orders/create", async (req, res) => {
       };
     });
 
-    const totalAmount = orderItems.reduce((s, i) => s + i.price * i.quantity, 0);
+    let totalAmount = orderItems.reduce((s, i) => s + i.price * i.quantity, 0);
+    if (discount && discount.fixedAmount) {
+      totalAmount = Math.max(0, totalAmount - discount.fixedAmount);
+    }
     const shippingAmount = currency === "EUR" ? SHIPPING_COST.EUR : SHIPPING_COST.SEK;
     const shippingCost = totalAmount >= FREE_SHIPPING_THRESHOLD ? 0 : shippingAmount;
     const vivaAmount = (totalAmount + shippingCost) * 100;
 
     const orderNumber = generateOrderNumber();
+
+    // Auto-create account if requested from checkout
+    let checkoutUserId = null;
+    if (createAccount) {
+      const existingUser = await db.findUserByEmail(customer.email);
+      if (!existingUser) {
+        try {
+          const resetToken = crypto.randomBytes(48).toString("hex");
+          const resetExpires = new Date(Date.now() + 72 * 3600_000).toISOString();
+          const tempHash = bcrypt ? await bcrypt.hash(crypto.randomBytes(32).toString("hex"), 10) : "temp";
+          const newUser = await db.createUser({
+            id: crypto.randomUUID(),
+            name: customer.name,
+            email: customer.email,
+            phone: customer.phone || "",
+            passwordHash: tempHash
+          });
+          await db.updateUser(newUser.id, {
+            password_reset_token: resetToken,
+            password_reset_expires: resetExpires
+          });
+          checkoutUserId = newUser.id;
+          console.log(`[Checkout] Account created for ${customer.email}, reset token generated`);
+
+          sendPasswordSetupEmail(customer.email, customer.name, resetToken).catch(err => {
+            console.error("[Checkout] Password email error:", err.message);
+          });
+        } catch (err) {
+          console.error("[Checkout] Auto-create account error:", err.message);
+        }
+      } else {
+        checkoutUserId = existingUser.id;
+      }
+    }
 
     const vivaOrderBody = {
       amount: vivaAmount,
@@ -1704,10 +1763,11 @@ app.post("/api/orders/create", async (req, res) => {
       items: orderItems,
       totalAmount,
       shippingCost,
-      currency
+      currency,
+      userId: checkoutUserId
     });
 
-    console.log(`[Order] Created ${orderNumber} (${currency}), vivaOrderCode=${vivaData.orderCode}`);
+    console.log(`[Order] Created ${orderNumber} (${currency}), vivaOrderCode=${vivaData.orderCode}${checkoutUserId ? `, userId=${checkoutUserId}` : ""}`);
 
     const env = process.env.VIVA_ENVIRONMENT === "production" ? "www" : "demo";
     const checkoutUrl = `https://${env}.vivapayments.com/web/checkout?ref=${vivaData.orderCode}`;
@@ -2005,7 +2065,26 @@ async function handleOrderCompletion(orderId) {
 
   const notesAfterFulfillment = notes.length;
 
-  // 7. Send confirmation email (kräver RESEND_API_KEY + verifierad avsändardomän i Resend)
+  // 7. Award loyalty points if customer has an account
+  try {
+    const loyaltyUser = await db.findUserByEmail(order.customer_email);
+    if (loyaltyUser) {
+      const orderCurrency = order.currency || "SEK";
+      const pointsToAward = orderCurrency === "EUR"
+        ? Math.round(order.total_amount * 11)
+        : order.total_amount;
+      const result = await db.addLoyaltyPoints(loyaltyUser.id, pointsToAward);
+      if (result) {
+        notes.push(`Lojalitetspoäng: +${pointsToAward} (${result.tier})`);
+        console.log(`[Loyalty] ${order.customer_email}: +${pointsToAward} pts → ${result.loyaltyPoints} total (${result.tier})`);
+      }
+    }
+  } catch (err) {
+    notes.push(`Lojalitetspoäng FEL: ${err.message}`);
+    console.error("[Order] Loyalty points error:", err);
+  }
+
+  // 8. Send confirmation email (kräver RESEND_API_KEY + verifierad avsändardomän i Resend)
   try {
     const emailResult = await sendOrderConfirmation(order, items);
     if (emailResult.sent) {
@@ -2021,7 +2100,7 @@ async function handleOrderCompletion(orderId) {
     console.error("[Order] Email error:", err);
   }
 
-  // 8. Trigger post-purchase automation + mark abandoned cart as recovered
+  // 9. Trigger post-purchase automation + mark abandoned cart as recovered
   try {
     const purchaseFlows = await db.findFlowByTrigger("purchase");
     if (purchaseFlows.length > 0) {
@@ -2127,6 +2206,98 @@ async function sendOrderConfirmation(order, items) {
   console.log(`[Email] Confirmation sent to ${order.customer_email}`);
   return { sent: true };
 }
+
+// ---- PASSWORD SETUP EMAIL ----
+
+async function sendPasswordSetupEmail(email, name, resetToken) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    console.warn("[Email] RESEND_API_KEY not set – password setup email NOT sent");
+    return { sent: false, skipReason: "no_api_key" };
+  }
+
+  const { Resend } = require("resend");
+  const resend = new Resend(apiKey);
+  const fromEmail = process.env.EMAIL_FROM || "noreply@1753skincare.com";
+  const baseUrl = process.env.FRONTEND_URL || "https://www.1753skin.com";
+  const resetUrl = `${baseUrl}/sv/valj-losenord?token=${resetToken}`;
+  const firstName = (name || "").split(" ")[0] || "du";
+
+  await resend.emails.send({
+    from: fromEmail,
+    to: email,
+    subject: "Välkommen till 1753 SKINCARE – Välj ditt lösenord",
+    html: `
+      <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;max-width:560px;margin:0 auto;color:#1d1d1f">
+        <div style="text-align:center;padding:32px 0 24px">
+          <h1 style="font-size:24px;font-weight:700;margin:0">Välkommen, ${firstName}!</h1>
+        </div>
+        <p style="font-size:15px;line-height:1.6;color:#515151">
+          Vi har skapat ett konto åt dig i vårt lojalitetsprogram. Du tjänar poäng på varje köp
+          och får tillgång till exklusiva förmåner och rabatter.
+        </p>
+        <p style="font-size:15px;line-height:1.6;color:#515151">
+          Klicka på knappen nedan för att välja ditt lösenord och aktivera ditt konto:
+        </p>
+        <div style="text-align:center;margin:28px 0">
+          <a href="${resetUrl}"
+             style="display:inline-block;padding:14px 32px;background:#108474;color:#fff;font-size:15px;font-weight:600;border-radius:980px;text-decoration:none">
+            Välj lösenord
+          </a>
+        </div>
+        <p style="font-size:13px;color:#766a62;line-height:1.6">
+          Länken är giltig i 72 timmar. Om den har gått ut kan du alltid begära en ny
+          via inloggningssidan.
+        </p>
+        <p style="font-size:13px;color:#766a62;line-height:1.6;margin-top:32px;text-align:center">
+          1753 SKINCARE – Holistisk hudvård med CBD och CBG<br>
+          <a href="https://www.1753skin.com" style="color:#108474">www.1753skin.com</a>
+        </p>
+      </div>
+    `
+  });
+
+  console.log(`[Email] Password setup email sent to ${email}`);
+  return { sent: true };
+}
+
+// ---- PASSWORD RESET / SET ----
+
+app.post("/api/auth/set-password", async (req, res) => {
+  try {
+    const { token, password } = req.body;
+    if (!token || !password) {
+      return res.status(400).json({ message: "Token och lösenord krävs" });
+    }
+    if (password.length < 6) {
+      return res.status(400).json({ message: "Lösenordet måste vara minst 6 tecken" });
+    }
+
+    const { rows } = await db.pool.query(
+      "SELECT * FROM users WHERE password_reset_token = $1 LIMIT 1",
+      [token]
+    );
+    const user = rows[0];
+    if (!user) {
+      return res.status(400).json({ message: "Ogiltig eller utgången länk" });
+    }
+    if (user.password_reset_expires && new Date(user.password_reset_expires) < new Date()) {
+      return res.status(400).json({ message: "Länken har gått ut. Begär en ny via inloggningssidan." });
+    }
+
+    const passwordHash = bcrypt ? await bcrypt.hash(password, 10) : password;
+    await db.updateUser(user.id, {
+      password_hash: passwordHash,
+      password_reset_token: null,
+      password_reset_expires: null
+    });
+
+    const authToken = generateToken(user);
+    res.json({ token: authToken, message: "Lösenord sparat!" });
+  } catch (err) {
+    res.status(500).json({ message: err.message || "Kunde inte spara lösenordet" });
+  }
+});
 
 // ---- EMAIL TEMPLATES (shared style) ----
 
@@ -2359,6 +2530,19 @@ app.post("/api/loyalty/redeem", authMiddleware, async (req, res) => {
     const discountKr = Math.round(amount / 10);
     const code = `LOYAL${discountKr}-${Date.now().toString(36).toUpperCase()}`;
 
+    const validUntil = new Date();
+    validUntil.setDate(validUntil.getDate() + 30);
+
+    await db.createDiscountCode({
+      code,
+      percent: 0,
+      fixedAmount: discountKr,
+      description: `Lojalitetsrabatt ${discountKr} kr (${amount} poäng)`,
+      maxUses: 1,
+      validUntil: validUntil.toISOString()
+    });
+
+    console.log(`[Loyalty] ${user.email} redeemed ${amount} pts → ${code} (${discountKr} kr off)`);
     res.json({ code, discountKr, remainingPoints: remaining });
   } catch (err) { res.status(500).json({ message: err.message }); }
 });
@@ -3047,7 +3231,7 @@ OM 1753 SKINCARE:
 - Telefon: 0732-30 55 21
 - E-post: info@1753skin.com
 - Fri frakt över 700 kr
-- Nöjd-kund-garanti med rådgivning före och efter köp
+- Personlig rådgivning före och efter köp
 
 ABSOLUT FÖRBJUDET:
 - Medicinsk rådgivning eller diagnos
@@ -3481,12 +3665,49 @@ async function checkWinbackEligibility() {
   }
 }
 
+// ---- SEED ADMIN ACCOUNTS ----
+
+async function seedAdminAccounts() {
+  const admins = [
+    { email: "torbjorn@1753skincare.com", name: "Torbjörn" },
+    { email: "christopher@1753skincare.com", name: "Christopher" },
+  ];
+
+  for (const admin of admins) {
+    const existing = await db.findUserByEmail(admin.email);
+    if (existing) {
+      if (existing.role !== "admin") {
+        await db.updateUser(existing.id, { role: "admin" });
+        console.log(`[Admin] ${admin.email}: role upgraded to admin`);
+      }
+      continue;
+    }
+
+    const tempPassword = "1753Admin!";
+    const hash = bcrypt ? await bcrypt.hash(tempPassword, 10) : tempPassword;
+    await db.createUser({
+      id: crypto.randomUUID(),
+      name: admin.name,
+      email: admin.email,
+      phone: "",
+      passwordHash: hash,
+    });
+
+    const user = await db.findUserByEmail(admin.email);
+    if (user) {
+      await db.updateUser(user.id, { role: "admin" });
+    }
+    console.log(`[Admin] ${admin.email}: account created with role admin`);
+  }
+}
+
 // ---- START ----
 
 (async () => {
   try {
     await db.initSchema();
     await seedAutomationFlows();
+    await seedAdminAccounts();
   } catch (err) {
     console.error("[DB] Schema init failed – running without database:", err.message);
   }
