@@ -1,6 +1,6 @@
 # Bokkunskap: "Weed Your Skin" (Christopher Genberg)
 
-Status: **Hela bokens kapitel 1–44 + slutord** är representerade som kondenserade teman nedan (extraherat från PDF *weed your glow complete 2025*, 403 sidor). Detta är **inte** fulltext – formulera som bokens perspektiv, inte ordagranna citat eller sidhänvisningar du inte verifierat. Osäkerhet ska nämnas där evidensen i boken beskrivs som preliminär.
+Status: Kondenserade teman för kap 1–44 + slutord (nedan). **Längre maskinutdrag** (inledning, slutord, ~1800 tecken/kapitel) ligger i `data/book-knowledge-extended.md` och laddas automatiskt efter denna fil i chat-prompten. **Full PDF-text** (403 sidor, pypdf) finns i `data/weed-book-full-extract.txt` för att kunna återgenerera utdrag: `python3 scripts/build-book-chat-snippets.py`. Formulera som bokens perspektiv; PDF kan ha små OCR-fel. Osäkerhet ska nämnas där evidensen är preliminär.
 
 ## Ton och filosofi (författarens röst)
 

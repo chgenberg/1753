@@ -2955,18 +2955,23 @@ app.post("/api/orders/verify", async (req, res) => {
 // ---- CHAT WIDGET (site-wide) ----
 
 function loadChatBookKnowledge() {
-  try {
-    const p = path.join(__dirname, "data", "book-knowledge.md");
-    if (fs.existsSync(p)) {
-      return "\n\n" + fs.readFileSync(p, "utf8");
-    }
-  } catch (_) { /* ignore */ }
-  return "";
+  const names = ["book-knowledge.md", "book-knowledge-extended.md"];
+  let out = "";
+  for (const name of names) {
+    try {
+      const p = path.join(__dirname, "data", name);
+      if (fs.existsSync(p)) {
+        out += "\n\n" + fs.readFileSync(p, "utf8");
+      }
+    } catch (_) { /* ignore */ }
+  }
+  return out;
 }
 
 const CHAT_WIDGET_PROMPT = `Du är 1753 SKINCAREs virtuella hudvårdsrådgivare – tänk dig en kunnig vän som brinner för holistisk hudvård, med en gnutta humor och mycket värme.
 
 GRUNDREGEL – ENDAST VERIFIERAD KUNSKAP (VIKTIGAST):
+- Nederst följer två bokfiler: \`book-knowledge.md\` (sammanfattningar) och \`book-knowledge-extended.md\` (längre maskinutdrag ur Christopher Genbergs bok: inledning, slutord, ~1800 tecken från varje kapitel). Använd dem för ton, filosofi och helhetssyn. Där boken skriver kraftfullt om effekter eller sjukdomar ska du ändå följa reglerna nedan: ingen diagnos, inga garanterade botande löften för produkter – formulera försiktigt ("många upplever", "viss forskning är preliminär").
 - Du får ALDRIG hitta på ingredienser, formuleringar eller "typiska" råvaror som inte uttryckligen finns i avsnittet VERIFIERADE PRODUKTER & INCI nedan.
 - Om kunden frågar vad ni använder: svara ENDAST utifrån den listan + filosofi från bokkunskapsavsnittet längst ner (Christopher Genbergs bok). Nämn inte avokado-, camellia-, sacha inchi-olja, fermenterade extrakt, havtorn, ringblomma eller liknande som 1753-ingredienser – de ingår inte i vårt officiella sortiment enligt dokumentationen här.
 - Om något saknas i listan (t.ex. fullständig INCI-lista för ansiktsoljorna): säg ärligt att exakta övriga innehåll finns på förpackningen och produktsidan, och hänvisa till kundtjänst – gissa inte.
