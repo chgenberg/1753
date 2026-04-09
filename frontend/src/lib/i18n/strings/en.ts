@@ -44,7 +44,7 @@ export const en: Messages = {
   topBanner: {
     m0: "Join and earn points on every purchase",
     m1: "Free shipping on all orders",
-    m2: "14-day satisfaction guarantee",
+    m2: "Natural ingredients without synthetic additives",
     m3: "Silver: 5% off · Gold: 8% · Platinum: 12%",
     m4: "Redeem points as discount codes",
   },
@@ -60,7 +60,7 @@ export const en: Messages = {
     heroSub: "No filter. No apology.",
     ctaProducts: "Shop products",
     trust0: "Free shipping over \u20AC60",
-    trust1: "14-day satisfaction guarantee",
+    trust1: "CBD and CBG from organic hemp",
     trust2: "4.6 / 5 from reviews",
     playVideo: "Play video",
     watchVideoTab: "Watch video",
@@ -85,12 +85,6 @@ export const en: Messages = {
         desc: "CBD and CBG from organically grown hemp, without synthetic additives.",
         detail:
           "Our products are built on cannabinoids from organically grown hemp -- CBD (cannabidiol) and CBG (cannabigerol). They work with your skin’s endocannabinoid system to regulate inflammation, sebum and cell renewal. No synthetic fragrance, parabens, silicones or mineral oil. Every ingredient has a clear job: strengthen the barrier, nourish or calm irritation. Nothing more, nothing less.",
-      },
-      {
-        title: "14-day satisfaction guarantee",
-        desc: "Try for 14 days. Not happy? Full refund, no questions.",
-        detail:
-          "Trying something new can feel risky. That’s why we offer a 14-day satisfaction guarantee on every product. If you don’t see a difference, or you’re simply not satisfied, send it back for a full refund -- no hassle, no interrogation. This isn’t fine print. It’s our promise: we believe in what we make enough to take the risk, not you.",
       },
       {
         title: "Deep hydration",
@@ -192,6 +186,8 @@ export const en: Messages = {
     termsLink: "terms of purchase",
     privacyLink: "privacy policy",
     subTerms: "as well as the subscription terms above",
+    createAccountLabel: "Create an account for the loyalty programme",
+    createAccountHint: "Earn points on every purchase and unlock exclusive discounts. We\u2019ll send you an email to set your password.",
     subscriptionHeading: "Subscription",
     subscriptionExplainer:
       "You are charged today and then according to the interval you choose. You can cancel anytime in My account.",
@@ -326,6 +322,8 @@ export const en: Messages = {
     messageLabel: "Message",
     messagePlaceholder: "Tell us how we can help...",
     submit: "Send message",
+    sending: "Sending...",
+    errorGeneric: "Something went wrong. Please try again or email us directly.",
     thanksTitle: "Thanks for your message!",
     thanksSub: "We’ll get back to you as soon as we can.",
   },
@@ -494,6 +492,22 @@ export const en: Messages = {
     passwordRules: "Password must be at least 6 characters and include at least one digit.",
     passwordMismatch: "Passwords do not match.",
     errorGeneric: "Registration failed.",
+  },
+  setPasswordPage: {
+    title: "Choose your password",
+    subtitle: "Set a password to activate your loyalty programme account.",
+    passwordLabel: "Password",
+    passwordPlaceholder: "At least 6 characters",
+    confirmLabel: "Confirm password",
+    confirmPlaceholder: "Enter password again",
+    submit: "Save password",
+    saving: "Saving...",
+    successTitle: "Password saved!",
+    successBody: "Your account is now active. You can log in and start earning points.",
+    goToAccount: "Go to My account",
+    invalidToken: "Invalid or expired link. Request a new one from the login page.",
+    passwordMismatch: "Passwords do not match.",
+    tooShort: "Password must be at least 6 characters.",
   },
   analysisLayoutSeo: {
     title: "Skin analysis",

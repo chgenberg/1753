@@ -5,6 +5,7 @@ import Image from "next/image";
 import { Mail, MapPin, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SectionWrapper } from "@/components/section-wrapper";
+import { apiFetch } from "@/lib/api";
 import { useLocale } from "@/providers/locale-provider";
 
 export default function ContactPage() {
@@ -12,10 +13,24 @@ export default function ContactPage() {
   const p = (key: string) => t(`contactPage.${key}`);
   const [form, setForm] = useState({ name: "", email: "", message: "" });
   const [sent, setSent] = useState(false);
+  const [sending, setSending] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSent(true);
+    setSending(true);
+    setError("");
+    try {
+      await apiFetch("/contact", {
+        method: "POST",
+        body: JSON.stringify(form),
+      });
+      setSent(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : p("errorGeneric"));
+    } finally {
+      setSending(false);
+    }
   };
 
   return (
@@ -160,11 +175,15 @@ export default function ContactPage() {
                   placeholder={p("messagePlaceholder")}
                 />
               </div>
+              {error && (
+                <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>
+              )}
               <Button
                 type="submit"
-                className="h-12 w-full rounded-xl text-sm font-medium active:scale-[0.98]"
+                disabled={sending}
+                className="h-12 w-full rounded-xl text-sm font-medium active:scale-[0.98] disabled:opacity-50"
               >
-                {p("submit")}
+                {sending ? p("sending") : p("submit")}
               </Button>
             </form>
           )}

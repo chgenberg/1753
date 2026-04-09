@@ -2265,6 +2265,51 @@ async function sendPasswordSetupEmail(email, name, resetToken) {
   return { sent: true };
 }
 
+// ---- CONTACT FORM ----
+
+app.post("/api/contact", async (req, res) => {
+  try {
+    const clientIp = req.ip || req.connection.remoteAddress;
+    if (!checkRateLimit(clientIp, "contact", 5)) {
+      return res.status(429).json({ message: "För många meddelanden. Försök igen om en stund." });
+    }
+    const { name, email, message } = req.body;
+    if (!name || !email || !message) {
+      return res.status(400).json({ message: "Alla fält krävs." });
+    }
+
+    const apiKey = process.env.RESEND_API_KEY;
+    if (!apiKey) {
+      console.error("[Contact] RESEND_API_KEY not set");
+      return res.status(500).json({ message: "E-posttjänsten är inte konfigurerad." });
+    }
+
+    const { Resend } = require("resend");
+    const resend = new Resend(apiKey);
+    const fromEmail = process.env.EMAIL_FROM || "info@1753skin.com";
+
+    await resend.emails.send({
+      from: `1753 SKINCARE <${fromEmail}>`,
+      to: "info@1753skin.com",
+      replyTo: email,
+      subject: `Kontaktformulär: ${name}`,
+      html: `
+        <h2>Nytt meddelande från kontaktformuläret</h2>
+        <p><strong>Namn:</strong> ${name}</p>
+        <p><strong>E-post:</strong> <a href="mailto:${email}">${email}</a></p>
+        <hr />
+        <p style="white-space:pre-wrap;">${message}</p>
+      `
+    });
+
+    console.log(`[Contact] Message from ${email} (${name}) forwarded to info@1753skin.com`);
+    res.json({ ok: true });
+  } catch (err) {
+    console.error("[Contact] Error:", err);
+    res.status(500).json({ message: "Kunde inte skicka meddelandet. Försök igen." });
+  }
+});
+
 // ---- PASSWORD RESET / SET ----
 
 app.post("/api/auth/set-password", async (req, res) => {
