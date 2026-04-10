@@ -73,8 +73,14 @@ interface Order {
 interface SkinAnalysis {
   id: number;
   score: number | null;
-  summary: string;
-  recommendations: string[];
+  answers: Record<string, unknown> | null;
+  result: {
+    summary?: string;
+    lifestyle?: { area: string; tip: string; impact: string }[];
+    products?: { id: string; reason: string }[];
+    avoid?: string[];
+  } | null;
+  full_text: string;
   created_at: string;
 }
 
@@ -383,6 +389,31 @@ function OverviewView({
 
 /* ─────────────────── SKIN JOURNEY ─────────────────── */
 
+function ScoreMiniChart({ scores }: { scores: { score: number; date: string }[] }) {
+  if (scores.length < 2) return null;
+  const max = 100;
+  const w = 200;
+  const h = 60;
+  const step = w / (scores.length - 1);
+  const points = scores
+    .slice()
+    .reverse()
+    .map((s, i) => `${i * step},${h - (s.score / max) * h}`);
+  const polyline = points.join(" ");
+  return (
+    <svg viewBox={`0 0 ${w} ${h}`} className="h-16 w-full" preserveAspectRatio="none">
+      <polyline
+        points={polyline}
+        fill="none"
+        stroke="#108474"
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
+}
+
 function SkinJourneyView({ token }: { token: string }) {
   const { t, path, locale } = useLocale();
   const loc = locale === "en" ? "en-GB" : "sv-SE";
@@ -391,7 +422,7 @@ function SkinJourneyView({ token }: { token: string }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    authFetch<SkinAnalysis[]>("/skin-analyses", token)
+    authFetch<SkinAnalysis[]>("/analysis/history", token)
       .then(setAnalyses)
       .catch(() => {})
       .finally(() => setLoading(false));
@@ -427,9 +458,11 @@ function SkinJourneyView({ token }: { token: string }) {
     );
   }
 
-  const scores = analyses.filter((a) => a.score !== null).map((a) => a.score as number);
-  const latestScore = scores[0] ?? null;
-  const oldestScore = scores.length > 1 ? scores[scores.length - 1] : null;
+  const scoredAnalyses = analyses
+    .filter((a) => a.score !== null)
+    .map((a) => ({ score: a.score as number, date: a.created_at }));
+  const latestScore = scoredAnalyses[0]?.score ?? null;
+  const oldestScore = scoredAnalyses.length > 1 ? scoredAnalyses[scoredAnalyses.length - 1].score : null;
   const diff = latestScore !== null && oldestScore !== null ? latestScore - oldestScore : null;
 
   return (
@@ -441,55 +474,78 @@ function SkinJourneyView({ token }: { token: string }) {
           : d("analysesDone", { count: analyses.length })}
       </p>
 
-      {latestScore !== null && (
-        <div className="flex items-center gap-6">
+      <div className="flex flex-wrap items-center gap-6">
+        {latestScore !== null && (
           <div className="rounded-xl bg-brand-50 p-6 text-center">
             <p className="text-3xl font-bold text-brand-900">{latestScore}</p>
             <p className="text-xs text-brand-600">{d("latestScore")}</p>
           </div>
-          {diff !== null && diff !== 0 && (
-            <div className={cn("rounded-xl p-6 text-center", diff > 0 ? "bg-green-50" : "bg-red-50")}>
-              <p className={cn("text-3xl font-bold", diff > 0 ? "text-green-700" : "text-red-700")}>
-                {diff > 0 ? "+" : ""}
-                {diff}
-              </p>
-              <p className={cn("text-xs", diff > 0 ? "text-green-600" : "text-red-600")}>{d("changeLabel")}</p>
-            </div>
-          )}
+        )}
+        {diff !== null && diff !== 0 && (
+          <div className={cn("rounded-xl p-6 text-center", diff > 0 ? "bg-green-50" : "bg-red-50")}>
+            <p className={cn("text-3xl font-bold", diff > 0 ? "text-green-700" : "text-red-700")}>
+              {diff > 0 ? "+" : ""}
+              {diff}
+            </p>
+            <p className={cn("text-xs", diff > 0 ? "text-green-600" : "text-red-600")}>{d("changeLabel")}</p>
+          </div>
+        )}
+      </div>
+
+      {scoredAnalyses.length >= 2 && (
+        <div className="rounded-xl border border-border bg-white p-4">
+          <ScoreMiniChart scores={scoredAnalyses} />
         </div>
       )}
 
       <div className="space-y-4">
-        {analyses.map((a, idx) => (
-          <div key={a.id} className="relative flex gap-4 pb-2">
-            {idx < analyses.length - 1 && (
-              <div className="absolute left-[11px] top-7 h-full w-0.5 bg-brand-100" />
-            )}
-            <div className="relative z-10 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border-2 border-brand-900 bg-white">
-              <div className="h-2 w-2 rounded-full bg-brand-900" />
-            </div>
-            <div className="flex-1 rounded-xl border border-border bg-white p-4 transition-all hover:shadow-sm">
-              <div className="flex items-center justify-between">
-                <p className="text-sm font-bold">
-                  {a.score !== null && (
-                    <span className="mr-2 text-brand-700">
-                      {a.score} {t("accountDash.scorePoints")}
-                    </span>
-                  )}
-                  {new Date(a.created_at).toLocaleDateString(loc, {
-                    year: "numeric",
-                    month: "long",
-                    day: "numeric",
-                  })}
-                </p>
-                <span className="text-xs text-muted-foreground">{relativeDate(a.created_at, locale, t)}</span>
-              </div>
-              {a.summary && (
-                <p className="mt-2 text-sm text-brand-600">{a.summary}</p>
+        {analyses.map((a, idx) => {
+          const summary = a.result?.summary;
+          return (
+            <div key={a.id} className="relative flex gap-4 pb-2">
+              {idx < analyses.length - 1 && (
+                <div className="absolute left-[11px] top-7 h-full w-0.5 bg-brand-100" />
               )}
+              <div className="relative z-10 flex h-6 w-6 flex-shrink-0 items-center justify-center rounded-full border-2 border-brand-900 bg-white">
+                <div className="h-2 w-2 rounded-full bg-brand-900" />
+              </div>
+              <div className="flex-1 rounded-xl border border-border bg-white p-4 transition-all hover:shadow-sm">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm font-bold">
+                    {a.score !== null && (
+                      <span className="mr-2 text-[#108474]">
+                        {a.score} {t("accountDash.scorePoints")}
+                      </span>
+                    )}
+                    {new Date(a.created_at).toLocaleDateString(loc, {
+                      year: "numeric",
+                      month: "long",
+                      day: "numeric",
+                    })}
+                  </p>
+                  <span className="text-xs text-muted-foreground">{relativeDate(a.created_at, locale, t)}</span>
+                </div>
+                {summary && (
+                  <p className="mt-2 text-sm text-brand-600">{summary}</p>
+                )}
+                {a.result?.products && a.result.products.length > 0 && (
+                  <div className="mt-2 flex flex-wrap gap-1.5">
+                    {a.result.products.map((p) => (
+                      <span
+                        key={p.id}
+                        className="rounded-full bg-[#108474]/10 px-2.5 py-0.5 text-[11px] font-medium text-[#108474]"
+                      >
+                        {PRODUCTS.find((pr) => pr.id === p.id)
+                          ? productDisplayName(PRODUCTS.find((pr) => pr.id === p.id)!, locale)
+                          : p.id}
+                      </span>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
-          </div>
-        ))}
+          );
+        })}
       </div>
 
       <a href={path("skinAnalysis")}>
@@ -578,14 +634,18 @@ function OrdersView({ orders, loading, error }: { orders: Order[]; loading: bool
                   </div>
                 </div>
                 <div className="mt-3 space-y-1.5">
-                  {(order.items || []).map((item, i) => (
-                    <p key={i} className="text-sm text-brand-600">
-                      {item.qty}x {item.name || item.id}{" "}
-                      <span className="text-brand-500">
-                        {formatPrice((item.price || 0) * item.qty, locale)}
-                      </span>
-                    </p>
-                  ))}
+                  {(order.items || []).map((item, i) => {
+                    const qty = Number(item.qty ?? item.quantity) || 1;
+                    const price = Number(item.price) || 0;
+                    return (
+                      <p key={i} className="text-sm text-brand-600">
+                        {qty}x {item.name || item.id}{" "}
+                        <span className="text-brand-500">
+                          {formatPrice(price * qty, locale)}
+                        </span>
+                      </p>
+                    );
+                  })}
                 </div>
                 <div className="mt-3 flex items-center justify-between border-t border-brand-100 pt-3">
                   <button
@@ -597,7 +657,7 @@ function OrdersView({ orders, loading, error }: { orders: Order[]; loading: bool
                     {d("reorder")}
                   </button>
                   <p className="text-sm font-bold">
-                    {formatPrice((order.total_amount || 0) / 100, locale)}
+                    {formatPrice(Number(order.total_amount) || 0, locale)}
                   </p>
                 </div>
               </div>
@@ -927,7 +987,9 @@ function SubscriptionsView({ token }: { token: string }) {
     );
   }
 
-  const activeSubs = subs.filter((s) => s.status === "active" || s.status === "paused");
+  const activeSubs = subs.filter(
+    (s) => s.status === "active" || s.status === "paused" || s.status === "pending"
+  );
 
   return (
     <div className="space-y-6">

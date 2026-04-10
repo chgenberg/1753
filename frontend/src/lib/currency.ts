@@ -15,10 +15,11 @@ export function getVivaCurrencyCode(locale: Locale): number {
  * Swedish: "1 495 kr"   English/EUR: "€129"
  */
 export function formatPrice(amount: number, locale: Locale): string {
+  const safe = Number.isFinite(amount) ? amount : 0;
   if (locale === "en") {
-    return `€${amount.toLocaleString("en-GB")}`;
+    return `€${safe.toLocaleString("en-GB")}`;
   }
-  return `${amount.toLocaleString("sv-SE")} kr`;
+  return `${safe.toLocaleString("sv-SE")} kr`;
 }
 
 export const SHIPPING_COST = { SEK: 49, EUR: 5 } as const;

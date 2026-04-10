@@ -223,18 +223,6 @@ async function initSchema() {
 
     CREATE INDEX IF NOT EXISTS idx_wishlists_user ON wishlists (user_id);
 
-    CREATE TABLE IF NOT EXISTS skin_analyses (
-      id              SERIAL PRIMARY KEY,
-      user_id         INTEGER NOT NULL,
-      score           INTEGER,
-      summary         TEXT DEFAULT '',
-      recommendations JSONB DEFAULT '[]',
-      full_response   TEXT DEFAULT '',
-      created_at      TIMESTAMPTZ DEFAULT NOW()
-    );
-
-    CREATE INDEX IF NOT EXISTS idx_skin_analyses_user ON skin_analyses (user_id);
-
     CREATE TABLE IF NOT EXISTS addresses (
       id              SERIAL PRIMARY KEY,
       user_id         INTEGER NOT NULL,
@@ -265,6 +253,18 @@ async function initSchema() {
     );
 
     CREATE INDEX IF NOT EXISTS idx_email_conv_status ON email_conversations (status);
+
+    CREATE TABLE IF NOT EXISTS skin_analyses (
+      id              SERIAL PRIMARY KEY,
+      user_id         UUID REFERENCES users(id),
+      answers         JSONB,
+      result          JSONB,
+      full_text       TEXT DEFAULT '',
+      score           INTEGER,
+      created_at      TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_skin_analyses_user ON skin_analyses (user_id);
 
     CREATE TABLE IF NOT EXISTS newsletter_drafts (
       id              SERIAL PRIMARY KEY,
@@ -438,8 +438,12 @@ async function createSubscription({
 
 async function findSubscriptionsByUser(userId) {
   const { rows } = await pool.query(
-    `SELECT * FROM subscriptions WHERE user_id = $1
-     AND cancelled_at IS NULL ORDER BY created_at DESC`,
+    `SELECT s.* FROM subscriptions s
+     WHERE s.cancelled_at IS NULL
+       AND (s.user_id = $1
+            OR (s.user_id IS NULL
+                AND LOWER(s.customer_email) = LOWER((SELECT email FROM users WHERE id = $1))))
+     ORDER BY s.created_at DESC`,
     [userId]
   );
   return rows;
@@ -1073,16 +1077,25 @@ async function removeFromWishlist(userId, productId) {
 
 async function saveSkinAnalysis({ userId, score, summary, recommendations, fullResponse }) {
   const { rows } = await pool.query(
-    `INSERT INTO skin_analyses (user_id, score, summary, recommendations, full_response)
+    `INSERT INTO skin_analyses (user_id, score, answers, result, full_text)
      VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-    [userId, score || null, summary || "", JSON.stringify(recommendations || []), fullResponse || ""]
+    [userId, score || null, JSON.stringify({ summary, recommendations }), JSON.stringify({ summary, recommendations }), fullResponse || ""]
+  );
+  return rows[0];
+}
+
+async function createSkinAnalysis({ userId, answers, result, fullText, score }) {
+  const { rows } = await pool.query(
+    `INSERT INTO skin_analyses (user_id, score, answers, result, full_text)
+     VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+    [userId || null, score || null, JSON.stringify(answers || {}), JSON.stringify(result || {}), fullText || ""]
   );
   return rows[0];
 }
 
 async function getSkinAnalyses(userId) {
   const { rows } = await pool.query(
-    "SELECT id, score, summary, recommendations, created_at FROM skin_analyses WHERE user_id = $1 ORDER BY created_at DESC",
+    "SELECT id, score, answers, result, full_text, created_at FROM skin_analyses WHERE user_id = $1 ORDER BY created_at DESC",
     [userId]
   );
   return rows;
@@ -1371,6 +1384,7 @@ module.exports = {
   addToWishlist,
   removeFromWishlist,
   saveSkinAnalysis,
+  createSkinAnalysis,
   getSkinAnalyses,
   getAddresses,
   createAddress,

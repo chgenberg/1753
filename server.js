@@ -539,7 +539,7 @@ async function refreshFortnoxToken() {
 }
 
 async function ensureFortnoxToken() {
-  if (fortnoxTokens.refreshToken && fortnoxTokens.expiresAt - Date.now() < 300_000) {
+  if (fortnoxTokens.refreshToken && (!fortnoxTokens.expiresAt || fortnoxTokens.expiresAt - Date.now() < 300_000)) {
     await refreshFortnoxToken();
   }
 }
@@ -1329,20 +1329,21 @@ DIN FILOSOFI:
 - Du rekommenderar ALDRIG fler produkter än nödvändigt – enkelhet är nyckeln
 - Du är rebellisk mot hudvårdsindustrins överdrivna rutin av 10-steg
 
-BILDFORMAT:
-Du får upp till 6 bilder: helansiktet + upp till 5 beskurna regioner (panna, vänster kind, höger kind, näsa, haka).
-Analysera varje region specifikt och namnge dem i din analys. Om du bara får en helansiktsbild, analysera helheten.
+ANALYSTYP:
+Denna analys är FRÅGEBASERAD – du har INGA bilder. Kunden har besvarat en interaktiv quiz om sin hudtyp, besvär, nuvarande rutin, livsstil (sömn, stress, kost, vatten, träning) och mål/känsligheter.
+
+Du ska ge en lika djup och personlig analys baserat på dessa svar som du hade gjort med bilder. Livsstilsfaktorer är ofta viktigare än det visuella – och det är din styrka.
 
 KUNDINPUT:
 Kunden har svarat på frågor om hudtyp, problem, rutin, livsstil och mål.
 Integrera dessa svar djupt i din analys – referera specifikt till deras svar.
 
 NÄR DU ANALYSERAR:
-1. Observera synliga hudtillstånd per region: torrhet, rodnad, ojämn hudton, akne, rosacea, fina linjer, pigmentfläckar, pormaskar, eksem, ärr
-2. Bedöm hudens generella balans, lyster och barriärfunktion
-3. Integrera kundens rapporterade livsstilsfaktorer (stress, sömn, kost, aktivitet)
-4. Relatera observationerna till mikrobiom och ECS
-5. Anpassa rekommendationerna till kundens uttalade mål
+1. Utgå från kundens rapporterade hudtyp och besvär
+2. Analysera hur livsstilsfaktorerna (sömn, stress, kost, vatten, träning) påverkar hudens tillstånd
+3. Bedöm nuvarande rutin – vad saknas, vad bör ändras
+4. Relatera allt till mikrobiom och ECS
+5. Anpassa rekommendationerna till kundens uttalade mål och eventuella känsligheter
 
 SVARFORMAT:
 Svara med BÅDE löpande text OCH ett strukturerat JSON-block i slutet.
@@ -1353,13 +1354,6 @@ JSON-blocket ska vara markerat med trippla backticks och "json" samt avslutande 
 {
   "score": 72,
   "summary": "Kort sammanfattning (2-3 meningar)",
-  "regions": [
-    { "label": "Panna", "observation": "Fin textur, lätt torrhet vid hårfästet", "score": 75 },
-    { "label": "Vänster kind", "observation": "...", "score": 68 },
-    { "label": "Höger kind", "observation": "...", "score": 70 },
-    { "label": "Näsa", "observation": "...", "score": 80 },
-    { "label": "Haka", "observation": "...", "score": 65 }
-  ],
   "lifestyle": [
     { "area": "Sömn", "tip": "Konkret tips kopplat till kundens svar", "impact": "hög" },
     { "area": "Stress", "tip": "...", "impact": "hög" },
@@ -1371,6 +1365,10 @@ JSON-blocket ska vara markerat med trippla backticks och "json" samt avslutande 
     { "id": "ta-da-serum", "reason": "..." }
   ],
   "avoid": ["Specifik sak att undvika 1", "Specifik sak att undvika 2"],
+  "routineSuggestion": {
+    "morning": ["Skölj med ljummet vatten", "Applicera 3-4 droppar The ONE Facial Oil"],
+    "evening": ["Rengör med Au Naturel", "Applicera I LOVE Facial Oil"]
+  },
   "nextAnalysis": "4 veckor"
 }
 \`\`\`
@@ -1381,11 +1379,15 @@ Tillgängliga produkt-ID:n (använd exakt dessa):
 - "fungtastic-mushroom-extract" – Fungtastic Mushroom Extract (399 kr), Chaga, Lion's Mane, Cordyceps, Reishi
 - "duo-kit" – DUO-kit (1 099 kr), The ONE Facial Oil (morgon) + I LOVE Facial Oil (kväll)
 - "duo-ta-da" – DUO-kit + TA-DA Serum (1 495 kr), komplett rutin med oljor och serum
+- "the-one-facial-oil" – The ONE Facial Oil (599 kr), dagolja med CBD
+- "i-love-facial-oil" – I LOVE Facial Oil (599 kr), nattlig olja med CBD och CBG
+- "the-one-i-love-ta-da" – The ONE + I LOVE + TA-DA (1 795 kr), komplett 3-stegsrutin
+- "au-naturel-ta-da" – Au Naturel + TA-DA Serum (949 kr), rengöring + serum
 
 Rekommendera max 2-3 produkter. Förklara VARFÖR varje produkt passar ur ett ECS/mikrobiom-perspektiv kopplat till just denna kunds situation.
 
 FORMAT:
-- Svara på svenska
+- Svara på svenska (om frågor skickas på engelska, svara på engelska)
 - Använd ALDRIG emojis
 - Var personlig och varm – som en kunnig vän, inte en kliniker
 - Håll löptexten under 500 ord
@@ -1396,15 +1398,14 @@ ABSOLUT FÖRBJUDET:
 - Ge medicinsk diagnos
 - Rekommendera receptbelagda läkemedel
 - Rekommendera att köpa alla produkter
-- Generisk rådgivning som inte relaterar till bilderna och kundens svar
+- Generisk rådgivning som inte relaterar till kundens svar
 - Emojis
-- Engelska ord (utom produktnamn)
 
 Vid allvarliga hudtillstånd: rekommendera att kontakta dermatolog, men förklara att du kan ge holistiska råd som komplement.`;
 
 // ---- OPENAI HUDANALYS (Responses API) ----
 
-const OPENAI_MODEL = process.env.OPENAI_MODEL || "gpt-4.1";
+const OPENAI_MODEL = process.env.OPENAI_MODEL || "gpt-5.4";
 
 function extractOutputText(data) {
   // 1. SDK-style helper (if present)
@@ -1431,20 +1432,29 @@ function extractOutputText(data) {
 }
 
 function buildAnalysisPrompt(questions) {
-  if (!questions) return "Analysera min hud baserat på detta foto. Ge mig personliga rekommendationer kring hudvård och livsstil enligt din holistiska filosofi.";
+  if (!questions) return "Ge mig en holistisk hudanalys baserat på din expertis.";
 
-  const parts = ["Kundens svar:"];
+  const parts = ["Kundens svar från hudanalysen:"];
   if (questions.skinType) parts.push(`- Hudtyp: ${questions.skinType}`);
-  if (questions.concerns?.length) parts.push(`- Huvudproblem: ${questions.concerns.join(", ")}`);
+  if (questions.concerns?.length) parts.push(`- Huvudbesvär: ${questions.concerns.join(", ")}`);
   if (questions.routine) parts.push(`- Nuvarande rutin: ${questions.routine}`);
   if (questions.lifestyle) {
     const ls = questions.lifestyle;
-    parts.push(`- Stressnivå: ${ls.stress || "?"}/5, Sömn: ${ls.sleep || "?"}/5, Kost: ${ls.diet || "?"}/5, Aktivitet: ${ls.activity || "?"}/5`);
+    if (ls.sleep) parts.push(`- Sömn: ${ls.sleep} timmar per natt`);
+    if (ls.stress) parts.push(`- Stressnivå: ${ls.stress}`);
+    if (ls.diet) parts.push(`- Kost: ${ls.diet}`);
+    if (ls.water) parts.push(`- Vattenintag: ${ls.water}`);
+    if (ls.activity) parts.push(`- Träning: ${ls.activity}`);
   }
   if (questions.goals?.length) parts.push(`- Mål: ${questions.goals.join(", ")}`);
   if (questions.goalFreeText) parts.push(`- Övrigt: ${questions.goalFreeText}`);
 
-  return parts.join("\n") + "\n\nAnalysera min hud baserat på bilderna och mina svar. Ge personliga rekommendationer kring hudvård och livsstil enligt din holistiska filosofi.";
+  const hasImages = false; // text-based analysis by default
+  const suffix = hasImages
+    ? "\n\nAnalysera min hud baserat på bilderna och mina svar."
+    : "\n\nGe en djup, personlig hudanalys baserat på mina svar. Inkludera livsstilsråd, produktrekommendationer och en föreslagen morgon- och kvällsrutin.";
+
+  return parts.join("\n") + suffix;
 }
 
 app.post("/api/analysis", async (req, res) => {
@@ -1457,8 +1467,11 @@ app.post("/api/analysis", async (req, res) => {
     const { imageBase64, regions, fullImage, questions } = req.body;
 
     const mainImage = fullImage || imageBase64;
-    if (!mainImage || !mainImage.startsWith("data:image/")) {
-      return res.status(400).json({ message: "Inget giltigt foto bifogat" });
+    const hasImage = mainImage && mainImage.startsWith("data:image/");
+    const hasQuestions = questions && (questions.skinType || questions.concerns?.length);
+
+    if (!hasImage && !hasQuestions) {
+      return res.status(400).json({ message: "Besvara frågorna eller bifoga ett foto." });
     }
 
     const promptText = buildAnalysisPrompt(questions);
@@ -1468,9 +1481,12 @@ app.post("/api/analysis", async (req, res) => {
     }
 
     const contentParts = [
-      { type: "input_text", text: promptText },
-      { type: "input_image", image_url: mainImage }
+      { type: "input_text", text: promptText }
     ];
+
+    if (hasImage) {
+      contentParts.push({ type: "input_image", image_url: mainImage });
+    }
 
     if (regions && Array.isArray(regions) && regions.length > 0) {
       const regionLabels = regions.map(r => r.label).join(", ");
@@ -1485,7 +1501,7 @@ app.post("/api/analysis", async (req, res) => {
       }
     }
 
-    console.log(`[Analysis] Sending ${contentParts.filter(p => p.type === "input_image").length} image(s), model=${OPENAI_MODEL}`);
+    console.log(`[Analysis] Sending ${contentParts.filter(p => p.type === "input_image").length} image(s), questions=${!!hasQuestions}, model=${OPENAI_MODEL}`);
 
     const response = await fetchWithRetry("https://api.openai.com/v1/responses", {
       method: "POST",
@@ -1521,14 +1537,89 @@ app.post("/api/analysis", async (req, res) => {
 
     console.log("[Analysis] Success, output length:", outputText.length);
 
+    let analysisId = null;
+    try {
+      let userId = null;
+      const authHeader = req.headers.authorization;
+      if (authHeader?.startsWith("Bearer ")) {
+        try {
+          const decoded = jwt.verify(authHeader.slice(7), process.env.JWT_SECRET);
+          userId = decoded.id || null;
+        } catch { /* not logged in, ok */ }
+      }
+
+      const jsonMatch = outputText.match(/```json\s*([\s\S]*?)```/);
+      const parsedResult = jsonMatch ? JSON.parse(jsonMatch[1]) : null;
+      const saved = await db.createSkinAnalysis({
+        userId,
+        answers: questions || null,
+        result: parsedResult,
+        fullText: outputText,
+        score: parsedResult?.score || null,
+      });
+      analysisId = saved?.id || null;
+      console.log(`[Analysis] Saved to DB: id=${analysisId}, userId=${userId}, score=${parsedResult?.score}`);
+    } catch (saveErr) {
+      console.error("[Analysis] DB save failed (non-fatal):", saveErr.message);
+    }
+
     res.json({
       content: outputText,
       responseId: data.id || null,
+      analysisId,
       usage: data.usage
     });
   } catch (err) {
     console.error("[Analysis Error]", err);
     res.status(err.status || 500).json({ message: err.message || "Analysen misslyckades" });
+  }
+});
+
+app.post("/api/analysis/classify", async (req, res) => {
+  try {
+    const classifierUrl = process.env.SKIN_CLASSIFIER_URL;
+    if (!classifierUrl) {
+      return res.status(501).json({ message: "Bildanalys är inte konfigurerad ännu." });
+    }
+
+    const { imageBase64 } = req.body;
+    if (!imageBase64 || !imageBase64.startsWith("data:image/")) {
+      return res.status(400).json({ message: "Inget giltigt foto bifogat" });
+    }
+
+    const base64Data = imageBase64.split(",")[1];
+    const buffer = Buffer.from(base64Data, "base64");
+
+    const blob = new Blob([buffer], { type: "image/jpeg" });
+    const form = new FormData();
+    form.append("file", blob, "skin.jpg");
+
+    const response = await fetch(`${classifierUrl}/classify`, {
+      method: "POST",
+      body: form,
+    });
+
+    if (!response.ok) {
+      const errData = await response.json().catch(() => ({}));
+      throw { status: response.status, message: errData.detail || "Classification failed" };
+    }
+
+    const data = await response.json();
+    console.log("[Skin Classifier] Result:", JSON.stringify(data));
+    res.json(data);
+  } catch (err) {
+    console.error("[Skin Classifier Error]", err);
+    res.status(err.status || 500).json({ message: err.message || "Bildanalys misslyckades" });
+  }
+});
+
+app.get("/api/analysis/history", authMiddleware, async (req, res) => {
+  try {
+    const analyses = await db.getSkinAnalyses(req.user.id);
+    res.json(analyses);
+  } catch (err) {
+    console.error("[Analysis History]", err);
+    res.status(500).json({ message: "Kunde inte hämta analyshistorik" });
   }
 });
 
@@ -1971,9 +2062,9 @@ async function handleOrderCompletion(orderId) {
           DeliveryAddress1: order.address || "",
           DeliveryZipCode: order.zip || "",
           DeliveryCity: order.city || "",
-          DeliveryCountry: "Sverige",
+          DeliveryCountry: (order.currency || "SEK") === "EUR" ? "" : "SE",
           YourReference: order.order_number,
-          Currency: "SEK",
+          Currency: order.currency || "SEK",
           InvoiceRows: invoiceRows,
           Comments: `Webborder ${order.order_number} – betald via Viva Wallet`
         }
@@ -2006,7 +2097,7 @@ async function handleOrderCompletion(orderId) {
           InvoiceNumber: fortnoxInvoiceNumber,
           Amount: paymentAmount,
           AmountCurrency: paymentAmount,
-          CurrencyCode: "SEK",
+          CurrencyCode: order.currency || "SEK",
           PaymentDate: new Date().toISOString().split("T")[0]
         }
       });
