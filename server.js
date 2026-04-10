@@ -500,27 +500,32 @@ async function persistTokensToRailway(accessToken, refreshToken) {
     const variables = { FORTNOX_ACCESS_TOKEN: accessToken };
     if (refreshToken) variables.FORTNOX_REFRESH_TOKEN = refreshToken;
 
-    const resp = await fetch("https://backboard.railway.com/graphql/v2", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${railwayToken}`
-      },
-      body: JSON.stringify({
-        query: `mutation($input: VariableCollectionUpsertInput!) {
-          variableCollectionUpsert(input: $input, skipDeploys: true)
-        }`,
-        variables: {
-          input: { projectId, environmentId, serviceId, variables, replace: false }
-        }
-      })
-    });
-    const result = await resp.json();
-    if (result.errors) {
-      console.error("[Railway] GraphQL errors persisting tokens:", JSON.stringify(result.errors));
-      return false;
+    // Use variableUpsert for each variable individually to avoid triggering
+    // multiple deploys. Railway's variableCollectionUpsert triggers a deploy
+    // per call; variableUpsert does too, but we batch them.
+    for (const [key, value] of Object.entries(variables)) {
+      const resp = await fetch("https://backboard.railway.com/graphql/v2", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          "Authorization": `Bearer ${railwayToken}`
+        },
+        body: JSON.stringify({
+          query: `mutation($input: VariableUpsertInput!) {
+            variableUpsert(input: $input)
+          }`,
+          variables: {
+            input: { projectId, environmentId, serviceId, name: key, value }
+          }
+        })
+      });
+      const result = await resp.json();
+      if (result.errors) {
+        console.error(`[Railway] Failed to persist ${key}:`, JSON.stringify(result.errors));
+        return false;
+      }
     }
-    console.log("[Railway] Fortnox tokens persisted to env vars (skipDeploys)");
+    console.log("[Railway] Fortnox tokens persisted to env vars");
     return true;
   } catch (err) {
     console.error("[Railway] Failed to persist tokens:", err.message);
