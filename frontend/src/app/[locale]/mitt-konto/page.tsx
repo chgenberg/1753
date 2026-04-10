@@ -64,7 +64,7 @@ interface Order {
   order_number: string;
   status: string;
   payment_status: string;
-  items: { id: string; name: string; qty: number; price: number }[];
+  items: { id: string; name: string; qty?: number; quantity?: number; price: number }[];
   total_amount: number;
   shipping_cost: number;
   created_at: string;
