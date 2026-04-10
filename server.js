@@ -478,21 +478,29 @@ const fortnoxTokens = {
   expiresAt: 0
 };
 
+let _fortnoxRefreshLock = null;
+
 async function persistTokensToRailway(accessToken, refreshToken) {
   const railwayToken = process.env.RAILWAY_API_TOKEN;
-  if (!railwayToken) return;
+  if (!railwayToken) {
+    console.warn("[Railway] RAILWAY_API_TOKEN saknas – tokens sparas INTE i Railway env. Re-deploy kommer kräva ny OAuth.");
+    return false;
+  }
 
   const projectId = process.env.RAILWAY_PROJECT_ID;
   const environmentId = process.env.RAILWAY_ENVIRONMENT_ID;
   const serviceId = process.env.RAILWAY_SERVICE_ID;
-  if (!projectId || !environmentId || !serviceId) return;
+  if (!projectId || !environmentId || !serviceId) {
+    console.warn("[Railway] PROJECT_ID/ENVIRONMENT_ID/SERVICE_ID saknas – tokens sparas INTE.");
+    return false;
+  }
 
   try {
     const fetch = (await import("node-fetch")).default;
     const variables = { FORTNOX_ACCESS_TOKEN: accessToken };
     if (refreshToken) variables.FORTNOX_REFRESH_TOKEN = refreshToken;
 
-    await fetch("https://backboard.railway.com/graphql/v2", {
+    const resp = await fetch("https://backboard.railway.com/graphql/v2", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -507,64 +515,100 @@ async function persistTokensToRailway(accessToken, refreshToken) {
         }
       })
     });
-    console.log("[Railway] Fortnox tokens persisted (skipDeploys)");
+    const result = await resp.json();
+    if (result.errors) {
+      console.error("[Railway] GraphQL errors persisting tokens:", JSON.stringify(result.errors));
+      return false;
+    }
+    console.log("[Railway] Fortnox tokens persisted to env vars (skipDeploys)");
+    return true;
   } catch (err) {
-    console.warn("[Railway] Failed to persist tokens:", err.message);
+    console.error("[Railway] Failed to persist tokens:", err.message);
+    return false;
   }
 }
 
 async function refreshFortnoxToken() {
-  const fetch = (await import("node-fetch")).default;
-  const res = await fetch("https://apps.fortnox.se/oauth-v1/token", {
-    method: "POST",
-    headers: { "Content-Type": "application/x-www-form-urlencoded" },
-    body: new URLSearchParams({
-      grant_type: "refresh_token",
-      refresh_token: fortnoxTokens.refreshToken,
-      client_id: process.env.FORTNOX_CLIENT_ID || "",
-      client_secret: process.env.FORTNOX_CLIENT_SECRET || ""
-    })
-  });
-  const data = await res.json();
-  if (!res.ok) {
-    console.error("[Fortnox] Token refresh failed", data);
-    throw { status: res.status, message: "Fortnox token refresh misslyckades" };
-  }
-  fortnoxTokens.accessToken = data.access_token;
-  if (data.refresh_token) fortnoxTokens.refreshToken = data.refresh_token;
-  fortnoxTokens.expiresAt = Date.now() + (data.expires_in || 3600) * 1000;
-  console.log("[Fortnox] Token refreshed, expires in", data.expires_in, "s");
+  // Mutex: Fortnox refresh_token is single-use. If two calls race,
+  // the second would use an already-consumed token and fail.
+  if (_fortnoxRefreshLock) return _fortnoxRefreshLock;
 
-  persistTokensToRailway(data.access_token, data.refresh_token).catch(() => {});
+  _fortnoxRefreshLock = (async () => {
+    try {
+      const fetch = (await import("node-fetch")).default;
+      const oldRefresh = fortnoxTokens.refreshToken;
+      if (!oldRefresh) throw { status: 400, message: "Ingen refresh token tillgänglig – kör /api/fortnox/auth" };
+
+      const res = await fetch("https://apps.fortnox.se/oauth-v1/token", {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: new URLSearchParams({
+          grant_type: "refresh_token",
+          refresh_token: oldRefresh,
+          client_id: process.env.FORTNOX_CLIENT_ID || "",
+          client_secret: process.env.FORTNOX_CLIENT_SECRET || ""
+        })
+      });
+      const data = await res.json();
+      if (!res.ok) {
+        console.error("[Fortnox] Token refresh failed:", JSON.stringify(data));
+        if (data.error === "invalid_grant") {
+          console.error("[Fortnox] Refresh token är ogiltig/utgången. Ny OAuth krävs: /api/fortnox/auth");
+          fortnoxTokens.refreshToken = "";
+        }
+        throw { status: res.status, message: data.error_description || "Fortnox token refresh misslyckades" };
+      }
+
+      fortnoxTokens.accessToken = data.access_token;
+      fortnoxTokens.refreshToken = data.refresh_token || oldRefresh;
+      fortnoxTokens.expiresAt = Date.now() + (data.expires_in || 3600) * 1000;
+
+      const expiresMin = Math.round((data.expires_in || 3600) / 60);
+      console.log(`[Fortnox] Token refreshed OK – access expires in ${expiresMin} min, new refresh token received: ${!!data.refresh_token}`);
+
+      const persisted = await persistTokensToRailway(data.access_token, data.refresh_token);
+      if (!persisted) {
+        console.warn("[Fortnox] ⚠ Tokens uppdaterade i minnet men INTE sparade i Railway – vid omstart behövs ny OAuth");
+      }
+    } finally {
+      _fortnoxRefreshLock = null;
+    }
+  })();
+
+  return _fortnoxRefreshLock;
 }
 
 async function ensureFortnoxToken() {
-  if (fortnoxTokens.refreshToken && (!fortnoxTokens.expiresAt || fortnoxTokens.expiresAt - Date.now() < 300_000)) {
+  if (!fortnoxTokens.refreshToken) return;
+  if (!fortnoxTokens.expiresAt || fortnoxTokens.expiresAt - Date.now() < 300_000) {
     await refreshFortnoxToken();
   }
 }
 
-// Proactive refresh: keeps refresh token alive even without API traffic.
-// Fortnox refresh tokens expire after ~31 days if unused; this runs every 45 min.
-const FORTNOX_PROACTIVE_REFRESH_MS = 45 * 60 * 1000;
+// Proactive refresh every 20 min – Fortnox access tokens live ~60 min,
+// refresh tokens are single-use and expire after ~31 days if unused.
+// Frequent refresh ensures we always have a fresh token pair persisted.
+const FORTNOX_PROACTIVE_REFRESH_MS = 20 * 60 * 1000;
 setInterval(async () => {
   if (!fortnoxTokens.refreshToken) return;
   try {
     await refreshFortnoxToken();
-    console.log("[Fortnox] Proactive token refresh succeeded");
   } catch (err) {
-    console.error("[Fortnox] Proactive token refresh failed:", err.message || err);
+    console.error("[Fortnox] Proactive refresh failed:", err.message || err);
   }
 }, FORTNOX_PROACTIVE_REFRESH_MS);
 
 // Refresh once on startup to validate stored tokens
 setTimeout(async () => {
-  if (!fortnoxTokens.refreshToken) return;
+  if (!fortnoxTokens.refreshToken) {
+    console.log("[Fortnox] Ingen refresh token – gå till /api/fortnox/auth för att ansluta");
+    return;
+  }
   try {
     await refreshFortnoxToken();
-    console.log("[Fortnox] Startup token refresh succeeded");
+    console.log("[Fortnox] Startup refresh OK – anslutning verifierad");
   } catch (err) {
-    console.error("[Fortnox] Startup token refresh failed – re-auth may be needed:", err.message || err);
+    console.error("[Fortnox] Startup refresh FAILED – kör /api/fortnox/auth för att återansluta:", err.message || err);
   }
 }, 5_000);
 
