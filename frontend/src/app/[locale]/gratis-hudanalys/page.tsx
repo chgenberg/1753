@@ -31,8 +31,8 @@ const content = {
     kicker: "AI-driven hudanalys",
     h1: "Gratis hudanalys – din hud, analyserad av AI på 60 sekunder",
     lead: "Vår hudanalys kombinerar en specialtränad AI-modell, ditt unika ansiktsscan och livsstilsfrågor för att ge dig en holistisk bild av din hudhälsa. Ingen registrering krävs. Ingen kostnad. Bara vetenskap.",
-    statsLabel: ["analyser genomförda", "hudtillstånd analyserade", "sekunder per analys", "nöjda användare"],
-    stats: ["12 000+", "14", "~60", "97 %"],
+    statsLabel: ["träningsbilder i modellen", "hudtillstånd analyserade", "sekunder per analys"],
+    stats: ["16 000+", "14", "~60"],
     processTitle: "Så fungerar det – tre steg till din hudanalys",
     steps: [
       {
@@ -75,12 +75,12 @@ const content = {
         id: "fusion",
         label: "Multimodal fusion",
         title: "Tre datakällor – ett holistiskt resultat",
-        body: "En bild berättar inte hela historien. Vår analys kombinerar tre datakällor i ett multimodalt fusionssystem:\n\n1. Bildanalys via den tränade modellen (vad kameran ser)\n2. Frågeformulär om livsstil, kost, sömn och stressnivå (vad du berättar)\n3. OpenAI:s vision-modell (GPT-4o) för en holistisk tolkning\n\nResultatet viktas så att livsstilsfaktorer påverkar poängen lika mycket som synliga tillstånd. En person med perfekt hud men dålig sömn och hög stress får en lägre poäng – för att huden till slut kommer att spegla det.",
+        body: "En bild berättar inte hela historien. Vår analys kombinerar tre datakällor i ett multimodalt fusionssystem:\n\n1. Bildanalys via den tränade modellen (vad kameran ser)\n2. Frågeformulär om livsstil, kost, sömn och stressnivå (vad du berättar)\n3. OpenAI:s vision-modell (GPT-5.4) för en holistisk tolkning\n\nResultatet viktas så att livsstilsfaktorer påverkar poängen lika mycket som synliga tillstånd. En person med perfekt hud men dålig sömn och hög stress får en lägre poäng – för att huden till slut kommer att spegla det.",
         highlights: [
           "Bildanalys + livsstil + AI-tolkning",
           "Viktad poäng som fångar hela bilden",
           "Livsstilsfaktorer påverkar 30 % av poängen",
-          "GPT-4o för medicinsk grundad holistisk bedömning",
+          "GPT-5.4 för medicinsk grundad holistisk bedömning",
         ],
       },
       {
@@ -138,7 +138,7 @@ const content = {
       { q: "Hur exakt är AI-hudanalysen?", a: "Vår modell har tränats på tusentals verifierade hudbilder och uppnår cirka 78–80 procent accuracy på de 14 hudtillstånden. Det motsvarar en erfaren hudterapeuts bedömning vid en visuell inspektion. Den multimodala fusionen med livsstilsdata höjer den kliniska relevansen ytterligare." },
       { q: "Laddas min bild upp till någon server?", a: "Nej. Ansiktsscannet sker 100 procent lokalt i din webbläsare med ONNX Runtime Web. Ingen bild skickas till våra servrar eller tredje part under scanningen. Om du väljer att spara en bild i ditt konto krypteras den med AES-256-GCM innan lagring." },
       { q: "Kan analysen ersätta ett besök hos en hudterapeut?", a: "Nej, och det är inte meningen heller. Vår analys ger en bra första indikation och personaliserade tips, men den ersätter inte en medicinsk bedömning. Vid allvarliga hudproblem rekommenderar vi alltid att du söker professionell hjälp." },
-      { q: "Vad är skillnaden mellan er analys och andra online-hudanalyser?", a: "De flesta online-hudanalyser är enkla quiz utan bildanalys, eller använder generiska modeller. Vår analys kombinerar en specialtränad bildklassificerare (14 tillstånd, 5 ansiktszoner), livsstilsdata och GPT-4o:s medicinska kunskap i ett multimodalt fusionssystem. Det ger en holistisk bild som går långt bortom vad en enkel selfie-analys kan erbjuda." },
+      { q: "Vad är skillnaden mellan er analys och andra online-hudanalyser?", a: "De flesta online-hudanalyser är enkla quiz utan bildanalys, eller använder generiska modeller. Vår analys kombinerar en specialtränad bildklassificerare (14 tillstånd, 5 ansiktszoner), livsstilsdata och GPT-5.4:s medicinska kunskap i ett multimodalt fusionssystem. Det ger en holistisk bild som går långt bortom vad en enkel selfie-analys kan erbjuda." },
       { q: "Hur lång tid tar analysen?", a: "Hela processen tar cirka 60 sekunder: ansiktsscan (10 sekunder), fem frågor (30 sekunder) och AI-analys (20 sekunder). Du har ditt resultat på under en minut." },
       { q: "Fungerar det på mobilen?", a: "Ja, analysen är helt optimerad för mobil. Frontkameran fungerar utmärkt, och hela upplevelsen är designad mobile-first." },
     ],
@@ -154,8 +154,8 @@ const content = {
     kicker: "AI-powered skin analysis",
     h1: "Free skin analysis – your skin, analysed by AI in 60 seconds",
     lead: "Our skin analysis combines a purpose-trained AI model, your unique face scan, and lifestyle questions to give you a holistic picture of your skin health. No sign-up required. No cost. Just science.",
-    statsLabel: ["analyses completed", "skin conditions analysed", "seconds per analysis", "satisfied users"],
-    stats: ["12,000+", "14", "~60", "97%"],
+    statsLabel: ["training images in our model", "skin conditions analysed", "seconds per analysis"],
+    stats: ["16,000+", "14", "~60"],
     processTitle: "How it works – three steps to your skin analysis",
     steps: [
       { icon: "camera", title: "1. Scan your face", body: "The camera activates directly in your browser. Nothing is uploaded – our AI analyses the image locally on your device using ONNX Runtime Web. Your privacy is guaranteed." },
@@ -177,8 +177,8 @@ const content = {
       },
       {
         id: "fusion", label: "Multimodal fusion", title: "Three data sources – one holistic result",
-        body: "A photo doesn't tell the whole story. Our analysis combines three data sources in a multimodal fusion system:\n\n1. Image analysis via the trained model (what the camera sees)\n2. Lifestyle questionnaire about diet, sleep, and stress levels (what you tell us)\n3. OpenAI's vision model (GPT-4o) for holistic interpretation\n\nThe result is weighted so lifestyle factors influence the score as much as visible conditions. Someone with flawless skin but poor sleep and high stress receives a lower score – because the skin will eventually reflect it.",
-        highlights: ["Image analysis + lifestyle + AI interpretation", "Weighted score that captures the full picture", "Lifestyle factors account for 30% of the score", "GPT-4o for medically-grounded holistic assessment"],
+        body: "A photo doesn't tell the whole story. Our analysis combines three data sources in a multimodal fusion system:\n\n1. Image analysis via the trained model (what the camera sees)\n2. Lifestyle questionnaire about diet, sleep, and stress levels (what you tell us)\n3. OpenAI's vision model (GPT-5.4) for holistic interpretation\n\nThe result is weighted so lifestyle factors influence the score as much as visible conditions. Someone with flawless skin but poor sleep and high stress receives a lower score – because the skin will eventually reflect it.",
+        highlights: ["Image analysis + lifestyle + AI interpretation", "Weighted score that captures the full picture", "Lifestyle factors account for 30% of the score", "GPT-5.4 for medically-grounded holistic assessment"],
       },
       {
         id: "tracking", label: "Tracking over time", title: "Measure your skin's progress week by week",
@@ -221,7 +221,7 @@ const content = {
       { q: "How accurate is the AI skin analysis?", a: "Our model has been trained on thousands of verified skin images and achieves approximately 78–80 percent accuracy across the 14 skin conditions. This matches an experienced aesthetician's assessment during a visual inspection. The multimodal fusion with lifestyle data further increases clinical relevance." },
       { q: "Is my photo uploaded to a server?", a: "No. The face scan runs 100 percent locally in your browser using ONNX Runtime Web. No image is sent to our servers or third parties during scanning. If you choose to save a photo to your account, it is encrypted with AES-256-GCM before storage." },
       { q: "Can the analysis replace a visit to a dermatologist?", a: "No, and it's not meant to. Our analysis provides a solid initial indication and personalised tips, but it doesn't replace a medical assessment. For serious skin concerns, we always recommend seeking professional help." },
-      { q: "What sets your analysis apart from other online skin analyses?", a: "Most online skin analyses are simple quizzes without image analysis, or use generic models. Our analysis combines a purpose-trained image classifier (14 conditions, 5 facial zones), lifestyle data, and GPT-4o's medical knowledge in a multimodal fusion system. This delivers a holistic picture far beyond what a simple selfie analysis can offer." },
+      { q: "What sets your analysis apart from other online skin analyses?", a: "Most online skin analyses are simple quizzes without image analysis, or use generic models. Our analysis combines a purpose-trained image classifier (14 conditions, 5 facial zones), lifestyle data, and GPT-5.4's medical knowledge in a multimodal fusion system. This delivers a holistic picture far beyond what a simple selfie analysis can offer." },
       { q: "How long does the analysis take?", a: "The entire process takes about 60 seconds: face scan (10 seconds), five questions (30 seconds), and AI analysis (20 seconds). You have your result in under a minute." },
       { q: "Does it work on mobile?", a: "Yes, the analysis is fully optimised for mobile. The front camera works perfectly, and the entire experience is designed mobile-first." },
     ],
@@ -354,7 +354,7 @@ export default async function FreeAnalysisLanding({ params }: Props) {
         </div>
 
         {/* Stats */}
-        <div className="mx-auto mt-16 grid max-w-3xl grid-cols-2 gap-6 px-6 md:grid-cols-4 md:px-10">
+        <div className="mx-auto mt-16 grid max-w-3xl grid-cols-3 gap-6 px-6 md:px-10">
           {c.stats.map((stat, i) => (
             <div key={i} className="text-center">
               <p className="text-2xl font-bold tracking-tight text-[#1d1d1f] md:text-3xl">{stat}</p>
