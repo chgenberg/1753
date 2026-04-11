@@ -291,6 +291,12 @@ async function initSchema() {
       sent_count      INTEGER DEFAULT 0,
       created_at      TIMESTAMPTZ DEFAULT NOW()
     );
+
+    CREATE TABLE IF NOT EXISTS system_config (
+      key             VARCHAR(100) PRIMARY KEY,
+      value           TEXT NOT NULL,
+      updated_at      TIMESTAMPTZ DEFAULT NOW()
+    );
   `);
   console.log("[DB] Schema ready");
 }
@@ -1341,6 +1347,43 @@ async function updateEmailConversation(id, fields) {
   await pool.query(`UPDATE email_conversations SET ${sets.join(", ")} WHERE id = $${idx}`, params);
 }
 
+// ---- System config (key-value store for tokens etc.) ----
+
+async function getConfig(key) {
+  const { rows } = await pool.query("SELECT value FROM system_config WHERE key = $1", [key]);
+  return rows[0]?.value ?? null;
+}
+
+async function setConfig(key, value) {
+  await pool.query(
+    `INSERT INTO system_config (key, value, updated_at)
+     VALUES ($1, $2, NOW())
+     ON CONFLICT (key) DO UPDATE SET value = $2, updated_at = NOW()`,
+    [key, value]
+  );
+}
+
+async function getFortnoxTokensFromDB() {
+  const [accessToken, refreshToken, expiresAt] = await Promise.all([
+    getConfig("fortnox_access_token"),
+    getConfig("fortnox_refresh_token"),
+    getConfig("fortnox_expires_at"),
+  ]);
+  return {
+    accessToken: accessToken || "",
+    refreshToken: refreshToken || "",
+    expiresAt: expiresAt ? parseInt(expiresAt, 10) : 0,
+  };
+}
+
+async function saveFortnoxTokensToDB(accessToken, refreshToken, expiresAt) {
+  await Promise.all([
+    setConfig("fortnox_access_token", accessToken),
+    setConfig("fortnox_refresh_token", refreshToken),
+    setConfig("fortnox_expires_at", String(expiresAt)),
+  ]);
+}
+
 module.exports = {
   pool,
   initSchema,
@@ -1428,5 +1471,9 @@ module.exports = {
   createEmailConversation,
   listEmailConversations,
   getEmailConversation,
-  updateEmailConversation
+  updateEmailConversation,
+  getConfig,
+  setConfig,
+  getFortnoxTokensFromDB,
+  saveFortnoxTokensToDB,
 };

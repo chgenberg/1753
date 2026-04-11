@@ -74,11 +74,29 @@ export const CONDITION_LABELS_SV: Record<string, string> = {
   dermatitis: "Dermatit",
   dryness: "Torr hy",
   eczema: "Eksem",
+  enlarged_pores: "Forstorda porer",
   fungal: "Svampinfektion",
   hyperpigmentation: "Hyperpigmentering",
+  normal: "Frisk hud",
   psoriasis: "Psoriasis",
   rosacea: "Rosacea",
   sun_damage: "Solskada",
+  wrinkles: "Rynkor",
+};
+
+export const CONDITION_LABELS_EN: Record<string, string> = {
+  acne: "Acne",
+  dermatitis: "Dermatitis",
+  dryness: "Dry skin",
+  eczema: "Eczema",
+  enlarged_pores: "Enlarged pores",
+  fungal: "Fungal infection",
+  hyperpigmentation: "Hyperpigmentation",
+  normal: "Healthy skin",
+  psoriasis: "Psoriasis",
+  rosacea: "Rosacea",
+  sun_damage: "Sun damage",
+  wrinkles: "Wrinkles",
 };
 
 export const CONDITION_COLORS: Record<string, string> = {
@@ -86,11 +104,14 @@ export const CONDITION_COLORS: Record<string, string> = {
   dermatitis: "#e08040",
   dryness: "#a0900a",
   eczema: "#c06060",
+  enlarged_pores: "#7090b0",
   fungal: "#8060c0",
   hyperpigmentation: "#705030",
+  normal: "#108474",
   psoriasis: "#b04090",
   rosacea: "#d05070",
   sun_damage: "#c08020",
+  wrinkles: "#908070",
 };
 
 export interface ZoneResult {

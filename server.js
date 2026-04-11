@@ -471,78 +471,50 @@ app.delete("/api/subscriptions/:id", authMiddleware, async (req, res) => {
 
 // ---- API HELPERS ----
 
-// Fortnox token state (initialised from env, refreshed automatically)
+// Fortnox token state -- loaded from DB on startup, refreshed automatically.
+// Tokens are persisted to PostgreSQL (system_config table) to survive deploys
+// without triggering Railway redeploys (which caused race conditions with
+// single-use refresh tokens).
 const fortnoxTokens = {
-  accessToken: process.env.FORTNOX_ACCESS_TOKEN || "",
-  refreshToken: process.env.FORTNOX_REFRESH_TOKEN || "",
+  accessToken: "",
+  refreshToken: "",
   expiresAt: 0
 };
 
 let _fortnoxRefreshLock = null;
 
-async function persistTokensToRailway(accessToken, refreshToken) {
-  const railwayToken = process.env.RAILWAY_API_TOKEN;
-  if (!railwayToken) {
-    console.warn("[Railway] RAILWAY_API_TOKEN saknas – tokens sparas INTE i Railway env. Re-deploy kommer kräva ny OAuth.");
-    return false;
-  }
-
-  const projectId = process.env.RAILWAY_PROJECT_ID;
-  const environmentId = process.env.RAILWAY_ENVIRONMENT_ID;
-  const serviceId = process.env.RAILWAY_SERVICE_ID;
-  if (!projectId || !environmentId || !serviceId) {
-    console.warn("[Railway] PROJECT_ID/ENVIRONMENT_ID/SERVICE_ID saknas – tokens sparas INTE.");
-    return false;
-  }
-
+async function loadFortnoxTokensFromDB() {
   try {
-    const fetch = (await import("node-fetch")).default;
-    const variables = { FORTNOX_ACCESS_TOKEN: accessToken };
-    if (refreshToken) variables.FORTNOX_REFRESH_TOKEN = refreshToken;
-
-    // Use variableUpsert for each variable individually to avoid triggering
-    // multiple deploys. Railway's variableCollectionUpsert triggers a deploy
-    // per call; variableUpsert does too, but we batch them.
-    for (const [key, value] of Object.entries(variables)) {
-      const resp = await fetch("https://backboard.railway.com/graphql/v2", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${railwayToken}`
-        },
-        body: JSON.stringify({
-          query: `mutation($input: VariableUpsertInput!) {
-            variableUpsert(input: $input)
-          }`,
-          variables: {
-            input: { projectId, environmentId, serviceId, name: key, value }
-          }
-        })
-      });
-      const result = await resp.json();
-      if (result.errors) {
-        console.error(`[Railway] Failed to persist ${key}:`, JSON.stringify(result.errors));
-        return false;
-      }
+    const dbTokens = await db.getFortnoxTokensFromDB();
+    if (dbTokens.refreshToken) {
+      fortnoxTokens.accessToken = dbTokens.accessToken;
+      fortnoxTokens.refreshToken = dbTokens.refreshToken;
+      fortnoxTokens.expiresAt = dbTokens.expiresAt;
+      console.log("[Fortnox] Tokens loaded from DB");
+      return true;
     }
-    console.log("[Railway] Fortnox tokens persisted to env vars");
-    return true;
   } catch (err) {
-    console.error("[Railway] Failed to persist tokens:", err.message);
-    return false;
+    console.warn("[Fortnox] Could not load tokens from DB:", err.message);
   }
+
+  // Fallback: env vars (first-time setup or migration)
+  if (process.env.FORTNOX_REFRESH_TOKEN) {
+    fortnoxTokens.accessToken = process.env.FORTNOX_ACCESS_TOKEN || "";
+    fortnoxTokens.refreshToken = process.env.FORTNOX_REFRESH_TOKEN || "";
+    console.log("[Fortnox] Tokens loaded from env vars (will migrate to DB on next refresh)");
+    return true;
+  }
+  return false;
 }
 
 async function refreshFortnoxToken() {
-  // Mutex: Fortnox refresh_token is single-use. If two calls race,
-  // the second would use an already-consumed token and fail.
   if (_fortnoxRefreshLock) return _fortnoxRefreshLock;
 
   _fortnoxRefreshLock = (async () => {
     try {
       const fetch = (await import("node-fetch")).default;
       const oldRefresh = fortnoxTokens.refreshToken;
-      if (!oldRefresh) throw { status: 400, message: "Ingen refresh token tillgänglig – kör /api/fortnox/auth" };
+      if (!oldRefresh) throw { status: 400, message: "Ingen refresh token -- kor /api/fortnox/auth" };
 
       const res = await fetch("https://apps.fortnox.se/oauth-v1/token", {
         method: "POST",
@@ -558,23 +530,32 @@ async function refreshFortnoxToken() {
       if (!res.ok) {
         console.error("[Fortnox] Token refresh failed:", JSON.stringify(data));
         if (data.error === "invalid_grant") {
-          console.error("[Fortnox] Refresh token är ogiltig/utgången. Ny OAuth krävs: /api/fortnox/auth");
+          console.error("[Fortnox] Refresh token forbrukad/utgangen. Ny OAuth kravs: /api/fortnox/auth");
           fortnoxTokens.refreshToken = "";
+          try { await db.setConfig("fortnox_refresh_token", ""); } catch {}
         }
         throw { status: res.status, message: data.error_description || "Fortnox token refresh misslyckades" };
       }
 
-      fortnoxTokens.accessToken = data.access_token;
-      fortnoxTokens.refreshToken = data.refresh_token || oldRefresh;
-      fortnoxTokens.expiresAt = Date.now() + (data.expires_in || 3600) * 1000;
+      const newAccessToken = data.access_token;
+      const newRefreshToken = data.refresh_token || oldRefresh;
+      const expiresAt = Date.now() + (data.expires_in || 3600) * 1000;
+
+      // Persist to DB FIRST (atomic, no deploys triggered)
+      try {
+        await db.saveFortnoxTokensToDB(newAccessToken, newRefreshToken, expiresAt);
+        console.log("[Fortnox] Tokens persisted to DB");
+      } catch (dbErr) {
+        console.error("[Fortnox] CRITICAL: Could not save tokens to DB:", dbErr.message);
+      }
+
+      // Then update in-memory state
+      fortnoxTokens.accessToken = newAccessToken;
+      fortnoxTokens.refreshToken = newRefreshToken;
+      fortnoxTokens.expiresAt = expiresAt;
 
       const expiresMin = Math.round((data.expires_in || 3600) / 60);
-      console.log(`[Fortnox] Token refreshed OK – access expires in ${expiresMin} min, new refresh token received: ${!!data.refresh_token}`);
-
-      const persisted = await persistTokensToRailway(data.access_token, data.refresh_token);
-      if (!persisted) {
-        console.warn("[Fortnox] ⚠ Tokens uppdaterade i minnet men INTE sparade i Railway – vid omstart behövs ny OAuth");
-      }
+      console.log(`[Fortnox] Token refreshed OK -- access expires in ${expiresMin} min, new refresh token: ${!!data.refresh_token}`);
     } finally {
       _fortnoxRefreshLock = null;
     }
@@ -590,10 +571,9 @@ async function ensureFortnoxToken() {
   }
 }
 
-// Proactive refresh every 20 min – Fortnox access tokens live ~60 min,
-// refresh tokens are single-use and expire after ~31 days if unused.
-// Frequent refresh ensures we always have a fresh token pair persisted.
-const FORTNOX_PROACTIVE_REFRESH_MS = 20 * 60 * 1000;
+// Proactive refresh every 45 min (Fortnox access tokens live ~60 min).
+// Less aggressive than before -- no need to hammer since DB persistence is reliable.
+const FORTNOX_PROACTIVE_REFRESH_MS = 45 * 60 * 1000;
 setInterval(async () => {
   if (!fortnoxTokens.refreshToken) return;
   try {
@@ -603,17 +583,18 @@ setInterval(async () => {
   }
 }, FORTNOX_PROACTIVE_REFRESH_MS);
 
-// Refresh once on startup to validate stored tokens
+// Load tokens from DB on startup, then do initial refresh
 setTimeout(async () => {
-  if (!fortnoxTokens.refreshToken) {
-    console.log("[Fortnox] Ingen refresh token – gå till /api/fortnox/auth för att ansluta");
+  const loaded = await loadFortnoxTokensFromDB();
+  if (!loaded) {
+    console.log("[Fortnox] Ingen refresh token -- ga till /api/fortnox/auth for att ansluta");
     return;
   }
   try {
     await refreshFortnoxToken();
-    console.log("[Fortnox] Startup refresh OK – anslutning verifierad");
+    console.log("[Fortnox] Startup refresh OK -- anslutning verifierad");
   } catch (err) {
-    console.error("[Fortnox] Startup refresh FAILED – kör /api/fortnox/auth för att återansluta:", err.message || err);
+    console.error("[Fortnox] Startup refresh FAILED:", err.message || err);
   }
 }, 5_000);
 
@@ -1794,6 +1775,157 @@ app.get("/api/analysis/history", authMiddleware, async (req, res) => {
   } catch (err) {
     console.error("[Analysis History]", err);
     res.status(500).json({ message: "Kunde inte hämta analyshistorik" });
+  }
+});
+
+/* ─── Multimodal Fusion Scoring ─── */
+
+const QUIZ_CONCERN_MAP = {
+  acne: ["acne", "breakouts", "pimples", "oily"],
+  dryness: ["dry", "flaky", "tight", "dehydrated"],
+  rosacea: ["redness", "flushing", "sensitive"],
+  hyperpigmentation: ["dark spots", "uneven tone", "pigmentation", "melasma"],
+  wrinkles: ["aging", "fine lines", "wrinkles", "sagging"],
+  enlarged_pores: ["large pores", "oily", "blackheads"],
+  eczema: ["itchy", "eczema", "atopic"],
+  sun_damage: ["sun damage", "sun spots"],
+};
+
+function computeFusionScore(imageScan, quizAnswers, aiResult) {
+  const weights = { image: 0.50, quiz: 0.20, ai: 0.30 };
+  const conditionScores = {};
+
+  if (imageScan?.overall?.length) {
+    for (const pred of imageScan.overall) {
+      const cond = pred.condition || pred.label;
+      if (!cond) continue;
+      conditionScores[cond] = conditionScores[cond] || { image: 0, quiz: 0, ai: 0 };
+      conditionScores[cond].image = Math.max(conditionScores[cond].image, pred.probability || pred.confidence || 0);
+    }
+  }
+
+  if (imageScan?.zones?.length) {
+    for (const zone of imageScan.zones) {
+      if (!zone.predictions?.length) continue;
+      for (const pred of zone.predictions) {
+        const cond = pred.condition || pred.label;
+        if (!cond) continue;
+        conditionScores[cond] = conditionScores[cond] || { image: 0, quiz: 0, ai: 0 };
+        conditionScores[cond].image = Math.max(conditionScores[cond].image, (pred.probability || 0) * 0.8);
+      }
+    }
+  }
+
+  if (quizAnswers?.concerns?.length) {
+    const userConcerns = quizAnswers.concerns.map(c => c.toLowerCase());
+    for (const [condition, keywords] of Object.entries(QUIZ_CONCERN_MAP)) {
+      const match = keywords.some(kw => userConcerns.some(uc => uc.includes(kw)));
+      if (match) {
+        conditionScores[condition] = conditionScores[condition] || { image: 0, quiz: 0, ai: 0 };
+        conditionScores[condition].quiz = 0.7;
+      }
+    }
+  }
+
+  if (aiResult?.conditions?.length) {
+    for (const c of aiResult.conditions) {
+      const cond = c.name || c.condition;
+      if (!cond) continue;
+      conditionScores[cond] = conditionScores[cond] || { image: 0, quiz: 0, ai: 0 };
+      const severity = { mild: 0.3, moderate: 0.6, severe: 0.9 };
+      conditionScores[cond].ai = severity[c.severity?.toLowerCase()] || 0.5;
+    }
+  }
+
+  const fused = Object.entries(conditionScores).map(([condition, scores]) => ({
+    condition,
+    confidence: Math.min(1,
+      scores.image * weights.image +
+      scores.quiz * weights.quiz +
+      scores.ai * weights.ai
+    ),
+    sources: {
+      image: Math.round(scores.image * 100),
+      quiz: Math.round(scores.quiz * 100),
+      ai: Math.round(scores.ai * 100),
+    },
+  })).filter(c => c.confidence > 0.1)
+    .sort((a, b) => b.confidence - a.confidence);
+
+  const normalScore = fused.find(c => c.condition === "normal");
+  const issueScore = fused.filter(c => c.condition !== "normal")
+    .reduce((sum, c) => sum + c.confidence, 0);
+
+  let overallScore = 100;
+  if (issueScore > 0) {
+    overallScore = Math.max(10, Math.round(100 - issueScore * 40));
+  }
+  if (normalScore && normalScore.confidence > 0.6) {
+    overallScore = Math.max(overallScore, 75);
+  }
+
+  return { conditions: fused, overallScore };
+}
+
+app.post("/api/analysis/fusion", async (req, res) => {
+  try {
+    const clientIp = req.ip || req.connection.remoteAddress;
+    if (!checkRateLimit(clientIp, "fusion", 20)) {
+      return res.status(429).json({ message: "For manga forfragan. Forsok igen om en stund." });
+    }
+
+    const { imageScan, quizAnswers, aiResult } = req.body;
+    const fusion = computeFusionScore(imageScan, quizAnswers, aiResult);
+
+    res.json(fusion);
+  } catch (err) {
+    console.error("[Fusion Error]", err);
+    res.status(500).json({ message: "Fusionsanalysen misslyckades." });
+  }
+});
+
+/* ─── Temporal Diff ─── */
+
+app.get("/api/analysis/diff", authMiddleware, async (req, res) => {
+  try {
+    const analyses = await db.getSkinAnalyses(req.user.id);
+    if (analyses.length < 2) {
+      return res.json({ hasDiff: false, message: "Minst tva analyser behovs for jamforelse." });
+    }
+
+    const latest = analyses[0];
+    const previous = analyses[1];
+
+    const latestResult = latest.result || {};
+    const previousResult = previous.result || {};
+
+    const scoreDiff = (latest.score ?? 0) - (previous.score ?? 0);
+    const daysBetween = Math.round(
+      (new Date(latest.created_at) - new Date(previous.created_at)) / (1000 * 60 * 60 * 24)
+    );
+
+    const latestConditions = new Set((latestResult.conditions || []).map(c => c.name || c.condition));
+    const previousConditions = new Set((previousResult.conditions || []).map(c => c.name || c.condition));
+
+    const improved = [...previousConditions].filter(c => !latestConditions.has(c));
+    const newConcerns = [...latestConditions].filter(c => !previousConditions.has(c));
+    const persistent = [...latestConditions].filter(c => previousConditions.has(c));
+
+    res.json({
+      hasDiff: true,
+      scoreDiff,
+      daysBetween,
+      latestScore: latest.score,
+      previousScore: previous.score,
+      improved,
+      newConcerns,
+      persistent,
+      latestDate: latest.created_at,
+      previousDate: previous.created_at,
+    });
+  } catch (err) {
+    console.error("[Diff Error]", err);
+    res.status(500).json({ message: "Kunde inte berakna forandring." });
   }
 });
 
@@ -4139,13 +4271,22 @@ app.get("/api/fortnox/callback", async (req, res) => {
       return res.status(400).send(`<h1>Token-utbyte misslyckades</h1><pre>${JSON.stringify(tokenData, null, 2)}</pre>`);
     }
 
-    fortnoxTokens.accessToken = tokenData.access_token;
-    fortnoxTokens.refreshToken = tokenData.refresh_token || "";
-    fortnoxTokens.expiresAt = Date.now() + (tokenData.expires_in || 3600) * 1000;
+    const newAccessToken = tokenData.access_token;
+    const newRefreshToken = tokenData.refresh_token || "";
+    const expiresAt = Date.now() + (tokenData.expires_in || 3600) * 1000;
+
+    fortnoxTokens.accessToken = newAccessToken;
+    fortnoxTokens.refreshToken = newRefreshToken;
+    fortnoxTokens.expiresAt = expiresAt;
 
     console.log("[Fortnox OAuth] Tokens received! Access token expires in", tokenData.expires_in, "s");
 
-    persistTokensToRailway(tokenData.access_token, tokenData.refresh_token).catch(() => {});
+    try {
+      await db.saveFortnoxTokensToDB(newAccessToken, newRefreshToken, expiresAt);
+      console.log("[Fortnox OAuth] Tokens saved to DB -- will survive deploys");
+    } catch (dbErr) {
+      console.error("[Fortnox OAuth] DB save failed:", dbErr.message);
+    }
 
     res.send(`
       <!DOCTYPE html>
@@ -4193,6 +4334,27 @@ app.get("/api/fortnox/company", adminOnly, async (req, res) => {
   } catch (err) {
     res.status(err.status || 500).json({ message: err.message });
   }
+});
+
+app.get("/api/fortnox/status", adminOnly, async (req, res) => {
+  const hasRefresh = !!fortnoxTokens.refreshToken;
+  const hasAccess = !!fortnoxTokens.accessToken;
+  const expiresIn = fortnoxTokens.expiresAt ? Math.round((fortnoxTokens.expiresAt - Date.now()) / 1000) : 0;
+
+  let dbTokens = null;
+  try {
+    dbTokens = await db.getFortnoxTokensFromDB();
+  } catch {}
+
+  res.json({
+    connected: hasRefresh && hasAccess,
+    accessTokenSet: hasAccess,
+    refreshTokenSet: hasRefresh,
+    accessExpiresInSeconds: Math.max(0, expiresIn),
+    accessExpiresInMinutes: Math.max(0, Math.round(expiresIn / 60)),
+    tokensInDB: !!dbTokens?.refreshToken,
+    dbLastUpdated: dbTokens?.expiresAt ? new Date(parseInt(dbTokens.expiresAt)).toISOString() : null,
+  });
 });
 
 // ---- HEALTH CHECK ----

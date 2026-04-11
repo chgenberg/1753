@@ -172,3 +172,70 @@ export async function classifyRegion(
   predictions.sort((a, b) => b.probability - a.probability);
   return predictions;
 }
+
+/**
+ * TTA: run inference with multiple augmentations and average probabilities.
+ * Horizontal flip + slight crops give more robust results at ~3x inference cost.
+ */
+export async function classifyRegionTTA(
+  session: InferenceSession,
+  canvas: HTMLCanvasElement,
+  cropX: number,
+  cropY: number,
+  cropW: number,
+  cropH: number,
+  passes: number = 3,
+): Promise<Prediction[]> {
+  const ort = await getOrt();
+  const m = await loadMeta();
+
+  const augmentations: [number, number, number, number][] = [
+    [cropX, cropY, cropW, cropH],
+    [cropX, cropY, cropW, cropH], // will be flipped
+  ];
+
+  const shrink = 0.08;
+  const dx = cropW * shrink;
+  const dy = cropH * shrink;
+  augmentations.push([cropX + dx, cropY + dy, cropW - dx * 2, cropH - dy * 2]);
+
+  const allProbs: number[][] = [];
+
+  for (let p = 0; p < Math.min(passes, augmentations.length); p++) {
+    const [cx, cy, cw, ch] = augmentations[p];
+    const isFlip = p === 1;
+
+    let inputCanvas: HTMLCanvasElement;
+    if (isFlip) {
+      inputCanvas = document.createElement("canvas");
+      inputCanvas.width = canvas.width;
+      inputCanvas.height = canvas.height;
+      const fCtx = inputCanvas.getContext("2d")!;
+      fCtx.translate(canvas.width, 0);
+      fCtx.scale(-1, 1);
+      fCtx.drawImage(canvas, 0, 0);
+    } else {
+      inputCanvas = canvas;
+    }
+
+    const input = preprocessRegion(inputCanvas, cx, cy, cw, ch, m.image_size, m.mean, m.std);
+    const tensor = new ort.Tensor("float32", input, [1, 3, m.image_size, m.image_size]);
+    const results = await session.run({ pixel_values: tensor });
+    const logits = results.logits.data as Float32Array;
+    const probs = softmax(logits);
+    allProbs.push(Array.from(probs));
+  }
+
+  const avgProbs = m.labels.map((_, i) => {
+    const sum = allProbs.reduce((acc, p) => acc + p[i], 0);
+    return sum / allProbs.length;
+  });
+
+  const predictions: Prediction[] = m.labels.map((label, i) => ({
+    label,
+    probability: avgProbs[i],
+  }));
+
+  predictions.sort((a, b) => b.probability - a.probability);
+  return predictions;
+}
