@@ -42,6 +42,19 @@ export default function sitemap(): MetadataRoute.Sitemap {
     }
   }
 
+  out.push({
+    url: `${BASE}/sv/gratis-hudanalys`,
+    lastModified: now,
+    changeFrequency: "weekly",
+    priority: 0.9,
+  });
+  out.push({
+    url: `${BASE}/en/free-skin-analysis`,
+    lastModified: now,
+    changeFrequency: "weekly",
+    priority: 0.9,
+  });
+
   for (const page of ALL_LANDING_PAGES) {
     out.push({
       url: `${BASE}/sv/guide/${page.svSlug}`,
