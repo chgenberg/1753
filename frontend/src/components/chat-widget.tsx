@@ -57,6 +57,7 @@ export function ChatWidget() {
 
   const bubbleCountRef = useRef(0);
   const messagesEndRef = useRef<HTMLDivElement | null>(null);
+  const textareaRef = useRef<HTMLTextAreaElement | null>(null);
   const localeRef = useRef(locale);
 
   useEffect(() => {
@@ -199,6 +200,9 @@ export function ChatWidget() {
   const onSubmit = (e: FormEvent) => {
     e.preventDefault();
     void sendMessage(input);
+    if (textareaRef.current) {
+      textareaRef.current.style.height = "auto";
+    }
   };
 
   const tips = messages.chatWidget.tips;
@@ -370,14 +374,29 @@ export function ChatWidget() {
                 <line x1="12" y1="17" x2="12.01" y2="17" />
               </svg>
             </button>
-            <input
-              type="text"
+            <textarea
+              ref={textareaRef}
               className="cw-input"
               placeholder={messages.chatWidget.placeholder}
-              maxLength={500}
+              maxLength={5000}
+              rows={1}
               aria-label={messages.chatWidget.placeholder}
               value={input}
-              onChange={(e) => setInput(e.target.value)}
+              onChange={(e) => {
+                setInput(e.target.value);
+                const el = e.target;
+                el.style.height = "auto";
+                el.style.height = `${Math.min(el.scrollHeight, 120)}px`;
+              }}
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) {
+                  e.preventDefault();
+                  if (input.trim()) {
+                    const form = e.currentTarget.closest("form");
+                    form?.requestSubmit();
+                  }
+                }
+              }}
             />
             <button type="submit" className="cw-send" aria-label={messages.chatWidget.send}>
               <svg
