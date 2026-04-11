@@ -12,6 +12,7 @@ import {
   Leaf,
   Loader2,
   Lock,
+  Mail,
   Moon,
   ScanFace,
   ShieldAlert,
@@ -237,6 +238,8 @@ export default function AnalysisPage() {
   const [trainingCount, setTrainingCount] = useState<number | null>(null);
   const [snapshotSaved, setSnapshotSaved] = useState(false);
   const [snapshotSaving, setSnapshotSaving] = useState(false);
+  const [nlEmail, setNlEmail] = useState("");
+  const [nlStatus, setNlStatus] = useState<"idle" | "loading" | "done">("idle");
 
   const toggleArray = (arr: string[], key: string, max?: number) => {
     if (arr.includes(key)) return arr.filter((k) => k !== key);
@@ -854,6 +857,77 @@ export default function AnalysisPage() {
                 </div>
               )}
 
+              {/* Newsletter opt-in with skin condition tagging */}
+              {nlStatus !== "done" && (
+                <div className="mx-auto max-w-md rounded-2xl border border-brand-200 bg-white p-5 text-center">
+                  <Mail className="mx-auto mb-2 h-5 w-5 text-[#108474]" />
+                  <p className="text-sm font-semibold text-brand-900">
+                    {locale === "en"
+                      ? "Get weekly tips for your skin type"
+                      : "Fa veckotips for just din hudtyp"}
+                  </p>
+                  <p className="mt-1.5 text-xs leading-relaxed text-brand-500">
+                    {locale === "en"
+                      ? "Personalised advice about lifestyle, nutrition and skincare based on your analysis results. One email per week."
+                      : "Personliga rad om livsstil, kost och hudvard baserat pa dina analysresultat. Ett mejl i veckan."}
+                  </p>
+                  <form
+                    onSubmit={async (e) => {
+                      e.preventDefault();
+                      if (!nlEmail.trim()) return;
+                      setNlStatus("loading");
+                      const topCondition =
+                        scanSummary?.overallTop?.[0]?.label
+                        || (parsed?.skinAnalysis?.concerns as Array<{condition?: string}>)?.[0]?.condition
+                        || "general";
+                      try {
+                        await apiFetch("/newsletter/subscribe", {
+                          method: "POST",
+                          body: JSON.stringify({
+                            email: nlEmail,
+                            skinCondition: topCondition,
+                          }),
+                        });
+                        setNlStatus("done");
+                      } catch {
+                        setNlStatus("idle");
+                      }
+                    }}
+                    className="mt-4 flex gap-2"
+                  >
+                    <input
+                      type="email"
+                      required
+                      placeholder={locale === "en" ? "Your email" : "Din e-post"}
+                      value={nlEmail}
+                      onChange={(e) => setNlEmail(e.target.value)}
+                      className="flex-1 rounded-full border border-brand-200 bg-brand-50/50 px-4 py-2.5 text-sm outline-none transition-all focus:border-[#108474] focus:ring-2 focus:ring-[#108474]/20"
+                    />
+                    <button
+                      type="submit"
+                      disabled={nlStatus === "loading"}
+                      className="inline-flex items-center gap-2 rounded-full bg-[#108474] px-5 py-2.5 text-xs font-semibold text-white transition-all hover:bg-[#0d6e62] disabled:opacity-50"
+                    >
+                      {nlStatus === "loading" ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <Mail className="h-3.5 w-3.5" />
+                      )}
+                      {locale === "en" ? "Subscribe" : "Prenumerera"}
+                    </button>
+                  </form>
+                </div>
+              )}
+
+              {nlStatus === "done" && (
+                <div className="flex items-center justify-center gap-2 rounded-xl bg-[#108474]/5 px-4 py-3 text-xs font-medium text-[#108474]">
+                  <Check className="h-3.5 w-3.5" />
+                  {locale === "en"
+                    ? "You're in! Weekly tips based on your skin profile coming soon."
+                    : "Du ar med! Veckotips baserade pa din hudprofil kommer snart."}
+                </div>
+              )}
+
               {/* New analysis CTA */}
               <div className="text-center">
                 <button
@@ -866,6 +940,8 @@ export default function AnalysisPage() {
                     setTrainingCount(null);
                     setSnapshotSaved(false);
                     setSnapshotSaving(false);
+                    setNlEmail("");
+                    setNlStatus("idle");
                     setAnswers({
                       skinType: "",
                       concerns: [],

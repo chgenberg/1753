@@ -171,14 +171,18 @@ async function initSchema() {
       first_name      VARCHAR(255) DEFAULT '',
       status          VARCHAR(20) DEFAULT 'active',
       source          VARCHAR(50) DEFAULT 'footer',
+      skin_condition  VARCHAR(50) DEFAULT NULL,
       gdpr_consent    BOOLEAN DEFAULT true,
       unsubscribe_token VARCHAR(64) UNIQUE,
       created_at      TIMESTAMPTZ DEFAULT NOW(),
       unsubscribed_at TIMESTAMPTZ
     );
 
+    ALTER TABLE subscribers ADD COLUMN IF NOT EXISTS skin_condition VARCHAR(50) DEFAULT NULL;
+
     CREATE INDEX IF NOT EXISTS idx_subscribers_email ON subscribers (email);
     CREATE INDEX IF NOT EXISTS idx_subscribers_status ON subscribers (status);
+    CREATE INDEX IF NOT EXISTS idx_subscribers_skin ON subscribers (skin_condition);
 
     CREATE TABLE IF NOT EXISTS automation_flows (
       id              SERIAL PRIMARY KEY,
@@ -610,6 +614,34 @@ async function findActiveSubscribers() {
     "SELECT * FROM subscribers WHERE status = 'active' ORDER BY created_at DESC"
   );
   return rows;
+}
+
+async function findSubscribersBySkinCondition(condition) {
+  const { rows } = await pool.query(
+    "SELECT * FROM subscribers WHERE status = 'active' AND skin_condition = $1 ORDER BY created_at DESC",
+    [condition]
+  );
+  return rows;
+}
+
+async function getSubscriberSkinSegments() {
+  const { rows } = await pool.query(
+    `SELECT skin_condition, COUNT(*)::int AS count
+     FROM subscribers
+     WHERE status = 'active' AND skin_condition IS NOT NULL
+     GROUP BY skin_condition
+     ORDER BY count DESC`
+  );
+  return rows;
+}
+
+async function updateSubscriberSkinCondition(email, skinCondition) {
+  const { rows } = await pool.query(
+    `UPDATE subscribers SET skin_condition = $2
+     WHERE email = $1 RETURNING *`,
+    [email.toLowerCase(), skinCondition]
+  );
+  return rows[0] || null;
 }
 
 // ---- AUTOMATION FLOW helpers ----
@@ -1514,6 +1546,9 @@ module.exports = {
   findSubscriberByToken,
   unsubscribe,
   findActiveSubscribers,
+  findSubscribersBySkinCondition,
+  getSubscriberSkinSegments,
+  updateSubscriberSkinCondition,
   upsertFlow,
   findFlowBySlug,
   findFlowByTrigger,

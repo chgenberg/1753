@@ -1678,6 +1678,25 @@ app.post("/api/analysis", async (req, res) => {
       });
       analysisId = saved?.id || null;
       console.log(`[Analysis] Saved to DB: id=${analysisId}, userId=${userId}, score=${parsedResult?.score}`);
+
+      // Auto-tag subscriber with primary skin condition if they exist
+      try {
+        const topCondition = imageScan?.overall?.[0]?.condition
+          || parsedResult?.skinAnalysis?.concerns?.[0]?.condition
+          || null;
+        if (topCondition && userId) {
+          const user = await db.findUserById(userId);
+          if (user?.email) {
+            const existing = await db.findSubscriberByEmail(user.email);
+            if (existing && !existing.skin_condition) {
+              await db.updateSubscriberSkinCondition(user.email, topCondition);
+              console.log(`[Analysis] Auto-tagged subscriber ${user.email} → ${topCondition}`);
+            }
+          }
+        }
+      } catch (tagErr) {
+        console.error("[Analysis] Auto-tag failed (non-fatal):", tagErr.message);
+      }
     } catch (saveErr) {
       console.error("[Analysis] DB save failed (non-fatal):", saveErr.message);
     }
@@ -3514,7 +3533,7 @@ app.get("/api/recommendations", authMiddleware, async (req, res) => {
 
 app.post("/api/newsletter/subscribe", async (req, res) => {
   try {
-    const { email, firstName } = req.body;
+    const { email, firstName, skinCondition } = req.body;
     if (!email || !email.includes("@")) {
       return res.status(400).json({ message: "Ange en giltig e-postadress" });
     }
@@ -3529,6 +3548,10 @@ app.post("/api/newsletter/subscribe", async (req, res) => {
       email, firstName: firstName || "", source: "footer", unsubscribeToken: token
     });
 
+    if (skinCondition) {
+      await db.updateSubscriberSkinCondition(email, skinCondition);
+    }
+
     // Enqueue welcome flow
     const welcomeFlows = await db.findFlowByTrigger("subscribe");
     for (const flow of welcomeFlows) {
@@ -3539,11 +3562,46 @@ app.post("/api/newsletter/subscribe", async (req, res) => {
       });
     }
 
-    console.log(`[Newsletter] ${email} subscribed (id=${subscriber.id})`);
+    console.log(`[Newsletter] ${email} subscribed (id=${subscriber.id}, skin=${skinCondition || "none"})`);
     res.json({ ok: true, message: "Tack! Du ar nu prenumerant." });
   } catch (err) {
     console.error("[Newsletter] Subscribe error:", err);
     res.status(500).json({ message: "Nagonting gick fel. Forsok igen." });
+  }
+});
+
+app.post("/api/newsletter/tag-skin-condition", async (req, res) => {
+  try {
+    const { email, skinCondition } = req.body;
+    if (!email || !skinCondition) {
+      return res.status(400).json({ message: "email och skinCondition kravs" });
+    }
+    const updated = await db.updateSubscriberSkinCondition(email, skinCondition);
+    if (!updated) {
+      return res.status(404).json({ message: "Prenumerant hittades inte" });
+    }
+    console.log(`[Newsletter] Tagged ${email} with skin_condition=${skinCondition}`);
+    res.json({ ok: true });
+  } catch (err) {
+    console.error("[Newsletter] Tag error:", err);
+    res.status(500).json({ message: "Kunde inte uppdatera" });
+  }
+});
+
+app.get("/api/newsletter/skin-segments", async (req, res) => {
+  try {
+    const adminKey = req.headers["x-admin-key"] || req.query.adminKey;
+    const expectedKey = process.env.ADMIN_API_KEY || "1753-admin-key";
+    if (adminKey !== expectedKey) {
+      return res.status(403).json({ message: "Ogiltig admin-nyckel" });
+    }
+    const segments = await db.getSubscriberSkinSegments();
+    const total = await db.findActiveSubscribers();
+    const tagged = segments.reduce((sum, s) => sum + s.count, 0);
+    res.json({ segments, totalActive: total.length, tagged, untagged: total.length - tagged });
+  } catch (err) {
+    console.error("[Newsletter] Segments error:", err);
+    res.status(500).json({ message: "Fel" });
   }
 });
 
@@ -3711,6 +3769,37 @@ app.post("/api/newsletter/generate", async (req, res) => {
   }
 });
 
+// ---- SKIN CONDITION NEWSLETTER GENERATE (cron-job.org trigger, Sundays 18:00) ----
+
+app.post("/api/newsletter/generate-skin", async (req, res) => {
+  try {
+    const adminKey = req.body.adminKey || req.headers["x-admin-key"];
+    const expectedKey = process.env.ADMIN_API_KEY || "1753-admin-key";
+    if (adminKey !== expectedKey) {
+      return res.status(403).json({ message: "Ogiltig admin-nyckel" });
+    }
+
+    const dryRun = req.body.dryRun === true;
+    const { execFile } = require("child_process");
+    const scriptPath = require("path").join(__dirname, "scripts", "generate-skin-newsletters.js");
+    const args = dryRun ? ["--dry-run"] : [];
+
+    res.json({ ok: true, message: "Segmenterad generering startad", dryRun });
+
+    execFile("node", [scriptPath, ...args], { env: process.env, timeout: 300_000 }, (err, stdout, stderr) => {
+      if (err) {
+        console.error("[SkinNewsletter] Generering misslyckades:", err.message);
+        if (stderr) console.error(stderr);
+      } else {
+        console.log("[SkinNewsletter] Klar:", stdout.trim().split("\n").slice(-5).join(" | "));
+      }
+    });
+  } catch (err) {
+    console.error("[SkinNewsletter] Generate error:", err);
+    res.status(500).json({ message: "Kunde inte starta generering" });
+  }
+});
+
 // ---- BROADCAST ENDPOINT (admin) ----
 
 app.post("/api/newsletter/broadcast", async (req, res) => {
@@ -3758,6 +3847,71 @@ app.post("/api/newsletter/broadcast", async (req, res) => {
   } catch (err) {
     console.error("[Broadcast] Error:", err);
     res.status(500).json({ message: "Broadcast misslyckades" });
+  }
+});
+
+// ---- SEGMENTED BROADCAST (skin condition newsletters) ----
+
+app.post("/api/newsletter/broadcast-segmented", async (req, res) => {
+  try {
+    const { newsletters, adminKey } = req.body;
+    const expectedKey = process.env.ADMIN_API_KEY || "1753-admin-key";
+    if (adminKey !== expectedKey) {
+      return res.status(403).json({ message: "Ogiltig admin-nyckel" });
+    }
+    if (!newsletters || !Array.isArray(newsletters)) {
+      return res.status(400).json({ message: "newsletters array kravs" });
+    }
+
+    const apiKey = process.env.RESEND_API_KEY;
+    if (!apiKey) return res.status(500).json({ message: "RESEND_API_KEY saknas" });
+
+    const { Resend } = require("resend");
+    const resend = new Resend(apiKey);
+    const fromEmail = process.env.EMAIL_FROM || "info@1753skin.com";
+    const baseUrl = process.env.BASE_URL || "https://api.1753skin.com";
+
+    const results = [];
+
+    for (const nl of newsletters) {
+      const { skinCondition, subject, html } = nl;
+      if (!skinCondition || !subject || !html) continue;
+
+      let subscribers;
+      if (skinCondition === "general") {
+        const all = await db.findActiveSubscribers();
+        subscribers = all.filter(s => !s.skin_condition);
+      } else {
+        subscribers = await db.findSubscribersBySkinCondition(skinCondition);
+      }
+
+      let sent = 0;
+      for (const sub of subscribers) {
+        try {
+          const unsubUrl = `${baseUrl}/api/newsletter/unsubscribe/${sub.unsubscribe_token}`;
+          await resend.emails.send({
+            from: fromEmail,
+            to: sub.email,
+            subject,
+            html: emailWrapper(
+              html.replace(/\{\{firstName\}\}/g, sub.first_name || "du"),
+              unsubUrl
+            )
+          });
+          sent++;
+        } catch (err) {
+          console.error(`[SegBroadcast] Failed ${sub.email}:`, err.message);
+        }
+      }
+
+      console.log(`[SegBroadcast] ${skinCondition}: ${sent}/${subscribers.length} sent`);
+      results.push({ skinCondition, sent, total: subscribers.length });
+    }
+
+    res.json({ ok: true, results });
+  } catch (err) {
+    console.error("[SegBroadcast] Error:", err);
+    res.status(500).json({ message: "Segmenterad broadcast misslyckades" });
   }
 });
 
