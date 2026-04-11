@@ -3800,6 +3800,39 @@ app.post("/api/content/refresh", async (req, res) => {
   }
 });
 
+// ---- AUTO-GENERATE NEW GUIDE PAGES (cron or manual trigger) ----
+
+app.post("/api/content/generate-guides", async (req, res) => {
+  try {
+    const adminKey = req.body.adminKey || req.headers["x-admin-key"];
+    const expectedKey = process.env.ADMIN_API_KEY || "1753-admin-key";
+    if (adminKey !== expectedKey) {
+      return res.status(403).json({ message: "Ogiltig admin-nyckel" });
+    }
+
+    const max = req.body.max || 3;
+    const category = req.body.category || null;
+    const { execFile } = require("child_process");
+    const scriptPath = require("path").join(__dirname, "scripts", "generate-new-guides.js");
+    const args = ["--max", String(max)];
+    if (category) args.push("--category", category);
+
+    res.json({ ok: true, message: "Guide-generering startad", max, category });
+
+    execFile("node", [scriptPath, ...args], { env: process.env, timeout: 900_000 }, (err, stdout, stderr) => {
+      if (err) {
+        console.error("[GuideGen] Misslyckades:", err.message);
+        if (stderr) console.error(stderr);
+      } else {
+        console.log("[GuideGen] Klar:", stdout.trim().split("\n").slice(-3).join(" | "));
+      }
+    });
+  } catch (err) {
+    console.error("[GuideGen] Error:", err);
+    res.status(500).json({ message: "Kunde inte starta guide-generering" });
+  }
+});
+
 // ---- SKIN CONDITION NEWSLETTER GENERATE (cron-job.org trigger, Sundays 18:00) ----
 
 app.post("/api/newsletter/generate-skin", async (req, res) => {

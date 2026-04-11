@@ -55,6 +55,19 @@ export default function sitemap(): MetadataRoute.Sitemap {
     priority: 0.9,
   });
 
+  out.push({
+    url: `${BASE}/sv/guide`,
+    lastModified: now,
+    changeFrequency: "weekly",
+    priority: 0.8,
+  });
+  out.push({
+    url: `${BASE}/en/guide`,
+    lastModified: now,
+    changeFrequency: "weekly",
+    priority: 0.8,
+  });
+
   for (const page of ALL_LANDING_PAGES) {
     out.push({
       url: `${BASE}/sv/guide/${page.svSlug}`,

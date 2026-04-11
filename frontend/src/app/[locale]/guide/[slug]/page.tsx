@@ -14,6 +14,20 @@ import { getMessages } from "@/lib/i18n";
 const BASE_URL = "https://www.1753skin.com";
 const LP = "/landing-pages";
 
+function getRelatedPages(current: ReturnType<typeof getPageBySlug>, locale: Locale, max = 6) {
+  if (!current) return [];
+  const candidates = ALL_LANDING_PAGES.filter(
+    (p) => p.svSlug !== current.svSlug,
+  );
+  const sameCategory = candidates.filter((p) => p.category === current.category);
+  const otherCategories = candidates.filter((p) => p.category !== current.category);
+
+  const result = [...sameCategory.slice(0, Math.min(4, sameCategory.length))];
+  const remaining = max - result.length;
+  if (remaining > 0) result.push(...otherCategories.slice(0, remaining));
+  return result.slice(0, max);
+}
+
 const CATEGORY_IMAGES: Record<string, { hero: string; secondary?: string }> = {
   general:   { hero: `${LP}/1.webp`, secondary: `${LP}/6.webp` },
   cbd:       { hero: `${LP}/4.webp`, secondary: `${LP}/3.webp` },
@@ -325,6 +339,56 @@ export default async function GuidePage({ params }: Props) {
           </div>
         </section>
       )}
+
+      {/* ── Related articles ── */}
+      {(() => {
+        const related = getRelatedPages(page, l);
+        if (!related.length) return null;
+        return (
+          <section className="border-t border-[#e6e6e6] bg-[#f5f5f7] py-16 md:py-24">
+            <div className="mx-auto max-w-[1280px] px-6 md:px-10">
+              <h2 className="mb-8 text-center text-2xl font-bold tracking-tight text-[#1d1d1f]">
+                {l === "sv" ? "Relaterade artiklar" : "Related articles"}
+              </h2>
+              <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                {related.map((rp) => {
+                  const rc = getContent(rp, l);
+                  const rSlug = l === "sv" ? rp.svSlug : rp.enSlug;
+                  return (
+                    <Link
+                      key={rSlug}
+                      href={`/${l}/guide/${rSlug}`}
+                      className="group flex items-start gap-3 rounded-2xl border border-[#e6e6e6] bg-white p-5 transition-all duration-300 hover:border-[#108474]/30 hover:shadow-lg hover:shadow-[#108474]/5"
+                    >
+                      <div className="flex-1">
+                        <p className="mb-1 text-[10px] font-semibold uppercase tracking-[0.15em] text-[#108474]">
+                          {rc.kicker}
+                        </p>
+                        <h3 className="text-sm font-semibold leading-snug text-[#1d1d1f] group-hover:text-[#108474]">
+                          {rc.h1}
+                        </h3>
+                        <p className="mt-1.5 line-clamp-2 text-xs leading-relaxed text-[#515151]">
+                          {rc.lead.slice(0, 100)}...
+                        </p>
+                      </div>
+                      <ArrowRight className="mt-1 h-4 w-4 flex-shrink-0 text-[#766a62] transition-transform group-hover:translate-x-1 group-hover:text-[#108474]" />
+                    </Link>
+                  );
+                })}
+              </div>
+              <div className="mt-8 text-center">
+                <Link
+                  href={`/${l}/guide`}
+                  className="inline-flex items-center gap-2 text-sm font-semibold text-[#108474] transition-colors hover:text-[#0d6e62]"
+                >
+                  {l === "sv" ? "Se alla artiklar" : "View all articles"}
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+              </div>
+            </div>
+          </section>
+        );
+      })()}
 
       {/* ── CTA ── */}
       <section className="py-16 md:py-24">

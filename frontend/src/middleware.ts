@@ -55,9 +55,9 @@ function handleShopifyRedirect(pathname: string, request: NextRequest): NextResp
     return NextResponse.redirect(new URL("/sv/produkter", request.url), 301);
   }
 
-  // /blogs/* → /sv (no blog equivalent)
+  // /blogs/* → /sv/guide (guide hub)
   if (lower.startsWith("/blogs")) {
-    return NextResponse.redirect(new URL("/sv", request.url), 301);
+    return NextResponse.redirect(new URL("/sv/guide", request.url), 301);
   }
 
   return null;
