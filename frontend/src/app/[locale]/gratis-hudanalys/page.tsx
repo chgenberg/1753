@@ -21,7 +21,7 @@ import { getMessages } from "@/lib/i18n";
 import { TechTabs } from "./tech-tabs";
 
 const BASE_URL = "https://www.1753skin.com";
-const HERO_IMAGE = "/New_Products/DUO+TA-DAWoman.jpg";
+const IMG = "/Landing_page_skinanalys";
 
 const content = {
   sv: {
@@ -51,7 +51,13 @@ const content = {
         body: "Du får en hudpoäng (0–100), detaljerad analys av styrkor och svagheter, livsstilsrekommendationer och produktförslag anpassade efter just din hud. Allt på under en minut.",
       },
     ],
+    mirrorSection: {
+      kicker: "Förstå din hud",
+      title: "Din spegel ljuger inte – men den berättar inte hela sanningen",
+      body: "Det du ser i spegeln är bara ytan. Under den finns ett komplext samspel mellan mikrobiom, endocannabinoidsystem, hormoner och livsstil. Vår AI ser det du inte kan se – och ger dig verktygen att agera på det.",
+    },
     techTitle: "Teknologin bakom analysen",
+    techIntro: "Klicka på flikarna för att utforska de fyra pelarna i vår hudanalys.",
     techTabs: [
       {
         id: "model",
@@ -102,76 +108,39 @@ const content = {
         ],
       },
     ],
+    holisticSection: {
+      kicker: "Holistiskt perspektiv",
+      title: "Huden speglar hela kroppen",
+      body: "Sömn, kost, stress och rörelse påverkar din hud lika mycket som de produkter du använder. Vår analys väger in allt – för att ge dig rekommendationer som faktiskt gör skillnad.",
+    },
     conditionsTitle: "Hudtillstånd vi analyserar",
     conditions: [
-      "Akne & finnar",
-      "Rosacea & rodnad",
-      "Hyperpigmentering",
-      "Fina linjer & rynkor",
-      "Dehydrering",
-      "Stora porer",
-      "Mörka ringar",
-      "Ojämn hudton",
-      "Talgöverproduktion",
-      "Solskadad hud",
-      "Känslig hud",
-      "Eksem & irritation",
-      "Texturobalans",
-      "Hudens mikrobiom",
+      "Akne & finnar", "Rosacea & rodnad", "Hyperpigmentering", "Fina linjer & rynkor",
+      "Dehydrering", "Stora porer", "Mörka ringar", "Ojämn hudton",
+      "Talgöverproduktion", "Solskadad hud", "Känslig hud", "Eksem & irritation",
+      "Texturobalans", "Hudens mikrobiom",
     ],
     whatYouGetTitle: "Vad du får i din analys",
     whatYouGet: [
-      {
-        icon: "target",
-        title: "Hudpoäng 0–100",
-        body: "En sammanfattande poäng som speglar din hudhälsa – baserad på synliga tillstånd, livsstilsfaktorer och hudens övergripande balans.",
-      },
-      {
-        icon: "layers",
-        title: "Detaljerad zonanalys",
-        body: "Specifika observationer för varje del av ansiktet: panna, kinder, näsa, haka och ögonområde. Du ser exakt var din hud behöver uppmärksamhet.",
-      },
-      {
-        icon: "heart",
-        title: "Livsstilsrekommendationer",
-        body: "Personaliserade tips om sömn, kost, stress och rörelse baserat på dina svar. Vi tror att huden speglar hela kroppen.",
-      },
-      {
-        icon: "leaf",
-        title: "Produktrekommendationer",
-        body: "Max 2–3 produkter som matchar just din hudprofil – aldrig säljigt, alltid relevant. Baserat på dina specifika behov, inte standardpaket.",
-      },
+      { icon: "target", title: "Hudpoäng 0–100", body: "En sammanfattande poäng som speglar din hudhälsa – baserad på synliga tillstånd, livsstilsfaktorer och hudens övergripande balans." },
+      { icon: "layers", title: "Detaljerad zonanalys", body: "Specifika observationer för varje del av ansiktet: panna, kinder, näsa, haka och ögonområde. Du ser exakt var din hud behöver uppmärksamhet." },
+      { icon: "heart", title: "Livsstilsrekommendationer", body: "Personaliserade tips om sömn, kost, stress och rörelse baserat på dina svar. Vi tror att huden speglar hela kroppen." },
+      { icon: "leaf", title: "Produktrekommendationer", body: "Max 2–3 produkter som matchar just din hudprofil – aldrig säljigt, alltid relevant. Baserat på dina specifika behov, inte standardpaket." },
     ],
+    resultsSection: {
+      kicker: "Dina resultat",
+      title: "Analysen är bara början",
+      body: "Spara dina resultat, följ din utveckling över tid och se hur dina förändringar påverkar din hud. Varje ny analys ger dig en tydligare bild av din hudresa.",
+    },
     faqTitle: "Vanliga frågor om hudanalysen",
     faq: [
-      {
-        q: "Är hudanalysen verkligen gratis?",
-        a: "Ja, helt gratis och utan registrering. Du kan göra analysen anonymt direkt i webbläsaren. Registrering krävs bara om du vill spara dina resultat och följa din huds utveckling över tid.",
-      },
-      {
-        q: "Hur exakt är AI-hudanalysen?",
-        a: "Vår modell har tränats på tusentals verifierade hudbilder och uppnår cirka 78–80 procent accuracy på de 14 hudtillstånden. Det motsvarar en erfaren hudterapeuts bedömning vid en visuell inspektion. Den multimodala fusionen med livsstilsdata höjer den kliniska relevansen ytterligare.",
-      },
-      {
-        q: "Laddas min bild upp till någon server?",
-        a: "Nej. Ansiktsscannet sker 100 procent lokalt i din webbläsare med ONNX Runtime Web. Ingen bild skickas till våra servrar eller tredje part under scanningen. Om du väljer att spara en bild i ditt konto krypteras den med AES-256-GCM innan lagring.",
-      },
-      {
-        q: "Kan analysen ersätta ett besök hos en hudterapeut?",
-        a: "Nej, och det är inte meningen heller. Vår analys ger en bra första indikation och personaliserade tips, men den ersätter inte en medicinsk bedömning. Vid allvarliga hudproblem rekommenderar vi alltid att du söker professionell hjälp.",
-      },
-      {
-        q: "Vad är skillnaden mellan er analys och andra online-hudanalyser?",
-        a: "De flesta online-hudanalyser är enkla quiz utan bildanalys, eller använder generiska modeller. Vår analys kombinerar en specialtränad bildklassificerare (14 tillstånd, 5 ansiktszoner), livsstilsdata och GPT-4o:s medicinska kunskap i ett multimodalt fusionssystem. Det ger en holistisk bild som går långt bortom vad en enkel selfie-analys kan erbjuda.",
-      },
-      {
-        q: "Hur lång tid tar analysen?",
-        a: "Hela processen tar cirka 60 sekunder: ansiktsscan (10 sekunder), fem frågor (30 sekunder) och AI-analys (20 sekunder). Du har ditt resultat på under en minut.",
-      },
-      {
-        q: "Fungerar det på mobilen?",
-        a: "Ja, analysen är helt optimerad för mobil. Frontkameran fungerar utmärkt, och hela upplevelsen är designad mobile-first.",
-      },
+      { q: "Är hudanalysen verkligen gratis?", a: "Ja, helt gratis och utan registrering. Du kan göra analysen anonymt direkt i webbläsaren. Registrering krävs bara om du vill spara dina resultat och följa din huds utveckling över tid." },
+      { q: "Hur exakt är AI-hudanalysen?", a: "Vår modell har tränats på tusentals verifierade hudbilder och uppnår cirka 78–80 procent accuracy på de 14 hudtillstånden. Det motsvarar en erfaren hudterapeuts bedömning vid en visuell inspektion. Den multimodala fusionen med livsstilsdata höjer den kliniska relevansen ytterligare." },
+      { q: "Laddas min bild upp till någon server?", a: "Nej. Ansiktsscannet sker 100 procent lokalt i din webbläsare med ONNX Runtime Web. Ingen bild skickas till våra servrar eller tredje part under scanningen. Om du väljer att spara en bild i ditt konto krypteras den med AES-256-GCM innan lagring." },
+      { q: "Kan analysen ersätta ett besök hos en hudterapeut?", a: "Nej, och det är inte meningen heller. Vår analys ger en bra första indikation och personaliserade tips, men den ersätter inte en medicinsk bedömning. Vid allvarliga hudproblem rekommenderar vi alltid att du söker professionell hjälp." },
+      { q: "Vad är skillnaden mellan er analys och andra online-hudanalyser?", a: "De flesta online-hudanalyser är enkla quiz utan bildanalys, eller använder generiska modeller. Vår analys kombinerar en specialtränad bildklassificerare (14 tillstånd, 5 ansiktszoner), livsstilsdata och GPT-4o:s medicinska kunskap i ett multimodalt fusionssystem. Det ger en holistisk bild som går långt bortom vad en enkel selfie-analys kan erbjuda." },
+      { q: "Hur lång tid tar analysen?", a: "Hela processen tar cirka 60 sekunder: ansiktsscan (10 sekunder), fem frågor (30 sekunder) och AI-analys (20 sekunder). Du har ditt resultat på under en minut." },
+      { q: "Fungerar det på mobilen?", a: "Ja, analysen är helt optimerad för mobil. Frontkameran fungerar utmärkt, och hela upplevelsen är designad mobile-first." },
     ],
     ctaTitle: "Redo att förstå din hud?",
     ctaSub: "60 sekunder. Gratis. Ingen registrering. Bara vetenskap och din hud.",
@@ -189,143 +158,72 @@ const content = {
     stats: ["12,000+", "14", "~60", "97%"],
     processTitle: "How it works – three steps to your skin analysis",
     steps: [
-      {
-        icon: "camera",
-        title: "1. Scan your face",
-        body: "The camera activates directly in your browser. Nothing is uploaded – our AI analyses the image locally on your device using ONNX Runtime Web. Your privacy is guaranteed.",
-      },
-      {
-        icon: "brain",
-        title: "2. Answer five questions",
-        body: "Skin type, lifestyle, sleep, diet, and skin goals. Your answers are combined with the face scan to create a complete profile – not just what the AI sees, but the full picture.",
-      },
-      {
-        icon: "sparkles",
-        title: "3. Get your personal analysis",
-        body: "You receive a skin score (0–100), detailed analysis of strengths and weaknesses, lifestyle recommendations, and product suggestions tailored to your skin. All in under a minute.",
-      },
+      { icon: "camera", title: "1. Scan your face", body: "The camera activates directly in your browser. Nothing is uploaded – our AI analyses the image locally on your device using ONNX Runtime Web. Your privacy is guaranteed." },
+      { icon: "brain", title: "2. Answer five questions", body: "Skin type, lifestyle, sleep, diet, and skin goals. Your answers are combined with the face scan to create a complete profile – not just what the AI sees, but the full picture." },
+      { icon: "sparkles", title: "3. Get your personal analysis", body: "You receive a skin score (0–100), detailed analysis of strengths and weaknesses, lifestyle recommendations, and product suggestions tailored to your skin. All in under a minute." },
     ],
+    mirrorSection: {
+      kicker: "Understand your skin",
+      title: "Your mirror doesn't lie – but it doesn't tell the whole truth",
+      body: "What you see in the mirror is only the surface. Beneath it lies a complex interplay of microbiome, endocannabinoid system, hormones, and lifestyle. Our AI sees what you can't – and gives you the tools to act on it.",
+    },
     techTitle: "The technology behind the analysis",
+    techIntro: "Click the tabs to explore the four pillars of our skin analysis.",
     techTabs: [
       {
-        id: "model",
-        label: "Trained AI model",
-        title: "A model trained specifically for skin analysis",
+        id: "model", label: "Trained AI model", title: "A model trained specifically for skin analysis",
         body: "Our image classifier has been trained on thousands of images of real skin conditions – acne, rosacea, hyperpigmentation, fine lines, dehydration, and more. The model runs as ONNX Runtime Web directly in your browser, meaning your face image never leaves your device.\n\nThe model identifies 14 different skin conditions and zone-maps them to specific areas of the face: forehead, cheeks, nose, chin, and eye area. The result is a detailed map of where your skin needs the most attention.",
-        highlights: [
-          "14 skin conditions identified",
-          "Zone-based analysis of five facial regions",
-          "Runs locally – zero data leaves your device",
-          "ONNX Runtime Web for fast inference",
-        ],
+        highlights: ["14 skin conditions identified", "Zone-based analysis of five facial regions", "Runs locally – zero data leaves your device", "ONNX Runtime Web for fast inference"],
       },
       {
-        id: "fusion",
-        label: "Multimodal fusion",
-        title: "Three data sources – one holistic result",
+        id: "fusion", label: "Multimodal fusion", title: "Three data sources – one holistic result",
         body: "A photo doesn't tell the whole story. Our analysis combines three data sources in a multimodal fusion system:\n\n1. Image analysis via the trained model (what the camera sees)\n2. Lifestyle questionnaire about diet, sleep, and stress levels (what you tell us)\n3. OpenAI's vision model (GPT-4o) for holistic interpretation\n\nThe result is weighted so lifestyle factors influence the score as much as visible conditions. Someone with flawless skin but poor sleep and high stress receives a lower score – because the skin will eventually reflect it.",
-        highlights: [
-          "Image analysis + lifestyle + AI interpretation",
-          "Weighted score that captures the full picture",
-          "Lifestyle factors account for 30% of the score",
-          "GPT-4o for medically-grounded holistic assessment",
-        ],
+        highlights: ["Image analysis + lifestyle + AI interpretation", "Weighted score that captures the full picture", "Lifestyle factors account for 30% of the score", "GPT-4o for medically-grounded holistic assessment"],
       },
       {
-        id: "tracking",
-        label: "Tracking over time",
-        title: "Measure your skin's progress week by week",
+        id: "tracking", label: "Tracking over time", title: "Measure your skin's progress week by week",
         body: "A single analysis gives you a snapshot. Real change becomes visible over time. Logged-in users can save their analyses and track their skin score on a timeline.\n\nWe also offer encrypted photo storage (AES-256-GCM) for those who want to see visual change – before and after photos in their account. All images are encrypted to banking standards and can be deleted with one click.",
-        highlights: [
-          "Skin score timeline in your account",
-          "Encrypted photo storage (AES-256-GCM)",
-          "Before/after comparison",
-          "Full control – delete everything with one click",
-        ],
+        highlights: ["Skin score timeline in your account", "Encrypted photo storage (AES-256-GCM)", "Before/after comparison", "Full control – delete everything with one click"],
       },
       {
-        id: "privacy",
-        label: "Privacy and security",
-        title: "Your data, your rules",
+        id: "privacy", label: "Privacy and security", title: "Your data, your rules",
         body: "We designed the entire analysis with privacy as the core principle:\n\nThe face scan runs 100% locally in your browser via ONNX Runtime Web – no image is uploaded to our servers during scanning. The questionnaire is combined with the AI result and sent encrypted to OpenAI for the holistic analysis.\n\nPhoto storage is entirely optional and requires active consent. Images are encrypted with AES-256-GCM (the same standard banks use) before storage. All analysis data can be permanently deleted from your account at any time.",
-        highlights: [
-          "Face scan runs 100% locally",
-          "No image uploaded without consent",
-          "AES-256-GCM encryption for saved photos",
-          "GDPR-compliant – delete everything at any time",
-        ],
+        highlights: ["Face scan runs 100% locally", "No image uploaded without consent", "AES-256-GCM encryption for saved photos", "GDPR-compliant – delete everything at any time"],
       },
     ],
+    holisticSection: {
+      kicker: "Holistic perspective",
+      title: "Your skin mirrors your whole body",
+      body: "Sleep, diet, stress, and movement affect your skin just as much as the products you use. Our analysis weighs everything – to give you recommendations that actually make a difference.",
+    },
     conditionsTitle: "Skin conditions we analyse",
     conditions: [
-      "Acne & breakouts",
-      "Rosacea & redness",
-      "Hyperpigmentation",
-      "Fine lines & wrinkles",
-      "Dehydration",
-      "Enlarged pores",
-      "Dark circles",
-      "Uneven skin tone",
-      "Excess oil production",
-      "Sun-damaged skin",
-      "Sensitive skin",
-      "Eczema & irritation",
-      "Texture imbalance",
-      "Skin microbiome",
+      "Acne & breakouts", "Rosacea & redness", "Hyperpigmentation", "Fine lines & wrinkles",
+      "Dehydration", "Enlarged pores", "Dark circles", "Uneven skin tone",
+      "Excess oil production", "Sun-damaged skin", "Sensitive skin", "Eczema & irritation",
+      "Texture imbalance", "Skin microbiome",
     ],
     whatYouGetTitle: "What you get in your analysis",
     whatYouGet: [
-      {
-        icon: "target",
-        title: "Skin score 0–100",
-        body: "A comprehensive score reflecting your skin health – based on visible conditions, lifestyle factors, and your skin's overall balance.",
-      },
-      {
-        icon: "layers",
-        title: "Detailed zone analysis",
-        body: "Specific observations for each part of the face: forehead, cheeks, nose, chin, and eye area. You see exactly where your skin needs attention.",
-      },
-      {
-        icon: "heart",
-        title: "Lifestyle recommendations",
-        body: "Personalised tips on sleep, diet, stress, and exercise based on your answers. We believe skin reflects the whole body.",
-      },
-      {
-        icon: "leaf",
-        title: "Product recommendations",
-        body: "Up to 2–3 products matched to your specific skin profile – never pushy, always relevant. Based on your actual needs, not standard packages.",
-      },
+      { icon: "target", title: "Skin score 0–100", body: "A comprehensive score reflecting your skin health – based on visible conditions, lifestyle factors, and your skin's overall balance." },
+      { icon: "layers", title: "Detailed zone analysis", body: "Specific observations for each part of the face: forehead, cheeks, nose, chin, and eye area. You see exactly where your skin needs attention." },
+      { icon: "heart", title: "Lifestyle recommendations", body: "Personalised tips on sleep, diet, stress, and exercise based on your answers. We believe skin reflects the whole body." },
+      { icon: "leaf", title: "Product recommendations", body: "Up to 2–3 products matched to your specific skin profile – never pushy, always relevant. Based on your actual needs, not standard packages." },
     ],
+    resultsSection: {
+      kicker: "Your results",
+      title: "The analysis is just the beginning",
+      body: "Save your results, track your progress over time, and see how your changes affect your skin. Every new analysis gives you a clearer picture of your skin journey.",
+    },
     faqTitle: "Frequently asked questions about the skin analysis",
     faq: [
-      {
-        q: "Is the skin analysis really free?",
-        a: "Yes, completely free with no sign-up required. You can do the analysis anonymously right in your browser. Registration is only needed if you want to save your results and track your skin's progress over time.",
-      },
-      {
-        q: "How accurate is the AI skin analysis?",
-        a: "Our model has been trained on thousands of verified skin images and achieves approximately 78–80 percent accuracy across the 14 skin conditions. This matches an experienced aesthetician's assessment during a visual inspection. The multimodal fusion with lifestyle data further increases clinical relevance.",
-      },
-      {
-        q: "Is my photo uploaded to a server?",
-        a: "No. The face scan runs 100 percent locally in your browser using ONNX Runtime Web. No image is sent to our servers or third parties during scanning. If you choose to save a photo to your account, it is encrypted with AES-256-GCM before storage.",
-      },
-      {
-        q: "Can the analysis replace a visit to a dermatologist?",
-        a: "No, and it's not meant to. Our analysis provides a solid initial indication and personalised tips, but it doesn't replace a medical assessment. For serious skin concerns, we always recommend seeking professional help.",
-      },
-      {
-        q: "What sets your analysis apart from other online skin analyses?",
-        a: "Most online skin analyses are simple quizzes without image analysis, or use generic models. Our analysis combines a purpose-trained image classifier (14 conditions, 5 facial zones), lifestyle data, and GPT-4o's medical knowledge in a multimodal fusion system. This delivers a holistic picture far beyond what a simple selfie analysis can offer.",
-      },
-      {
-        q: "How long does the analysis take?",
-        a: "The entire process takes about 60 seconds: face scan (10 seconds), five questions (30 seconds), and AI analysis (20 seconds). You have your result in under a minute.",
-      },
-      {
-        q: "Does it work on mobile?",
-        a: "Yes, the analysis is fully optimised for mobile. The front camera works perfectly, and the entire experience is designed mobile-first.",
-      },
+      { q: "Is the skin analysis really free?", a: "Yes, completely free with no sign-up required. You can do the analysis anonymously right in your browser. Registration is only needed if you want to save your results and track your skin's progress over time." },
+      { q: "How accurate is the AI skin analysis?", a: "Our model has been trained on thousands of verified skin images and achieves approximately 78–80 percent accuracy across the 14 skin conditions. This matches an experienced aesthetician's assessment during a visual inspection. The multimodal fusion with lifestyle data further increases clinical relevance." },
+      { q: "Is my photo uploaded to a server?", a: "No. The face scan runs 100 percent locally in your browser using ONNX Runtime Web. No image is sent to our servers or third parties during scanning. If you choose to save a photo to your account, it is encrypted with AES-256-GCM before storage." },
+      { q: "Can the analysis replace a visit to a dermatologist?", a: "No, and it's not meant to. Our analysis provides a solid initial indication and personalised tips, but it doesn't replace a medical assessment. For serious skin concerns, we always recommend seeking professional help." },
+      { q: "What sets your analysis apart from other online skin analyses?", a: "Most online skin analyses are simple quizzes without image analysis, or use generic models. Our analysis combines a purpose-trained image classifier (14 conditions, 5 facial zones), lifestyle data, and GPT-4o's medical knowledge in a multimodal fusion system. This delivers a holistic picture far beyond what a simple selfie analysis can offer." },
+      { q: "How long does the analysis take?", a: "The entire process takes about 60 seconds: face scan (10 seconds), five questions (30 seconds), and AI analysis (20 seconds). You have your result in under a minute." },
+      { q: "Does it work on mobile?", a: "Yes, the analysis is fully optimised for mobile. The front camera works perfectly, and the entire experience is designed mobile-first." },
     ],
     ctaTitle: "Ready to understand your skin?",
     ctaSub: "60 seconds. Free. No sign-up. Just science and your skin.",
@@ -358,7 +256,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title: c.metaTitle,
       description: c.metaDescription,
       url: `${BASE_URL}/${locale}/gratis-hudanalys`,
-      images: [{ url: `${BASE_URL}${HERO_IMAGE}`, width: 1600, height: 1073 }],
+      images: [{ url: `${BASE_URL}${IMG}/1.webp`, width: 1600, height: 1600 }],
       locale: locale === "sv" ? "sv_SE" : "en_GB",
       type: "website",
     },
@@ -369,17 +267,16 @@ const iconMap: Record<string, React.FC<{ className?: string }>> = {
   camera: Camera,
   brain: Brain,
   sparkles: Sparkles,
-  target: ({ className }) => <ScanFace className={className} />,
+  target: ScanFace,
   layers: Layers,
-  heart: ({ className }) => <Eye className={className} />,
-  leaf: ({ className }) => <Fingerprint className={className} />,
+  heart: Eye,
+  leaf: Fingerprint,
 };
 
 export default async function FreeAnalysisLanding({ params }: Props) {
   const { locale } = await params;
   const l = (locale as Locale) || "sv";
   const c = content[l as keyof typeof content] || content.sv;
-  const t = getMessages(l);
   const analysisPath = localizePath(l, "skinAnalysis");
   const productsPath = localizePath(l, "products");
 
@@ -398,26 +295,11 @@ export default async function FreeAnalysisLanding({ params }: Props) {
     "@type": "Service",
     name: l === "sv" ? "AI Hudanalys" : "AI Skin Analysis",
     description: c.metaDescription,
-    provider: {
-      "@type": "Organization",
-      name: "1753 SKINCARE",
-      url: BASE_URL,
-    },
+    provider: { "@type": "Organization", name: "1753 SKINCARE", url: BASE_URL },
     serviceType: "Skin Analysis",
-    isRelatedTo: {
-      "@type": "MedicalSpecialty",
-      name: "Dermatology",
-    },
-    offers: {
-      "@type": "Offer",
-      price: "0",
-      priceCurrency: "SEK",
-      availability: "https://schema.org/InStock",
-    },
-    areaServed: {
-      "@type": "Country",
-      name: l === "sv" ? "Sverige" : "Sweden",
-    },
+    isRelatedTo: { "@type": "MedicalSpecialty", name: "Dermatology" },
+    offers: { "@type": "Offer", price: "0", priceCurrency: "SEK", availability: "https://schema.org/InStock" },
+    areaServed: { "@type": "Country", name: l === "sv" ? "Sverige" : "Sweden" },
   };
 
   const breadcrumbSchema = {
@@ -435,21 +317,21 @@ export default async function FreeAnalysisLanding({ params }: Props) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
 
-      {/* ── Hero ── */}
-      <section className="relative overflow-hidden bg-gradient-to-b from-[#f5f5f7] to-white py-20 md:py-28">
-        <div className="mx-auto max-w-[1280px] px-6 md:px-10">
-          <div className="mx-auto max-w-3xl text-center">
+      {/* ── Hero with image ── */}
+      <section className="relative overflow-hidden bg-gradient-to-b from-[#f5f5f7] to-white py-16 md:py-24">
+        <div className="mx-auto grid max-w-[1280px] items-center gap-10 px-6 md:grid-cols-2 md:gap-16 md:px-10">
+          <div className="max-w-xl">
             <p className="mb-4 inline-flex items-center gap-2 rounded-full bg-[#108474]/10 px-4 py-1.5 text-xs font-semibold uppercase tracking-[0.15em] text-[#108474]">
               <ScanFace className="h-4 w-4" />
               {c.kicker}
             </p>
-            <h1 className="text-[2.2rem] font-bold leading-[1.1] tracking-tight text-[#1d1d1f] md:text-[3.2rem]">
+            <h1 className="text-[2.2rem] font-bold leading-[1.1] tracking-tight text-[#1d1d1f] md:text-[3rem]">
               {c.h1}
             </h1>
-            <p className="mx-auto mt-6 max-w-2xl text-base leading-relaxed text-[#515151] md:text-lg">
+            <p className="mt-5 text-base leading-relaxed text-[#515151] md:text-lg">
               {c.lead}
             </p>
-            <div className="mt-10 flex flex-wrap justify-center gap-4">
+            <div className="mt-8 flex flex-wrap gap-4">
               <Link
                 href={analysisPath}
                 className="inline-flex h-[56px] items-center gap-2 rounded-full bg-[#108474] px-10 text-sm font-medium text-white shadow-lg shadow-[#108474]/20 transition-all duration-300 hover:bg-[#0d6e61] hover:shadow-xl hover:shadow-[#108474]/30"
@@ -459,16 +341,26 @@ export default async function FreeAnalysisLanding({ params }: Props) {
               </Link>
             </div>
           </div>
-
-          {/* Stats */}
-          <div className="mx-auto mt-16 grid max-w-3xl grid-cols-2 gap-6 md:grid-cols-4">
-            {c.stats.map((stat, i) => (
-              <div key={i} className="text-center">
-                <p className="text-2xl font-bold tracking-tight text-[#1d1d1f] md:text-3xl">{stat}</p>
-                <p className="mt-1 text-xs font-medium uppercase tracking-wider text-[#766a62]">{c.statsLabel[i]}</p>
-              </div>
-            ))}
+          <div className="relative aspect-[4/5] overflow-hidden rounded-3xl shadow-2xl shadow-black/10 md:aspect-square">
+            <Image
+              src={`${IMG}/1.webp`}
+              alt={l === "sv" ? "Kvinna som analyserar sin hud" : "Woman analysing her skin"}
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, 50vw"
+              priority
+            />
           </div>
+        </div>
+
+        {/* Stats */}
+        <div className="mx-auto mt-16 grid max-w-3xl grid-cols-2 gap-6 px-6 md:grid-cols-4 md:px-10">
+          {c.stats.map((stat, i) => (
+            <div key={i} className="text-center">
+              <p className="text-2xl font-bold tracking-tight text-[#1d1d1f] md:text-3xl">{stat}</p>
+              <p className="mt-1 text-xs font-medium uppercase tracking-wider text-[#766a62]">{c.statsLabel[i]}</p>
+            </div>
+          ))}
         </div>
       </section>
 
@@ -498,18 +390,75 @@ export default async function FreeAnalysisLanding({ params }: Props) {
         </div>
       </section>
 
+      {/* ── Mirror Section (image 4) ── */}
+      <section className="overflow-hidden bg-[#f5f5f7] py-16 md:py-24">
+        <div className="mx-auto grid max-w-[1280px] items-center gap-10 px-6 md:grid-cols-2 md:gap-16 md:px-10">
+          <div className="relative aspect-[4/5] overflow-hidden rounded-3xl shadow-xl shadow-black/8 md:aspect-[3/4]">
+            <Image
+              src={`${IMG}/4.webp`}
+              alt={l === "sv" ? "Kvinna tittar i spegeln" : "Woman looking in the mirror"}
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, 50vw"
+            />
+          </div>
+          <div className="max-w-lg">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-[#108474]">
+              {c.mirrorSection.kicker}
+            </p>
+            <h2 className="text-2xl font-bold leading-tight tracking-tight text-[#1d1d1f] md:text-3xl">
+              {c.mirrorSection.title}
+            </h2>
+            <p className="mt-5 text-base leading-relaxed text-[#515151]">
+              {c.mirrorSection.body}
+            </p>
+            <Link
+              href={analysisPath}
+              className="mt-8 inline-flex h-[48px] items-center gap-2 rounded-full bg-[#108474] px-8 text-sm font-medium text-white transition-all duration-300 hover:bg-[#0d6e61] hover:shadow-lg"
+            >
+              {c.ctaButton}
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+        </div>
+      </section>
+
       {/* ── Tech Tabs ── */}
-      <section className="bg-[#f5f5f7] py-16 md:py-24">
+      <section className="py-16 md:py-24">
         <div className="mx-auto max-w-[1280px] px-6 md:px-10">
           <h2 className="mb-4 text-center text-2xl font-bold tracking-tight text-[#1d1d1f] md:text-3xl">
             {c.techTitle}
           </h2>
           <p className="mx-auto mb-12 max-w-2xl text-center text-sm leading-relaxed text-[#515151]">
-            {l === "sv"
-              ? "Klicka på flikarna för att utforska de fyra pelarna i vår hudanalys."
-              : "Click the tabs to explore the four pillars of our skin analysis."}
+            {c.techIntro}
           </p>
           <TechTabs tabs={c.techTabs} />
+        </div>
+      </section>
+
+      {/* ── Holistic Section (image 3) ── */}
+      <section className="overflow-hidden bg-[#f5f5f7] py-16 md:py-24">
+        <div className="mx-auto grid max-w-[1280px] items-center gap-10 px-6 md:grid-cols-2 md:gap-16 md:px-10">
+          <div className="order-2 max-w-lg md:order-1">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-[#108474]">
+              {c.holisticSection.kicker}
+            </p>
+            <h2 className="text-2xl font-bold leading-tight tracking-tight text-[#1d1d1f] md:text-3xl">
+              {c.holisticSection.title}
+            </h2>
+            <p className="mt-5 text-base leading-relaxed text-[#515151]">
+              {c.holisticSection.body}
+            </p>
+          </div>
+          <div className="relative order-1 aspect-[4/5] overflow-hidden rounded-3xl shadow-xl shadow-black/8 md:order-2 md:aspect-[3/4]">
+            <Image
+              src={`${IMG}/3.webp`}
+              alt={l === "sv" ? "Kvinna i naturen, holistisk hudvård" : "Woman in nature, holistic skincare"}
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, 50vw"
+            />
+          </div>
         </div>
       </section>
 
@@ -533,34 +482,78 @@ export default async function FreeAnalysisLanding({ params }: Props) {
         </div>
       </section>
 
-      {/* ── What You Get ── */}
+      {/* ── What You Get + image 5 ── */}
       <section className="bg-[#f5f5f7] py-16 md:py-24">
         <div className="mx-auto max-w-[1280px] px-6 md:px-10">
           <h2 className="mb-12 text-center text-2xl font-bold tracking-tight text-[#1d1d1f] md:text-3xl">
             {c.whatYouGetTitle}
           </h2>
-          <div className="grid gap-6 sm:grid-cols-2">
-            {c.whatYouGet.map((item, i) => {
-              const Icon = iconMap[item.icon] || Sparkles;
-              return (
-                <div
-                  key={i}
-                  className="rounded-2xl bg-white p-8 shadow-sm shadow-black/5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg"
-                >
-                  <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[#108474]/10">
-                    <Icon className="h-5 w-5 text-[#108474]" />
+          <div className="grid gap-10 md:grid-cols-5">
+            <div className="grid gap-6 md:col-span-3 sm:grid-cols-2">
+              {c.whatYouGet.map((item, i) => {
+                const Icon = iconMap[item.icon] || Sparkles;
+                return (
+                  <div
+                    key={i}
+                    className="rounded-2xl bg-white p-7 shadow-sm shadow-black/5 transition-all duration-300 hover:-translate-y-0.5 hover:shadow-lg"
+                  >
+                    <div className="mb-4 inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[#108474]/10">
+                      <Icon className="h-5 w-5 text-[#108474]" />
+                    </div>
+                    <h3 className="mb-2 text-base font-bold text-[#1d1d1f]">{item.title}</h3>
+                    <p className="text-sm leading-relaxed text-[#515151]">{item.body}</p>
                   </div>
-                  <h3 className="mb-2 text-lg font-bold text-[#1d1d1f]">{item.title}</h3>
-                  <p className="text-sm leading-relaxed text-[#515151]">{item.body}</p>
-                </div>
-              );
-            })}
+                );
+              })}
+            </div>
+            <div className="relative hidden overflow-hidden rounded-3xl shadow-xl shadow-black/8 md:col-span-2 md:block">
+              <Image
+                src={`${IMG}/5.webp`}
+                alt={l === "sv" ? "Kvinna rör sin hud" : "Woman touching her skin"}
+                fill
+                className="object-cover"
+                sizes="40vw"
+              />
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* ── Results Section (image 2) ── */}
+      <section className="overflow-hidden py-16 md:py-24">
+        <div className="mx-auto grid max-w-[1280px] items-center gap-10 px-6 md:grid-cols-2 md:gap-16 md:px-10">
+          <div className="max-w-lg">
+            <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-[#108474]">
+              {c.resultsSection.kicker}
+            </p>
+            <h2 className="text-2xl font-bold leading-tight tracking-tight text-[#1d1d1f] md:text-3xl">
+              {c.resultsSection.title}
+            </h2>
+            <p className="mt-5 text-base leading-relaxed text-[#515151]">
+              {c.resultsSection.body}
+            </p>
+            <Link
+              href={analysisPath}
+              className="mt-8 inline-flex h-[48px] items-center gap-2 rounded-full bg-[#108474] px-8 text-sm font-medium text-white transition-all duration-300 hover:bg-[#0d6e61] hover:shadow-lg"
+            >
+              {c.ctaButton}
+              <ArrowRight className="h-4 w-4" />
+            </Link>
+          </div>
+          <div className="relative aspect-[4/5] overflow-hidden rounded-3xl shadow-xl shadow-black/8 md:aspect-square">
+            <Image
+              src={`${IMG}/2.webp`}
+              alt={l === "sv" ? "Kvinna tittar på sina resultat" : "Woman looking at her results"}
+              fill
+              className="object-cover"
+              sizes="(max-width: 768px) 100vw, 50vw"
+            />
           </div>
         </div>
       </section>
 
       {/* ── FAQ ── */}
-      <section className="py-16 md:py-24">
+      <section className="bg-[#f5f5f7] py-16 md:py-24">
         <div className="mx-auto max-w-[1280px] px-6 md:px-10">
           <h2 className="mb-10 text-center text-2xl font-bold tracking-tight text-[#1d1d1f] md:text-3xl">
             {c.faqTitle}

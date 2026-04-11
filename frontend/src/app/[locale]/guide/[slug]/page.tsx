@@ -11,8 +11,25 @@ import { ALL_LANDING_PAGES } from "@/lib/seo";
 import { getPageBySlug, getContent } from "@/lib/seo/types";
 import { getMessages } from "@/lib/i18n";
 
-const HERO_IMAGE = "/New_Products/DUO+TA-DAWoman.jpg";
 const BASE_URL = "https://www.1753skin.com";
+const LP = "/landing-pages";
+
+const CATEGORY_IMAGES: Record<string, { hero: string; secondary?: string }> = {
+  general:   { hero: `${LP}/1.webp`, secondary: `${LP}/6.webp` },
+  cbd:       { hero: `${LP}/4.webp`, secondary: `${LP}/3.webp` },
+  cbg:       { hero: `${LP}/4.webp`, secondary: `${LP}/1.webp` },
+  condition: { hero: `${LP}/3.webp`, secondary: `${LP}/5.webp` },
+  lifestyle: { hero: `${LP}/2.webp`, secondary: `${LP}/7.webp` },
+  howto:     { hero: `${LP}/1.webp`, secondary: `${LP}/4.webp` },
+  audience:  { hero: `${LP}/8.webp`, secondary: `${LP}/6.webp` },
+  stad:      { hero: `${LP}/6.webp`, secondary: `${LP}/2.webp` },
+};
+
+const FALLBACK = { hero: `${LP}/1.webp` };
+
+function getImages(category: string) {
+  return CATEGORY_IMAGES[category] || FALLBACK;
+}
 
 interface Props {
   params: Promise<{ locale: Locale; slug: string }>;
@@ -32,6 +49,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const page = getPageBySlug(ALL_LANDING_PAGES, slug, locale as Locale);
   if (!page) return {};
   const c = getContent(page, locale as Locale);
+  const images = getImages(page.category);
   const svPath = `/sv/guide/${page.svSlug}`;
   const enPath = `/en/guide/${page.enSlug}`;
   return {
@@ -45,7 +63,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title: c.metaTitle,
       description: c.metaDescription,
       url: `${BASE_URL}/${locale}/guide/${slug}`,
-      images: [{ url: `${BASE_URL}${HERO_IMAGE}`, width: 1600, height: 1073 }],
+      images: [{ url: `${BASE_URL}${images.hero}`, width: 1200, height: 1200 }],
       locale: locale === "sv" ? "sv_SE" : "en_GB",
       type: "article",
     },
@@ -60,6 +78,7 @@ export default async function GuidePage({ params }: Props) {
 
   const c = getContent(page, l);
   const t = getMessages(l);
+  const images = getImages(page.category);
   const products = page.productIds
     .map((id) => PRODUCTS.find((p) => p.id === id))
     .filter(Boolean);
@@ -140,9 +159,9 @@ export default async function GuidePage({ params }: Props) {
               </Link>
             </div>
           </div>
-          <div className="relative aspect-[4/3] overflow-hidden rounded-3xl shadow-2xl shadow-black/10">
+          <div className="relative aspect-square overflow-hidden rounded-3xl shadow-2xl shadow-black/10">
             <Image
-              src={HERO_IMAGE}
+              src={images.hero}
               alt={c.h1}
               fill
               className="object-cover"
@@ -195,39 +214,77 @@ export default async function GuidePage({ params }: Props) {
         </div>
       </section>
 
-      {/* ── Solution + Products ── */}
-      <section className="py-16 md:py-24">
-        <div className="mx-auto max-w-[1280px] px-6 md:px-10">
-          <div className="mx-auto max-w-3xl">
-            <h2 className="text-2xl font-bold tracking-tight text-[#1d1d1f] md:text-3xl">
-              {c.solutionTitle}
-            </h2>
-            <div
-              className="mt-6 space-y-4 text-base leading-relaxed text-[#515151]"
-              dangerouslySetInnerHTML={{ __html: c.solutionBody }}
-            />
-          </div>
-
-          {products.length > 0 && (
-            <div className="mt-14">
-              <h3 className="mb-8 text-center text-xl font-bold tracking-tight text-[#1d1d1f]">
-                {l === "sv"
-                  ? "Produkter vi rekommenderar"
-                  : "Products we recommend"}
-              </h3>
-              <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {products.map(
-                  (p) => p && <ProductCard key={p.id} product={p} />,
-                )}
-              </div>
+      {/* ── Secondary Image Break ── */}
+      {images.secondary && (
+        <section className="overflow-hidden py-16 md:py-24">
+          <div className="mx-auto grid max-w-[1280px] items-center gap-10 px-6 md:grid-cols-2 md:gap-16 md:px-10">
+            <div className="relative aspect-[4/5] overflow-hidden rounded-3xl shadow-xl shadow-black/8 md:aspect-[3/4]">
+              <Image
+                src={images.secondary}
+                alt={c.solutionTitle}
+                fill
+                className="object-cover"
+                sizes="(max-width: 768px) 100vw, 50vw"
+              />
             </div>
-          )}
-        </div>
-      </section>
+            <div className="max-w-lg">
+              <h2 className="text-2xl font-bold tracking-tight text-[#1d1d1f] md:text-3xl">
+                {c.solutionTitle}
+              </h2>
+              <div
+                className="mt-6 space-y-4 text-base leading-relaxed text-[#515151]"
+                dangerouslySetInnerHTML={{ __html: c.solutionBody }}
+              />
+              <Link
+                href={localizePath(l, "products")}
+                className="mt-8 inline-flex h-[48px] items-center gap-2 rounded-full bg-[#108474] px-8 text-sm font-medium text-white transition-all duration-300 hover:bg-[#0d6e61] hover:shadow-lg"
+              >
+                {l === "sv" ? "Se produkter" : "View products"}
+                <ArrowRight className="h-4 w-4" />
+              </Link>
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ── Solution (text only fallback if no secondary image) ── */}
+      {!images.secondary && (
+        <section className="py-16 md:py-24">
+          <div className="mx-auto max-w-[1280px] px-6 md:px-10">
+            <div className="mx-auto max-w-3xl">
+              <h2 className="text-2xl font-bold tracking-tight text-[#1d1d1f] md:text-3xl">
+                {c.solutionTitle}
+              </h2>
+              <div
+                className="mt-6 space-y-4 text-base leading-relaxed text-[#515151]"
+                dangerouslySetInnerHTML={{ __html: c.solutionBody }}
+              />
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* ── Products ── */}
+      {products.length > 0 && (
+        <section className="bg-[#f5f5f7] py-16 md:py-24">
+          <div className="mx-auto max-w-[1280px] px-6 md:px-10">
+            <h3 className="mb-8 text-center text-xl font-bold tracking-tight text-[#1d1d1f]">
+              {l === "sv"
+                ? "Produkter vi rekommenderar"
+                : "Products we recommend"}
+            </h3>
+            <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+              {products.map(
+                (p) => p && <ProductCard key={p.id} product={p} />,
+              )}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* ── FAQ ── */}
       {c.faq.length > 0 && (
-        <section className="bg-[#f5f5f7] py-16 md:py-24">
+        <section className="py-16 md:py-24">
           <div className="mx-auto max-w-[1280px] px-6 md:px-10">
             <h2 className="mb-10 text-center text-2xl font-bold tracking-tight text-[#1d1d1f] md:text-3xl">
               {l === "sv" ? "Vanliga frågor" : "Frequently asked questions"}
