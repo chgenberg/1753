@@ -624,6 +624,8 @@ const bundle = {
     firstAnalysisCta: "Gör din första hudanalys",
     analysesDone: "{count} analyser genomförda",
     analysesDoneOne: "{count} analys genomförd",
+    skinScoreOverTime: "Hudpoäng över tid",
+    skinScoreChartSub: "{count} analyser",
     latestScore: "Senaste poäng",
     newAnalysis: "Gör en ny analys",
     ordersTitle: "Mina ordrar",

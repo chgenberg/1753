@@ -204,11 +204,18 @@ async function initSchema() {
       title           VARCHAR(500) DEFAULT '',
       body            TEXT DEFAULT '',
       reply           TEXT DEFAULT '',
+      title_en        VARCHAR(500) DEFAULT '',
+      body_en         TEXT DEFAULT '',
+      reply_en        TEXT DEFAULT '',
       verified        BOOLEAN DEFAULT false,
       review_date     TIMESTAMPTZ,
       location        VARCHAR(255) DEFAULT '',
       created_at      TIMESTAMPTZ DEFAULT NOW()
     );
+
+    ALTER TABLE reviews ADD COLUMN IF NOT EXISTS title_en VARCHAR(500) DEFAULT '';
+    ALTER TABLE reviews ADD COLUMN IF NOT EXISTS body_en TEXT DEFAULT '';
+    ALTER TABLE reviews ADD COLUMN IF NOT EXISTS reply_en TEXT DEFAULT '';
 
     CREATE INDEX IF NOT EXISTS idx_reviews_product ON reviews (product_id);
     CREATE INDEX IF NOT EXISTS idx_reviews_rating ON reviews (product_id, rating);
@@ -1017,14 +1024,24 @@ async function createReview({ product_id, reviewer_name, rating, title, body, re
   return rows[0];
 }
 
-async function findReviewsByProduct(productId, limit = 10, offset = 0) {
+async function findReviewsByProduct(productId, limit = 10, offset = 0, locale = "sv") {
   const { rows } = await pool.query(
-    `SELECT id, product_id, reviewer_name, rating, title, body, reply, verified, review_date, location
+    `SELECT id, product_id, reviewer_name, rating,
+       title, body, reply, title_en, body_en, reply_en,
+       verified, review_date, location
      FROM reviews WHERE product_id = $1
      ORDER BY review_date DESC NULLS LAST
      LIMIT $2 OFFSET $3`,
     [productId, limit, offset]
   );
+  if (locale === "en") {
+    return rows.map((r) => ({
+      ...r,
+      title: r.title_en || r.title,
+      body: r.body_en || r.body,
+      reply: r.reply_en || r.reply,
+    }));
+  }
   return rows;
 }
 

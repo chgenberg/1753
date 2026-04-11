@@ -50,7 +50,7 @@ const TIERS: {
 ];
 
 export default function LoyaltyPage() {
-  const { t, path } = useLocale();
+  const { t, path, locale } = useLocale();
   const p = (key: string) => t(`loyaltyPage.${key}`);
   const [activeTier, setActiveTier] = useState<Tier>("silver");
   const active = TIERS.find((tier) => tier.id === activeTier)!;
@@ -190,7 +190,7 @@ export default function LoyaltyPage() {
                   />
                 </div>
                 <span className="text-xs font-semibold text-brand-500 tabular-nums">
-                  {active.threshold.toLocaleString()} / 10 000
+                  {active.threshold.toLocaleString(locale === "en" ? "en-GB" : "sv-SE")} / {(10000).toLocaleString(locale === "en" ? "en-GB" : "sv-SE")}
                 </span>
               </div>
             </div>

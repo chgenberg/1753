@@ -5,8 +5,10 @@ import { cn } from "@/lib/utils";
 import {
   CONDITION_COLORS,
   CONDITION_LABELS_SV,
+  CONDITION_LABELS_EN,
   type ZoneResult,
 } from "./zones";
+import { useLocale } from "@/providers/locale-provider";
 
 interface FaceCanvasProps {
   imageSrc: string;
@@ -17,6 +19,7 @@ interface FaceCanvasProps {
 const FACE_OVAL = { x: 0.125, y: 0.05, w: 0.75, h: 0.85 };
 
 export function FaceCanvas({ imageSrc, results, className }: FaceCanvasProps) {
+  const { locale } = useLocale();
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const [imgDims, setImgDims] = useState({ w: 0, h: 0 });
@@ -112,7 +115,7 @@ export function FaceCanvas({ imageSrc, results, className }: FaceCanvasProps) {
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={imageSrc}
-        alt="Hudanalys"
+        alt={locale === "en" ? "Skin analysis" : "Hudanalys"}
         className="block h-auto w-full rounded-2xl"
         onLoad={(e) => {
           const el = e.currentTarget;
@@ -129,7 +132,9 @@ export function FaceCanvas({ imageSrc, results, className }: FaceCanvasProps) {
         const { zone, topCondition, confidence } = r;
         const isRevealed = revealed.has(zone.id);
         const color = CONDITION_COLORS[topCondition] || "#108474";
-        const labelSv = CONDITION_LABELS_SV[topCondition] || topCondition;
+        const conditionLabel =
+          (locale === "en" ? CONDITION_LABELS_EN : CONDITION_LABELS_SV)[topCondition] ||
+          topCondition;
 
         const top = `${zone.labelY * 100}%`;
         const style: React.CSSProperties = {
@@ -165,10 +170,10 @@ export function FaceCanvas({ imageSrc, results, className }: FaceCanvasProps) {
               />
               <div>
                 <p className="text-xs font-semibold leading-tight" style={{ color }}>
-                  {labelSv}
+                  {conditionLabel}
                 </p>
                 <p className="text-[10px] leading-tight text-[#515151]">
-                  {zone.labelSv} — {Math.round(confidence * 100)}%
+                  {(locale === "en" ? zone.labelEn : zone.labelSv)} — {Math.round(confidence * 100)}%
                 </p>
               </div>
             </div>

@@ -18,9 +18,11 @@ import { FaceCanvas } from "./face-canvas";
 import {
   FACE_ZONES,
   CONDITION_LABELS_SV,
+  CONDITION_LABELS_EN,
   CONDITION_COLORS,
   type ZoneResult,
 } from "./zones";
+import { useLocale } from "@/providers/locale-provider";
 
 export interface ScanSummary {
   overallTop: Prediction[];
@@ -36,6 +38,7 @@ interface SkinScannerProps {
 }
 
 export function SkinScanner({ onComplete }: SkinScannerProps) {
+  const { locale } = useLocale();
   const [step, setStep] = useState<ScannerStep>("idle");
   const [modelProgress, setModelProgress] = useState(0);
   const [imageSrc, setImageSrc] = useState<string | null>(null);
@@ -72,10 +75,14 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
         await videoRef.current.play();
       }
     } catch {
-      setError("Kunde inte starta kameran. Kontrollera att du gett tillstånd.");
+      setError(
+        locale === "en"
+          ? "Could not start the camera. Please check your permissions."
+          : "Kunde inte starta kameran. Kontrollera att du gett tillstånd."
+      );
       setStep("idle");
     }
-  }, []);
+  }, [locale]);
 
   const captureFromCamera = useCallback(() => {
     const video = videoRef.current;
@@ -129,7 +136,7 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
     try {
       const session = await loadModel((pct) => setModelProgress(pct));
       setStep("analyzing");
-      setAnalyzingZone("Helhetsbild");
+      setAnalyzingZone(locale === "en" ? "Full face" : "Helhetsbild");
 
       const overallPreds = await classifyRegion(
         session,
@@ -147,7 +154,7 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
       const zoneResults: ZoneResult[] = [];
 
       for (const zone of FACE_ZONES) {
-        setAnalyzingZone(zone.labelSv);
+        setAnalyzingZone(locale === "en" ? zone.labelEn : zone.labelSv);
 
         const [rx, ry, rw, rh] = zone.rect;
         const cropX = faceX + rx * faceW;
@@ -183,10 +190,14 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
       });
     } catch (err) {
       console.error("Analysis error:", err);
-      setError("Något gick fel vid analysen. Försök igen.");
+      setError(
+        locale === "en"
+          ? "Something went wrong during the analysis. Please try again."
+          : "Något gick fel vid analysen. Försök igen."
+      );
       setStep("captured");
     }
-  }, [consent, imageSrc, onComplete]);
+  }, [consent, imageSrc, locale, onComplete]);
 
   const reset = useCallback(() => {
     setStep("idle");
@@ -221,11 +232,12 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
           </div>
           <div>
             <h3 className="text-xl font-bold tracking-tight text-[#1d1d1f]">
-              Ansiktsskanning
+              {locale === "en" ? "Face scan" : "Ansiktsskanning"}
             </h3>
             <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-[#515151]">
-              Ta en selfie eller ladda upp ett foto. Vår AI analyserar sex
-              ansiktszoner direkt i din enhet — helt privat.
+              {locale === "en"
+                ? "Take a selfie or upload a photo. Our AI reviews six facial zones directly on your device, completely privately."
+                : "Ta en selfie eller ladda upp ett foto. Vår AI analyserar sex ansiktszoner direkt i din enhet — helt privat."}
             </p>
           </div>
 
@@ -235,20 +247,24 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
               className="inline-flex h-12 w-full items-center justify-center gap-2.5 rounded-full bg-[#108474] px-7 text-sm font-semibold text-white shadow-lg shadow-[#108474]/20 transition-all hover:bg-[#0d6e62] hover:shadow-xl active:scale-[0.97] sm:w-auto"
             >
               <Camera className="h-4.5 w-4.5" />
-              Öppna kamera
+              {locale === "en" ? "Open camera" : "Öppna kamera"}
             </button>
             <button
               onClick={() => fileRef.current?.click()}
               className="inline-flex h-12 w-full items-center justify-center gap-2.5 rounded-full border-2 border-[#108474] px-7 text-sm font-semibold text-[#108474] transition-all hover:bg-[#108474]/5 active:scale-[0.97] sm:w-auto"
             >
               <ImagePlus className="h-4.5 w-4.5" />
-              Ladda upp foto
+              {locale === "en" ? "Upload photo" : "Ladda upp foto"}
             </button>
           </div>
 
           <div className="flex items-center justify-center gap-2 text-xs text-[#766a62]">
             <Shield className="h-3.5 w-3.5" />
-            <span>Din bild lämnar aldrig din enhet</span>
+            <span>
+              {locale === "en"
+                ? "Your image never leaves your device"
+                : "Din bild lämnar aldrig din enhet"}
+            </span>
           </div>
         </div>
       )}
@@ -268,7 +284,7 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
               <div className="h-[70%] w-[55%] rounded-[50%] border-2 border-white/30 shadow-[0_0_0_9999px_rgba(0,0,0,0.3)]" />
             </div>
             <p className="absolute bottom-4 left-0 right-0 text-center text-sm font-medium text-white/80">
-              Placera ditt ansikte inom ovalen
+              {locale === "en" ? "Place your face inside the oval" : "Placera ditt ansikte inom ovalen"}
             </p>
           </div>
 
@@ -278,12 +294,12 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
               className="inline-flex h-10 items-center gap-2 rounded-xl px-5 text-sm font-medium text-[#515151] transition-colors hover:bg-[#f5f5f7]"
             >
               <X className="h-4 w-4" />
-              Avbryt
+              {locale === "en" ? "Cancel" : "Avbryt"}
             </button>
             <button
               onClick={captureFromCamera}
               className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-white shadow-lg transition-all hover:scale-105 active:scale-90"
-              aria-label="Ta foto"
+              aria-label={locale === "en" ? "Take photo" : "Ta foto"}
             >
               <div className="h-11 w-11 rounded-full border-[3px] border-[#108474]" />
             </button>
@@ -296,7 +312,11 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
         <div className="animate-fade-in space-y-5">
           <div className="overflow-hidden rounded-2xl shadow-lg shadow-black/5">
             {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src={imageSrc} alt="Förhandsvisning" className="block h-auto w-full" />
+            <img
+              src={imageSrc}
+              alt={locale === "en" ? "Preview" : "Förhandsvisning"}
+              className="block h-auto w-full"
+            />
           </div>
 
           {error && (
@@ -319,10 +339,21 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
               <Square className="mt-0.5 h-5 w-5 flex-shrink-0 text-[#766a62]/50" />
             )}
             <span className="text-xs leading-relaxed text-[#515151]">
-              Jag godkänner att min bild och mina svar får användas{" "}
-              <span className="font-semibold text-[#1d1d1f]">anonymt</span> för
-              att förbättra 1753 SKINCAREs AI-hudanalys. Ingen personlig
-              information sparas.
+              {locale === "en" ? (
+                <>
+                  I agree that my image and answers may be used{" "}
+                  <span className="font-semibold text-[#1d1d1f]">anonymously</span> to
+                  improve 1753 SKINCARE&apos;s AI skin analysis. No personal
+                  information is stored.
+                </>
+              ) : (
+                <>
+                  Jag godkänner att min bild och mina svar får användas{" "}
+                  <span className="font-semibold text-[#1d1d1f]">anonymt</span> för
+                  att förbättra 1753 SKINCAREs AI-hudanalys. Ingen personlig
+                  information sparas.
+                </>
+              )}
             </span>
           </button>
 
@@ -332,14 +363,14 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
               className="inline-flex h-11 items-center gap-2 rounded-full px-6 text-sm font-medium text-[#515151] transition-colors hover:bg-[#f5f5f7]"
             >
               <RefreshCw className="h-4 w-4" />
-              Nytt foto
+              {locale === "en" ? "Use another photo" : "Nytt foto"}
             </button>
             <button
               onClick={runAnalysis}
               className="inline-flex h-12 items-center gap-2.5 rounded-full bg-[#108474] px-8 text-sm font-semibold text-white shadow-lg shadow-[#108474]/20 transition-all hover:bg-[#0d6e62] hover:shadow-xl active:scale-[0.97]"
             >
               <ScanFace className="h-4.5 w-4.5" />
-              Analysera min hy
+              {locale === "en" ? "Analyse my skin" : "Analysera min hy"}
             </button>
           </div>
         </div>
@@ -353,12 +384,16 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
           </div>
           <div>
             <h3 className="text-lg font-bold tracking-tight text-[#1d1d1f]">
-              Laddar analysmodell
+              {locale === "en" ? "Loading analysis model" : "Laddar analysmodell"}
             </h3>
             <p className="mt-1 text-sm text-[#515151]">
               {modelProgress < 100
-                ? `${modelProgress}% nedladdat`
-                : "Förbereder modellen..."}
+                ? locale === "en"
+                  ? `${modelProgress}% downloaded`
+                  : `${modelProgress}% nedladdat`
+                : locale === "en"
+                  ? "Preparing model..."
+                  : "Förbereder modellen..."}
             </p>
           </div>
           <div className="mx-auto h-2 w-72 overflow-hidden rounded-full bg-[#e6e6e6]">
@@ -368,7 +403,9 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
             />
           </div>
           <p className="text-xs text-[#766a62]">
-            Första gången kräver nedladdning (87 MB). Cachelagras sedan lokalt.
+            {locale === "en"
+              ? "The first run requires a download (87 MB). After that it is cached locally."
+              : "Första gången kräver nedladdning (87 MB). Cachelagras sedan lokalt."}
           </p>
         </div>
       )}
@@ -386,10 +423,12 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
           </div>
           <div>
             <h3 className="text-lg font-bold tracking-tight text-[#1d1d1f]">
-              Analyserar din hy
+              {locale === "en" ? "Analysing your skin" : "Analyserar din hy"}
             </h3>
             <p className="mt-2 text-sm text-[#515151]">
-              Sex ansiktszoner granskas av vår AI
+              {locale === "en"
+                ? "Our AI is reviewing six facial zones"
+                : "Sex ansiktszoner granskas av vår AI"}
             </p>
           </div>
           {analyzingZone && (
@@ -414,13 +453,14 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
           {overallTop.length > 0 && (
             <div className="rounded-2xl border border-[#e6e6e6] bg-white p-5 shadow-sm">
               <h4 className="mb-3 text-sm font-bold tracking-tight text-[#1d1d1f]">
-                Översiktlig bedömning
+                {locale === "en" ? "Overall read" : "Översiktlig bedömning"}
               </h4>
               <div className="flex flex-wrap gap-2">
                 {overallTop.map((pred) => {
                   const color = CONDITION_COLORS[pred.label] || "#108474";
-                  const labelSv =
-                    CONDITION_LABELS_SV[pred.label] || pred.label;
+                  const conditionLabels =
+                    locale === "en" ? CONDITION_LABELS_EN : CONDITION_LABELS_SV;
+                  const localizedLabel = conditionLabels[pred.label] || pred.label;
                   return (
                     <div
                       key={pred.label}
@@ -438,7 +478,7 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
                         className="text-sm font-semibold"
                         style={{ color }}
                       >
-                        {labelSv}
+                        {localizedLabel}
                       </span>
                       <span className="text-xs text-[#766a62]">
                         {Math.round(pred.probability * 100)}%
@@ -453,7 +493,7 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
           {/* Zone-by-zone breakdown */}
           <div className="space-y-3">
             <h4 className="text-sm font-bold tracking-tight text-[#1d1d1f]">
-              Zon för zon
+              {locale === "en" ? "Zone by zone" : "Zon för zon"}
             </h4>
             <div className="grid gap-3 sm:grid-cols-2">
               {results
@@ -461,8 +501,10 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
                 .map((r) => {
                   const color =
                     CONDITION_COLORS[r.topCondition] || "#108474";
-                  const labelSv =
-                    CONDITION_LABELS_SV[r.topCondition] || r.topCondition;
+                  const conditionLabels =
+                    locale === "en" ? CONDITION_LABELS_EN : CONDITION_LABELS_SV;
+                  const localizedLabel =
+                    conditionLabels[r.topCondition] || r.topCondition;
                   return (
                     <div
                       key={r.zone.id}
@@ -470,7 +512,7 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
                     >
                       <div className="mb-2 flex items-center justify-between">
                         <span className="text-sm font-semibold text-[#1d1d1f]">
-                          {r.zone.labelSv}
+                          {locale === "en" ? r.zone.labelEn : r.zone.labelSv}
                         </span>
                         <span
                           className="rounded-full px-2.5 py-0.5 text-[11px] font-bold"
@@ -483,13 +525,15 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
                         </span>
                       </div>
                       <p className="text-sm font-medium" style={{ color }}>
-                        {labelSv}
+                        {localizedLabel}
                       </p>
                       {r.allPredictions.length > 1 &&
                         r.allPredictions[1].probability > 0.1 && (
                           <p className="mt-1 text-xs text-[#766a62]">
-                            Även:{" "}
-                            {CONDITION_LABELS_SV[r.allPredictions[1].label] ||
+                            {locale === "en" ? "Also:" : "Även:"}{" "}
+                            {(locale === "en"
+                              ? CONDITION_LABELS_EN[r.allPredictions[1].label]
+                              : CONDITION_LABELS_SV[r.allPredictions[1].label]) ||
                               r.allPredictions[1].label}{" "}
                             ({Math.round(r.allPredictions[1].probability * 100)}%)
                           </p>
@@ -504,7 +548,9 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
           <div className="space-y-4 text-center">
             <div className="inline-flex items-center gap-2 rounded-full bg-[#108474]/5 px-4 py-2 text-xs font-medium text-[#108474]">
               <Shield className="h-3.5 w-3.5" />
-              Din bild analyserades helt lokalt och har inte lämnat din enhet
+              {locale === "en"
+                ? "Your image was analysed locally and never left your device"
+                : "Din bild analyserades helt lokalt och har inte lämnat din enhet"}
             </div>
 
             {!consent && (
@@ -515,9 +561,19 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
               >
                 <Square className="mt-0.5 h-5 w-5 flex-shrink-0 text-[#766a62]/50" />
                 <span className="text-xs leading-relaxed text-[#515151]">
-                  Jag godkänner att min bild och mina svar får användas{" "}
-                  <span className="font-semibold text-[#1d1d1f]">anonymt</span> för
-                  att förbättra vår AI-hudanalys.
+                  {locale === "en" ? (
+                    <>
+                      I agree that my image and answers may be used{" "}
+                      <span className="font-semibold text-[#1d1d1f]">anonymously</span> to
+                      improve our AI skin analysis.
+                    </>
+                  ) : (
+                    <>
+                      Jag godkänner att min bild och mina svar får användas{" "}
+                      <span className="font-semibold text-[#1d1d1f]">anonymt</span> för
+                      att förbättra vår AI-hudanalys.
+                    </>
+                  )}
                 </span>
               </button>
             )}
@@ -528,14 +584,14 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
                 className="inline-flex h-10 items-center gap-2 rounded-full border-2 border-[#108474] px-6 text-sm font-semibold text-[#108474] transition-all hover:bg-[#108474]/5 active:scale-[0.97]"
               >
                 <RefreshCw className="h-4 w-4" />
-                Ny skanning
+                {locale === "en" ? "New scan" : "Ny skanning"}
               </button>
             </div>
 
             <p className="mx-auto max-w-sm text-[11px] leading-relaxed text-[#766a62]/80">
-              Denna analys är framtagen med hjälp av artificiell intelligens och
-              utgör inte medicinsk rådgivning, diagnos eller behandlingsrekommendation.
-              Vid hudbesvär, kontakta alltid en legitimerad dermatolog eller läkare.
+              {locale === "en"
+                ? "This analysis is generated with the help of artificial intelligence and does not constitute medical advice, diagnosis or treatment recommendations. If you have ongoing skin concerns, always contact a licensed dermatologist or doctor."
+                : "Denna analys är framtagen med hjälp av artificiell intelligens och utgör inte medicinsk rådgivning, diagnos eller behandlingsrekommendation. Vid hudbesvär, kontakta alltid en legitimerad dermatolog eller läkare."}
             </p>
           </div>
         </div>

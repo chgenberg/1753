@@ -158,7 +158,7 @@ export default function RegisterPage() {
                       setForm((p) => ({ ...p, password: e.target.value }))
                     }
                     className="w-full rounded-xl border border-input bg-background px-4 py-3 pr-12 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring focus:outline-none"
-                    placeholder="Minst 6 tecken, inkl. en siffra"
+                    placeholder={ex("passwordPlaceholder")}
                   />
                   <button
                     type="button"

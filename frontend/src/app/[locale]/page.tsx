@@ -46,7 +46,7 @@ function ReviewCarousel() {
     const productIds = ["duo-kit", "duo-ta-da", "ta-da-serum", "au-naturel-makeup-remover", "fungtastic-mushroom-extract"];
     Promise.all(
       productIds.map((id) =>
-        apiFetch<{ reviews: ReviewSnippet[] }>(`/reviews/${id}?limit=10&offset=0`)
+        apiFetch<{ reviews: ReviewSnippet[] }>(`/reviews/${id}?limit=10&offset=0&locale=${locale}`)
           .then((d) => d.reviews.filter((r) => r.rating === 5 && r.body.length > 30))
           .catch(() => [] as ReviewSnippet[])
       )
@@ -58,7 +58,7 @@ function ReviewCarousel() {
       }
       setReviews(all.slice(0, 20));
     });
-  }, []);
+  }, [locale]);
 
   const checkScroll = useCallback(() => {
     const el = scrollRef.current;

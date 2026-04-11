@@ -38,7 +38,7 @@ export const CITY_PAGES: LandingPage[] = [
       metaDescription: "Natural CBD skincare for Stockholm. Order online with free shipping over €60. Protect your skin from urban stress and harsh Swedish winters.",
       kicker: "Skincare in Stockholm",
       h1: "Natural skincare for Stockholm",
-      lead: "Stockholm skin has it rough. Exhaust fumes along Sveavägen, bone-dry winter air off Lake Mälaren, and heated office air nine months a year. Your skin deserves better than aggressive products that make the problem worse. Order online – free shipping over €60, straight to your door in Stockholm.",
+      lead: "Skin in Stockholm has it rough. Exhaust fumes along Sveavägen, bone-dry winter air off Lake Mälaren, and heated office air nine months a year. Your skin deserves better than aggressive products that make the problem worse. Order online – free shipping over €60, straight to your door in Stockholm.",
       problemTitle: "What Stockholm does to your skin",
       problemBody: "<p>Living in Stockholm means your skin faces a unique combination of stressors. Urban air pollution – traffic exhaust, subway particles, heated indoor air – attacks your skin barrier day after day. Stockholm's subway system has some of Europe's highest levels of airborne iron particles, which oxidize on the skin and drive inflammatory processes.</p><p>Winters are long and dry. Temperatures can swing from minus fifteen outside to twenty-five degrees indoors, and the rapid shift between cold and heat puts enormous stress on the skin. Stockholm's tap water also has moderate hardness – calcium levels that can dry out and irritate sensitive skin over time.</p><p>Add the typical Stockholm stress – the commute, the deadlines, the constant connectivity – and you have a perfect storm for skin issues. Stress raises cortisol levels, which in turn drives oil production and inflammation. Your skin tells the story your lifestyle won't.</p>",
       tipsTitle: "Skincare tips for Stockholmers",
@@ -50,14 +50,14 @@ export const CITY_PAGES: LandingPage[] = [
         { title: "Protect your face when cycling", body: "Stockholm is a cycling city, but wind and cold dry out your skin fast. Apply a protective oil before getting on your bike – especially from October to April." }
       ],
       solutionTitle: "CBD skincare delivered to your door in Stockholm",
-      solutionBody: "<p>You don't need to run around Biblioteksgatan chasing skincare products. 1753 SKINCARE ships directly to you in Stockholm – from our warehouse in Åsa outside Gothenburg, with free shipping on orders over €60.</p><p>Our DUO-kit with The ONE and I LOVE gives your Stockholm skin the balance it desperately needs. CBD and CBG work with your skin's own endocannabinoid system to calm inflammation, strengthen the barrier, and counteract oxidative stress from city life. TA-DA Serum with concentrated CBG is perfect for the extra dry winter months. And Au Naturel Makeup Remover cleans away the day's dirt and particles without further stressing the skin.</p><p>Natural, honest skincare that works – whether you live in Södermalm, Vasastan, or out in Nacka.</p>",
+      solutionBody: "<p>You don't need to run around Biblioteksgatan chasing skincare products. 1753 SKINCARE ships directly to you in Stockholm – from our warehouse in Åsa outside Gothenburg, with free shipping on orders over €60.</p><p>Our DUO-kit with The ONE and I LOVE gives skin in Stockholm the balance it keeps asking for. CBD and CBG work with your skin's own endocannabinoid system to calm inflammation, strengthen the barrier, and counteract oxidative stress from city life. TA-DA Serum with concentrated CBG is perfect for the extra dry winter months. And Au Naturel Makeup Remover cleans away the day's dirt and particles without further stressing the skin.</p><p>Natural, honest skincare that works – whether you live in Södermalm, Vasastan, or out in Nacka.</p>",
       faq: [
         { q: "Do you ship to Stockholm?", a: "Absolutely. We ship from Åsa outside Gothenburg and most orders reach Stockholm within 1–2 business days. Free shipping on orders over €60." },
         { q: "Where can I buy CBD skincare in Stockholm?", a: "You can order our full range at 1753skin.com. We sell directly to you online – no middlemen, no store markups. Conveniently delivered to your door." },
         { q: "Does CBD skincare help against pollution damage?", a: "Yes, CBD has documented antioxidant properties that help the skin handle oxidative stress from pollution. It doesn't replace sunscreen or cleansing, but strengthens your skin's own resilience." },
         { q: "Which product is best for Stockholm's dry winters?", a: "The DUO-kit provides a solid base with two oils that strengthen the barrier. Add TA-DA Serum during the coldest months for extra protection against dry indoor air and freezing temperatures." }
       ],
-      ctaTitle: "Give your Stockholm skin what it deserves",
+      ctaTitle: "Give your skin in Stockholm what it deserves",
       ctaSub: "Natural CBD skincare to your door. Free shipping over €60."
     }
   },
@@ -100,7 +100,7 @@ export const CITY_PAGES: LandingPage[] = [
       h1: "Natural skincare for Gothenburg",
       lead: "We know what it's like – we live just outside the city ourselves. The rain, the ocean wind, the grey November days. Gothenburg's climate tests your skin in ways Stockholmers will never understand. Order online – free shipping over €60, and we're just a short delivery away in Åsa.",
       problemTitle: "What Gothenburg does to your skin",
-      problemBody: "<p>Gothenburg's oceanic climate is unique in Sweden. The moist sea air from the Skagerrak carries salt that settles on the skin and can disrupt its natural pH balance. The rain – yes, the famous rain – means the skin rarely gets real sun exposure for vitamin D production, while being constantly exposed to moisture and wind.</p><p>Paradoxically, the humid outdoor air leads many to underestimate dry skin. Indoors, it's a different story: heated apartments in Majorna and Linnéstaden have air just as dry as anywhere in Sweden during winter. The skin faces a constant wet-dry-wet cycle that weakens the barrier.</p><p>Gothenburg is also a port city with industry, and air quality varies. Particles from the Göta river area and harbor operations stress the skin, especially if you live or work in the center. Add the west coast lifestyle – outdoors in all weather, often with wind in your face – and you understand why Gothenburg skin needs extra care.</p>",
+      problemBody: "<p>Gothenburg's oceanic climate is unique in Sweden. The moist sea air from the Skagerrak carries salt that settles on the skin and can disrupt its natural pH balance. The rain – yes, the famous rain – means the skin rarely gets real sun exposure for vitamin D production, while being constantly exposed to moisture and wind.</p><p>Paradoxically, the humid outdoor air leads many to underestimate dry skin. Indoors, it's a different story: heated apartments in Majorna and Linnéstaden have air just as dry as anywhere in Sweden during winter. The skin faces a constant wet-dry-wet cycle that weakens the barrier.</p><p>Gothenburg is also a port city with industry, and air quality varies. Particles from the Göta river area and harbor operations stress the skin, especially if you live or work in the center. Add the west coast lifestyle – outdoors in all weather, often with wind in your face – and you understand why skin in Gothenburg needs extra care.</p>",
       tipsTitle: "Skincare tips for Gothenburgers",
       tips: [
         { title: "Use the sea air wisely", body: "Salt ocean air can be both good and bad. Short walks along Saltholmen or Långedrag provide minerals and fresh air, but always rinse your face afterward to avoid salt-induced dryness." },
@@ -117,7 +117,7 @@ export const CITY_PAGES: LandingPage[] = [
         { q: "Does CBD skincare help against weather and wind?", a: "Yes, CBD strengthens the skin barrier and helps the skin handle external stressors like wind, salt, and temperature changes. It doesn't protect like a physical barrier, but makes your skin more resilient." },
         { q: "Do you make your products in Gothenburg?", a: "We're based in Åsa, just south of Gothenburg. Products are developed and distributed from here – it's west coast skincare for west coast conditions." }
       ],
-      ctaTitle: "Gothenburg's climate demands Gothenburg skincare",
+      ctaTitle: "Gothenburg's climate calls for skincare that gets it",
       ctaSub: "From Åsa to your door – natural CBD skincare that understands your climate. Free shipping over €60."
     }
   },

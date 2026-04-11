@@ -388,13 +388,14 @@ function OverviewView({
 
 /* ─────────────────── SKIN JOURNEY ─────────────────── */
 
-function ScoreLineChart({ scores }: { scores: { score: number; date: string }[] }) {
+function ScoreLineChart({ scores, locale }: { scores: { score: number; date: string }[]; locale: string }) {
   if (scores.length < 2) return null;
+  const loc = locale === "en" ? "en-GB" : "sv-SE";
   const data = scores
     .slice()
     .reverse()
     .map((s) => ({
-      label: new Date(s.date).toLocaleDateString("sv-SE", { day: "numeric", month: "short" }),
+      label: new Date(s.date).toLocaleDateString(loc, { day: "numeric", month: "short" }),
       score: s.score,
     }));
   return (
@@ -486,8 +487,8 @@ function SkinJourneyView({ token }: { token: string }) {
       </div>
 
       {scoredAnalyses.length >= 2 && (
-        <ChartCard title={d("skinScoreOverTime") || "Hudpoäng över tid"} subtitle={`${scoredAnalyses.length} analyser`}>
-          <ScoreLineChart scores={scoredAnalyses} />
+        <ChartCard title={d("skinScoreOverTime")} subtitle={d("skinScoreChartSub", { count: scoredAnalyses.length })}>
+          <ScoreLineChart scores={scoredAnalyses} locale={locale} />
         </ChartCard>
       )}
 

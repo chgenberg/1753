@@ -169,7 +169,7 @@ export function ReviewsSection({ productId }: { productId: string }) {
   const PAGE_SIZE = 8;
 
   useEffect(() => {
-    apiFetch<ReviewsResponse>(`/reviews/${productId}?limit=${PAGE_SIZE}&offset=0`)
+    apiFetch<ReviewsResponse>(`/reviews/${productId}?limit=${PAGE_SIZE}&offset=0&locale=${locale}`)
       .then((data) => {
         setReviews(data.reviews);
         setStats(data.stats);
@@ -177,19 +177,19 @@ export function ReviewsSection({ productId }: { productId: string }) {
       })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [productId]);
+  }, [productId, locale]);
 
   const loadMore = useCallback(() => {
     if (loadingMore || !hasMore) return;
     setLoadingMore(true);
-    apiFetch<ReviewsResponse>(`/reviews/${productId}?limit=${PAGE_SIZE}&offset=${reviews.length}`)
+    apiFetch<ReviewsResponse>(`/reviews/${productId}?limit=${PAGE_SIZE}&offset=${reviews.length}&locale=${locale}`)
       .then((data) => {
         setReviews((prev) => [...prev, ...data.reviews]);
         setHasMore(data.reviews.length === PAGE_SIZE);
       })
       .catch(() => {})
       .finally(() => setLoadingMore(false));
-  }, [productId, reviews.length, loadingMore, hasMore]);
+  }, [productId, reviews.length, loadingMore, hasMore, locale]);
 
   if (loading) {
     return (

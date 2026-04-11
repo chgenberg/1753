@@ -45,7 +45,7 @@ export const PRODUCTS: Product[] = [
     shortDesc:
       "Hela rutinen i ett. Tre produkter som stärker huden på djupet – inte bara förbättrar ytan.",
     shortDescEn:
-      "The full routine in one. Three products that strengthen skin deeply – not just the surface.",
+      "The full routine in one: three products that help skin become calmer, stronger and more resilient.",
     description: `<p>Det här är inte ytterligare en hudvårdsrutin. Det här är den enda du behöver.</p>
 <p>Tre produkter. Ett syfte: en hud som fungerar bättre på egen hand. Lugnare, starkare, mer motståndskraftig – utan att du behöver tänka på det.</p>
 
@@ -62,27 +62,27 @@ export const PRODUCTS: Product[] = [
 <p><strong>Morgon:</strong> Skölj ansiktet med ljummet vatten. 3–4 droppar The ONE Facial Oil. 1–2 pump TA-DA Serum.</p>
 <p><strong>Kväll:</strong> Rengör huden varsamt. 3–4 droppar I LOVE Facial Oil. 1–2 pump TA-DA Serum.</p>
 <p><em>Serumet appliceras efter oljan – inte före. Det gör att huden tar upp näringen mer effektivt.</em></p>`,
-    descriptionEn: `<p>This is not another skincare routine. This is the only one you need.</p>
-<p>Three products. One goal: skin that works better on its own. Calmer, stronger, more resilient – without you having to think about it.</p>
+    descriptionEn: `<p>This is not another skincare routine. It is the one that earns its place.</p>
+<p>Three products. One goal: skin that works better on its own. Calmer, stronger and more resilient, without turning your bathroom shelf into a full-time job.</p>
 
 <h3>Why this routine works</h3>
-<p>The formulas are built to work with your skin’s own systems – especially the endocannabinoid system and microbial balance. Two factors that decide whether your skin can take care of itself or constantly needs rescuing.</p>
-<p>It is skincare that works with the body. Not against it.</p>
+<p>The formulas are made to work with your skin’s own systems, especially the endocannabinoid system and microbial balance. Those two factors often decide whether skin can stay steady on its own or keep swinging out of balance.</p>
+<p>This is skincare that works with the body, not against it.</p>
 
 <h3>What’s in the kit</h3>
-<p><strong>The ONE Facial Oil</strong> – Your daily oil. 10% CBD and 0.2% CBG to protect, hydrate and strengthen the barrier. Leaves skin looking even and fresh without feeling heavy. Suitable for all skin types.</p>
-<p><strong>I LOVE Facial Oil</strong> – Evening recovery. 10% CBD and 5% CBG to calm, repair and deeply hydrate while you sleep. Makes the biggest difference for stressed, sensitive or unbalanced skin.</p>
-<p><strong>TA-DA Serum</strong> – The boost that amplifies everything. 3% CBG in organic jojoba oil, applied after your oil. Locks in moisture, adds glow and supports the skin’s recovery.</p>
+<p><strong>The ONE Facial Oil</strong> – Your daytime oil. 10% CBD and 0.2% CBG help protect, hydrate and strengthen the barrier. Skin looks fresher and more even, without feeling greasy or heavy. Suitable for all skin types.</p>
+<p><strong>I LOVE Facial Oil</strong> – Your evening reset. 10% CBD and 5% CBG help calm, repair and deeply hydrate while you sleep. Especially helpful for stressed, sensitive or unbalanced skin.</p>
+<p><strong>TA-DA Serum</strong> – The finishing boost. 3% CBG in organic jojoba oil, applied after your facial oil. It helps lock in moisture, add glow and support recovery.</p>
 
 <h3>How to use it</h3>
 <p><strong>Morning:</strong> Rinse with lukewarm water. 3–4 drops of The ONE Facial Oil. 1–2 pumps of TA-DA Serum.</p>
 <p><strong>Evening:</strong> Cleanse gently. 3–4 drops of I LOVE Facial Oil. 1–2 pumps of TA-DA Serum.</p>
-<p><em>Apply serum after oil – not before. That way the skin absorbs nutrients more effectively.</em></p>`,
+<p><em>Apply the serum after your oil, not before. That helps the skin hold on to the nourishing oils more effectively.</em></p>`,
     ingredients: null,
     size: null,
     guarantee:
       "Fri frakt.",
-    guaranteeEn: "Free shipping.",
+    guaranteeEn: "Free shipping over €60.",
     vatRate: 0.25,
   },
   {
@@ -101,7 +101,7 @@ export const PRODUCTS: Product[] = [
     shortDesc:
       "CBG-berikat serum som låser in fukt och ger lyster. Din huds bästa kompis – oavsett årstid.",
     shortDescEn:
-      "CBG-powered serum that locks in moisture and adds glow. Your skin’s best friend in any season.",
+      "A CBG-powered serum that seals in moisture and adds glow, whatever the season.",
     description: `<p>Torr hud? Det behöver inte vara så. TA-DA Serum är framtaget för att göra en sak riktigt bra: ge din hud fukt som faktiskt stannar kvar.</p>
 
 <h3>Kraften i CBG</h3>
@@ -122,17 +122,17 @@ export const PRODUCTS: Product[] = [
 
 <h3>Varför 3% CBG?</h3>
 <p>Med 1500 mg CBG per flaska i ekologisk jojobaolja får du ett serum med kraftfulla antioxidantegenskaper – perfekt för torr, känslig eller inflammerad hud. Ingen utfyllnad. Bara det huden faktiskt behöver.</p>`,
-    descriptionEn: `<p>Dry skin? It doesn’t have to be that way. TA-DA Serum is made to do one thing really well: give your skin moisture that actually stays put.</p>
+    descriptionEn: `<p>Dry skin does not need another temporary fix. TA-DA Serum is made to do one thing really well: help your skin hold on to moisture that actually stays.</p>
 
 <h3>The power of CBG</h3>
-<p>At the heart of the serum is CBG (cannabigerol) – a potent ingredient that works with your skin’s own endocannabinoid system. The result? Better moisture balance, less water loss and skin that copes even when the climate doesn’t.</p>
+<p>At the heart of the serum is CBG (cannabigerol), a powerful ingredient that works with your skin’s own endocannabinoid system. The result: better moisture balance, less water loss, and skin that still behaves when the weather doesn’t.</p>
 
 <h3>What you get</h3>
 <ul>
-<li>Moisture that stays – doesn’t evaporate after an hour</li>
+<li>Moisture that stays instead of disappearing after an hour</li>
 <li>Less inflammation and redness</li>
 <li>Improved elasticity and firmness</li>
-<li>Visible glow within the first weeks</li>
+<li>Visible glow within the first few weeks</li>
 </ul>
 
 <h3>How to use the serum</h3>
@@ -141,7 +141,7 @@ export const PRODUCTS: Product[] = [
 <p><em>For best results, apply serum after oil.</em></p>
 
 <h3>Why 3% CBG?</h3>
-<p>With 1500 mg CBG per bottle in organic jojoba oil you get a serum with strong antioxidant properties – ideal for dry, sensitive or inflamed skin. No filler. Only what skin actually needs.</p>`,
+<p>With 1500 mg of CBG per bottle in organic jojoba oil, this is a concentrated serum with strong antioxidant support for dry, sensitive or inflamed skin. No filler. Just what skin actually needs.</p>`,
     ingredients:
       "Simmondsia chinensis (Jojoba) Seed Oil (ekologisk), Cannabigerol (CBG, 3% / 1500 mg)",
     ingredientsEn:
@@ -151,7 +151,7 @@ export const PRODUCTS: Product[] = [
     sizes: ["30 ml"],
     guarantee:
       "Fri frakt.",
-    guaranteeEn: "Free shipping.",
+    guaranteeEn: "Free shipping over €60.",
     vatRate: 0.25,
   },
   {
@@ -170,7 +170,7 @@ export const PRODUCTS: Product[] = [
     shortDesc:
       "Två ansiktsoljor. En för morgonen, en för kvällen. Komplett hudvård som fungerar med din hud – inte mot den.",
     shortDescEn:
-      "Two face oils: one for morning, one for evening. Complete care that works with your skin – not against it.",
+      "Two face oils, one for morning and one for evening. Simple skincare that works with your skin, not against it.",
     description: `<p>En olja för dagen. En för natten. Mer behöver det inte vara.</p>
 <p>DUO-kitet ger dig en komplett hudvårdsrutin som är enkel, effektiv och utvecklad för att stärka huden – inte göra den beroende av fler produkter.</p>
 
@@ -196,37 +196,37 @@ export const PRODUCTS: Product[] = [
 <p><strong>Morgon:</strong> Applicera 3–4 droppar The ONE Facial Oil på ren hud.</p>
 <p><strong>Kväll:</strong> Applicera 3–4 droppar I LOVE Facial Oil på ren hud.</p>
 <p><em>Tänk "The ONE I LOVE" för att komma ihåg ordningen.</em></p>`,
-    descriptionEn: `<p>One oil for day. One for night. It doesn’t need to be more complicated than that.</p>
-<p>The DUO kit gives you a complete routine that is simple, effective and built to strengthen skin – not make it dependent on more products.</p>
+    descriptionEn: `<p>One oil for the day. One for the night. It does not need to be more complicated than that.</p>
+<p>The DUO kit gives you a complete routine that is simple, effective and designed to strengthen skin, not make it dependent on more and more products.</p>
 
 <h3>The ONE Facial Oil – morning</h3>
-<p>10% CBD and 0.2% CBG. Protects the barrier, hydrates deeply and leaves an even, fresh look. A light formula for all skin types – oily, dry, sensitive or combination.</p>
+<p>10% CBD and 0.2% CBG help protect the barrier, hydrate deeply and leave skin looking fresher and more even. A light formula for oily, dry, sensitive and combination skin.</p>
 <ul>
-<li>Less inflammation and redness</li>
-<li>Stronger barrier</li>
-<li>Visible glow</li>
-<li>Deep hydration without heaviness</li>
+<li>Less of the angry, blotchy look</li>
+<li>A stronger, steadier skin barrier</li>
+<li>Glow that still looks believable in daylight</li>
+<li>Deep hydration without the heavy finish</li>
 </ul>
 
 <h3>I LOVE Facial Oil – evening</h3>
-<p>10% CBD and 5% CBG. Night is when skin recovers. This oil calms, repairs and deeply hydrates while you sleep. Extra strength for stressed, sensitive or unbalanced skin.</p>
+<p>10% CBD and 5% CBG. Night is when skin recovers, and this oil is made for that window. It helps calm, repair and deeply hydrate while you sleep. Especially helpful for stressed, sensitive or unbalanced skin.</p>
 <ul>
-<li>Repairs and calms overnight</li>
+<li>Calms and repairs while you sleep</li>
 <li>Deep hydration with 5% CBG</li>
-<li>Improved elasticity and firmness</li>
-<li>Softer, more even skin in just weeks</li>
+<li>Better elasticity and bounce</li>
+<li>Softer, more even-looking skin within weeks</li>
 </ul>
 
 <h3>How to use the kit</h3>
 <p><strong>Morning:</strong> Apply 3–4 drops of The ONE Facial Oil to clean skin.</p>
 <p><strong>Evening:</strong> Apply 3–4 drops of I LOVE Facial Oil to clean skin.</p>
-<p><em>Think “The ONE I LOVE” to remember the order.</em></p>`,
+<p><em>Think “The ONE I LOVE” if you want an easy way to remember the order.</em></p>`,
     ingredients: null,
     size: "2 x 10 ml glasflaskor med pipett",
     sizeEn: "2 × 10 ml glass bottles with dropper",
     guarantee:
       "Fri frakt.",
-    guaranteeEn: "Free shipping.",
+    guaranteeEn: "Free shipping over €60.",
     vatRate: 0.25,
   },
   {
@@ -245,7 +245,7 @@ export const PRODUCTS: Product[] = [
     shortDesc:
       "Rengöringsolja med MCT och CBD. Tar bort allt – utan att röra hudens naturliga balans.",
     shortDescEn:
-      "Cleansing oil with MCT and CBD. Removes everything – without disturbing your skin’s natural balance.",
+      "A cleansing oil with MCT and CBD that removes makeup and buildup without stripping your skin bare.",
     description: `<p>De flesta rengöringsprodukter tar bort smuts men skadar hudens naturliga funktioner i processen. Det här är inte en av dem.</p>
 <p>Au Naturel löser upp makeup, smuts och luftföroreningar – utan att störa hudens mikrobiom eller endocannabinoidsystem. Din hud lämnas ren, mjuk och redo.</p>
 
@@ -263,19 +263,19 @@ export const PRODUCTS: Product[] = [
 
 <h3>Så använder du den</h3>
 <p>Applicera några droppar på ansiktet. Massera in. Avlägsna med en varm, fuktig handduk eller bomullspad. Följ upp med ansiktsolja.</p>`,
-    descriptionEn: `<p>Most cleansers remove dirt but damage the skin in the process. This isn’t one of them.</p>
-<p>Au Naturel dissolves makeup, grime and pollution – without disrupting the microbiome or endocannabinoid system. Skin is left clean, soft and ready.</p>
+    descriptionEn: `<p>Many cleansers strip as they clean. This one doesn’t.</p>
+<p>Au Naturel dissolves makeup, grime and pollution without disrupting the microbiome or the endocannabinoid system. Skin is left clean, soft and ready for the next step.</p>
 
 <h3>Just two ingredients</h3>
 <p><strong>MCT (caprylic/capric triglyceride)</strong> – A light oil that binds to sebum and dirt without clogging pores.</p>
-<p><strong>CBD (cannabidiol, 0.2%)</strong> – Calms, hydrates and supports elasticity. Cleansing becomes skincare.</p>
+<p><strong>CBD (cannabidiol, 0.2%)</strong> – Helps calm, hydrate and support elasticity. In other words, cleansing becomes part of your skincare, not the punishment before it.</p>
 
 <h3>What you get</h3>
 <ul>
 <li>Clean skin without that tight feeling</li>
-<li>Deep hydration already at the cleanse step</li>
+<li>Hydration even at the cleansing step</li>
 <li>Improved elasticity and firmness</li>
-<li>Microbial diversity stays intact</li>
+<li>Clean skin that doesn’t feel punished</li>
 </ul>
 
 <h3>How to use it</h3>
@@ -288,7 +288,7 @@ export const PRODUCTS: Product[] = [
     sizes: ["100 ml"],
     guarantee:
       "Fri frakt.",
-    guaranteeEn: "Free shipping.",
+    guaranteeEn: "Free shipping over €60.",
     vatRate: 0.25,
   },
   {
@@ -307,7 +307,7 @@ export const PRODUCTS: Product[] = [
     shortDesc:
       "Fyra medicinska svampar i perfekt balans. Stöd för immunförsvar, fokus, energi och sömn – inifrån.",
     shortDescEn:
-      "Four medicinal mushrooms in balance. Support for immunity, focus, energy and sleep – from within.",
+      "Four mushrooms in one formula to support immunity, focus, energy and sleep from within.",
     description: `<p>Bra hud börjar inifrån. Fungtastic kombinerar fyra av naturens mest kraftfulla medicinska svampar för att stödja kroppen där det verkligen räknas.</p>
 
 <h3>Fyra svampar – fyra superkrafter</h3>
@@ -326,24 +326,24 @@ export const PRODUCTS: Product[] = [
 <p>400 mg per kapsel (15:1 extrakt). Minst 20% betaglukaner. 100% ekologiskt.</p>
 
 <p><em>Undvik om du är gravid, ammande eller allergisk mot någon ingrediens.</em></p>`,
-    descriptionEn: `<p>Great skin starts from within. Fungtastic blends four of nature’s most potent medicinal mushrooms to support the body where it really matters.</p>
+    descriptionEn: `<p>We care about what happens under the skin, not only on it. Fungtastic brings together four mushrooms chosen to support the body where it matters most.</p>
 
-<h3>Four mushrooms – four strengths</h3>
+<h3>Four mushrooms, four jobs</h3>
 <ul>
-<li><strong>Chaga (25%)</strong> – Immune support. Packed with antioxidants and betulinic acid that complements the endocannabinoid system from the inside.</li>
-<li><strong>Lion’s Mane (25%)</strong> – Focus and clarity. Supports memory and mental sharpness.</li>
-<li><strong>Cordyceps (25%)</strong> – Energy and stamina. Supports endurance and physical performance.</li>
-<li><strong>Reishi (25%)</strong> – Calm and recovery. Supports relaxation and deeper sleep.</li>
+<li><strong>Chaga (25%)</strong> – For immune support and antioxidant defence when the body feels a little under siege.</li>
+<li><strong>Lion’s Mane (25%)</strong> – For focus, memory and a clearer head on days that feel mentally crowded.</li>
+<li><strong>Cordyceps (25%)</strong> – For energy and stamina that belong to real life, not just the gym.</li>
+<li><strong>Reishi (25%)</strong> – For calm, recovery and sleep that actually shows up.</li>
 </ul>
 
 <h3>Why these mushrooms?</h3>
-<p>It started with Chaga and betulinic acid – a compound that supports the body’s endocannabinoid system much like CBD does for the skin. From there we brought in Lion’s Mane, Cordyceps and Reishi – four mushrooms that work together for a whole-body boost.</p>
+<p>It started with Chaga and betulinic acid, a compound that supports the body’s endocannabinoid system in a way that mirrors what CBD does for the skin. From there we added Lion’s Mane, Cordyceps and Reishi: four mushrooms that work with the body instead of trying to bully it.</p>
 
 <h3>How to take them</h3>
 <p>2 capsules daily. Most people notice a difference after 2–4 weeks.</p>
 <p>400 mg per capsule (15:1 extract). At least 20% beta-glucans. 100% organic.</p>
 
-<p><em>Avoid if pregnant, breastfeeding or allergic to any ingredient.</em></p>`,
+<p><em>Avoid if you’re pregnant, breastfeeding, or allergic to any ingredient.</em></p>`,
     ingredients:
       "Chaga (25%), Lion's Mane (25%), Cordyceps (25%), Reishi (25%) – 400 mg per kapsel (15:1 extrakt). Betaglukaner: minst 20%.",
     ingredientsEn:
@@ -353,7 +353,7 @@ export const PRODUCTS: Product[] = [
     sizes: ["60 kapslar"],
     guarantee:
       "Fri frakt.",
-    guaranteeEn: "Free shipping.",
+    guaranteeEn: "Free shipping over €60.",
     vatRate: 0.12,
   },
 ];

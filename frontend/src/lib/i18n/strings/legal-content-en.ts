@@ -11,7 +11,7 @@ export const LEGAL_TERMS_EN: LegalDoc = {
   sections: [
     {
       h: "1. General",
-      html: `<p>These terms apply to purchases of products via 1753skincare.com and are operated by Floranie International AB, org.no. 559266-5735, Sodra Skjutbanevagen 10, 439 55 Asa, Sweden. By completing a purchase you accept these terms.</p>`,
+      html: `<p>These terms apply to purchases made through 1753skincare.com. The site is operated by Floranie International AB, company registration number 559266-5735, Södra Skjutbanevägen 10, 439 55 Åsa, Sweden. By completing a purchase, you accept these terms.</p>`,
     },
     {
       h: "2. Prices",
@@ -39,11 +39,11 @@ export const LEGAL_TERMS_EN: LegalDoc = {
     },
     {
       h: "8. Disputes",
-      html: `<p>Disputes should first be resolved by mutual agreement. If we cannot agree, you may turn to the Swedish National Board for Consumer Disputes (ARN) or a general court. Swedish law applies.</p>`,
+      html: `<p>Any dispute should first be resolved by agreement between us. If that is not possible, you may turn to the Swedish National Board for Consumer Disputes (ARN) or to the ordinary courts. Swedish law applies.</p>`,
     },
     {
       h: "9. Contact",
-      html: `<p>Floranie International AB<br />Sodra Skjutbanevagen 10, 439 55 Asa, Sweden<br /><a href="mailto:hej@1753skincare.com" class="font-medium text-brand-900 underline underline-offset-2">hej@1753skincare.com</a><br /><a href="tel:0732305521" class="font-medium text-brand-900 underline underline-offset-2">0732-30 55 21</a></p>`,
+      html: `<p>Floranie International AB<br />Södra Skjutbanevägen 10, 439 55 Åsa, Sweden<br /><a href="mailto:hej@1753skincare.com" class="font-medium text-brand-900 underline underline-offset-2">hej@1753skincare.com</a><br /><a href="tel:0732305521" class="font-medium text-brand-900 underline underline-offset-2">0732-30 55 21</a></p>`,
     },
   ],
 };
@@ -57,7 +57,7 @@ export const LEGAL_PRIVACY_EN: LegalDoc = {
   sections: [
     {
       h: "1. Data controller",
-      html: `<p>Floranie International AB, org.no. 559266-5735, Sodra Skjutbanevagen 10, 439 55 Asa, Sweden (&quot;we&quot;, &quot;us&quot;, &quot;1753 SKINCARE&quot;) is the controller for your personal data.</p>`,
+      html: `<p>Floranie International AB, company registration number 559266-5735, Södra Skjutbanevägen 10, 439 55 Åsa, Sweden (&quot;we&quot;, &quot;us&quot;, &quot;1753 SKINCARE&quot;) is the controller for your personal data.</p>`,
     },
     {
       h: "2. Data we collect",

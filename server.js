@@ -3202,8 +3202,9 @@ app.get("/api/reviews/:productId", async (req, res) => {
   try {
     const limit = Math.min(parseInt(req.query.limit) || 10, 50);
     const offset = parseInt(req.query.offset) || 0;
+    const locale = req.query.locale === "en" ? "en" : "sv";
     const [reviews, stats] = await Promise.all([
-      db.findReviewsByProduct(req.params.productId, limit, offset),
+      db.findReviewsByProduct(req.params.productId, limit, offset, locale),
       db.getReviewStats(req.params.productId),
     ]);
     res.json({ reviews, stats });

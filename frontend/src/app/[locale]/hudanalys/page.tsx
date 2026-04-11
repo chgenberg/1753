@@ -24,7 +24,10 @@ import { useLocale } from "@/providers/locale-provider";
 import { useAuth } from "@/providers/auth-provider";
 import { cn } from "@/lib/utils";
 import { SkinScanner, type ScanSummary } from "@/components/skin-scanner/skin-scanner";
-import { CONDITION_LABELS_SV } from "@/components/skin-scanner/zones";
+import {
+  CONDITION_LABELS_EN,
+  CONDITION_LABELS_SV,
+} from "@/components/skin-scanner/zones";
 
 type Step = "intro" | "scan" | 1 | 2 | 3 | 4 | 5 | "analyzing" | "result";
 
@@ -205,10 +208,11 @@ function stripJSON(content: string): string {
 }
 
 export default function AnalysisPage() {
-  const { t } = useLocale();
+  const { locale, t } = useLocale();
   const { token } = useAuth();
   const a = (key: string, vars?: Record<string, string | number>) =>
     t(`analysisPage.${key}`, vars);
+  const conditionLabels = locale === "en" ? CONDITION_LABELS_EN : CONDITION_LABELS_SV;
 
   const [step, setStep] = useState<Step>("intro");
   const [answers, setAnswers] = useState<QuizAnswers>({
@@ -302,15 +306,15 @@ export default function AnalysisPage() {
             imageScan: {
               overall: scanSummary.overallTop.map((p) => ({
                 condition: p.label,
-                conditionSv: CONDITION_LABELS_SV[p.label] || p.label,
+                conditionSv: conditionLabels[p.label] || p.label,
                 confidence: Math.round(p.probability * 100),
               })),
               zones: scanSummary.zones
                 .filter((z) => z.confidence >= 0.15)
                 .map((z) => ({
-                  zone: z.zone.labelSv,
+                  zone: locale === "en" ? z.zone.labelEn : z.zone.labelSv,
                   condition: z.topCondition,
-                  conditionSv: CONDITION_LABELS_SV[z.topCondition] || z.topCondition,
+                  conditionSv: conditionLabels[z.topCondition] || z.topCondition,
                   confidence: Math.round(z.confidence * 100),
                 })),
             },
@@ -334,8 +338,11 @@ export default function AnalysisPage() {
             },
             goals: answers.goals,
             goalFreeText: answers.sensitivities
-              ? `Känsligheter/allergier: ${answers.sensitivities}`
+              ? locale === "en"
+                ? `Sensitivities/allergies: ${answers.sensitivities}`
+                : `Känsligheter/allergier: ${answers.sensitivities}`
               : undefined,
+            locale,
           },
           ...scanContext,
         }),
@@ -432,13 +439,14 @@ export default function AnalysisPage() {
                   className="inline-flex h-14 flex-1 items-center justify-center gap-3 rounded-full border-2 border-[#108474] px-8 text-sm font-semibold text-[#108474] transition-all hover:bg-[#108474]/5 active:scale-[0.97]"
                 >
                   <ScanFace className="h-5 w-5" />
-                  Ansiktsskanning
+                  {locale === "en" ? "Face scan" : "Ansiktsskanning"}
                 </button>
               </div>
 
               <p className="mx-auto mt-4 max-w-sm text-xs text-[#766a62]">
-                Ansiktsskanningen analyserar din hy direkt i din enhet.
-                Ingen bild skickas till någon server.
+                {locale === "en"
+                  ? "The face scan analyses your skin directly on your device. No image is sent to any server."
+                  : "Ansiktsskanningen analyserar din hy direkt i din enhet. Ingen bild skickas till någon server."}
               </p>
             </div>
           )}
@@ -451,7 +459,7 @@ export default function AnalysisPage() {
                 className="mb-6 inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium text-[#515151] transition-colors hover:bg-[#f5f5f7]"
               >
                 <ArrowLeft className="h-4 w-4" />
-                Tillbaka
+                {locale === "en" ? "Back" : "Tillbaka"}
               </button>
               <SkinScanner
                 onComplete={(summary) => {
@@ -466,18 +474,19 @@ export default function AnalysisPage() {
                   <div className="mx-auto max-w-sm rounded-2xl border border-[#108474]/20 bg-[#108474]/5 p-6">
                     <Sparkles className="mx-auto mb-3 h-6 w-6 text-[#108474]" />
                     <p className="text-sm font-bold tracking-tight text-[#1d1d1f]">
-                      Vill du ha en djupare analys?
+                      {locale === "en" ? "Want a deeper read?" : "Vill du ha en djupare analys?"}
                     </p>
                     <p className="mt-2 text-xs leading-relaxed text-[#515151]">
-                      Kombinera skanningen med fem korta frågor om din livsstil
-                      för personliga rekommendationer från vår AI.
+                      {locale === "en"
+                        ? "Combine the scan with five short questions about your lifestyle for more personal recommendations from our AI."
+                        : "Kombinera skanningen med fem korta frågor om din livsstil för personliga rekommendationer från vår AI."}
                     </p>
                     <button
                       onClick={() => setStep(1)}
                       className="mt-5 inline-flex h-12 items-center gap-2 rounded-full bg-[#108474] px-8 text-sm font-semibold text-white shadow-lg shadow-[#108474]/20 transition-all hover:bg-[#0d6e62] hover:shadow-xl active:scale-[0.97]"
                     >
                       <Sparkles className="h-4 w-4" />
-                      Fortsätt med livsstilsanalys
+                      {locale === "en" ? "Continue to lifestyle questions" : "Fortsätt med livsstilsanalys"}
                     </button>
                   </div>
                 </div>
@@ -493,7 +502,7 @@ export default function AnalysisPage() {
               {scanSummary && step === 1 && (
                 <div className="mx-auto mb-5 flex max-w-xs items-center justify-center gap-2 rounded-full bg-[#108474]/5 px-4 py-2 text-xs font-medium text-[#108474]">
                   <ScanFace className="h-3.5 w-3.5" />
-                  Skanningsdata kopplad till analysen
+                  {locale === "en" ? "Scan data linked to this analysis" : "Skanningsdata kopplad till analysen"}
                 </div>
               )}
 
@@ -764,10 +773,12 @@ export default function AnalysisPage() {
               {trainingUploaded && (
                 <div className="flex items-center justify-center gap-2 rounded-xl bg-[#fcb237]/10 px-4 py-3 text-xs font-medium text-[#766a62]">
                   <Heart className="h-3.5 w-3.5 text-[#fcb237]" />
-                  Tack för att du bidrar till att förbättra vår AI-hudanalys
+                  {locale === "en"
+                    ? "Thank you for helping us improve our AI skin analysis"
+                    : "Tack för att du bidrar till att förbättra vår AI-hudanalys"}
                   {trainingCount !== null && (
                     <span className="text-[#766a62]/60">
-                      {" "}&mdash; bidrag #{trainingCount}
+                      {" "}&mdash; {locale === "en" ? "contribution" : "bidrag"} #{trainingCount}
                     </span>
                   )}
                 </div>
@@ -805,9 +816,9 @@ export default function AnalysisPage() {
 
               {/* Medical disclaimer */}
               <p className="mx-auto max-w-md text-center text-[11px] leading-relaxed text-[#766a62]/80">
-                Denna analys är framtagen med hjälp av artificiell intelligens och
-                utgör inte medicinsk rådgivning, diagnos eller behandlingsrekommendation.
-                Vid hudbesvär, kontakta alltid en legitimerad dermatolog eller läkare.
+                {locale === "en"
+                  ? "This analysis is generated with the help of artificial intelligence and does not constitute medical advice, diagnosis or treatment recommendations. If you have ongoing skin concerns, always contact a licensed dermatologist or doctor."
+                  : "Denna analys är framtagen med hjälp av artificiell intelligens och utgör inte medicinsk rådgivning, diagnos eller behandlingsrekommendation. Vid hudbesvär, kontakta alltid en legitimerad dermatolog eller läkare."}
               </p>
             </div>
           )}
