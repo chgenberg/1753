@@ -6,6 +6,7 @@ import {
   CheckSquare,
   ImagePlus,
   Loader2,
+  Lock,
   RefreshCw,
   ScanFace,
   Shield,
@@ -46,6 +47,7 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
   const [overallTop, setOverallTop] = useState<Prediction[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [consent, setConsent] = useState(false);
+  const [showSecurity, setShowSecurity] = useState(false);
   const [analyzingZone, setAnalyzingZone] = useState("");
 
   const videoRef = useRef<HTMLVideoElement>(null);
@@ -186,7 +188,7 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
         overallTop: overallPreds.slice(0, 3),
         zones: zoneResults,
         consentGiven: consent,
-        imageBase64: consent ? imageSrc ?? undefined : undefined,
+        imageBase64: imageSrc ?? undefined,
       });
     } catch (err) {
       console.error("Analysis error:", err);
@@ -323,39 +325,49 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
             <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>
           )}
 
-          <button
-            type="button"
-            onClick={() => setConsent((c) => !c)}
-            className={cn(
-              "mx-auto flex max-w-sm items-start gap-3 rounded-2xl border-2 px-4 py-3 text-left transition-all duration-300",
-              consent
-                ? "border-[#108474]/30 bg-[#108474]/5"
-                : "border-transparent bg-[#f5f5f7] hover:border-[#e6e6e6]"
-            )}
-          >
-            {consent ? (
-              <CheckSquare className="mt-0.5 h-5 w-5 flex-shrink-0 text-[#108474]" />
-            ) : (
-              <Square className="mt-0.5 h-5 w-5 flex-shrink-0 text-[#766a62]/50" />
-            )}
-            <span className="text-xs leading-relaxed text-[#515151]">
-              {locale === "en" ? (
-                <>
-                  I agree that my image and answers may be used{" "}
-                  <span className="font-semibold text-[#1d1d1f]">anonymously</span> to
-                  improve 1753 SKINCARE&apos;s AI skin analysis. No personal
-                  information is stored.
-                </>
-              ) : (
-                <>
-                  Jag godkänner att min bild och mina svar får användas{" "}
-                  <span className="font-semibold text-[#1d1d1f]">anonymt</span> för
-                  att förbättra 1753 SKINCAREs AI-hudanalys. Ingen personlig
-                  information sparas.
-                </>
+          <div className="mx-auto max-w-sm space-y-2">
+            <button
+              type="button"
+              onClick={() => setConsent((c) => !c)}
+              className={cn(
+                "flex w-full items-start gap-3 rounded-2xl border-2 px-4 py-3 text-left transition-all duration-300",
+                consent
+                  ? "border-[#108474]/30 bg-[#108474]/5"
+                  : "border-transparent bg-[#f5f5f7] hover:border-[#e6e6e6]"
               )}
-            </span>
-          </button>
+            >
+              {consent ? (
+                <CheckSquare className="mt-0.5 h-5 w-5 flex-shrink-0 text-[#108474]" />
+              ) : (
+                <Square className="mt-0.5 h-5 w-5 flex-shrink-0 text-[#766a62]/50" />
+              )}
+              <span className="text-xs leading-relaxed text-[#515151]">
+                {locale === "en" ? (
+                  <>
+                    I agree that my image and answers may be used{" "}
+                    <span className="font-semibold text-[#1d1d1f]">anonymously</span> to
+                    improve 1753 SKINCARE&apos;s AI skin analysis. No personal
+                    information is stored.
+                  </>
+                ) : (
+                  <>
+                    Jag godkänner att min bild och mina svar får användas{" "}
+                    <span className="font-semibold text-[#1d1d1f]">anonymt</span> för
+                    att förbättra 1753 SKINCAREs AI-hudanalys. Ingen personlig
+                    information sparas.
+                  </>
+                )}
+              </span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setShowSecurity(true)}
+              className="mx-auto flex items-center gap-1.5 text-[11px] font-medium text-[#766a62]/70 transition-colors hover:text-[#108474]"
+            >
+              <Lock className="h-3 w-3" />
+              {locale === "en" ? "Security" : "Säkerhet"}
+            </button>
+          </div>
 
           <div className="flex items-center justify-center gap-3">
             <button
@@ -593,6 +605,92 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
                 ? "This analysis is generated with the help of artificial intelligence and does not constitute medical advice, diagnosis or treatment recommendations. If you have ongoing skin concerns, always contact a licensed dermatologist or doctor."
                 : "Denna analys är framtagen med hjälp av artificiell intelligens och utgör inte medicinsk rådgivning, diagnos eller behandlingsrekommendation. Vid hudbesvär, kontakta alltid en legitimerad dermatolog eller läkare."}
             </p>
+          </div>
+        </div>
+      )}
+      {/* Security info modal */}
+      {showSecurity && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setShowSecurity(false)}>
+          <div
+            className="relative mx-4 max-h-[85vh] w-full max-w-md overflow-y-auto rounded-3xl bg-white p-6 shadow-2xl md:p-8"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <button
+              onClick={() => setShowSecurity(false)}
+              className="absolute right-4 top-4 rounded-full p-1.5 text-[#766a62] transition-colors hover:bg-[#f5f5f7]"
+            >
+              <X className="h-4 w-4" />
+            </button>
+
+            <div className="mb-6 flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#108474]/10">
+                <Shield className="h-5 w-5 text-[#108474]" />
+              </div>
+              <h3 className="text-lg font-bold tracking-tight text-[#1d1d1f]">
+                {locale === "en" ? "How we protect your data" : "Så skyddar vi din data"}
+              </h3>
+            </div>
+
+            <div className="space-y-5 text-[13px] leading-relaxed text-[#515151]">
+              <div>
+                <h4 className="mb-1 font-semibold text-[#1d1d1f]">
+                  {locale === "en" ? "Face scan stays on your device" : "Ansiktsskanningen stannar i din enhet"}
+                </h4>
+                <p>
+                  {locale === "en"
+                    ? "The AI model runs entirely in your browser. Your photo is never uploaded to any server during the scan. The analysis happens locally on your device using machine learning technology (ONNX Runtime Web)."
+                    : "AI-modellen körs helt i din webbläsare. Ditt foto laddas aldrig upp till någon server under skanningen. Analysen sker lokalt på din enhet med maskininlärningsteknik (ONNX Runtime Web)."}
+                </p>
+              </div>
+
+              <div>
+                <h4 className="mb-1 font-semibold text-[#1d1d1f]">
+                  {locale === "en" ? "Optional photo storage with encryption" : "Valfri fotolagring med kryptering"}
+                </h4>
+                <p>
+                  {locale === "en"
+                    ? "If you choose to save your photo to track skin changes over time, it is encrypted with AES-256-GCM before being stored. This is the same encryption standard used by banks and healthcare providers. Each image gets a unique encryption key. Only you can view your saved photos when logged in."
+                    : "Om du väljer att spara ditt foto för att följa hudförändringar över tid krypteras det med AES-256-GCM innan det lagras. Detta är samma krypteringsstandard som används av banker och sjukvården. Varje bild får en unik krypteringsnyckel. Bara du kan se dina sparade foton när du är inloggad."}
+                </p>
+              </div>
+
+              <div>
+                <h4 className="mb-1 font-semibold text-[#1d1d1f]">
+                  {locale === "en" ? "Training data is anonymised" : "Träningsdata anonymiseras"}
+                </h4>
+                <p>
+                  {locale === "en"
+                    ? "If you consent to help improve our AI, a copy of the scan data is stored separately without any link to your account, name or personal information. This data is used solely to train and improve the skin analysis model."
+                    : "Om du samtycker till att hjälpa förbättra vår AI sparas en kopia av skanningsdatan separat utan koppling till ditt konto, namn eller personlig information. Datan används enbart för att träna och förbättra hudanalysmodellen."}
+                </p>
+              </div>
+
+              <div>
+                <h4 className="mb-1 font-semibold text-[#1d1d1f]">
+                  {locale === "en" ? "You are in control" : "Du har kontroll"}
+                </h4>
+                <p>
+                  {locale === "en"
+                    ? "You can delete all your saved photos at any time from your account under \"My skin journey\". Deletion is immediate and permanent. You can also use the analysis without saving any data at all."
+                    : "Du kan radera alla dina sparade foton när som helst från ditt konto under \"Min hudresa\". Radering sker omedelbart och permanent. Du kan också använda analysen utan att spara någon data alls."}
+                </p>
+              </div>
+
+              <div className="rounded-xl bg-[#f5f5f7] px-4 py-3">
+                <p className="text-[11px] text-[#766a62]">
+                  {locale === "en"
+                    ? "1753 SKINCARE processes personal data in accordance with GDPR (EU 2016/679). For questions about your data, contact info@1753skin.com."
+                    : "1753 SKINCARE behandlar personuppgifter i enlighet med GDPR (EU 2016/679). För frågor om din data, kontakta info@1753skin.com."}
+                </p>
+              </div>
+            </div>
+
+            <button
+              onClick={() => setShowSecurity(false)}
+              className="mt-6 w-full rounded-full bg-[#108474] py-3 text-sm font-semibold text-white transition-all hover:bg-[#0d6e62]"
+            >
+              {locale === "en" ? "Got it" : "Jag förstår"}
+            </button>
           </div>
         </div>
       )}

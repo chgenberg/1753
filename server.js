@@ -3352,6 +3352,66 @@ app.get("/api/skin-analyses", authMiddleware, async (req, res) => {
   } catch (err) { res.status(500).json({ message: err.message }); }
 });
 
+// ---- FACE SNAPSHOTS (encrypted photo storage) ----
+
+app.post("/api/face-snapshots", authMiddleware, async (req, res) => {
+  try {
+    const { image, analysisId } = req.body;
+    if (!image) return res.status(400).json({ message: "No image provided" });
+    if (!process.env.FACE_ENCRYPTION_KEY) return res.status(503).json({ message: "Image storage not configured" });
+
+    const base64Data = image.replace(/^data:image\/\w+;base64,/, "");
+    const imageBuffer = Buffer.from(base64Data, "base64");
+
+    if (imageBuffer.length > 500_000) return res.status(413).json({ message: "Image too large (max 500 KB)" });
+
+    const snapshot = await db.saveFaceSnapshot({
+      userId: req.user.id,
+      analysisId: analysisId || null,
+      imageBuffer,
+    });
+    res.json(snapshot);
+  } catch (err) {
+    console.error("[FaceSnapshot] Save error:", err.message);
+    res.status(500).json({ message: "Could not save image" });
+  }
+});
+
+app.get("/api/face-snapshots", authMiddleware, async (req, res) => {
+  try {
+    const list = await db.listFaceSnapshots(req.user.id);
+    res.json(list);
+  } catch (err) { res.status(500).json({ message: "Could not load snapshots" }); }
+});
+
+app.get("/api/face-snapshots/:id/image", authMiddleware, async (req, res) => {
+  try {
+    const imageBuffer = await db.getFaceSnapshot(parseInt(req.params.id), req.user.id);
+    if (!imageBuffer) return res.status(404).json({ message: "Not found" });
+    res.set("Content-Type", "image/jpeg");
+    res.set("Cache-Control", "private, max-age=3600");
+    res.send(imageBuffer);
+  } catch (err) {
+    console.error("[FaceSnapshot] Decrypt error:", err.message);
+    res.status(500).json({ message: "Could not load image" });
+  }
+});
+
+app.delete("/api/face-snapshots/:id", authMiddleware, async (req, res) => {
+  try {
+    const ok = await db.deleteFaceSnapshot(parseInt(req.params.id), req.user.id);
+    if (!ok) return res.status(404).json({ message: "Not found" });
+    res.json({ success: true });
+  } catch (err) { res.status(500).json({ message: "Could not delete" }); }
+});
+
+app.delete("/api/face-snapshots", authMiddleware, async (req, res) => {
+  try {
+    const count = await db.deleteAllFaceSnapshots(req.user.id);
+    res.json({ deleted: count });
+  } catch (err) { res.status(500).json({ message: "Could not delete" }); }
+});
+
 // ---- ADDRESS ROUTES ----
 
 app.get("/api/addresses", authMiddleware, async (req, res) => {

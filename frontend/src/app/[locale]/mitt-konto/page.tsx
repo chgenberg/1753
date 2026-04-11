@@ -5,9 +5,11 @@ import { useRouter } from "next/navigation";
 import {
   BarChart3,
   CalendarClock,
+  Camera,
   Gift,
   Heart,
   LayoutDashboard,
+  Lock,
   LogOut,
   MapPin,
   Package,
@@ -29,7 +31,7 @@ import { Button } from "@/components/ui/button";
 import { useAuth } from "@/providers/auth-provider";
 import { useCart } from "@/providers/cart-provider";
 import { useLocale } from "@/providers/locale-provider";
-import { authFetch } from "@/lib/api";
+import { authFetch, API_URL } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/notification";
 import type { Locale } from "@/lib/i18n/types";
@@ -83,6 +85,13 @@ interface SkinAnalysis {
   } | null;
   full_text: string;
   created_at: string;
+}
+
+interface FaceSnapshot {
+  id: number;
+  analysis_id: number | null;
+  created_at: string;
+  score: number | null;
 }
 
 interface Address {
@@ -408,19 +417,54 @@ function ScoreLineChart({ scores, locale }: { scores: { score: number; date: str
   );
 }
 
+function SnapshotImage({ id, token, className }: { id: number; token: string; className?: string }) {
+  const [src, setSrc] = useState<string | null>(null);
+  useEffect(() => {
+    const url = `${API_URL}/face-snapshots/${id}/image`;
+    fetch(url, { headers: { Authorization: `Bearer ${token}` } })
+      .then((r) => (r.ok ? r.blob() : null))
+      .then((blob) => { if (blob) setSrc(URL.createObjectURL(blob)); })
+      .catch(() => {});
+    return () => { if (src) URL.revokeObjectURL(src); };
+  }, [id, token]);
+  if (!src) return null;
+  return <img src={src} alt="" className={cn("rounded-xl object-cover", className)} />;
+}
+
 function SkinJourneyView({ token }: { token: string }) {
   const { t, path, locale } = useLocale();
   const loc = locale === "en" ? "en-GB" : "sv-SE";
   const d = (key: string, vars?: Record<string, string | number>) => t(`accountDash.${key}`, vars);
   const [analyses, setAnalyses] = useState<SkinAnalysis[]>([]);
+  const [snapshots, setSnapshots] = useState<FaceSnapshot[]>([]);
   const [loading, setLoading] = useState(true);
+  const [compareMode, setCompareMode] = useState(false);
+  const [deletingAll, setDeletingAll] = useState(false);
+  const { showToast } = useToast();
 
   useEffect(() => {
-    authFetch<SkinAnalysis[]>("/analysis/history", token)
-      .then(setAnalyses)
-      .catch(() => {})
-      .finally(() => setLoading(false));
+    Promise.all([
+      authFetch<SkinAnalysis[]>("/analysis/history", token).catch(() => [] as SkinAnalysis[]),
+      authFetch<FaceSnapshot[]>("/face-snapshots", token).catch(() => [] as FaceSnapshot[]),
+    ]).then(([a, s]) => {
+      setAnalyses(a);
+      setSnapshots(s);
+    }).finally(() => setLoading(false));
   }, [token]);
+
+  const deleteAllSnapshots = async () => {
+    if (!confirm(locale === "en" ? "Delete all saved photos? This cannot be undone." : "Radera alla sparade foton? Detta kan inte ångras.")) return;
+    setDeletingAll(true);
+    try {
+      await authFetch("/face-snapshots", token, { method: "DELETE" });
+      setSnapshots([]);
+      showToast(locale === "en" ? "All photos deleted" : "Alla foton raderade");
+    } catch {
+      showToast(locale === "en" ? "Could not delete photos" : "Kunde inte radera foton");
+    } finally {
+      setDeletingAll(false);
+    }
+  };
 
   if (loading) {
     return (
@@ -490,6 +534,85 @@ function SkinJourneyView({ token }: { token: string }) {
         <ChartCard title={d("skinScoreOverTime")} subtitle={d("skinScoreChartSub", { count: scoredAnalyses.length })}>
           <ScoreLineChart scores={scoredAnalyses} locale={locale} />
         </ChartCard>
+      )}
+
+      {/* Face snapshot gallery */}
+      {snapshots.length > 0 && (
+        <div className="rounded-2xl border border-border bg-white p-5">
+          <div className="mb-4 flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Camera className="h-4 w-4 text-brand-500" />
+              <h3 className="text-sm font-bold text-brand-900">
+                {locale === "en" ? "Your skin over time" : "Din hud över tid"}
+              </h3>
+            </div>
+            <div className="flex items-center gap-2">
+              {snapshots.length >= 2 && (
+                <button
+                  onClick={() => setCompareMode(!compareMode)}
+                  className={cn(
+                    "rounded-full px-3 py-1.5 text-[11px] font-semibold transition-all",
+                    compareMode
+                      ? "bg-[#108474] text-white"
+                      : "bg-brand-50 text-brand-600 hover:bg-brand-100"
+                  )}
+                >
+                  {locale === "en" ? "Compare" : "Jämför"}
+                </button>
+              )}
+              <button
+                onClick={deleteAllSnapshots}
+                disabled={deletingAll}
+                className="rounded-full p-1.5 text-brand-400 transition-colors hover:bg-red-50 hover:text-red-500"
+                title={locale === "en" ? "Delete all photos" : "Radera alla foton"}
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+            </div>
+          </div>
+
+          {compareMode && snapshots.length >= 2 ? (
+            <div className="space-y-3">
+              <div className="grid grid-cols-2 gap-3">
+                <div className="text-center">
+                  <SnapshotImage id={snapshots[snapshots.length - 1].id} token={token} className="aspect-square w-full" />
+                  <p className="mt-1.5 text-[11px] text-brand-500">
+                    {new Date(snapshots[snapshots.length - 1].created_at).toLocaleDateString(loc, { month: "short", day: "numeric" })}
+                    {snapshots[snapshots.length - 1].score !== null && (
+                      <span className="ml-1 font-semibold text-brand-900">{snapshots[snapshots.length - 1].score}p</span>
+                    )}
+                  </p>
+                </div>
+                <div className="text-center">
+                  <SnapshotImage id={snapshots[0].id} token={token} className="aspect-square w-full" />
+                  <p className="mt-1.5 text-[11px] text-brand-500">
+                    {new Date(snapshots[0].created_at).toLocaleDateString(loc, { month: "short", day: "numeric" })}
+                    {snapshots[0].score !== null && (
+                      <span className="ml-1 font-semibold text-brand-900">{snapshots[0].score}p</span>
+                    )}
+                  </p>
+                </div>
+              </div>
+              <div className="flex items-center justify-center gap-2 rounded-lg bg-brand-50 px-3 py-2 text-xs text-brand-600">
+                <Lock className="h-3 w-3" />
+                {locale === "en"
+                  ? "Photos are encrypted. Only you can see them."
+                  : "Foton är krypterade. Bara du kan se dem."}
+              </div>
+            </div>
+          ) : (
+            <div className="flex gap-3 overflow-x-auto pb-2">
+              {snapshots.map((s) => (
+                <div key={s.id} className="flex-shrink-0 text-center">
+                  <SnapshotImage id={s.id} token={token} className="h-24 w-24" />
+                  <p className="mt-1 text-[10px] text-brand-500">
+                    {new Date(s.created_at).toLocaleDateString(loc, { month: "short", day: "numeric" })}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       )}
 
       <div className="space-y-4">

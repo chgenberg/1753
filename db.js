@@ -4,6 +4,27 @@
 // Railway injicerar DATABASE_URL automatiskt när PostgreSQL-addon läggs till.
 
 const { Pool } = require("pg");
+const crypto = require("crypto");
+
+const FACE_KEY = process.env.FACE_ENCRYPTION_KEY
+  ? Buffer.from(process.env.FACE_ENCRYPTION_KEY, "hex")
+  : null;
+
+function encryptImage(buffer) {
+  if (!FACE_KEY) throw new Error("FACE_ENCRYPTION_KEY not configured");
+  const iv = crypto.randomBytes(12);
+  const cipher = crypto.createCipheriv("aes-256-gcm", FACE_KEY, iv);
+  const encrypted = Buffer.concat([cipher.update(buffer), cipher.final()]);
+  const authTag = cipher.getAuthTag();
+  return { encrypted, iv, authTag };
+}
+
+function decryptImage(encrypted, iv, authTag) {
+  if (!FACE_KEY) throw new Error("FACE_ENCRYPTION_KEY not configured");
+  const decipher = crypto.createDecipheriv("aes-256-gcm", FACE_KEY, iv);
+  decipher.setAuthTag(authTag);
+  return Buffer.concat([decipher.update(encrypted), decipher.final()]);
+}
 
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
@@ -272,6 +293,20 @@ async function initSchema() {
     );
 
     CREATE INDEX IF NOT EXISTS idx_skin_analyses_user ON skin_analyses (user_id);
+
+    CREATE TABLE IF NOT EXISTS face_snapshots (
+      id              SERIAL PRIMARY KEY,
+      user_id         UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
+      analysis_id     INTEGER REFERENCES skin_analyses(id) ON DELETE SET NULL,
+      encrypted_image BYTEA NOT NULL,
+      iv              BYTEA NOT NULL,
+      auth_tag        BYTEA NOT NULL,
+      width           INTEGER DEFAULT 640,
+      height          INTEGER DEFAULT 640,
+      created_at      TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_face_snapshots_user ON face_snapshots (user_id);
 
     CREATE TABLE IF NOT EXISTS training_uploads (
       id              SERIAL PRIMARY KEY,
@@ -1134,6 +1169,56 @@ async function getSkinAnalyses(userId) {
   return rows;
 }
 
+// ---- FACE SNAPSHOTS (encrypted) ----
+
+async function saveFaceSnapshot({ userId, analysisId, imageBuffer }) {
+  const { encrypted, iv, authTag } = encryptImage(imageBuffer);
+  const { rows } = await pool.query(
+    `INSERT INTO face_snapshots (user_id, analysis_id, encrypted_image, iv, auth_tag)
+     VALUES ($1, $2, $3, $4, $5) RETURNING id, analysis_id, created_at`,
+    [userId, analysisId || null, encrypted, iv, authTag]
+  );
+  return rows[0];
+}
+
+async function getFaceSnapshot(snapshotId, userId) {
+  const { rows } = await pool.query(
+    `SELECT encrypted_image, iv, auth_tag FROM face_snapshots WHERE id = $1 AND user_id = $2`,
+    [snapshotId, userId]
+  );
+  if (!rows[0]) return null;
+  const r = rows[0];
+  return decryptImage(r.encrypted_image, r.iv, r.auth_tag);
+}
+
+async function listFaceSnapshots(userId) {
+  const { rows } = await pool.query(
+    `SELECT fs.id, fs.analysis_id, fs.created_at, sa.score
+     FROM face_snapshots fs
+     LEFT JOIN skin_analyses sa ON sa.id = fs.analysis_id
+     WHERE fs.user_id = $1
+     ORDER BY fs.created_at DESC`,
+    [userId]
+  );
+  return rows;
+}
+
+async function deleteFaceSnapshot(snapshotId, userId) {
+  const { rowCount } = await pool.query(
+    `DELETE FROM face_snapshots WHERE id = $1 AND user_id = $2`,
+    [snapshotId, userId]
+  );
+  return rowCount > 0;
+}
+
+async function deleteAllFaceSnapshots(userId) {
+  const { rowCount } = await pool.query(
+    `DELETE FROM face_snapshots WHERE user_id = $1`,
+    [userId]
+  );
+  return rowCount;
+}
+
 // ---- TRAINING UPLOADS ----
 
 async function createTrainingUpload({ imageData, scanResults, quizAnswers, topCondition, confidence }) {
@@ -1493,4 +1578,9 @@ module.exports = {
   setConfig,
   getFortnoxTokensFromDB,
   saveFortnoxTokensToDB,
+  saveFaceSnapshot,
+  getFaceSnapshot,
+  listFaceSnapshots,
+  deleteFaceSnapshot,
+  deleteAllFaceSnapshots,
 };

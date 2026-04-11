@@ -4,12 +4,14 @@ import { useCallback, useState } from "react";
 import {
   ArrowLeft,
   ArrowRight,
+  Camera,
   Check,
   Droplets,
   Flame,
   Heart,
   Leaf,
   Loader2,
+  Lock,
   Moon,
   ScanFace,
   ShieldAlert,
@@ -233,6 +235,8 @@ export default function AnalysisPage() {
   const [error, setError] = useState("");
   const [trainingUploaded, setTrainingUploaded] = useState(false);
   const [trainingCount, setTrainingCount] = useState<number | null>(null);
+  const [snapshotSaved, setSnapshotSaved] = useState(false);
+  const [snapshotSaving, setSnapshotSaving] = useState(false);
 
   const toggleArray = (arr: string[], key: string, max?: number) => {
     if (arr.includes(key)) return arr.filter((k) => k !== key);
@@ -293,6 +297,26 @@ export default function AnalysisPage() {
       // Non-critical — silently ignore
     }
   }, []);
+
+  const saveSnapshot = useCallback(async () => {
+    if (!token || !scanSummary?.imageBase64 || snapshotSaving || snapshotSaved) return;
+    setSnapshotSaving(true);
+    try {
+      await apiFetch("/face-snapshots", {
+        method: "POST",
+        headers: { Authorization: `Bearer ${token}` },
+        body: JSON.stringify({
+          image: scanSummary.imageBase64,
+          analysisId: result?.analysisId || null,
+        }),
+      });
+      setSnapshotSaved(true);
+    } catch {
+      // Non-critical
+    } finally {
+      setSnapshotSaving(false);
+    }
+  }, [token, scanSummary, result, snapshotSaving, snapshotSaved]);
 
   const analyze = useCallback(async () => {
     setStep("analyzing");
@@ -784,6 +808,52 @@ export default function AnalysisPage() {
                 </div>
               )}
 
+              {/* Save face snapshot opt-in */}
+              {token && scanSummary?.imageBase64 && !snapshotSaved && (
+                <div className="mx-auto max-w-md rounded-2xl border border-brand-200 bg-white p-5 text-center">
+                  <Camera className="mx-auto mb-2 h-5 w-5 text-brand-500" />
+                  <p className="text-sm font-semibold text-brand-900">
+                    {locale === "en"
+                      ? "Save your photo to track changes over time?"
+                      : "Spara ditt foto för att följa förändringar över tid?"}
+                  </p>
+                  <p className="mt-1.5 text-xs leading-relaxed text-brand-500">
+                    {locale === "en"
+                      ? "Your image is encrypted and stored securely. Only you can see it. You can delete it anytime from your account."
+                      : "Din bild krypteras och lagras säkert. Bara du kan se den. Du kan radera den när som helst från ditt konto."}
+                  </p>
+                  <div className="mt-4 flex items-center justify-center gap-3">
+                    <button
+                      onClick={saveSnapshot}
+                      disabled={snapshotSaving}
+                      className="inline-flex items-center gap-2 rounded-full bg-[#108474] px-6 py-2.5 text-xs font-semibold text-white transition-all hover:bg-[#0d6e62] disabled:opacity-50"
+                    >
+                      {snapshotSaving ? (
+                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                      ) : (
+                        <Lock className="h-3.5 w-3.5" />
+                      )}
+                      {locale === "en" ? "Save encrypted" : "Spara krypterat"}
+                    </button>
+                    <button
+                      onClick={() => setSnapshotSaved(true)}
+                      className="rounded-full px-5 py-2.5 text-xs font-medium text-brand-500 transition-colors hover:bg-brand-50"
+                    >
+                      {locale === "en" ? "No thanks" : "Nej tack"}
+                    </button>
+                  </div>
+                </div>
+              )}
+
+              {snapshotSaved && token && scanSummary?.imageBase64 && (
+                <div className="flex items-center justify-center gap-2 rounded-xl bg-[#108474]/5 px-4 py-3 text-xs font-medium text-[#108474]">
+                  <Check className="h-3.5 w-3.5" />
+                  {locale === "en"
+                    ? "Photo saved to your skin journey"
+                    : "Foto sparat i din hudresa"}
+                </div>
+              )}
+
               {/* New analysis CTA */}
               <div className="text-center">
                 <button
@@ -794,6 +864,8 @@ export default function AnalysisPage() {
                     setScanSummary(null);
                     setTrainingUploaded(false);
                     setTrainingCount(null);
+                    setSnapshotSaved(false);
+                    setSnapshotSaving(false);
                     setAnswers({
                       skinType: "",
                       concerns: [],
