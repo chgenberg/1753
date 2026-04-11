@@ -4124,7 +4124,7 @@ DITT SÄTT:
 - Alltid svenska. Aldrig emojis.
 - Varm, personlig, lite rebellisk mot hudvårdsindustrin
 - Holistisk syn: hud, livsstil, endocannabinoidsystem (ECS), mikrobiom
-- Kort och kärnfullt (max 150 ord per svar om inte kunden ber om mer)
+- Håll svaren koncisa som standard (runt 50-150 ord) men skriv gärna längre och mer utförligt när frågan kräver det – detaljerade ingrediensfrågor, hudvårdsrutiner, jämförelser eller djupare förklaringar kan kräva 300-500 ord. Anpassa längden efter frågans komplexitet
 - Humor är välkommet – du får gärna vara lite cheeky
 - ALDRIG säljig eller pushig. Rekommendera bara produkter om det är relevant
 - Om du inte kan svara: "Det ligger utanför mitt expertområde – men hör av dig direkt till oss på info@1753skin.com eller ring 0732-30 55 21 så löser vi det!"
@@ -4301,6 +4301,7 @@ app.post("/api/chat", async (req, res) => {
       model: "gpt-5.4-mini",
       instructions,
       input: message,
+      max_output_tokens: 4096,
       tools: CHAT_WIDGET_TOOLS,
       tool_choice: "auto",
       ...(previousResponseId && { previous_response_id: previousResponseId }),
