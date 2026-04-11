@@ -45,26 +45,64 @@ export default async function ProductPage({ params }: Props) {
     const product = getProduct(id);
     if (!product) return null;
     const path = localizePath(l, "product", { productId: product.id });
-    return {
+    const name = productDisplayName(product, l);
+    const currency = getCurrency(l);
+    const price = productPrice(product, l);
+
+    const schema: Record<string, unknown> = {
       "@context": "https://schema.org",
       "@type": "Product",
-      name: productDisplayName(product, l),
+      name,
       description: productShortDesc(product, l),
       image: `${SITE_ORIGIN}${product.image}`,
+      sku: product.articleNumber,
+      category: l === "sv" ? "Hudvard" : "Skincare",
       brand: { "@type": "Brand", name: "1753 SKINCARE" },
+      manufacturer: { "@type": "Organization", "@id": "https://www.1753skin.com/#organization" },
       offers: {
         "@type": "Offer",
-        price: productPrice(product, l),
-        priceCurrency: getCurrency(l),
+        price,
+        priceCurrency: currency,
         availability: "https://schema.org/InStock",
         url: `${SITE_ORIGIN}${path}`,
+        seller: { "@type": "Organization", "@id": "https://www.1753skin.com/#organization" },
+        shippingDetails: {
+          "@type": "OfferShippingDetails",
+          shippingRate: { "@type": "MonetaryAmount", value: "0", currency },
+          shippingDestination: { "@type": "DefinedRegion", addressCountry: l === "sv" ? "SE" : "GB" },
+          deliveryTime: {
+            "@type": "ShippingDeliveryTime",
+            handlingTime: { "@type": "QuantitativeValue", minValue: 1, maxValue: 2, unitCode: "d" },
+            transitTime: { "@type": "QuantitativeValue", minValue: 1, maxValue: 3, unitCode: "d" },
+          },
+        },
+        hasMerchantReturnPolicy: {
+          "@type": "MerchantReturnPolicy",
+          applicableCountry: "SE",
+          returnPolicyCategory: "https://schema.org/MerchantReturnFiniteReturnWindow",
+          merchantReturnDays: 30,
+          returnMethod: "https://schema.org/ReturnByMail",
+        },
       },
       aggregateRating: {
         "@type": "AggregateRating",
         ratingValue: "4.8",
+        bestRating: "5",
+        worstRating: "1",
         reviewCount: String(product.reviews),
       },
     };
+
+    if (product.size) schema.weight = product.size;
+    if (product.ingredients) {
+      schema.additionalProperty = {
+        "@type": "PropertyValue",
+        name: l === "sv" ? "Ingredienser" : "Ingredients",
+        value: product.ingredients,
+      };
+    }
+
+    return schema;
   })();
 
   return (

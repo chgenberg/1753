@@ -3769,6 +3769,37 @@ app.post("/api/newsletter/generate", async (req, res) => {
   }
 });
 
+// ---- CONTENT REFRESH (cron-job.org trigger, every 30 days) ----
+
+app.post("/api/content/refresh", async (req, res) => {
+  try {
+    const adminKey = req.body.adminKey || req.headers["x-admin-key"];
+    const expectedKey = process.env.ADMIN_API_KEY || "1753-admin-key";
+    if (adminKey !== expectedKey) {
+      return res.status(403).json({ message: "Ogiltig admin-nyckel" });
+    }
+
+    const force = req.body.force === true;
+    const { execFile } = require("child_process");
+    const scriptPath = require("path").join(__dirname, "scripts", "refresh-landing-content.js");
+    const args = force ? ["--force"] : [];
+
+    res.json({ ok: true, message: "Content refresh startad", force });
+
+    execFile("node", [scriptPath, ...args], { env: process.env, timeout: 600_000 }, (err, stdout, stderr) => {
+      if (err) {
+        console.error("[ContentRefresh] Misslyckades:", err.message);
+        if (stderr) console.error(stderr);
+      } else {
+        console.log("[ContentRefresh] Klar:", stdout.trim().split("\n").slice(-3).join(" | "));
+      }
+    });
+  } catch (err) {
+    console.error("[ContentRefresh] Error:", err);
+    res.status(500).json({ message: "Kunde inte starta content refresh" });
+  }
+});
+
 // ---- SKIN CONDITION NEWSLETTER GENERATE (cron-job.org trigger, Sundays 18:00) ----
 
 app.post("/api/newsletter/generate-skin", async (req, res) => {

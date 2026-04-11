@@ -12,8 +12,33 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
   const p = getMessages(l).aboutPage;
   const values = p.values.map((v, i) => ({ ...v, icon: VALUE_ICONS[i] }));
 
+  const personSchema = {
+    "@context": "https://schema.org",
+    "@type": "Person",
+    "@id": "https://www.1753skin.com/#founder",
+    name: "Christopher Genberg",
+    jobTitle: l === "sv" ? "Grundare" : "Founder",
+    worksFor: {
+      "@type": "Organization",
+      "@id": "https://www.1753skin.com/#organization",
+      name: "1753 SKINCARE",
+    },
+    knowsAbout: [
+      "CBD skincare",
+      "CBG skincare",
+      "Endocannabinoid system",
+      "Holistic skincare",
+      "Nordic skincare",
+    ],
+    url: "https://www.1753skin.com" + (l === "sv" ? "/sv/om-oss" : "/en/about"),
+  };
+
   return (
     <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(personSchema) }}
+      />
       <section className="py-16 md:py-20">
         <div className="mx-auto max-w-[1280px] px-6 md:px-10">
           <div className="grid items-center gap-10 md:grid-cols-2 lg:gap-16">

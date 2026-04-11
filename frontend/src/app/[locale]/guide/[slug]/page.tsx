@@ -118,6 +118,20 @@ export default async function GuidePage({ params }: Props) {
     ],
   };
 
+  const howToSchema = page.category === "howto" ? {
+    "@context": "https://schema.org",
+    "@type": "HowTo",
+    name: c.h1,
+    description: c.lead,
+    totalTime: "PT5M",
+    step: c.tips.map((tip, i) => ({
+      "@type": "HowToStep",
+      position: i + 1,
+      name: tip.title,
+      text: tip.body,
+    })),
+  } : null;
+
   return (
     <>
       <script
@@ -128,6 +142,12 @@ export default async function GuidePage({ params }: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
+      {howToSchema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
+        />
+      )}
 
       {/* ── Hero ── */}
       <section className="relative overflow-hidden bg-[#f5f5f7] py-20 md:py-28">

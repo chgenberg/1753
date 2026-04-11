@@ -58,8 +58,66 @@ export default async function LocaleLayout({
   if (!locales.includes(locale as Locale)) notFound();
   const messages = getMessages(locale as Locale);
 
+  const orgSchema = {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "@id": "https://www.1753skin.com/#organization",
+    name: "1753 SKINCARE",
+    legalName: "Floranie International AB",
+    url: "https://www.1753skin.com",
+    logo: "https://www.1753skin.com/1753.webp",
+    image: "https://www.1753skin.com/og-image.jpg",
+    description:
+      locale === "en"
+        ? "Swedish skincare with CBD and CBG. Developed for Nordic skin."
+        : "Svensk hudvard med CBD och CBG. Utvecklad for nordisk hud.",
+    foundingDate: "2020",
+    founder: {
+      "@type": "Person",
+      "@id": "https://www.1753skin.com/#founder",
+      name: "Christopher Genberg",
+    },
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: "Sodra Skjutbanevagen 10",
+      addressLocality: "Asa",
+      postalCode: "439 55",
+      addressCountry: "SE",
+    },
+    contactPoint: [
+      {
+        "@type": "ContactPoint",
+        telephone: "+46732305521",
+        email: "info@1753skin.com",
+        contactType: "customer service",
+        availableLanguage: ["Swedish", "English"],
+      },
+    ],
+    sameAs: [
+      "https://www.instagram.com/1753skincare",
+    ],
+  };
+
+  const webSiteSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebSite",
+    "@id": "https://www.1753skin.com/#website",
+    name: "1753 SKINCARE",
+    url: "https://www.1753skin.com",
+    publisher: { "@id": "https://www.1753skin.com/#organization" },
+    inLanguage: locale === "en" ? "en" : "sv",
+  };
+
   return (
     <LocaleProvider locale={locale as Locale} messages={messages}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(orgSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteSchema) }}
+      />
       <TopBanner />
       <Header />
       <main className="flex-1">{children}</main>
