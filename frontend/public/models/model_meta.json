@@ -1,0 +1,36 @@
+{
+  "image_size": 224,
+  "labels": [
+    "acne",
+    "dermatitis",
+    "dryness",
+    "eczema",
+    "fungal",
+    "hyperpigmentation",
+    "psoriasis",
+    "rosacea",
+    "sun_damage"
+  ],
+  "label_names_sv": {
+    "acne": "Akne",
+    "dermatitis": "Dermatit",
+    "dryness": "Torr hy",
+    "eczema": "Eksem",
+    "fungal": "Svampinfektion",
+    "hyperpigmentation": "Hyperpigmentering",
+    "psoriasis": "Psoriasis",
+    "rosacea": "Rosacea",
+    "sun_damage": "Solskada"
+  },
+  "mean": [
+    0.485,
+    0.456,
+    0.406
+  ],
+  "std": [
+    0.229,
+    0.224,
+    0.225
+  ],
+  "source_model": "best_model"
+}

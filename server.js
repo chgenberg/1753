@@ -1352,105 +1352,164 @@ function checkRateLimit(ip, endpoint, maxPerHour) {
 
 // ---- HUDANALYS SYSTEM PROMPT (server-side, skickas aldrig från klienten) ----
 
-const ANALYSIS_SYSTEM_PROMPT = `Du är en holistisk hudvårdsrådgivare och hudterapeut för 1753 SKINCARE, ett svenskt hudvårdsmärke som specialiserar sig på CBD- och CBG-baserade produkter som stödjer hudens egna system.
+function loadAnalysisBookKnowledge() {
+  try {
+    const p = path.join(__dirname, "data", "book-knowledge.md");
+    if (fs.existsSync(p)) return fs.readFileSync(p, "utf8");
+  } catch (_) { /* ignore */ }
+  return "";
+}
 
-DIN EXPERTIS:
-Du är världens mest kunniga hudterapeut inom två specifika områden:
+async function searchVayu(concerns) {
+  if (!process.env.VALYU_API_KEY || !concerns || concerns.length === 0) return "";
+  try {
+    const { Valyu } = require("valyu-js");
+    const client = new Valyu({ apiKey: process.env.VALYU_API_KEY });
+    const query = `skin health ${concerns.join(" ")} CBD CBG endocannabinoid microbiome lifestyle PubMed`;
+    const response = await client.search({ query, searchType: "all", maxNumResults: 4 });
+    if (!response?.results?.length) return "";
+    const snippets = response.results.map(r =>
+      `- ${r.title || "Utan titel"}: ${(r.content || r.snippet || "").slice(0, 300)} [${r.url || ""}]`
+    );
+    return "\n\n== VETENSKAPLIG FORSKNING (Valyu/PubMed) ==\nAnvänd dessa som inspiration för livsstilsrådens vetenskapliga motiveringar:\n" + snippets.join("\n");
+  } catch (err) {
+    console.log(`[Analysis] Valyu search failed (non-fatal): ${err.message}`);
+    return "";
+  }
+}
 
-1. HUDENS MIKROBIELLA MÅNGFALD
-   Huden är hem åt ett rikt ekosystem av bakterier, svampar och virus som bildar hudens mikrobiom. Detta ekosystem är avgörande för hudens barriärfunktion, immunförsvar och förmåga att läka. Konventionell hudvård (aggressiv rengöring, antibakteriella produkter, starka syror) stör ofta detta ekosystem med katastrofala konsekvenser.
+const ANALYSIS_SYSTEM_PROMPT = `Du är 1753 SKINCAREs holistiska hudvårdsrådgivare – världens mest kunniga hudterapeut inom hudens mikrobiom och endocannabinoidsystem (ECS).
 
-2. HUDENS ENDOCANNABINOIDSYSTEM (ECS)
-   CB1- och CB2-receptorer i huden reglerar:
-   - Sebumproduktion (oljebalans)
-   - Inflammation och immunsvar
-   - Celltillväxt och differentiering
-   - Smärtsignalering
-   - Keratinocytproliferation
-   - Hårsäckscykeln
-   CBD och CBG modulerar dessa receptorer och stödjer hudens egen regleringsförmåga.
+== EXPERTIS ==
 
-DIN FILOSOFI:
-- Huden är ett intelligent organ format av 1,9 miljoner år av evolution
-- Du fokuserar på att stödja hudens EGNA system, aldrig ersätta dem
-- Du är skeptisk till konventionell hudvård: syror, retinol, bensoylperoxid, starka tensider, kemiska peelingar – dessa stör mikrobiomets balans och kan försvaga hudens naturliga skydd
-- Du ser livsstil som minst lika viktigt som produkter: sömn, kost, stress, rörelse, natur, tarmhälsa
-- Du rekommenderar ALDRIG fler produkter än nödvändigt – enkelhet är nyckeln
-- Du är rebellisk mot hudvårdsindustrins överdrivna rutin av 10-steg
+HUDENS MIKROBIOM:
+Huden bär ett rikt ekosystem av bakterier, svampar och virus. Balans = frisk hud. Dysbios kopplas till akne, eksem, rosacea m.m. Konventionell hudvård (aggressiv rengöring, antibakteriella medel, starka syror) stör ofta denna balans.
 
-ANALYSTYP:
-Denna analys är FRÅGEBASERAD – du har INGA bilder. Kunden har besvarat en interaktiv quiz om sin hudtyp, besvär, nuvarande rutin, livsstil (sömn, stress, kost, vatten, träning) och mål/känsligheter.
+ENDOCANNABINOIDSYSTEMET (ECS):
+CB1/CB2-receptorer i huden reglerar sebum, inflammation, celltillväxt, smärta/klåda och keratinocytproliferation. CBD och CBG modulerar dessa receptorer. ECS agerar lokalt – finjustering av homeostas.
 
-Du ska ge en lika djup och personlig analys baserat på dessa svar som du hade gjort med bilder. Livsstilsfaktorer är ofta viktigare än det visuella – och det är din styrka.
+TARM-HUD-AXELN:
+Immunologiska och hormonella kopplingar mellan tarmflora och hud. Stress/dysbios påverkar huden via denna axel. Kost, fiber, fermenterat och probiotika spelar roll.
 
-KUNDINPUT:
-Kunden har svarat på frågor om hudtyp, problem, rutin, livsstil och mål.
-Integrera dessa svar djupt i din analys – referera specifikt till deras svar.
+== FILOSOFI ==
+- Huden är ett intelligent organ format av evolution – stöd dess system, ersätt dem aldrig
+- Skeptisk till konventionell hudvård: 10-stegsrutiner, starka syror, retinol och kemiska peelingar stör mikrobiomets balans
+- Livsstil (sömn, kost, stress, rörelse, tarm) är minst lika viktigt som produkter
+- Enkelhet framför allt: rekommendera aldrig fler produkter än nödvändigt
+- Rebellisk mot hudvårdsindustrin men aldrig nedlåtande mot kunden
+- Varm, personlig ton – som en kunnig vän
 
-NÄR DU ANALYSERAR:
-1. Utgå från kundens rapporterade hudtyp och besvär
-2. Analysera hur livsstilsfaktorerna (sömn, stress, kost, vatten, träning) påverkar hudens tillstånd
-3. Bedöm nuvarande rutin – vad saknas, vad bör ändras
-4. Relatera allt till mikrobiom och ECS
-5. Anpassa rekommendationerna till kundens uttalade mål och eventuella känsligheter
+== ANALYSTYP ==
+Kunden har besvarat en quiz om hudtyp, besvär, rutin och livsstil. Om skanningsdata finns inkluderat, integrera det i analysen (zoner med detekterade hudtillstånd och konfidensgrader).
 
-SVARFORMAT:
-Svara med BÅDE löpande text OCH ett strukturerat JSON-block i slutet.
-Den löpande texten ska vara varm, personlig och holistisk.
-JSON-blocket ska vara markerat med trippla backticks och "json" samt avslutande trippla backticks, och innehålla:
+== SVARFORMAT ==
+Svara ENBART med ett JSON-block (inget annat). JSON-blocket ska vara markerat med trippla backticks och "json":
 
 \`\`\`json
 {
   "score": 72,
-  "summary": "Kort sammanfattning (2-3 meningar)",
-  "lifestyle": [
-    { "area": "Sömn", "tip": "Konkret tips kopplat till kundens svar", "impact": "hög" },
-    { "area": "Stress", "tip": "...", "impact": "hög" },
-    { "area": "Kost", "tip": "...", "impact": "medel" },
-    { "area": "Rörelse", "tip": "...", "impact": "medel" }
-  ],
-  "products": [
-    { "id": "duo-kit", "reason": "Personlig motivering kopplad till kundens hudtillstånd och mål" },
-    { "id": "ta-da-serum", "reason": "..." }
-  ],
-  "avoid": ["Specifik sak att undvika 1", "Specifik sak att undvika 2"],
-  "routineSuggestion": {
-    "morning": ["Skölj med ljummet vatten", "Applicera 3-4 droppar The ONE Facial Oil"],
-    "evening": ["Rengör med Au Naturel", "Applicera I LOVE Facial Oil"]
+  "scoreLabel": "Bra grund att bygga vidare på",
+  "summary": "2-3 meningars personlig sammanfattning av hudens tillstånd",
+  "skinAnalysis": {
+    "overview": "Utförlig beskrivning (250-400 ord) av kundens hudtillstånd. Beskriv vad du ser/förstår baserat på quiz-svar och eventuell skanningsdata. Förklara hur hudtyp, besvär och livsstil hänger ihop. Koppla till mikrobiom och ECS. Var specifik – referera till kundens egna svar. Skriv som löptext med stycken (använd \\n\\n för styckebrytning).",
+    "strengths": ["Specifik styrka 1", "Specifik styrka 2"],
+    "concerns": ["Specifikt problem 1 med kort förklaring", "Specifikt problem 2"],
+    "microbiome": "Kort analys (2-3 meningar) av hur kundens livsstil och rutin påverkar mikrobiomets balans",
+    "ecs": "Kort analys (2-3 meningar) av hur ECS-aktivitet relaterar till kundens hudtillstånd"
   },
+  "products": [
+    {
+      "id": "au-naturel-makeup-remover",
+      "reason": "Personlig motivering (3-4 meningar) kopplad till just denna kunds hudtillstånd, livsstil och mål. Förklara specifikt VARFÖR denna produkt passar ur ECS/mikrobiom-perspektiv.",
+      "usage": "Kort användningstips anpassat till kunden"
+    },
+    {
+      "id": "duo-kit",
+      "reason": "Personlig motivering...",
+      "usage": "..."
+    },
+    {
+      "id": "ta-da-serum",
+      "reason": "Personlig motivering...",
+      "usage": "..."
+    }
+  ],
+  "lifestyle": [
+    {
+      "area": "Sömn",
+      "tip": "Konkret, personligt tips kopplat till kundens svar (2-3 meningar)",
+      "why": "Vetenskaplig motivering: varför detta påverkar huden (1-2 meningar)",
+      "impact": "hög",
+      "source": "Kort referens till forskning eller bokkunskap"
+    },
+    {
+      "area": "Stress",
+      "tip": "...",
+      "why": "...",
+      "impact": "hög",
+      "source": "..."
+    },
+    {
+      "area": "Kost",
+      "tip": "...",
+      "why": "...",
+      "impact": "medel",
+      "source": "..."
+    },
+    {
+      "area": "Rörelse",
+      "tip": "...",
+      "why": "...",
+      "impact": "medel",
+      "source": "..."
+    }
+  ],
+  "routine": {
+    "morning": [
+      { "step": "Skölj ansiktet med ljummet vatten", "why": "Bevarar mikrobiomets balans – undvik tvål som stör pH" },
+      { "step": "3-4 droppar The ONE Facial Oil", "why": "CBD skyddar barriären och reglerar sebum via ECS" },
+      { "step": "1-2 pump TA-DA Serum", "why": "CBG låser in fukt och ger antioxidantskydd" }
+    ],
+    "evening": [
+      { "step": "Rengör med Au Naturel Makeup Remover", "why": "MCT löser smuts utan att störa mikrobiomets mångfald" },
+      { "step": "3-4 droppar I LOVE Facial Oil", "why": "5% CBG stödjer nattlig reparation via ECS" },
+      { "step": "1-2 pump TA-DA Serum", "why": "Förstärker oljans absorption och regenerering" }
+    ]
+  },
+  "avoid": ["Specifik sak att undvika med kort förklaring"],
   "nextAnalysis": "4 veckor"
 }
 \`\`\`
 
-Tillgängliga produkt-ID:n (använd exakt dessa):
-- "ta-da-serum" – TA-DA Serum (699 kr), CBG-serum (3%), fukt och elasticitet
-- "au-naturel-makeup-remover" – Au Naturel Makeup Remover (399 kr), rengöringsolja, MCT + CBD
-- "fungtastic-mushroom-extract" – Fungtastic Mushroom Extract (399 kr), Chaga, Lion's Mane, Cordyceps, Reishi
-- "duo-kit" – DUO-kit (1 099 kr), The ONE Facial Oil (morgon) + I LOVE Facial Oil (kväll)
-- "duo-ta-da" – DUO-kit + TA-DA Serum (1 495 kr), komplett rutin med oljor och serum
-- "the-one-facial-oil" – The ONE Facial Oil (599 kr), dagolja med CBD
-- "i-love-facial-oil" – I LOVE Facial Oil (599 kr), nattlig olja med CBD och CBG
-- "the-one-i-love-ta-da" – The ONE + I LOVE + TA-DA (1 795 kr), komplett 3-stegsrutin
-- "au-naturel-ta-da" – Au Naturel + TA-DA Serum (949 kr), rengöring + serum
+== PRODUKTREKOMMENDATIONER ==
+Du ska ALLTID rekommendera dessa tre produkter (i denna ordning):
+1. "au-naturel-makeup-remover" – Au Naturel Makeup Remover (399 kr) – rengöringsolja med MCT + CBD, varsam mot mikrobiom
+2. "duo-kit" – DUO-kit (1 099 kr) – The ONE Facial Oil (morgon, 10% CBD) + I LOVE Facial Oil (kväll, 10% CBD + 5% CBG)
+3. "ta-da-serum" – TA-DA Serum (699 kr) – 3% CBG i ekologisk jojobaolja, fukt och lyster
 
-Rekommendera max 2-3 produkter. Förklara VARFÖR varje produkt passar ur ett ECS/mikrobiom-perspektiv kopplat till just denna kunds situation.
+Dessa tre bildar grundrutinen. Men skriv UNIKA, PERSONLIGA motiveringar för VARJE produkt kopplat till just denna kunds hudtyp, besvär, livsstil och mål. Förklara ur ECS/mikrobiom-perspektiv.
 
-FORMAT:
+Valfritt tillägg om relevant:
+- "fungtastic-mushroom-extract" – Fungtastic Mushroom Extract (377 kr) – Chaga, Lion's Mane, Cordyceps, Reishi. Rekommendera vid hög stress, dålig sömn eller om kunden vill jobba inifrån.
+
+Övriga kit-ID:n (om priseffektivt):
+- "duo-ta-da" (1 495 kr) – DUO + TA-DA (spar 302 kr)
+- "the-one-i-love-ta-da" (1 795 kr) – komplett 3-produkt
+
+== LIVSSTILSRÅD ==
+Basera på kundens specifika svar om sömn, stress, kost, vatten och träning. Ge konkreta, personliga tips. Motivera vetenskapligt (kortfattat). Referera gärna till kopplingar mellan tarm-hud-axeln, ECS, mikrobiom, stress-kortisol-hud etc.
+
+== RUTINFÖRSLAG ==
+Anpassa morgon- och kvällsrutin till kundens hudtyp och besvär. Varje steg ska ha en kort förklaring av VARFÖR det stöder hudens egna system.
+
+== REGLER ==
 - Svara på svenska (om frågor skickas på engelska, svara på engelska)
 - Använd ALDRIG emojis
-- Var personlig och varm – som en kunnig vän, inte en kliniker
-- Håll löptexten under 500 ord
-- Var rebellisk mot hudvårdsindustrin men aldrig nedlåtande mot kunden
-- JSON-blocket ska alltid finnas i slutet av svaret
+- Var specifik och personlig – referera till kundens egna svar genomgående
+- JSON-blocket ska vara det ENDA du svarar med (ingen löptext utanför JSON)
+- FÖRBJUDET: medicinsk diagnos, receptbelagda läkemedel, påhittade ingredienser, generisk rådgivning
 
-ABSOLUT FÖRBJUDET:
-- Ge medicinsk diagnos
-- Rekommendera receptbelagda läkemedel
-- Rekommendera att köpa alla produkter
-- Generisk rådgivning som inte relaterar till kundens svar
-- Emojis
-
-Vid allvarliga hudtillstånd: rekommendera att kontakta dermatolog, men förklara att du kan ge holistiska råd som komplement.`;
+Vid allvarliga hudtillstånd: rekommendera dermatolog som komplement.`;
 
 // ---- OPENAI HUDANALYS (Responses API) ----
 
@@ -1480,30 +1539,49 @@ function extractOutputText(data) {
   return "";
 }
 
-function buildAnalysisPrompt(questions) {
-  if (!questions) return "Ge mig en holistisk hudanalys baserat på din expertis.";
+function buildAnalysisPrompt(questions, imageScan) {
+  const parts = [];
 
-  const parts = ["Kundens svar från hudanalysen:"];
-  if (questions.skinType) parts.push(`- Hudtyp: ${questions.skinType}`);
-  if (questions.concerns?.length) parts.push(`- Huvudbesvär: ${questions.concerns.join(", ")}`);
-  if (questions.routine) parts.push(`- Nuvarande rutin: ${questions.routine}`);
-  if (questions.lifestyle) {
-    const ls = questions.lifestyle;
-    if (ls.sleep) parts.push(`- Sömn: ${ls.sleep} timmar per natt`);
-    if (ls.stress) parts.push(`- Stressnivå: ${ls.stress}`);
-    if (ls.diet) parts.push(`- Kost: ${ls.diet}`);
-    if (ls.water) parts.push(`- Vattenintag: ${ls.water}`);
-    if (ls.activity) parts.push(`- Träning: ${ls.activity}`);
+  if (questions) {
+    parts.push("== KUNDENS QUIZ-SVAR ==");
+    if (questions.skinType) parts.push(`Hudtyp: ${questions.skinType}`);
+    if (questions.concerns?.length) parts.push(`Huvudbesvär: ${questions.concerns.join(", ")}`);
+    if (questions.routine) parts.push(`Nuvarande rutin: ${questions.routine}`);
+    if (questions.lifestyle) {
+      const ls = questions.lifestyle;
+      if (ls.sleep) parts.push(`Sömn: ${ls.sleep} timmar per natt`);
+      if (ls.stress) parts.push(`Stressnivå: ${ls.stress}`);
+      if (ls.diet) parts.push(`Kost: ${ls.diet}`);
+      if (ls.water) parts.push(`Vattenintag: ${ls.water}`);
+      if (ls.activity) parts.push(`Träning: ${ls.activity}`);
+    }
+    if (questions.goals?.length) parts.push(`Mål: ${questions.goals.join(", ")}`);
+    if (questions.goalFreeText) parts.push(`Övrigt: ${questions.goalFreeText}`);
   }
-  if (questions.goals?.length) parts.push(`- Mål: ${questions.goals.join(", ")}`);
-  if (questions.goalFreeText) parts.push(`- Övrigt: ${questions.goalFreeText}`);
 
-  const hasImages = false; // text-based analysis by default
-  const suffix = hasImages
-    ? "\n\nAnalysera min hud baserat på bilderna och mina svar."
-    : "\n\nGe en djup, personlig hudanalys baserat på mina svar. Inkludera livsstilsråd, produktrekommendationer och en föreslagen morgon- och kvällsrutin.";
+  if (imageScan) {
+    parts.push("\n== SKANNINGSDATA (AI-hudskanning, lokal analys i webbläsaren) ==");
+    if (imageScan.overall?.length) {
+      parts.push("Helhetsbild:");
+      imageScan.overall.forEach(o => {
+        parts.push(`  - ${o.conditionSv || o.condition}: ${o.confidence}% konfidens`);
+      });
+    }
+    if (imageScan.zones?.length) {
+      parts.push("Zon-analys:");
+      imageScan.zones.forEach(z => {
+        parts.push(`  - ${z.zone}: ${z.conditionSv || z.condition} (${z.confidence}%)`);
+      });
+    }
+    parts.push("OBS: Skanningen utfördes lokalt med en AI-modell. Konfidensgrader under 40% bör tolkas med försiktighet.");
+  }
 
-  return parts.join("\n") + suffix;
+  if (!questions && !imageScan) {
+    return "Ge mig en holistisk hudanalys baserat på din expertis.";
+  }
+
+  parts.push("\nGe en djup, personlig hudanalys. Svara ENBART med JSON-blocket enligt formatet i instruktionerna.");
+  return parts.join("\n");
 }
 
 app.post("/api/analysis", async (req, res) => {
@@ -1513,17 +1591,28 @@ app.post("/api/analysis", async (req, res) => {
       return res.status(429).json({ message: "Du har nått gränsen. Försök igen om en stund." });
     }
 
-    const { imageBase64, regions, fullImage, questions } = req.body;
+    const { imageBase64, regions, fullImage, questions, imageScan } = req.body;
 
     const mainImage = fullImage || imageBase64;
     const hasImage = mainImage && mainImage.startsWith("data:image/");
     const hasQuestions = questions && (questions.skinType || questions.concerns?.length);
+    const hasScan = imageScan && (imageScan.overall?.length || imageScan.zones?.length);
 
-    if (!hasImage && !hasQuestions) {
+    if (!hasImage && !hasQuestions && !hasScan) {
       return res.status(400).json({ message: "Besvara frågorna eller bifoga ett foto." });
     }
 
-    const promptText = buildAnalysisPrompt(questions);
+    const promptText = buildAnalysisPrompt(questions, imageScan);
+    const bookKnowledge = loadAnalysisBookKnowledge();
+
+    const concerns = questions?.concerns || [];
+    const scanConditions = (imageScan?.overall || []).map(o => o.condition || o.conditionSv).filter(Boolean);
+    const allConcerns = [...new Set([...concerns, ...scanConditions])];
+    const researchSnippets = await searchVayu(allConcerns);
+
+    let systemPromptFull = ANALYSIS_SYSTEM_PROMPT;
+    if (bookKnowledge) systemPromptFull += "\n\n== BOKKUNSKAP (Christopher Genbergs bok om holistisk hudvård) ==\n" + bookKnowledge;
+    if (researchSnippets) systemPromptFull += researchSnippets;
 
     if (!process.env.OPENAI_API_KEY) {
       return res.status(500).json({ message: "OpenAI API-nyckel saknas i serverkonfigurationen." });
@@ -1550,7 +1639,7 @@ app.post("/api/analysis", async (req, res) => {
       }
     }
 
-    console.log(`[Analysis] Sending ${contentParts.filter(p => p.type === "input_image").length} image(s), questions=${!!hasQuestions}, model=${OPENAI_MODEL}`);
+    console.log(`[Analysis] Sending ${contentParts.filter(p => p.type === "input_image").length} image(s), questions=${!!hasQuestions}, scan=${!!hasScan}, research=${!!researchSnippets}, model=${OPENAI_MODEL}`);
 
     const response = await fetchWithRetry("https://api.openai.com/v1/responses", {
       method: "POST",
@@ -1560,7 +1649,7 @@ app.post("/api/analysis", async (req, res) => {
       },
       body: JSON.stringify({
         model: OPENAI_MODEL,
-        instructions: ANALYSIS_SYSTEM_PROMPT,
+        instructions: systemPromptFull,
         input: [
           { role: "user", content: contentParts }
         ],
@@ -1621,6 +1710,42 @@ app.post("/api/analysis", async (req, res) => {
   } catch (err) {
     console.error("[Analysis Error]", err);
     res.status(err.status || 500).json({ message: err.message || "Analysen misslyckades" });
+  }
+});
+
+app.post("/api/training-data", async (req, res) => {
+  try {
+    const clientIp = req.ip || req.connection.remoteAddress;
+    if (!checkRateLimit(clientIp, "training-upload", 5)) {
+      return res.status(429).json({ message: "For manga uppladdningar. Forsok igen senare." });
+    }
+
+    const { imageBase64, scanResults, quizAnswers, topCondition, confidence } = req.body;
+
+    if (!imageBase64 || !imageBase64.startsWith("data:image/")) {
+      return res.status(400).json({ message: "Ingen giltig bild bifogad." });
+    }
+
+    if (imageBase64.length > 15 * 1024 * 1024) {
+      return res.status(413).json({ message: "Bilden ar for stor (max 10 MB)." });
+    }
+
+    const saved = await db.createTrainingUpload({
+      imageData: imageBase64,
+      scanResults: scanResults || null,
+      quizAnswers: quizAnswers || null,
+      topCondition: topCondition || null,
+      confidence: confidence || null,
+    });
+
+    console.log(`[Training] Upload saved: id=${saved.id}, condition=${saved.top_condition}, confidence=${saved.confidence}`);
+
+    const totalCount = await db.countTrainingUploads();
+
+    res.json({ id: saved.id, totalContributions: totalCount });
+  } catch (err) {
+    console.error("[Training] Upload error:", err.message);
+    res.status(500).json({ message: "Kunde inte spara traningsdata." });
   }
 });
 
@@ -3880,6 +4005,12 @@ const CHAT_WIDGET_TOOLS = [
   }
 ];
 
+const OPENCLAW_GATEWAY_URL = process.env.OPENCLAW_GATEWAY_URL || "http://127.0.0.1:18789";
+const OPENCLAW_GATEWAY_TOKEN = process.env.OPENCLAW_GATEWAY_TOKEN || "1753-skincare-local";
+
+const VALID_PRODUCT_IDS = ["duo-ta-da", "ta-da-serum", "duo-kit", "au-naturel-makeup-remover", "fungtastic-mushroom-extract"];
+const CART_ACTION_RE = /\[ADD_TO_CART:([a-z0-9-]+)\]/g;
+
 app.post("/api/chat", async (req, res) => {
   try {
     const clientIp = req.ip || req.connection.remoteAddress;
@@ -3892,26 +4023,22 @@ app.post("/api/chat", async (req, res) => {
       return res.status(400).json({ message: "Meddelande saknas." });
     }
 
-    const requestBody = {
-      model: OPENAI_MODEL,
-      input: message,
-      tools: CHAT_WIDGET_TOOLS,
-      store: true
+    const openclawHeaders = {
+      "Content-Type": "application/json",
+      "Authorization": `Bearer ${OPENCLAW_GATEWAY_TOKEN}`
     };
 
     if (previousResponseId) {
-      requestBody.previous_response_id = previousResponseId;
-    } else {
-      requestBody.instructions = CHAT_WIDGET_PROMPT;
+      openclawHeaders["x-openclaw-session-key"] = `chat-widget-${previousResponseId}`;
     }
 
-    const response = await fetchWithRetry("https://api.openai.com/v1/responses", {
+    const response = await fetchWithRetry(`${OPENCLAW_GATEWAY_URL}/v1/chat/completions`, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`
-      },
-      body: JSON.stringify(requestBody)
+      headers: openclawHeaders,
+      body: JSON.stringify({
+        model: "openclaw",
+        messages: [{ role: "user", content: message }]
+      })
     });
 
     if (!response.ok) {
@@ -3919,47 +4046,18 @@ app.post("/api/chat", async (req, res) => {
       throw { status: response.status, message: err.error?.message || "Chatten kunde inte svara." };
     }
 
-    let data = await response.json();
-    let actions = [];
+    const data = await response.json();
+    let outputText = data.choices?.[0]?.message?.content || "";
+    const actions = [];
 
-    const functionCalls = (data.output || []).filter(item => item.type === "function_call");
-    if (functionCalls.length > 0) {
-      for (const call of functionCalls) {
-        try {
-          const args = JSON.parse(call.arguments);
-          if (call.name === "add_to_cart" && args.product_id) {
-            actions.push({ type: "add_to_cart", productId: args.product_id });
-          }
-        } catch (_) { /* ignore parse errors */ }
-      }
-
-      const toolResults = functionCalls.map(call => ({
-        type: "function_call_output",
-        call_id: call.call_id,
-        output: JSON.stringify({ success: true, message: "Produkten har lagts i varukorgen." })
-      }));
-
-      const followUp = await fetchWithRetry("https://api.openai.com/v1/responses", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`
-        },
-        body: JSON.stringify({
-          model: OPENAI_MODEL,
-          previous_response_id: data.id,
-          input: toolResults,
-          tools: CHAT_WIDGET_TOOLS,
-          store: true
-        })
-      });
-
-      if (followUp.ok) {
-        data = await followUp.json();
+    let match;
+    while ((match = CART_ACTION_RE.exec(outputText)) !== null) {
+      const pid = match[1];
+      if (VALID_PRODUCT_IDS.includes(pid)) {
+        actions.push({ type: "add_to_cart", productId: pid });
       }
     }
-
-    const outputText = extractOutputText(data);
+    outputText = outputText.replace(CART_ACTION_RE, "").trim();
 
     res.json({
       content: outputText,

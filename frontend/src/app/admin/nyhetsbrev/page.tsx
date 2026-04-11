@@ -13,6 +13,7 @@ import {
   Users,
   Zap,
 } from "lucide-react";
+import { KpiCard, ChartCard, DonutChart } from "@/components/charts";
 
 interface NewsletterStats {
   subscribers: {
@@ -165,28 +166,39 @@ export default function AdminNewsletterPage() {
         </div>
       ) : stats ? (
         <>
-          <div className="grid gap-4 sm:grid-cols-3">
-            <KPICard
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <KpiCard
               icon={Users}
-              label="Totalt"
+              label="Totalt prenumeranter"
               value={stats.subscribers.total}
-              color="text-[#108474]"
-              bgColor="bg-emerald-50"
+              loading={false}
             />
-            <KPICard
+            <KpiCard
               icon={MailCheck}
               label="Aktiva"
               value={stats.subscribers.active}
-              color="text-[#108474]"
-              bgColor="bg-emerald-50"
+              loading={false}
             />
-            <KPICard
+            <KpiCard
               icon={MailX}
               label="Avregistrerade"
               value={stats.subscribers.unsubscribed}
-              color="text-red-600"
-              bgColor="bg-red-50"
+              loading={false}
+              color="#ef4444"
             />
+            <ChartCard title="Fördelning" className="!p-4">
+              <DonutChart
+                data={[
+                  { name: "active", value: stats.subscribers.active },
+                  { name: "unsubscribed", value: stats.subscribers.unsubscribed },
+                ]}
+                labels={{ active: "Aktiva", unsubscribed: "Avregistrerade" }}
+                colors={{ active: "#108474", unsubscribed: "#ef4444" }}
+                height={120}
+                innerRadius={30}
+                outerRadius={50}
+              />
+            </ChartCard>
           </div>
 
           {/* Automation flows */}
@@ -396,34 +408,3 @@ export default function AdminNewsletterPage() {
   );
 }
 
-function KPICard({
-  icon: Icon,
-  label,
-  value,
-  color,
-  bgColor,
-}: {
-  icon: React.ComponentType<{ className?: string }>;
-  label: string;
-  value: number;
-  color: string;
-  bgColor: string;
-}) {
-  return (
-    <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-[#e6e6e6] transition-shadow hover:shadow-md">
-      <div className="flex items-center gap-3">
-        <div
-          className={`flex h-10 w-10 items-center justify-center rounded-xl ${bgColor}`}
-        >
-          <Icon className={`h-5 w-5 ${color}`} />
-        </div>
-        <div>
-          <p className="text-xs font-medium text-[#766a62]">{label}</p>
-          <p className="text-2xl font-bold tabular-nums tracking-tight text-[#1d1d1f]">
-            {value.toLocaleString("sv-SE")}
-          </p>
-        </div>
-      </div>
-    </div>
-  );
-}

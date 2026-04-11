@@ -266,6 +266,16 @@ async function initSchema() {
 
     CREATE INDEX IF NOT EXISTS idx_skin_analyses_user ON skin_analyses (user_id);
 
+    CREATE TABLE IF NOT EXISTS training_uploads (
+      id              SERIAL PRIMARY KEY,
+      image_data      TEXT NOT NULL,
+      scan_results    JSONB,
+      quiz_answers    JSONB,
+      top_condition   VARCHAR(50),
+      confidence      REAL,
+      created_at      TIMESTAMPTZ DEFAULT NOW()
+    );
+
     CREATE TABLE IF NOT EXISTS newsletter_drafts (
       id              SERIAL PRIMARY KEY,
       issue_number    INTEGER NOT NULL,
@@ -1101,6 +1111,22 @@ async function getSkinAnalyses(userId) {
   return rows;
 }
 
+// ---- TRAINING UPLOADS ----
+
+async function createTrainingUpload({ imageData, scanResults, quizAnswers, topCondition, confidence }) {
+  const { rows } = await pool.query(
+    `INSERT INTO training_uploads (image_data, scan_results, quiz_answers, top_condition, confidence)
+     VALUES ($1, $2, $3, $4, $5) RETURNING id, top_condition, confidence, created_at`,
+    [imageData, JSON.stringify(scanResults || {}), JSON.stringify(quizAnswers || {}), topCondition || null, confidence || null]
+  );
+  return rows[0];
+}
+
+async function countTrainingUploads() {
+  const { rows } = await pool.query("SELECT COUNT(*)::int AS count FROM training_uploads");
+  return rows[0].count;
+}
+
 // ---- ADDRESSES ----
 
 async function getAddresses(userId) {
@@ -1386,6 +1412,8 @@ module.exports = {
   saveSkinAnalysis,
   createSkinAnalysis,
   getSkinAnalyses,
+  createTrainingUpload,
+  countTrainingUploads,
   getAddresses,
   createAddress,
   updateAddress,

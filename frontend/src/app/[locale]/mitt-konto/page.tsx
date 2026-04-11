@@ -41,6 +41,7 @@ import {
   productPrice,
 } from "@/lib/products";
 import { formatPrice } from "@/lib/currency";
+import { LineChartComponent, ChartCard, ScoreRing, ProgressBar } from "@/components/charts";
 
 type View =
   | "oversikt"
@@ -248,16 +249,14 @@ function OverviewView({
         </p>
         {info.next && (
           <div className="mt-4 max-w-md">
-            <div className="flex items-center justify-between text-xs text-muted-foreground">
-              <span>{t(`account.tier.${tier}`)}</span>
-              <span>{t(`account.tier.${info.next}`)}</span>
-            </div>
-            <div className="mt-1.5 h-1.5 overflow-hidden rounded-full bg-brand-100">
-              <div
-                className="h-full rounded-full bg-brand-900 transition-all duration-700"
-                style={{ width: `${progress}%` }}
-              />
-            </div>
+            <ProgressBar
+              value={progress}
+              max={100}
+              color="#1C1410"
+              label={t(`account.tier.${tier}`)}
+              valueLabel={t(`account.tier.${info.next}`)}
+              size="sm"
+            />
             <p className="mt-1.5 text-xs text-muted-foreground">
               {d("progressPointsLeft", {
                 points: remaining.toLocaleString(loc),
@@ -389,28 +388,22 @@ function OverviewView({
 
 /* ─────────────────── SKIN JOURNEY ─────────────────── */
 
-function ScoreMiniChart({ scores }: { scores: { score: number; date: string }[] }) {
+function ScoreLineChart({ scores }: { scores: { score: number; date: string }[] }) {
   if (scores.length < 2) return null;
-  const max = 100;
-  const w = 200;
-  const h = 60;
-  const step = w / (scores.length - 1);
-  const points = scores
+  const data = scores
     .slice()
     .reverse()
-    .map((s, i) => `${i * step},${h - (s.score / max) * h}`);
-  const polyline = points.join(" ");
+    .map((s) => ({
+      label: new Date(s.date).toLocaleDateString("sv-SE", { day: "numeric", month: "short" }),
+      score: s.score,
+    }));
   return (
-    <svg viewBox={`0 0 ${w} ${h}`} className="h-16 w-full" preserveAspectRatio="none">
-      <polyline
-        points={polyline}
-        fill="none"
-        stroke="#108474"
-        strokeWidth="2.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
+    <LineChartComponent
+      data={data}
+      dataKey="score"
+      height={180}
+      valueFormatter={(v) => `${v} / 100`}
+    />
   );
 }
 
@@ -493,9 +486,9 @@ function SkinJourneyView({ token }: { token: string }) {
       </div>
 
       {scoredAnalyses.length >= 2 && (
-        <div className="rounded-xl border border-border bg-white p-4">
-          <ScoreMiniChart scores={scoredAnalyses} />
-        </div>
+        <ChartCard title={d("skinScoreOverTime") || "Hudpoäng över tid"} subtitle={`${scoredAnalyses.length} analyser`}>
+          <ScoreLineChart scores={scoredAnalyses} />
+        </ChartCard>
       )}
 
       <div className="space-y-4">

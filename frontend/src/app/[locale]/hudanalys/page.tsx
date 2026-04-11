@@ -7,24 +7,26 @@ import {
   Check,
   Droplets,
   Flame,
+  Heart,
   Leaf,
   Loader2,
   Moon,
+  ScanFace,
   ShieldAlert,
   Sparkles,
   Sun,
   Target,
   Zap,
 } from "lucide-react";
-import { ProductCard } from "@/components/product-card";
-import { SectionWrapper } from "@/components/section-wrapper";
+import { AnalysisTabs } from "@/components/analysis/analysis-tabs";
 import { apiFetch } from "@/lib/api";
-import { PRODUCTS, type Product } from "@/lib/products";
 import { useLocale } from "@/providers/locale-provider";
 import { useAuth } from "@/providers/auth-provider";
 import { cn } from "@/lib/utils";
+import { SkinScanner, type ScanSummary } from "@/components/skin-scanner/skin-scanner";
+import { CONDITION_LABELS_SV } from "@/components/skin-scanner/zones";
 
-type Step = "intro" | 1 | 2 | 3 | 4 | 5 | "analyzing" | "result";
+type Step = "intro" | "scan" | 1 | 2 | 3 | 4 | 5 | "analyzing" | "result";
 
 interface QuizAnswers {
   skinType: string;
@@ -41,12 +43,25 @@ interface QuizAnswers {
 
 interface AnalysisJSON {
   score: number;
+  scoreLabel?: string;
   summary: string;
-  regions?: { label: string; observation: string; score: number }[];
-  lifestyle: { area: string; tip: string; impact: string }[];
-  products: { id: string; reason: string }[];
+  skinAnalysis?: {
+    overview: string;
+    strengths: string[];
+    concerns: string[];
+    microbiome: string;
+    ecs: string;
+  };
+  products: { id: string; reason: string; usage?: string }[];
+  lifestyle: { area: string; tip: string; why?: string; impact: string; source?: string }[];
+  routine?: {
+    morning: { step: string; why: string }[];
+    evening: { step: string; why: string }[];
+  };
   avoid: string[];
   nextAnalysis: string;
+  /** Legacy fields for backward compat */
+  regions?: { label: string; observation: string; score: number }[];
   routineSuggestion?: { morning: string[]; evening: string[] };
 }
 
@@ -174,44 +189,6 @@ function ChipSelect({
   );
 }
 
-function ScoreRing({ score }: { score: number }) {
-  const r = 70;
-  const circ = 2 * Math.PI * r;
-  const offset = circ - (score / 100) * circ;
-  const color =
-    score >= 75 ? "#108474" : score >= 50 ? "#fcb237" : "#e55050";
-
-  return (
-    <div className="relative mx-auto h-48 w-48">
-      <svg viewBox="0 0 160 160" className="h-full w-full -rotate-90">
-        <circle
-          cx="80"
-          cy="80"
-          r={r}
-          fill="none"
-          stroke="#e6e6e6"
-          strokeWidth="10"
-        />
-        <circle
-          cx="80"
-          cy="80"
-          r={r}
-          fill="none"
-          stroke={color}
-          strokeWidth="10"
-          strokeLinecap="round"
-          strokeDasharray={circ}
-          strokeDashoffset={offset}
-          className="transition-all duration-1000 ease-out"
-        />
-      </svg>
-      <div className="absolute inset-0 flex flex-col items-center justify-center">
-        <span className="text-4xl font-bold text-brand-900">{score}</span>
-        <span className="text-xs font-medium text-brand-500">av 100</span>
-      </div>
-    </div>
-  );
-}
 
 function parseAnalysisJSON(content: string): AnalysisJSON | null {
   const match = content.match(/```json\s*([\s\S]*?)```/);
@@ -246,9 +223,12 @@ export default function AnalysisPage() {
     goals: [],
     sensitivities: "",
   });
+  const [scanSummary, setScanSummary] = useState<ScanSummary | null>(null);
   const [result, setResult] = useState<AnalysisResponse | null>(null);
   const [parsed, setParsed] = useState<AnalysisJSON | null>(null);
   const [error, setError] = useState("");
+  const [trainingUploaded, setTrainingUploaded] = useState(false);
+  const [trainingCount, setTrainingCount] = useState<number | null>(null);
 
   const toggleArray = (arr: string[], key: string, max?: number) => {
     if (arr.includes(key)) return arr.filter((k) => k !== key);
@@ -273,12 +253,69 @@ export default function AnalysisPage() {
     }
   }, [step, answers]);
 
+  const uploadTrainingData = useCallback(async (
+    scan: ScanSummary,
+    quiz?: QuizAnswers
+  ) => {
+    if (!scan.consentGiven || !scan.imageBase64) return;
+    try {
+      const res = await apiFetch<{ id: number; totalContributions: number }>(
+        "/training-data",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            imageBase64: scan.imageBase64,
+            scanResults: {
+              overall: scan.overallTop.map((p) => ({
+                condition: p.label,
+                probability: p.probability,
+              })),
+              zones: scan.zones.map((z) => ({
+                zone: z.zone.id,
+                zoneSv: z.zone.labelSv,
+                topCondition: z.topCondition,
+                confidence: z.confidence,
+              })),
+            },
+            quizAnswers: quiz || null,
+            topCondition: scan.overallTop[0]?.label || null,
+            confidence: scan.overallTop[0]?.probability || null,
+          }),
+        }
+      );
+      setTrainingUploaded(true);
+      setTrainingCount(res.totalContributions);
+    } catch {
+      // Non-critical — silently ignore
+    }
+  }, []);
+
   const analyze = useCallback(async () => {
     setStep("analyzing");
     setError("");
     try {
       const headers: Record<string, string> = {};
       if (token) headers["Authorization"] = `Bearer ${token}`;
+
+      const scanContext = scanSummary
+        ? {
+            imageScan: {
+              overall: scanSummary.overallTop.map((p) => ({
+                condition: p.label,
+                conditionSv: CONDITION_LABELS_SV[p.label] || p.label,
+                confidence: Math.round(p.probability * 100),
+              })),
+              zones: scanSummary.zones
+                .filter((z) => z.confidence >= 0.15)
+                .map((z) => ({
+                  zone: z.zone.labelSv,
+                  condition: z.topCondition,
+                  conditionSv: CONDITION_LABELS_SV[z.topCondition] || z.topCondition,
+                  confidence: Math.round(z.confidence * 100),
+                })),
+            },
+          }
+        : {};
 
       const data = await apiFetch<AnalysisResponse>("/analysis", {
         method: "POST",
@@ -300,17 +337,22 @@ export default function AnalysisPage() {
               ? `Känsligheter/allergier: ${answers.sensitivities}`
               : undefined,
           },
+          ...scanContext,
         }),
       });
       setResult(data);
       const json = parseAnalysisJSON(data.content);
       setParsed(json);
       setStep("result");
+
+      if (scanSummary?.consentGiven) {
+        uploadTrainingData(scanSummary, answers);
+      }
     } catch {
       setError(a("analysisError"));
       setStep(5);
     }
-  }, [answers, a, token]);
+  }, [answers, a, token, scanSummary, uploadTrainingData]);
 
   const goNext = () => {
     if (typeof step === "number" && step < TOTAL_STEPS) setStep((step + 1) as Step);
@@ -359,21 +401,6 @@ export default function AnalysisPage() {
     { key: "simplify", label: a("goalSimplify") },
   ];
 
-  const matchedProducts: (Product & { reason: string })[] = (parsed?.products ?? [])
-    .map((rec) => {
-      const p = PRODUCTS.find((prod) => prod.id === rec.id);
-      return p ? { ...p, reason: rec.reason } : null;
-    })
-    .filter(Boolean) as (Product & { reason: string })[];
-
-  const impactBadge = (impact: string) => {
-    const key = impact.toLowerCase();
-    if (key === "hög" || key === "high")
-      return { label: a("lifestyleImpactHigh"), cls: "bg-red-50 text-red-700" };
-    if (key === "medel" || key === "medium")
-      return { label: a("lifestyleImpactMedium"), cls: "bg-amber-50 text-amber-700" };
-    return { label: a("lifestyleImpactLow"), cls: "bg-green-50 text-green-700" };
-  };
 
   return (
     <>
@@ -391,13 +418,70 @@ export default function AnalysisPage() {
               <p className="mx-auto mt-4 max-w-lg text-base leading-relaxed text-muted-foreground">
                 {a("intro")}
               </p>
+
+              <div className="mx-auto mt-10 flex max-w-md flex-col gap-4 sm:flex-row sm:justify-center">
+                <button
+                  onClick={() => setStep(1)}
+                  className="inline-flex h-14 flex-1 items-center justify-center gap-3 rounded-full bg-[#108474] px-8 text-sm font-semibold text-white shadow-lg shadow-[#108474]/20 transition-all hover:bg-[#0d6e62] hover:shadow-xl active:scale-[0.97]"
+                >
+                  <Sparkles className="h-5 w-5" />
+                  {a("startQuiz")}
+                </button>
+                <button
+                  onClick={() => setStep("scan")}
+                  className="inline-flex h-14 flex-1 items-center justify-center gap-3 rounded-full border-2 border-[#108474] px-8 text-sm font-semibold text-[#108474] transition-all hover:bg-[#108474]/5 active:scale-[0.97]"
+                >
+                  <ScanFace className="h-5 w-5" />
+                  Ansiktsskanning
+                </button>
+              </div>
+
+              <p className="mx-auto mt-4 max-w-sm text-xs text-[#766a62]">
+                Ansiktsskanningen analyserar din hy direkt i din enhet.
+                Ingen bild skickas till någon server.
+              </p>
+            </div>
+          )}
+
+          {/* ---- FACE SCAN ---- */}
+          {step === "scan" && (
+            <div className="animate-fade-in">
               <button
-                onClick={() => setStep(1)}
-                className="mt-10 inline-flex h-14 items-center gap-3 rounded-full bg-[#108474] px-10 text-sm font-semibold text-white shadow-lg shadow-[#108474]/20 transition-all hover:bg-[#0d6e62] hover:shadow-xl active:scale-[0.97]"
+                onClick={() => setStep("intro")}
+                className="mb-6 inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium text-[#515151] transition-colors hover:bg-[#f5f5f7]"
               >
-                <Sparkles className="h-5 w-5" />
-                {a("startQuiz")}
+                <ArrowLeft className="h-4 w-4" />
+                Tillbaka
               </button>
+              <SkinScanner
+                onComplete={(summary) => {
+                  setScanSummary(summary);
+                  if (summary.consentGiven) {
+                    uploadTrainingData(summary);
+                  }
+                }}
+              />
+              {scanSummary && (
+                <div className="mt-8 animate-fade-in space-y-4 text-center">
+                  <div className="mx-auto max-w-sm rounded-2xl border border-[#108474]/20 bg-[#108474]/5 p-6">
+                    <Sparkles className="mx-auto mb-3 h-6 w-6 text-[#108474]" />
+                    <p className="text-sm font-bold tracking-tight text-[#1d1d1f]">
+                      Vill du ha en djupare analys?
+                    </p>
+                    <p className="mt-2 text-xs leading-relaxed text-[#515151]">
+                      Kombinera skanningen med fem korta frågor om din livsstil
+                      för personliga rekommendationer från vår AI.
+                    </p>
+                    <button
+                      onClick={() => setStep(1)}
+                      className="mt-5 inline-flex h-12 items-center gap-2 rounded-full bg-[#108474] px-8 text-sm font-semibold text-white shadow-lg shadow-[#108474]/20 transition-all hover:bg-[#0d6e62] hover:shadow-xl active:scale-[0.97]"
+                    >
+                      <Sparkles className="h-4 w-4" />
+                      Fortsätt med livsstilsanalys
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
@@ -405,6 +489,13 @@ export default function AnalysisPage() {
           {typeof step === "number" && (
             <div className="animate-fade-in">
               <ProgressBar current={step} total={TOTAL_STEPS} />
+
+              {scanSummary && step === 1 && (
+                <div className="mx-auto mb-5 flex max-w-xs items-center justify-center gap-2 rounded-full bg-[#108474]/5 px-4 py-2 text-xs font-medium text-[#108474]">
+                  <ScanFace className="h-3.5 w-3.5" />
+                  Skanningsdata kopplad till analysen
+                </div>
+              )}
 
               <p className="mb-6 text-center text-xs font-medium uppercase tracking-widest text-muted-foreground">
                 {a("stepOf", { current: step, total: TOTAL_STEPS })}
@@ -646,84 +737,40 @@ export default function AnalysisPage() {
                 <h2 className="text-3xl font-bold tracking-tight">{a("resultTitle")}</h2>
               </div>
 
-              {/* Score ring */}
-              {parsed && (
-                <div className="text-center">
-                  <ScoreRing score={parsed.score} />
-                  <p className="mt-2 text-sm font-medium text-brand-500">
-                    {a("resultScore")}
-                  </p>
-                  {parsed.summary && (
-                    <p className="mx-auto mt-4 max-w-md text-sm leading-relaxed text-brand-600">
-                      {parsed.summary}
-                    </p>
+              {parsed ? (
+                <AnalysisTabs
+                  score={parsed.score}
+                  scoreLabel={parsed.scoreLabel}
+                  summary={parsed.summary}
+                  skinAnalysis={parsed.skinAnalysis}
+                  products={parsed.products}
+                  lifestyle={parsed.lifestyle}
+                  routine={parsed.routine}
+                  routineLegacy={parsed.routineSuggestion}
+                  avoid={parsed.avoid}
+                  nextAnalysis={parsed.nextAnalysis}
+                  hasScan={!!scanSummary}
+                />
+              ) : (
+                <div className="rounded-2xl border border-border bg-white p-6 md:p-8">
+                  <div
+                    className="prose prose-sm max-w-none text-muted-foreground"
+                    dangerouslySetInnerHTML={{ __html: stripJSON(result.content) }}
+                  />
+                </div>
+              )}
+
+              {/* Training data contribution */}
+              {trainingUploaded && (
+                <div className="flex items-center justify-center gap-2 rounded-xl bg-[#fcb237]/10 px-4 py-3 text-xs font-medium text-[#766a62]">
+                  <Heart className="h-3.5 w-3.5 text-[#fcb237]" />
+                  Tack för att du bidrar till att förbättra vår AI-hudanalys
+                  {trainingCount !== null && (
+                    <span className="text-[#766a62]/60">
+                      {" "}&mdash; bidrag #{trainingCount}
+                    </span>
                   )}
                 </div>
-              )}
-
-              {/* Prose content (without JSON) */}
-              <div className="rounded-2xl border border-border bg-white p-6 md:p-8">
-                <div
-                  className="prose prose-sm max-w-none text-muted-foreground"
-                  dangerouslySetInnerHTML={{ __html: stripJSON(result.content) }}
-                />
-              </div>
-
-              {/* Lifestyle recommendations */}
-              {parsed?.lifestyle && parsed.lifestyle.length > 0 && (
-                <div>
-                  <h3 className="mb-4 text-lg font-bold tracking-tight">{a("lifestyleTitle")}</h3>
-                  <div className="grid gap-3 sm:grid-cols-2">
-                    {parsed.lifestyle.map((item, i) => {
-                      const badge = impactBadge(item.impact);
-                      return (
-                        <div
-                          key={i}
-                          className="rounded-2xl border border-border bg-white p-5 shadow-sm"
-                        >
-                          <div className="mb-2 flex items-center justify-between">
-                            <span className="text-sm font-semibold text-brand-900">
-                              {item.area}
-                            </span>
-                            <span
-                              className={cn(
-                                "rounded-full px-2.5 py-0.5 text-[11px] font-medium",
-                                badge.cls
-                              )}
-                            >
-                              {badge.label}
-                            </span>
-                          </div>
-                          <p className="text-sm leading-relaxed text-brand-600">{item.tip}</p>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-              )}
-
-              {/* Avoid list */}
-              {parsed?.avoid && parsed.avoid.length > 0 && (
-                <div>
-                  <h3 className="mb-3 text-lg font-bold tracking-tight">{a("avoidTitle")}</h3>
-                  <div className="flex flex-wrap gap-2">
-                    {parsed.avoid.map((item, i) => (
-                      <span
-                        key={i}
-                        className="rounded-full border border-red-200 bg-red-50 px-4 py-1.5 text-xs font-medium text-red-700"
-                      >
-                        {item}
-                      </span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Next analysis hint */}
-              {parsed?.nextAnalysis && (
-                <p className="text-center text-sm text-brand-500">
-                  {a("nextAnalysisHint", { time: parsed.nextAnalysis })}
-                </p>
               )}
 
               {/* New analysis CTA */}
@@ -733,6 +780,9 @@ export default function AnalysisPage() {
                     setStep("intro");
                     setResult(null);
                     setParsed(null);
+                    setScanSummary(null);
+                    setTrainingUploaded(false);
+                    setTrainingCount(null);
                     setAnswers({
                       skinType: "",
                       concerns: [],
@@ -752,32 +802,17 @@ export default function AnalysisPage() {
                   {a("newAnalysis")}
                 </button>
               </div>
+
+              {/* Medical disclaimer */}
+              <p className="mx-auto max-w-md text-center text-[11px] leading-relaxed text-[#766a62]/80">
+                Denna analys är framtagen med hjälp av artificiell intelligens och
+                utgör inte medicinsk rådgivning, diagnos eller behandlingsrekommendation.
+                Vid hudbesvär, kontakta alltid en legitimerad dermatolog eller läkare.
+              </p>
             </div>
           )}
         </div>
       </section>
-
-      {/* Recommended products */}
-      {step === "result" && matchedProducts.length > 0 && (
-        <SectionWrapper alt>
-          <h2 className="mb-8 text-center text-3xl font-bold tracking-tight">
-            {a("recProductsTitle")}
-          </h2>
-          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-            {matchedProducts.map((p) => (
-              <div key={p.id} className="space-y-3">
-                <ProductCard product={p} />
-                <div className="rounded-xl bg-[#108474]/5 px-4 py-3">
-                  <p className="mb-1 text-xs font-semibold text-[#108474]">
-                    {a("recProductWhy")}
-                  </p>
-                  <p className="text-xs leading-relaxed text-brand-700">{p.reason}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </SectionWrapper>
-      )}
     </>
   );
 }

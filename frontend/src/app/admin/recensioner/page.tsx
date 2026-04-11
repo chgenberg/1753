@@ -4,6 +4,7 @@ import { useCallback, useEffect, useState } from "react";
 import { authFetch } from "@/lib/api";
 import { useAuth } from "@/providers/auth-provider";
 import { Star, MessageSquare, Trash2, Search, ChevronLeft, ChevronRight, X } from "lucide-react";
+import { ChartCard, BarChartComponent, DonutChart } from "@/components/charts";
 
 interface Review {
   id: number;
@@ -139,18 +140,37 @@ export default function AdminRecensionerPage() {
         )}
       </div>
 
-      {/* Stats cards */}
+      {/* Stats charts */}
       {stats && (
-        <div className="grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-5">
-          {Object.entries(stats.perProduct)
-            .sort((a, b) => b[1].count - a[1].count)
-            .map(([pid, s]) => (
-            <div key={pid} className="rounded-2xl border border-[#e6e6e6] bg-white p-4">
-              <p className="text-xs font-medium text-[#766a62] truncate">{PRODUCT_NAMES[pid] || pid}</p>
-              <p className="mt-1 text-2xl font-bold text-[#1d1d1f]">{s.avg}</p>
-              <p className="text-xs text-[#515151]">{s.count} omdömen</p>
-            </div>
-          ))}
+        <div className="grid gap-6 lg:grid-cols-2">
+          <ChartCard title="Genomsnittsbetyg" subtitle="Per produkt">
+            <BarChartComponent
+              data={Object.entries(stats.perProduct)
+                .sort((a, b) => b[1].avg - a[1].avg)
+                .map(([pid, s]) => ({
+                  label: PRODUCT_NAMES[pid] || pid,
+                  betyg: Number(s.avg),
+                }))}
+              dataKey="betyg"
+              height={220}
+              color="#fcb237"
+              valueFormatter={(v) => `${v.toFixed(1)} / 5`}
+            />
+          </ChartCard>
+          <ChartCard title="Antal omdömen" subtitle="Fördelning per produkt">
+            <DonutChart
+              data={Object.entries(stats.perProduct)
+                .sort((a, b) => b[1].count - a[1].count)
+                .map(([pid, s]) => ({
+                  name: pid,
+                  value: s.count,
+                }))}
+              labels={PRODUCT_NAMES}
+              height={180}
+              innerRadius={45}
+              outerRadius={75}
+            />
+          </ChartCard>
         </div>
       )}
 
