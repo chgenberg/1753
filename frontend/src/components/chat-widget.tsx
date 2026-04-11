@@ -12,6 +12,7 @@ import {
 import { API_URL } from "@/lib/api";
 import { getProduct, productDisplayName, productPrice } from "@/lib/products";
 import { formatPrice } from "@/lib/currency";
+import { useAuth } from "@/providers/auth-provider";
 import { useCart } from "@/providers/cart-provider";
 import { useLocale } from "@/providers/locale-provider";
 
@@ -47,6 +48,7 @@ export function ChatWidget() {
   const id = useId();
   const { t, path, locale, messages } = useLocale();
   const { addItem } = useCart();
+  const { token } = useAuth();
 
   const [isOpen, setIsOpen] = useState(false);
   const [tipsOpen, setTipsOpen] = useState(false);
@@ -143,12 +145,16 @@ export function ChatWidget() {
       setTyping(true);
 
       try {
+        const headers: Record<string, string> = { "Content-Type": "application/json" };
+        if (token) headers["Authorization"] = `Bearer ${token}`;
+
         const res = await fetch(`${API_URL}/chat`, {
           method: "POST",
-          headers: { "Content-Type": "application/json" },
+          headers,
           body: JSON.stringify({
             message: trimmed,
             previousResponseId: responseId,
+            locale,
           }),
         });
 
@@ -194,6 +200,7 @@ export function ChatWidget() {
       messages.chatWidget.maxMessages,
       responseId,
       locale,
+      token,
     ]
   );
 

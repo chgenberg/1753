@@ -4198,11 +4198,73 @@ const CHAT_WIDGET_TOOLS = [
   }
 ];
 
-const OPENCLAW_GATEWAY_URL = process.env.OPENCLAW_GATEWAY_URL || "http://127.0.0.1:18789";
-const OPENCLAW_GATEWAY_TOKEN = process.env.OPENCLAW_GATEWAY_TOKEN || "1753-skincare-local";
-
 const VALID_PRODUCT_IDS = ["duo-ta-da", "ta-da-serum", "duo-kit", "au-naturel-makeup-remover", "fungtastic-mushroom-extract"];
-const CART_ACTION_RE = /\[ADD_TO_CART:([a-z0-9-]+)\]/g;
+
+async function buildCustomerContext(userId) {
+  try {
+    const user = await db.findUserById(userId);
+    if (!user) return "";
+
+    const parts = [`\n\nKUNDKONTEXT (inloggad kund – använd för att personalisera svaret):`];
+    parts.push(`Namn: ${user.name || "Okänt"}`);
+
+    const orders = await db.findOrdersByEmail(user.email).catch(() => []);
+    if (orders && orders.length > 0) {
+      parts.push(`\nOrderhistorik (${orders.length} ordrar):`);
+      for (const o of orders.slice(0, 5)) {
+        const items = (o.items || []).map(i => i.name || i.product_id).join(", ");
+        const date = o.created_at ? new Date(o.created_at).toLocaleDateString("sv-SE") : "okänt datum";
+        parts.push(`  - ${date}: ${items || "inga produkter"} (${o.status || "okänd status"})`);
+      }
+      if (orders.length > 5) parts.push(`  ... och ${orders.length - 5} äldre ordrar`);
+    } else {
+      parts.push("Ordrar: Inga tidigare ordrar.");
+    }
+
+    const analyses = await db.getSkinAnalyses(userId).catch(() => []);
+    if (analyses && analyses.length > 0) {
+      const latest = analyses[0];
+      parts.push(`\nHudanalyser (${analyses.length} st):`);
+      parts.push(`  Senaste: ${latest.created_at ? new Date(latest.created_at).toLocaleDateString("sv-SE") : "okänt datum"}, poäng ${latest.score || "ej betygsatt"}`);
+      if (latest.result) {
+        const r = typeof latest.result === "string" ? JSON.parse(latest.result) : latest.result;
+        if (r.summary) parts.push(`  Sammanfattning: ${r.summary.substring(0, 300)}`);
+        if (r.recommendations) {
+          const recs = Array.isArray(r.recommendations) ? r.recommendations : [];
+          if (recs.length > 0) parts.push(`  Rekommendationer: ${recs.slice(0, 3).join("; ")}`);
+        }
+      }
+      if (analyses.length > 1) {
+        const oldest = analyses[analyses.length - 1];
+        parts.push(`  Första analys: ${oldest.created_at ? new Date(oldest.created_at).toLocaleDateString("sv-SE") : ""}, poäng ${oldest.score || "?"}`);
+        if (latest.score && oldest.score) {
+          const diff = latest.score - oldest.score;
+          parts.push(`  Utveckling: ${diff > 0 ? "+" : ""}${diff} poäng sedan start`);
+        }
+      }
+    }
+
+    const wishlist = await db.getWishlist(userId).catch(() => []);
+    if (wishlist && wishlist.length > 0) {
+      parts.push(`\nÖnskelista: ${wishlist.map(w => w.product_id).join(", ")}`);
+    }
+
+    const subs = await db.findSubscriptionsByUser(userId).catch(() => []);
+    if (subs && subs.length > 0) {
+      const active = subs.filter(s => s.status === "active");
+      if (active.length > 0) {
+        parts.push(`\nAktiva prenumerationer: ${active.map(s => s.product_id).join(", ")}`);
+      }
+    }
+
+    parts.push(`\nAnvänd denna information för att ge personaliserade svar. Nämn kundens namn ibland. Om de frågar om sin hudanalys, referera till deras senaste resultat. Om de redan köpt en produkt, föreslå inte samma igen utan fokusera på komplement.`);
+
+    return parts.join("\n");
+  } catch (err) {
+    console.error("[Chat Widget] Customer context error:", err.message);
+    return "";
+  }
+}
 
 app.post("/api/chat", async (req, res) => {
   try {
@@ -4211,51 +4273,78 @@ app.post("/api/chat", async (req, res) => {
       return res.status(429).json({ message: "Du har nått gränsen. Försök igen om en stund." });
     }
 
-    const { message, previousResponseId } = req.body;
+    const { message, previousResponseId, locale } = req.body;
     if (!message) {
       return res.status(400).json({ message: "Meddelande saknas." });
     }
 
-    const openclawHeaders = {
-      "Content-Type": "application/json",
-      "Authorization": `Bearer ${OPENCLAW_GATEWAY_TOKEN}`
-    };
-
-    if (previousResponseId) {
-      openclawHeaders["x-openclaw-session-key"] = `chat-widget-${previousResponseId}`;
+    const apiKey = process.env.OPENAI_API_KEY;
+    if (!apiKey) {
+      throw { status: 503, message: "Chatten är tillfälligt otillgänglig." };
     }
 
-    const response = await fetchWithRetry(`${OPENCLAW_GATEWAY_URL}/v1/chat/completions`, {
+    let customerContext = "";
+    const authHeader = req.headers.authorization;
+    if (authHeader && authHeader.startsWith("Bearer ")) {
+      const payload = verifyToken(authHeader.split(" ")[1]);
+      if (payload && payload.id) {
+        customerContext = await buildCustomerContext(payload.id);
+      }
+    }
+
+    let instructions = CHAT_WIDGET_PROMPT + customerContext;
+    if (locale === "en") {
+      instructions += "\n\nSPRÅK: Kunden surfar på engelska. Svara på engelska istället för svenska. Behåll samma ton och personlighet.";
+    }
+
+    const body = {
+      model: "gpt-5.4-mini",
+      instructions,
+      input: message,
+      tools: CHAT_WIDGET_TOOLS,
+      tool_choice: "auto",
+      ...(previousResponseId && { previous_response_id: previousResponseId }),
+    };
+
+    const response = await fetchWithRetry("https://api.openai.com/v1/responses", {
       method: "POST",
-      headers: openclawHeaders,
-      body: JSON.stringify({
-        model: "openclaw",
-        messages: [{ role: "user", content: message }]
-      })
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify(body),
     });
 
     if (!response.ok) {
       const err = await response.json().catch(() => ({}));
-      throw { status: response.status, message: err.error?.message || "Chatten kunde inte svara." };
+      console.error("[Chat Widget] OpenAI error:", err);
+      throw { status: response.status, message: "Chatten kunde inte svara just nu." };
     }
 
     const data = await response.json();
-    let outputText = data.choices?.[0]?.message?.content || "";
     const actions = [];
+    let outputText = "";
 
-    let match;
-    while ((match = CART_ACTION_RE.exec(outputText)) !== null) {
-      const pid = match[1];
-      if (VALID_PRODUCT_IDS.includes(pid)) {
-        actions.push({ type: "add_to_cart", productId: pid });
+    for (const item of data.output || []) {
+      if (item.type === "function_call" && item.name === "add_to_cart") {
+        try {
+          const args = JSON.parse(item.arguments || "{}");
+          if (VALID_PRODUCT_IDS.includes(args.product_id)) {
+            actions.push({ type: "add_to_cart", productId: args.product_id });
+          }
+        } catch (_) { /* ignore bad JSON */ }
+      }
+      if (item.type === "message") {
+        for (const c of item.content || []) {
+          if (c.type === "output_text") outputText += c.text;
+        }
       }
     }
-    outputText = outputText.replace(CART_ACTION_RE, "").trim();
 
     res.json({
-      content: outputText,
+      content: outputText.trim(),
       responseId: data.id || null,
-      actions
+      actions,
     });
   } catch (err) {
     console.error("[Chat Widget Error]", err);
