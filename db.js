@@ -61,7 +61,10 @@ async function initSchema() {
       updated_at      TIMESTAMPTZ DEFAULT NOW(),
       processed_at    TIMESTAMPTZ,
       internal_notes  TEXT DEFAULT '',
-      locale          VARCHAR(5) DEFAULT 'sv'
+      locale          VARCHAR(5) DEFAULT 'sv',
+      tracking_number VARCHAR(255),
+      tracking_url    TEXT,
+      shipped_at      TIMESTAMPTZ
     );
 
     CREATE INDEX IF NOT EXISTS idx_orders_merchant_trns ON orders (merchant_trns);
@@ -152,6 +155,9 @@ async function initSchema() {
 
     ALTER TABLE orders ADD COLUMN IF NOT EXISTS currency VARCHAR(3) DEFAULT 'SEK';
     ALTER TABLE orders ADD COLUMN IF NOT EXISTS locale VARCHAR(5) DEFAULT 'sv';
+    ALTER TABLE orders ADD COLUMN IF NOT EXISTS tracking_number VARCHAR(255);
+    ALTER TABLE orders ADD COLUMN IF NOT EXISTS tracking_url TEXT;
+    ALTER TABLE orders ADD COLUMN IF NOT EXISTS shipped_at TIMESTAMPTZ;
 
     CREATE INDEX IF NOT EXISTS idx_subscriptions_user ON subscriptions (user_id);
     CREATE INDEX IF NOT EXISTS idx_subscriptions_status ON subscriptions (status);

@@ -1069,6 +1069,17 @@ app.post("/api/orders/:id/retry", adminOnly, async (req, res) => {
   }
 });
 
+app.post("/api/orders/:id/reprocess", adminOnly, async (req, res) => {
+  try {
+    const orderId = parseInt(req.params.id);
+    await db.pool.query("UPDATE orders SET processed_at = NULL WHERE id = $1", [orderId]);
+    const result = await handleOrderCompletion(orderId);
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 app.post("/api/orders/:id/resend-email", adminOnly, async (req, res) => {
   try {
     const orderId = parseInt(req.params.id);
@@ -2918,6 +2929,108 @@ async function sendOrderConfirmation(order, items) {
   return { sent: true };
 }
 
+// ---- SHIPPING CONFIRMATION EMAIL ----
+
+async function sendShippingConfirmation(order, items, trackingNumber, trackingUrl) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return { sent: false, skipReason: "no_api_key" };
+
+  const { Resend } = require("resend");
+  const resend = new Resend(apiKey);
+  const fromEmail = process.env.EMAIL_FROM || "order@1753skin.com";
+  const baseUrl = process.env.FRONTEND_URL || "https://www.1753skin.com";
+  const en = (order.locale || "sv") === "en";
+  const localePath = en ? "en" : "sv";
+  const currency = order.currency || "SEK";
+  const isSEK = currency === "SEK";
+  const fmt = (amount) => isSEK ? `${Math.round(amount).toLocaleString("sv-SE")} kr` : `€${Number(amount).toFixed(2)}`;
+  const firstName = (order.customer_name || "").split(" ")[0] || (en ? "there" : "du");
+
+  const itemRows = items.map(i => `<tr>
+    <td style="padding:8px 0;border-bottom:1px solid #eee">${i.name}</td>
+    <td style="padding:8px 0;border-bottom:1px solid #eee;text-align:center">${i.quantity}</td>
+    <td style="padding:8px 0;border-bottom:1px solid #eee;text-align:right">${fmt(i.price * i.quantity)}</td>
+  </tr>`).join("");
+
+  const trackingBlock = trackingNumber ? `
+    <div style="background:#108474;border-radius:12px;padding:20px 24px;margin:24px 0;color:#fff;text-align:center">
+      <p style="margin:0;font-size:13px;opacity:0.9">${en ? "Tracking number" : "Spårningsnummer"}</p>
+      <p style="margin:8px 0 0;font-size:20px;font-weight:700;letter-spacing:0.5px">${trackingNumber}</p>
+      ${trackingUrl ? `<a href="${trackingUrl}" style="display:inline-block;margin-top:14px;background:#fff;color:#108474;padding:10px 24px;border-radius:980px;font-size:13px;font-weight:600;text-decoration:none">
+        ${en ? "Track your package" : "Spåra ditt paket"} →
+      </a>` : ""}
+    </div>
+  ` : `
+    <div style="background:#f5f5f7;border-radius:12px;padding:16px 20px;margin:20px 0;text-align:center">
+      <p style="margin:0;font-size:14px;color:#515151">
+        ${en ? "Tracking information will be available shortly." : "Spårningsinformation blir tillgänglig inom kort."}
+      </p>
+    </div>
+  `;
+
+  const subject = en
+    ? `Your order is on its way! – ${order.order_number}`
+    : `Din order är på väg! – ${order.order_number}`;
+
+  const { data: sendResult, error: sendError } = await resend.emails.send({
+    from: fromEmail,
+    to: order.customer_email,
+    replyTo: "info@1753skin.com",
+    subject,
+    html: `
+      <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;max-width:560px;margin:0 auto;color:#1d1d1f">
+        <div style="text-align:center;padding:32px 0 24px">
+          <h1 style="font-size:24px;font-weight:700;margin:0">${en ? "Your order is on its way!" : "Din order är på väg!"}</h1>
+        </div>
+        <p style="font-size:15px;line-height:1.6;color:#515151">
+          ${en
+            ? `Hi ${firstName}, great news! Your order has been packed and shipped. ${trackingNumber ? "You can track your package using the link below." : "We'll send tracking details as soon as they're available."}`
+            : `Hej ${firstName}, goda nyheter! Din order har packats och skickats. ${trackingNumber ? "Du kan spåra ditt paket via länken nedan." : "Vi skickar spårningsdetaljer så snart de finns tillgängliga."}`}
+        </p>
+        <div style="background:#f5f5f7;border-radius:12px;padding:16px 20px;margin:20px 0">
+          <p style="margin:0;font-size:13px;color:#766a62">${en ? "Order number" : "Ordernummer"}</p>
+          <p style="margin:4px 0 0;font-size:17px;font-weight:600">${order.order_number}</p>
+        </div>
+        ${trackingBlock}
+        <table style="width:100%;border-collapse:collapse;font-size:14px;margin:20px 0">
+          <thead>
+            <tr style="border-bottom:2px solid #1d1d1f">
+              <th style="text-align:left;padding:8px 0">${en ? "Product" : "Produkt"}</th>
+              <th style="text-align:center;padding:8px 0">${en ? "Qty" : "Antal"}</th>
+              <th style="text-align:right;padding:8px 0">${en ? "Price" : "Pris"}</th>
+            </tr>
+          </thead>
+          <tbody>${itemRows}</tbody>
+        </table>
+        <div style="background:#f5f5f7;border-radius:12px;padding:16px 20px;margin:20px 0">
+          <p style="margin:0;font-size:13px;color:#766a62">${en ? "Delivery address" : "Leveransadress"}</p>
+          <p style="margin:4px 0 0;font-size:14px">${order.customer_name}<br>${order.address}<br>${order.zip} ${order.city}</p>
+        </div>
+        ${order.user_id ? `
+        <div style="text-align:center;margin:20px 0">
+          <a href="${baseUrl}/${localePath}/mitt-konto" style="display:inline-block;background:#1d1d1f;color:#fff;padding:12px 32px;border-radius:980px;font-size:14px;font-weight:600;text-decoration:none">
+            ${en ? "My Account" : "Mitt konto"}
+          </a>
+        </div>` : ""}
+        <p style="font-size:13px;color:#766a62;line-height:1.6;margin-top:32px;text-align:center">
+          ${en ? "Questions? Reply to this email or contact us at" : "Har du frågor? Svara på detta mejl eller kontakta oss på"}
+          <a href="mailto:info@1753skin.com" style="color:#108474">info@1753skin.com</a><br><br>
+          ${en ? "1753 SKINCARE – Holistic skincare with CBD and CBG" : "1753 SKINCARE – Holistisk hudvård med CBD och CBG"}<br>
+          <a href="https://www.1753skin.com" style="color:#108474">1753skin.com</a>
+        </p>
+      </div>
+    `
+  });
+
+  if (sendError) {
+    console.error(`[Email] Shipping email error for ${order.customer_email}:`, JSON.stringify(sendError));
+    throw new Error(`Resend: ${sendError.message || JSON.stringify(sendError)}`);
+  }
+
+  console.log(`[Email] Shipping confirmation sent to ${order.customer_email} (id: ${sendResult?.id}) for ${order.order_number} [${order.locale || "sv"}]`);
+  return { sent: true };
+}
+
 // ---- PASSWORD SETUP EMAIL ----
 
 async function sendPasswordSetupEmail(email, name, resetToken) {
@@ -4146,6 +4259,73 @@ app.post("/api/newsletter/generate-skin", async (req, res) => {
   } catch (err) {
     console.error("[SkinNewsletter] Generate error:", err);
     res.status(500).json({ message: "Kunde inte starta generering" });
+  }
+});
+
+// ---- SHIPMENT TRACKING CHECK (cron-job.org trigger, every 15 min) ----
+
+app.post("/api/cron/check-shipments", async (req, res) => {
+  try {
+    const adminKey = req.body.adminKey || req.headers["x-admin-key"];
+    const expectedKey = process.env.ADMIN_API_KEY || "1753-admin-key";
+    if (adminKey !== expectedKey) {
+      return res.status(403).json({ message: "Ogiltig admin-nyckel" });
+    }
+
+    const { rows: pendingOrders } = await db.pool.query(`
+      SELECT id, order_number, ongoing_order_id, customer_email, customer_name, locale
+      FROM orders
+      WHERE payment_status = 'paid'
+        AND shipped_at IS NULL
+        AND ongoing_order_id IS NOT NULL
+    `);
+
+    if (pendingOrders.length === 0) {
+      return res.json({ checked: 0, shipped: 0 });
+    }
+
+    let shipped = 0;
+    for (const row of pendingOrders) {
+      try {
+        const ogData = await ongoingFetch(`/orders?goodsOwnerOrderId=${encodeURIComponent(row.ongoing_order_id)}`);
+        const ogOrder = Array.isArray(ogData) ? ogData[0] : ogData;
+        if (!ogOrder) continue;
+
+        const orderInfo = ogOrder.orderInfo || ogOrder;
+        const orderStatus = (orderInfo.orderStatusText || orderInfo.currentOrderStatus || "").toLowerCase();
+        const isSent = orderStatus.includes("sent") || orderStatus.includes("shipped") || orderStatus.includes("skickad");
+        if (!isSent) continue;
+
+        const tracking = orderInfo.tracking || orderInfo.shipmentInfo || {};
+        const trackingNumber = tracking.shipmentId || tracking.trackingNumber || tracking.waybillNumber || null;
+        const trackingUrl = trackingNumber
+          ? `https://tracking.postnord.com/tracking.html?id=${trackingNumber}`
+          : null;
+
+        await db.pool.query(
+          `UPDATE orders SET tracking_number = $1, tracking_url = $2, shipped_at = NOW(), status = 'shipped'
+           WHERE id = $3`,
+          [trackingNumber, trackingUrl, row.id]
+        );
+
+        const fullOrder = await db.findOrderByNumber(row.order_number);
+        if (fullOrder) {
+          const items = typeof fullOrder.items === "string" ? JSON.parse(fullOrder.items) : fullOrder.items;
+          await sendShippingConfirmation(fullOrder, items, trackingNumber, trackingUrl);
+          await db.appendNotes(row.id, `Leveransbekräftelse skickad${trackingNumber ? ` (${trackingNumber})` : ""}`);
+        }
+
+        shipped++;
+        console.log(`[Shipment] Order ${row.order_number} shipped, tracking: ${trackingNumber || "n/a"}`);
+      } catch (err) {
+        console.error(`[Shipment] Error checking ${row.order_number}:`, err.message);
+      }
+    }
+
+    res.json({ checked: pendingOrders.length, shipped });
+  } catch (err) {
+    console.error("[Shipment] Cron error:", err);
+    res.status(500).json({ message: err.message });
   }
 });
 
