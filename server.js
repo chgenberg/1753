@@ -2917,11 +2917,14 @@ async function sendOrderConfirmation(order, items) {
     replyTo: "info@1753skin.com",
     subject,
     html: `
-      <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;max-width:560px;margin:0 auto;color:#1d1d1f">
-        <div style="text-align:center;padding:32px 0 24px">
-          <h1 style="font-size:24px;font-weight:700;margin:0">${en ? "Thank you for your order!" : "Tack för din beställning!"}</h1>
+      <div style="font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Helvetica,Arial,sans-serif;max-width:560px;margin:0 auto;color:#1d1d1f;padding:0 16px">
+        <div style="text-align:center;padding:32px 0 8px">
+          <img src="https://www.1753skin.com/1753.webp" alt="1753 SKINCARE" width="48" height="48" style="border-radius:12px"/>
         </div>
-        <p style="font-size:15px;line-height:1.6;color:#515151">
+        <div style="text-align:center;padding:16px 0 24px">
+          <h1 style="font-size:24px;font-weight:700;margin:0;letter-spacing:-0.02em">${en ? "Thank you for your order!" : "Tack för din beställning!"}</h1>
+        </div>
+        <p style="font-size:15px;line-height:1.7;color:#515151">
           ${en
             ? `Hi ${firstName}, we have received your payment and your order is now being processed. You will receive a separate email with tracking information once your order has shipped.`
             : `Hej ${firstName}, vi har mottagit din betalning och din order behandlas nu. Du får ett separat mejl med spårningsinformation när din order skickats.`}
@@ -2934,9 +2937,9 @@ async function sendOrderConfirmation(order, items) {
         <table style="width:100%;border-collapse:collapse;font-size:14px;margin:20px 0">
           <thead>
             <tr style="border-bottom:2px solid #1d1d1f">
-              <th style="text-align:left;padding:8px 0">${en ? "Product" : "Produkt"}</th>
-              <th style="text-align:center;padding:8px 0">${en ? "Qty" : "Antal"}</th>
-              <th style="text-align:right;padding:8px 0">${en ? "Price" : "Pris"}</th>
+              <th style="text-align:left;padding:8px 0;font-weight:600">${en ? "Product" : "Produkt"}</th>
+              <th style="text-align:center;padding:8px 0;font-weight:600">${en ? "Qty" : "Antal"}</th>
+              <th style="text-align:right;padding:8px 0;font-weight:600">${en ? "Price" : "Pris"}</th>
             </tr>
           </thead>
           <tbody>${itemRows}</tbody>
@@ -2949,16 +2952,20 @@ async function sendOrderConfirmation(order, items) {
           <p style="margin:4px 0 0;font-size:14px">${order.customer_name}<br>${order.address}<br>${order.zip} ${order.city}</p>
         </div>
         ${accountBlock}
-        <p style="font-size:13px;color:#766a62;line-height:1.6;margin-top:32px;text-align:center">
-          ${en
-            ? `Questions? Reply to this email or contact us at`
-            : `Har du frågor? Svara på detta mejl eller kontakta oss på`}
-          <a href="mailto:info@1753skin.com" style="color:#108474">info@1753skin.com</a><br><br>
-          ${en
-            ? "1753 SKINCARE – Holistic skincare with CBD and CBG"
-            : "1753 SKINCARE – Holistisk hudvård med CBD och CBG"}<br>
-          <a href="https://www.1753skin.com" style="color:#108474">1753skin.com</a>
-        </p>
+        <div style="margin-top:40px;padding-top:24px;border-top:1px solid #e6e6e6;text-align:center">
+          <p style="font-size:13px;color:#766a62;line-height:1.6;margin:0">
+            ${en
+              ? `Questions? Reply to this email or contact us at`
+              : `Har du frågor? Svara på detta mejl eller kontakta oss på`}
+            <a href="mailto:info@1753skin.com" style="color:#108474">info@1753skin.com</a>
+          </p>
+          <p style="font-size:12px;color:#766a62;line-height:1.6;margin:16px 0 0">
+            ${en
+              ? "1753 SKINCARE – Holistic skincare with CBD and CBG"
+              : "1753 SKINCARE – Holistisk hudvård med CBD och CBG"}<br>
+            <a href="https://www.1753skin.com" style="color:#108474">www.1753skin.com</a>
+          </p>
+        </div>
       </div>
     `
   });
@@ -3021,11 +3028,14 @@ async function sendShippingConfirmation(order, items, trackingNumber, trackingUr
     replyTo: "info@1753skin.com",
     subject,
     html: `
-      <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;max-width:560px;margin:0 auto;color:#1d1d1f">
-        <div style="text-align:center;padding:32px 0 24px">
-          <h1 style="font-size:24px;font-weight:700;margin:0">${en ? "Your order is on its way!" : "Din order är på väg!"}</h1>
+      <div style="font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Helvetica,Arial,sans-serif;max-width:560px;margin:0 auto;color:#1d1d1f;padding:0 16px">
+        <div style="text-align:center;padding:32px 0 8px">
+          <img src="https://www.1753skin.com/1753.webp" alt="1753 SKINCARE" width="48" height="48" style="border-radius:12px"/>
         </div>
-        <p style="font-size:15px;line-height:1.6;color:#515151">
+        <div style="text-align:center;padding:16px 0 24px">
+          <h1 style="font-size:24px;font-weight:700;margin:0;letter-spacing:-0.02em">${en ? "Your order is on its way!" : "Din order är på väg!"}</h1>
+        </div>
+        <p style="font-size:15px;line-height:1.7;color:#515151">
           ${en
             ? `Hi ${firstName}, great news! Your order has been packed and shipped. ${trackingNumber ? "You can track your package using the link below." : "We'll send tracking details as soon as they're available."}`
             : `Hej ${firstName}, goda nyheter! Din order har packats och skickats. ${trackingNumber ? "Du kan spåra ditt paket via länken nedan." : "Vi skickar spårningsdetaljer så snart de finns tillgängliga."}`}
@@ -3038,9 +3048,9 @@ async function sendShippingConfirmation(order, items, trackingNumber, trackingUr
         <table style="width:100%;border-collapse:collapse;font-size:14px;margin:20px 0">
           <thead>
             <tr style="border-bottom:2px solid #1d1d1f">
-              <th style="text-align:left;padding:8px 0">${en ? "Product" : "Produkt"}</th>
-              <th style="text-align:center;padding:8px 0">${en ? "Qty" : "Antal"}</th>
-              <th style="text-align:right;padding:8px 0">${en ? "Price" : "Pris"}</th>
+              <th style="text-align:left;padding:8px 0;font-weight:600">${en ? "Product" : "Produkt"}</th>
+              <th style="text-align:center;padding:8px 0;font-weight:600">${en ? "Qty" : "Antal"}</th>
+              <th style="text-align:right;padding:8px 0;font-weight:600">${en ? "Price" : "Pris"}</th>
             </tr>
           </thead>
           <tbody>${itemRows}</tbody>
@@ -3055,12 +3065,16 @@ async function sendShippingConfirmation(order, items, trackingNumber, trackingUr
             ${en ? "My Account" : "Mitt konto"}
           </a>
         </div>` : ""}
-        <p style="font-size:13px;color:#766a62;line-height:1.6;margin-top:32px;text-align:center">
-          ${en ? "Questions? Reply to this email or contact us at" : "Har du frågor? Svara på detta mejl eller kontakta oss på"}
-          <a href="mailto:info@1753skin.com" style="color:#108474">info@1753skin.com</a><br><br>
-          ${en ? "1753 SKINCARE – Holistic skincare with CBD and CBG" : "1753 SKINCARE – Holistisk hudvård med CBD och CBG"}<br>
-          <a href="https://www.1753skin.com" style="color:#108474">1753skin.com</a>
-        </p>
+        <div style="margin-top:40px;padding-top:24px;border-top:1px solid #e6e6e6;text-align:center">
+          <p style="font-size:13px;color:#766a62;line-height:1.6;margin:0">
+            ${en ? "Questions? Reply to this email or contact us at" : "Har du frågor? Svara på detta mejl eller kontakta oss på"}
+            <a href="mailto:info@1753skin.com" style="color:#108474">info@1753skin.com</a>
+          </p>
+          <p style="font-size:12px;color:#766a62;line-height:1.6;margin:16px 0 0">
+            ${en ? "1753 SKINCARE – Holistic skincare with CBD and CBG" : "1753 SKINCARE – Holistisk hudvård med CBD och CBG"}<br>
+            <a href="https://www.1753skin.com" style="color:#108474">www.1753skin.com</a>
+          </p>
+        </div>
       </div>
     `
   });
@@ -3095,15 +3109,18 @@ async function sendPasswordSetupEmail(email, name, resetToken) {
     to: email,
     subject: "Välkommen till 1753 SKINCARE – Välj ditt lösenord",
     html: `
-      <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;max-width:560px;margin:0 auto;color:#1d1d1f">
-        <div style="text-align:center;padding:32px 0 24px">
-          <h1 style="font-size:24px;font-weight:700;margin:0">Välkommen, ${firstName}!</h1>
+      <div style="font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Helvetica,Arial,sans-serif;max-width:560px;margin:0 auto;color:#1d1d1f;padding:0 16px">
+        <div style="text-align:center;padding:32px 0 8px">
+          <img src="https://www.1753skin.com/1753.webp" alt="1753 SKINCARE" width="48" height="48" style="border-radius:12px"/>
         </div>
-        <p style="font-size:15px;line-height:1.6;color:#515151">
+        <div style="text-align:center;padding:16px 0 24px">
+          <h1 style="font-size:24px;font-weight:700;margin:0;letter-spacing:-0.02em">Välkommen, ${firstName}!</h1>
+        </div>
+        <p style="font-size:15px;line-height:1.7;color:#515151">
           Vi har skapat ett konto åt dig i vårt lojalitetsprogram. Du tjänar poäng på varje köp
           och får tillgång till exklusiva förmåner och rabatter.
         </p>
-        <p style="font-size:15px;line-height:1.6;color:#515151">
+        <p style="font-size:15px;line-height:1.7;color:#515151">
           Klicka på knappen nedan för att välja ditt lösenord och aktivera ditt konto:
         </p>
         <div style="text-align:center;margin:28px 0">
@@ -3112,14 +3129,16 @@ async function sendPasswordSetupEmail(email, name, resetToken) {
             Välj lösenord
           </a>
         </div>
-        <p style="font-size:13px;color:#766a62;line-height:1.6">
+        <p style="font-size:13px;color:#766a62;line-height:1.7">
           Länken är giltig i 72 timmar. Om den har gått ut kan du alltid begära en ny
           via inloggningssidan.
         </p>
-        <p style="font-size:13px;color:#766a62;line-height:1.6;margin-top:32px;text-align:center">
-          1753 SKINCARE – Holistisk hudvård med CBD och CBG<br>
-          <a href="https://www.1753skin.com" style="color:#108474">www.1753skin.com</a>
-        </p>
+        <div style="margin-top:40px;padding-top:24px;border-top:1px solid #e6e6e6;text-align:center">
+          <p style="font-size:12px;color:#766a62;line-height:1.6;margin:0">
+            1753 SKINCARE – Holistisk hudvård med CBD och CBG<br>
+            <a href="https://www.1753skin.com" style="color:#108474">www.1753skin.com</a>
+          </p>
+        </div>
       </div>
     `
   });
@@ -3524,7 +3543,7 @@ function emailWrapper(content, unsubscribeUrl) {
     ${content}
     <div style="margin-top:40px;padding-top:24px;border-top:1px solid #e6e6e6;text-align:center">
       <p style="font-size:12px;color:#766a62;line-height:1.6;margin:0">
-        1753 SKINCARE -- Holistisk hudvard med CBD och CBG<br>
+        1753 SKINCARE – Holistisk hudvård med CBD och CBG<br>
         <a href="https://www.1753skin.com" style="color:#108474">www.1753skin.com</a>
       </p>
       ${unsubscribeUrl ? `<p style="margin-top:12px;font-size:11px"><a href="${unsubscribeUrl}" style="color:#999;text-decoration:underline">Avprenumerera</a></p>` : ""}
@@ -4507,43 +4526,43 @@ async function seedAutomationFlows() {
   // Welcome flow (5 emails over 14 days)
   await db.upsertFlow({
     slug: "welcome",
-    name: "Valkomstserie",
+    name: "Välkomstserie",
     triggerEvent: "subscribe",
     steps: [
       {
         delay_hours: 0,
-        subject: "Valkommen till 1753 SKINCARE, {{firstName}}!",
+        subject: "Välkommen till 1753 SKINCARE, {{firstName}}!",
         html: `
-          <h2 style="font-size:22px;font-weight:700;margin:24px 0 12px">Valkommen till familjen!</h2>
+          <h2 style="font-size:22px;font-weight:700;margin:24px 0 12px">Välkommen till familjen!</h2>
           <p style="font-size:15px;line-height:1.7;color:#515151">
-            Vi ar sa glada att du ar har. 1753 SKINCARE ar mer an hudvard -- det ar en filosofi.
-            Vi tror pa att jobba med kroppen, inte mot den. Vare produkter bygger pa CBD, CBG
+            Vi är så glada att du är här. 1753 SKINCARE är mer än hudvård – det är en filosofi.
+            Vi tror på att jobba med kroppen, inte mot den. Våra produkter bygger på CBD, CBG
             och noga utvalda naturliga ingredienser.
           </p>
           <p style="font-size:15px;line-height:1.7;color:#515151">
-            Som tack for att du gatt med far du <strong>10% rabatt</strong> pa din forsta bestallning
-            med koden <strong style="color:#108474;font-size:17px">VALKOMST10</strong>.
+            Som tack för att du gått med får du <strong>10% rabatt</strong> på din första beställning
+            med koden <strong style="color:#108474;font-size:17px">VÄLKOMST10</strong>.
           </p>
           ${greenButton("Utforska produkterna", siteUrl + "/produkter")}
         `
       },
       {
         delay_hours: 48,
-        subject: "Var filosofi -- hudvard som faktiskt fungerar",
+        subject: "Vår filosofi – hudvård som faktiskt fungerar",
         html: `
-          <h2 style="font-size:22px;font-weight:700;margin:24px 0 12px">Holistisk hudvard</h2>
+          <h2 style="font-size:22px;font-weight:700;margin:24px 0 12px">Holistisk hudvård</h2>
           <p style="font-size:15px;line-height:1.7;color:#515151">
-            De flesta hudvardsprodukter loser symtom. Vi vill losa orsaken.
+            De flesta hudvårdsprodukter löser symtom. Vi vill lösa orsaken.
           </p>
           <p style="font-size:15px;line-height:1.7;color:#515151">
-            Vara CBD- och CBG-baserade oljor jobbar med hudens egna endocannabinoidsystem
-            for att atersta balans. Ingen onaturlig kemi, inga tomma loften.
+            Våra CBD- och CBG-baserade oljor jobbar med hudens egna endocannabinoidsystem
+            för att återställa balans. Ingen onaturlig kemi, inga tomma löften.
           </p>
           <p style="font-size:15px;line-height:1.7;color:#515151">
-            Men produkter ar bara en del. Somn, kost, stresshantering och rorelse -- allt spelar
-            roll for din hud. Det ar darfor vi tar ett holistiskt grepp.
+            Men produkter är bara en del. Sömn, kost, stresshantering och rörelse – allt spelar
+            roll för din hud. Det är därför vi tar ett holistiskt grepp.
           </p>
-          ${greenButton("Las mer om oss", siteUrl + "/om-oss")}
+          ${greenButton("Läs mer om oss", siteUrl + "/om-oss")}
         `
       },
       {
@@ -4552,60 +4571,60 @@ async function seedAutomationFlows() {
         html: `
           <h2 style="font-size:22px;font-weight:700;margin:24px 0 12px">Hitta din match</h2>
           <p style="font-size:15px;line-height:1.7;color:#515151">
-            <strong>The ONE Facial Oil</strong> -- Var allround-olja. Perfekt om du vill borja enkelt
-            med en produkt som balanserar, aterFuktar och ger lyster. Funkar for alla hudtyper.
+            <strong>The ONE Facial Oil</strong> – Vår allround-olja. Perfekt om du vill börja enkelt
+            med en produkt som balanserar, återfuktar och ger lyster. Funkar för alla hudtyper.
           </p>
           <p style="font-size:15px;line-height:1.7;color:#515151">
-            <strong>I LOVE Facial Oil</strong> -- Extra narig med CBG. Bast for torr eller mogen hud
-            som behover djupgaende aterfuktning.
+            <strong>I LOVE Facial Oil</strong> – Extra näringsrik med CBG. Bäst för torr eller mogen hud
+            som behöver djupgående återfuktning.
           </p>
           <p style="font-size:15px;line-height:1.7;color:#515151">
-            <strong>DUO-kit</strong> -- Bada oljorna i ett kit. The ONE pa morgonen, I LOVE pa kvallen.
-            Var mest populara produkt.
+            <strong>DUO-kit</strong> – Båda oljorna i ett kit. The ONE på morgonen, I LOVE på kvällen.
+            Vår mest populära produkt.
           </p>
           <p style="font-size:15px;line-height:1.7;color:#515151">
-            Osaker? Prova var <strong>AI-hudanalys</strong> -- ladda upp ett foto och fa personliga rekommendationer.
+            Osäker? Prova vår <strong>AI-hudanalys</strong> – ladda upp ett foto och få personliga rekommendationer.
           </p>
-          ${greenButton("Gor hudanalys", siteUrl + "/hudanalys")}
+          ${greenButton("Gör hudanalys", siteUrl + "/hudanalys")}
         `
       },
       {
         delay_hours: 96,
-        subject: "\"Min hud har aldrig varit battre\"",
+        subject: "\"Min hud har aldrig varit bättre\"",
         html: `
-          <h2 style="font-size:22px;font-weight:700;margin:24px 0 12px">Riktig feedback fran riktiga manniskor</h2>
+          <h2 style="font-size:22px;font-weight:700;margin:24px 0 12px">Riktig feedback från riktiga människor</h2>
           <p style="font-size:15px;line-height:1.7;color:#515151">
-            Vi behover inte hitta pa berattelser. Vara kunder talar for sig sjalva.
+            Vi behöver inte hitta på berättelser. Våra kunder talar för sig själva.
           </p>
           <div style="background:#f5f5f7;border-radius:12px;padding:20px;margin:20px 0">
             <p style="font-size:15px;line-height:1.7;color:#515151;font-style:italic;margin:0">
-              "Jag har provat allt -- dyr hudvard, billig hudvard, ingenting. The ONE ar den
+              "Jag har provat allt – dyr hudvård, billig hudvård, ingenting. The ONE är den
               enda produkten som verkligen gjort skillnad. Lugnar, balanserar, ger lyster."
             </p>
-            <p style="font-size:13px;color:#766a62;margin:8px 0 0">-- Sandra, 34 ar</p>
+            <p style="font-size:13px;color:#766a62;margin:8px 0 0">– Sandra, 34 år</p>
           </div>
           <div style="background:#f5f5f7;border-radius:12px;padding:20px;margin:20px 0">
             <p style="font-size:15px;line-height:1.7;color:#515151;font-style:italic;margin:0">
-              "DUO-kitet har blivit min morgon- och kvallsrutin. Sa enkelt, sa bra. Huden
-              ar mjukare och jamnare an nagonsin."
+              "DUO-kitet har blivit min morgon- och kvällsrutin. Så enkelt, så bra. Huden
+              är mjukare och jämnare än någonsin."
             </p>
-            <p style="font-size:13px;color:#766a62;margin:8px 0 0">-- Mikael, 41 ar</p>
+            <p style="font-size:13px;color:#766a62;margin:8px 0 0">– Mikael, 41 år</p>
           </div>
           ${greenButton("Se alla produkter", siteUrl + "/produkter")}
         `
       },
       {
         delay_hours: 120,
-        subject: "Ditt exklusiva erbjudande vantar, {{firstName}}",
+        subject: "Ditt exklusiva erbjudande väntar, {{firstName}}",
         html: `
-          <h2 style="font-size:22px;font-weight:700;margin:24px 0 12px">Bara for dig</h2>
+          <h2 style="font-size:22px;font-weight:700;margin:24px 0 12px">Bara för dig</h2>
           <p style="font-size:15px;line-height:1.7;color:#515151">
-            Du har foljt med oss i tva veckor nu -- tack for det! Vi hoppas att du lart dig
-            nagot nytt om holistisk hudvard.
+            Du har följt med oss i två veckor nu – tack för det! Vi hoppas att du lärt dig
+            något nytt om holistisk hudvård.
           </p>
           <p style="font-size:15px;line-height:1.7;color:#515151">
             Som tack vill vi ge dig ett exklusivt erbjudande:
-            <strong>fri frakt + 15% rabatt</strong> pa hela sortimentet.
+            <strong>fri frakt + 15% rabatt</strong> på hela sortimentet.
           </p>
           <p style="font-size:17px;font-weight:700;color:#108474;text-align:center;margin:20px 0">
             Kod: INSIDER15
@@ -4622,47 +4641,47 @@ async function seedAutomationFlows() {
   // Post-purchase flow (4 emails)
   await db.upsertFlow({
     slug: "post-purchase",
-    name: "Efter kop",
+    name: "Efter köp",
     triggerEvent: "purchase",
     steps: [
       {
         delay_hours: 24,
-        subject: "Tack for ditt kop, {{firstName}} -- har ar dina tips!",
+        subject: "Tack för ditt köp, {{firstName}} – här är dina tips!",
         html: `
-          <h2 style="font-size:22px;font-weight:700;margin:24px 0 12px">Sa far du bast resultat</h2>
+          <h2 style="font-size:22px;font-weight:700;margin:24px 0 12px">Så får du bäst resultat</h2>
           <p style="font-size:15px;line-height:1.7;color:#515151">
-            Grattis till ditt kop! Har ar nagra tips for att fa ut maximalt av dina produkter:
+            Grattis till ditt köp! Här är några tips för att få ut maximalt av dina produkter:
           </p>
           <ul style="font-size:15px;line-height:2;color:#515151;padding-left:20px">
-            <li>Applicera pa ren, fuktad hud for bast absorption</li>
-            <li>2-3 droppar racker -- varma oljan mellan handflatorna forst</li>
-            <li>Ge huden tid -- CBD och CBG bygger effekt over tid (2-4 veckor)</li>
-            <li>Kombinera med bra somn och vatten for synergieffekt</li>
+            <li>Applicera på ren, fuktad hud för bäst absorption</li>
+            <li>2–3 droppar räcker – värm oljan mellan handflatorna först</li>
+            <li>Ge huden tid – CBD och CBG bygger effekt över tid (2–4 veckor)</li>
+            <li>Kombinera med bra sömn och vatten för synergieffekt</li>
           </ul>
-          ${greenButton("Las mer om vara ingredienser", siteUrl + "/om-oss")}
+          ${greenButton("Läs mer om våra ingredienser", siteUrl + "/om-oss")}
         `
       },
       {
         delay_hours: 168,
-        subject: "Din hudvardsrutin -- enklare an du tror",
+        subject: "Din hudvårdsrutin – enklare än du tror",
         html: `
-          <h2 style="font-size:22px;font-weight:700;margin:24px 0 12px">Morgon och kvall</h2>
+          <h2 style="font-size:22px;font-weight:700;margin:24px 0 12px">Morgon och kväll</h2>
           <p style="font-size:15px;line-height:1.7;color:#515151">
-            En bra rutin behover inte vara komplicerad. Har ar vart forslag:
+            En bra rutin behöver inte vara komplicerad. Här är vårt förslag:
           </p>
           <div style="background:#f5f5f7;border-radius:12px;padding:20px;margin:16px 0">
             <p style="font-size:13px;font-weight:700;color:#108474;margin:0">MORGON</p>
             <p style="font-size:14px;line-height:1.7;color:#515151;margin:8px 0 0">
-              1. Skoljj ansiktet med ljummet vatten<br>
-              2. The ONE Facial Oil -- 2-3 droppar<br>
-              3. SPF (om du gar ut)
+              1. Skölj ansiktet med ljummet vatten<br>
+              2. The ONE Facial Oil – 2–3 droppar<br>
+              3. SPF (om du går ut)
             </p>
           </div>
           <div style="background:#f5f5f7;border-radius:12px;padding:20px;margin:16px 0">
-            <p style="font-size:13px;font-weight:700;color:#108474;margin:0">KVALL</p>
+            <p style="font-size:13px;font-weight:700;color:#108474;margin:0">KVÄLL</p>
             <p style="font-size:14px;line-height:1.7;color:#515151;margin:8px 0 0">
               1. Au Naturel Makeup Remover<br>
-              2. I LOVE Facial Oil -- 3-4 droppar<br>
+              2. I LOVE Facial Oil – 3–4 droppar<br>
               3. Sov gott!
             </p>
           </div>
@@ -4671,36 +4690,36 @@ async function seedAutomationFlows() {
       },
       {
         delay_hours: 504,
-        subject: "Hur mar din hud, {{firstName}}?",
+        subject: "Hur mår din hud, {{firstName}}?",
         html: `
-          <h2 style="font-size:22px;font-weight:700;margin:24px 0 12px">Vi vill hora fran dig</h2>
+          <h2 style="font-size:22px;font-weight:700;margin:24px 0 12px">Vi vill höra från dig</h2>
           <p style="font-size:15px;line-height:1.7;color:#515151">
-            Det har nu gatt tre veckor sedan ditt kop. Forhoppningsvis borjar du se
-            skillnad -- CBD och CBG bygger effekt over tid.
+            Det har nu gått tre veckor sedan ditt köp. Förhoppningsvis börjar du se
+            skillnad – CBD och CBG bygger effekt över tid.
           </p>
           <p style="font-size:15px;line-height:1.7;color:#515151">
-            Vill du se hur din hud utvecklas? Var AI-hudanalys ger dig en objektiv
-            bedomning och personliga rad.
+            Vill du se hur din hud utvecklas? Vår AI-hudanalys ger dig en objektiv
+            bedömning och personliga råd.
           </p>
-          ${greenButton("Gor en gratis hudanalys", siteUrl + "/hudanalys")}
+          ${greenButton("Gör en gratis hudanalys", siteUrl + "/hudanalys")}
           <p style="font-size:14px;line-height:1.7;color:#515151;margin-top:16px">
-            Har du fragor? Svara pa detta mejl sa aterommer vi inom 24 timmar.
+            Har du frågor? Svara på detta mejl så återkommer vi inom 24 timmar.
           </p>
         `
       },
       {
         delay_hours: 1080,
-        subject: "Dags att fylla pa? Spara med prenumeration",
+        subject: "Dags att fylla på? Spara med prenumeration",
         html: `
-          <h2 style="font-size:22px;font-weight:700;margin:24px 0 12px">Slipp att slockna</h2>
+          <h2 style="font-size:22px;font-weight:700;margin:24px 0 12px">Slipp att ta slut</h2>
           <p style="font-size:15px;line-height:1.7;color:#515151">
-            Beroende pa hur mycket du anvander borde det snart vara dags for paafyllning.
+            Beroende på hur mycket du använder borde det snart vara dags för påfyllning.
           </p>
           <p style="font-size:15px;line-height:1.7;color:#515151">
-            Med vara prenumeration far du <strong>15% rabatt</strong> pa varje leverans,
-            och du valjer sjalv intervall (30, 60 eller 90 dagar). Avbryt nar du vill.
+            Med våra prenumerationer får du <strong>15% rabatt</strong> på varje leverans,
+            och du väljer själv intervall (30, 60 eller 90 dagar). Avbryt när du vill.
           </p>
-          ${greenButton("Bestall igen", siteUrl + "/produkter")}
+          ${greenButton("Beställ igen", siteUrl + "/produkter")}
         `
       }
     ]
@@ -4709,51 +4728,51 @@ async function seedAutomationFlows() {
   // Cart abandonment flow (3 emails)
   await db.upsertFlow({
     slug: "cart-abandoned",
-    name: "Overgiven varukorg",
+    name: "Övergiven varukorg",
     triggerEvent: "cart_abandoned",
     steps: [
       {
         delay_hours: 1,
-        subject: "Du glomde nagot i varukorgen",
+        subject: "Du glömde något i varukorgen",
         html: `
-          <h2 style="font-size:22px;font-weight:700;margin:24px 0 12px">Din varukorg vantar</h2>
+          <h2 style="font-size:22px;font-weight:700;margin:24px 0 12px">Din varukorg väntar</h2>
           <p style="font-size:15px;line-height:1.7;color:#515151">
-            Vi sag att du var nara att slutfora din bestallning. Dina produkter
-            vantarfortfarande pa dig!
+            Vi såg att du var nära att slutföra din beställning. Dina produkter
+            väntar fortfarande på dig!
           </p>
-          ${greenButton("Slutfor din bestallning", siteUrl + "/kassa")}
+          ${greenButton("Slutför din beställning", siteUrl + "/kassa")}
           <p style="font-size:13px;color:#766a62;text-align:center">
-            Fri frakt pa ordrar over 700 kr.
+            Fri frakt på ordrar över 700 kr.
           </p>
         `
       },
       {
         delay_hours: 24,
-        subject: "Fortfarande intresserad? Fri frakt pa oss",
+        subject: "Fortfarande intresserad? Fri frakt på oss",
         html: `
-          <h2 style="font-size:22px;font-weight:700;margin:24px 0 12px">Vi bjuder pa frakten</h2>
+          <h2 style="font-size:22px;font-weight:700;margin:24px 0 12px">Vi bjuder på frakten</h2>
           <p style="font-size:15px;line-height:1.7;color:#515151">
-            Vi vill gora det enkelt for dig. Slutfor din bestallning idag
-            sa star vi for fraktkostnaden -- oavsett ordervarde.
+            Vi vill göra det enkelt för dig. Slutför din beställning idag
+            så står vi för fraktkostnaden – oavsett ordervärde.
           </p>
           ${greenButton("Handla med fri frakt", siteUrl + "/kassa")}
         `
       },
       {
         delay_hours: 72,
-        subject: "Sista chansen -- 5% extra rabatt",
+        subject: "Sista chansen – 5% extra rabatt",
         html: `
-          <h2 style="font-size:22px;font-weight:700;margin:24px 0 12px">Sista puff</h2>
+          <h2 style="font-size:22px;font-weight:700;margin:24px 0 12px">Sista knuffen</h2>
           <p style="font-size:15px;line-height:1.7;color:#515151">
-            Vi ger inte upp sa latt! Har ar <strong>5% extra rabatt</strong>
-            pa hela din varukorg. Anvand koden:
+            Vi ger inte upp så lätt! Här är <strong>5% extra rabatt</strong>
+            på hela din varukorg. Använd koden:
           </p>
           <p style="font-size:17px;font-weight:700;color:#108474;text-align:center;margin:20px 0">
             KOMTILLBAKA5
           </p>
-          ${greenButton("Slutfor ditt kop", siteUrl + "/kassa")}
+          ${greenButton("Slutför ditt köp", siteUrl + "/kassa")}
           <p style="font-size:13px;color:#766a62;text-align:center">
-            Erbjudandet ar giltigt i 48 timmar.
+            Erbjudandet är giltigt i 48 timmar.
           </p>
         `
       }
