@@ -2531,9 +2531,15 @@ async function handleOrderCompletion(orderId) {
   // 2b. Fortnox: create invoice from the order
   if (fortnoxOrderNumber) {
     try {
-      const fxInvoice = await fortnoxFetch(`/orders/${fortnoxOrderNumber}/createinvoice`, "PUT");
-      fortnoxInvoiceNumber = fxInvoice?.Invoice?.DocumentNumber;
-      notes.push(`Fortnox faktura: ${fortnoxInvoiceNumber}`);
+      const fxInvoiceResult = await fortnoxFetch(`/orders/${fortnoxOrderNumber}/createinvoice`, "PUT");
+      console.log("[Order] Fortnox createinvoice response:", JSON.stringify(fxInvoiceResult).slice(0, 500));
+      fortnoxInvoiceNumber = fxInvoiceResult?.Invoice?.DocumentNumber
+        || fxInvoiceResult?.DocumentNumber
+        || fxInvoiceResult?.invoice?.DocumentNumber;
+      if (!fortnoxInvoiceNumber && fxInvoiceResult?.Invoice?.InvoiceNumber) {
+        fortnoxInvoiceNumber = fxInvoiceResult.Invoice.InvoiceNumber;
+      }
+      notes.push(`Fortnox faktura: ${fortnoxInvoiceNumber || "kunde ej parsas"}`);
     } catch (err) {
       notes.push(`Fortnox faktura FEL: ${err.message}`);
       console.error("[Order] Fortnox invoice error:", err);
