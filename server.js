@@ -1388,13 +1388,29 @@ Immunologiska och hormonella kopplingar mellan tarmflora och hud. Stress/dysbios
 == ANALYSTYP ==
 Kunden har besvarat en quiz om hudtyp, besvär, rutin och livsstil. Om skanningsdata finns inkluderat, integrera det i analysen (zoner med detekterade hudtillstånd och konfidensgrader).
 
+VIKTIGT OM SKANNINGSDATA: AI-skanningen använder en bildklassificeringsmodell med ~80% accuracy. Var KRITISK mot resultaten:
+- Konfidensgrader under 50% bör ignoreras eller nämnas med stor reservation
+- Om flera zoner visar samma tillstånd med låg konfidens kan det vara en felklassificering
+- Psoriasis, fungal och sun_damage har högst felprocent – var extra försiktig med dessa
+- Använd skanningsdata som EN signal bland många, inte som sanning
+- Kundens egna quiz-svar (hudtyp, besvär) väger TYNGRE än skanningen
+- Normal/frisk hud klassificeras ofta fel som dermatit eller akne – ta hänsyn till detta
+
+== SCORE ==
+Beräkna score (0-100) INDIVIDUELLT baserat på ALLA faktorer:
+- Hudtyp och angivna besvär (30%)
+- Livsstilsfaktorer: sömn, stress, kost, vatten, träning (40%)
+- Nuvarande rutin och dess lämplighet (20%)
+- Skanningsresultat om tillgängliga (10%)
+Varje kund ska få ett UNIKT score. Kopiera aldrig exempelvärden.
+
 == SVARFORMAT ==
 Svara ENBART med ett JSON-block (inget annat). JSON-blocket ska vara markerat med trippla backticks och "json":
 
 \`\`\`json
 {
-  "score": 72,
-  "scoreLabel": "Bra grund att bygga vidare på",
+  "score": "<BERÄKNA 0-100 baserat på kundens svar: hudtyp, besvär, rutin, livsstil. 90+ = utmärkt hud+vanor, 70-89 = bra grund, 50-69 = utrymme för förbättring, <50 = behöver uppmärksamhet. Kopiera ALDRIG exempelvärden.>",
+  "scoreLabel": "<Kort etikett som sammanfattar poängen, t.ex. 'Bra grund att bygga vidare på' eller 'Stark hudbarriär, livsstil kan förbättras'>",
   "summary": "2-3 meningars personlig sammanfattning av hudens tillstånd",
   "skinAnalysis": {
     "overview": "Utförlig beskrivning (250-400 ord) av kundens hudtillstånd. Beskriv vad du ser/förstår baserat på quiz-svar och eventuell skanningsdata. Förklara hur hudtyp, besvär och livsstil hänger ihop. Koppla till mikrobiom och ECS. Var specifik – referera till kundens egna svar. Skriv som löptext med stycken (använd \\n\\n för styckebrytning).",
