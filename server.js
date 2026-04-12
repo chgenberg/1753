@@ -2720,18 +2720,6 @@ async function handleOrderCompletion(orderId) {
         };
       });
 
-      if (order.shipping_cost > 0) {
-        const shippingExVat = Math.round((order.shipping_cost / 1.25) * 100) / 100;
-        orderRows.push({
-          ArticleNumber: "FRAKT",
-          Description: "Frakt",
-          OrderedQuantity: 1,
-          DeliveredQuantity: 1,
-          Price: shippingExVat,
-          VAT: 25
-        });
-      }
-
       const today = new Date().toISOString().split("T")[0];
       const fxOrder = await fortnoxFetch("/orders", "POST", {
         Order: {
@@ -2746,6 +2734,7 @@ async function handleOrderCompletion(orderId) {
           YourOrderNumber: sharedOrderNumber,
           ExternalInvoiceReference1: sharedOrderNumber,
           Currency: order.currency || "SEK",
+          Freight: order.shipping_cost || 0,
           OrderRows: orderRows,
           Remarks: `Order ${sharedOrderNumber} – betald via Viva Wallet`
         }
