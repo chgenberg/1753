@@ -2,7 +2,9 @@
 
 import { useState } from "react";
 import {
+  Check,
   Droplets,
+  Gift,
   Heart,
   Leaf,
   Moon,
@@ -17,6 +19,7 @@ import { cn } from "@/lib/utils";
 import { PRODUCTS, type Product } from "@/lib/products";
 import { ProductCard } from "@/components/product-card";
 import { useLocale } from "@/providers/locale-provider";
+import { useCart } from "@/providers/cart-provider";
 import {
   CONDITION_LABELS_SV,
   CONDITION_LABELS_EN,
@@ -304,6 +307,9 @@ function SkinTab({ score, scoreLabel, summary, skinAnalysis, hasScan, scanImageS
 
 function ProductsTab({ products }: { products: ProductRec[] }) {
   const { locale } = useLocale();
+  const { addItems, openCart } = useCart();
+  const [added, setAdded] = useState(false);
+
   const matched: (Product & { reason: string; usage?: string })[] = products
     .map((rec) => {
       const p = PRODUCTS.find((prod) => prod.id === rec.id);
@@ -313,13 +319,49 @@ function ProductsTab({ products }: { products: ProductRec[] }) {
 
   if (matched.length === 0) return null;
 
+  const totalBefore = matched.reduce((s, p) => s + (p.price ?? 0), 0);
+  const discount = Math.round(totalBefore * 0.15);
+  const totalAfter = totalBefore - discount;
+
+  const handleAddAll = () => {
+    addItems(matched.map((p) => ({ id: p.id, qty: 1 })));
+    localStorage.setItem("1753_auto_discount", "HUDANALYS15");
+    setAdded(true);
+    openCart();
+  };
+
   return (
     <div className="space-y-6 animate-fade-in">
+      {/* Gift banner */}
+      <div className="overflow-hidden rounded-2xl border border-[#fcb237]/30 bg-gradient-to-br from-[#fcb237]/5 to-[#fcb237]/10">
+        <div className="p-6 text-center">
+          <Gift className="mx-auto mb-3 h-8 w-8 text-[#fcb237]" />
+          <h3 className="text-lg font-bold tracking-tight text-[#1d1d1f]">
+            {locale === "en"
+              ? "A gift from us — 15% off"
+              : "En gåva från oss — 15% rabatt"}
+          </h3>
+          <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-[#515151]">
+            {locale === "en"
+              ? "Thank you for taking the analysis and helping us improve. As a thank-you, you get 15% off all recommended products."
+              : "Tack för att du genomförde analysen och hjälper oss bli bättre. Som tack får du 15% rabatt på alla rekommenderade produkter."}
+          </p>
+          <div className="mt-4 inline-flex items-center gap-3 rounded-full bg-white/80 px-5 py-2 shadow-sm">
+            <span className="text-sm text-[#766a62] line-through">{totalBefore} kr</span>
+            <span className="text-lg font-bold text-[#108474]">{totalAfter} kr</span>
+            <span className="rounded-full bg-[#fcb237]/20 px-2.5 py-0.5 text-xs font-bold text-[#766a62]">
+              -{discount} kr
+            </span>
+          </div>
+        </div>
+      </div>
+
       <p className="text-center text-sm text-[#515151]">
         {locale === "en"
           ? "Products chosen around your skin analysis"
           : "Produkter anpassade efter din hudanalys"}
       </p>
+
       <div className="grid gap-6 sm:grid-cols-2">
         {matched.map((p) => (
           <div key={p.id} className="space-y-3">
@@ -337,6 +379,41 @@ function ProductsTab({ products }: { products: ProductRec[] }) {
             </div>
           </div>
         ))}
+      </div>
+
+      {/* Add all to cart CTA */}
+      <div className="text-center">
+        <button
+          onClick={handleAddAll}
+          disabled={added}
+          className={cn(
+            "inline-flex items-center gap-3 rounded-full px-8 py-4 text-sm font-semibold shadow-lg transition-all active:scale-[0.97]",
+            added
+              ? "bg-[#108474]/10 text-[#108474] shadow-none"
+              : "bg-[#108474] text-white shadow-[#108474]/20 hover:bg-[#0d6e62] hover:shadow-xl"
+          )}
+        >
+          {added ? (
+            <>
+              <Check className="h-5 w-5" />
+              {locale === "en" ? "Added to cart with 15% off" : "Tillagda i varukorgen med 15% rabatt"}
+            </>
+          ) : (
+            <>
+              <Gift className="h-5 w-5" />
+              {locale === "en"
+                ? `Add all ${matched.length} products — ${totalAfter} kr`
+                : `Lägg alla ${matched.length} produkter i varukorgen — ${totalAfter} kr`}
+            </>
+          )}
+        </button>
+        {!added && (
+          <p className="mt-2 text-xs text-[#766a62]">
+            {locale === "en"
+              ? "Discount code HUDANALYS15 is applied automatically at checkout"
+              : "Rabattkoden HUDANALYS15 läggs in automatiskt i kassan"}
+          </p>
+        )}
       </div>
     </div>
   );

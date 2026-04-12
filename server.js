@@ -295,6 +295,11 @@ const DISCOUNT_CODES = {
     productIds: null,
     description: "5% rabatt -- valkommen tillbaka",
   },
+  hudanalys15: {
+    percent: 15,
+    productIds: null,
+    description: "15% rabatt -- tack for din hudanalys",
+  },
 };
 
 function generateOrderNumber() {

@@ -99,6 +99,27 @@ export default function CheckoutPage() {
     }
   };
 
+  const autoDiscountApplied = useRef(false);
+
+  useEffect(() => {
+    if (autoDiscountApplied.current || activeDiscount || items.length === 0) return;
+    const stored = localStorage.getItem("1753_auto_discount");
+    if (!stored) return;
+    autoDiscountApplied.current = true;
+    (async () => {
+      try {
+        const data = await apiFetch<ActiveDiscount>("/discount/validate", {
+          method: "POST",
+          body: JSON.stringify({ code: stored, items: items.map((i) => ({ id: productIdFromCartId(i.id), qty: i.qty })) }),
+        });
+        setActiveDiscount(data);
+        localStorage.removeItem("1753_auto_discount");
+      } catch {
+        localStorage.removeItem("1753_auto_discount");
+      }
+    })();
+  }, [items, activeDiscount]);
+
   const abandonSent = useRef(false);
 
   useEffect(() => {
