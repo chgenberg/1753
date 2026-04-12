@@ -13,8 +13,7 @@ import {
   Trash2,
   Edit3,
   RefreshCw,
-  Instagram,
-  Facebook,
+  Share2,
   Sparkles,
   Calendar,
   Image as ImageIcon,
@@ -352,7 +351,7 @@ export default function AdminSocialPage() {
                   </span>
                 </div>
                 {post.platform !== "facebook" && (
-                  <Instagram className="absolute right-3 top-3 h-5 w-5 text-white drop-shadow" />
+                  <Share2 className="absolute right-3 top-3 h-5 w-5 text-white drop-shadow" />
                 )}
               </div>
 
