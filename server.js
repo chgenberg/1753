@@ -2786,7 +2786,7 @@ async function sendOrderConfirmation(order, items) {
 
   const { Resend } = require("resend");
   const resend = new Resend(apiKey);
-  const fromEmail = process.env.EMAIL_FROM || "order@1753skincare.com";
+  const fromEmail = process.env.EMAIL_FROM || "order@1753skin.com";
   const baseUrl = process.env.FRONTEND_URL || "https://www.1753skin.com";
   const currency = order.currency || "SEK";
   const isSEK = currency === "SEK";
@@ -2917,7 +2917,7 @@ async function sendPasswordSetupEmail(email, name, resetToken) {
 
   const { Resend } = require("resend");
   const resend = new Resend(apiKey);
-  const fromEmail = process.env.EMAIL_FROM || "noreply@1753skincare.com";
+  const fromEmail = process.env.EMAIL_FROM || "noreply@1753skin.com";
   const baseUrl = process.env.FRONTEND_URL || "https://www.1753skin.com";
   const resetUrl = `${baseUrl}/sv/valj-losenord?token=${resetToken}`;
   const firstName = (name || "").split(" ")[0] || "du";
@@ -3078,7 +3078,7 @@ async function sendAdminNotification(fromEmail, fromName, subject) {
 
     await resend.emails.send({
       from: `1753 SKINCARE <${fromAddr}>`,
-      to: "christopher@1753skincare.com",
+      to: "christopher@1753skin.com",
       subject: `Nytt kundmeddelande: ${subject}`,
       html: `
         <h3>Nytt inkommande meddelande</h3>
@@ -3456,7 +3456,7 @@ async function processReviewReply(review, productName, reviewerName) {
         const fromAddr = process.env.EMAIL_FROM || "info@1753skin.com";
         await resend.emails.send({
           from: `1753 SKINCARE <${fromAddr}>`,
-          to: "christopher@1753skincare.com",
+          to: "christopher@1753skin.com",
           subject: `Ny recension: ${rating} stjärnor från ${reviewerName}`,
           html: `
             <h3>Ny recension kräver ditt svar</h3>
@@ -5171,8 +5171,8 @@ async function checkWinbackEligibility() {
 
 async function seedAdminAccounts() {
   const admins = [
-    { email: "torbjorn@1753skincare.com", name: "Torbjörn" },
-    { email: "christopher@1753skincare.com", name: "Christopher" },
+    { email: "torbjorn@1753skin.com", name: "Torbjörn" },
+    { email: "christopher@1753skin.com", name: "Christopher" },
   ];
 
   for (const admin of admins) {
