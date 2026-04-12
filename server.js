@@ -2573,14 +2573,46 @@ async function handleOrderCompletion(orderId) {
   if (fortnoxOrderNumber) {
     try {
       const fxInvoiceResult = await fortnoxFetch(`/orders/${fortnoxOrderNumber}/createinvoice`, "PUT");
-      console.log("[Order] Fortnox createinvoice response:", JSON.stringify(fxInvoiceResult).slice(0, 500));
+      const invKeys = Object.keys(fxInvoiceResult || {});
+      const innerObj = fxInvoiceResult?.Order || fxInvoiceResult?.Invoice || {};
+      console.log(`[Order] Fortnox createinvoice keys: ${invKeys}, InvoiceReference=${innerObj.InvoiceReference}, DocumentNumber=${innerObj.DocumentNumber}, InvoiceNumber=${innerObj.InvoiceNumber}`);
+
+      // Fortnox returns either an Invoice object or an Order object with InvoiceReference
       fortnoxInvoiceNumber = fxInvoiceResult?.Invoice?.DocumentNumber
         || fxInvoiceResult?.DocumentNumber
-        || fxInvoiceResult?.invoice?.DocumentNumber;
-      if (!fortnoxInvoiceNumber && fxInvoiceResult?.Invoice?.InvoiceNumber) {
-        fortnoxInvoiceNumber = fxInvoiceResult.Invoice.InvoiceNumber;
+        || fxInvoiceResult?.invoice?.DocumentNumber
+        || fxInvoiceResult?.Invoice?.InvoiceNumber
+        || fxInvoiceResult?.Order?.InvoiceReference
+        || fxInvoiceResult?.Order?.DocumentNumber;
+
+      // Last resort: search all top-level keys for anything that looks like an invoice number
+      if (!fortnoxInvoiceNumber && fxInvoiceResult) {
+        const flat = fxInvoiceResult.Invoice || fxInvoiceResult.Order || fxInvoiceResult;
+        for (const key of ["InvoiceReference", "InvoiceNumber", "DocumentNumber"]) {
+          if (flat[key] && typeof flat[key] === "number") {
+            fortnoxInvoiceNumber = flat[key];
+            break;
+          }
+        }
       }
-      notes.push(`Fortnox faktura: ${fortnoxInvoiceNumber || "kunde ej parsas"}`);
+
+      // Fallback: if we still don't have it, fetch the order to get InvoiceReference
+      if (!fortnoxInvoiceNumber) {
+        try {
+          const orderCheck = await fortnoxFetch(`/orders/${fortnoxOrderNumber}`);
+          fortnoxInvoiceNumber = orderCheck?.Order?.InvoiceReference;
+          if (fortnoxInvoiceNumber) {
+            console.log(`[Order] Got invoice number ${fortnoxInvoiceNumber} from order lookup`);
+          }
+        } catch { /* non-critical */ }
+      }
+
+      if (fortnoxInvoiceNumber) {
+        notes.push(`Fortnox faktura: ${fortnoxInvoiceNumber}`);
+      } else {
+        console.error("[Order] Fortnox createinvoice could not find invoice number in:", JSON.stringify(fxInvoiceResult).slice(0, 1000));
+        notes.push("Fortnox faktura: kunde ej parsas");
+      }
     } catch (err) {
       notes.push(`Fortnox faktura FEL: ${err.message}`);
       console.error("[Order] Fortnox invoice error:", err);
