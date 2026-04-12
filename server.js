@@ -2655,6 +2655,51 @@ async function handleOrderCompletion(orderId) {
     console.error("[Order] Loyalty points error:", err);
   }
 
+  // 7b. Create subscriptions for subscription items
+  try {
+    const subItems = items.filter(i => i.subscription || i.intervalDays);
+    if (subItems.length > 0) {
+      const subUser = await db.findUserByEmail(order.customer_email);
+      if (subUser) {
+        for (const item of subItems) {
+          const intervalDays = item.intervalDays || item.subscription?.intervalDays || 30;
+          const product = PRODUCTS_MAP[item.articleNumber] || PRODUCTS_MAP[item.id];
+          const originalPrice = item.price || (product ? (order.currency === "EUR" ? product.priceEUR : product.price) : 0);
+          const discountPercent = 15;
+          const recurringPrice = Math.round(originalPrice * (1 - discountPercent / 100));
+
+          const existingSubs = await db.findSubscriptionsByUser(subUser.id);
+          const alreadyExists = existingSubs.some(s =>
+            s.product_id === (item.articleNumber || item.id) &&
+            s.status === "active"
+          );
+
+          if (!alreadyExists) {
+            await db.createSubscription({
+              userId: subUser.id,
+              productId: item.articleNumber || item.id,
+              productName: item.name || (product ? product.name : "Produkt"),
+              quantity: item.quantity || 1,
+              intervalDays,
+              discountPercent,
+              originalPrice,
+              recurringPrice,
+              vivaInitialOrderCode: order.viva_order_code || null,
+            });
+            notes.push(`Prenumeration skapad: ${item.name || item.articleNumber} (var ${intervalDays}:e dag)`);
+            console.log(`[Subscription] Created for ${order.customer_email}: ${item.articleNumber || item.id} every ${intervalDays} days`);
+          }
+        }
+      } else {
+        notes.push("Prenumeration ej skapad: inget konto kopplat");
+        console.warn(`[Subscription] No user account for ${order.customer_email} — subscription items not saved`);
+      }
+    }
+  } catch (err) {
+    notes.push(`Prenumeration FEL: ${err.message}`);
+    console.error("[Order] Subscription creation error:", err);
+  }
+
   // 8. Send confirmation email (kräver RESEND_API_KEY + verifierad avsändardomän i Resend)
   try {
     const emailResult = await sendOrderConfirmation(order, items);

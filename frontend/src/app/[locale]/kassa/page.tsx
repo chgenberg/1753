@@ -10,6 +10,7 @@ import { PRODUCTS, productDisplayName, productPrice } from "@/lib/products";
 import { formatPrice, getCurrency, getShippingCost } from "@/lib/currency";
 import { apiFetch } from "@/lib/api";
 import { useLocale } from "@/providers/locale-provider";
+import { useAuth } from "@/providers/auth-provider";
 
 function productIdFromCartId(cartId: string) {
   return cartId.replace(/__sub$/, "");
