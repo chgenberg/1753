@@ -535,7 +535,7 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
             </h4>
             <div className="grid gap-3 sm:grid-cols-2">
               {results
-                .filter((r) => r.confidence >= 0.15)
+                .filter((r) => r.confidence >= 0.50)
                 .map((r) => {
                   const color =
                     CONDITION_COLORS[r.topCondition] || "#108474";

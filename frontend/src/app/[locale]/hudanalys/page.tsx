@@ -76,6 +76,11 @@ interface AnalysisJSON {
   avoid: string[];
   nextAnalysis: string;
   faceZones?: FaceZoneGPT[];
+  primaryCondition?: {
+    condition: string;
+    confidence: "low" | "medium" | "high";
+    reasoning?: string;
+  };
   /** Legacy fields for backward compat */
   regions?: { label: string; observation: string; score: number }[];
   routineSuggestion?: { morning: string[]; evening: string[] };
@@ -489,7 +494,7 @@ export default function AnalysisPage() {
                 confidence: Math.round(p.probability * 100),
               })),
               zones: scanSummary.zones
-                .filter((z) => z.confidence >= 0.15)
+                .filter((z) => z.confidence >= 0.50)
                 .map((z) => ({
                   zone: locale === "en" ? z.zone.labelEn : z.zone.labelSv,
                   condition: z.topCondition,
@@ -548,13 +553,15 @@ export default function AnalysisPage() {
       }
 
       if (userEmail && !nlSubscribed) {
-        const topCondition =
-          scanSummary?.overallTop?.[0]?.label || "general";
+        const pc = json?.primaryCondition;
+        const gptCondition = pc?.condition && pc.condition !== "normal" && pc.confidence !== "low"
+          ? pc.condition
+          : "general";
         apiFetch("/newsletter/subscribe", {
           method: "POST",
           body: JSON.stringify({
             email: userEmail,
-            skinCondition: topCondition,
+            skinCondition: gptCondition,
           }),
         }).then(() => setNlSubscribed(true)).catch(() => {});
       }

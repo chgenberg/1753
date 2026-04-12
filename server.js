@@ -68,6 +68,7 @@ app.use((req, res, next) => {
 });
 
 app.use(express.static("."));
+app.use(express.static(path.join(__dirname, "public")));
 
 const PORT = process.env.PORT || process.env.BACKEND_PORT || 3001;
 const JWT_SECRET = process.env.JWT_SECRET || "1753skincare_dev_secret_change_in_production";
@@ -1173,11 +1174,21 @@ app.post("/api/admin/orders/:id/cancel", adminAuthMiddleware, async (req, res) =
           const paymentAmount = order.total_amount + (order.shipping_cost || 0);
           const today = new Date().toISOString().split("T")[0];
           try {
-            const origPay = await fortnoxFetch("/invoicepayments", "POST", {
-              InvoicePayment: { InvoiceNumber: parseInt(order.fortnox_invoice_number), Amount: paymentAmount, AmountCurrency: paymentAmount, PaymentDate: today }
-            });
-            const origPayNum = origPay?.InvoicePayment?.Number;
-            if (origPayNum) await fortnoxFetch(`/invoicepayments/${origPayNum}/bookkeep`, "PUT").catch(() => {});
+            let origInvoice;
+            try {
+              const origData = await fortnoxFetch(`/invoices/${order.fortnox_invoice_number}`);
+              origInvoice = origData?.Invoice;
+            } catch (_) {}
+
+            const origAlreadyPaid = origInvoice && (origInvoice.Balance === 0 || origInvoice.FinalPayDate);
+
+            if (!origAlreadyPaid) {
+              const origPay = await fortnoxFetch("/invoicepayments", "POST", {
+                InvoicePayment: { InvoiceNumber: parseInt(order.fortnox_invoice_number), Amount: paymentAmount, AmountCurrency: paymentAmount, PaymentDate: today }
+              });
+              const origPayNum = origPay?.InvoicePayment?.Number;
+              if (origPayNum) await fortnoxFetch(`/invoicepayments/${origPayNum}/bookkeep`, "PUT").catch(() => {});
+            }
 
             const creditPay = await fortnoxFetch("/invoicepayments", "POST", {
               InvoicePayment: { InvoiceNumber: parseInt(creditNum), Amount: -paymentAmount, AmountCurrency: -paymentAmount, PaymentDate: today }
@@ -1239,42 +1250,57 @@ app.post("/api/admin/orders/:id/cancel", adminAuthMiddleware, async (req, res) =
       const currencyLabel = (order.currency || "SEK") === "EUR" ? "\u20ac" : "kr";
 
       const apiKey = process.env.RESEND_API_KEY;
+      const fromEmail = process.env.EMAIL_FROM || "info@1753skin.com";
       if (apiKey) {
         const { Resend } = require("resend");
         const resend = new Resend(apiKey);
+        const firstName = order.customer_name?.split(" ")[0] || "";
         await resend.emails.send({
-          from: "1753 SKINCARE <info@1753skincare.com>",
+          from: fromEmail,
+          replyTo: "info@1753skin.com",
           to: order.customer_email,
           subject: isSv
             ? `Order #${order.order_number} har makulerats`
             : `Order #${order.order_number} has been cancelled`,
           html: emailWrapper(`
-            <h1 style="font-size:24px;font-weight:600;color:#1d1d1f;letter-spacing:-0.02em;margin:0 0 16px;">
+            <div style="text-align:center;padding:32px 0 8px">
+              <img src="https://www.1753skin.com/1753.webp" alt="1753 SKINCARE" width="48" height="48" style="border-radius:12px"/>
+            </div>
+            <h1 style="font-size:24px;font-weight:600;color:#1d1d1f;letter-spacing:-0.02em;margin:16px 0;">
               ${isSv ? "Din order har makulerats" : "Your order has been cancelled"}
             </h1>
             <p style="color:#515151;font-size:15px;line-height:1.6;margin:0 0 24px;">
               ${isSv
-                ? `Order <strong>#${order.order_number}</strong> har makulerats. ${order.viva_transaction_id ? "\u00c5terbetalningen kommer att synas p\u00e5 ditt konto inom 3\u20135 bankdagar." : ""}`
-                : `Order <strong>#${order.order_number}</strong> has been cancelled. ${order.viva_transaction_id ? "The refund will appear in your account within 3\u20135 business days." : ""}`
+                ? `Hej ${firstName}${firstName ? ", " : ""}order <strong>#${order.order_number}</strong> har makulerats.${order.viva_transaction_id ? " Återbetalningen på <strong>" + totalKr + " " + currencyLabel + "</strong> kommer att synas på ditt konto inom 3–5 bankdagar." : ""}`
+                : `Hi ${firstName}${firstName ? ", " : ""}order <strong>#${order.order_number}</strong> has been cancelled.${order.viva_transaction_id ? " The refund of <strong>" + totalKr + " " + currencyLabel + "</strong> will appear in your account within 3–5 business days." : ""}`
               }
             </p>
-            <table style="width:100%;border-collapse:collapse;margin-bottom:24px;">
-              <tr style="border-bottom:1px solid #e6e6e6;">
-                <td style="padding:12px 0;color:#515151;font-size:14px;">${isSv ? "Ordernummer" : "Order number"}</td>
-                <td style="padding:12px 0;text-align:right;font-weight:600;color:#1d1d1f;font-size:14px;">#${order.order_number}</td>
-              </tr>
-              ${order.viva_transaction_id ? `
-              <tr style="border-bottom:1px solid #e6e6e6;">
-                <td style="padding:12px 0;color:#515151;font-size:14px;">${isSv ? "\u00c5terbetalat" : "Refunded"}</td>
-                <td style="padding:12px 0;text-align:right;font-weight:600;color:#1d1d1f;font-size:14px;">${totalKr} ${currencyLabel}</td>
-              </tr>` : ""}
-            </table>
-            <p style="color:#515151;font-size:14px;line-height:1.6;margin:0;">
-              ${isSv ? "Har du fr\u00e5gor? Kontakta oss p\u00e5 info@1753skincare.com." : "Questions? Contact us at info@1753skincare.com."}
+            <div style="background:#f5f5f7;border-radius:12px;padding:16px 20px;margin:20px 0">
+              <table style="width:100%;border-collapse:collapse;">
+                <tr>
+                  <td style="padding:8px 0;color:#766a62;font-size:14px;">${isSv ? "Ordernummer" : "Order number"}</td>
+                  <td style="padding:8px 0;text-align:right;font-weight:600;color:#1d1d1f;font-size:14px;">#${order.order_number}</td>
+                </tr>
+                ${order.viva_transaction_id ? `
+                <tr>
+                  <td style="padding:8px 0;color:#766a62;font-size:14px;">${isSv ? "Återbetalat belopp" : "Refunded amount"}</td>
+                  <td style="padding:8px 0;text-align:right;font-weight:600;color:#108474;font-size:14px;">${totalKr} ${currencyLabel}</td>
+                </tr>` : ""}
+                <tr>
+                  <td style="padding:8px 0;color:#766a62;font-size:14px;">${isSv ? "Status" : "Status"}</td>
+                  <td style="padding:8px 0;text-align:right;font-weight:600;color:#1d1d1f;font-size:14px;">${isSv ? (order.viva_transaction_id ? "Återbetalning påbörjad" : "Makulerad") : (order.viva_transaction_id ? "Refund initiated" : "Cancelled")}</td>
+                </tr>
+              </table>
+            </div>
+            <p style="color:#515151;font-size:14px;line-height:1.6;margin:24px 0 0;">
+              ${isSv
+                ? "Har du frågor om din återbetalning? Svara på detta mejl eller kontakta oss på"
+                : "Questions about your refund? Reply to this email or contact us at"}
+              <a href="mailto:info@1753skin.com" style="color:#108474"> info@1753skin.com</a>.
             </p>
           `)
         });
-        notes.push("Makuleringsbek\u00e4ftelse skickad");
+        notes.push("Makuleringsbekräftelse skickad");
       }
     } catch (emailErr) {
       notes.push(`E-post FEL: ${emailErr.message}`);
@@ -1720,13 +1746,15 @@ Kunden har besvarat en quiz om hudtyp, besvär, rutin och livsstil. Om skannings
 == VISUELL BEDÖMNING (DIN VIKTIGASTE UPPGIFT NÄR BILD FINNS) ==
 Om en ansiktsbild bifogas: DU SKA ANVÄNDA DIN EGEN VISUELLA BEDÖMNING SOM PRIMÄRKÄLLA. Titta noggrant på bilden och bedöm huden själv. Din visuella analys väger MYCKET tyngre än skanningsdata.
 
-KRITISKT: Det lokala ONNX-modellen har INGEN "normal/frisk hud"-klass och MÅSTE alltid klassificera som en hudåkomma (akne, dermatit etc.) även om huden är helt frisk. Detta betyder att skanningsdata SYSTEMATISKT överrapporterar problem.
+KRITISKT: Det lokala ONNX-modellen har INGEN "normal/frisk hud"-klass och MÅSTE alltid klassificera som en hudåkomma (akne, dermatit etc.) även om huden är helt frisk. Detta betyder att skanningsdata SYSTEMATISKT överrapporterar problem. ONNX-data ska i princip IGNORERAS som diagnostisk källa.
 
 Prioriteringsordning (viktigast först):
-1. DIN VISUELLA BEDÖMNING av bilden (om bild bifogas) – 50% vikt
-2. Kundens egna quiz-svar (hudtyp, besvär) – 30% vikt
-3. Skanningsdata från ONNX-modellen – max 10% vikt, och ENBART om konfidens >60%
-4. Livsstilsfaktorer – 10% vikt
+1. DIN VISUELLA BEDÖMNING av bilden (om bild bifogas) – 60% vikt
+2. Kundens egna quiz-svar (hudtyp, besvär) – 25% vikt
+3. Livsstilsfaktorer – 10% vikt
+4. Skanningsdata från ONNX-modellen – max 5% vikt, och ENBART om konfidens >70% OCH din visuella bedömning bekräftar samma sak
+
+VIKTIGT OM NORMAL HUD: De flesta människor som gör en hudanalys har i grunden FRISK HUD med kanske milda, normala variationer. Det är INTE ett problem att ha lätt torrhet på vintern, enstaka porer eller minimal rodnad. Behandla detta som normal variation, inte som en diagnos.
 
 VIKTIGT OM SKANNINGSDATA: AI-skanningen använder en begränsad bildklassificeringsmodell (~80% accuracy) som SAKNAR "normal"-klass:
 - Modellen TVINGAS välja en åkomma även för helt frisk hud – detta är en känd brist
@@ -1745,7 +1773,13 @@ Beräkna score (0-100) INDIVIDUELLT baserat på ALLA faktorer:
 - Nuvarande rutin och dess lämplighet (15%)
 Skanningsresultat påverkar INTE poängen direkt – de kan bekräfta din visuella bedömning men aldrig sänka poängen på egen hand.
 Varje kund ska få ett UNIKT score. Kopiera aldrig exempelvärden.
-OBS: Frisk, välmående hud ska få HÖG poäng (80+). Sänk inte poängen bara för att skanningen rapporterar åkommor – bedöm bilden själv.
+
+KRITISKT OM SCORE-FÖRDELNING:
+- 85-100: Frisk hud + bra livsstil. DE FLESTA kunder med normal hud och hyfsad livsstil hamnar här.
+- 70-84: Bra grund med utrymme för förbättring. Normal hud men livsstilsfaktorer kan förbättras.
+- 55-69: Tydliga besvär eller bristfällig livsstil som påverkar huden.
+- Under 55: Allvarliga hudproblem eller flera bristande livsstilsfaktorer.
+Sänk ALDRIG poängen bara för att skanningen rapporterar åkommor. En person med frisk hud i bilden och OK livsstil ska ALLTID få minst 75+.
 
 == SVARFORMAT ==
 Svara ENBART med ett JSON-block (inget annat). JSON-blocket ska vara markerat med trippla backticks och "json":
@@ -1758,7 +1792,9 @@ Svara ENBART med ett JSON-block (inget annat). JSON-blocket ska vara markerat me
   "skinAnalysis": {
     "overview": "Utförlig beskrivning (250-400 ord) av kundens hudtillstånd. Beskriv vad du ser/förstår baserat på quiz-svar och eventuell skanningsdata. Förklara hur hudtyp, besvär och livsstil hänger ihop. Koppla till mikrobiom och ECS. Var specifik – referera till kundens egna svar. Skriv som löptext med stycken (använd \\n\\n för styckebrytning).",
     "strengths": ["Specifik styrka 1", "Specifik styrka 2"],
-    "concerns": ["Specifikt problem 1 med kort förklaring", "Specifikt problem 2"],
+    "concerns": [
+      { "issue": "Specifikt problem med kort förklaring", "severity": "mild | moderate | severe" }
+    ],
     "microbiome": "Kort analys (2-3 meningar) av hur kundens livsstil och rutin påverkar mikrobiomets balans",
     "ecs": "Kort analys (2-3 meningar) av hur ECS-aktivitet relaterar till kundens hudtillstånd"
   },
@@ -1821,6 +1857,11 @@ Svara ENBART med ett JSON-block (inget annat). JSON-blocket ska vara markerat me
       { "step": "1-2 pump TA-DA Serum", "why": "Förstärker oljans absorption och regenerering" }
     ]
   },
+  "primaryCondition": {
+    "condition": "normal | acne | dermatitis | dryness | eczema | fungal | hyperpigmentation | psoriasis | rosacea | sun_damage",
+    "confidence": "low | medium | high",
+    "reasoning": "1-2 meningar som motiverar valet. Om huden ar frisk, skriv det tydligt."
+  },
   "avoid": ["Specifik sak att undvika med kort förklaring"],
   "nextAnalysis": "4 veckor",
   "faceZones": [
@@ -1868,12 +1909,22 @@ Basera på kundens specifika svar om sömn, stress, kost, vatten och träning. G
 == RUTINFÖRSLAG ==
 Anpassa morgon- och kvällsrutin till kundens hudtyp och besvär. Varje steg ska ha en kort förklaring av VARFÖR det stöder hudens egna system.
 
+== PRIMARYCONDITION (KRITISKT FOR KORREKT TAGGNING) ==
+Fältet "primaryCondition" avgör hur kunden taggas i vårt system. Felaktig taggning gör att kunden får irrelevanta nyhetsbrev. VAR EXTREMT KONSERVATIV:
+- Sätt "normal" om huden i stort sett är frisk och du inte ser tydliga tecken på en specifik åkomma
+- DE FLESTA MÄNNISKOR HAR NORMAL HUD. Det är det vanligaste tillståndet. "normal" ska vara ditt standardval.
+- Sätt en specifik åkomma (acne, dermatitis, etc.) ENBART om du ser tydliga, obestridliga tecken i bilden ELLER om kunden själv uppger det i quiz-svaren
+- "confidence" ska vara "high" bara om du är helt säker. Vid minsta tvekan: "medium" eller "low"
+- Om du är osäker mellan "normal" och en mild åkomma: VÄLJ ALLTID "normal"
+- IGNORERA skanningsdata helt för detta fält – basera ENBART på din visuella bedömning + quiz-svar
+
 == REGLER ==
 - Svara på svenska (om frågor skickas på engelska, svara på engelska)
 - Använd ALDRIG emojis
 - Var specifik och personlig – referera till kundens egna svar genomgående
 - JSON-blocket ska vara det ENDA du svarar med (ingen löptext utanför JSON)
 - FÖRBJUDET: medicinsk diagnos, receptbelagda läkemedel, påhittade ingredienser, generisk rådgivning
+- ÖVERDIAGNOSTISERA ALDRIG: Frisk hud är det vanligaste. Om bilden visar balanserad hud utan synliga problem, ge högt score (80+) och primaryCondition "normal". Att hitta problem som inte finns skadar kundens förtroende.
 
 Vid allvarliga hudtillstånd: rekommendera dermatolog som komplement.`;
 
@@ -2064,20 +2115,28 @@ app.post("/api/analysis", async (req, res) => {
       analysisId = saved?.id || null;
       console.log(`[Analysis] Saved to DB: id=${analysisId}, userId=${userId}, score=${parsedResult?.score}`);
 
-      // Auto-tag subscriber with primary skin condition if they exist
+      // Auto-tag subscriber using GPT's primaryCondition (not raw ONNX)
       try {
-        const topCondition = imageScan?.overall?.[0]?.condition
-          || parsedResult?.skinAnalysis?.concerns?.[0]?.condition
-          || null;
-        if (topCondition && userId) {
+        const pc = parsedResult?.primaryCondition;
+        const gptCondition = pc?.condition || null;
+        const gptConfidence = pc?.confidence || "low";
+
+        const shouldTag = gptCondition
+          && gptCondition !== "normal"
+          && gptConfidence !== "low"
+          && userId;
+
+        if (shouldTag) {
           const user = await db.findUserById(userId);
           if (user?.email) {
             const existing = await db.findSubscriberByEmail(user.email);
             if (existing && !existing.skin_condition) {
-              await db.updateSubscriberSkinCondition(user.email, topCondition);
-              console.log(`[Analysis] Auto-tagged subscriber ${user.email} → ${topCondition}`);
+              await db.updateSubscriberSkinCondition(user.email, gptCondition);
+              console.log(`[Analysis] Auto-tagged subscriber ${user.email} → ${gptCondition} (confidence: ${gptConfidence})`);
             }
           }
+        } else if (userId) {
+          console.log(`[Analysis] No auto-tag: condition=${gptCondition}, confidence=${gptConfidence}`);
         }
       } catch (tagErr) {
         console.error("[Analysis] Auto-tag failed (non-fatal):", tagErr.message);
@@ -2131,6 +2190,39 @@ app.post("/api/training-data", async (req, res) => {
   } catch (err) {
     console.error("[Training] Upload error:", err.message);
     res.status(500).json({ message: "Kunde inte spara traningsdata." });
+  }
+});
+
+// ---- ADMIN: TRAINING DATA EXPORT ----
+
+app.get("/api/admin/training-data/stats", adminAuthMiddleware, async (req, res) => {
+  try {
+    const stats = await db.getTrainingUploadStats();
+    res.json(stats);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+app.get("/api/admin/training-data/export", adminAuthMiddleware, async (req, res) => {
+  try {
+    const limit = Math.min(parseInt(req.query.limit) || 100, 500);
+    const offset = parseInt(req.query.offset) || 0;
+    const condition = req.query.condition || null;
+    const rows = await db.exportTrainingUploads({ limit, offset, condition });
+    res.json({ count: rows.length, offset, rows });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+app.get("/api/admin/training-data/:id/image", adminAuthMiddleware, async (req, res) => {
+  try {
+    const row = await db.exportTrainingUploadImage(parseInt(req.params.id));
+    if (!row) return res.status(404).json({ message: "Inte hittad" });
+    res.json({ id: row.id, topCondition: row.top_condition, confidence: row.confidence, imageData: row.image_data });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
   }
 });
 
@@ -3215,6 +3307,12 @@ async function sendOrderConfirmation(order, items) {
   }
 
   console.log(`[Email] Order confirmation sent to ${order.customer_email} (id: ${sendResult?.id}) for ${order.order_number} [${order.locale || "sv"}]${hasSubscription ? " (subscription)" : ""}`);
+
+  try {
+    const sub = await db.findSubscriberByEmail(order.customer_email);
+    if (sub) await db.touchSubscriberEmailed(sub.id);
+  } catch (_) { /* non-critical */ }
+
   return { sent: true };
 }
 
@@ -3324,6 +3422,12 @@ async function sendShippingConfirmation(order, items, trackingNumber, trackingUr
   }
 
   console.log(`[Email] Shipping confirmation sent to ${order.customer_email} (id: ${sendResult?.id}) for ${order.order_number} [${order.locale || "sv"}]`);
+
+  try {
+    const sub = await db.findSubscriberByEmail(order.customer_email);
+    if (sub) await db.touchSubscriberEmailed(sub.id);
+  } catch (_) { /* non-critical */ }
+
   return { sent: true };
 }
 
@@ -4523,12 +4627,22 @@ async function processAutomationQueue() {
           unsubUrl
         );
 
+        const canSend = await db.canEmailSubscriber(item.subscriber_id, 20);
+        if (!canSend) {
+          const retryAt = new Date(Date.now() + 24 * 3600000);
+          await db.advanceAutomation(item.id, { nextStep: item.current_step, nextSendAt: retryAt });
+          console.log(`[Automation] Deferred "${step.subject}" to ${item.email} – emailed too recently, retry ${retryAt.toISOString()}`);
+          continue;
+        }
+
         await resend.emails.send({
           from: fromEmail,
           to: item.email,
           subject: step.subject.replace(/\{\{firstName\}\}/g, item.first_name || "du"),
           html
         });
+
+        await db.touchSubscriberEmailed(item.subscriber_id);
 
         const nextStepIdx = item.current_step + 1;
         const nextStep = steps[nextStepIdx];
@@ -4829,8 +4943,15 @@ app.post("/api/newsletter/broadcast-segmented", async (req, res) => {
       }
 
       let sent = 0;
+      let skipped = 0;
       for (const sub of subscribers) {
         try {
+          const canSend = await db.canEmailSubscriber(sub.id, 24);
+          if (!canSend) {
+            skipped++;
+            continue;
+          }
+
           const unsubUrl = `${baseUrl}/api/newsletter/unsubscribe/${sub.unsubscribe_token}`;
           await resend.emails.send({
             from: fromEmail,
@@ -4841,14 +4962,17 @@ app.post("/api/newsletter/broadcast-segmented", async (req, res) => {
               unsubUrl
             )
           });
+          await db.touchSubscriberEmailed(sub.id);
           sent++;
+
+          if (sent % 5 === 0) await new Promise(r => setTimeout(r, 1000));
         } catch (err) {
           console.error(`[SegBroadcast] Failed ${sub.email}:`, err.message);
         }
       }
 
-      console.log(`[SegBroadcast] ${skinCondition}: ${sent}/${subscribers.length} sent`);
-      results.push({ skinCondition, sent, total: subscribers.length });
+      console.log(`[SegBroadcast] ${skinCondition}: ${sent}/${subscribers.length} sent, ${skipped} skipped (cooldown)`);
+      results.push({ skinCondition, sent, total: subscribers.length, skipped });
     }
 
     res.json({ ok: true, results });
@@ -5813,6 +5937,36 @@ async function seedAdminAccounts() {
 
 const socialGen = require("./scripts/social-media-generator");
 
+app.get("/api/admin/social/accounts", adminAuthMiddleware, async (req, res) => {
+  try {
+    const fetch = (await import("node-fetch")).default;
+    const apiKey = process.env.PUBLER_API_KEY;
+    const workspaceId = process.env.PUBLER_WORKSPACE_ID;
+    if (!apiKey || !workspaceId) {
+      return res.json({ connected: false, accounts: [], message: "PUBLER_API_KEY eller PUBLER_WORKSPACE_ID saknas" });
+    }
+    const headers = {
+      Authorization: `Bearer-API ${apiKey}`,
+      "Publer-Workspace-Id": workspaceId,
+    };
+    const acctRes = await fetch("https://app.publer.com/api/v1/accounts", { headers });
+    const acctData = await acctRes.json();
+    const accounts = (Array.isArray(acctData) ? acctData : []).map((a) => ({
+      id: a.id,
+      name: a.name,
+      provider: a.provider,
+      type: a.type,
+      avatar: a.picture,
+    }));
+    const wsRes = await fetch("https://app.publer.com/api/v1/workspaces", { headers });
+    const workspaces = await wsRes.json();
+    const wsName = Array.isArray(workspaces) ? workspaces[0]?.name : "Unknown";
+    res.json({ connected: accounts.length > 0, accounts, workspace: wsName });
+  } catch (err) {
+    res.status(500).json({ connected: false, accounts: [], message: err.message });
+  }
+});
+
 app.get("/api/admin/social", adminAuthMiddleware, async (req, res) => {
   try {
     const { status, limit, offset } = req.query;
@@ -5841,11 +5995,13 @@ app.post("/api/admin/social/generate", adminAuthMiddleware, async (req, res) => 
     const result = await socialGen.generatePost({ type, productKey, customPrompt });
 
     const post = await db.createSocialPost({
-      platform: "both",
+      platform: "all",
       post_type: result.type,
       image_path: result.imagePath,
       caption_sv: result.captionSv,
       caption_en: result.captionEn,
+      caption_linkedin_sv: result.linkedinSv || null,
+      caption_linkedin_en: result.linkedinEn || null,
       hashtags: result.hashtags,
       reference_images: result.referenceImages,
       prompt_used: result.promptUsed,
@@ -5882,10 +6038,21 @@ app.delete("/api/admin/social/:id", adminAuthMiddleware, async (req, res) => {
 
 app.post("/api/admin/social/:id/schedule", adminAuthMiddleware, async (req, res) => {
   try {
-    const { scheduled_at } = req.body;
+    const { scheduled_at, push_to_publer } = req.body;
+    const scheduledTime = scheduled_at || new Date(Date.now() + 3600_000).toISOString();
+
+    if (push_to_publer && process.env.PUBLER_API_KEY) {
+      const post = await db.getSocialPost(parseInt(req.params.id));
+      if (!post) return res.status(404).json({ message: "Post hittades inte" });
+      const results = await publishToPubler(post, { scheduled_at: scheduledTime });
+      if (results.error) {
+        return res.status(400).json({ message: results.error });
+      }
+    }
+
     const updated = await db.updateSocialPost(parseInt(req.params.id), {
       status: "scheduled",
-      scheduled_at: scheduled_at || new Date(Date.now() + 3600_000).toISOString(),
+      scheduled_at: scheduledTime,
     });
     res.json(updated);
   } catch (err) {
@@ -5898,14 +6065,18 @@ app.post("/api/admin/social/:id/publish", adminAuthMiddleware, async (req, res) 
     const post = await db.getSocialPost(parseInt(req.params.id));
     if (!post) return res.status(404).json({ message: "Post hittades inte" });
 
-    const results = await publishToMeta(post);
+    const results = await publishToPubler(post);
     const updateFields = { status: "published", published_at: new Date().toISOString() };
     if (results.ig) updateFields.ig_post_id = results.ig;
     if (results.fb) updateFields.fb_post_id = results.fb;
-    if (results.error) updateFields.error_message = results.error;
+    if (results.li) updateFields.li_post_id = results.li;
+    if (results.error) {
+      updateFields.error_message = results.error;
+      updateFields.status = "failed";
+    }
 
     const updated = await db.updateSocialPost(post.id, updateFields);
-    console.log(`[Social] Post #${post.id} published`);
+    console.log(`[Social] Post #${post.id}: ${updateFields.status}`);
     res.json(updated);
   } catch (err) {
     console.error("[Social] Publish error:", err);
@@ -5913,68 +6084,149 @@ app.post("/api/admin/social/:id/publish", adminAuthMiddleware, async (req, res) 
   }
 });
 
-async function publishToMeta(post) {
+async function publishToPubler(post, options = {}) {
   const fetch = (await import("node-fetch")).default;
-  const accessToken = process.env.META_ACCESS_TOKEN;
-  const igAccountId = process.env.META_IG_ACCOUNT_ID;
-  const fbPageId = process.env.META_FB_PAGE_ID;
-  const baseUrl = process.env.BASE_URL || "https://1753skincare.com";
+  const FormData = (await import("form-data")).default;
+  const fs = require("fs");
+  const path = require("path");
 
-  if (!accessToken) return { error: "META_ACCESS_TOKEN not configured" };
+  const apiKey = process.env.PUBLER_API_KEY;
+  const workspaceId = process.env.PUBLER_WORKSPACE_ID;
+  if (!apiKey) return { error: "PUBLER_API_KEY not configured" };
+  if (!workspaceId) return { error: "PUBLER_WORKSPACE_ID not configured" };
 
-  const imageUrl = `${baseUrl}${post.image_path}`;
-  const caption = `${post.caption_sv || ""}\n\n${post.hashtags || ""}`.trim();
+  const headers = {
+    Authorization: `Bearer-API ${apiKey}`,
+    "Publer-Workspace-Id": workspaceId,
+  };
+
   const results = {};
 
-  if (igAccountId && (post.platform === "both" || post.platform === "instagram")) {
-    try {
-      const containerRes = await fetch(
-        `https://graph.facebook.com/v22.0/${igAccountId}/media`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ image_url: imageUrl, caption, access_token: accessToken }),
-        }
-      );
-      const container = await containerRes.json();
-      if (container.id) {
-        const pubRes = await fetch(
-          `https://graph.facebook.com/v22.0/${igAccountId}/media_publish`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ creation_id: container.id, access_token: accessToken }),
-          }
-        );
-        const pub = await pubRes.json();
-        results.ig = pub.id || null;
-        if (pub.error) results.error = (results.error || "") + ` IG: ${pub.error.message}`;
-      } else {
-        results.error = (results.error || "") + ` IG container: ${container.error?.message || "unknown"}`;
+  // 1. Upload image
+  let mediaId;
+  const imagePath = post.image_path
+    ? path.join(__dirname, "public", post.image_path.replace(/^\//, ""))
+    : null;
+
+  if (imagePath && fs.existsSync(imagePath)) {
+    const form = new FormData();
+    form.append("file", fs.createReadStream(imagePath));
+    const uploadRes = await fetch("https://app.publer.com/api/v1/media", {
+      method: "POST",
+      headers: { ...headers, ...form.getHeaders() },
+      body: form,
+    });
+    const media = await uploadRes.json();
+    if (media.id) {
+      mediaId = media.id;
+    } else {
+      results.error = `Media upload failed: ${JSON.stringify(media.errors || media)}`;
+      return results;
+    }
+  } else {
+    results.error = `Image file not found: ${imagePath}`;
+    return results;
+  }
+
+  // 2. Get connected accounts
+  const acctRes = await fetch("https://app.publer.com/api/v1/accounts", { headers });
+  const acctData = await acctRes.json();
+  const accounts = Array.isArray(acctData) ? acctData : [];
+
+  if (accounts.length === 0) {
+    results.error = "No social accounts connected in Publer. Connect Instagram/Facebook/LinkedIn first.";
+    return results;
+  }
+
+  const SUPPORTED_PROVIDERS = ["instagram", "facebook", "linkedin"];
+  const targetAccounts = accounts.filter((a) => {
+    if (post.platform === "all" || post.platform === "both") return SUPPORTED_PROVIDERS.includes(a.provider);
+    return a.provider === post.platform;
+  });
+
+  if (targetAccounts.length === 0) {
+    results.error = `No ${post.platform} accounts connected in Publer`;
+    return results;
+  }
+
+  const igFbCaption = `${post.caption_sv || ""}\n\n${post.hashtags || ""}`.trim();
+  const linkedinCaption = `${post.caption_linkedin_sv || post.caption_sv || ""}\n\n${post.hashtags || ""}`.trim();
+
+  // 3. Build post payload with per-network content
+  const networks = {};
+  for (const acc of targetAccounts) {
+    const text = acc.provider === "linkedin" ? linkedinCaption : igFbCaption;
+    networks[acc.provider] = {
+      type: "photo",
+      text,
+      media: [{ id: mediaId, type: "image" }],
+    };
+  }
+
+  const accountsList = targetAccounts.map((a) => {
+    const entry = { id: a.id };
+    if (options.scheduled_at) entry.scheduled_at = options.scheduled_at;
+    return entry;
+  });
+
+  const isScheduled = !!options.scheduled_at;
+  const endpoint = isScheduled
+    ? "https://app.publer.com/api/v1/posts/schedule"
+    : "https://app.publer.com/api/v1/posts/schedule/publish";
+
+  const payload = {
+    bulk: {
+      state: "scheduled",
+      posts: [{ networks, accounts: accountsList }],
+    },
+  };
+
+  const postRes = await fetch(endpoint, {
+    method: "POST",
+    headers: { ...headers, "Content-Type": "application/json" },
+    body: JSON.stringify(payload),
+  });
+  const postResult = await postRes.json();
+
+  if (!postResult.job_id) {
+    results.error = `Publer post failed: ${JSON.stringify(postResult.errors || postResult)}`;
+    return results;
+  }
+
+  // 4. Poll job status
+  let jobComplete = false;
+  for (let i = 0; i < 15; i++) {
+    await new Promise((r) => setTimeout(r, 2000));
+    const statusRes = await fetch(
+      `https://app.publer.com/api/v1/job_status/${postResult.job_id}`,
+      { headers }
+    );
+    const status = await statusRes.json();
+    if (status.status === "complete" || status.data?.status === "complete") {
+      jobComplete = true;
+      const failures = status.payload?.failures || status.data?.result?.payload?.failures || {};
+      if (Object.keys(failures).length > 0) {
+        results.error = `Partial failures: ${JSON.stringify(failures)}`;
       }
-    } catch (err) {
-      results.error = (results.error || "") + ` IG: ${err.message}`;
+      break;
+    }
+    if (status.status === "failed" || status.data?.status === "failed") {
+      results.error = `Publer job failed: ${JSON.stringify(status)}`;
+      return results;
     }
   }
 
-  if (fbPageId && (post.platform === "both" || post.platform === "facebook")) {
-    try {
-      const fbRes = await fetch(
-        `https://graph.facebook.com/v22.0/${fbPageId}/photos`,
-        {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ url: imageUrl, message: caption, access_token: accessToken }),
-        }
-      );
-      const fb = await fbRes.json();
-      results.fb = fb.post_id || fb.id || null;
-      if (fb.error) results.error = (results.error || "") + ` FB: ${fb.error.message}`;
-    } catch (err) {
-      results.error = (results.error || "") + ` FB: ${err.message}`;
-    }
+  if (!jobComplete) {
+    results.error = "Publer job timeout – check Publer dashboard";
   }
 
+  for (const acc of targetAccounts) {
+    if (acc.provider === "instagram") results.ig = postResult.job_id;
+    if (acc.provider === "facebook") results.fb = postResult.job_id;
+    if (acc.provider === "linkedin") results.li = postResult.job_id;
+  }
+
+  console.log(`[Social] Published via Publer to ${targetAccounts.map(a => a.provider).join(", ")} (job: ${postResult.job_id})`);
   return results;
 }
 
@@ -5985,10 +6237,11 @@ async function processSocialMediaQueue() {
     console.log(`[Social] Processing ${duePosts.length} scheduled posts...`);
     for (const post of duePosts) {
       try {
-        const results = await publishToMeta(post);
+        const results = await publishToPubler(post);
         const updateFields = { status: "published", published_at: new Date().toISOString() };
         if (results.ig) updateFields.ig_post_id = results.ig;
         if (results.fb) updateFields.fb_post_id = results.fb;
+        if (results.li) updateFields.li_post_id = results.li;
         if (results.error) {
           updateFields.error_message = results.error;
           updateFields.status = "failed";
@@ -6004,6 +6257,87 @@ async function processSocialMediaQueue() {
     console.error("[Social] Queue processing error:", err.message);
   }
 }
+
+// ---- DAILY SOCIAL MEDIA AUTO-GENERATION ----
+
+const POST_TYPES = ["product", "lifestyle", "mood"];
+
+async function dailySocialMediaGeneration() {
+  const hasImageGen = process.env.FAL_KEY || process.env.NANOBANANA_API_KEY;
+  if (!process.env.GEMINI_API_KEY || !hasImageGen) {
+    console.log("[Social] Daily generation skipped – GEMINI_API_KEY or image gen key not configured");
+    return;
+  }
+  if (!process.env.PUBLER_API_KEY) {
+    console.log("[Social] Daily generation skipped – PUBLER_API_KEY not configured");
+    return;
+  }
+
+  try {
+    const type = POST_TYPES[Math.floor(Math.random() * POST_TYPES.length)];
+    console.log(`[Social] Daily auto-generation starting (type: ${type})...`);
+
+    const result = await socialGen.generatePost({ type });
+
+    const post = await db.createSocialPost({
+      platform: "all",
+      post_type: result.type,
+      image_path: result.imagePath,
+      caption_sv: result.captionSv,
+      caption_en: result.captionEn,
+      caption_linkedin_sv: result.linkedinSv || "",
+      caption_linkedin_en: result.linkedinEn || "",
+      hashtags: result.hashtags,
+      reference_images: result.referenceImages || [],
+      prompt_used: result.promptUsed,
+      product_ids: result.productIds || [],
+      status: "draft",
+    });
+
+    console.log(`[Social] Daily post #${post.id} generated. Publishing to Publer...`);
+
+    const results = await publishToPubler(post);
+    const updateFields = { status: "published", published_at: new Date().toISOString() };
+    if (results.ig) updateFields.ig_post_id = results.ig;
+    if (results.fb) updateFields.fb_post_id = results.fb;
+    if (results.li) updateFields.li_post_id = results.li;
+    if (results.error) {
+      updateFields.status = "failed";
+      updateFields.error_message = results.error;
+      console.error(`[Social] Daily post #${post.id} publish failed:`, results.error);
+    }
+
+    await db.updateSocialPost(post.id, updateFields);
+    console.log(`[Social] Daily post #${post.id}: ${updateFields.status}`);
+  } catch (err) {
+    console.error("[Social] Daily generation error:", err.message);
+  }
+}
+
+function scheduleDailyAt(hour, minute, fn) {
+  function scheduleNext() {
+    const now = new Date();
+    const target = new Date(now);
+    target.setHours(hour, minute, 0, 0);
+    if (target <= now) target.setDate(target.getDate() + 1);
+    const ms = target - now;
+    console.log(`[Social] Next daily generation scheduled for ${target.toISOString()} (in ${Math.round(ms / 60000)} min)`);
+    setTimeout(() => {
+      fn();
+      scheduleNext();
+    }, ms);
+  }
+  scheduleNext();
+}
+
+app.post("/api/admin/social/daily-generate", adminAuthMiddleware, async (req, res) => {
+  try {
+    await dailySocialMediaGeneration();
+    res.json({ message: "Daglig generering körd manuellt" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
 
 // ---- START ----
 
@@ -6021,6 +6355,10 @@ async function processSocialMediaQueue() {
     else console.log("[OK] OPENAI_API_KEY konfigurerad");
     if (!process.env.FORTNOX_ACCESS_TOKEN) console.log("[INFO] Fortnox ej ansluten – gå till /api/fortnox/auth för att auktorisera");
     else console.log("[OK] Fortnox-tokens konfigurerade");
+    if (process.env.FAL_KEY) console.log("[OK] fal.ai (Nano Banana Pro) konfigurerad");
+    else if (process.env.NANOBANANA_API_KEY) console.log("[OK] Nano Banana Pro konfigurerad");
+    else console.log("[INFO] Ingen bildgenererings-API konfigurerad (FAL_KEY)");
+    if (process.env.PUBLER_API_KEY) console.log("[OK] Publer konfigurerad");
 
     setInterval(processRecurringCharges, SIX_HOURS);
     setTimeout(processRecurringCharges, 60_000);
@@ -6033,5 +6371,8 @@ async function processSocialMediaQueue() {
     setInterval(processSocialMediaQueue, 5 * 60_000);
     setTimeout(processSocialMediaQueue, 120_000);
     console.log("[OK] Social media scheduler started (every 5min)");
+
+    scheduleDailyAt(10, 0, dailySocialMediaGeneration);
+    console.log("[OK] Daily social media auto-generation scheduled (10:00 CET)");
   });
 })();

@@ -31,10 +31,15 @@ import {
 /*  Types                                                              */
 /* ------------------------------------------------------------------ */
 
+interface ConcernItem {
+  issue: string;
+  severity?: "mild" | "moderate" | "severe";
+}
+
 interface SkinAnalysis {
   overview: string;
   strengths: string[];
-  concerns: string[];
+  concerns: (string | ConcernItem)[];
   microbiome: string;
   ecs: string;
 }
@@ -393,11 +398,16 @@ function SkinTab({ score, scoreLabel, summary, skinAnalysis, hasScan, scanImageS
               defaultOpen
             >
               <div className="flex flex-wrap gap-2">
-                {skinAnalysis.concerns.map((c, i) => (
-                  <span key={i} className="rounded-full border border-[#e6e6e6] bg-white px-4 py-2 text-xs font-medium text-[#515151]">
-                    {c}
-                  </span>
-                ))}
+                {skinAnalysis.concerns.map((c, i) => {
+                  const label = typeof c === "string" ? c : c.issue;
+                  const severity = typeof c === "string" ? undefined : c.severity;
+                  const borderColor = severity === "severe" ? "#e57373" : severity === "moderate" ? "#fcb237" : "#e6e6e6";
+                  return (
+                    <span key={i} className="rounded-full bg-white px-4 py-2 text-xs font-medium text-[#515151]" style={{ border: `1px solid ${borderColor}` }}>
+                      {label}{severity && severity !== "mild" ? ` (${severity})` : ""}
+                    </span>
+                  );
+                })}
               </div>
             </ExpandableBox>
           )}

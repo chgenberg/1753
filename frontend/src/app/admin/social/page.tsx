@@ -17,6 +17,8 @@ import {
   Sparkles,
   Calendar,
   Image as ImageIcon,
+  Link,
+  Unlink,
 } from "lucide-react";
 
 interface SocialPost {
@@ -27,6 +29,8 @@ interface SocialPost {
   image_path: string | null;
   caption_sv: string | null;
   caption_en: string | null;
+  caption_linkedin_sv: string | null;
+  caption_linkedin_en: string | null;
   hashtags: string | null;
   reference_images: string[];
   prompt_used: string | null;
@@ -36,6 +40,7 @@ interface SocialPost {
   published_at: string | null;
   ig_post_id: string | null;
   fb_post_id: string | null;
+  li_post_id: string | null;
   error_message: string | null;
   created_at: string;
 }
@@ -63,7 +68,8 @@ const PRODUCT_OPTIONS = [
   { key: "DUO+TA-DA", label: "DUO + TA-DA" },
 ];
 
-const API_BASE = process.env.NEXT_PUBLIC_API_URL || "";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "";
+const BACKEND_BASE = API_URL.replace(/\/api\/?$/, "");
 
 export default function AdminSocialPage() {
   const { token } = useAuth();
@@ -79,11 +85,21 @@ export default function AdminSocialPage() {
 
   const [editingPost, setEditingPost] = useState<SocialPost | null>(null);
   const [editCaption, setEditCaption] = useState("");
+  const [editLinkedinCaption, setEditLinkedinCaption] = useState("");
   const [editHashtags, setEditHashtags] = useState("");
 
   const [schedulePostId, setSchedulePostId] = useState<number | null>(null);
   const [scheduleDate, setScheduleDate] = useState("");
   const [scheduleTime, setScheduleTime] = useState("10:00");
+  const [pushToPubler, setPushToPubler] = useState(true);
+
+  const [triggeringDaily, setTriggeringDaily] = useState(false);
+
+  const [publerAccounts, setPublerAccounts] = useState<
+    { id: string; name: string; provider: string; avatar?: string }[]
+  >([]);
+  const [publerConnected, setPublerConnected] = useState(false);
+  const [publerWorkspace, setPublerWorkspace] = useState("");
 
   const loadPosts = useCallback(async () => {
     if (!token) return;
@@ -101,6 +117,18 @@ export default function AdminSocialPage() {
   }, [token, filterStatus]);
 
   useEffect(() => { loadPosts(); }, [loadPosts]);
+
+  useEffect(() => {
+    if (!token) return;
+    authFetch<{ connected: boolean; accounts: typeof publerAccounts; workspace: string }>(
+      "/admin/social/accounts",
+      token
+    ).then((data) => {
+      setPublerAccounts(data.accounts || []);
+      setPublerConnected(data.connected || false);
+      setPublerWorkspace(data.workspace || "");
+    }).catch(() => {});
+  }, [token]);
 
   async function handleGenerate() {
     if (!token) return;
@@ -120,14 +148,14 @@ export default function AdminSocialPage() {
       await loadPosts();
     } catch (err) {
       console.error("Generation failed:", err);
-      alert("Bildgenerering misslyckades. Kontrollera att GEMINI_API_KEY finns i Railway.");
+      alert("Bildgenerering misslyckades. Kontrollera att FAL_KEY och GEMINI_API_KEY finns i Railway.");
     } finally {
       setGenerating(false);
     }
   }
 
   async function handlePublish(postId: number) {
-    if (!token || !confirm("Publicera nu till Instagram och Facebook?")) return;
+    if (!token || !confirm("Publicera nu till alla kopplade plattformar?")) return;
     try {
       await authFetch(`/admin/social/${postId}/publish`, token, { method: "POST" });
       await loadPosts();
@@ -143,12 +171,13 @@ export default function AdminSocialPage() {
       const dt = new Date(`${scheduleDate}T${scheduleTime}:00`);
       await authFetch(`/admin/social/${schedulePostId}/schedule`, token, {
         method: "POST",
-        body: JSON.stringify({ scheduled_at: dt.toISOString() }),
+        body: JSON.stringify({ scheduled_at: dt.toISOString(), push_to_publer: pushToPubler }),
       });
       setSchedulePostId(null);
       await loadPosts();
-    } catch (err) {
+    } catch (err: any) {
       console.error("Schedule failed:", err);
+      alert(err?.message || "Schemaläggning misslyckades");
     }
   }
 
@@ -167,7 +196,7 @@ export default function AdminSocialPage() {
     try {
       await authFetch(`/admin/social/${editingPost.id}`, token, {
         method: "PUT",
-        body: JSON.stringify({ caption_sv: editCaption, hashtags: editHashtags }),
+        body: JSON.stringify({ caption_sv: editCaption, caption_linkedin_sv: editLinkedinCaption, hashtags: editHashtags }),
       });
       setEditingPost(null);
       await loadPosts();
@@ -176,9 +205,24 @@ export default function AdminSocialPage() {
     }
   }
 
+  async function handleTriggerDaily() {
+    if (!token || !confirm("Generera och publicera ett nytt inlagg nu (alla plattformar)?")) return;
+    setTriggeringDaily(true);
+    try {
+      await authFetch("/admin/social/daily-generate", token, { method: "POST" });
+      await loadPosts();
+    } catch (err) {
+      console.error("Daily generation failed:", err);
+      alert("Daglig generering misslyckades.");
+    } finally {
+      setTriggeringDaily(false);
+    }
+  }
+
   function openEdit(post: SocialPost) {
     setEditingPost(post);
     setEditCaption(post.caption_sv || "");
+    setEditLinkedinCaption(post.caption_linkedin_sv || "");
     setEditHashtags(post.hashtags || "");
   }
 
@@ -201,16 +245,65 @@ export default function AdminSocialPage() {
         <div>
           <h1 className="text-2xl font-bold text-[#1d1d1f]">Sociala medier</h1>
           <p className="mt-1 text-sm text-[#515151]">
-            Generera och publicera inlägg till Instagram och Facebook
+            Generera och publicera inlägg till Instagram, Facebook och LinkedIn
           </p>
         </div>
-        <button
-          onClick={() => setShowGenerate(true)}
-          className="inline-flex items-center gap-2 rounded-2xl bg-[#108474] px-5 py-2.5 text-sm font-medium text-white transition-all hover:bg-[#0d6b5e]"
-        >
-          <Sparkles className="h-4 w-4" />
-          Generera inlägg
-        </button>
+        <div className="flex gap-2">
+          <button
+            onClick={handleTriggerDaily}
+            disabled={triggeringDaily}
+            className="inline-flex items-center gap-2 rounded-2xl border border-[#108474] px-5 py-2.5 text-sm font-medium text-[#108474] transition-all hover:bg-[#108474]/5 disabled:opacity-50"
+          >
+            {triggeringDaily ? (
+              <>
+                <RefreshCw className="h-4 w-4 animate-spin" />
+                Genererar och publicerar...
+              </>
+            ) : (
+              <>
+                <Send className="h-4 w-4" />
+                Publicera nu
+              </>
+            )}
+          </button>
+          <button
+            onClick={() => setShowGenerate(true)}
+            className="inline-flex items-center gap-2 rounded-2xl bg-[#108474] px-5 py-2.5 text-sm font-medium text-white transition-all hover:bg-[#0d6b5e]"
+          >
+            <Sparkles className="h-4 w-4" />
+            Generera inlägg
+          </button>
+        </div>
+      </div>
+
+      {/* Publer connection status */}
+      <div className={`flex items-center gap-3 rounded-2xl border p-4 ${publerConnected ? "border-green-200 bg-green-50" : "border-amber-200 bg-amber-50"}`}>
+        {publerConnected ? (
+          <Link className="h-5 w-5 text-green-600" />
+        ) : (
+          <Unlink className="h-5 w-5 text-amber-600" />
+        )}
+        <div className="flex-1">
+          <p className={`text-sm font-medium ${publerConnected ? "text-green-800" : "text-amber-800"}`}>
+            {publerConnected
+              ? `Publer ansluten (${publerWorkspace})`
+              : "Publer ej ansluten"}
+          </p>
+          {publerConnected ? (
+            <div className="space-y-0.5">
+              <p className="text-xs text-green-600">
+                {publerAccounts.map((a) => `${a.name} (${a.provider})`).join(", ")}
+              </p>
+              <p className="text-xs text-green-600/70">
+                Daglig auto-publicering kl 10:00 CET
+              </p>
+            </div>
+          ) : (
+            <p className="text-xs text-amber-600">
+              Koppla Instagram, Facebook och LinkedIn i Publer for att kunna publicera.
+            </p>
+          )}
+        </div>
       </div>
 
       {/* Stats */}
@@ -321,7 +414,7 @@ export default function AdminSocialPage() {
         {posts.map((post) => {
           const cfg = STATUS_CONFIG[post.status] || STATUS_CONFIG.draft;
           const StatusIcon = cfg.icon;
-          const imgSrc = post.image_path ? `${API_BASE}${post.image_path}` : null;
+          const imgSrc = post.image_path ? `${BACKEND_BASE}${post.image_path}` : null;
 
           return (
             <div
@@ -350,9 +443,17 @@ export default function AdminSocialPage() {
                     {TYPE_LABELS[post.post_type] || post.post_type}
                   </span>
                 </div>
-                {post.platform !== "facebook" && (
-                  <Share2 className="absolute right-3 top-3 h-5 w-5 text-white drop-shadow" />
-                )}
+                <div className="absolute right-3 top-3 flex gap-1.5">
+                  {(post.platform === "all" || post.platform === "both" || post.platform === "instagram") && (
+                    <span className="rounded-full bg-black/60 px-2 py-0.5 text-[10px] font-medium text-white">IG</span>
+                  )}
+                  {(post.platform === "all" || post.platform === "both" || post.platform === "facebook") && (
+                    <span className="rounded-full bg-black/60 px-2 py-0.5 text-[10px] font-medium text-white">FB</span>
+                  )}
+                  {(post.platform === "all" || post.platform === "linkedin") && (
+                    <span className="rounded-full bg-black/60 px-2 py-0.5 text-[10px] font-medium text-white">LI</span>
+                  )}
+                </div>
               </div>
 
               {/* Content */}
@@ -360,6 +461,11 @@ export default function AdminSocialPage() {
                 <p className="line-clamp-3 text-sm text-[#1d1d1f]">
                   {post.caption_sv || "Ingen caption"}
                 </p>
+                {post.caption_linkedin_sv && (
+                  <p className="mt-1 line-clamp-2 text-xs text-[#515151]">
+                    <span className="font-medium">LI:</span> {post.caption_linkedin_sv}
+                  </p>
+                )}
                 {post.hashtags && (
                   <p className="mt-1 line-clamp-1 text-xs text-[#108474]">{post.hashtags}</p>
                 )}
@@ -453,13 +559,24 @@ export default function AdminSocialPage() {
                   className="w-full rounded-xl border border-[#e6e6e6] px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#108474]/30"
                 />
               </div>
+              {publerConnected && (
+                <label className="flex items-center gap-2 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={pushToPubler}
+                    onChange={(e) => setPushToPubler(e.target.checked)}
+                    className="h-4 w-4 rounded border-[#e6e6e6] text-[#108474] focus:ring-[#108474]"
+                  />
+                  <span className="text-sm text-[#1d1d1f]">Skicka direkt till Publer</span>
+                </label>
+              )}
             </div>
             <div className="mt-5 flex gap-3">
               <button
                 onClick={handleSchedule}
                 className="flex-1 rounded-2xl bg-[#108474] px-4 py-2.5 text-sm font-medium text-white hover:bg-[#0d6b5e]"
               >
-                Schemalägg
+                {pushToPubler ? "Schemalägg via Publer" : "Schemalägg"}
               </button>
               <button
                 onClick={() => setSchedulePostId(null)}
@@ -479,11 +596,21 @@ export default function AdminSocialPage() {
             <h3 className="text-lg font-semibold text-[#1d1d1f]">Redigera inlägg #{editingPost.id}</h3>
             <div className="mt-4 space-y-3">
               <div>
-                <label className="mb-1 block text-sm font-medium text-[#1d1d1f]">Caption (svenska)</label>
+                <label className="mb-1 block text-sm font-medium text-[#1d1d1f]">Caption – Instagram / Facebook</label>
                 <textarea
                   value={editCaption}
                   onChange={(e) => setEditCaption(e.target.value)}
-                  rows={5}
+                  rows={4}
+                  className="w-full rounded-xl border border-[#e6e6e6] px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#108474]/30"
+                />
+              </div>
+              <div>
+                <label className="mb-1 block text-sm font-medium text-[#1d1d1f]">Caption – LinkedIn</label>
+                <textarea
+                  value={editLinkedinCaption}
+                  onChange={(e) => setEditLinkedinCaption(e.target.value)}
+                  rows={6}
+                  placeholder="Langre, mer professionell ton for LinkedIn..."
                   className="w-full rounded-xl border border-[#e6e6e6] px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-[#108474]/30"
                 />
               </div>

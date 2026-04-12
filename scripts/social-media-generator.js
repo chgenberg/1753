@@ -1,14 +1,15 @@
 /**
  * Social Media Post Generator – 1753 SKINCARE
  *
- * Generates AI images and captions using Google Gemini,
- * with reference images for brand consistency.
+ * Image generation: fal.ai Nano Banana Pro (superior label preservation)
+ * Caption generation: Google Gemini
  * Content themes drawn from "Weed Your Skin" (e-book) and Valyu research.
  *
  * Usage:
  *   node scripts/social-media-generator.js [--type product|lifestyle|mood|education] [--product DUO]
  *
- * Env:  GEMINI_API_KEY, VALYU_API_KEY (optional – enriches captions with research)
+ * Env:  FAL_KEY (images), GEMINI_API_KEY (captions),
+ *       VALYU_API_KEY (optional – enriches captions with research)
  */
 
 const fs = require("fs");
@@ -16,20 +17,23 @@ const path = require("path");
 const https = require("https");
 
 const GEMINI_API_KEY = process.env.GEMINI_API_KEY;
-const MODEL = process.env.GEMINI_IMAGE_MODEL || "gemini-2.5-flash-image";
+const FAL_KEY = process.env.FAL_KEY;
+const GEMINI_IMAGE_MODEL = process.env.GEMINI_IMAGE_MODEL || "gemini-3-pro-image-preview";
+const GEMINI_TEXT_MODEL = process.env.GEMINI_TEXT_MODEL || "gemini-2.5-flash";
 const API_BASE = "https://generativelanguage.googleapis.com/v1beta";
+const BASE_URL = process.env.BASE_URL || "https://api.1753skin.com";
 
 const REF_DIR = path.join(__dirname, "..", "public", "Referensbilder");
 const EBOOK_PATH = path.join(__dirname, "..", "data", "ebook-segments.json");
 
 const PRODUCTS = {
-  "TheONE":     { name: "The ONE CBD Face Cream",  ref: "TheONE.jpg",    woman: "TheONEWoman.jpg", desc: "CBD-ansiktskräm med fullspektrum cannabinoider" },
-  "ILOVE":      { name: "I LOVE Facial Oil",       ref: "ILOVE.jpg",     woman: "ILOVEWoman.jpg", desc: "Ansiktsolja med CBD och CBG för djup näring" },
-  "TA-DA":      { name: "TA-DA Serum",             ref: "TA-DA.jpg",     woman: "TA-DAWoman.jpg", desc: "Aktivt serum med cannabinoider och hyaluronsyra" },
-  "MR":         { name: "Makeup Remover",           ref: "MR.jpg",        woman: "MRwoman.jpg", desc: "Mild rengöring som respekterar hudens mikrobiom" },
-  "Fungtastic": { name: "Fungtastic Face Mask",    ref: "Fungtastic.jpg",woman: "Fungtasticwoman.jpg", desc: "Ansiktsmask med medicinska svampar och CBD" },
-  "DUO":        { name: "DUO-kit",                  ref: "DUO.jpg",       woman: "DUOwoman.jpg", desc: "The ONE + I LOVE Facial Oil – komplett duo" },
-  "DUO+TA-DA":  { name: "DUO + TA-DA bundle",      ref: "DUO+TA-DA.jpg", woman: "DUO+TA-DAWoman.jpg", desc: "Komplett rutin med tre produkter" },
+  "TheONE":     { name: "The ONE Facial Oil",       ref: "TheONE.jpg",    woman: "TheONEWoman.jpg", desc: "CBD-ansiktsolja med fullspektrum cannabinoider", shape: "small amber glass dropper bottle with black dropper cap", label: '\"1753\" (large serif, square border) | \"SKINCARE\" (small caps) | \"The ONE\" (italic) | \"Facial Oil\" (bold) | \"CBD+CBG\" (pink band) | \"15 ml / 0.5 fl.oz\"' },
+  "ILOVE":      { name: "I LOVE Facial Oil",        ref: "ILOVE.jpg",     woman: "ILOVEWoman.jpg", desc: "Ansiktsolja med CBD och CBG for djup naring", shape: "small amber glass dropper bottle with black dropper cap", label: '\"1753\" (large serif, square border) | \"SKINCARE\" (small caps) | \"I LOVE\" (italic) | \"Facial Oil\" (bold) | \"CBG+CBD\" (yellow/gold band) | \"15 ml / 0.5 fl.oz\"' },
+  "TA-DA":      { name: "TA-DA Serum",              ref: "TA-DA.jpg",     woman: "TA-DAWoman.jpg", desc: "Aktivt serum med cannabinoider och hyaluronsyra", shape: "small amber glass dropper bottle with black dropper cap", label: '\"1753\" (large serif, square border) | \"SKINCARE\" (small caps) | \"TA-DA\" (italic) | \"Serum\" (bold) | \"CBD+CBG\" (teal/green band) | \"15 ml / 0.5 fl.oz\"' },
+  "MR":         { name: "Au Naturel Makeup Remover", ref: "MR.jpg",        woman: "MRwoman.jpg", desc: "Mild CBD-rengorning i sprayflaska som respekterar hudens mikrobiom", shape: "amber glass spray bottle with black pump cap (NOT a dropper)", label: '\"1753\" (large serif, square border) | \"SKINCARE\" (small caps) | \"Au Naturel\" (italic) | \"Makeup Remover\" (bold) | \"MCT || CBD\" (beige/tan band) | \"100ml / 3.38 fl oz\"' },
+  "Fungtastic": { name: "Fungtastic",               ref: "Fungtastic.jpg",woman: "Fungtasticwoman.jpg", desc: "Kosttillskott med medicinska svampar (Chaga, Reishi, Lions Mane, Cordyceps) – 60 kapslar i morkt glasburk", shape: "dark glass wide-mouth JAR with black screw cap (NOT a dropper bottle – this is a supplement jar with capsules inside)", label: '\"1753\" (large serif, square border) | \"LIFESTYLE\" (small caps, NOTE: not SKINCARE) | \"FUNGTASTIC\" (bold) | \"Chaga | Reishi | Lions Mane | Cordyceps\" | brown/copper band | \"60 KAPSLAR\"' },
+  "DUO":        { name: "DUO-kit",                  ref: "DUO.jpg",       woman: "DUOwoman.jpg", desc: "The ONE Facial Oil + I LOVE Facial Oil – komplett duo", shape: "two small amber glass dropper bottles side by side", label: 'Two bottles side by side. Left: \"1753 SKINCARE\" | \"I LOVE\" | \"Facial Oil\" | yellow band. Right: \"1753 SKINCARE\" | \"The ONE\" | \"Facial Oil\" | pink band.' },
+  "DUO+TA-DA":  { name: "DUO + TA-DA bundle",      ref: "DUO+TA-DA.jpg", woman: "DUO+TA-DAWoman.jpg", desc: "Komplett rutin med tre produkter: The ONE Facial Oil, I LOVE Facial Oil och TA-DA Serum", shape: "three small amber glass dropper bottles", label: 'Three bottles. \"1753 SKINCARE\" on each. \"I LOVE\" (yellow), \"The ONE\" (pink), \"TA-DA\" (teal). All say \"Facial Oil\" or \"Serum\".' },
 };
 
 const MOOD_IMAGES = ["Bild-1.jpg","Bild-2.jpg","Bild-3.jpg","Bild-4.jpg","Bild-5.jpg","Bild-6.jpg","Bild-7.jpg","Bild-8.jpg","1.jpg","2.jpg","3.jpg","4.jpg","5.jpg"];
@@ -67,13 +71,29 @@ const LIFESTYLE_ANGLES = [
   "Bästa hudvårdsprodukten du aldrig köpt? En promenad i skogen. Forskning om shinrin-yoku visar att naturvistelse stärker immunförsvaret och sänker stress.",
 ];
 
+const PRODUCT_LABEL_LOCK = `CRITICAL PRODUCT PRESERVATION RULES (HIGHEST PRIORITY):
+- The product in the reference image has a specific shape and printed label. You MUST preserve BOTH exactly as they appear in the reference photo.
+- DO NOT change the product shape, size, or type. A jar must remain a jar. A spray bottle must remain a spray bottle. A dropper bottle must remain a dropper bottle.
+- DO NOT invent, guess, or hallucinate any text on the label.
+- DO NOT add ANY other text anywhere in the image – no watermarks, no titles, no captions.
+- The product proportions and label design must match the reference EXACTLY.
+- If you cannot render the text perfectly, angle the product slightly so the label is partially hidden rather than showing wrong text.`;
+
+function getProductLabelLock(productKey) {
+  const product = PRODUCTS[productKey];
+  let extra = "";
+  if (product?.shape) extra += `\nPRODUCT SHAPE (CRITICAL – do NOT change): ${product.shape}`;
+  if (product?.label) extra += `\nEXACT LABEL TEXT (reproduce if visible): ${product.label}`;
+  return `${PRODUCT_LABEL_LOCK}${extra}`;
+}
+
 const PRODUCT_PROMPT_TEMPLATES = [
-  `Use the provided image as the exact product reference. STRICT: Preserve product exactly as is. No label changes. No text modifications. No logo alterations. Environment: Minimalist bathroom combining light oak wood and soft stone. Wooden countertop with natural grain. Soft beige wall in background. Lighting: Warm natural light, late afternoon tone. Composition: Product placed on wooden surface next to a folded linen towel. Style: Natural, grounded, Scandinavian-Japanese (Japandi) aesthetic. Maintain realistic shadows and reflections. Product must remain 100% untouched. Aspect ratio: square 1:1.`,
-  `Use the provided image as the exact product reference. STRICT PRODUCT LOCK: Products must remain 100% identical to reference. Do not change label, logo, text, typography, colors or proportions. Create a scene: minimalist Nordic bathroom shelf. Clean white marble surface. Single green plant (eucalyptus sprig) beside product. Soft morning light from left side. Steam or mist very subtly in background. Premium editorial skincare campaign feel. Hyper-realistic, cinematic composition. Square format.`,
-  `Use the provided image as the exact product reference. STRICT: Preserve product exactly as is. Zero modifications to labels or design. Scene: Product resting on a smooth river stone beside a small pool of still water. Surrounded by soft moss and fern leaves. Natural forest floor setting. Lighting: Dappled sunlight through canopy above. Warm golden tone. Style: Nature meets luxury skincare. Scandinavian organic aesthetic. Sharp product focus, softly blurred natural background. Square.`,
-  `Use the provided image as the exact product reference. STRICT PRODUCT LOCK: No changes to product whatsoever. Scene: Clean concrete shelf in a high-end spa. Soft white towels rolled nearby. Single dried flower stem in a ceramic vase. Background: frosted glass with soft diffused light. Style: Luxury minimalism. Premium spa campaign. Neutral palette: white, beige, soft grey. Warm but clean lighting. Editorial product photography. 1:1 aspect ratio.`,
-  `Use the provided image as the exact product reference. STRICT: Product must be 100% untouched, identical to reference. Scene: Outdoor morning table setting. Weathered wooden table with a linen runner. A ceramic cup of herbal tea beside the product. Fresh rosemary sprigs scattered naturally. Background: soft-focus garden with morning dew. Lighting: Early golden hour, warm and honest. Style: Organic Nordic breakfast editorial. Calm, grounded, authentic.`,
-  `Use the provided image as the exact product reference. STRICT PRODUCT LOCK: Preserve every detail of product unchanged. Scene: Minimalist floating shelf against raw plaster wall. Product centered on shelf. A single candle (unlit) beside it. Small ceramic dish with dried botanicals below. Lighting: Soft directional light from window, gentle shadows. Style: Wabi-sabi meets Scandinavian. Imperfect textures, perfect simplicity. Premium but approachable.`,
+  `${PRODUCT_LABEL_LOCK}\n\nPlace the EXACT product from the reference image into this scene: Minimalist bathroom combining light oak wood and soft stone. Wooden countertop with natural grain. Soft beige wall in background. Lighting: Warm natural light, late afternoon tone. Composition: Product placed on wooden surface next to a folded linen towel. Style: Natural, grounded, Scandinavian-Japanese (Japandi) aesthetic. Maintain realistic shadows and reflections. No text anywhere in the image. Aspect ratio: square 1:1.`,
+  `${PRODUCT_LABEL_LOCK}\n\nPlace the EXACT product from the reference image into this scene: Minimalist Nordic bathroom shelf. Clean white marble surface. Single green plant (eucalyptus sprig) beside product. Soft morning light from left side. Steam or mist very subtly in background. Premium editorial skincare campaign feel. Hyper-realistic, cinematic composition. No text anywhere. Square format.`,
+  `${PRODUCT_LABEL_LOCK}\n\nPlace the EXACT product from the reference image into this scene: Product resting on a smooth river stone beside a small pool of still water. Surrounded by soft moss and fern leaves. Natural forest floor setting. Lighting: Dappled sunlight through canopy above. Warm golden tone. Style: Nature meets luxury skincare. Scandinavian organic aesthetic. Sharp product focus, softly blurred natural background. No text anywhere. Square.`,
+  `${PRODUCT_LABEL_LOCK}\n\nPlace the EXACT product from the reference image into this scene: Clean concrete shelf in a high-end spa. Soft white towels rolled nearby. Single dried flower stem in a ceramic vase. Background: frosted glass with soft diffused light. Style: Luxury minimalism. Premium spa campaign. Neutral palette: white, beige, soft grey. Warm but clean lighting. No text anywhere. 1:1 aspect ratio.`,
+  `${PRODUCT_LABEL_LOCK}\n\nPlace the EXACT product from the reference image into this scene: Outdoor morning table setting. Weathered wooden table with a linen runner. A ceramic cup of herbal tea beside the product. Fresh rosemary sprigs scattered naturally. Background: soft-focus garden with morning dew. Lighting: Early golden hour, warm and honest. Style: Organic Nordic breakfast editorial. No text anywhere. Calm, grounded, authentic.`,
+  `${PRODUCT_LABEL_LOCK}\n\nPlace the EXACT product from the reference image into this scene: Minimalist floating shelf against raw plaster wall. Product centered on shelf. A single candle (unlit) beside it. Small ceramic dish with dried botanicals below. Lighting: Soft directional light from window, gentle shadows. Style: Wabi-sabi meets Scandinavian. Imperfect textures, perfect simplicity. No text anywhere. Premium but approachable.`,
 ];
 
 const LIFESTYLE_PROMPT_TEMPLATES = [
@@ -132,8 +152,8 @@ async function searchValyu(query) {
   return null;
 }
 
-async function geminiRequest(body) {
-  const url = `${API_BASE}/models/${MODEL}:generateContent?key=${GEMINI_API_KEY}`;
+async function geminiRequest(body, model) {
+  const url = `${API_BASE}/models/${model || GEMINI_TEXT_MODEL}:generateContent?key=${GEMINI_API_KEY}`;
   return new Promise((resolve, reject) => {
     const data = JSON.stringify(body);
     const req = https.request(url, {
@@ -153,63 +173,121 @@ async function geminiRequest(body) {
   });
 }
 
+async function falUploadRef(filename) {
+  const filePath = path.join(REF_DIR, filename);
+  if (!fs.existsSync(filePath)) return null;
+  const { fal } = await import("@fal-ai/client");
+  fal.config({ credentials: FAL_KEY });
+  const fileBuffer = fs.readFileSync(filePath);
+  const blob = new Blob([fileBuffer], { type: getMimeType(filename) });
+  return fal.storage.upload(blob);
+}
+
+async function falGenerate(prompt, imageUrls, aspectRatio = "1:1") {
+  const { fal } = await import("@fal-ai/client");
+  fal.config({ credentials: FAL_KEY });
+  const result = await fal.subscribe("fal-ai/nano-banana-pro/edit", {
+    input: {
+      prompt,
+      image_urls: imageUrls,
+      aspect_ratio: aspectRatio,
+      resolution: "2K",
+      output_format: "jpeg",
+    },
+  });
+  return result;
+}
+
+async function downloadImage(url) {
+  return new Promise((resolve, reject) => {
+    const proto = url.startsWith("https") ? https : require("http");
+    proto.get(url, (res) => {
+      if (res.statusCode >= 300 && res.statusCode < 400 && res.headers.location) {
+        return downloadImage(res.headers.location).then(resolve).catch(reject);
+      }
+      const chunks = [];
+      res.on("data", (c) => chunks.push(c));
+      res.on("end", () => resolve(Buffer.concat(chunks)));
+    }).on("error", reject);
+  });
+}
+
 async function generateImage({ type, productKey, customPrompt }) {
-  let prompt, refImages = [];
+  let prompt, refImageNames = [], refFilename = null;
 
   if (type === "product" && productKey && PRODUCTS[productKey]) {
     const product = PRODUCTS[productKey];
     prompt = customPrompt || pick(PRODUCT_PROMPT_TEMPLATES);
-    const b64 = readImageAsBase64(product.ref);
-    if (b64) refImages.push({ data: b64, mime: getMimeType(product.ref), name: product.ref });
+    if (!customPrompt && product.label) {
+      prompt = prompt.replace(PRODUCT_LABEL_LOCK, getProductLabelLock(productKey));
+    }
+    refFilename = product.ref;
+    refImageNames.push(product.ref);
   } else if (type === "lifestyle" && productKey && PRODUCTS[productKey]) {
     const product = PRODUCTS[productKey];
     prompt = customPrompt || pick(LIFESTYLE_PROMPT_TEMPLATES);
-    const b64 = readImageAsBase64(product.woman);
-    if (b64) refImages.push({ data: b64, mime: getMimeType(product.woman), name: product.woman });
+    refFilename = product.woman;
+    refImageNames.push(product.woman);
   } else {
     prompt = customPrompt || pick(MOOD_PROMPT_TEMPLATES);
     const moodFile = pick(MOOD_IMAGES);
-    const b64 = readImageAsBase64(moodFile);
-    if (b64) refImages.push({ data: b64, mime: getMimeType(moodFile), name: moodFile });
+    refFilename = moodFile;
+    refImageNames.push(moodFile);
   }
 
+  // Use fal.ai Nano Banana Pro for image generation (superior label preservation)
+  if (FAL_KEY) {
+    console.log(`[SocialGen] Generating ${type} image with fal.ai Nano Banana Pro...`);
+    console.log(`[SocialGen] Reference: ${refImageNames.join(", ")}`);
+
+    const refUrl = await falUploadRef(refFilename);
+    console.log(`[SocialGen] Uploaded ref to fal storage: ${refUrl}`);
+
+    const t0 = Date.now();
+    const result = await falGenerate(prompt, [refUrl]);
+    const secs = ((Date.now() - t0) / 1000).toFixed(1);
+    console.log(`[SocialGen] fal.ai generation complete (${secs}s)`);
+
+    const imgUrl = result.data.images[0].url;
+    const imageBuffer = await downloadImage(imgUrl);
+    const imageData = {
+      data: imageBuffer.toString("base64"),
+      mimeType: "image/jpeg",
+    };
+
+    return { imageData, textResponse: "", prompt, refImages: refImageNames };
+  }
+
+  // Fallback: Gemini
+  console.log(`[SocialGen] Generating ${type} image with Gemini (${GEMINI_IMAGE_MODEL})...`);
+  console.log(`[SocialGen] Reference: ${refImageNames.join(", ") || "none"}`);
+
   const parts = [];
-  for (const img of refImages) {
-    parts.push({ inlineData: { mimeType: img.mime, data: img.data } });
+  if (refFilename) {
+    const b64 = readImageAsBase64(refFilename);
+    if (b64) parts.push({ inlineData: { mimeType: getMimeType(refFilename), data: b64 } });
   }
   parts.push({ text: prompt });
 
   const body = {
     contents: [{ role: "user", parts }],
-    generationConfig: {
-      responseModalities: ["TEXT", "IMAGE"],
-      temperature: 1.0,
-    },
+    generationConfig: { responseModalities: ["TEXT", "IMAGE"], temperature: 1.0 },
   };
 
-  console.log(`[SocialGen] Generating ${type} image with model ${MODEL}...`);
-  console.log(`[SocialGen] Reference: ${refImages.map(r => r.name).join(", ") || "none"}`);
-
-  const response = await geminiRequest(body);
-
-  if (response.error) {
-    throw new Error(`Gemini error: ${response.error.message || JSON.stringify(response.error)}`);
-  }
+  const gemResponse = await geminiRequest(body, GEMINI_IMAGE_MODEL);
+  if (gemResponse.error) throw new Error(`Gemini error: ${gemResponse.error.message}`);
 
   let imageData = null, textResponse = "";
-  const candidate = response.candidates?.[0];
+  const candidate = gemResponse.candidates?.[0];
   if (candidate?.content?.parts) {
     for (const part of candidate.content.parts) {
       if (part.inlineData) imageData = part.inlineData;
       if (part.text) textResponse += part.text;
     }
   }
+  if (!imageData) throw new Error("No image returned from Gemini");
 
-  if (!imageData) {
-    throw new Error("No image returned from Gemini");
-  }
-
-  return { imageData, textResponse, prompt, refImages: refImages.map(r => r.name) };
+  return { imageData, textResponse, prompt, refImages: refImageNames };
 }
 
 async function generateCaption({ type, productKey, imageDescription, theme }) {
@@ -256,37 +334,53 @@ ${productName ? `Produkten "${productName}" (${productDesc}) kan nämnas naturli
 
 ${imageDescription ? `Bilden visar: ${imageDescription}` : ""}
 
-Skriv ett Instagram-inlägg på svenska. Max 120 ord. Börja med en mening som stoppar scrollandet – provocerande, tankeväckande eller oväntat. Avsluta med en fråga som bjuder in till samtal.
+Skriv FYRA versioner:
+
+1. Instagram/Facebook (svenska, max 120 ord). Börja med en mening som stoppar scrollandet – provocerande, tankeväckande eller oväntat. Avsluta med en fråga som bjuder in till samtal.
+
+2. LinkedIn (svenska, 150-250 ord). Professionell men personlig. Dela en insikt, kopplad till vetenskap, entreprenörskap eller innovation inom hudvård/wellness. Skriv som en grundare som delar kunskap med sitt nätverk – inte som ett varumärke som säljer. Styckebrytningar för läsbarhet. Avsluta med en tankeväckande fråga som inbjuder till diskussion.
+
+3. Engelska versioner av båda.
 
 FORMAT (skriv exakt så här):
 CAPTION:
-[captionen här]
+[Instagram/Facebook caption här]
+
+LINKEDIN:
+[LinkedIn caption här]
 
 HASHTAGS:
 [5-8 relevanta hashtags]
 
 EN:
-[samma caption på engelska]`;
+[Instagram/Facebook caption på engelska]
+
+LINKEDIN_EN:
+[LinkedIn caption på engelska]`;
 
   const body = {
     contents: [{ role: "user", parts: [{ text: captionPrompt }] }],
-    generationConfig: { temperature: 0.85, maxOutputTokens: 1024 },
+    generationConfig: { temperature: 0.85, maxOutputTokens: 4096 },
   };
 
   const response = await geminiRequest(body);
   const text = response.candidates?.[0]?.content?.parts?.[0]?.text || "";
 
-  let captionSv = "", captionEn = "", hashtags = "";
+  let captionSv = "", captionEn = "", hashtags = "", linkedinSv = "", linkedinEn = "";
 
-  const captionMatch = text.match(/CAPTION:\s*\n([\s\S]*?)(?=\nHASHTAGS:)/i);
+  const captionMatch = text.match(/CAPTION:\s*\n([\s\S]*?)(?=\n(?:LINKEDIN:|HASHTAGS:))/i);
+  const linkedinMatch = text.match(/LINKEDIN:\s*\n([\s\S]*?)(?=\nHASHTAGS:)/i);
   const hashMatch = text.match(/HASHTAGS:\s*\n(.*?)(?=\n(?:EN:|$))/is);
-  const enMatch = text.match(/EN:\s*\n([\s\S]*?)$/i);
+  const enMatch = text.match(/EN:\s*\n([\s\S]*?)(?=\n(?:LINKEDIN_EN:|$))/i);
+  const linkedinEnMatch = text.match(/LINKEDIN_EN:\s*\n([\s\S]*?)$/i);
 
   captionSv = captionMatch?.[1]?.trim() || text.split("HASHTAGS:")[0]?.replace("CAPTION:", "").trim() || text.trim();
+  linkedinSv = linkedinMatch?.[1]?.trim() || "";
   hashtags = hashMatch?.[1]?.trim() || "";
   captionEn = enMatch?.[1]?.trim() || "";
+  linkedinEn = linkedinEnMatch?.[1]?.trim() || "";
 
-  return { captionSv, captionEn, hashtags };
+  return { captionSv, captionEn, hashtags, linkedinSv, linkedinEn };
 }
 
 async function generatePost({ type = "product", productKey, customPrompt } = {}) {
@@ -315,7 +409,7 @@ async function generatePost({ type = "product", productKey, customPrompt } = {})
   console.log(`[SocialGen] Image saved: ${filepath}`);
 
   const captionType = type === "mood" ? pick(["mood", "education", "lifestyle"]) : type;
-  const { captionSv, captionEn, hashtags } = await generateCaption({
+  const { captionSv, captionEn, hashtags, linkedinSv, linkedinEn } = await generateCaption({
     type: captionType, productKey, imageDescription: textResponse, theme,
   });
 
@@ -326,6 +420,8 @@ async function generatePost({ type = "product", productKey, customPrompt } = {})
     captionSv,
     captionEn,
     hashtags,
+    linkedinSv,
+    linkedinEn,
     promptUsed: prompt,
     referenceImages: refImages,
     productIds: productKey ? [productKey] : [],
@@ -347,7 +443,9 @@ if (require.main === module) {
       console.log(`Product: ${result.productKey || "N/A"}`);
       console.log(`Image: ${result.imagePath}`);
       console.log(`\nCaption (SV):\n${result.captionSv}`);
+      console.log(`\nLinkedIn (SV):\n${result.linkedinSv}`);
       console.log(`\nCaption (EN):\n${result.captionEn}`);
+      console.log(`\nLinkedIn (EN):\n${result.linkedinEn}`);
       console.log(`\nHashtags: ${result.hashtags}`);
     })
     .catch(err => {

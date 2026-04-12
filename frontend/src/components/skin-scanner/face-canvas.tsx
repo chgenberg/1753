@@ -73,7 +73,7 @@ export function FaceCanvas({ imageSrc, results, className }: FaceCanvasProps) {
     results.forEach((r) => {
       if (!revealed.has(r.zone.id)) return;
       const { zone, topCondition, confidence } = r;
-      if (confidence < 0.15) return;
+      if (confidence < 0.50) return;
 
       const [rx, ry, rw, rh] = zone.rect;
       const zoneCenterX = faceX + (rx + rw / 2) * faceW;
@@ -110,7 +110,7 @@ export function FaceCanvas({ imageSrc, results, className }: FaceCanvasProps) {
     });
   }, [results, revealed, imgDims]);
 
-  const significantResults = results.filter((r) => r.confidence >= 0.15);
+  const significantResults = results.filter((r) => r.confidence >= 0.50);
 
   return (
     <div ref={containerRef} className={cn("relative overflow-hidden", className)}>

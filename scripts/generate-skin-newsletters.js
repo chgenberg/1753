@@ -309,10 +309,21 @@ Svara ENBART med JSON:
 
 // ---- Main ----
 
+const MIN_DAYS_BETWEEN_RUNS = 5;
+
 async function main() {
   console.log("=== Segmenterat hudtillstandsnyhetsbrev ===\n");
 
   const state = loadState();
+
+  if (state.lastRun && !process.argv.includes("--force")) {
+    const daysSinceLast = (Date.now() - new Date(state.lastRun).getTime()) / 86400000;
+    if (daysSinceLast < MIN_DAYS_BETWEEN_RUNS) {
+      console.log(`Avbryter: senaste korning var ${daysSinceLast.toFixed(1)} dagar sedan (minimum ${MIN_DAYS_BETWEEN_RUNS}). Anvand --force for att kora anda.`);
+      return;
+    }
+  }
+
   const weekNum = state.weekCounter + 1;
   const season = getCurrentSeason();
   const isSelling = weekNum % 4 === 0;

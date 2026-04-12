@@ -187,6 +187,7 @@ async function initSchema() {
     );
 
     ALTER TABLE subscribers ADD COLUMN IF NOT EXISTS skin_condition VARCHAR(50) DEFAULT NULL;
+    ALTER TABLE subscribers ADD COLUMN IF NOT EXISTS last_emailed_at TIMESTAMPTZ DEFAULT NULL;
 
     CREATE INDEX IF NOT EXISTS idx_subscribers_email ON subscribers (email);
     CREATE INDEX IF NOT EXISTS idx_subscribers_status ON subscribers (status);
@@ -354,12 +355,14 @@ async function initSchema() {
 
     CREATE TABLE IF NOT EXISTS social_posts (
       id              SERIAL PRIMARY KEY,
-      platform        VARCHAR(20) NOT NULL DEFAULT 'both',
+      platform        VARCHAR(20) NOT NULL DEFAULT 'all',
       post_type       VARCHAR(30) NOT NULL DEFAULT 'product',
       image_url       TEXT,
       image_path      TEXT,
       caption_sv      TEXT,
       caption_en      TEXT,
+      caption_linkedin_sv TEXT,
+      caption_linkedin_en TEXT,
       hashtags        TEXT,
       reference_images JSONB DEFAULT '[]',
       prompt_used     TEXT,
@@ -369,10 +372,18 @@ async function initSchema() {
       published_at    TIMESTAMPTZ,
       ig_post_id      VARCHAR(100),
       fb_post_id      VARCHAR(100),
+      li_post_id      VARCHAR(100),
       error_message   TEXT,
       created_at      TIMESTAMPTZ DEFAULT NOW()
     );
   `);
+
+  // Migrations
+  try {
+    await pool.query(`ALTER TABLE social_posts ADD COLUMN IF NOT EXISTS li_post_id VARCHAR(100)`);
+    await pool.query(`ALTER TABLE social_posts ADD COLUMN IF NOT EXISTS caption_linkedin_sv TEXT`);
+    await pool.query(`ALTER TABLE social_posts ADD COLUMN IF NOT EXISTS caption_linkedin_en TEXT`);
+  } catch (_) {}
 
   // Ensure shared_order_seq starts at 20000 minimum
   try {
@@ -691,6 +702,23 @@ async function updateSubscriberSkinCondition(email, skinCondition) {
     [email.toLowerCase(), skinCondition]
   );
   return rows[0] || null;
+}
+
+async function touchSubscriberEmailed(subscriberId) {
+  await pool.query(
+    `UPDATE subscribers SET last_emailed_at = NOW() WHERE id = $1`,
+    [subscriberId]
+  );
+}
+
+async function canEmailSubscriber(subscriberId, cooldownHours = 24) {
+  const { rows } = await pool.query(
+    `SELECT last_emailed_at FROM subscribers WHERE id = $1`,
+    [subscriberId]
+  );
+  if (!rows[0] || !rows[0].last_emailed_at) return true;
+  const elapsed = Date.now() - new Date(rows[0].last_emailed_at).getTime();
+  return elapsed >= cooldownHours * 3600000;
 }
 
 // ---- AUTOMATION FLOW helpers ----
@@ -1318,6 +1346,40 @@ async function countTrainingUploads() {
   return rows[0].count;
 }
 
+async function exportTrainingUploads({ limit = 100, offset = 0, condition = null } = {}) {
+  let query = `SELECT id, top_condition, confidence, scan_results, quiz_answers, created_at
+               FROM training_uploads`;
+  const params = [];
+  if (condition) {
+    params.push(condition);
+    query += ` WHERE top_condition = $${params.length}`;
+  }
+  query += ` ORDER BY created_at DESC LIMIT $${params.length + 1} OFFSET $${params.length + 2}`;
+  params.push(limit, offset);
+  const { rows } = await pool.query(query, params);
+  return rows;
+}
+
+async function exportTrainingUploadImage(id) {
+  const { rows } = await pool.query(
+    `SELECT id, image_data, top_condition, confidence FROM training_uploads WHERE id = $1`,
+    [id]
+  );
+  return rows[0] || null;
+}
+
+async function getTrainingUploadStats() {
+  const { rows } = await pool.query(
+    `SELECT top_condition, COUNT(*)::int AS count, ROUND(AVG(confidence)::numeric, 2) AS avg_confidence
+     FROM training_uploads
+     WHERE top_condition IS NOT NULL
+     GROUP BY top_condition
+     ORDER BY count DESC`
+  );
+  const total = await countTrainingUploads();
+  return { total, conditions: rows };
+}
+
 // ---- ADDRESSES ----
 
 async function getAddresses(userId) {
@@ -1573,12 +1635,12 @@ async function saveFortnoxTokensToDB(accessToken, refreshToken, expiresAt) {
 
 async function createSocialPost(data) {
   const { rows } = await pool.query(
-    `INSERT INTO social_posts (platform, post_type, image_url, image_path, caption_sv, caption_en, hashtags, reference_images, prompt_used, product_ids, status, scheduled_at)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+    `INSERT INTO social_posts (platform, post_type, image_url, image_path, caption_sv, caption_en, caption_linkedin_sv, caption_linkedin_en, hashtags, reference_images, prompt_used, product_ids, status, scheduled_at)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
      RETURNING *`,
-    [data.platform||'both', data.post_type||'product', data.image_url||null, data.image_path||null,
-     data.caption_sv||null, data.caption_en||null, data.hashtags||null,
-     JSON.stringify(data.reference_images||[]), data.prompt_used||null,
+    [data.platform||'all', data.post_type||'product', data.image_url||null, data.image_path||null,
+     data.caption_sv||null, data.caption_en||null, data.caption_linkedin_sv||null, data.caption_linkedin_en||null,
+     data.hashtags||null, JSON.stringify(data.reference_images||[]), data.prompt_used||null,
      JSON.stringify(data.product_ids||[]), data.status||'draft', data.scheduled_at||null]
   );
   return rows[0];
@@ -1661,6 +1723,8 @@ module.exports = {
   findSubscribersBySkinCondition,
   getSubscriberSkinSegments,
   updateSubscriberSkinCondition,
+  touchSubscriberEmailed,
+  canEmailSubscriber,
   upsertFlow,
   findFlowBySlug,
   findFlowByTrigger,
@@ -1707,6 +1771,9 @@ module.exports = {
   getSkinAnalyses,
   createTrainingUpload,
   countTrainingUploads,
+  exportTrainingUploads,
+  exportTrainingUploadImage,
+  getTrainingUploadStats,
   getAddresses,
   createAddress,
   updateAddress,
