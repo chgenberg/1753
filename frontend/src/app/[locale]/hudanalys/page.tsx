@@ -238,7 +238,7 @@ function AnalyzingProgress({ locale }: { locale: string }) {
   const steps = locale === "en" ? ANALYSIS_STEPS_EN : ANALYSIS_STEPS_SV;
 
   useEffect(() => {
-    const totalDuration = 30000;
+    const totalDuration = 47000;
     const interval = 50;
     let elapsed = 0;
 
@@ -363,6 +363,21 @@ export default function AnalysisPage() {
   const [snapshotSaved, setSnapshotSaved] = useState(false);
   const [snapshotSaving, setSnapshotSaving] = useState(false);
   const [nlSubscribed, setNlSubscribed] = useState(false);
+
+  useEffect(() => {
+    try {
+      const saved = sessionStorage.getItem("1753_analysis_result");
+      if (!saved) return;
+      const data = JSON.parse(saved);
+      if (data.result && data.parsed) {
+        setResult(data.result);
+        setParsed(data.parsed);
+        if (data.answers) setAnswers(data.answers);
+        if (data.scanSummary) setScanSummary(data.scanSummary);
+        setStep("result");
+      }
+    } catch { /* ignore corrupt data */ }
+  }, []);
 
   const toggleArray = (arr: string[], key: string, max?: number) => {
     if (arr.includes(key)) return arr.filter((k) => k !== key);
@@ -501,6 +516,15 @@ export default function AnalysisPage() {
       const json = parseAnalysisJSON(data.content);
       setParsed(json);
       setStep("result");
+
+      try {
+        sessionStorage.setItem("1753_analysis_result", JSON.stringify({
+          result: data,
+          parsed: json,
+          answers,
+          scanSummary: scanSummary ? { overallTop: scanSummary.overallTop, zones: scanSummary.zones, consentGiven: scanSummary.consentGiven } : null,
+        }));
+      } catch { /* quota exceeded */ }
 
       if (scanSummary?.consentGiven) {
         uploadTrainingData(scanSummary, answers);
@@ -1118,6 +1142,7 @@ export default function AnalysisPage() {
               <div className="text-center">
                 <button
                   onClick={() => {
+                    sessionStorage.removeItem("1753_analysis_result");
                     setStep("intro");
                     setResult(null);
                     setParsed(null);
