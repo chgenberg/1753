@@ -26,21 +26,11 @@ import { apiFetch } from "@/lib/api";
 import { useLocale } from "@/providers/locale-provider";
 import { useAuth } from "@/providers/auth-provider";
 import { cn } from "@/lib/utils";
-import type { ScanSummary } from "@/components/skin-scanner/skin-scanner";
-import dynamic from "next/dynamic";
+import { SkinScanner, type ScanSummary } from "@/components/skin-scanner/skin-scanner";
 import {
   CONDITION_LABELS_EN,
   CONDITION_LABELS_SV,
 } from "@/components/skin-scanner/zones";
-
-const SkinScanner = dynamic(
-  () => import("@/components/skin-scanner/skin-scanner").then(m => m.SkinScanner),
-  { ssr: false, loading: () => (
-    <div className="flex justify-center py-12">
-      <div className="h-8 w-8 animate-spin rounded-full border-2 border-[#108474] border-t-transparent" />
-    </div>
-  )}
-);
 
 type Step = "intro" | "scan" | 1 | 2 | 3 | 4 | 5 | "analyzing" | "result";
 
