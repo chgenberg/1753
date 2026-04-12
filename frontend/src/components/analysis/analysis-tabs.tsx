@@ -17,7 +17,12 @@ import { cn } from "@/lib/utils";
 import { PRODUCTS, type Product } from "@/lib/products";
 import { ProductCard } from "@/components/product-card";
 import { useLocale } from "@/providers/locale-provider";
-import { FaceCanvas as FaceCanvasLazy } from "@/components/skin-scanner/face-canvas";
+import {
+  CONDITION_LABELS_SV,
+  CONDITION_LABELS_EN,
+  CONDITION_COLORS,
+  type ZoneResult,
+} from "@/components/skin-scanner/zones";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -68,7 +73,7 @@ export interface AnalysisTabsProps {
   nextAnalysis: string;
   hasScan?: boolean;
   scanImageSrc?: string;
-  scanZoneResults?: import("@/components/skin-scanner/zones").ZoneResult[];
+  scanZoneResults?: ZoneResult[];
 }
 
 /* ------------------------------------------------------------------ */
@@ -163,9 +168,13 @@ function SkinTab({ score, scoreLabel, summary, skinAnalysis, hasScan, scanImageS
   skinAnalysis?: SkinAnalysis;
   hasScan?: boolean;
   scanImageSrc?: string;
-  scanZoneResults?: import("@/components/skin-scanner/zones").ZoneResult[];
+  scanZoneResults?: ZoneResult[];
 }) {
   const { locale } = useLocale();
+  const condLabels = locale === "en" ? CONDITION_LABELS_EN : CONDITION_LABELS_SV;
+
+  const significantZones = scanZoneResults?.filter((z) => z.confidence >= 0.15) ?? [];
+
   return (
     <div className="space-y-8 animate-fade-in">
       <ScoreRing score={score} label={scoreLabel} />
@@ -175,15 +184,40 @@ function SkinTab({ score, scoreLabel, summary, skinAnalysis, hasScan, scanImageS
         className="mx-auto max-w-lg text-center text-sm leading-relaxed text-[#515151]"
       />
 
-      {hasScan && scanImageSrc && scanZoneResults && (
-        <div className="space-y-3">
+      {hasScan && scanImageSrc && (
+        <div className="space-y-4">
           <div className="flex items-center justify-center gap-2 text-xs font-medium text-[#108474]">
             <ScanFace className="h-3.5 w-3.5" />
-            {locale === "en" ? "Your face scan results" : "Resultat från din ansiktsskanning"}
+            {locale === "en" ? "Your face scan" : "Din ansiktsskanning"}
           </div>
-          <div className="mx-auto max-w-md overflow-hidden rounded-2xl border border-[#e6e6e6] shadow-sm">
-            <FaceCanvasLazy imageSrc={scanImageSrc} results={scanZoneResults} />
+          <div className="mx-auto max-w-sm overflow-hidden rounded-2xl border border-[#e6e6e6] shadow-sm">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={scanImageSrc}
+              alt={locale === "en" ? "Face scan" : "Ansiktsskanning"}
+              className="block h-auto w-full"
+            />
           </div>
+
+          {significantZones.length > 0 && (
+            <div className="mx-auto max-w-sm space-y-2">
+              {significantZones.map((z) => {
+                const color = CONDITION_COLORS[z.topCondition] || "#108474";
+                const label = condLabels[z.topCondition] || z.topCondition;
+                const zone = locale === "en" ? z.zone.labelEn : z.zone.labelSv;
+                return (
+                  <div key={z.zone.id} className="flex items-center justify-between rounded-xl px-4 py-2" style={{ backgroundColor: `${color}0d` }}>
+                    <div className="flex items-center gap-2">
+                      <div className="h-2 w-2 rounded-full" style={{ backgroundColor: color }} />
+                      <span className="text-xs font-semibold" style={{ color }}>{label}</span>
+                      <span className="text-xs text-[#766a62]">{zone}</span>
+                    </div>
+                    <span className="text-xs font-medium text-[#515151]">{Math.round(z.confidence * 100)}%</span>
+                  </div>
+                );
+              })}
+            </div>
+          )}
         </div>
       )}
 
@@ -286,7 +320,7 @@ function ProductsTab({ products }: { products: ProductRec[] }) {
           ? "Products chosen around your skin analysis"
           : "Produkter anpassade efter din hudanalys"}
       </p>
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+      <div className="grid gap-6 sm:grid-cols-2">
         {matched.map((p) => (
           <div key={p.id} className="space-y-3">
             <ProductCard product={p} />
