@@ -67,7 +67,7 @@ async function initSchema() {
     CREATE INDEX IF NOT EXISTS idx_orders_order_number  ON orders (order_number);
     CREATE INDEX IF NOT EXISTS idx_orders_viva_order_code ON orders (viva_order_code);
 
-    CREATE SEQUENCE IF NOT EXISTS ongoing_order_seq START WITH 10001;
+    CREATE SEQUENCE IF NOT EXISTS ongoing_order_seq START WITH 10000;
 
     CREATE TABLE IF NOT EXISTS users (
       id              UUID PRIMARY KEY,

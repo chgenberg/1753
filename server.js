@@ -2472,7 +2472,8 @@ async function handleOrderCompletion(orderId) {
     notes.push(`Fortnox kund hittad: ${fortnoxCustomerNumber}`);
   }
 
-  // 2. Fortnox: create order, then create invoice from that order
+  // 2. Get shared order number for Fortnox + Ongoing
+  const sharedOrderNumber = await db.nextOngoingOrderNumber();
   let fortnoxOrderNumber = null;
   if (fortnoxCustomerNumber) {
     try {
@@ -2504,6 +2505,7 @@ async function handleOrderCompletion(orderId) {
       const today = new Date().toISOString().split("T")[0];
       const fxOrder = await fortnoxFetch("/orders", "POST", {
         Order: {
+          DocumentNumber: sharedOrderNumber,
           CustomerNumber: fortnoxCustomerNumber,
           OrderDate: today,
           DeliveryDate: today,
@@ -2579,10 +2581,9 @@ async function handleOrderCompletion(orderId) {
     ongoingOrderId = order.ongoing_order_id;
     notes.push(`Ongoing order redan skapad: ${ongoingOrderId}`);
   } else try {
-    const ongoingSeqNumber = await db.nextOngoingOrderNumber();
     const deliveryDate = new Date(Date.now() + 1 * 86400000).toISOString().split("T")[0];
     const ogOrder = await ongoingFetch("/orders", "PUT", {
-      orderNumber: ongoingSeqNumber,
+      orderNumber: sharedOrderNumber,
       deliveryDate,
       referenceNumber: "1753 Skincare",
       orderRemark: `Webborder ${order.order_number} – ${order.customer_email}`,
