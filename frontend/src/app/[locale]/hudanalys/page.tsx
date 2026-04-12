@@ -218,6 +218,9 @@ export default function AnalysisPage() {
   const conditionLabels = locale === "en" ? CONDITION_LABELS_EN : CONDITION_LABELS_SV;
 
   const [step, setStep] = useState<Step>("intro");
+  const [userEmail, setUserEmail] = useState("");
+  const [emailConsent, setEmailConsent] = useState(false);
+  const [emailError, setEmailError] = useState("");
   const [answers, setAnswers] = useState<QuizAnswers>({
     skinType: "",
     concerns: [],
@@ -238,8 +241,7 @@ export default function AnalysisPage() {
   const [trainingCount, setTrainingCount] = useState<number | null>(null);
   const [snapshotSaved, setSnapshotSaved] = useState(false);
   const [snapshotSaving, setSnapshotSaving] = useState(false);
-  const [nlEmail, setNlEmail] = useState("");
-  const [nlStatus, setNlStatus] = useState<"idle" | "loading" | "done">("idle");
+  const [nlSubscribed, setNlSubscribed] = useState(false);
 
   const toggleArray = (arr: string[], key: string, max?: number) => {
     if (arr.includes(key)) return arr.filter((k) => k !== key);
@@ -382,11 +384,23 @@ export default function AnalysisPage() {
       if (scanSummary?.consentGiven) {
         uploadTrainingData(scanSummary, answers);
       }
+
+      if (userEmail && !nlSubscribed) {
+        const topCondition =
+          scanSummary?.overallTop?.[0]?.label || "general";
+        apiFetch("/newsletter/subscribe", {
+          method: "POST",
+          body: JSON.stringify({
+            email: userEmail,
+            skinCondition: topCondition,
+          }),
+        }).then(() => setNlSubscribed(true)).catch(() => {});
+      }
     } catch {
       setError(a("analysisError"));
       setStep(5);
     }
-  }, [answers, a, token, scanSummary, uploadTrainingData]);
+  }, [answers, a, token, scanSummary, uploadTrainingData, userEmail, nlSubscribed]);
 
   const goNext = () => {
     if (typeof step === "number" && step < TOTAL_STEPS) setStep((step + 1) as Step);
@@ -479,20 +493,100 @@ export default function AnalysisPage() {
                 </div>
               </div>
 
-              <button
-                onClick={() => setStep("scan")}
-                className="mt-8 inline-flex h-14 items-center justify-center gap-3 rounded-full bg-[#108474] px-10 text-sm font-semibold text-white shadow-lg shadow-[#108474]/20 transition-all hover:bg-[#0d6e62] hover:shadow-xl active:scale-[0.97]"
-              >
-                <ScanFace className="h-5 w-5" />
-                {locale === "en" ? "Start analysis" : "Starta analys"}
-              </button>
+              {/* Email collection */}
+              <div className="mx-auto mt-8 max-w-sm">
+                <form
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    setEmailError("");
+                    if (!userEmail.trim() || !userEmail.includes("@")) {
+                      setEmailError(locale === "en" ? "Please enter a valid email address." : "Ange en giltig e-postadress.");
+                      return;
+                    }
+                    if (!emailConsent) {
+                      setEmailError(locale === "en" ? "You need to accept the terms to continue." : "Du behöver godkänna villkoren för att fortsätta.");
+                      return;
+                    }
+                    setStep("scan");
+                  }}
+                  className="space-y-4"
+                >
+                  <div>
+                    <label className="mb-2 block text-left text-sm font-medium text-[#1d1d1f]">
+                      {locale === "en" ? "Your email" : "Din e-postadress"}
+                    </label>
+                    <input
+                      type="email"
+                      required
+                      value={userEmail}
+                      onChange={(e) => setUserEmail(e.target.value)}
+                      placeholder={locale === "en" ? "name@example.com" : "namn@exempel.se"}
+                      className="w-full rounded-xl border border-[#e6e6e6] bg-white px-4 py-3 text-sm shadow-sm placeholder:text-[#766a62]/50 focus:border-[#108474] focus:outline-none focus:ring-2 focus:ring-[#108474]/20"
+                    />
+                  </div>
 
-              <button
-                onClick={() => setStep(1)}
-                className="mt-3 block mx-auto text-xs font-medium text-[#766a62] underline underline-offset-2 transition-colors hover:text-[#108474]"
-              >
-                {locale === "en" ? "Skip face scan, answer questions only" : "Hoppa över skanning, svara bara på frågor"}
-              </button>
+                  <button
+                    type="button"
+                    onClick={() => setEmailConsent((c) => !c)}
+                    className={cn(
+                      "flex w-full items-start gap-3 rounded-2xl border-2 px-4 py-3 text-left transition-all duration-300",
+                      emailConsent
+                        ? "border-[#108474]/30 bg-[#108474]/5"
+                        : "border-transparent bg-[#f5f5f7] hover:border-[#e6e6e6]"
+                    )}
+                  >
+                    {emailConsent ? (
+                      <Check className="mt-0.5 h-5 w-5 flex-shrink-0 text-[#108474]" />
+                    ) : (
+                      <div className="mt-0.5 h-5 w-5 flex-shrink-0 rounded border-2 border-[#766a62]/30" />
+                    )}
+                    <span className="text-xs leading-relaxed text-[#515151]">
+                      {locale === "en" ? (
+                        <>
+                          I agree to receive personalised skincare tips by email based on my analysis results.
+                          I also agree that my answers may be used <span className="font-semibold text-[#1d1d1f]">anonymously</span> to
+                          improve the AI analysis. I can unsubscribe at any time.
+                        </>
+                      ) : (
+                        <>
+                          Jag godkänner att få personliga hudvårdstips via e-post baserat på mina analysresultat.
+                          Jag godkänner också att mina svar får användas <span className="font-semibold text-[#1d1d1f]">anonymt</span> för
+                          att förbättra AI-analysen. Jag kan avregistrera mig när som helst.
+                        </>
+                      )}
+                    </span>
+                  </button>
+
+                  {emailError && (
+                    <p className="rounded-xl bg-red-50 px-4 py-2 text-xs text-red-700">{emailError}</p>
+                  )}
+
+                  <button
+                    type="submit"
+                    className="inline-flex h-14 w-full items-center justify-center gap-3 rounded-full bg-[#108474] px-10 text-sm font-semibold text-white shadow-lg shadow-[#108474]/20 transition-all hover:bg-[#0d6e62] hover:shadow-xl active:scale-[0.97]"
+                  >
+                    <ScanFace className="h-5 w-5" />
+                    {locale === "en" ? "Start analysis" : "Starta analys"}
+                  </button>
+                </form>
+
+                <button
+                  onClick={() => {
+                    if (!userEmail.trim() || !userEmail.includes("@")) {
+                      setEmailError(locale === "en" ? "Please enter a valid email address." : "Ange en giltig e-postadress.");
+                      return;
+                    }
+                    if (!emailConsent) {
+                      setEmailError(locale === "en" ? "You need to accept the terms to continue." : "Du behöver godkänna villkoren för att fortsätta.");
+                      return;
+                    }
+                    setStep(1);
+                  }}
+                  className="mt-3 block mx-auto text-xs font-medium text-[#766a62] underline underline-offset-2 transition-colors hover:text-[#108474]"
+                >
+                  {locale === "en" ? "Skip face scan, answer questions only" : "Hoppa över skanning, svara bara på frågor"}
+                </button>
+              </div>
 
               <p className="mx-auto mt-6 max-w-sm text-xs text-[#766a62]">
                 {locale === "en"
@@ -892,74 +986,13 @@ export default function AnalysisPage() {
                 </div>
               )}
 
-              {/* Newsletter opt-in with skin condition tagging */}
-              {nlStatus !== "done" && (
-                <div className="mx-auto max-w-md rounded-2xl border border-brand-200 bg-white p-5 text-center">
-                  <Mail className="mx-auto mb-2 h-5 w-5 text-[#108474]" />
-                  <p className="text-sm font-semibold text-brand-900">
-                    {locale === "en"
-                      ? "Get weekly tips for your skin type"
-                      : "Få veckotips för just din hudtyp"}
-                  </p>
-                  <p className="mt-1.5 text-xs leading-relaxed text-brand-500">
-                    {locale === "en"
-                      ? "Personalised advice about lifestyle, nutrition and skincare based on your analysis results. One email per week."
-                      : "Personliga råd om livsstil, kost och hudvård baserat på dina analysresultat. Ett mejl i veckan."}
-                  </p>
-                  <form
-                    onSubmit={async (e) => {
-                      e.preventDefault();
-                      if (!nlEmail.trim()) return;
-                      setNlStatus("loading");
-                      const topCondition =
-                        scanSummary?.overallTop?.[0]?.label
-                        || (parsed?.skinAnalysis?.concerns as Array<{condition?: string}>)?.[0]?.condition
-                        || "general";
-                      try {
-                        await apiFetch("/newsletter/subscribe", {
-                          method: "POST",
-                          body: JSON.stringify({
-                            email: nlEmail,
-                            skinCondition: topCondition,
-                          }),
-                        });
-                        setNlStatus("done");
-                      } catch {
-                        setNlStatus("idle");
-                      }
-                    }}
-                    className="mt-4 flex gap-2"
-                  >
-                    <input
-                      type="email"
-                      required
-                      placeholder={locale === "en" ? "Your email" : "Din e-post"}
-                      value={nlEmail}
-                      onChange={(e) => setNlEmail(e.target.value)}
-                      className="flex-1 rounded-full border border-brand-200 bg-brand-50/50 px-4 py-2.5 text-sm outline-none transition-all focus:border-[#108474] focus:ring-2 focus:ring-[#108474]/20"
-                    />
-                    <button
-                      type="submit"
-                      disabled={nlStatus === "loading"}
-                      className="inline-flex items-center gap-2 rounded-full bg-[#108474] px-5 py-2.5 text-xs font-semibold text-white transition-all hover:bg-[#0d6e62] disabled:opacity-50"
-                    >
-                      {nlStatus === "loading" ? (
-                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                      ) : (
-                        <Mail className="h-3.5 w-3.5" />
-                      )}
-                      {locale === "en" ? "Subscribe" : "Prenumerera"}
-                    </button>
-                  </form>
-                </div>
-              )}
-
-              {nlStatus === "done" && (
+              {/* Newsletter confirmation */}
+              {nlSubscribed && userEmail && (
                 <div className="flex items-center justify-center gap-2 rounded-xl bg-[#108474]/5 px-4 py-3 text-xs font-medium text-[#108474]">
-                  <Check className="h-3.5 w-3.5" />
+                  <Mail className="h-3.5 w-3.5" />
                   {locale === "en"
-                    ? "You're in! Weekly tips based on your skin profile coming soon."
-                    : "Du är med! Veckotips baserade på din hudprofil kommer snart."}
+                    ? `Weekly skincare tips will be sent to ${userEmail}`
+                    : `Veckovisa hudvårdstips skickas till ${userEmail}`}
                 </div>
               )}
 
@@ -975,8 +1008,10 @@ export default function AnalysisPage() {
                     setTrainingCount(null);
                     setSnapshotSaved(false);
                     setSnapshotSaving(false);
-                    setNlEmail("");
-                    setNlStatus("idle");
+                    setNlSubscribed(false);
+                    setUserEmail("");
+                    setEmailConsent(false);
+                    setEmailError("");
                     setAnswers({
                       skinType: "",
                       concerns: [],
