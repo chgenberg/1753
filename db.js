@@ -351,23 +351,42 @@ async function initSchema() {
       value           TEXT NOT NULL,
       updated_at      TIMESTAMPTZ DEFAULT NOW()
     );
+
+    CREATE TABLE IF NOT EXISTS social_posts (
+      id              SERIAL PRIMARY KEY,
+      platform        VARCHAR(20) NOT NULL DEFAULT 'both',
+      post_type       VARCHAR(30) NOT NULL DEFAULT 'product',
+      image_url       TEXT,
+      image_path      TEXT,
+      caption_sv      TEXT,
+      caption_en      TEXT,
+      hashtags        TEXT,
+      reference_images JSONB DEFAULT '[]',
+      prompt_used     TEXT,
+      product_ids     JSONB DEFAULT '[]',
+      status          VARCHAR(20) DEFAULT 'draft',
+      scheduled_at    TIMESTAMPTZ,
+      published_at    TIMESTAMPTZ,
+      ig_post_id      VARCHAR(100),
+      fb_post_id      VARCHAR(100),
+      error_message   TEXT,
+      created_at      TIMESTAMPTZ DEFAULT NOW()
+    );
   `);
 
   // Ensure shared_order_seq starts at 20000 minimum
   try {
     const seqCheck = await pool.query(
-      `SELECT last_value, is_called FROM shared_order_seq`
+      `SELECT last_value FROM shared_order_seq`
     );
     const current = Number(seqCheck.rows[0].last_value);
-    const isCalled = seqCheck.rows[0].is_called;
-    const effectiveNext = isCalled ? current + 1 : current;
-    if (effectiveNext < 20000) {
-      await pool.query(`SELECT setval('shared_order_seq', 20000, false)`);
+    if (current < 20000) {
+      await pool.query(`SELECT setval('shared_order_seq', 19999, false)`);
       console.log("[DB] shared_order_seq reset to start at 20000");
     }
   } catch {
     try {
-      await pool.query(`SELECT setval('shared_order_seq', 20000, false)`);
+      await pool.query(`SELECT setval('shared_order_seq', 19999, false)`);
       console.log("[DB] shared_order_seq initialized to start at 20000");
     } catch (e2) {
       console.warn("[DB] Could not set shared_order_seq:", e2.message);
@@ -1550,6 +1569,67 @@ async function saveFortnoxTokensToDB(accessToken, refreshToken, expiresAt) {
   ]);
 }
 
+// ---- Social media posts ----
+
+async function createSocialPost(data) {
+  const { rows } = await pool.query(
+    `INSERT INTO social_posts (platform, post_type, image_url, image_path, caption_sv, caption_en, hashtags, reference_images, prompt_used, product_ids, status, scheduled_at)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+     RETURNING *`,
+    [data.platform||'both', data.post_type||'product', data.image_url||null, data.image_path||null,
+     data.caption_sv||null, data.caption_en||null, data.hashtags||null,
+     JSON.stringify(data.reference_images||[]), data.prompt_used||null,
+     JSON.stringify(data.product_ids||[]), data.status||'draft', data.scheduled_at||null]
+  );
+  return rows[0];
+}
+
+async function updateSocialPost(id, fields) {
+  const sets = [];
+  const vals = [];
+  let i = 1;
+  for (const [k, v] of Object.entries(fields)) {
+    if (v !== undefined) {
+      sets.push(`${k} = $${i++}`);
+      vals.push(typeof v === 'object' && v !== null && !(v instanceof Date) ? JSON.stringify(v) : v);
+    }
+  }
+  if (sets.length === 0) return null;
+  vals.push(id);
+  const { rows } = await pool.query(
+    `UPDATE social_posts SET ${sets.join(', ')} WHERE id = $${i} RETURNING *`,
+    vals
+  );
+  return rows[0] || null;
+}
+
+async function listSocialPosts({ status, limit, offset } = {}) {
+  let q = 'SELECT * FROM social_posts';
+  const params = [];
+  if (status) { q += ' WHERE status = $1'; params.push(status); }
+  q += ' ORDER BY COALESCE(scheduled_at, created_at) DESC';
+  if (limit) { q += ` LIMIT $${params.length + 1}`; params.push(limit); }
+  if (offset) { q += ` OFFSET $${params.length + 1}`; params.push(offset); }
+  const { rows } = await pool.query(q, params);
+  return rows;
+}
+
+async function getSocialPost(id) {
+  const { rows } = await pool.query('SELECT * FROM social_posts WHERE id = $1', [id]);
+  return rows[0] || null;
+}
+
+async function deleteSocialPost(id) {
+  await pool.query('DELETE FROM social_posts WHERE id = $1', [id]);
+}
+
+async function getDueSocialPosts() {
+  const { rows } = await pool.query(
+    `SELECT * FROM social_posts WHERE status = 'scheduled' AND scheduled_at <= NOW() ORDER BY scheduled_at ASC`
+  );
+  return rows;
+}
+
 module.exports = {
   pool,
   initSchema,
@@ -1651,4 +1731,10 @@ module.exports = {
   listFaceSnapshots,
   deleteFaceSnapshot,
   deleteAllFaceSnapshots,
+  createSocialPost,
+  updateSocialPost,
+  listSocialPosts,
+  getSocialPost,
+  deleteSocialPost,
+  getDueSocialPosts,
 };

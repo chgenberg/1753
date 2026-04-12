@@ -5809,6 +5809,202 @@ async function seedAdminAccounts() {
   }
 }
 
+// ---- SOCIAL MEDIA ----
+
+const socialGen = require("./scripts/social-media-generator");
+
+app.get("/api/admin/social", adminAuthMiddleware, async (req, res) => {
+  try {
+    const { status, limit, offset } = req.query;
+    const posts = await db.listSocialPosts({ status, limit: parseInt(limit) || 50, offset: parseInt(offset) || 0 });
+    res.json(posts);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+app.get("/api/admin/social/:id", adminAuthMiddleware, async (req, res) => {
+  try {
+    const post = await db.getSocialPost(parseInt(req.params.id));
+    if (!post) return res.status(404).json({ message: "Post hittades inte" });
+    res.json(post);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+app.post("/api/admin/social/generate", adminAuthMiddleware, async (req, res) => {
+  try {
+    const { type, productKey, customPrompt } = req.body;
+    console.log(`[Social] Generating ${type || "product"} post${productKey ? ` for ${productKey}` : ""}...`);
+
+    const result = await socialGen.generatePost({ type, productKey, customPrompt });
+
+    const post = await db.createSocialPost({
+      platform: "both",
+      post_type: result.type,
+      image_path: result.imagePath,
+      caption_sv: result.captionSv,
+      caption_en: result.captionEn,
+      hashtags: result.hashtags,
+      reference_images: result.referenceImages,
+      prompt_used: result.promptUsed,
+      product_ids: result.productIds,
+      status: "draft",
+    });
+
+    console.log(`[Social] Post #${post.id} generated successfully`);
+    res.json(post);
+  } catch (err) {
+    console.error("[Social] Generation error:", err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
+app.put("/api/admin/social/:id", adminAuthMiddleware, async (req, res) => {
+  try {
+    const updated = await db.updateSocialPost(parseInt(req.params.id), req.body);
+    if (!updated) return res.status(404).json({ message: "Post hittades inte" });
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+app.delete("/api/admin/social/:id", adminAuthMiddleware, async (req, res) => {
+  try {
+    await db.deleteSocialPost(parseInt(req.params.id));
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+app.post("/api/admin/social/:id/schedule", adminAuthMiddleware, async (req, res) => {
+  try {
+    const { scheduled_at } = req.body;
+    const updated = await db.updateSocialPost(parseInt(req.params.id), {
+      status: "scheduled",
+      scheduled_at: scheduled_at || new Date(Date.now() + 3600_000).toISOString(),
+    });
+    res.json(updated);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+app.post("/api/admin/social/:id/publish", adminAuthMiddleware, async (req, res) => {
+  try {
+    const post = await db.getSocialPost(parseInt(req.params.id));
+    if (!post) return res.status(404).json({ message: "Post hittades inte" });
+
+    const results = await publishToMeta(post);
+    const updateFields = { status: "published", published_at: new Date().toISOString() };
+    if (results.ig) updateFields.ig_post_id = results.ig;
+    if (results.fb) updateFields.fb_post_id = results.fb;
+    if (results.error) updateFields.error_message = results.error;
+
+    const updated = await db.updateSocialPost(post.id, updateFields);
+    console.log(`[Social] Post #${post.id} published`);
+    res.json(updated);
+  } catch (err) {
+    console.error("[Social] Publish error:", err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
+async function publishToMeta(post) {
+  const fetch = (await import("node-fetch")).default;
+  const accessToken = process.env.META_ACCESS_TOKEN;
+  const igAccountId = process.env.META_IG_ACCOUNT_ID;
+  const fbPageId = process.env.META_FB_PAGE_ID;
+  const baseUrl = process.env.BASE_URL || "https://1753skincare.com";
+
+  if (!accessToken) return { error: "META_ACCESS_TOKEN not configured" };
+
+  const imageUrl = `${baseUrl}${post.image_path}`;
+  const caption = `${post.caption_sv || ""}\n\n${post.hashtags || ""}`.trim();
+  const results = {};
+
+  if (igAccountId && (post.platform === "both" || post.platform === "instagram")) {
+    try {
+      const containerRes = await fetch(
+        `https://graph.facebook.com/v22.0/${igAccountId}/media`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ image_url: imageUrl, caption, access_token: accessToken }),
+        }
+      );
+      const container = await containerRes.json();
+      if (container.id) {
+        const pubRes = await fetch(
+          `https://graph.facebook.com/v22.0/${igAccountId}/media_publish`,
+          {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ creation_id: container.id, access_token: accessToken }),
+          }
+        );
+        const pub = await pubRes.json();
+        results.ig = pub.id || null;
+        if (pub.error) results.error = (results.error || "") + ` IG: ${pub.error.message}`;
+      } else {
+        results.error = (results.error || "") + ` IG container: ${container.error?.message || "unknown"}`;
+      }
+    } catch (err) {
+      results.error = (results.error || "") + ` IG: ${err.message}`;
+    }
+  }
+
+  if (fbPageId && (post.platform === "both" || post.platform === "facebook")) {
+    try {
+      const fbRes = await fetch(
+        `https://graph.facebook.com/v22.0/${fbPageId}/photos`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ url: imageUrl, message: caption, access_token: accessToken }),
+        }
+      );
+      const fb = await fbRes.json();
+      results.fb = fb.post_id || fb.id || null;
+      if (fb.error) results.error = (results.error || "") + ` FB: ${fb.error.message}`;
+    } catch (err) {
+      results.error = (results.error || "") + ` FB: ${err.message}`;
+    }
+  }
+
+  return results;
+}
+
+async function processSocialMediaQueue() {
+  try {
+    const duePosts = await db.getDueSocialPosts();
+    if (duePosts.length === 0) return;
+    console.log(`[Social] Processing ${duePosts.length} scheduled posts...`);
+    for (const post of duePosts) {
+      try {
+        const results = await publishToMeta(post);
+        const updateFields = { status: "published", published_at: new Date().toISOString() };
+        if (results.ig) updateFields.ig_post_id = results.ig;
+        if (results.fb) updateFields.fb_post_id = results.fb;
+        if (results.error) {
+          updateFields.error_message = results.error;
+          updateFields.status = "failed";
+        }
+        await db.updateSocialPost(post.id, updateFields);
+        console.log(`[Social] Post #${post.id}: ${updateFields.status}`);
+      } catch (err) {
+        await db.updateSocialPost(post.id, { status: "failed", error_message: err.message });
+        console.error(`[Social] Post #${post.id} failed:`, err.message);
+      }
+    }
+  } catch (err) {
+    console.error("[Social] Queue processing error:", err.message);
+  }
+}
+
 // ---- START ----
 
 (async () => {
@@ -5833,5 +6029,9 @@ async function seedAdminAccounts() {
     setInterval(processAutomationQueue, 60_000);
     setTimeout(processAutomationQueue, 30_000);
     console.log("[OK] Email automation engine started (every 60s)");
+
+    setInterval(processSocialMediaQueue, 5 * 60_000);
+    setTimeout(processSocialMediaQueue, 120_000);
+    console.log("[OK] Social media scheduler started (every 5min)");
   });
 })();
