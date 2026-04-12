@@ -16,6 +16,8 @@ import {
   MapPin,
   Phone,
   Mail,
+  Ban,
+  AlertTriangle,
 } from "lucide-react";
 
 interface OrderItem {
@@ -49,9 +51,12 @@ interface OrderDetail {
   city: string;
   total_amount: number;
   shipping_cost: number;
+  currency: string;
   created_at: string;
+  viva_transaction_id: string | null;
   fortnox_invoice_number: string | null;
   ongoing_order_id: string | null;
+  shipped_at: string | null;
   internal_notes: string | null;
   items: OrderItem[];
   returns: Return[];
@@ -79,6 +84,8 @@ const STATUS_CONFIG: Record<string, { label: string; bg: string; text: string }>
   pending: { label: "Väntande", bg: "bg-amber-50", text: "text-amber-700" },
   partial: { label: "Delvis", bg: "bg-orange-50", text: "text-orange-700" },
   returned: { label: "Returnerad", bg: "bg-red-50", text: "text-red-700" },
+  cancelled: { label: "Makulerad", bg: "bg-red-50", text: "text-red-700" },
+  partially_returned: { label: "Delvis returnerad", bg: "bg-orange-50", text: "text-orange-700" },
 };
 
 function StatusBadge({ status }: { status: string }) {
@@ -171,6 +178,11 @@ export default function OrderDetailPage() {
   const [returnResult, setReturnResult] = useState<ReturnResult | null>(null);
   const [returnError, setReturnError] = useState<string | null>(null);
 
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [cancelling, setCancelling] = useState(false);
+  const [cancelResult, setCancelResult] = useState<{ success: boolean; notes: string[] } | null>(null);
+  const [cancelError, setCancelError] = useState<string | null>(null);
+
   const fetchOrder = useCallback(async () => {
     if (!token) return;
     setLoading(true);
@@ -241,6 +253,30 @@ export default function OrderDetailPage() {
       );
     } finally {
       setRetrying(false);
+    }
+  }
+
+  async function handleCancel() {
+    if (!token || !order) return;
+    setCancelling(true);
+    setCancelError(null);
+    setCancelResult(null);
+
+    try {
+      const result = await authFetch<{ success: boolean; notes: string[] }>(
+        `/admin/orders/${id}/cancel`,
+        token,
+        { method: "POST" },
+      );
+      setCancelResult(result);
+      setShowCancelConfirm(false);
+      await fetchOrder();
+    } catch (err) {
+      setCancelError(
+        err instanceof Error ? err.message : "Kunde inte makulera ordern",
+      );
+    } finally {
+      setCancelling(false);
     }
   }
 
@@ -315,6 +351,7 @@ export default function OrderDetailPage() {
   }
 
   const canRetry = order.status === "pending" || order.status === "partial";
+  const canCancel = !order.shipped_at && order.status !== "cancelled" && order.status !== "returned";
 
   return (
     <div className="space-y-6">
@@ -356,6 +393,15 @@ export default function OrderDetailPage() {
               Försök igen
             </button>
           )}
+          {canCancel && (
+            <button
+              onClick={() => setShowCancelConfirm(true)}
+              className="inline-flex h-9 items-center gap-2 rounded-xl border border-red-200 bg-white px-4 text-sm font-medium text-red-600 transition-all hover:bg-red-50"
+            >
+              <Ban className="h-4 w-4" />
+              Makulera
+            </button>
+          )}
           <button
             onClick={initReturnForm}
             className="inline-flex h-9 items-center gap-2 rounded-xl border border-[#e6e6e6] bg-white px-4 text-sm font-medium text-[#1d1d1f] transition-all hover:bg-[#f5f5f7]"
@@ -369,6 +415,71 @@ export default function OrderDetailPage() {
       {retryMessage && (
         <div className="rounded-xl bg-[#f5f5f7] px-4 py-3 text-sm text-[#1d1d1f]">
           {retryMessage}
+        </div>
+      )}
+
+      {/* Cancel confirmation dialog */}
+      {showCancelConfirm && (
+        <div className="rounded-2xl border border-red-200 bg-red-50 p-6">
+          <div className="flex items-start gap-3">
+            <AlertTriangle className="mt-0.5 h-5 w-5 flex-shrink-0 text-red-600" />
+            <div className="flex-1">
+              <h3 className="text-sm font-semibold text-red-900">
+                Makulera order #{order.order_number}?
+              </h3>
+              <p className="mt-1 text-sm text-red-800">
+                Detta kommer att:
+              </p>
+              <ul className="mt-2 space-y-1 text-sm text-red-800">
+                {order.viva_transaction_id && (
+                  <li>&bull; Återbetala {formatCurrency(order.total_amount + order.shipping_cost)} via Viva Wallet</li>
+                )}
+                {order.fortnox_invoice_number && (
+                  <li>&bull; Kreditera faktura {order.fortnox_invoice_number} i Fortnox</li>
+                )}
+                {order.ongoing_order_id && (
+                  <li>&bull; Avboka order i Ongoing WMS</li>
+                )}
+                <li>&bull; Skicka makuleringsbekräftelse till {order.customer_email}</li>
+              </ul>
+              <div className="mt-4 flex items-center gap-3">
+                <button
+                  onClick={handleCancel}
+                  disabled={cancelling}
+                  className="inline-flex h-9 items-center gap-2 rounded-xl bg-red-600 px-4 text-sm font-medium text-white transition-all hover:bg-red-700 disabled:opacity-50"
+                >
+                  {cancelling ? (
+                    <Loader2 className="h-4 w-4 animate-spin" />
+                  ) : (
+                    <Ban className="h-4 w-4" />
+                  )}
+                  Bekräfta makulering
+                </button>
+                <button
+                  onClick={() => setShowCancelConfirm(false)}
+                  disabled={cancelling}
+                  className="inline-flex h-9 items-center rounded-xl border border-red-200 bg-white px-4 text-sm font-medium text-red-800 transition-all hover:bg-red-50 disabled:opacity-50"
+                >
+                  Avbryt
+                </button>
+              </div>
+              {cancelError && (
+                <p className="mt-3 text-sm text-red-700">{cancelError}</p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Cancel result */}
+      {cancelResult && (
+        <div className="rounded-2xl bg-emerald-50 p-4">
+          <p className="text-sm font-medium text-emerald-800">
+            Ordern har makulerats
+          </p>
+          {cancelResult.notes.map((note, i) => (
+            <p key={i} className="mt-1 text-sm text-emerald-700">{note}</p>
+          ))}
         </div>
       )}
 
@@ -419,6 +530,10 @@ export default function OrderDetailPage() {
             Integrationer
           </h2>
           <div className="space-y-3">
+            <IntegrationStatus
+              label="Viva Wallet TX"
+              value={order.viva_transaction_id}
+            />
             <IntegrationStatus
               label="Fortnox faktura"
               value={order.fortnox_invoice_number}

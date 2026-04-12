@@ -1100,6 +1100,164 @@ app.post("/api/orders/:id/resend-email", adminOnly, async (req, res) => {
   }
 });
 
+// ---- ADMIN: CANCEL ORDER ----
+
+async function vivaRefund(transactionId, amountInCents) {
+  const fetch = (await import("node-fetch")).default;
+  const env = process.env.VIVA_ENVIRONMENT === "production" ? "" : "demo-";
+  const merchantId = process.env.VIVA_MERCHANT_ID;
+  const apiKey = process.env.VIVA_API_KEY;
+
+  if (!merchantId || !apiKey) {
+    throw new Error("VIVA_MERCHANT_ID / VIVA_API_KEY not configured");
+  }
+
+  const basicAuth = Buffer.from(`${merchantId}:${apiKey}`).toString("base64");
+  const url = `https://${env}api.vivapayments.com/api/transactions/${transactionId}?amount=${amountInCents}`;
+
+  const res = await fetch(url, {
+    method: "DELETE",
+    headers: { "Authorization": `Basic ${basicAuth}` }
+  });
+
+  const data = await res.json().catch(() => null);
+  if (!res.ok) {
+    console.error("[Viva Refund] Error:", res.status, data);
+    throw new Error(data?.message || `Viva refund failed (${res.status})`);
+  }
+  return data;
+}
+
+app.post("/api/admin/orders/:id/cancel", adminAuthMiddleware, async (req, res) => {
+  const orderId = parseInt(req.params.id);
+  console.log(`[Cancel] Cancelling order ${orderId}`);
+  try {
+    const order = await db.adminGetOrder(orderId);
+    if (!order) return res.status(404).json({ message: "Order hittades inte" });
+
+    if (order.status === "cancelled") {
+      return res.status(400).json({ message: "Ordern \u00e4r redan makulerad" });
+    }
+    if (order.shipped_at) {
+      return res.status(400).json({ message: "Kan inte makulera en skickad order \u2013 skapa retur ist\u00e4llet" });
+    }
+
+    const notes = [];
+
+    // 1. Viva Wallet refund
+    if (order.viva_transaction_id) {
+      try {
+        const refundAmountCents = (order.total_amount + (order.shipping_cost || 0)) * 100;
+        const refundData = await vivaRefund(order.viva_transaction_id, refundAmountCents);
+        const refundTxId = refundData?.transactionId || refundData?.TransactionId || null;
+        notes.push(`Viva \u00e5terbetalning: ${refundTxId || "OK"}`);
+        console.log(`[Cancel] Viva refund OK for order ${orderId}:`, refundTxId);
+      } catch (err) {
+        notes.push(`Viva \u00e5terbetalning FEL: ${err.message}`);
+        console.error("[Cancel] Viva refund error:", err);
+      }
+    } else {
+      notes.push("Viva: inget transaction-id, \u00e5terbetalning hoppades \u00f6ver");
+    }
+
+    // 2. Fortnox: cancel/credit invoice
+    if (order.fortnox_invoice_number) {
+      try {
+        const creditRes = await fortnoxFetch(
+          `/invoices/${order.fortnox_invoice_number}/credit`, "PUT"
+        );
+        const creditNum = creditRes?.Invoice?.DocumentNumber ?? creditRes?.DocumentNumber ?? null;
+        if (creditNum) {
+          await fortnoxFetch(`/invoices/${creditNum}/bookkeep`, "PUT").catch(() => {});
+          notes.push(`Fortnox kreditfaktura: ${creditNum}`);
+        } else {
+          notes.push("Fortnox kredit: svar saknade dokumentnummer");
+        }
+      } catch (err) {
+        notes.push(`Fortnox kredit FEL: ${err.message}`);
+        console.error("[Cancel] Fortnox credit error:", err);
+      }
+    }
+
+    // 3. Ongoing: try to cancel the delivery order
+    if (order.ongoing_order_id) {
+      try {
+        await ongoingFetch("/orders", "PUT", {
+          orderNumber: order.ongoing_order_id,
+          orderOperation: "Remove"
+        });
+        notes.push(`Ongoing order ${order.ongoing_order_id} avbokad`);
+      } catch (err) {
+        notes.push(`Ongoing avbokning FEL: ${err.message} (kan beh\u00f6va avbokas manuellt)`);
+        console.error("[Cancel] Ongoing cancel error:", err);
+      }
+    }
+
+    // 4. Update DB
+    await db.updateOrder(orderId, {
+      status: "cancelled",
+      payment_status: order.viva_transaction_id ? "refunded" : order.payment_status
+    });
+    await db.appendNotes(orderId, `MAKULERAD: ${notes.join(" | ")}`);
+
+    // 5. Send cancellation email
+    try {
+      const locale = order.locale || "sv";
+      const isSv = locale.startsWith("sv");
+      const totalKr = (order.total_amount + (order.shipping_cost || 0)).toLocaleString(isSv ? "sv-SE" : "en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+      const currencyLabel = (order.currency || "SEK") === "EUR" ? "\u20ac" : "kr";
+
+      const apiKey = process.env.RESEND_API_KEY;
+      if (apiKey) {
+        const { Resend } = require("resend");
+        const resend = new Resend(apiKey);
+        await resend.emails.send({
+          from: "1753 SKINCARE <info@1753skincare.com>",
+          to: order.customer_email,
+          subject: isSv
+            ? `Order #${order.order_number} har makulerats`
+            : `Order #${order.order_number} has been cancelled`,
+          html: emailWrapper(`
+            <h1 style="font-size:24px;font-weight:600;color:#1d1d1f;letter-spacing:-0.02em;margin:0 0 16px;">
+              ${isSv ? "Din order har makulerats" : "Your order has been cancelled"}
+            </h1>
+            <p style="color:#515151;font-size:15px;line-height:1.6;margin:0 0 24px;">
+              ${isSv
+                ? `Order <strong>#${order.order_number}</strong> har makulerats. ${order.viva_transaction_id ? "\u00c5terbetalningen kommer att synas p\u00e5 ditt konto inom 3\u20135 bankdagar." : ""}`
+                : `Order <strong>#${order.order_number}</strong> has been cancelled. ${order.viva_transaction_id ? "The refund will appear in your account within 3\u20135 business days." : ""}`
+              }
+            </p>
+            <table style="width:100%;border-collapse:collapse;margin-bottom:24px;">
+              <tr style="border-bottom:1px solid #e6e6e6;">
+                <td style="padding:12px 0;color:#515151;font-size:14px;">${isSv ? "Ordernummer" : "Order number"}</td>
+                <td style="padding:12px 0;text-align:right;font-weight:600;color:#1d1d1f;font-size:14px;">#${order.order_number}</td>
+              </tr>
+              ${order.viva_transaction_id ? `
+              <tr style="border-bottom:1px solid #e6e6e6;">
+                <td style="padding:12px 0;color:#515151;font-size:14px;">${isSv ? "\u00c5terbetalat" : "Refunded"}</td>
+                <td style="padding:12px 0;text-align:right;font-weight:600;color:#1d1d1f;font-size:14px;">${totalKr} ${currencyLabel}</td>
+              </tr>` : ""}
+            </table>
+            <p style="color:#515151;font-size:14px;line-height:1.6;margin:0;">
+              ${isSv ? "Har du fr\u00e5gor? Kontakta oss p\u00e5 info@1753skincare.com." : "Questions? Contact us at info@1753skincare.com."}
+            </p>
+          `)
+        });
+        notes.push("Makuleringsbek\u00e4ftelse skickad");
+      }
+    } catch (emailErr) {
+      notes.push(`E-post FEL: ${emailErr.message}`);
+      console.error("[Cancel] Email error:", emailErr);
+    }
+
+    console.log(`[Cancel] Order ${orderId} cancelled: ${notes.join(", ")}`);
+    res.json({ success: true, notes });
+  } catch (err) {
+    console.error("[Cancel] Fatal error:", err);
+    res.status(500).json({ message: err.message || "Kunde inte makulera ordern" });
+  }
+});
+
 // ---- ADMIN: RETURNS ----
 
 app.post("/api/admin/orders/:id/return", adminAuthMiddleware, async (req, res) => {
@@ -1127,6 +1285,20 @@ app.post("/api/admin/orders/:id/return", adminAuthMiddleware, async (req, res) =
     const notes = [];
     let fortnoxCreditNumber = null;
     let ongoingReturnId = null;
+
+    // Viva Wallet: refund the specified amount
+    if (order.viva_transaction_id && refundAmount > 0) {
+      try {
+        const refundCents = Math.round(refundAmount * 100);
+        const refundData = await vivaRefund(order.viva_transaction_id, refundCents);
+        const refundTxId = refundData?.transactionId || refundData?.TransactionId || null;
+        notes.push(`Viva \u00e5terbetalning: ${refundTxId || "OK"} (${refundAmount} ${order.currency || "SEK"})`);
+        console.log(`[Return] Viva refund OK:`, refundTxId);
+      } catch (err) {
+        notes.push(`Viva \u00e5terbetalning FEL: ${err.message}`);
+        console.error("[Return] Viva refund error:", err);
+      }
+    }
 
     // Fortnox: create credit invoice
     if (order.fortnox_invoice_number) {
@@ -1375,6 +1547,15 @@ app.put("/api/admin/subscriptions/:id", adminAuthMiddleware, async (req, res) =>
     else return res.status(400).json({ message: "Ogiltig åtgärd" });
 
     const updated = await db.updateSubscription(sub.id, fields);
+
+    try {
+      if (action === "pause") await sendSubscriptionChangeEmail(sub, "paused");
+      else if (action === "resume") await sendSubscriptionChangeEmail(sub, "resumed", { nextCharge: fields.next_charge_date });
+      else if (action === "cancel") await sendSubscriptionChangeEmail(sub, "cancelled");
+    } catch (emailErr) {
+      console.error("[Admin Sub] Email error:", emailErr.message);
+    }
+
     res.json(updated);
   } catch (err) {
     res.status(500).json({ message: err.message });
