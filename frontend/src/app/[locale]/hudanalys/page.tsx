@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import {
   ArrowLeft,
   ArrowRight,
@@ -195,6 +195,117 @@ function ChipSelect({
   );
 }
 
+
+const ANALYSIS_STEPS_SV = [
+  { pct: 0, label: "Förbereder analys..." },
+  { pct: 8, label: "Bearbetar skanningsdata..." },
+  { pct: 18, label: "Analyserar hudtyp och tillstånd..." },
+  { pct: 30, label: "Utvärderar livsstilsfaktorer..." },
+  { pct: 45, label: "Beräknar hudpoäng..." },
+  { pct: 58, label: "Matchar produkter mot din hud..." },
+  { pct: 70, label: "Skapar personlig rutin..." },
+  { pct: 82, label: "Sammanställer livsstilsråd..." },
+  { pct: 92, label: "Slutför din analys..." },
+  { pct: 100, label: "Klar!" },
+];
+
+const ANALYSIS_STEPS_EN = [
+  { pct: 0, label: "Preparing analysis..." },
+  { pct: 8, label: "Processing scan data..." },
+  { pct: 18, label: "Analysing skin type and condition..." },
+  { pct: 30, label: "Evaluating lifestyle factors..." },
+  { pct: 45, label: "Calculating skin score..." },
+  { pct: 58, label: "Matching products to your skin..." },
+  { pct: 70, label: "Creating personalised routine..." },
+  { pct: 82, label: "Compiling lifestyle recommendations..." },
+  { pct: 92, label: "Finalising your analysis..." },
+  { pct: 100, label: "Done!" },
+];
+
+function AnalyzingProgress({ locale }: { locale: string }) {
+  const [progress, setProgress] = useState(0);
+  const [stepIdx, setStepIdx] = useState(0);
+  const steps = locale === "en" ? ANALYSIS_STEPS_EN : ANALYSIS_STEPS_SV;
+
+  useEffect(() => {
+    const totalDuration = 13000;
+    const interval = 50;
+    let elapsed = 0;
+
+    const timer = setInterval(() => {
+      elapsed += interval;
+      const t = elapsed / totalDuration;
+      const eased = t < 0.5
+        ? 4 * t * t * t
+        : 1 - Math.pow(-2 * t + 2, 3) / 2;
+      const pct = Math.min(Math.round(eased * 98), 98);
+      setProgress(pct);
+
+      const idx = steps.reduce((acc, s, i) => (pct >= s.pct ? i : acc), 0);
+      setStepIdx(idx);
+
+      if (elapsed >= totalDuration) {
+        clearInterval(timer);
+      }
+    }, interval);
+
+    return () => clearInterval(timer);
+  }, [steps]);
+
+  const r = 70;
+  const circ = 2 * Math.PI * r;
+  const offset = circ - (progress / 100) * circ;
+
+  return (
+    <div className="text-center animate-fade-in">
+      <div className="relative mx-auto h-48 w-48">
+        <svg viewBox="0 0 160 160" className="h-full w-full -rotate-90">
+          <circle
+            cx="80" cy="80" r={r}
+            fill="none" stroke="#e6e6e6" strokeWidth="6"
+          />
+          <circle
+            cx="80" cy="80" r={r}
+            fill="none" stroke="#108474" strokeWidth="6"
+            strokeLinecap="round"
+            strokeDasharray={circ}
+            strokeDashoffset={offset}
+            className="transition-all duration-200 ease-out"
+          />
+        </svg>
+        <div className="absolute inset-0 flex flex-col items-center justify-center">
+          <span className="text-3xl font-bold tabular-nums text-[#1d1d1f]">
+            {progress}%
+          </span>
+        </div>
+      </div>
+
+      <h2 className="mt-4 text-xl font-bold tracking-tight text-[#1d1d1f]">
+        {steps[stepIdx].label}
+      </h2>
+
+      <div className="mx-auto mt-6 max-w-xs">
+        <div className="flex flex-wrap justify-center gap-1.5">
+          {steps.slice(0, -1).map((s, i) => (
+            <div
+              key={i}
+              className={cn(
+                "h-1.5 flex-1 rounded-full transition-all duration-500",
+                i <= stepIdx ? "bg-[#108474]" : "bg-[#e6e6e6]"
+              )}
+            />
+          ))}
+        </div>
+      </div>
+
+      <p className="mt-4 text-xs text-[#766a62]">
+        {locale === "en"
+          ? "Our AI is building your personalised analysis"
+          : "Vår AI bygger din personliga analys"}
+      </p>
+    </div>
+  );
+}
 
 function parseAnalysisJSON(content: string): AnalysisJSON | null {
   const match = content.match(/```json\s*([\s\S]*?)```/);
@@ -878,11 +989,7 @@ export default function AnalysisPage() {
 
           {/* ---- ANALYZING ---- */}
           {step === "analyzing" && (
-            <div className="text-center animate-fade-in">
-              <Loader2 className="mx-auto mb-6 h-14 w-14 animate-spin text-[#108474]" />
-              <h2 className="text-2xl font-bold tracking-tight">{a("analyzingTitle")}</h2>
-              <p className="mt-2 text-sm text-muted-foreground">{a("analyzingSub")}</p>
-            </div>
+            <AnalyzingProgress locale={locale} />
           )}
 
           {/* ---- RESULT ---- */}
