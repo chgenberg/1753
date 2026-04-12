@@ -140,7 +140,7 @@ function SkinTab({ score, scoreLabel, summary, skinAnalysis, hasScan, scanImageS
         <div className="space-y-3">
           <div className="flex items-center justify-center gap-2 text-xs font-medium text-[#108474]">
             <ScanFace className="h-3.5 w-3.5" />
-            {locale === "en" ? "Your face scan results" : "Resultat fran din ansiktsskanning"}
+            {locale === "en" ? "Your face scan results" : "Resultat från din ansiktsskanning"}
           </div>
           <div className="mx-auto max-w-md overflow-hidden rounded-2xl border border-[#e6e6e6] shadow-sm">
             <FaceCanvasLazy imageSrc={scanImageSrc} results={scanZoneResults} />
@@ -153,7 +153,7 @@ function SkinTab({ score, scoreLabel, summary, skinAnalysis, hasScan, scanImageS
           <ScanFace className="h-3.5 w-3.5" />
           {locale === "en"
             ? "Includes data from your face scan"
-            : "Inkluderar data fran din ansiktsskanning"}
+            : "Inkluderar data från din ansiktsskanning"}
         </div>
       )}
 

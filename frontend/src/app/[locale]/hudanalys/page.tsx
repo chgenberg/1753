@@ -460,21 +460,21 @@ export default function AnalysisPage() {
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#108474]/10 text-sm font-bold text-[#108474]">1</div>
                   <div>
                     <p className="text-sm font-semibold text-[#1d1d1f]">{locale === "en" ? "Face scan" : "Ansiktsskanning"}</p>
-                    <p className="mt-0.5 text-xs text-[#515151]">{locale === "en" ? "AI analyses your skin zone by zone" : "AI analyserar din hud zon for zon"}</p>
+                    <p className="mt-0.5 text-xs text-[#515151]">{locale === "en" ? "AI analyses your skin zone by zone" : "AI analyserar din hud zon för zon"}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4 rounded-2xl border border-[#e6e6e6] bg-white p-4">
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#108474]/10 text-sm font-bold text-[#108474]">2</div>
                   <div>
-                    <p className="text-sm font-semibold text-[#1d1d1f]">{locale === "en" ? "Lifestyle questions" : "Livsstilsfragor"}</p>
-                    <p className="mt-0.5 text-xs text-[#515151]">{locale === "en" ? "Five questions about sleep, diet & stress" : "Fem fragor om somn, kost och stress"}</p>
+                    <p className="text-sm font-semibold text-[#1d1d1f]">{locale === "en" ? "Lifestyle questions" : "Livsstilsfrågor"}</p>
+                    <p className="mt-0.5 text-xs text-[#515151]">{locale === "en" ? "Five questions about sleep, diet & stress" : "Fem frågor om sömn, kost och stress"}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4 rounded-2xl border border-[#e6e6e6] bg-white p-4">
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#108474]/10 text-sm font-bold text-[#108474]">3</div>
                   <div>
                     <p className="text-sm font-semibold text-[#1d1d1f]">{locale === "en" ? "Personalised analysis" : "Personlig analys"}</p>
-                    <p className="mt-0.5 text-xs text-[#515151]">{locale === "en" ? "Complete results with routine, products & lifestyle tips" : "Komplett resultat med rutin, produkter och livsstilsrad"}</p>
+                    <p className="mt-0.5 text-xs text-[#515151]">{locale === "en" ? "Complete results with routine, products & lifestyle tips" : "Komplett resultat med rutin, produkter och livsstilsråd"}</p>
                   </div>
                 </div>
               </div>
@@ -491,13 +491,13 @@ export default function AnalysisPage() {
                 onClick={() => setStep(1)}
                 className="mt-3 block mx-auto text-xs font-medium text-[#766a62] underline underline-offset-2 transition-colors hover:text-[#108474]"
               >
-                {locale === "en" ? "Skip face scan, answer questions only" : "Hoppa over skanning, svara bara pa fragor"}
+                {locale === "en" ? "Skip face scan, answer questions only" : "Hoppa över skanning, svara bara på frågor"}
               </button>
 
               <p className="mx-auto mt-6 max-w-sm text-xs text-[#766a62]">
                 {locale === "en"
                   ? "The face scan analyses your skin directly on your device. No image is sent to any server."
-                  : "Ansiktsskanningen analyserar din hy direkt i din enhet. Ingen bild skickas till nagon server."}
+                  : "Ansiktsskanningen analyserar din hy direkt i din enhet. Ingen bild skickas till någon server."}
               </p>
             </div>
           )}
@@ -535,7 +535,7 @@ export default function AnalysisPage() {
                     <Check className="h-3.5 w-3.5" />
                     {locale === "en"
                       ? "Scan complete — continuing to questions..."
-                      : "Skanning klar — gar vidare till fragor..."}
+                      : "Skanning klar — går vidare till frågor..."}
                   </div>
                 </div>
               )}
@@ -558,7 +558,7 @@ export default function AnalysisPage() {
                 {scanSummary
                   ? (locale === "en"
                       ? `Step 2 of 3 — Question ${step} of ${TOTAL_STEPS}`
-                      : `Steg 2 av 3 — Fraga ${step} av ${TOTAL_STEPS}`)
+                      : `Steg 2 av 3 — Fråga ${step} av ${TOTAL_STEPS}`)
                   : a("stepOf", { current: step, total: TOTAL_STEPS })}
               </p>
 
@@ -891,12 +891,12 @@ export default function AnalysisPage() {
                   <p className="text-sm font-semibold text-brand-900">
                     {locale === "en"
                       ? "Get weekly tips for your skin type"
-                      : "Fa veckotips for just din hudtyp"}
+                      : "Få veckotips för just din hudtyp"}
                   </p>
                   <p className="mt-1.5 text-xs leading-relaxed text-brand-500">
                     {locale === "en"
                       ? "Personalised advice about lifestyle, nutrition and skincare based on your analysis results. One email per week."
-                      : "Personliga rad om livsstil, kost och hudvard baserat pa dina analysresultat. Ett mejl i veckan."}
+                      : "Personliga råd om livsstil, kost och hudvård baserat på dina analysresultat. Ett mejl i veckan."}
                   </p>
                   <form
                     onSubmit={async (e) => {
@@ -951,7 +951,7 @@ export default function AnalysisPage() {
                   <Check className="h-3.5 w-3.5" />
                   {locale === "en"
                     ? "You're in! Weekly tips based on your skin profile coming soon."
-                    : "Du ar med! Veckotips baserade pa din hudprofil kommer snart."}
+                    : "Du är med! Veckotips baserade på din hudprofil kommer snart."}
                 </div>
               )}
 
