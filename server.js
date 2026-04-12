@@ -5056,7 +5056,7 @@ app.get("/api/fortnox/auth", (req, res) => {
   authUrl.searchParams.set("redirect_uri", redirectUri);
   authUrl.searchParams.set("response_type", "code");
   authUrl.searchParams.set("state", state);
-  authUrl.searchParams.set("scope", "companyinformation customer article order invoice");
+  authUrl.searchParams.set("scope", "companyinformation customer article order invoice payment");
   authUrl.searchParams.set("access_type", "offline");
 
   console.log("[Fortnox OAuth] redirect_uri:", redirectUri);
@@ -5066,7 +5066,7 @@ app.get("/api/fortnox/auth", (req, res) => {
     return res.send(`<h1>Fortnox OAuth Debug</h1>
       <p><strong>redirect_uri:</strong> ${redirectUri}</p>
       <p><strong>client_id:</strong> ${clientId}</p>
-      <p><strong>scope:</strong> companyinformation customer article order invoice</p>
+      <p><strong>scope:</strong> companyinformation customer article order invoice payment</p>
       <p><strong>Full URL:</strong></p>
       <pre style="word-break:break-all">${authUrl.toString()}</pre>
       <p><a href="${authUrl.toString()}">Klicka här för att auktorisera</a></p>`);
