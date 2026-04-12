@@ -2720,6 +2720,16 @@ async function handleOrderCompletion(orderId) {
         };
       });
 
+      if (order.shipping_cost > 0) {
+        orderRows.push({
+          Description: "Porto/varubrev",
+          OrderedQuantity: 1,
+          DeliveredQuantity: 1,
+          Price: order.shipping_cost,
+          VAT: 0
+        });
+      }
+
       const today = new Date().toISOString().split("T")[0];
       const fxOrder = await fortnoxFetch("/orders", "POST", {
         Order: {
@@ -2734,7 +2744,6 @@ async function handleOrderCompletion(orderId) {
           YourOrderNumber: sharedOrderNumber,
           ExternalInvoiceReference1: sharedOrderNumber,
           Currency: order.currency || "SEK",
-          Freight: order.shipping_cost || 0,
           OrderRows: orderRows,
           Remarks: `Order ${sharedOrderNumber} – betald via Viva Wallet`
         }
