@@ -2505,7 +2505,6 @@ async function handleOrderCompletion(orderId) {
       const today = new Date().toISOString().split("T")[0];
       const fxOrder = await fortnoxFetch("/orders", "POST", {
         Order: {
-          DocumentNumber: sharedOrderNumber,
           CustomerNumber: fortnoxCustomerNumber,
           OrderDate: today,
           DeliveryDate: today,
@@ -2514,13 +2513,15 @@ async function handleOrderCompletion(orderId) {
           DeliveryCity: order.city || "",
           DeliveryCountry: (order.currency || "SEK") === "EUR" ? "" : "Sverige",
           YourReference: order.customer_name,
+          YourOrderNumber: sharedOrderNumber,
+          ExternalInvoiceReference1: sharedOrderNumber,
           Currency: order.currency || "SEK",
           OrderRows: orderRows,
-          Remarks: `Webborder ${order.order_number} – betald via Viva Wallet`
+          Remarks: `Order ${sharedOrderNumber} – betald via Viva Wallet`
         }
       });
       fortnoxOrderNumber = fxOrder?.Order?.DocumentNumber;
-      notes.push(`Fortnox order: ${fortnoxOrderNumber}`);
+      notes.push(`Fortnox order: ${fortnoxOrderNumber} (ordernr ${sharedOrderNumber})`);
     } catch (err) {
       notes.push(`Fortnox order FEL: ${err.message}`);
       console.error("[Order] Fortnox order error:", err);
@@ -2588,7 +2589,7 @@ async function handleOrderCompletion(orderId) {
       referenceNumber: "1753 Skincare",
       orderRemark: `Webborder ${order.order_number} – ${order.customer_email}`,
       orderType: { code: "B2C", name: "B2C" },
-      transporter: { transporterCode: "PostNord", transporterServiceCode: "Varubrev" },
+      transporter: { transporterCode: "PBREV", transporterServiceCode: "PUA" },
       consignee: {
         customerNumber: order.customer_email,
         name: order.customer_name,
