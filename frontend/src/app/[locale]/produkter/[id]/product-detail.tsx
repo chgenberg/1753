@@ -258,13 +258,13 @@ export default function ProductDetail({ id }: { id: string }) {
                   <div className="border-t border-brand-200 bg-white px-4 py-4 space-y-4">
                     <p className="text-xs text-brand-500">{t("productDetail.chooseInterval")}</p>
                     <div className="flex gap-2">
-                      {[30, 60, 90].map((days) => (
+                      {[30, 60].map((days) => (
                         <button
                           key={days}
                           type="button"
                           onClick={() => setSubInterval(days)}
                           className={cn(
-                            "flex-1 rounded-lg border-2 px-3 py-2.5 text-center text-sm font-medium transition-all",
+                            "flex-1 rounded-lg border-2 px-3 py-2.5 text-center text-sm font-medium transition-all cursor-pointer",
                             subInterval === days
                               ? "border-brand-900 bg-brand-900 text-white shadow-md"
                               : "border-brand-200 text-brand-700 hover:border-brand-400"
