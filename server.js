@@ -270,7 +270,7 @@ const PRODUCTS_MAP = {
   "fungtastic-mushroom-extract":{ name: "Fungtastic Mushroom Extract", price: 399, priceEur: 32, articleNumber: "4001", vatRate: 0.06 }
 };
 
-const FREE_SHIPPING_THRESHOLD = 700;
+const FREE_SHIPPING_THRESHOLD = { SEK: 700, EUR: 60 };
 const SHIPPING_COST = { SEK: 49, EUR: 5 };
 const VIVA_CURRENCY_CODE = { SEK: 752, EUR: 978 };
 
@@ -2279,7 +2279,8 @@ app.post("/api/orders/create", async (req, res) => {
       totalAmount = Math.max(0, totalAmount - discount.fixedAmount);
     }
     const shippingAmount = currency === "EUR" ? SHIPPING_COST.EUR : SHIPPING_COST.SEK;
-    const shippingCost = totalAmount >= FREE_SHIPPING_THRESHOLD ? 0 : shippingAmount;
+    const threshold = currency === "EUR" ? FREE_SHIPPING_THRESHOLD.EUR : FREE_SHIPPING_THRESHOLD.SEK;
+    const shippingCost = totalAmount >= threshold ? 0 : shippingAmount;
     const vivaAmount = (totalAmount + shippingCost) * 100;
 
     const orderNumber = await generateOrderNumber();
