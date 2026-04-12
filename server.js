@@ -277,8 +277,8 @@ const VIVA_CURRENCY_CODE = { SEK: 752, EUR: 978 };
 const DISCOUNT_CODES = {
   test: {
     percent: 97,
-    productIds: ["duo-kit"],
-    description: "97% rabatt pa DUO-kit",
+    productIds: null,
+    description: "97% testrabatt",
   },
   valkomst10: {
     percent: 10,
