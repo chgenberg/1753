@@ -356,16 +356,18 @@ async function initSchema() {
   // Ensure shared_order_seq starts at 20000 minimum
   try {
     const seqCheck = await pool.query(
-      `SELECT last_value FROM shared_order_seq`
+      `SELECT last_value, is_called FROM shared_order_seq`
     );
     const current = Number(seqCheck.rows[0].last_value);
-    if (current < 20000) {
-      await pool.query(`SELECT setval('shared_order_seq', 19999, false)`);
+    const isCalled = seqCheck.rows[0].is_called;
+    const effectiveNext = isCalled ? current + 1 : current;
+    if (effectiveNext < 20000) {
+      await pool.query(`SELECT setval('shared_order_seq', 20000, false)`);
       console.log("[DB] shared_order_seq reset to start at 20000");
     }
   } catch {
     try {
-      await pool.query(`SELECT setval('shared_order_seq', 19999, false)`);
+      await pool.query(`SELECT setval('shared_order_seq', 20000, false)`);
       console.log("[DB] shared_order_seq initialized to start at 20000");
     } catch (e2) {
       console.warn("[DB] Could not set shared_order_seq:", e2.message);
