@@ -385,6 +385,7 @@ app.put("/api/subscriptions/:id/pause", authMiddleware, async (req, res) => {
       status: "paused",
       paused_at: new Date().toISOString()
     });
+    sendSubscriptionChangeEmail(sub, "paused").catch(err => console.error("[Email] Sub pause email error:", err.message));
     res.json(updated);
   } catch (err) {
     res.status(500).json({ message: err.message || "Kunde inte pausa prenumerationen" });
@@ -405,6 +406,7 @@ app.put("/api/subscriptions/:id/resume", authMiddleware, async (req, res) => {
       paused_at: null,
       next_charge_date: nextCharge.toISOString().split("T")[0]
     });
+    sendSubscriptionChangeEmail(sub, "resumed", { nextCharge: nextCharge.toISOString().split("T")[0] }).catch(err => console.error("[Email] Sub resume email error:", err.message));
     res.json(updated);
   } catch (err) {
     res.status(500).json({ message: err.message || "Kunde inte återuppta prenumerationen" });
@@ -450,6 +452,10 @@ app.put("/api/subscriptions/:id", authMiddleware, async (req, res) => {
     }
 
     const updated = await db.updateSubscription(sub.id, fields);
+    sendSubscriptionChangeEmail(sub, "updated", {
+      intervalDays: fields.interval_days,
+      quantity: fields.quantity,
+    }).catch(err => console.error("[Email] Sub update email error:", err.message));
     res.json(updated);
   } catch (err) {
     res.status(500).json({ message: err.message || "Kunde inte uppdatera prenumerationen" });
@@ -465,6 +471,7 @@ app.delete("/api/subscriptions/:id", authMiddleware, async (req, res) => {
       status: "cancelled",
       cancelled_at: new Date().toISOString()
     });
+    sendSubscriptionChangeEmail(sub, "cancelled").catch(err => console.error("[Email] Sub cancel email error:", err.message));
     res.json(updated);
   } catch (err) {
     res.status(500).json({ message: err.message || "Kunde inte avbryta prenumerationen" });
@@ -3086,6 +3093,107 @@ async function sendShippingConfirmation(order, items, trackingNumber, trackingUr
   }
 
   console.log(`[Email] Shipping confirmation sent to ${order.customer_email} (id: ${sendResult?.id}) for ${order.order_number} [${order.locale || "sv"}]`);
+  return { sent: true };
+}
+
+// ---- SUBSCRIPTION CHANGE EMAIL ----
+
+async function sendSubscriptionChangeEmail(sub, action, details) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return { sent: false, skipReason: "no_api_key" };
+
+  const { Resend } = require("resend");
+  const resend = new Resend(apiKey);
+  const fromEmail = process.env.EMAIL_FROM || "order@1753skin.com";
+  const baseUrl = process.env.FRONTEND_URL || "https://www.1753skin.com";
+
+  const email = sub.customer_email;
+  if (!email) return { sent: false, skipReason: "no_email" };
+
+  const user = sub.user_id ? await db.findUserById(sub.user_id) : null;
+  const locale = user?.locale || "sv";
+  const en = locale === "en";
+  const localePath = en ? "en" : "sv";
+  const firstName = (user?.name || sub.customer_name || "").split(" ")[0] || (en ? "there" : "du");
+
+  const actionTexts = {
+    paused: {
+      subject: en ? "Your subscription has been paused" : "Din prenumeration är pausad",
+      heading: en ? "Subscription paused" : "Prenumeration pausad",
+      body: en
+        ? `Hi ${firstName}, your subscription for <strong>${sub.product_name}</strong> has been paused. You won't be charged until you resume it. You can resume at any time from My Account.`
+        : `Hej ${firstName}, din prenumeration på <strong>${sub.product_name}</strong> har pausats. Du debiteras inte förrän du återupptar den. Du kan återuppta den när som helst via Mitt konto.`,
+    },
+    resumed: {
+      subject: en ? "Your subscription is active again" : "Din prenumeration är aktiv igen",
+      heading: en ? "Subscription resumed" : "Prenumeration återupptagen",
+      body: en
+        ? `Hi ${firstName}, your subscription for <strong>${sub.product_name}</strong> is active again. Your next delivery is scheduled for <strong>${details?.nextCharge || "soon"}</strong>.`
+        : `Hej ${firstName}, din prenumeration på <strong>${sub.product_name}</strong> är aktiv igen. Nästa leverans är planerad till <strong>${details?.nextCharge || "snart"}</strong>.`,
+    },
+    cancelled: {
+      subject: en ? "Your subscription has been cancelled" : "Din prenumeration är avbruten",
+      heading: en ? "Subscription cancelled" : "Prenumeration avbruten",
+      body: en
+        ? `Hi ${firstName}, your subscription for <strong>${sub.product_name}</strong> has been cancelled. You won't be charged again. We're sorry to see you go — you can always start a new subscription from our product pages.`
+        : `Hej ${firstName}, din prenumeration på <strong>${sub.product_name}</strong> har avbrutits. Du kommer inte debiteras igen. Vi hoppas att du kommer tillbaka — du kan alltid starta en ny prenumeration via våra produktsidor.`,
+    },
+    updated: {
+      subject: en ? "Your subscription has been updated" : "Din prenumeration har uppdaterats",
+      heading: en ? "Subscription updated" : "Prenumeration uppdaterad",
+      body: en
+        ? `Hi ${firstName}, your subscription for <strong>${sub.product_name}</strong> has been updated.${details?.intervalDays ? ` New delivery interval: every <strong>${details.intervalDays} days</strong>.` : ""}${details?.quantity ? ` New quantity: <strong>${details.quantity}</strong>.` : ""}`
+        : `Hej ${firstName}, din prenumeration på <strong>${sub.product_name}</strong> har uppdaterats.${details?.intervalDays ? ` Nytt leveransintervall: var <strong>${details.intervalDays}:e dag</strong>.` : ""}${details?.quantity ? ` Ny mängd: <strong>${details.quantity}</strong>.` : ""}`,
+    },
+  };
+
+  const t = actionTexts[action];
+  if (!t) return { sent: false, skipReason: "unknown_action" };
+
+  const { data: sendResult, error: sendError } = await resend.emails.send({
+    from: fromEmail,
+    to: email,
+    replyTo: "info@1753skin.com",
+    subject: t.subject,
+    html: `
+      <div style="font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Helvetica,Arial,sans-serif;max-width:560px;margin:0 auto;color:#1d1d1f;padding:0 16px">
+        <div style="text-align:center;padding:32px 0 8px">
+          <img src="https://www.1753skin.com/1753.webp" alt="1753 SKINCARE" width="48" height="48" style="border-radius:12px"/>
+        </div>
+        <div style="text-align:center;padding:16px 0 24px">
+          <h1 style="font-size:24px;font-weight:700;margin:0;letter-spacing:-0.02em">${t.heading}</h1>
+        </div>
+        <p style="font-size:15px;line-height:1.7;color:#515151">${t.body}</p>
+        <div style="background:#f5f5f7;border-radius:12px;padding:16px 20px;margin:24px 0">
+          <p style="margin:0;font-size:13px;color:#766a62">${en ? "Product" : "Produkt"}</p>
+          <p style="margin:4px 0 0;font-size:15px;font-weight:600">${sub.product_name}</p>
+        </div>
+        <div style="text-align:center;margin:28px 0">
+          <a href="${baseUrl}/${localePath}/mitt-konto"
+             style="display:inline-block;padding:14px 32px;background:#1d1d1f;color:#fff;font-size:15px;font-weight:600;border-radius:980px;text-decoration:none">
+            ${en ? "My Account" : "Mitt konto"}
+          </a>
+        </div>
+        <div style="margin-top:40px;padding-top:24px;border-top:1px solid #e6e6e6;text-align:center">
+          <p style="font-size:13px;color:#766a62;line-height:1.6;margin:0">
+            ${en ? "Questions? Reply to this email or contact us at" : "Har du frågor? Svara på detta mejl eller kontakta oss på"}
+            <a href="mailto:info@1753skin.com" style="color:#108474">info@1753skin.com</a>
+          </p>
+          <p style="font-size:12px;color:#766a62;line-height:1.6;margin:16px 0 0">
+            ${en ? "1753 SKINCARE – Holistic skincare with CBD and CBG" : "1753 SKINCARE – Holistisk hudvård med CBD och CBG"}<br>
+            <a href="https://www.1753skin.com" style="color:#108474">www.1753skin.com</a>
+          </p>
+        </div>
+      </div>
+    `
+  });
+
+  if (sendError) {
+    console.error(`[Email] Subscription change error for ${email}:`, JSON.stringify(sendError));
+    return { sent: false, error: sendError.message };
+  }
+
+  console.log(`[Email] Subscription ${action} email sent to ${email} (id: ${sendResult?.id})`);
   return { sent: true };
 }
 
