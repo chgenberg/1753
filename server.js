@@ -2183,8 +2183,9 @@ app.post("/api/orders/create", async (req, res) => {
     if (!checkRateLimit(clientIp, "orders-create", 20)) {
       return res.status(429).json({ message: "För många beställningar. Försök igen om en stund." });
     }
-    const { customer, deliveryAddress, items, discountCode, currency: reqCurrency, createAccount } = req.body;
+    const { customer, deliveryAddress, items, discountCode, currency: reqCurrency, createAccount, locale: reqLocale } = req.body;
     const currency = reqCurrency === "EUR" ? "EUR" : "SEK";
+    const locale = reqLocale === "en" ? "en" : "sv";
 
     if (!customer?.name || !customer?.email) {
       return res.status(400).json({ message: "Namn och e-post krävs" });
@@ -2326,7 +2327,8 @@ app.post("/api/orders/create", async (req, res) => {
       totalAmount,
       shippingCost,
       currency,
-      userId: checkoutUserId
+      userId: checkoutUserId,
+      locale
     });
 
     console.log(`[Order] Created ${orderNumber} (${currency}), vivaOrderCode=${vivaData.orderCode}${checkoutUserId ? `, userId=${checkoutUserId}` : ""}`);
@@ -2791,15 +2793,17 @@ async function sendOrderConfirmation(order, items) {
   const currency = order.currency || "SEK";
   const isSEK = currency === "SEK";
   const fmt = (amount) => isSEK ? `${Math.round(amount).toLocaleString("sv-SE")} kr` : `€${Number(amount).toFixed(2)}`;
+  const en = (order.locale || "sv") === "en";
+  const localePath = en ? "en" : "sv";
 
   const hasSubscription = items.some(i => i.subscription || i.intervalDays);
-  const firstName = (order.customer_name || "").split(" ")[0] || "du";
+  const firstName = (order.customer_name || "").split(" ")[0] || (en ? "there" : "du");
 
   const itemRows = items.map(i => {
     const isSubItem = i.subscription || i.intervalDays;
     const intervalDays = i.subscription?.intervalDays || i.intervalDays;
     const subBadge = isSubItem
-      ? `<br><span style="display:inline-block;margin-top:4px;background:#108474;color:#fff;font-size:10px;font-weight:600;padding:2px 8px;border-radius:4px">Prenumeration var ${intervalDays}:e dag</span>`
+      ? `<br><span style="display:inline-block;margin-top:4px;background:#108474;color:#fff;font-size:10px;font-weight:600;padding:2px 8px;border-radius:4px">${en ? `Subscription every ${intervalDays} days` : `Prenumeration var ${intervalDays}:e dag`}</span>`
       : "";
     return `<tr>
       <td style="padding:10px 0;border-bottom:1px solid #eee">${i.name}${subBadge}</td>
@@ -2814,41 +2818,44 @@ async function sendOrderConfirmation(order, items) {
   const discountAmount = subtotal > totalAmount ? subtotal - totalAmount : 0;
 
   const summaryRows = [];
-  summaryRows.push(`<tr><td style="padding:4px 0;color:#515151">Delsumma</td><td style="padding:4px 0;text-align:right">${fmt(subtotal)}</td></tr>`);
+  summaryRows.push(`<tr><td style="padding:4px 0;color:#515151">${en ? "Subtotal" : "Delsumma"}</td><td style="padding:4px 0;text-align:right">${fmt(subtotal)}</td></tr>`);
   if (discountAmount > 0) {
-    summaryRows.push(`<tr><td style="padding:4px 0;color:#108474">Rabatt</td><td style="padding:4px 0;text-align:right;color:#108474">-${fmt(discountAmount)}</td></tr>`);
+    summaryRows.push(`<tr><td style="padding:4px 0;color:#108474">${en ? "Discount" : "Rabatt"}</td><td style="padding:4px 0;text-align:right;color:#108474">-${fmt(discountAmount)}</td></tr>`);
   }
-  summaryRows.push(`<tr><td style="padding:4px 0;color:#515151">Frakt</td><td style="padding:4px 0;text-align:right">${shippingCost > 0 ? fmt(shippingCost) : "Fri frakt"}</td></tr>`);
-  summaryRows.push(`<tr><td style="padding:8px 0 0;font-weight:700;font-size:16px;border-top:2px solid #1d1d1f">Totalt</td><td style="padding:8px 0 0;text-align:right;font-weight:700;font-size:16px;border-top:2px solid #1d1d1f">${fmt(totalAmount + shippingCost)}</td></tr>`);
+  summaryRows.push(`<tr><td style="padding:4px 0;color:#515151">${en ? "Shipping" : "Frakt"}</td><td style="padding:4px 0;text-align:right">${shippingCost > 0 ? fmt(shippingCost) : (en ? "Free shipping" : "Fri frakt")}</td></tr>`);
+  summaryRows.push(`<tr><td style="padding:8px 0 0;font-weight:700;font-size:16px;border-top:2px solid #1d1d1f">${en ? "Total" : "Totalt"}</td><td style="padding:8px 0 0;text-align:right;font-weight:700;font-size:16px;border-top:2px solid #1d1d1f">${fmt(totalAmount + shippingCost)}</td></tr>`);
 
   const subscriptionBlock = hasSubscription ? `
     <div style="background:#108474;border-radius:12px;padding:20px 24px;margin:24px 0;color:#fff">
-      <p style="margin:0;font-size:15px;font-weight:700">Din prenumeration är aktiverad</p>
+      <p style="margin:0;font-size:15px;font-weight:700">${en ? "Your subscription is active" : "Din prenumeration är aktiverad"}</p>
       <p style="margin:8px 0 0;font-size:13px;line-height:1.6;opacity:0.9">
-        Nästa leverans skickas automatiskt enligt ditt valda intervall med 15% rabatt.
-        Du kan när som helst pausa, ändra intervall eller avbryta via Mitt konto.
+        ${en
+          ? "Your next delivery will be sent automatically at your chosen interval with a 15% discount. You can pause, change or cancel anytime from My Account."
+          : "Nästa leverans skickas automatiskt enligt ditt valda intervall med 15% rabatt. Du kan när som helst pausa, ändra intervall eller avbryta via Mitt konto."}
       </p>
-      <a href="${baseUrl}/sv/mitt-konto" style="display:inline-block;margin-top:14px;background:#fff;color:#108474;padding:10px 24px;border-radius:980px;font-size:13px;font-weight:600;text-decoration:none">
-        Hantera prenumeration →
+      <a href="${baseUrl}/${localePath}/mitt-konto" style="display:inline-block;margin-top:14px;background:#fff;color:#108474;padding:10px 24px;border-radius:980px;font-size:13px;font-weight:600;text-decoration:none">
+        ${en ? "Manage subscription" : "Hantera prenumeration"} →
       </a>
     </div>
   ` : "";
 
   const accountBlock = order.user_id ? `
     <div style="background:#f5f5f7;border-radius:12px;padding:16px 20px;margin:20px 0;text-align:center">
-      <p style="margin:0;font-size:13px;color:#766a62">Ditt konto</p>
+      <p style="margin:0;font-size:13px;color:#766a62">${en ? "Your account" : "Ditt konto"}</p>
       <p style="margin:6px 0 0;font-size:14px;line-height:1.6;color:#515151">
-        Logga in på Mitt konto för att följa din order, se leveransstatus och hantera dina inställningar.
+        ${en
+          ? "Sign in to My Account to track your order, view delivery status and manage your settings."
+          : "Logga in på Mitt konto för att följa din order, se leveransstatus och hantera dina inställningar."}
       </p>
-      <a href="${baseUrl}/sv/mitt-konto" style="display:inline-block;margin-top:12px;background:#1d1d1f;color:#fff;padding:10px 28px;border-radius:980px;font-size:13px;font-weight:600;text-decoration:none">
-        Mitt konto
+      <a href="${baseUrl}/${localePath}/mitt-konto" style="display:inline-block;margin-top:12px;background:#1d1d1f;color:#fff;padding:10px 28px;border-radius:980px;font-size:13px;font-weight:600;text-decoration:none">
+        ${en ? "My Account" : "Mitt konto"}
       </a>
     </div>
   ` : "";
 
   const subject = hasSubscription
-    ? `Orderbekräftelse & prenumeration – ${order.order_number}`
-    : `Orderbekräftelse – ${order.order_number}`;
+    ? (en ? `Order confirmation & subscription – ${order.order_number}` : `Orderbekräftelse & prenumeration – ${order.order_number}`)
+    : (en ? `Order confirmation – ${order.order_number}` : `Orderbekräftelse – ${order.order_number}`);
 
   const { data: sendResult, error: sendError } = await resend.emails.send({
     from: fromEmail,
@@ -2858,23 +2865,24 @@ async function sendOrderConfirmation(order, items) {
     html: `
       <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;max-width:560px;margin:0 auto;color:#1d1d1f">
         <div style="text-align:center;padding:32px 0 24px">
-          <h1 style="font-size:24px;font-weight:700;margin:0">Tack för din beställning!</h1>
+          <h1 style="font-size:24px;font-weight:700;margin:0">${en ? "Thank you for your order!" : "Tack för din beställning!"}</h1>
         </div>
         <p style="font-size:15px;line-height:1.6;color:#515151">
-          Hej ${firstName}, vi har mottagit din betalning och din order behandlas nu.
-          Du får ett separat mejl med spårningsinformation när din order skickats.
+          ${en
+            ? `Hi ${firstName}, we have received your payment and your order is now being processed. You will receive a separate email with tracking information once your order has shipped.`
+            : `Hej ${firstName}, vi har mottagit din betalning och din order behandlas nu. Du får ett separat mejl med spårningsinformation när din order skickats.`}
         </p>
         <div style="background:#f5f5f7;border-radius:12px;padding:16px 20px;margin:20px 0">
-          <p style="margin:0;font-size:13px;color:#766a62">Ordernummer</p>
+          <p style="margin:0;font-size:13px;color:#766a62">${en ? "Order number" : "Ordernummer"}</p>
           <p style="margin:4px 0 0;font-size:17px;font-weight:600">${order.order_number}</p>
         </div>
         ${subscriptionBlock}
         <table style="width:100%;border-collapse:collapse;font-size:14px;margin:20px 0">
           <thead>
             <tr style="border-bottom:2px solid #1d1d1f">
-              <th style="text-align:left;padding:8px 0">Produkt</th>
-              <th style="text-align:center;padding:8px 0">Antal</th>
-              <th style="text-align:right;padding:8px 0">Pris</th>
+              <th style="text-align:left;padding:8px 0">${en ? "Product" : "Produkt"}</th>
+              <th style="text-align:center;padding:8px 0">${en ? "Qty" : "Antal"}</th>
+              <th style="text-align:right;padding:8px 0">${en ? "Price" : "Pris"}</th>
             </tr>
           </thead>
           <tbody>${itemRows}</tbody>
@@ -2883,14 +2891,18 @@ async function sendOrderConfirmation(order, items) {
           ${summaryRows.join("")}
         </table>
         <div style="background:#f5f5f7;border-radius:12px;padding:16px 20px;margin:20px 0">
-          <p style="margin:0;font-size:13px;color:#766a62">Leveransadress</p>
+          <p style="margin:0;font-size:13px;color:#766a62">${en ? "Delivery address" : "Leveransadress"}</p>
           <p style="margin:4px 0 0;font-size:14px">${order.customer_name}<br>${order.address}<br>${order.zip} ${order.city}</p>
         </div>
         ${accountBlock}
         <p style="font-size:13px;color:#766a62;line-height:1.6;margin-top:32px;text-align:center">
-          Har du frågor? Svara på detta mejl eller kontakta oss på
+          ${en
+            ? `Questions? Reply to this email or contact us at`
+            : `Har du frågor? Svara på detta mejl eller kontakta oss på`}
           <a href="mailto:info@1753skin.com" style="color:#108474">info@1753skin.com</a><br><br>
-          1753 SKINCARE – Holistisk hudvård med CBD och CBG<br>
+          ${en
+            ? "1753 SKINCARE – Holistic skincare with CBD and CBG"
+            : "1753 SKINCARE – Holistisk hudvård med CBD och CBG"}<br>
           <a href="https://www.1753skin.com" style="color:#108474">1753skin.com</a>
         </p>
       </div>
@@ -2902,7 +2914,7 @@ async function sendOrderConfirmation(order, items) {
     throw new Error(`Resend: ${sendError.message || JSON.stringify(sendError)}`);
   }
 
-  console.log(`[Email] Order confirmation sent to ${order.customer_email} (id: ${sendResult?.id}) for ${order.order_number}${hasSubscription ? " (subscription)" : ""}`);
+  console.log(`[Email] Order confirmation sent to ${order.customer_email} (id: ${sendResult?.id}) for ${order.order_number} [${order.locale || "sv"}]${hasSubscription ? " (subscription)" : ""}`);
   return { sent: true };
 }
 

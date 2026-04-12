@@ -211,6 +211,7 @@ export default function CheckoutPage() {
             })),
             discountCode: activeDiscount?.code || undefined,
             currency,
+            locale,
             createAccount: createAccount || undefined,
           }),
         }

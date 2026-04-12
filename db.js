@@ -60,7 +60,8 @@ async function initSchema() {
       created_at      TIMESTAMPTZ DEFAULT NOW(),
       updated_at      TIMESTAMPTZ DEFAULT NOW(),
       processed_at    TIMESTAMPTZ,
-      internal_notes  TEXT DEFAULT ''
+      internal_notes  TEXT DEFAULT '',
+      locale          VARCHAR(5) DEFAULT 'sv'
     );
 
     CREATE INDEX IF NOT EXISTS idx_orders_merchant_trns ON orders (merchant_trns);
@@ -150,6 +151,7 @@ async function initSchema() {
     ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS currency VARCHAR(3) DEFAULT 'SEK';
 
     ALTER TABLE orders ADD COLUMN IF NOT EXISTS currency VARCHAR(3) DEFAULT 'SEK';
+    ALTER TABLE orders ADD COLUMN IF NOT EXISTS locale VARCHAR(5) DEFAULT 'sv';
 
     CREATE INDEX IF NOT EXISTS idx_subscriptions_user ON subscriptions (user_id);
     CREATE INDEX IF NOT EXISTS idx_subscriptions_status ON subscriptions (status);
@@ -373,19 +375,19 @@ async function initSchema() {
 async function createOrder({
   orderNumber, customerName, customerEmail, customerPhone,
   address, zip, city, vivaOrderCode, merchantTrns,
-  items, totalAmount, shippingCost, currency, userId
+  items, totalAmount, shippingCost, currency, userId, locale
 }) {
   const { rows } = await pool.query(
     `INSERT INTO orders
        (order_number, customer_name, customer_email, customer_phone,
         address, zip, city, viva_order_code, merchant_trns,
-        items, total_amount, shipping_cost, currency, user_id)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
+        items, total_amount, shipping_cost, currency, user_id, locale)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
      RETURNING *`,
     [orderNumber, customerName, customerEmail, customerPhone || null,
      address, zip, city, vivaOrderCode, merchantTrns,
      JSON.stringify(items), totalAmount, shippingCost || 0, currency || "SEK",
-     userId || null]
+     userId || null, locale || "sv"]
   );
   return rows[0];
 }
