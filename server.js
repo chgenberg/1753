@@ -2639,7 +2639,6 @@ async function handleOrderCompletion(orderId) {
           InvoiceNumber: fortnoxInvoiceNumber,
           Amount: paymentAmount,
           AmountCurrency: paymentAmount,
-          CurrencyCode: order.currency || "SEK",
           PaymentDate: new Date().toISOString().split("T")[0]
         }
       });
