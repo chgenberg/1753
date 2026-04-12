@@ -1199,16 +1199,27 @@ app.post("/api/admin/orders/:id/cancel", adminAuthMiddleware, async (req, res) =
       }
     }
 
-    // 3. Ongoing: try to cancel the delivery order
+    // 3. Ongoing: cancel the delivery order via DELETE /orders/{orderId}
     if (order.ongoing_order_id) {
       try {
-        await ongoingFetch("/orders", "PUT", {
-          orderNumber: order.ongoing_order_id,
-          orderOperation: "Remove"
-        });
-        notes.push(`Ongoing order ${order.ongoing_order_id} avbokad`);
+        let ongoingInternalId = null;
+        const candidates = [order.ongoing_order_id, order.order_number];
+        for (const candidate of candidates) {
+          try {
+            const results = await ongoingFetch(`/orders?orderNumber=${encodeURIComponent(candidate)}`);
+            if (Array.isArray(results) && results.length > 0) {
+              ongoingInternalId = results[0]?.orderInfo?.orderId;
+              break;
+            }
+          } catch (_) {}
+        }
+        if (!ongoingInternalId) {
+          ongoingInternalId = order.ongoing_order_id;
+        }
+        await ongoingFetch(`/orders/${ongoingInternalId}`, "DELETE");
+        notes.push(`Ongoing order ${ongoingInternalId} makulerad`);
       } catch (err) {
-        notes.push(`Ongoing avbokning FEL: ${err.message} (kan beh\u00f6va avbokas manuellt)`);
+        notes.push(`Ongoing makulering FEL: ${err.message} (kan behöva makuleras manuellt)`);
         console.error("[Cancel] Ongoing cancel error:", err);
       }
     }
