@@ -124,6 +124,39 @@ function Paragraphs({ text, className }: { text: string; className?: string }) {
 }
 
 /* ------------------------------------------------------------------ */
+/*  Zone badge (left/right of face image)                              */
+/* ------------------------------------------------------------------ */
+
+function ZoneBadge({ z, locale, condLabels, align }: {
+  z: ZoneResult;
+  locale: string;
+  condLabels: Record<string, string>;
+  align: "left" | "right";
+}) {
+  const color = CONDITION_COLORS[z.topCondition] || "#108474";
+  const label = condLabels[z.topCondition] || z.topCondition;
+  const zone = locale === "en" ? z.zone.labelEn : z.zone.labelSv;
+  const pct = Math.round(z.confidence * 100);
+
+  return (
+    <div
+      className={cn(
+        "rounded-xl px-3 py-2 max-w-[150px] md:max-w-[180px]",
+        align === "right" ? "text-right" : "text-left"
+      )}
+      style={{ backgroundColor: `${color}0d` }}
+    >
+      <div className={cn("flex items-center gap-1.5", align === "right" && "justify-end")}>
+        <div className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: color }} />
+        <span className="text-[11px] font-semibold leading-tight md:text-xs" style={{ color }}>{label}</span>
+      </div>
+      <p className="mt-0.5 text-[10px] text-[#766a62] md:text-[11px]">{zone}</p>
+      <p className="mt-0.5 text-[11px] font-medium text-[#515151] md:text-xs">{pct}%</p>
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
 /*  Score ring                                                         */
 /* ------------------------------------------------------------------ */
 
@@ -176,7 +209,12 @@ function SkinTab({ score, scoreLabel, summary, skinAnalysis, hasScan, scanImageS
   const { locale } = useLocale();
   const condLabels = locale === "en" ? CONDITION_LABELS_EN : CONDITION_LABELS_SV;
 
-  const significantZones = scanZoneResults?.filter((z) => z.confidence >= 0.15) ?? [];
+  const HIGH_FP_CONDITIONS = new Set(["psoriasis", "fungal", "sun_damage"]);
+  const significantZones = scanZoneResults?.filter((z) => {
+    if (z.topCondition === "normal") return false;
+    if (HIGH_FP_CONDITIONS.has(z.topCondition)) return z.confidence >= 0.55;
+    return z.confidence >= 0.30;
+  }) ?? [];
 
   return (
     <div className="space-y-8 animate-fade-in">
@@ -193,32 +231,41 @@ function SkinTab({ score, scoreLabel, summary, skinAnalysis, hasScan, scanImageS
             <ScanFace className="h-3.5 w-3.5" />
             {locale === "en" ? "Your face scan" : "Din ansiktsskanning"}
           </div>
-          <div className="mx-auto max-w-sm overflow-hidden rounded-2xl border border-[#e6e6e6] shadow-sm">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={scanImageSrc}
-              alt={locale === "en" ? "Face scan" : "Ansiktsskanning"}
-              className="block h-auto w-full"
-            />
-          </div>
 
-          {significantZones.length > 0 && (
-            <div className="mx-auto max-w-sm space-y-2">
-              {significantZones.map((z) => {
-                const color = CONDITION_COLORS[z.topCondition] || "#108474";
-                const label = condLabels[z.topCondition] || z.topCondition;
-                const zone = locale === "en" ? z.zone.labelEn : z.zone.labelSv;
-                return (
-                  <div key={z.zone.id} className="flex items-center justify-between rounded-xl px-4 py-2" style={{ backgroundColor: `${color}0d` }}>
-                    <div className="flex items-center gap-2">
-                      <div className="h-2 w-2 rounded-full" style={{ backgroundColor: color }} />
-                      <span className="text-xs font-semibold" style={{ color }}>{label}</span>
-                      <span className="text-xs text-[#766a62]">{zone}</span>
-                    </div>
-                    <span className="text-xs font-medium text-[#515151]">{Math.round(z.confidence * 100)}%</span>
-                  </div>
-                );
-              })}
+          {significantZones.length > 0 ? (
+            <div className="mx-auto grid max-w-3xl grid-cols-[1fr_auto_1fr] items-center gap-3 md:gap-5">
+              {/* Left column */}
+              <div className="flex flex-col items-end gap-2">
+                {significantZones.filter((_, i) => i % 2 === 0).map((z) => (
+                  <ZoneBadge key={z.zone.id} z={z} locale={locale} condLabels={condLabels} align="right" />
+                ))}
+              </div>
+
+              {/* Center image */}
+              <div className="w-48 md:w-64 shrink-0 overflow-hidden rounded-2xl border border-[#e6e6e6] shadow-sm">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={scanImageSrc}
+                  alt={locale === "en" ? "Face scan" : "Ansiktsskanning"}
+                  className="block h-auto w-full"
+                />
+              </div>
+
+              {/* Right column */}
+              <div className="flex flex-col items-start gap-2">
+                {significantZones.filter((_, i) => i % 2 === 1).map((z) => (
+                  <ZoneBadge key={z.zone.id} z={z} locale={locale} condLabels={condLabels} align="left" />
+                ))}
+              </div>
+            </div>
+          ) : (
+            <div className="mx-auto max-w-sm overflow-hidden rounded-2xl border border-[#e6e6e6] shadow-sm">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={scanImageSrc}
+                alt={locale === "en" ? "Face scan" : "Ansiktsskanning"}
+                className="block h-auto w-full"
+              />
             </div>
           )}
         </div>

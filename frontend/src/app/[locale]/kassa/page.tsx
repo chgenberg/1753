@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
-import { ArrowLeft, Check, CreditCard, Gift, Lock, RefreshCcw, ShieldCheck, Tag, Truck, X } from "lucide-react";
+import { ArrowLeft, Check, CreditCard, Gift, Lock, Minus, Plus, RefreshCcw, ShieldCheck, Tag, Trash2, Truck, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart, type CartItem } from "@/providers/cart-provider";
 import { PRODUCTS, productDisplayName, productPrice } from "@/lib/products";
@@ -26,7 +26,7 @@ interface ActiveDiscount {
 export default function CheckoutPage() {
   const { t, path, locale, homeHash } = useLocale();
   const currency = getCurrency(locale);
-  const { items } = useCart();
+  const { items, addItem, removeItem, updateQty } = useCart();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [acceptedTerms, setAcceptedTerms] = useState(false);
@@ -35,6 +35,8 @@ export default function CheckoutPage() {
   const [discountLoading, setDiscountLoading] = useState(false);
   const [activeDiscount, setActiveDiscount] = useState<ActiveDiscount | null>(null);
   const [createAccount, setCreateAccount] = useState(false);
+  const [knownMember, setKnownMember] = useState<{ exists: boolean; name: string | null }>({ exists: false, name: null });
+  const emailCheckTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const [form, setForm] = useState({
     firstname: "",
     lastname: "",
@@ -149,6 +151,25 @@ export default function CheckoutPage() {
   const handlePhoneChange = (value: string) => {
     const digits = value.replace(/\D/g, "").slice(0, 10);
     setForm((prev) => ({ ...prev, phone: formatPhone(digits) }));
+  };
+
+  const checkEmailMembership = (email: string) => {
+    if (emailCheckTimer.current) clearTimeout(emailCheckTimer.current);
+    if (!email || !email.includes("@") || !email.includes(".")) {
+      setKnownMember({ exists: false, name: null });
+      return;
+    }
+    emailCheckTimer.current = setTimeout(async () => {
+      try {
+        const data = await apiFetch<{ exists: boolean; name: string | null }>("/account/check-email", {
+          method: "POST",
+          body: JSON.stringify({ email: email.trim().toLowerCase() }),
+        });
+        setKnownMember(data);
+      } catch {
+        setKnownMember({ exists: false, name: null });
+      }
+    }, 500);
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -284,12 +305,24 @@ export default function CheckoutPage() {
                 required
                 autoComplete="email"
                 value={form.email}
-                onChange={(e) =>
-                  setForm((p) => ({ ...p, email: e.target.value }))
-                }
+                onChange={(e) => {
+                  const val = e.target.value;
+                  setForm((p) => ({ ...p, email: val }));
+                  checkEmailMembership(val);
+                }}
                 className="w-full rounded-xl border border-input bg-background px-4 py-3 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring focus:outline-none"
                 placeholder={t("checkout.email")}
               />
+              {knownMember.exists && (
+                <div className="mt-2 flex items-center gap-2 rounded-xl bg-[#108474]/[0.06] px-3 py-2.5">
+                  <Check className="h-4 w-4 shrink-0 text-[#108474]" />
+                  <p className="text-xs text-[#108474]">
+                    {locale === "en"
+                      ? `Welcome back${knownMember.name ? `, ${knownMember.name}` : ""}! This order will be linked to your account.`
+                      : `Välkommen tillbaka${knownMember.name ? `, ${knownMember.name}` : ""}! Ordern kopplas automatiskt till ditt konto.`}
+                  </p>
+                </div>
+              )}
             </div>
 
             <div>
@@ -424,22 +457,33 @@ export default function CheckoutPage() {
               </span>
             </label>
 
-            <label className="flex items-start gap-3 cursor-pointer rounded-xl border border-brand-100 bg-brand-50/40 px-4 py-3 transition-colors hover:bg-brand-50/70">
-              <input
-                type="checkbox"
-                checked={createAccount}
-                onChange={(e) => setCreateAccount(e.target.checked)}
-                className="mt-0.5 h-4 w-4 rounded border-brand-300 accent-brand-900"
-              />
-              <div>
-                <span className="text-sm font-medium leading-relaxed text-brand-900">
-                  {t("checkout.createAccountLabel")}
-                </span>
-                <p className="mt-0.5 text-xs leading-relaxed text-brand-500">
-                  {t("checkout.createAccountHint")}
-                </p>
-              </div>
-            </label>
+            {!knownMember.exists && (
+              <label className={`flex items-start gap-3 rounded-xl border px-4 py-3 transition-colors ${
+                hasSubscription
+                  ? "border-[#108474]/20 bg-[#108474]/[0.04]"
+                  : "cursor-pointer border-brand-100 bg-brand-50/40 hover:bg-brand-50/70"
+              }`}>
+                <input
+                  type="checkbox"
+                  checked={createAccount || hasSubscription}
+                  disabled={hasSubscription}
+                  onChange={(e) => setCreateAccount(e.target.checked)}
+                  className="mt-0.5 h-4 w-4 rounded border-brand-300 accent-brand-900"
+                />
+                <div>
+                  <span className="text-sm font-medium leading-relaxed text-brand-900">
+                    {t("checkout.createAccountLabel")}
+                  </span>
+                  <p className="mt-0.5 text-xs leading-relaxed text-brand-500">
+                    {hasSubscription
+                      ? (locale === "en"
+                          ? "An account is required to manage your subscription — pause, change or cancel anytime."
+                          : "Ett konto krävs för att hantera din prenumeration — pausa, ändra eller avbryt när som helst.")
+                      : t("checkout.createAccountHint")}
+                  </p>
+                </div>
+              </label>
+            )}
 
             {error && (
               <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">
@@ -490,40 +534,81 @@ export default function CheckoutPage() {
                 const base = productPrice(p, locale);
                 const unitPrice = p.subscription ? Math.round(base * 0.85) : base;
                 return (
-                  <div key={p.cartId} className="flex gap-3">
-                    <div className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-2xl bg-white ring-1 ring-inset ring-black/5">
-                      <Image
-                        src={p.image}
-                        alt={productDisplayName(p, locale)}
-                        fill
-                        className="object-cover"
-                        sizes="64px"
-                      />
-                    </div>
-                    <div className="flex-1">
-                      <p className="text-sm font-medium">{productDisplayName(p, locale)}</p>
-                      <p className="text-xs text-muted-foreground">
-                        {p.qty} {t("checkout.qtyUnit")}
-                      </p>
-                      {p.subscription && (
-                        <span className="mt-0.5 inline-flex items-center gap-1 rounded-md bg-brand-800 px-1.5 py-0.5 text-[10px] font-semibold text-white">
-                          <RefreshCcw className="h-2.5 w-2.5" />
-                          {t("cartDrawer.subscriptionOrdinal", {
-                            days: p.subscription.intervalDays,
-                          })}
-                        </span>
-                      )}
-                    </div>
-                    <div className="text-right">
-                      <p className="text-sm font-medium">
-                        {formatPrice(unitPrice * p.qty, locale)}
-                      </p>
-                      {p.subscription && (
-                        <p className="text-xs text-brand-400 line-through">
-                          {formatPrice(base * p.qty, locale)}
+                  <div key={p.cartId}>
+                    <div className="flex gap-3">
+                      <div className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-2xl bg-white ring-1 ring-inset ring-black/5">
+                        <Image
+                          src={p.image}
+                          alt={productDisplayName(p, locale)}
+                          fill
+                          className="object-cover"
+                          sizes="64px"
+                        />
+                      </div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium truncate">{productDisplayName(p, locale)}</p>
+                        <div className="mt-1.5 flex items-center gap-2">
+                          <div className="inline-flex items-center rounded-lg border border-[#e6e6e6]">
+                            <button
+                              type="button"
+                              onClick={() => updateQty(p.cartId, p.qty - 1)}
+                              aria-label={t("cartDrawer.decreaseQty")}
+                              className="flex h-7 w-7 items-center justify-center text-[#766a62] transition-colors hover:text-[#1d1d1f] cursor-pointer"
+                            >
+                              <Minus className="h-3 w-3" />
+                            </button>
+                            <span className="min-w-[28px] text-center text-xs font-semibold tabular-nums text-[#1d1d1f]">
+                              {p.qty}
+                            </span>
+                            <button
+                              type="button"
+                              onClick={() => updateQty(p.cartId, p.qty + 1)}
+                              aria-label={t("cartDrawer.increaseQty")}
+                              className="flex h-7 w-7 items-center justify-center text-[#766a62] transition-colors hover:text-[#1d1d1f] cursor-pointer"
+                            >
+                              <Plus className="h-3 w-3" />
+                            </button>
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => removeItem(p.cartId)}
+                            aria-label={t("cartDrawer.remove")}
+                            className="flex h-7 w-7 items-center justify-center rounded-lg text-[#766a62] transition-colors hover:bg-red-50 hover:text-red-500 cursor-pointer"
+                          >
+                            <Trash2 className="h-3.5 w-3.5" />
+                          </button>
+                        </div>
+                        {p.subscription && (
+                          <span className="mt-1.5 inline-flex items-center gap-1 rounded-md bg-brand-800 px-1.5 py-0.5 text-[10px] font-semibold text-white">
+                            <RefreshCcw className="h-2.5 w-2.5" />
+                            {t("cartDrawer.subscriptionOrdinal", {
+                              days: p.subscription.intervalDays,
+                            })}
+                          </span>
+                        )}
+                      </div>
+                      <div className="text-right shrink-0">
+                        <p className="text-sm font-medium">
+                          {formatPrice(unitPrice * p.qty, locale)}
                         </p>
-                      )}
+                        {p.subscription && (
+                          <p className="text-xs text-brand-400 line-through">
+                            {formatPrice(base * p.qty, locale)}
+                          </p>
+                        )}
+                      </div>
                     </div>
+                    {!p.subscription && (
+                      <SubscriptionUpsell
+                        productId={productIdFromCartId(p.cartId)}
+                        cartId={p.cartId}
+                        qty={p.qty}
+                        basePrice={base}
+                        locale={locale}
+                        addItem={addItem}
+                        removeItem={removeItem}
+                      />
+                    )}
                   </div>
                 );
               })}
@@ -619,5 +704,96 @@ export default function CheckoutPage() {
         </div>
       </div>
     </section>
+  );
+}
+
+/* ── Subscription upsell inline component ── */
+
+function SubscriptionUpsell({
+  productId,
+  cartId,
+  qty,
+  basePrice,
+  locale,
+  addItem,
+  removeItem,
+}: {
+  productId: string;
+  cartId: string;
+  qty: number;
+  basePrice: number;
+  locale: "sv" | "en";
+  addItem: (id: string, qty?: number, subscription?: { intervalDays: number }) => void;
+  removeItem: (id: string) => void;
+}) {
+  const { t } = useLocale();
+  const [open, setOpen] = useState(false);
+  const [selectedDays, setSelectedDays] = useState(30);
+  const subPrice = Math.round(basePrice * 0.85);
+  const savings = (basePrice - subPrice) * qty;
+
+  const handleSwitch = () => {
+    removeItem(cartId);
+    addItem(productId, qty, { intervalDays: selectedDays });
+    setOpen(false);
+  };
+
+  if (!open) {
+    return (
+      <button
+        type="button"
+        onClick={() => setOpen(true)}
+        className="mt-1 ml-[76px] flex items-center gap-1.5 rounded-lg bg-[#108474]/[0.07] px-3 py-1.5 text-[11px] font-medium text-[#108474] transition-colors hover:bg-[#108474]/[0.13] cursor-pointer"
+      >
+        <RefreshCcw className="h-3 w-3" />
+        {t("checkout.upsellSub")}
+      </button>
+    );
+  }
+
+  return (
+    <div className="mt-2 ml-[76px] rounded-xl border border-[#108474]/20 bg-[#108474]/[0.04] p-3 space-y-3">
+      <div className="flex items-center justify-between">
+        <span className="text-xs font-semibold text-[#108474]">
+          {t("checkout.upsellSub")}
+        </span>
+        <button
+          type="button"
+          onClick={() => setOpen(false)}
+          className="text-[#766a62] hover:text-[#1d1d1f] cursor-pointer"
+        >
+          <X className="h-3.5 w-3.5" />
+        </button>
+      </div>
+
+      <div className="flex gap-2">
+        {[30, 60].map((days) => (
+          <button
+            key={days}
+            type="button"
+            onClick={() => setSelectedDays(days)}
+            className={`flex-1 rounded-lg border-2 px-2.5 py-2 text-center text-xs font-medium transition-all cursor-pointer ${
+              selectedDays === days
+                ? "border-[#108474] bg-[#108474] text-white"
+                : "border-[#e6e6e6] text-[#515151] hover:border-[#108474]/40"
+            }`}
+          >
+            {t("checkout.upsellDays", { days: String(days) })}
+          </button>
+        ))}
+      </div>
+
+      <p className="text-[11px] text-[#108474] font-medium">
+        {t("checkout.upsellSave", { amount: formatPrice(savings, locale) })}
+      </p>
+
+      <button
+        type="button"
+        onClick={handleSwitch}
+        className="w-full rounded-lg bg-[#108474] px-3 py-2 text-xs font-semibold text-white shadow-sm transition-all hover:bg-[#0d6e62] active:scale-[0.98] cursor-pointer"
+      >
+        {t("checkout.upsellSwitch")}
+      </button>
+    </div>
   );
 }

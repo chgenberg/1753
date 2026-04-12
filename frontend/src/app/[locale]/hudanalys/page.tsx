@@ -228,7 +228,7 @@ function AnalyzingProgress({ locale }: { locale: string }) {
   const steps = locale === "en" ? ANALYSIS_STEPS_EN : ANALYSIS_STEPS_SV;
 
   useEffect(() => {
-    const totalDuration = 13000;
+    const totalDuration = 30000;
     const interval = 50;
     let elapsed = 0;
 

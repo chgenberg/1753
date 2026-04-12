@@ -569,7 +569,13 @@ async function refreshFortnoxToken() {
   return _fortnoxRefreshLock;
 }
 
+let _fortnoxInitialized = false;
+
 async function ensureFortnoxToken() {
+  if (!_fortnoxInitialized) {
+    await loadFortnoxTokensFromDB();
+    _fortnoxInitialized = true;
+  }
   if (!fortnoxTokens.refreshToken) return;
   if (!fortnoxTokens.expiresAt || fortnoxTokens.expiresAt - Date.now() < 300_000) {
     await refreshFortnoxToken();
@@ -720,6 +726,55 @@ function adminOnly(req, res, next) {
   if (provided === ADMIN_KEY) return next();
   return res.status(403).json({ message: "Åtkomst nekad" });
 }
+
+app.get("/api/fortnox/status", adminOnly, async (req, res) => {
+  try {
+    await ensureFortnoxToken();
+    const hasToken = !!fortnoxTokens.accessToken;
+    const hasRefresh = !!fortnoxTokens.refreshToken;
+    const expiresIn = fortnoxTokens.expiresAt ? Math.round((fortnoxTokens.expiresAt - Date.now()) / 1000) : 0;
+
+    let apiOk = false;
+    let apiError = null;
+    if (hasToken) {
+      try {
+        await fortnoxFetch("/companyinformation");
+        apiOk = true;
+      } catch (err) {
+        apiError = err.message || "Unknown error";
+      }
+    }
+
+    const recentOrders = await db.pool.query(
+      `SELECT order_number, status, payment_status, fortnox_invoice_number, ongoing_order_id, internal_notes, processed_at, created_at
+       FROM orders ORDER BY created_at DESC LIMIT 5`
+    );
+
+    res.json({
+      fortnox: {
+        connected: hasToken && apiOk,
+        hasAccessToken: hasToken,
+        hasRefreshToken: hasRefresh,
+        tokenExpiresInSeconds: expiresIn,
+        apiTest: apiOk ? "OK" : (apiError || "No token"),
+      },
+      resend: { configured: !!process.env.RESEND_API_KEY },
+      ongoing: { configured: !!process.env.ONGOING_BASE_URL },
+      recentOrders: recentOrders.rows.map(o => ({
+        orderNumber: o.order_number,
+        status: o.status,
+        paymentStatus: o.payment_status,
+        fortnoxInvoice: o.fortnox_invoice_number,
+        ongoingOrder: o.ongoing_order_id,
+        processedAt: o.processed_at,
+        createdAt: o.created_at,
+        notes: o.internal_notes
+      }))
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
 
 app.post("/api/fortnox/customers", adminOnly, async (req, res) => {
   try {
@@ -2061,6 +2116,19 @@ app.post("/api/discount/validate", async (req, res) => {
   });
 });
 
+// ---- EMAIL ACCOUNT CHECK (checkout helper) ----
+
+app.post("/api/account/check-email", async (req, res) => {
+  try {
+    const { email } = req.body;
+    if (!email) return res.status(400).json({ exists: false });
+    const user = await db.findUserByEmail(email.trim().toLowerCase());
+    res.json({ exists: !!user, name: user ? (user.name || "").split(" ")[0] : null });
+  } catch (err) {
+    res.json({ exists: false });
+  }
+});
+
 // ---- ORDER CREATION (checkout → DB → Viva payment order) ----
 
 app.post("/api/orders/create", async (req, res) => {
@@ -2131,7 +2199,8 @@ app.post("/api/orders/create", async (req, res) => {
         quantity: item.qty || 1,
         price,
         originalPrice,
-        vatRate: product.vatRate || 0.25
+        vatRate: product.vatRate || 0.25,
+        ...(isSubscription && { subscription: true, intervalDays: item.subscription.intervalDays })
       };
     });
 
@@ -2145,37 +2214,37 @@ app.post("/api/orders/create", async (req, res) => {
 
     const orderNumber = generateOrderNumber();
 
-    // Auto-create account if requested from checkout
+    // Always look up existing user by email so orders are linked to their account.
+    // Force account creation for subscription orders (user needs login to manage it).
+    const shouldCreateAccount = createAccount || hasSubscription;
     let checkoutUserId = null;
-    if (createAccount) {
-      const existingUser = await db.findUserByEmail(customer.email);
-      if (!existingUser) {
-        try {
-          const resetToken = crypto.randomBytes(48).toString("hex");
-          const resetExpires = new Date(Date.now() + 72 * 3600_000).toISOString();
-          const tempHash = bcrypt ? await bcrypt.hash(crypto.randomBytes(32).toString("hex"), 10) : "temp";
-          const newUser = await db.createUser({
-            id: crypto.randomUUID(),
-            name: customer.name,
-            email: customer.email,
-            phone: customer.phone || "",
-            passwordHash: tempHash
-          });
-          await db.updateUser(newUser.id, {
-            password_reset_token: resetToken,
-            password_reset_expires: resetExpires
-          });
-          checkoutUserId = newUser.id;
-          console.log(`[Checkout] Account created for ${customer.email}, reset token generated`);
+    const existingUser = await db.findUserByEmail(customer.email);
+    if (existingUser) {
+      checkoutUserId = existingUser.id;
+    } else if (shouldCreateAccount) {
+      try {
+        const resetToken = crypto.randomBytes(48).toString("hex");
+        const resetExpires = new Date(Date.now() + 72 * 3600_000).toISOString();
+        const tempHash = bcrypt ? await bcrypt.hash(crypto.randomBytes(32).toString("hex"), 10) : "temp";
+        const newUser = await db.createUser({
+          id: crypto.randomUUID(),
+          name: customer.name,
+          email: customer.email,
+          phone: customer.phone || "",
+          passwordHash: tempHash
+        });
+        await db.updateUser(newUser.id, {
+          password_reset_token: resetToken,
+          password_reset_expires: resetExpires
+        });
+        checkoutUserId = newUser.id;
+        console.log(`[Checkout] Account created for ${customer.email}, reset token generated`);
 
-          sendPasswordSetupEmail(customer.email, customer.name, resetToken).catch(err => {
-            console.error("[Checkout] Password email error:", err.message);
-          });
-        } catch (err) {
-          console.error("[Checkout] Auto-create account error:", err.message);
-        }
-      } else {
-        checkoutUserId = existingUser.id;
+        sendPasswordSetupEmail(customer.email, customer.name, resetToken).catch(err => {
+          console.error("[Checkout] Password email error:", err.message);
+        });
+      } catch (err) {
+        console.error("[Checkout] Auto-create account error:", err.message);
       }
     }
 
@@ -2457,13 +2526,14 @@ async function handleOrderCompletion(orderId) {
   // 5. Ongoing: create delivery order (REST API uses PUT, consignee inline)
   try {
     const ongoingSeqNumber = await db.nextOngoingOrderNumber();
-    const deliveryDate = new Date(Date.now() + 3 * 86400000).toISOString().split("T")[0];
+    const deliveryDate = new Date(Date.now() + 1 * 86400000).toISOString().split("T")[0];
     const ogOrder = await ongoingFetch("/orders", "PUT", {
       orderNumber: ongoingSeqNumber,
       deliveryDate,
       referenceNumber: "1753 Skincare",
       orderRemark: `Webborder ${order.order_number} – ${order.customer_email}`,
       orderType: { code: "B2C", name: "B2C" },
+      transporter: { transporterCode: "PostNord", transporterServiceCode: "Varubrev" },
       consignee: {
         customerNumber: order.customer_email,
         name: order.customer_name,
@@ -2498,11 +2568,9 @@ async function handleOrderCompletion(orderId) {
     fortnox_order_number: fortnoxInvoiceNumber ? String(fortnoxInvoiceNumber) : null,
     fortnox_invoice_number: fortnoxInvoiceNumber ? String(fortnoxInvoiceNumber) : null,
     ongoing_order_id: ongoingOrderId ? String(ongoingOrderId) : null,
-    status: allSucceeded ? "fulfilled" : (fortnoxDone || ongoingDone ? "partial" : "pending")
+    status: allSucceeded ? "fulfilled" : (fortnoxDone || ongoingDone ? "partial" : "confirmed"),
+    processed_at: new Date().toISOString()
   };
-  if (allSucceeded) {
-    updateFields.processed_at = new Date().toISOString();
-  }
 
   await db.updateOrder(order.id, updateFields);
   await db.appendNotes(order.id, notes.join(" | "));
@@ -2594,34 +2662,89 @@ async function sendOrderConfirmation(order, items) {
 
   const { Resend } = require("resend");
   const resend = new Resend(apiKey);
-
   const fromEmail = process.env.EMAIL_FROM || "order@1753skincare.com";
-  const itemRows = items.map(i =>
-    `<tr>
-      <td style="padding:8px 0;border-bottom:1px solid #eee">${i.name}</td>
-      <td style="padding:8px 0;border-bottom:1px solid #eee;text-align:center">${i.quantity}</td>
-      <td style="padding:8px 0;border-bottom:1px solid #eee;text-align:right">${i.price.toLocaleString("sv-SE")} kr</td>
-    </tr>`
-  ).join("");
+  const baseUrl = process.env.FRONTEND_URL || "https://www.1753skin.com";
+  const currency = order.currency || "SEK";
+  const isSEK = currency === "SEK";
+  const fmt = (amount) => isSEK ? `${Math.round(amount).toLocaleString("sv-SE")} kr` : `€${Number(amount).toFixed(2)}`;
 
-  const total = items.reduce((s, i) => s + i.price * i.quantity, 0);
+  const hasSubscription = items.some(i => i.subscription || i.intervalDays);
+  const firstName = (order.customer_name || "").split(" ")[0] || "du";
+
+  const itemRows = items.map(i => {
+    const isSubItem = i.subscription || i.intervalDays;
+    const intervalDays = i.subscription?.intervalDays || i.intervalDays;
+    const subBadge = isSubItem
+      ? `<br><span style="display:inline-block;margin-top:4px;background:#108474;color:#fff;font-size:10px;font-weight:600;padding:2px 8px;border-radius:4px">Prenumeration var ${intervalDays}:e dag</span>`
+      : "";
+    return `<tr>
+      <td style="padding:10px 0;border-bottom:1px solid #eee">${i.name}${subBadge}</td>
+      <td style="padding:10px 0;border-bottom:1px solid #eee;text-align:center">${i.quantity}</td>
+      <td style="padding:10px 0;border-bottom:1px solid #eee;text-align:right">${fmt(i.price * i.quantity)}</td>
+    </tr>`;
+  }).join("");
+
+  const subtotal = items.reduce((s, i) => s + i.price * i.quantity, 0);
+  const shippingCost = order.shipping_cost || 0;
+  const totalAmount = order.total_amount || subtotal;
+  const discountAmount = subtotal > totalAmount ? subtotal - totalAmount : 0;
+
+  const summaryRows = [];
+  summaryRows.push(`<tr><td style="padding:4px 0;color:#515151">Delsumma</td><td style="padding:4px 0;text-align:right">${fmt(subtotal)}</td></tr>`);
+  if (discountAmount > 0) {
+    summaryRows.push(`<tr><td style="padding:4px 0;color:#108474">Rabatt</td><td style="padding:4px 0;text-align:right;color:#108474">-${fmt(discountAmount)}</td></tr>`);
+  }
+  summaryRows.push(`<tr><td style="padding:4px 0;color:#515151">Frakt</td><td style="padding:4px 0;text-align:right">${shippingCost > 0 ? fmt(shippingCost) : "Fri frakt"}</td></tr>`);
+  summaryRows.push(`<tr><td style="padding:8px 0 0;font-weight:700;font-size:16px;border-top:2px solid #1d1d1f">Totalt</td><td style="padding:8px 0 0;text-align:right;font-weight:700;font-size:16px;border-top:2px solid #1d1d1f">${fmt(totalAmount + shippingCost)}</td></tr>`);
+
+  const subscriptionBlock = hasSubscription ? `
+    <div style="background:#108474;border-radius:12px;padding:20px 24px;margin:24px 0;color:#fff">
+      <p style="margin:0;font-size:15px;font-weight:700">Din prenumeration är aktiverad</p>
+      <p style="margin:8px 0 0;font-size:13px;line-height:1.6;opacity:0.9">
+        Nästa leverans skickas automatiskt enligt ditt valda intervall med 15% rabatt.
+        Du kan när som helst pausa, ändra intervall eller avbryta via Mitt konto.
+      </p>
+      <a href="${baseUrl}/sv/mitt-konto" style="display:inline-block;margin-top:14px;background:#fff;color:#108474;padding:10px 24px;border-radius:980px;font-size:13px;font-weight:600;text-decoration:none">
+        Hantera prenumeration →
+      </a>
+    </div>
+  ` : "";
+
+  const accountBlock = order.user_id ? `
+    <div style="background:#f5f5f7;border-radius:12px;padding:16px 20px;margin:20px 0;text-align:center">
+      <p style="margin:0;font-size:13px;color:#766a62">Ditt konto</p>
+      <p style="margin:6px 0 0;font-size:14px;line-height:1.6;color:#515151">
+        Logga in på Mitt konto för att följa din order, se leveransstatus och hantera dina inställningar.
+      </p>
+      <a href="${baseUrl}/sv/mitt-konto" style="display:inline-block;margin-top:12px;background:#1d1d1f;color:#fff;padding:10px 28px;border-radius:980px;font-size:13px;font-weight:600;text-decoration:none">
+        Mitt konto
+      </a>
+    </div>
+  ` : "";
+
+  const subject = hasSubscription
+    ? `Orderbekräftelse & prenumeration – ${order.order_number}`
+    : `Orderbekräftelse – ${order.order_number}`;
 
   await resend.emails.send({
     from: fromEmail,
     to: order.customer_email,
-    subject: `Orderbekräftelse – ${order.order_number}`,
+    replyTo: "info@1753skin.com",
+    subject,
     html: `
       <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;max-width:560px;margin:0 auto;color:#1d1d1f">
         <div style="text-align:center;padding:32px 0 24px">
           <h1 style="font-size:24px;font-weight:700;margin:0">Tack för din beställning!</h1>
         </div>
         <p style="font-size:15px;line-height:1.6;color:#515151">
-          Hej ${order.customer_name}, vi har mottagit din betalning och din order behandlas nu.
+          Hej ${firstName}, vi har mottagit din betalning och din order behandlas nu.
+          Du får ett separat mejl med spårningsinformation när din order skickats.
         </p>
         <div style="background:#f5f5f7;border-radius:12px;padding:16px 20px;margin:20px 0">
           <p style="margin:0;font-size:13px;color:#766a62">Ordernummer</p>
           <p style="margin:4px 0 0;font-size:17px;font-weight:600">${order.order_number}</p>
         </div>
+        ${subscriptionBlock}
         <table style="width:100%;border-collapse:collapse;font-size:14px;margin:20px 0">
           <thead>
             <tr style="border-bottom:2px solid #1d1d1f">
@@ -2631,26 +2754,26 @@ async function sendOrderConfirmation(order, items) {
             </tr>
           </thead>
           <tbody>${itemRows}</tbody>
-          <tfoot>
-            <tr>
-              <td colspan="2" style="padding:12px 0;font-weight:700">Totalt</td>
-              <td style="padding:12px 0;text-align:right;font-weight:700">${total.toLocaleString("sv-SE")} kr</td>
-            </tr>
-          </tfoot>
+        </table>
+        <table style="width:100%;border-collapse:collapse;font-size:14px;margin:0 0 20px">
+          ${summaryRows.join("")}
         </table>
         <div style="background:#f5f5f7;border-radius:12px;padding:16px 20px;margin:20px 0">
           <p style="margin:0;font-size:13px;color:#766a62">Leveransadress</p>
           <p style="margin:4px 0 0;font-size:14px">${order.customer_name}<br>${order.address}<br>${order.zip} ${order.city}</p>
         </div>
+        ${accountBlock}
         <p style="font-size:13px;color:#766a62;line-height:1.6;margin-top:32px;text-align:center">
+          Har du frågor? Svara på detta mejl eller kontakta oss på
+          <a href="mailto:info@1753skin.com" style="color:#108474">info@1753skin.com</a><br><br>
           1753 SKINCARE – Holistisk hudvård med CBD och CBG<br>
-          <a href="https://1753skincare.com" style="color:#108474">1753skincare.com</a>
+          <a href="https://www.1753skin.com" style="color:#108474">1753skin.com</a>
         </p>
       </div>
     `
   });
 
-  console.log(`[Email] Confirmation sent to ${order.customer_email}`);
+  console.log(`[Email] Order confirmation sent to ${order.customer_email} for ${order.order_number}${hasSubscription ? " (subscription)" : ""}`);
   return { sent: true };
 }
 

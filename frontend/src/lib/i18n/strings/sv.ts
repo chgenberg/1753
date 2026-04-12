@@ -212,6 +212,10 @@ const bundle = {
     removeDiscountAria: "Ta bort rabattkod",
     loyaltyTitle: "Tjäna poäng!",
     loyaltyDesc: "Den här ordern ger dig {points} poäng i vårt lojalitetsprogram. Samla poäng och lås upp rabatter.",
+    upsellSub: "Prenumerera & spara 15%",
+    upsellSwitch: "Byt till prenumeration",
+    upsellSave: "Du sparar {amount} per leverans",
+    upsellDays: "{days} dagar",
   },
   paymentSuccess: {
     title: "Tack för din beställning!",

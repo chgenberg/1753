@@ -214,6 +214,10 @@ export const en: Messages = {
     removeDiscountAria: "Remove discount code",
     loyaltyTitle: "You’ll earn points",
     loyaltyDesc: "This order gives you {points} points in our loyalty programme. Collect points and turn them into discounts.",
+    upsellSub: "Subscribe & save 15%",
+    upsellSwitch: "Switch to subscription",
+    upsellSave: "You save {amount} per delivery",
+    upsellDays: "{days} days",
   },
   paymentSuccess: {
     title: "Thank you for your order!",
