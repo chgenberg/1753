@@ -2472,15 +2472,17 @@ async function handleOrderCompletion(orderId) {
     notes.push(`Fortnox kund hittad: ${fortnoxCustomerNumber}`);
   }
 
-  // 2. Fortnox: create invoice directly (skip order step)
+  // 2. Fortnox: create order, then create invoice from that order
+  let fortnoxOrderNumber = null;
   if (fortnoxCustomerNumber) {
     try {
-      const invoiceRows = items.map(i => {
+      const orderRows = items.map(i => {
         const vat = i.vatRate || 0.25;
         const priceExVat = Math.round((i.price / (1 + vat)) * 100) / 100;
         return {
           ArticleNumber: i.articleNumber,
           Description: i.name,
+          OrderedQuantity: i.quantity,
           DeliveredQuantity: i.quantity,
           Price: priceExVat,
           VAT: Math.round(vat * 100)
@@ -2489,9 +2491,10 @@ async function handleOrderCompletion(orderId) {
 
       if (order.shipping_cost > 0) {
         const shippingExVat = Math.round((order.shipping_cost / 1.25) * 100) / 100;
-        invoiceRows.push({
+        orderRows.push({
           ArticleNumber: "FRAKT",
           Description: "Frakt",
+          OrderedQuantity: 1,
           DeliveredQuantity: 1,
           Price: shippingExVat,
           VAT: 25
@@ -2499,21 +2502,33 @@ async function handleOrderCompletion(orderId) {
       }
 
       const today = new Date().toISOString().split("T")[0];
-      const fxInvoice = await fortnoxFetch("/invoices", "POST", {
-        Invoice: {
+      const fxOrder = await fortnoxFetch("/orders", "POST", {
+        Order: {
           CustomerNumber: fortnoxCustomerNumber,
-          InvoiceDate: today,
-          DueDate: today,
+          OrderDate: today,
+          DeliveryDate: today,
           DeliveryAddress1: order.address || "",
           DeliveryZipCode: order.zip || "",
           DeliveryCity: order.city || "",
           DeliveryCountry: (order.currency || "SEK") === "EUR" ? "" : "Sverige",
-          YourReference: order.order_number,
+          YourReference: order.customer_name,
           Currency: order.currency || "SEK",
-          InvoiceRows: invoiceRows,
-          Comments: `Webborder ${order.order_number} – betald via Viva Wallet`
+          OrderRows: orderRows,
+          Remarks: `Webborder ${order.order_number} – betald via Viva Wallet`
         }
       });
+      fortnoxOrderNumber = fxOrder?.Order?.DocumentNumber;
+      notes.push(`Fortnox order: ${fortnoxOrderNumber}`);
+    } catch (err) {
+      notes.push(`Fortnox order FEL: ${err.message}`);
+      console.error("[Order] Fortnox order error:", err);
+    }
+  }
+
+  // 2b. Fortnox: create invoice from the order
+  if (fortnoxOrderNumber) {
+    try {
+      const fxInvoice = await fortnoxFetch(`/orders/${fortnoxOrderNumber}/createinvoice`, "PUT");
       fortnoxInvoiceNumber = fxInvoice?.Invoice?.DocumentNumber;
       notes.push(`Fortnox faktura: ${fortnoxInvoiceNumber}`);
     } catch (err) {
@@ -2604,7 +2619,7 @@ async function handleOrderCompletion(orderId) {
   const allSucceeded = fortnoxDone && ongoingDone;
   const updateFields = {
     fortnox_customer_number: fortnoxCustomerNumber || null,
-    fortnox_order_number: fortnoxInvoiceNumber ? String(fortnoxInvoiceNumber) : null,
+    fortnox_order_number: fortnoxOrderNumber ? String(fortnoxOrderNumber) : null,
     fortnox_invoice_number: fortnoxInvoiceNumber ? String(fortnoxInvoiceNumber) : null,
     ongoing_order_id: ongoingOrderId ? String(ongoingOrderId) : null,
     status: allSucceeded ? "fulfilled" : (fortnoxDone || ongoingDone ? "partial" : "confirmed"),
