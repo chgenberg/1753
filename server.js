@@ -1113,7 +1113,8 @@ async function vivaRefund(transactionId, amountInCents) {
   }
 
   const basicAuth = Buffer.from(`${merchantId}:${apiKey}`).toString("base64");
-  const url = `https://${env}api.vivapayments.com/api/transactions/${transactionId}?amount=${amountInCents}`;
+  const baseHost = env ? `demo.vivapayments.com` : `www.vivapayments.com`;
+  const url = `https://${baseHost}/api/transactions/${transactionId}?amount=${amountInCents}`;
 
   const res = await fetch(url, {
     method: "DELETE",
@@ -1138,9 +1139,7 @@ app.post("/api/admin/orders/:id/cancel", adminAuthMiddleware, async (req, res) =
     if (order.status === "cancelled") {
       return res.status(400).json({ message: "Ordern \u00e4r redan makulerad" });
     }
-    if (order.shipped_at) {
-      return res.status(400).json({ message: "Kan inte makulera en skickad order \u2013 skapa retur ist\u00e4llet" });
-    }
+    // Levererade ordrar kan nu makuleras/krediteras via admin
 
     const notes = [];
 
@@ -1160,16 +1159,37 @@ app.post("/api/admin/orders/:id/cancel", adminAuthMiddleware, async (req, res) =
       notes.push("Viva: inget transaction-id, \u00e5terbetalning hoppades \u00f6ver");
     }
 
-    // 2. Fortnox: cancel/credit invoice
+    // 2. Fortnox: credit invoice + register payments to zero out balances
     if (order.fortnox_invoice_number) {
       try {
         const creditRes = await fortnoxFetch(
           `/invoices/${order.fortnox_invoice_number}/credit`, "PUT"
         );
-        const creditNum = creditRes?.Invoice?.DocumentNumber ?? creditRes?.DocumentNumber ?? null;
+        const creditNum = creditRes?.Invoice?.DocumentNumber ?? creditRes?.Invoice?.CreditInvoiceReference ?? null;
         if (creditNum) {
           await fortnoxFetch(`/invoices/${creditNum}/bookkeep`, "PUT").catch(() => {});
           notes.push(`Fortnox kreditfaktura: ${creditNum}`);
+
+          const paymentAmount = order.total_amount + (order.shipping_cost || 0);
+          const today = new Date().toISOString().split("T")[0];
+          try {
+            const origPay = await fortnoxFetch("/invoicepayments", "POST", {
+              InvoicePayment: { InvoiceNumber: parseInt(order.fortnox_invoice_number), Amount: paymentAmount, AmountCurrency: paymentAmount, PaymentDate: today }
+            });
+            const origPayNum = origPay?.InvoicePayment?.Number;
+            if (origPayNum) await fortnoxFetch(`/invoicepayments/${origPayNum}/bookkeep`, "PUT").catch(() => {});
+
+            const creditPay = await fortnoxFetch("/invoicepayments", "POST", {
+              InvoicePayment: { InvoiceNumber: parseInt(creditNum), Amount: -paymentAmount, AmountCurrency: -paymentAmount, PaymentDate: today }
+            });
+            const creditPayNum = creditPay?.InvoicePayment?.Number;
+            if (creditPayNum) await fortnoxFetch(`/invoicepayments/${creditPayNum}/bookkeep`, "PUT").catch(() => {});
+
+            notes.push("Fortnox kvittning bokförd");
+          } catch (payErr) {
+            notes.push(`Fortnox kvittning FEL: ${payErr.message}`);
+            console.error("[Cancel] Fortnox payment netting error:", payErr);
+          }
         } else {
           notes.push("Fortnox kredit: svar saknade dokumentnummer");
         }
@@ -1300,7 +1320,7 @@ app.post("/api/admin/orders/:id/return", adminAuthMiddleware, async (req, res) =
       }
     }
 
-    // Fortnox: create credit invoice
+    // Fortnox: credit invoice + register payments to zero out balances
     if (order.fortnox_invoice_number) {
       try {
         const creditRes = await fortnoxFetch(
@@ -1309,12 +1329,33 @@ app.post("/api/admin/orders/:id/return", adminAuthMiddleware, async (req, res) =
         );
         fortnoxCreditNumber =
           creditRes?.Invoice?.DocumentNumber ??
-          creditRes?.DocumentNumber ??
+          creditRes?.Invoice?.CreditInvoiceReference ??
           null;
 
         if (fortnoxCreditNumber) {
           await fortnoxFetch(`/invoices/${fortnoxCreditNumber}/bookkeep`, "PUT").catch(() => {});
           notes.push(`Fortnox kreditfaktura: ${fortnoxCreditNumber}`);
+
+          const paymentAmount = order.total_amount + (order.shipping_cost || 0);
+          const today = new Date().toISOString().split("T")[0];
+          try {
+            const origPay = await fortnoxFetch("/invoicepayments", "POST", {
+              InvoicePayment: { InvoiceNumber: parseInt(order.fortnox_invoice_number), Amount: paymentAmount, AmountCurrency: paymentAmount, PaymentDate: today }
+            });
+            const origPayNum = origPay?.InvoicePayment?.Number;
+            if (origPayNum) await fortnoxFetch(`/invoicepayments/${origPayNum}/bookkeep`, "PUT").catch(() => {});
+
+            const creditPay = await fortnoxFetch("/invoicepayments", "POST", {
+              InvoicePayment: { InvoiceNumber: parseInt(fortnoxCreditNumber), Amount: -paymentAmount, AmountCurrency: -paymentAmount, PaymentDate: today }
+            });
+            const creditPayNum = creditPay?.InvoicePayment?.Number;
+            if (creditPayNum) await fortnoxFetch(`/invoicepayments/${creditPayNum}/bookkeep`, "PUT").catch(() => {});
+
+            notes.push("Fortnox kvittning bokförd");
+          } catch (payErr) {
+            notes.push(`Fortnox kvittning FEL: ${payErr.message}`);
+            console.error("[Return] Fortnox payment netting error:", payErr);
+          }
         } else {
           notes.push("Fortnox kredit: svar saknade dokumentnummer");
         }
