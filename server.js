@@ -1534,9 +1534,29 @@ Svara ENBART med ett JSON-block (inget annat). JSON-blocket ska vara markerat me
     ]
   },
   "avoid": ["Specifik sak att undvika med kort förklaring"],
-  "nextAnalysis": "4 veckor"
+  "nextAnalysis": "4 veckor",
+  "faceZones": [
+    {
+      "zone": "forehead",
+      "label": "Panna",
+      "x": 50,
+      "y": 18,
+      "condition": "dermatitis",
+      "confidence": "medium"
+    }
+  ]
 }
 \`\`\`
+
+== ANSIKTSZONER (faceZones) ==
+Om en ansiktsbild bifogas: titta på bilden och identifiera visuellt var ansiktets zoner befinner sig.
+Returnera faceZones-arrayen med en post per synlig zon (panna, näsa, vänster kind, höger kind, haka, t-zon).
+- "zone": ett av forehead, nose, left_cheek, right_cheek, chin, t_zone
+- "label": zonens svenska namn
+- "x" och "y": zonens VISUELLA centrum i bilden, angivet som procenttal (0-100) av bildens bredd och höjd. 0,0 = övre vänstra hörnet, 100,100 = nedre högra hörnet. Uppskatta var i den FAKTISKA bilden varje zon befinner sig – ta hänsyn till inzoomning, ansiktsposition och vinkel.
+- "condition": det hudtillstånd du bedömer finns i zonen (acne, dermatitis, dryness, eczema, normal etc.) baserat på DIN visuella bedömning av bilden, INTE skannermodellens resultat
+- "confidence": din egen bedömning av säkerheten: "low", "medium" eller "high"
+Returnera BARA zoner som syns i bilden. Om ingen bild bifogades, returnera en tom array [].
 
 == PRODUKTREKOMMENDATIONER ==
 Du ska ALLTID rekommendera dessa tre produkter (i denna ordning):
@@ -2477,7 +2497,7 @@ async function handleOrderCompletion(orderId) {
           DeliveryAddress1: order.address || "",
           DeliveryZipCode: order.zip || "",
           DeliveryCity: order.city || "",
-          DeliveryCountry: (order.currency || "SEK") === "EUR" ? "" : "SE",
+          DeliveryCountry: (order.currency || "SEK") === "EUR" ? "" : "Sverige",
           YourReference: order.order_number,
           Currency: order.currency || "SEK",
           InvoiceRows: invoiceRows,
@@ -2503,7 +2523,7 @@ async function handleOrderCompletion(orderId) {
     }
   }
 
-  // 4. Fortnox: register payment on invoice
+  // 4. Fortnox: register payment on invoice (requires 'payment' scope)
   if (fortnoxInvoiceNumber) {
     try {
       const paymentAmount = order.total_amount + (order.shipping_cost || 0);
@@ -2518,8 +2538,14 @@ async function handleOrderCompletion(orderId) {
       });
       notes.push("Fortnox betalning registrerad");
     } catch (err) {
-      notes.push(`Fortnox betalning FEL: ${err.message}`);
-      console.error("[Order] Fortnox payment error:", err);
+      const isScope = err.message?.includes("scope") || err.message?.includes("behörighet");
+      if (isScope) {
+        notes.push("Fortnox betalning hoppades over (payment scope saknas i OAuth-appen)");
+        console.warn(`[Order] Fortnox payment scope missing -- add 'payment' scope in Fortnox developer portal to auto-register payments`);
+      } else {
+        notes.push(`Fortnox betalning FEL: ${err.message}`);
+        console.error("[Order] Fortnox payment error:", err);
+      }
     }
   }
 
@@ -4847,27 +4873,6 @@ app.get("/api/fortnox/company", adminOnly, async (req, res) => {
   } catch (err) {
     res.status(err.status || 500).json({ message: err.message });
   }
-});
-
-app.get("/api/fortnox/status", adminOnly, async (req, res) => {
-  const hasRefresh = !!fortnoxTokens.refreshToken;
-  const hasAccess = !!fortnoxTokens.accessToken;
-  const expiresIn = fortnoxTokens.expiresAt ? Math.round((fortnoxTokens.expiresAt - Date.now()) / 1000) : 0;
-
-  let dbTokens = null;
-  try {
-    dbTokens = await db.getFortnoxTokensFromDB();
-  } catch {}
-
-  res.json({
-    connected: hasRefresh && hasAccess,
-    accessTokenSet: hasAccess,
-    refreshTokenSet: hasRefresh,
-    accessExpiresInSeconds: Math.max(0, expiresIn),
-    accessExpiresInMinutes: Math.max(0, Math.round(expiresIn / 60)),
-    tokensInDB: !!dbTokens?.refreshToken,
-    dbLastUpdated: dbTokens?.expiresAt ? new Date(parseInt(dbTokens.expiresAt)).toISOString() : null,
-  });
 });
 
 // ---- HEALTH CHECK ----

@@ -37,6 +37,9 @@ export default function CheckoutPage() {
   const [createAccount, setCreateAccount] = useState(false);
   const [knownMember, setKnownMember] = useState<{ exists: boolean; name: string | null }>({ exists: false, name: null });
   const emailCheckTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  useEffect(() => {
+    return () => { if (emailCheckTimer.current) clearTimeout(emailCheckTimer.current); };
+  }, []);
   const [form, setForm] = useState({
     firstname: "",
     lastname: "",

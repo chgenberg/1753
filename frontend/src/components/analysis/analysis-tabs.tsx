@@ -63,6 +63,15 @@ interface Routine {
   evening: RoutineStep[];
 }
 
+export interface FaceZoneGPT {
+  zone: string;
+  label: string;
+  x: number;
+  y: number;
+  condition: string;
+  confidence: "low" | "medium" | "high";
+}
+
 export interface AnalysisTabsProps {
   score: number;
   scoreLabel?: string;
@@ -77,6 +86,7 @@ export interface AnalysisTabsProps {
   hasScan?: boolean;
   scanImageSrc?: string;
   scanZoneResults?: ZoneResult[];
+  faceZonesGPT?: FaceZoneGPT[];
 }
 
 /* ------------------------------------------------------------------ */
@@ -197,7 +207,7 @@ function ScoreRing({ score, label }: { score: number; label?: string }) {
 /*  Tab 1 – Din hy                                                     */
 /* ------------------------------------------------------------------ */
 
-function SkinTab({ score, scoreLabel, summary, skinAnalysis, hasScan, scanImageSrc, scanZoneResults }: {
+function SkinTab({ score, scoreLabel, summary, skinAnalysis, hasScan, scanImageSrc, scanZoneResults, faceZonesGPT }: {
   score: number;
   scoreLabel?: string;
   summary: string;
@@ -205,9 +215,15 @@ function SkinTab({ score, scoreLabel, summary, skinAnalysis, hasScan, scanImageS
   hasScan?: boolean;
   scanImageSrc?: string;
   scanZoneResults?: ZoneResult[];
+  faceZonesGPT?: FaceZoneGPT[];
 }) {
   const { locale } = useLocale();
   const condLabels = locale === "en" ? CONDITION_LABELS_EN : CONDITION_LABELS_SV;
+
+  const gptZones = (faceZonesGPT ?? []).filter(
+    (z) => z.confidence !== "low" && z.condition !== "normal"
+  );
+  const hasGPTZones = gptZones.length > 0;
 
   const HIGH_FP_CONDITIONS = new Set(["psoriasis", "fungal", "sun_damage"]);
   const significantZones = scanZoneResults?.filter((z) => {
@@ -232,16 +248,80 @@ function SkinTab({ score, scoreLabel, summary, skinAnalysis, hasScan, scanImageS
             {locale === "en" ? "Your face scan" : "Din ansiktsskanning"}
           </div>
 
-          {significantZones.length > 0 ? (
+          {/* GPT Vision-based zones: badges positioned on the image */}
+          {hasGPTZones ? (
+            <div className="mx-auto max-w-md">
+              <div className="relative overflow-hidden rounded-2xl border border-[#e6e6e6] shadow-sm">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={scanImageSrc}
+                  alt={locale === "en" ? "Face scan" : "Ansiktsskanning"}
+                  className="block h-auto w-full"
+                />
+                {gptZones.map((z) => {
+                  const color = CONDITION_COLORS[z.condition] || "#108474";
+                  const label = condLabels[z.condition] || z.label;
+                  const isLeft = z.x < 50;
+                  return (
+                    <div
+                      key={z.zone}
+                      className="absolute flex items-center gap-1.5 pointer-events-none"
+                      style={{
+                        left: `${z.x}%`,
+                        top: `${z.y}%`,
+                        transform: isLeft ? "translate(-100%, -50%)" : "translate(0%, -50%)",
+                      }}
+                    >
+                      {isLeft ? (
+                        <>
+                          <span
+                            className="rounded-lg px-2 py-1 text-[10px] font-semibold leading-tight text-white shadow-md backdrop-blur-sm md:text-xs"
+                            style={{ backgroundColor: `${color}dd` }}
+                          >
+                            {label}
+                          </span>
+                          <div className="h-2.5 w-2.5 rounded-full border-2 border-white shadow-md" style={{ backgroundColor: color }} />
+                        </>
+                      ) : (
+                        <>
+                          <div className="h-2.5 w-2.5 rounded-full border-2 border-white shadow-md" style={{ backgroundColor: color }} />
+                          <span
+                            className="rounded-lg px-2 py-1 text-[10px] font-semibold leading-tight text-white shadow-md backdrop-blur-sm md:text-xs"
+                            style={{ backgroundColor: `${color}dd` }}
+                          >
+                            {label}
+                          </span>
+                        </>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+
+              {/* Zone list below image on mobile for readability */}
+              <div className="mt-3 space-y-1.5 md:hidden">
+                {gptZones.map((z) => {
+                  const color = CONDITION_COLORS[z.condition] || "#108474";
+                  const label = condLabels[z.condition] || z.label;
+                  return (
+                    <div key={z.zone} className="flex items-center gap-2 rounded-lg px-3 py-1.5" style={{ backgroundColor: `${color}0d` }}>
+                      <div className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: color }} />
+                      <span className="text-[11px] font-semibold" style={{ color }}>{label}</span>
+                      <span className="text-[11px] text-[#766a62]">{z.label}</span>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          ) : significantZones.length > 0 ? (
+            /* Fallback: scanner-based zones displayed beside the image */
             <div className="mx-auto grid max-w-3xl grid-cols-[1fr_auto_1fr] items-center gap-3 md:gap-5">
-              {/* Left column */}
               <div className="flex flex-col items-end gap-2">
                 {significantZones.filter((_, i) => i % 2 === 0).map((z) => (
                   <ZoneBadge key={z.zone.id} z={z} locale={locale} condLabels={condLabels} align="right" />
                 ))}
               </div>
 
-              {/* Center image */}
               <div className="w-48 md:w-64 shrink-0 overflow-hidden rounded-2xl border border-[#e6e6e6] shadow-sm">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
@@ -251,7 +331,6 @@ function SkinTab({ score, scoreLabel, summary, skinAnalysis, hasScan, scanImageS
                 />
               </div>
 
-              {/* Right column */}
               <div className="flex flex-col items-start gap-2">
                 {significantZones.filter((_, i) => i % 2 === 1).map((z) => (
                   <ZoneBadge key={z.zone.id} z={z} locale={locale} condLabels={condLabels} align="left" />
@@ -689,6 +768,7 @@ export function AnalysisTabs({
   hasScan,
   scanImageSrc,
   scanZoneResults,
+  faceZonesGPT,
 }: AnalysisTabsProps) {
   const { locale } = useLocale();
   const [activeTab, setActiveTab] = useState<TabId>("skin");
@@ -737,6 +817,7 @@ export function AnalysisTabs({
             hasScan={hasScan}
             scanImageSrc={scanImageSrc}
             scanZoneResults={scanZoneResults}
+            faceZonesGPT={faceZonesGPT}
           />
         )}
         {activeTab === "products" && <ProductsTab products={products} />}

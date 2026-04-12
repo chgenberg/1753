@@ -47,6 +47,15 @@ interface QuizAnswers {
   sensitivities: string;
 }
 
+interface FaceZoneGPT {
+  zone: string;
+  label: string;
+  x: number;
+  y: number;
+  condition: string;
+  confidence: "low" | "medium" | "high";
+}
+
 interface AnalysisJSON {
   score: number;
   scoreLabel?: string;
@@ -66,6 +75,7 @@ interface AnalysisJSON {
   };
   avoid: string[];
   nextAnalysis: string;
+  faceZones?: FaceZoneGPT[];
   /** Legacy fields for backward compat */
   regions?: { label: string; observation: string; score: number }[];
   routineSuggestion?: { morning: string[]; evening: string[] };
@@ -1014,6 +1024,7 @@ export default function AnalysisPage() {
                   hasScan={!!scanSummary}
                   scanImageSrc={scanSummary?.imageBase64 || undefined}
                   scanZoneResults={scanSummary?.zones || undefined}
+                  faceZonesGPT={parsed.faceZones || undefined}
                 />
               ) : (
                 <div className="rounded-2xl border border-border bg-white p-6 md:p-8">
