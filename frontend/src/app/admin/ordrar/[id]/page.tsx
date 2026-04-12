@@ -351,7 +351,7 @@ export default function OrderDetailPage() {
   }
 
   const canRetry = order.status === "pending" || order.status === "partial";
-  const canCancel = !order.shipped_at && order.status !== "cancelled" && order.status !== "returned";
+  const canCancel = order.status !== "cancelled" && order.status !== "returned";
 
   return (
     <div className="space-y-6">
