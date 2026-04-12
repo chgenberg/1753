@@ -302,11 +302,8 @@ const DISCOUNT_CODES = {
   },
 };
 
-function generateOrderNumber() {
-  const d = new Date();
-  const date = d.toISOString().slice(0, 10).replace(/-/g, "");
-  const rand = crypto.randomBytes(3).toString("hex").toUpperCase().slice(0, 5);
-  return `1753-${date}-${rand}`;
+async function generateOrderNumber() {
+  return await db.nextSharedOrderNumber();
 }
 
 // ---- SUBSCRIPTION ROUTES ----
@@ -330,7 +327,7 @@ app.post("/api/subscriptions/create", authMiddleware, async (req, res) => {
     const recurringPrice = Math.round(originalPrice * (1 - discountPercent / 100));
     const vivaAmount = recurringPrice * 100;
 
-    const orderNumber = generateOrderNumber();
+    const orderNumber = await generateOrderNumber();
 
     const vivaData = await vivaFetch("/checkout/v2/orders", "POST", {
       amount: vivaAmount,
@@ -2285,7 +2282,7 @@ app.post("/api/orders/create", async (req, res) => {
     const shippingCost = totalAmount >= FREE_SHIPPING_THRESHOLD ? 0 : shippingAmount;
     const vivaAmount = (totalAmount + shippingCost) * 100;
 
-    const orderNumber = generateOrderNumber();
+    const orderNumber = await generateOrderNumber();
 
     // Always look up existing user by email so orders are linked to their account.
     // Force account creation for subscription orders (user needs login to manage it).
@@ -2516,8 +2513,8 @@ async function handleOrderCompletion(orderId) {
     notes.push(`Fortnox kund hittad: ${fortnoxCustomerNumber}`);
   }
 
-  // 2. Get shared order number for Fortnox + Ongoing
-  const sharedOrderNumber = await db.nextOngoingOrderNumber();
+  // 2. Use the order's own number for Fortnox + Ongoing (generated at checkout)
+  const sharedOrderNumber = order.order_number;
   let fortnoxOrderNumber = null;
   if (fortnoxCustomerNumber) {
     try {
@@ -5268,7 +5265,7 @@ async function processRecurringCharges() {
         }
 
         const newTxId = chargeData?.TransactionId || chargeData?.transactionId;
-        const orderNumber = generateOrderNumber();
+        const orderNumber = await generateOrderNumber();
 
         const user = await db.findUserById(sub.user_id);
         const lastOrder = user ? (await db.pool.query(
