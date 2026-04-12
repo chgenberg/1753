@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import {
+  ArrowRight,
   Check,
   Droplets,
   Gift,
@@ -204,10 +205,35 @@ function ScoreRing({ score, label }: { score: number; label?: string }) {
 }
 
 /* ------------------------------------------------------------------ */
+/*  Next-step CTA                                                      */
+/* ------------------------------------------------------------------ */
+
+function NextStepButton({ label, subtext, onClick }: {
+  label: string;
+  subtext?: string;
+  onClick: () => void;
+}) {
+  return (
+    <div className="mt-8 text-center">
+      <button
+        onClick={onClick}
+        className="group inline-flex items-center gap-2.5 rounded-full border-2 border-[#108474] bg-[#108474]/5 px-7 py-3.5 text-sm font-semibold text-[#108474] transition-all hover:bg-[#108474] hover:text-white active:scale-[0.97]"
+      >
+        {label}
+        <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
+      </button>
+      {subtext && (
+        <p className="mt-2 text-xs text-[#766a62]">{subtext}</p>
+      )}
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
 /*  Tab 1 – Din hy                                                     */
 /* ------------------------------------------------------------------ */
 
-function SkinTab({ score, scoreLabel, summary, skinAnalysis, hasScan, scanImageSrc, scanZoneResults, faceZonesGPT }: {
+function SkinTab({ score, scoreLabel, summary, skinAnalysis, hasScan, scanImageSrc, scanZoneResults, faceZonesGPT, onNextTab }: {
   score: number;
   scoreLabel?: string;
   summary: string;
@@ -216,6 +242,7 @@ function SkinTab({ score, scoreLabel, summary, skinAnalysis, hasScan, scanImageS
   scanImageSrc?: string;
   scanZoneResults?: ZoneResult[];
   faceZonesGPT?: FaceZoneGPT[];
+  onNextTab?: () => void;
 }) {
   const { locale } = useLocale();
   const condLabels = locale === "en" ? CONDITION_LABELS_EN : CONDITION_LABELS_SV;
@@ -423,6 +450,14 @@ function SkinTab({ score, scoreLabel, summary, skinAnalysis, hasScan, scanImageS
           </div>
         </>
       )}
+
+      {onNextTab && (
+        <NextStepButton
+          label={locale === "en" ? "See your products" : "Se dina produkter"}
+          subtext={locale === "en" ? "Products matched to your skin" : "Produkter anpassade efter din hud"}
+          onClick={onNextTab}
+        />
+      )}
     </div>
   );
 }
@@ -431,7 +466,7 @@ function SkinTab({ score, scoreLabel, summary, skinAnalysis, hasScan, scanImageS
 /*  Tab 2 – Produkter                                                  */
 /* ------------------------------------------------------------------ */
 
-function ProductsTab({ products }: { products: ProductRec[] }) {
+function ProductsTab({ products, onNextTab }: { products: ProductRec[]; onNextTab?: () => void }) {
   const { locale } = useLocale();
   const { addItems, openCart } = useCart();
   const [added, setAdded] = useState(false);
@@ -573,6 +608,14 @@ function ProductsTab({ products }: { products: ProductRec[] }) {
           </p>
         )}
       </div>
+
+      {onNextTab && (
+        <NextStepButton
+          label={locale === "en" ? "Your lifestyle tips" : "Dina livsstilsråd"}
+          subtext={locale === "en" ? "Personalised habits for better skin" : "Personliga vanor for battre hud"}
+          onClick={onNextTab}
+        />
+      )}
     </div>
   );
 }
@@ -629,7 +672,7 @@ function getAreaLabel(area: string, locale: "sv" | "en") {
   return area;
 }
 
-function LifestyleTab({ lifestyle, avoid }: { lifestyle: LifestyleItem[]; avoid: string[] }) {
+function LifestyleTab({ lifestyle, avoid, onNextTab }: { lifestyle: LifestyleItem[]; avoid: string[]; onNextTab?: () => void }) {
   const { locale } = useLocale();
   return (
     <div className="space-y-6 animate-fade-in">
@@ -674,6 +717,14 @@ function LifestyleTab({ lifestyle, avoid }: { lifestyle: LifestyleItem[]; avoid:
             ))}
           </div>
         </div>
+      )}
+
+      {onNextTab && (
+        <NextStepButton
+          label={locale === "en" ? "See your routine" : "Se din rutin"}
+          subtext={locale === "en" ? "Morning & evening steps" : "Morgon- och kvallsrutin"}
+          onClick={onNextTab}
+        />
       )}
     </div>
   );
@@ -772,12 +823,23 @@ export function AnalysisTabs({
 }: AnalysisTabsProps) {
   const { locale } = useLocale();
   const [activeTab, setActiveTab] = useState<TabId>("skin");
+  const tabOrder: TabId[] = ["skin", "products", "lifestyle", "routine"];
   const tabs: { id: TabId; label: string; icon: LucideIcon }[] = [
     { id: "skin", label: locale === "en" ? "Your skin" : "Din hy", icon: Sparkles },
     { id: "products", label: locale === "en" ? "Products" : "Produkter", icon: Package },
     { id: "lifestyle", label: locale === "en" ? "Lifestyle" : "Livsstil", icon: Leaf },
     { id: "routine", label: locale === "en" ? "Routine" : "Din rutin", icon: Moon },
   ];
+
+  const goToNextTab = () => {
+    const idx = tabOrder.indexOf(activeTab);
+    if (idx < tabOrder.length - 1) {
+      setActiveTab(tabOrder[idx + 1]);
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
+  const isLastTab = activeTab === tabOrder[tabOrder.length - 1];
 
   return (
     <div className="space-y-8">
@@ -792,14 +854,14 @@ export function AnalysisTabs({
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id)}
                 className={cn(
-                  "inline-flex items-center gap-1.5 rounded-xl px-4 py-2.5 text-xs font-semibold transition-all duration-300",
+                  "inline-flex items-center gap-1.5 rounded-xl px-3 py-2.5 text-[11px] font-semibold transition-all duration-300 sm:px-4 sm:text-xs",
                   active
                     ? "bg-white text-[#108474] shadow-sm"
                     : "text-[#766a62] hover:text-[#1d1d1f]"
                 )}
               >
-                <Icon className="h-3.5 w-3.5" />
-                <span className="hidden sm:inline">{tab.label}</span>
+                <Icon className="h-3.5 w-3.5 shrink-0" />
+                {tab.label}
               </button>
             );
           })}
@@ -818,14 +880,34 @@ export function AnalysisTabs({
             scanImageSrc={scanImageSrc}
             scanZoneResults={scanZoneResults}
             faceZonesGPT={faceZonesGPT}
+            onNextTab={goToNextTab}
           />
         )}
-        {activeTab === "products" && <ProductsTab products={products} />}
-        {activeTab === "lifestyle" && <LifestyleTab lifestyle={lifestyle} avoid={avoid} />}
+        {activeTab === "products" && (
+          <ProductsTab products={products} onNextTab={goToNextTab} />
+        )}
+        {activeTab === "lifestyle" && (
+          <LifestyleTab lifestyle={lifestyle} avoid={avoid} onNextTab={goToNextTab} />
+        )}
         {activeTab === "routine" && (
           <RoutineTab routine={routine} routineLegacy={routineLegacy} />
         )}
       </div>
+
+      {/* Step indicator on mobile */}
+      {!isLastTab && (
+        <div className="flex items-center justify-center gap-1.5 sm:hidden">
+          {tabOrder.map((id) => (
+            <div
+              key={id}
+              className={cn(
+                "h-1.5 rounded-full transition-all duration-300",
+                id === activeTab ? "w-6 bg-[#108474]" : "w-1.5 bg-[#e6e6e6]"
+              )}
+            />
+          ))}
+        </div>
+      )}
 
       {/* Next analysis hint */}
       {nextAnalysis && (
