@@ -9,6 +9,9 @@ import { CookieBanner } from "@/components/cookie-banner";
 import { Analytics } from "@/components/analytics";
 import { LocaleProvider } from "@/providers/locale-provider";
 import { getMessages } from "@/lib/i18n/messages";
+import { PRODUCTS, productDisplayName, productShortDesc, productPrice } from "@/lib/products";
+import { getCurrency } from "@/lib/currency";
+import { localizePath } from "@/lib/i18n/navigation";
 import type { Locale } from "@/lib/i18n/types";
 import { locales } from "@/lib/i18n/types";
 
@@ -108,6 +111,33 @@ export default async function LocaleLayout({
     inLanguage: locale === "en" ? "en" : "sv",
   };
 
+  const l = locale as Locale;
+  const currency = getCurrency(l);
+  const itemListSchema = {
+    "@context": "https://schema.org",
+    "@type": "ItemList",
+    name: l === "en" ? "1753 SKINCARE Products" : "1753 SKINCARE Produkter",
+    numberOfItems: PRODUCTS.length,
+    itemListElement: PRODUCTS.map((p, i) => ({
+      "@type": "ListItem",
+      position: i + 1,
+      item: {
+        "@type": "Product",
+        name: productDisplayName(p, l),
+        description: productShortDesc(p, l),
+        image: `https://www.1753skin.com${p.image}`,
+        url: `https://www.1753skin.com${localizePath(l, "product", { productId: p.id })}`,
+        brand: { "@type": "Brand", name: "1753 SKINCARE" },
+        offers: {
+          "@type": "Offer",
+          price: productPrice(p, l),
+          priceCurrency: currency,
+          availability: "https://schema.org/InStock",
+        },
+      },
+    })),
+  };
+
   return (
     <LocaleProvider locale={locale as Locale} messages={messages}>
       <script
@@ -117,6 +147,10 @@ export default async function LocaleLayout({
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(webSiteSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }}
       />
       <TopBanner />
       <Header />
