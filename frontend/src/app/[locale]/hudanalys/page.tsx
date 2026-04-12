@@ -818,7 +818,15 @@ export default function AnalysisPage() {
                 <div className="rounded-2xl border border-border bg-white p-6 md:p-8">
                   <div
                     className="prose prose-sm max-w-none text-muted-foreground"
-                    dangerouslySetInnerHTML={{ __html: stripJSON(result.content) }}
+                    dangerouslySetInnerHTML={{
+                      __html: stripJSON(result.content)
+                        .split(/\n\n+/)
+                        .flatMap((p) => p.split(/\n/))
+                        .map((p) => p.trim())
+                        .filter(Boolean)
+                        .map((p) => `<p>${p}</p>`)
+                        .join("")
+                    }}
                   />
                 </div>
               )}

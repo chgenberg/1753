@@ -78,6 +78,44 @@ export interface AnalysisTabsProps {
 type TabId = "skin" | "products" | "lifestyle" | "routine";
 
 /* ------------------------------------------------------------------ */
+/*  Helpers                                                            */
+/* ------------------------------------------------------------------ */
+
+function Paragraphs({ text, className }: { text: string; className?: string }) {
+  const paragraphs = text
+    .split(/\n\n+/)
+    .flatMap((p) => p.split(/\n/))
+    .map((p) => p.trim())
+    .filter(Boolean);
+
+  if (paragraphs.length <= 1) {
+    const sentences = text.split(/(?<=\.)\s+/);
+    if (sentences.length > 4) {
+      const chunks: string[] = [];
+      const perChunk = Math.ceil(sentences.length / Math.ceil(sentences.length / 4));
+      for (let i = 0; i < sentences.length; i += perChunk) {
+        chunks.push(sentences.slice(i, i + perChunk).join(" "));
+      }
+      return (
+        <div className={cn("space-y-3", className)}>
+          {chunks.map((chunk, i) => (
+            <p key={i}>{chunk}</p>
+          ))}
+        </div>
+      );
+    }
+  }
+
+  return (
+    <div className={cn("space-y-3", className)}>
+      {paragraphs.map((p, i) => (
+        <p key={i}>{p}</p>
+      ))}
+    </div>
+  );
+}
+
+/* ------------------------------------------------------------------ */
 /*  Score ring                                                         */
 /* ------------------------------------------------------------------ */
 
@@ -132,9 +170,10 @@ function SkinTab({ score, scoreLabel, summary, skinAnalysis, hasScan, scanImageS
     <div className="space-y-8 animate-fade-in">
       <ScoreRing score={score} label={scoreLabel} />
 
-      <p className="mx-auto max-w-lg text-center text-sm leading-relaxed text-[#515151]">
-        {summary}
-      </p>
+      <Paragraphs
+        text={summary}
+        className="mx-auto max-w-lg text-center text-sm leading-relaxed text-[#515151]"
+      />
 
       {hasScan && scanImageSrc && scanZoneResults && (
         <div className="space-y-3">
@@ -163,11 +202,10 @@ function SkinTab({ score, scoreLabel, summary, skinAnalysis, hasScan, scanImageS
             <h3 className="mb-4 text-lg font-bold tracking-tight text-[#1d1d1f]">
               {locale === "en" ? "Skin analysis" : "Hudanalys"}
             </h3>
-            <div className="space-y-3 text-sm leading-relaxed text-[#515151]">
-              {skinAnalysis.overview.split("\\n\\n").map((paragraph, i) => (
-                <p key={i}>{paragraph}</p>
-              ))}
-            </div>
+            <Paragraphs
+              text={skinAnalysis.overview}
+              className="text-sm leading-relaxed text-[#515151]"
+            />
           </div>
 
           {skinAnalysis.strengths.length > 0 && (
