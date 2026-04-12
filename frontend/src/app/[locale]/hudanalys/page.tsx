@@ -333,7 +333,7 @@ function stripJSON(content: string): string {
 
 export default function AnalysisPage() {
   const { locale, t } = useLocale();
-  const { token } = useAuth();
+  const { token, user } = useAuth();
   const a = (key: string, vars?: Record<string, string | number>) =>
     t(`analysisPage.${key}`, vars);
   const conditionLabels = locale === "en" ? CONDITION_LABELS_EN : CONDITION_LABELS_SV;
@@ -363,6 +363,7 @@ export default function AnalysisPage() {
   const [snapshotSaved, setSnapshotSaved] = useState(false);
   const [snapshotSaving, setSnapshotSaving] = useState(false);
   const [nlSubscribed, setNlSubscribed] = useState(false);
+  const [isReturningUser, setIsReturningUser] = useState(false);
 
   useEffect(() => {
     try {
@@ -378,6 +379,19 @@ export default function AnalysisPage() {
       }
     } catch { /* ignore corrupt data */ }
   }, []);
+
+  useEffect(() => {
+    if (!user) return;
+    setUserEmail(user.email);
+    setEmailConsent(true);
+    setIsReturningUser(true);
+
+    apiFetch<{ subscribed: boolean }>(`/newsletter/status?email=${encodeURIComponent(user.email)}`)
+      .then((res) => {
+        if (res.subscribed) setNlSubscribed(true);
+      })
+      .catch(() => {});
+  }, [user]);
 
   const toggleArray = (arr: string[], key: string, max?: number) => {
     if (arr.includes(key)) return arr.filter((k) => k !== key);
@@ -486,6 +500,8 @@ export default function AnalysisPage() {
           }
         : {};
 
+      const faceImage = scanSummary?.imageBase64 || null;
+
       const data = await apiFetch<AnalysisResponse>("/analysis", {
         method: "POST",
         headers,
@@ -510,6 +526,7 @@ export default function AnalysisPage() {
             locale,
           },
           ...scanContext,
+          ...(faceImage ? { fullImage: faceImage } : {}),
         }),
       });
       setResult(data);
@@ -638,99 +655,127 @@ export default function AnalysisPage() {
                 </div>
               </div>
 
-              {/* Email collection */}
+              {/* Email collection -- skip for logged-in users */}
               <div className="mx-auto mt-8 max-w-sm">
-                <form
-                  onSubmit={(e) => {
-                    e.preventDefault();
-                    setEmailError("");
-                    if (!userEmail.trim() || !userEmail.includes("@")) {
-                      setEmailError(locale === "en" ? "Please enter a valid email address." : "Ange en giltig e-postadress.");
-                      return;
-                    }
-                    if (!emailConsent) {
-                      setEmailError(locale === "en" ? "You need to accept the terms to continue." : "Du behöver godkänna villkoren för att fortsätta.");
-                      return;
-                    }
-                    setStep("scan");
-                  }}
-                  className="space-y-4"
-                >
-                  <div>
-                    <label className="mb-2 block text-left text-sm font-medium text-[#1d1d1f]">
-                      {locale === "en" ? "Your email" : "Din e-postadress"}
-                    </label>
-                    <input
-                      type="email"
-                      required
-                      value={userEmail}
-                      onChange={(e) => setUserEmail(e.target.value)}
-                      placeholder={locale === "en" ? "name@example.com" : "namn@exempel.se"}
-                      className="w-full rounded-xl border border-[#e6e6e6] bg-white px-4 py-3 text-sm shadow-sm placeholder:text-[#766a62]/50 focus:border-[#108474] focus:outline-none focus:ring-2 focus:ring-[#108474]/20"
-                    />
+                {isReturningUser ? (
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-center gap-2 rounded-xl bg-[#108474]/5 px-4 py-3 text-xs font-medium text-[#108474]">
+                      <Check className="h-3.5 w-3.5" />
+                      {locale === "en"
+                        ? `Logged in as ${user?.name || userEmail}`
+                        : `Inloggad som ${user?.name || userEmail}`}
+                    </div>
+
+                    <button
+                      onClick={() => setStep("scan")}
+                      className="inline-flex h-14 w-full items-center justify-center gap-3 rounded-full bg-[#108474] px-10 text-sm font-semibold text-white shadow-lg shadow-[#108474]/20 transition-all hover:bg-[#0d6e62] hover:shadow-xl active:scale-[0.97]"
+                    >
+                      <ScanFace className="h-5 w-5" />
+                      {locale === "en" ? "Start analysis" : "Starta analys"}
+                    </button>
+
+                    <button
+                      onClick={() => setStep(1)}
+                      className="mt-1 block mx-auto text-xs font-medium text-[#766a62] underline underline-offset-2 transition-colors hover:text-[#108474]"
+                    >
+                      {locale === "en" ? "Skip face scan, answer questions only" : "Hoppa över skanning, svara bara på frågor"}
+                    </button>
                   </div>
+                ) : (
+                  <>
+                    <form
+                      onSubmit={(e) => {
+                        e.preventDefault();
+                        setEmailError("");
+                        if (!userEmail.trim() || !userEmail.includes("@")) {
+                          setEmailError(locale === "en" ? "Please enter a valid email address." : "Ange en giltig e-postadress.");
+                          return;
+                        }
+                        if (!emailConsent) {
+                          setEmailError(locale === "en" ? "You need to accept the terms to continue." : "Du behöver godkänna villkoren för att fortsätta.");
+                          return;
+                        }
+                        setStep("scan");
+                      }}
+                      className="space-y-4"
+                    >
+                      <div>
+                        <label className="mb-2 block text-left text-sm font-medium text-[#1d1d1f]">
+                          {locale === "en" ? "Your email" : "Din e-postadress"}
+                        </label>
+                        <input
+                          type="email"
+                          required
+                          value={userEmail}
+                          onChange={(e) => setUserEmail(e.target.value)}
+                          placeholder={locale === "en" ? "name@example.com" : "namn@exempel.se"}
+                          className="w-full rounded-xl border border-[#e6e6e6] bg-white px-4 py-3 text-sm shadow-sm placeholder:text-[#766a62]/50 focus:border-[#108474] focus:outline-none focus:ring-2 focus:ring-[#108474]/20"
+                        />
+                      </div>
 
-                  <button
-                    type="button"
-                    onClick={() => setEmailConsent((c) => !c)}
-                    className={cn(
-                      "flex w-full items-start gap-3 rounded-2xl border-2 px-4 py-3 text-left transition-all duration-300",
-                      emailConsent
-                        ? "border-[#108474]/30 bg-[#108474]/5"
-                        : "border-transparent bg-[#f5f5f7] hover:border-[#e6e6e6]"
-                    )}
-                  >
-                    {emailConsent ? (
-                      <Check className="mt-0.5 h-5 w-5 flex-shrink-0 text-[#108474]" />
-                    ) : (
-                      <div className="mt-0.5 h-5 w-5 flex-shrink-0 rounded border-2 border-[#766a62]/30" />
-                    )}
-                    <span className="text-xs leading-relaxed text-[#515151]">
-                      {locale === "en" ? (
-                        <>
-                          I agree to receive personalised skincare tips by email based on my analysis results.
-                          I also agree that my answers may be used <span className="font-semibold text-[#1d1d1f]">anonymously</span> to
-                          improve the AI analysis. I can unsubscribe at any time.
-                        </>
-                      ) : (
-                        <>
-                          Jag godkänner att få personliga hudvårdstips via e-post baserat på mina analysresultat.
-                          Jag godkänner också att mina svar får användas <span className="font-semibold text-[#1d1d1f]">anonymt</span> för
-                          att förbättra AI-analysen. Jag kan avregistrera mig när som helst.
-                        </>
+                      <button
+                        type="button"
+                        onClick={() => setEmailConsent((c) => !c)}
+                        className={cn(
+                          "flex w-full items-start gap-3 rounded-2xl border-2 px-4 py-3 text-left transition-all duration-300",
+                          emailConsent
+                            ? "border-[#108474]/30 bg-[#108474]/5"
+                            : "border-transparent bg-[#f5f5f7] hover:border-[#e6e6e6]"
+                        )}
+                      >
+                        {emailConsent ? (
+                          <Check className="mt-0.5 h-5 w-5 flex-shrink-0 text-[#108474]" />
+                        ) : (
+                          <div className="mt-0.5 h-5 w-5 flex-shrink-0 rounded border-2 border-[#766a62]/30" />
+                        )}
+                        <span className="text-xs leading-relaxed text-[#515151]">
+                          {locale === "en" ? (
+                            <>
+                              I agree to receive personalised skincare tips by email based on my analysis results.
+                              I also agree that my answers may be used <span className="font-semibold text-[#1d1d1f]">anonymously</span> to
+                              improve the AI analysis. I can unsubscribe at any time.
+                            </>
+                          ) : (
+                            <>
+                              Jag godkänner att få personliga hudvårdstips via e-post baserat på mina analysresultat.
+                              Jag godkänner också att mina svar får användas <span className="font-semibold text-[#1d1d1f]">anonymt</span> för
+                              att förbättra AI-analysen. Jag kan avregistrera mig när som helst.
+                            </>
+                          )}
+                        </span>
+                      </button>
+
+                      {emailError && (
+                        <p className="rounded-xl bg-red-50 px-4 py-2 text-xs text-red-700">{emailError}</p>
                       )}
-                    </span>
-                  </button>
 
-                  {emailError && (
-                    <p className="rounded-xl bg-red-50 px-4 py-2 text-xs text-red-700">{emailError}</p>
-                  )}
+                      <button
+                        type="submit"
+                        className="inline-flex h-14 w-full items-center justify-center gap-3 rounded-full bg-[#108474] px-10 text-sm font-semibold text-white shadow-lg shadow-[#108474]/20 transition-all hover:bg-[#0d6e62] hover:shadow-xl active:scale-[0.97]"
+                      >
+                        <ScanFace className="h-5 w-5" />
+                        {locale === "en" ? "Start analysis" : "Starta analys"}
+                      </button>
+                    </form>
 
-                  <button
-                    type="submit"
-                    className="inline-flex h-14 w-full items-center justify-center gap-3 rounded-full bg-[#108474] px-10 text-sm font-semibold text-white shadow-lg shadow-[#108474]/20 transition-all hover:bg-[#0d6e62] hover:shadow-xl active:scale-[0.97]"
-                  >
-                    <ScanFace className="h-5 w-5" />
-                    {locale === "en" ? "Start analysis" : "Starta analys"}
-                  </button>
-                </form>
-
-                <button
-                  onClick={() => {
-                    if (!userEmail.trim() || !userEmail.includes("@")) {
-                      setEmailError(locale === "en" ? "Please enter a valid email address." : "Ange en giltig e-postadress.");
-                      return;
-                    }
-                    if (!emailConsent) {
-                      setEmailError(locale === "en" ? "You need to accept the terms to continue." : "Du behöver godkänna villkoren för att fortsätta.");
-                      return;
-                    }
-                    setStep(1);
-                  }}
-                  className="mt-3 block mx-auto text-xs font-medium text-[#766a62] underline underline-offset-2 transition-colors hover:text-[#108474]"
-                >
-                  {locale === "en" ? "Skip face scan, answer questions only" : "Hoppa över skanning, svara bara på frågor"}
-                </button>
+                    <button
+                      onClick={() => {
+                        if (!userEmail.trim() || !userEmail.includes("@")) {
+                          setEmailError(locale === "en" ? "Please enter a valid email address." : "Ange en giltig e-postadress.");
+                          return;
+                        }
+                        if (!emailConsent) {
+                          setEmailError(locale === "en" ? "You need to accept the terms to continue." : "Du behöver godkänna villkoren för att fortsätta.");
+                          return;
+                        }
+                        setStep(1);
+                      }}
+                      className="mt-3 block mx-auto text-xs font-medium text-[#766a62] underline underline-offset-2 transition-colors hover:text-[#108474]"
+                    >
+                      {locale === "en" ? "Skip face scan, answer questions only" : "Hoppa över skanning, svara bara på frågor"}
+                    </button>
+                  </>
+                )}
               </div>
 
               <p className="mx-auto mt-6 max-w-sm text-xs text-[#766a62]">

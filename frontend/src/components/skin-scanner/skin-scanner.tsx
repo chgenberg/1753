@@ -136,12 +136,34 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
     setAnalyzingZone("");
 
     try {
-      const { loadModel, classifyRegion } = await import("./onnx-inference");
+      const { loadModel, classifyRegionTTA } = await import("./onnx-inference");
       const session = await loadModel((pct) => setModelProgress(pct));
       setStep("analyzing");
       setAnalyzingZone(locale === "en" ? "Full face" : "Helhetsbild");
 
-      const overallPreds = await classifyRegion(
+      const NORMAL_THRESHOLD = 0.35;
+      const ENTROPY_THRESHOLD = 2.0;
+
+      function entropy(preds: { probability: number }[]) {
+        return -preds.reduce((s, p) => {
+          const q = Math.max(p.probability, 1e-10);
+          return s + q * Math.log2(q);
+        }, 0);
+      }
+
+      function applyNormalFilter(preds: { label: string; probability: number }[]) {
+        const topProb = preds[0]?.probability ?? 0;
+        const e = entropy(preds);
+        if (topProb < NORMAL_THRESHOLD || e > ENTROPY_THRESHOLD) {
+          return [
+            { label: "normal", probability: 1 - topProb },
+            ...preds,
+          ];
+        }
+        return preds;
+      }
+
+      const rawOverall = await classifyRegionTTA(
         session,
         canvas,
         0,
@@ -149,6 +171,8 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
         canvas.width,
         canvas.height
       );
+      const overallPreds = applyNormalFilter(rawOverall);
+
       const faceW = canvas.width * 0.75;
       const faceH = canvas.height * 0.85;
       const faceX = (canvas.width - faceW) / 2;
@@ -172,7 +196,8 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
 
         if (safeW < 20 || safeH < 20) continue;
 
-        const preds = await classifyRegion(session, canvas, safeX, safeY, safeW, safeH);
+        const rawPreds = await classifyRegionTTA(session, canvas, safeX, safeY, safeW, safeH);
+        const preds = applyNormalFilter(rawPreds);
 
         zoneResults.push({
           zone,

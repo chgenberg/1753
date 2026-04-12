@@ -74,7 +74,7 @@ export const CONDITION_LABELS_SV: Record<string, string> = {
   dermatitis: "Dermatit",
   dryness: "Torr hy",
   eczema: "Eksem",
-  enlarged_pores: "Forstorda porer",
+  enlarged_pores: "Förstorade porer",
   fungal: "Svampinfektion",
   hyperpigmentation: "Hyperpigmentering",
   normal: "Frisk hud",

@@ -1480,21 +1480,35 @@ Immunologiska och hormonella kopplingar mellan tarmflora och hud. Stress/dysbios
 == ANALYSTYP ==
 Kunden har besvarat en quiz om hudtyp, besvär, rutin och livsstil. Om skanningsdata finns inkluderat, integrera det i analysen (zoner med detekterade hudtillstånd och konfidensgrader).
 
-VIKTIGT OM SKANNINGSDATA: AI-skanningen använder en bildklassificeringsmodell med ~80% accuracy. Var KRITISK mot resultaten:
-- Konfidensgrader under 50% bör ignoreras eller nämnas med stor reservation
-- Om flera zoner visar samma tillstånd med låg konfidens kan det vara en felklassificering
-- Psoriasis, fungal och sun_damage har högst felprocent – var extra försiktig med dessa
-- Använd skanningsdata som EN signal bland många, inte som sanning
-- Kundens egna quiz-svar (hudtyp, besvär) väger TYNGRE än skanningen
-- Normal/frisk hud klassificeras ofta fel som dermatit eller akne – ta hänsyn till detta
+== VISUELL BEDÖMNING (DIN VIKTIGASTE UPPGIFT NÄR BILD FINNS) ==
+Om en ansiktsbild bifogas: DU SKA ANVÄNDA DIN EGEN VISUELLA BEDÖMNING SOM PRIMÄRKÄLLA. Titta noggrant på bilden och bedöm huden själv. Din visuella analys väger MYCKET tyngre än skanningsdata.
+
+KRITISKT: Det lokala ONNX-modellen har INGEN "normal/frisk hud"-klass och MÅSTE alltid klassificera som en hudåkomma (akne, dermatit etc.) även om huden är helt frisk. Detta betyder att skanningsdata SYSTEMATISKT överrapporterar problem.
+
+Prioriteringsordning (viktigast först):
+1. DIN VISUELLA BEDÖMNING av bilden (om bild bifogas) – 50% vikt
+2. Kundens egna quiz-svar (hudtyp, besvär) – 30% vikt
+3. Skanningsdata från ONNX-modellen – max 10% vikt, och ENBART om konfidens >60%
+4. Livsstilsfaktorer – 10% vikt
+
+VIKTIGT OM SKANNINGSDATA: AI-skanningen använder en begränsad bildklassificeringsmodell (~80% accuracy) som SAKNAR "normal"-klass:
+- Modellen TVINGAS välja en åkomma även för helt frisk hud – detta är en känd brist
+- Konfidensgrader under 60% bör IGNORERAS helt
+- "normal" i skanningsdata betyder att vår filtrering bedömt att ingen åkomma detekterades tillförlitligt – behandla det som frisk hud
+- Om din visuella bedömning av bilden visar frisk hud men skanningen säger "akne" eller "dermatit" – LITA PÅ DIN BEDÖMNING
+- Om flera zoner visar samma tillstånd med låg konfidens är det sannolikt en felklassificering
+- Psoriasis, fungal och sun_damage har högst felprocent – var EXTREMT försiktig med dessa
+- Nämn ALDRIG skanningsresultat som fakta – om du nämner dem, var tydlig med att det är en indikation med låg tillförlitlighet
 
 == SCORE ==
 Beräkna score (0-100) INDIVIDUELLT baserat på ALLA faktorer:
-- Hudtyp och angivna besvär (30%)
-- Livsstilsfaktorer: sömn, stress, kost, vatten, träning (40%)
-- Nuvarande rutin och dess lämplighet (20%)
-- Skanningsresultat om tillgängliga (10%)
+- Din egen visuella bedömning av bilden, om bild finns (35%)
+- Livsstilsfaktorer: sömn, stress, kost, vatten, träning (30%)
+- Hudtyp och angivna besvär (20%)
+- Nuvarande rutin och dess lämplighet (15%)
+Skanningsresultat påverkar INTE poängen direkt – de kan bekräfta din visuella bedömning men aldrig sänka poängen på egen hand.
 Varje kund ska få ett UNIKT score. Kopiera aldrig exempelvärden.
+OBS: Frisk, välmående hud ska få HÖG poäng (80+). Sänk inte poängen bara för att skanningen rapporterar åkommor – bedöm bilden själv.
 
 == SVARFORMAT ==
 Svara ENBART med ett JSON-block (inget annat). JSON-blocket ska vara markerat med trippla backticks och "json":
@@ -1586,13 +1600,14 @@ Svara ENBART med ett JSON-block (inget annat). JSON-blocket ska vara markerat me
 \`\`\`
 
 == ANSIKTSZONER (faceZones) ==
-Om en ansiktsbild bifogas: titta på bilden och identifiera visuellt var ansiktets zoner befinner sig.
+Om en ansiktsbild bifogas: TITTA NOGGRANT på bilden och gör din EGEN visuella bedömning av varje zon.
 Returnera faceZones-arrayen med en post per synlig zon (panna, näsa, vänster kind, höger kind, haka, t-zon).
 - "zone": ett av forehead, nose, left_cheek, right_cheek, chin, t_zone
 - "label": zonens svenska namn
-- "x" och "y": zonens VISUELLA centrum i bilden, angivet som procenttal (0-100) av bildens bredd och höjd. 0,0 = övre vänstra hörnet, 100,100 = nedre högra hörnet. Uppskatta var i den FAKTISKA bilden varje zon befinner sig – ta hänsyn till inzoomning, ansiktsposition och vinkel.
-- "condition": det hudtillstånd du bedömer finns i zonen (acne, dermatitis, dryness, eczema, normal etc.) baserat på DIN visuella bedömning av bilden, INTE skannermodellens resultat
+- "x" och "y": zonens VISUELLA centrum i bilden, angivet som procenttal (0-100) av bildens bredd och höjd. 0,0 = övre vänstra hörnet, 100,100 = nedre högra hörnet.
+- "condition": det hudtillstånd du SJÄLV bedömer finns i zonen baserat på bilden. Använd "normal" om zonen ser frisk ut. IGNORERA skannermodellens resultat helt – lita på vad DU ser.
 - "confidence": din egen bedömning av säkerheten: "low", "medium" eller "high"
+VIKTIGT: De flesta människor har mestadels frisk hud. Det är HELT NORMALT att de flesta zoner bedöms som "normal". Rapportera ett problem ENBART om du tydligt kan se det i bilden.
 Returnera BARA zoner som syns i bilden. Om ingen bild bifogades, returnera en tom array [].
 
 == PRODUKTREKOMMENDATIONER ==
@@ -1687,14 +1702,14 @@ function buildAnalysisPrompt(questions, imageScan) {
         parts.push(`  - ${z.zone}: ${z.conditionSv || z.condition} (${z.confidence}%)`);
       });
     }
-    parts.push("OBS: Skanningen utfördes lokalt med en AI-modell. Konfidensgrader under 40% bör tolkas med försiktighet.");
+    parts.push("OBS: Skanningen utfördes lokalt med en begränsad AI-modell som SAKNAR 'normal'-klass (dvs den tvingas alltid ange en hudåkomma). 'normal' i datan ovan innebär att vårt filter bedömt att ingen åkomma detekterades tillförlitligt. Konfidensgrader under 60% bör IGNORERAS. LITA PÅ DIN EGEN VISUELLA BEDÖMNING av bilden istället.");
   }
 
   if (!questions && !imageScan) {
     return "Ge mig en holistisk hudanalys baserat på din expertis.";
   }
 
-  parts.push("\nGe en djup, personlig hudanalys. Svara ENBART med JSON-blocket enligt formatet i instruktionerna.");
+  parts.push("\nGe en djup, personlig hudanalys. Om en bild bifogas, basera din bedömning PRIMÄRT på vad du ser i bilden. Svara ENBART med JSON-blocket enligt formatet i instruktionerna.");
   return parts.join("\n");
 }
 
@@ -4000,6 +4015,18 @@ app.get("/api/newsletter/skin-segments", async (req, res) => {
   } catch (err) {
     console.error("[Newsletter] Segments error:", err);
     res.status(500).json({ message: "Fel" });
+  }
+});
+
+app.get("/api/newsletter/status", async (req, res) => {
+  try {
+    const { email } = req.query;
+    if (!email) return res.json({ subscribed: false });
+    const subscriber = await db.findSubscriberByEmail(email);
+    res.json({ subscribed: !!(subscriber && subscriber.status === "active") });
+  } catch (err) {
+    console.error("[Newsletter] Status check error:", err);
+    res.json({ subscribed: false });
   }
 });
 
