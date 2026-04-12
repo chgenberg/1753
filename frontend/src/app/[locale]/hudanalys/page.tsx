@@ -134,7 +134,7 @@ function OptionCard({
       type="button"
       onClick={onClick}
       className={cn(
-        "group relative flex flex-col items-center gap-2 rounded-2xl border-2 px-5 py-6 text-center transition-all duration-300",
+        "group relative flex min-h-[130px] flex-col items-center justify-center gap-2 rounded-2xl border-2 px-5 py-6 text-center transition-all duration-300",
         selected
           ? "border-[#108474] bg-[#108474]/5 shadow-md shadow-[#108474]/10"
           : "border-brand-100 bg-white hover:border-brand-200 hover:shadow-sm",
@@ -809,7 +809,7 @@ export default function AnalysisPage() {
                   if (summary.consentGiven) {
                     uploadTrainingData(summary);
                   }
-                  setTimeout(() => setStep(1), 1500);
+                  setStep(1);
                 }}
               />
 

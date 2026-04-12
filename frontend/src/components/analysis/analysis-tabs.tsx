@@ -4,9 +4,9 @@ import { useState } from "react";
 import {
   ArrowRight,
   Check,
+  ChevronDown,
   Droplets,
   Gift,
-  Heart,
   Leaf,
   Moon,
   Package,
@@ -24,7 +24,6 @@ import { useCart } from "@/providers/cart-provider";
 import {
   CONDITION_LABELS_SV,
   CONDITION_LABELS_EN,
-  CONDITION_COLORS,
   type ZoneResult,
 } from "@/components/skin-scanner/zones";
 
@@ -91,10 +90,51 @@ export interface AnalysisTabsProps {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Tab definitions                                                    */
+/*  Expandable box                                                     */
 /* ------------------------------------------------------------------ */
 
-type TabId = "skin" | "products" | "lifestyle" | "routine";
+function ExpandableBox({
+  title,
+  icon: Icon,
+  children,
+  defaultOpen = false,
+}: {
+  title: string;
+  icon?: LucideIcon;
+  children: React.ReactNode;
+  defaultOpen?: boolean;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
+  return (
+    <div className="overflow-hidden rounded-2xl border border-[#e6e6e6] bg-white transition-shadow hover:shadow-sm">
+      <button
+        onClick={() => setOpen((o) => !o)}
+        className="flex w-full items-center justify-between px-5 py-4 text-left"
+      >
+        <div className="flex items-center gap-2.5">
+          {Icon && <Icon className="h-4 w-4 text-[#108474]" />}
+          <span className="text-sm font-semibold text-[#1d1d1f]">{title}</span>
+        </div>
+        <ChevronDown
+          className={cn(
+            "h-4 w-4 text-[#766a62] transition-transform duration-300",
+            open && "rotate-180"
+          )}
+        />
+      </button>
+      <div
+        className={cn(
+          "grid transition-all duration-300 ease-out",
+          open ? "grid-rows-[1fr] opacity-100" : "grid-rows-[0fr] opacity-0"
+        )}
+      >
+        <div className="overflow-hidden">
+          <div className="px-5 pb-5">{children}</div>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 /* ------------------------------------------------------------------ */
 /*  Helpers                                                            */
@@ -135,39 +175,6 @@ function Paragraphs({ text, className }: { text: string; className?: string }) {
 }
 
 /* ------------------------------------------------------------------ */
-/*  Zone badge (left/right of face image)                              */
-/* ------------------------------------------------------------------ */
-
-function ZoneBadge({ z, locale, condLabels, align }: {
-  z: ZoneResult;
-  locale: string;
-  condLabels: Record<string, string>;
-  align: "left" | "right";
-}) {
-  const color = CONDITION_COLORS[z.topCondition] || "#108474";
-  const label = condLabels[z.topCondition] || z.topCondition;
-  const zone = locale === "en" ? z.zone.labelEn : z.zone.labelSv;
-  const pct = Math.round(z.confidence * 100);
-
-  return (
-    <div
-      className={cn(
-        "rounded-xl px-3 py-2 max-w-[150px] md:max-w-[180px]",
-        align === "right" ? "text-right" : "text-left"
-      )}
-      style={{ backgroundColor: `${color}0d` }}
-    >
-      <div className={cn("flex items-center gap-1.5", align === "right" && "justify-end")}>
-        <div className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: color }} />
-        <span className="text-[11px] font-semibold leading-tight md:text-xs" style={{ color }}>{label}</span>
-      </div>
-      <p className="mt-0.5 text-[10px] text-[#766a62] md:text-[11px]">{zone}</p>
-      <p className="mt-0.5 text-[11px] font-medium text-[#515151] md:text-xs">{pct}%</p>
-    </div>
-  );
-}
-
-/* ------------------------------------------------------------------ */
 /*  Score ring                                                         */
 /* ------------------------------------------------------------------ */
 
@@ -176,8 +183,7 @@ function ScoreRing({ score, label }: { score: number; label?: string }) {
   const r = 70;
   const circ = 2 * Math.PI * r;
   const offset = circ - (score / 100) * circ;
-  const color =
-    score >= 75 ? "#108474" : score >= 50 ? "#fcb237" : "#e55050";
+  const color = "#108474";
 
   return (
     <div className="text-center">
@@ -217,7 +223,7 @@ function NextStepButton({ label, subtext, onClick }: {
     <div className="mt-8 text-center">
       <button
         onClick={onClick}
-        className="group inline-flex items-center gap-2.5 rounded-full border-2 border-[#108474] bg-[#108474]/5 px-7 py-3.5 text-sm font-semibold text-[#108474] transition-all hover:bg-[#108474] hover:text-white active:scale-[0.97]"
+        className="group inline-flex items-center gap-2.5 rounded-full border-2 border-[#1d1d1f] px-7 py-3.5 text-sm font-semibold text-[#1d1d1f] transition-all hover:bg-[#1d1d1f] hover:text-white active:scale-[0.97]"
       >
         {label}
         <ArrowRight className="h-4 w-4 transition-transform group-hover:translate-x-0.5" />
@@ -252,13 +258,6 @@ function SkinTab({ score, scoreLabel, summary, skinAnalysis, hasScan, scanImageS
   );
   const hasGPTZones = gptZones.length > 0;
 
-  const HIGH_FP_CONDITIONS = new Set(["psoriasis", "fungal", "sun_damage"]);
-  const significantZones = scanZoneResults?.filter((z) => {
-    if (z.topCondition === "normal") return false;
-    if (HIGH_FP_CONDITIONS.has(z.topCondition)) return z.confidence >= 0.55;
-    return z.confidence >= 0.30;
-  }) ?? [];
-
   return (
     <div className="space-y-8 animate-fade-in">
       <ScoreRing score={score} label={scoreLabel} />
@@ -275,10 +274,9 @@ function SkinTab({ score, scoreLabel, summary, skinAnalysis, hasScan, scanImageS
             {locale === "en" ? "Your face scan" : "Din ansiktsskanning"}
           </div>
 
-          {/* GPT Vision-based zones: badges positioned on the image */}
           {hasGPTZones ? (
             <div className="mx-auto max-w-md">
-              <div className="relative overflow-hidden rounded-2xl border border-[#e6e6e6] shadow-sm">
+              <div className="relative overflow-hidden rounded-2xl border border-[#e6e6e6]">
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={scanImageSrc}
@@ -286,7 +284,6 @@ function SkinTab({ score, scoreLabel, summary, skinAnalysis, hasScan, scanImageS
                   className="block h-auto w-full"
                 />
                 {gptZones.map((z) => {
-                  const color = CONDITION_COLORS[z.condition] || "#108474";
                   const label = condLabels[z.condition] || z.label;
                   const isLeft = z.x < 50;
                   return (
@@ -301,21 +298,15 @@ function SkinTab({ score, scoreLabel, summary, skinAnalysis, hasScan, scanImageS
                     >
                       {isLeft ? (
                         <>
-                          <span
-                            className="rounded-lg px-2 py-1 text-[10px] font-semibold leading-tight text-white shadow-md backdrop-blur-sm md:text-xs"
-                            style={{ backgroundColor: `${color}dd` }}
-                          >
+                          <span className="rounded-lg bg-[#1d1d1f]/80 px-2 py-1 text-[10px] font-semibold leading-tight text-white backdrop-blur-sm md:text-xs">
                             {label}
                           </span>
-                          <div className="h-2.5 w-2.5 rounded-full border-2 border-white shadow-md" style={{ backgroundColor: color }} />
+                          <div className="h-2.5 w-2.5 rounded-full border-2 border-white bg-[#1d1d1f]" />
                         </>
                       ) : (
                         <>
-                          <div className="h-2.5 w-2.5 rounded-full border-2 border-white shadow-md" style={{ backgroundColor: color }} />
-                          <span
-                            className="rounded-lg px-2 py-1 text-[10px] font-semibold leading-tight text-white shadow-md backdrop-blur-sm md:text-xs"
-                            style={{ backgroundColor: `${color}dd` }}
-                          >
+                          <div className="h-2.5 w-2.5 rounded-full border-2 border-white bg-[#1d1d1f]" />
+                          <span className="rounded-lg bg-[#1d1d1f]/80 px-2 py-1 text-[10px] font-semibold leading-tight text-white backdrop-blur-sm md:text-xs">
                             {label}
                           </span>
                         </>
@@ -325,47 +316,21 @@ function SkinTab({ score, scoreLabel, summary, skinAnalysis, hasScan, scanImageS
                 })}
               </div>
 
-              {/* Zone list below image on mobile for readability */}
               <div className="mt-3 space-y-1.5 md:hidden">
                 {gptZones.map((z) => {
-                  const color = CONDITION_COLORS[z.condition] || "#108474";
                   const label = condLabels[z.condition] || z.label;
                   return (
-                    <div key={z.zone} className="flex items-center gap-2 rounded-lg px-3 py-1.5" style={{ backgroundColor: `${color}0d` }}>
-                      <div className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: color }} />
-                      <span className="text-[11px] font-semibold" style={{ color }}>{label}</span>
+                    <div key={z.zone} className="flex items-center gap-2 rounded-lg bg-[#f5f5f7] px-3 py-1.5">
+                      <div className="h-2 w-2 shrink-0 rounded-full bg-[#1d1d1f]" />
+                      <span className="text-[11px] font-semibold text-[#1d1d1f]">{label}</span>
                       <span className="text-[11px] text-[#766a62]">{z.label}</span>
                     </div>
                   );
                 })}
               </div>
             </div>
-          ) : significantZones.length > 0 ? (
-            /* Fallback: scanner-based zones displayed beside the image */
-            <div className="mx-auto grid max-w-3xl grid-cols-[1fr_auto_1fr] items-center gap-3 md:gap-5">
-              <div className="flex flex-col items-end gap-2">
-                {significantZones.filter((_, i) => i % 2 === 0).map((z) => (
-                  <ZoneBadge key={z.zone.id} z={z} locale={locale} condLabels={condLabels} align="right" />
-                ))}
-              </div>
-
-              <div className="w-48 md:w-64 shrink-0 overflow-hidden rounded-2xl border border-[#e6e6e6] shadow-sm">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={scanImageSrc}
-                  alt={locale === "en" ? "Face scan" : "Ansiktsskanning"}
-                  className="block h-auto w-full"
-                />
-              </div>
-
-              <div className="flex flex-col items-start gap-2">
-                {significantZones.filter((_, i) => i % 2 === 1).map((z) => (
-                  <ZoneBadge key={z.zone.id} z={z} locale={locale} condLabels={condLabels} align="left" />
-                ))}
-              </div>
-            </div>
           ) : (
-            <div className="mx-auto max-w-sm overflow-hidden rounded-2xl border border-[#e6e6e6] shadow-sm">
+            <div className="mx-auto max-w-sm overflow-hidden rounded-2xl border border-[#e6e6e6]">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={scanImageSrc}
@@ -378,7 +343,7 @@ function SkinTab({ score, scoreLabel, summary, skinAnalysis, hasScan, scanImageS
       )}
 
       {hasScan && !scanImageSrc && (
-        <div className="flex items-center justify-center gap-2 rounded-xl bg-[#108474]/5 px-4 py-2.5 text-xs font-medium text-[#108474]">
+        <div className="flex items-center justify-center gap-2 rounded-xl bg-[#f5f5f7] px-4 py-2.5 text-xs font-medium text-[#108474]">
           <ScanFace className="h-3.5 w-3.5" />
           {locale === "en"
             ? "Includes data from your face scan"
@@ -387,68 +352,65 @@ function SkinTab({ score, scoreLabel, summary, skinAnalysis, hasScan, scanImageS
       )}
 
       {skinAnalysis && (
-        <>
-          <div className="rounded-2xl border border-[#e6e6e6] bg-white p-6 md:p-8">
-            <h3 className="mb-4 text-lg font-bold tracking-tight text-[#1d1d1f]">
-              {locale === "en" ? "Skin analysis" : "Hudanalys"}
-            </h3>
+        <div className="space-y-4">
+          <ExpandableBox
+            title={locale === "en" ? "Skin analysis" : "Hudanalys"}
+            icon={Sparkles}
+            defaultOpen
+          >
             <Paragraphs
               text={skinAnalysis.overview}
               className="text-sm leading-relaxed text-[#515151]"
             />
-          </div>
+          </ExpandableBox>
 
           {skinAnalysis.strengths.length > 0 && (
-            <div>
-              <h4 className="mb-3 text-sm font-bold tracking-tight text-[#1d1d1f]">
-                {locale === "en" ? "What looks strong" : "Styrkor"}
-              </h4>
+            <ExpandableBox
+              title={locale === "en" ? "What looks strong" : "Dina styrkor"}
+              icon={Check}
+              defaultOpen
+            >
               <div className="flex flex-wrap gap-2">
                 {skinAnalysis.strengths.map((s, i) => (
-                  <span key={i} className="rounded-full bg-[#108474]/5 px-4 py-2 text-xs font-medium text-[#108474]">
+                  <span key={i} className="rounded-full bg-[#f5f5f7] px-4 py-2 text-xs font-medium text-[#1d1d1f]">
                     {s}
                   </span>
                 ))}
               </div>
-            </div>
+            </ExpandableBox>
           )}
 
           {skinAnalysis.concerns.length > 0 && (
-            <div>
-              <h4 className="mb-3 text-sm font-bold tracking-tight text-[#1d1d1f]">
-                {locale === "en" ? "What to pay attention to" : "Att uppmärksamma"}
-              </h4>
+            <ExpandableBox
+              title={locale === "en" ? "What to pay attention to" : "Att uppmärksamma"}
+              icon={ShieldCheck}
+              defaultOpen
+            >
               <div className="flex flex-wrap gap-2">
                 {skinAnalysis.concerns.map((c, i) => (
-                  <span key={i} className="rounded-full bg-[#fcb237]/10 px-4 py-2 text-xs font-medium text-[#766a62]">
+                  <span key={i} className="rounded-full border border-[#e6e6e6] bg-white px-4 py-2 text-xs font-medium text-[#515151]">
                     {c}
                   </span>
                 ))}
               </div>
-            </div>
+            </ExpandableBox>
           )}
 
           <div className="grid gap-4 sm:grid-cols-2">
-            <div className="rounded-2xl border border-[#e6e6e6] bg-white p-5">
-              <div className="mb-2 flex items-center gap-2">
-                <ShieldCheck className="h-4 w-4 text-[#108474]" />
-                <h4 className="text-sm font-bold text-[#1d1d1f]">
-                  {locale === "en" ? "Microbiome" : "Mikrobiom"}
-                </h4>
-              </div>
+            <ExpandableBox
+              title={locale === "en" ? "Microbiome" : "Mikrobiom"}
+              icon={ShieldCheck}
+            >
               <p className="text-sm leading-relaxed text-[#515151]">{skinAnalysis.microbiome}</p>
-            </div>
-            <div className="rounded-2xl border border-[#e6e6e6] bg-white p-5">
-              <div className="mb-2 flex items-center gap-2">
-                <Droplets className="h-4 w-4 text-[#108474]" />
-                <h4 className="text-sm font-bold text-[#1d1d1f]">
-                  {locale === "en" ? "Endocannabinoid system" : "Endocannabinoidsystemet"}
-                </h4>
-              </div>
+            </ExpandableBox>
+            <ExpandableBox
+              title={locale === "en" ? "Endocannabinoid system" : "Endocannabinoidsystemet"}
+              icon={Droplets}
+            >
               <p className="text-sm leading-relaxed text-[#515151]">{skinAnalysis.ecs}</p>
-            </div>
+            </ExpandableBox>
           </div>
-        </>
+        </div>
       )}
 
       {onNextTab && (
@@ -493,36 +455,33 @@ function ProductsTab({ products, onNextTab }: { products: ProductRec[]; onNextTa
 
   return (
     <div className="space-y-6 animate-fade-in">
-      {/* Gift banner */}
-      <div className="overflow-hidden rounded-2xl border border-[#fcb237]/30 bg-gradient-to-br from-[#fcb237]/5 to-[#fcb237]/10">
-        <div className="p-6 text-center">
-          <Gift className="mx-auto mb-3 h-8 w-8 text-[#fcb237]" />
-          <h3 className="text-lg font-bold tracking-tight text-[#1d1d1f]">
-            {locale === "en"
-              ? "A gift from us — 15% off"
-              : "En gåva från oss — 15% rabatt"}
-          </h3>
-          <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-[#515151]">
-            {locale === "en"
-              ? "Thank you for taking the analysis and helping us improve. As a thank-you, you get 15% off all recommended products."
-              : "Tack för att du genomförde analysen och hjälper oss bli bättre. Som tack får du 15% rabatt på alla rekommenderade produkter."}
-          </p>
-          <div className="mt-4 inline-flex items-center gap-3 rounded-full bg-white/80 px-5 py-2 shadow-sm">
-            <span className="text-sm text-[#766a62] line-through">{totalBefore} kr</span>
-            <span className="text-lg font-bold text-[#108474]">{totalAfter} kr</span>
-            <span className="rounded-full bg-[#fcb237]/20 px-2.5 py-0.5 text-xs font-bold text-[#766a62]">
-              -{discount} kr
-            </span>
-          </div>
+      {/* Clean discount banner */}
+      <div className="rounded-2xl border border-[#e6e6e6] bg-white p-6 text-center">
+        <p className="text-xs font-medium uppercase tracking-widest text-[#766a62]">
+          {locale === "en" ? "Thank you for your analysis" : "Tack för din analys"}
+        </p>
+        <h3 className="mt-2 text-xl font-bold tracking-tight text-[#1d1d1f]">
+          {locale === "en"
+            ? "15% off your recommended products"
+            : "15% rabatt på dina rekommenderade produkter"}
+        </h3>
+        <div className="mt-4 inline-flex items-center gap-3 rounded-full bg-[#f5f5f7] px-5 py-2">
+          <span className="text-sm text-[#766a62] line-through">{totalBefore} kr</span>
+          <span className="text-lg font-bold text-[#1d1d1f]">{totalAfter} kr</span>
+          <span className="rounded-full bg-[#108474]/10 px-2.5 py-0.5 text-xs font-bold text-[#108474]">
+            -{discount} kr
+          </span>
+        </div>
 
+        <div className="mt-5">
           <button
             onClick={handleAddAll}
             disabled={added}
             className={cn(
-              "mt-5 inline-flex items-center gap-2.5 rounded-full px-8 py-3.5 text-sm font-semibold shadow-md transition-all active:scale-[0.97]",
+              "inline-flex items-center gap-2.5 rounded-full px-8 py-3.5 text-sm font-semibold transition-all active:scale-[0.97]",
               added
-                ? "bg-[#108474]/10 text-[#108474] shadow-none"
-                : "bg-[#108474] text-white shadow-[#108474]/20 hover:bg-[#0d6e62] hover:shadow-lg"
+                ? "bg-[#f5f5f7] text-[#108474]"
+                : "bg-[#1d1d1f] text-white hover:bg-[#108474]"
             )}
           >
             {added ? (
@@ -539,80 +498,45 @@ function ProductsTab({ products, onNextTab }: { products: ProductRec[]; onNextTa
               </>
             )}
           </button>
-          {!added && (
-            <p className="mt-2 text-[11px] text-[#766a62]">
-              {locale === "en"
-                ? "Discount code HUDANALYS15 applied automatically"
-                : "Rabattkoden HUDANALYS15 läggs in automatiskt"}
-            </p>
-          )}
         </div>
+        {!added && (
+          <p className="mt-2 text-[11px] text-[#766a62]">
+            {locale === "en"
+              ? "Discount code HUDANALYS15 applied automatically"
+              : "Rabattkoden HUDANALYS15 läggs in automatiskt"}
+          </p>
+        )}
       </div>
 
-      <p className="text-center text-sm text-[#515151]">
+      <p className="text-center text-xs font-medium uppercase tracking-widest text-[#766a62]">
         {locale === "en"
-          ? "Products chosen around your skin analysis"
-          : "Produkter anpassade efter din hudanalys"}
+          ? "Products chosen for your skin"
+          : "Produkter anpassade efter din hud"}
       </p>
 
       <div className="grid gap-6 sm:grid-cols-2">
         {matched.map((p) => (
           <div key={p.id} className="space-y-3">
             <ProductCard product={p} />
-            <div className="rounded-2xl border border-[#108474]/10 bg-[#108474]/[0.03] p-4">
-              <p className="mb-1.5 text-xs font-bold text-[#108474]">
-                {locale === "en" ? "Why this fits your skin" : "Varför just för dig"}
-              </p>
+            <ExpandableBox
+              title={locale === "en" ? "Why this fits your skin" : "Varför just för dig"}
+              defaultOpen
+            >
               <p className="text-xs leading-relaxed text-[#515151]">{p.reason}</p>
               {p.usage && (
                 <p className="mt-2 border-t border-[#e6e6e6] pt-2 text-xs leading-relaxed text-[#766a62]">
                   {p.usage}
                 </p>
               )}
-            </div>
+            </ExpandableBox>
           </div>
         ))}
-      </div>
-
-      {/* Add all to cart CTA */}
-      <div className="text-center">
-        <button
-          onClick={handleAddAll}
-          disabled={added}
-          className={cn(
-            "inline-flex items-center gap-3 rounded-full px-8 py-4 text-sm font-semibold shadow-lg transition-all active:scale-[0.97]",
-            added
-              ? "bg-[#108474]/10 text-[#108474] shadow-none"
-              : "bg-[#108474] text-white shadow-[#108474]/20 hover:bg-[#0d6e62] hover:shadow-xl"
-          )}
-        >
-          {added ? (
-            <>
-              <Check className="h-5 w-5" />
-              {locale === "en" ? "Added to cart with 15% off" : "Tillagda i varukorgen med 15% rabatt"}
-            </>
-          ) : (
-            <>
-              <Gift className="h-5 w-5" />
-              {locale === "en"
-                ? `Add all ${matched.length} products — ${totalAfter} kr`
-                : `Lägg alla ${matched.length} produkter i varukorgen — ${totalAfter} kr`}
-            </>
-          )}
-        </button>
-        {!added && (
-          <p className="mt-2 text-xs text-[#766a62]">
-            {locale === "en"
-              ? "Discount code HUDANALYS15 is applied automatically at checkout"
-              : "Rabattkoden HUDANALYS15 läggs in automatiskt i kassan"}
-          </p>
-        )}
       </div>
 
       {onNextTab && (
         <NextStepButton
           label={locale === "en" ? "Your lifestyle tips" : "Dina livsstilsråd"}
-          subtext={locale === "en" ? "Personalised habits for better skin" : "Personliga vanor for battre hud"}
+          subtext={locale === "en" ? "Personalised habits for better skin" : "Personliga vanor för bättre hud"}
           onClick={onNextTab}
         />
       )}
@@ -624,36 +548,16 @@ function ProductsTab({ products, onNextTab }: { products: ProductRec[]; onNextTa
 /*  Tab 3 – Livsstil                                                   */
 /* ------------------------------------------------------------------ */
 
-const IMPACT_STYLES: Record<string, { cls: string }> = {
-  "hög": { cls: "bg-red-50 text-red-700" },
-  "high": { cls: "bg-red-50 text-red-700" },
-  "medel": { cls: "bg-amber-50 text-amber-700" },
-  "medium": { cls: "bg-amber-50 text-amber-700" },
-  "låg": { cls: "bg-green-50 text-green-700" },
-  "low": { cls: "bg-green-50 text-green-700" },
-};
-
 const AREA_ICONS: Record<string, LucideIcon> = {
   "Sömn": Moon,
   "Sleep": Moon,
-  "Stress": Heart,
+  "Stress": Sparkles,
   "Kost": Leaf,
   "Diet": Leaf,
   "Rörelse": Sun,
   "Movement": Sun,
   "Exercise": Sun,
 };
-
-function getImpactLabel(impact: string, locale: "sv" | "en") {
-  const normalized = impact.toLowerCase();
-  if (normalized === "hög" || normalized === "high") {
-    return locale === "en" ? "High priority" : "Hög prioritet";
-  }
-  if (normalized === "medel" || normalized === "medium") {
-    return locale === "en" ? "Medium" : "Medel";
-  }
-  return locale === "en" ? "Lower priority" : "Bonus";
-}
 
 function getAreaLabel(area: string, locale: "sv" | "en") {
   const normalized = area.toLowerCase();
@@ -672,57 +576,68 @@ function getAreaLabel(area: string, locale: "sv" | "en") {
   return area;
 }
 
+function getImpactLabel(impact: string, locale: "sv" | "en") {
+  const normalized = impact.toLowerCase();
+  if (normalized === "hög" || normalized === "high") {
+    return locale === "en" ? "High priority" : "Hög prioritet";
+  }
+  if (normalized === "medel" || normalized === "medium") {
+    return locale === "en" ? "Medium" : "Medel";
+  }
+  return locale === "en" ? "Lower priority" : "Bonus";
+}
+
 function LifestyleTab({ lifestyle, avoid, onNextTab }: { lifestyle: LifestyleItem[]; avoid: string[]; onNextTab?: () => void }) {
   const { locale } = useLocale();
   return (
-    <div className="space-y-6 animate-fade-in">
-      <div className="grid gap-4 sm:grid-cols-2">
-        {lifestyle.map((item, i) => {
-          const badge = IMPACT_STYLES[item.impact.toLowerCase()] ?? IMPACT_STYLES["medel"];
-          const areaLabel = getAreaLabel(item.area, locale);
-          const Icon = AREA_ICONS[item.area] ?? AREA_ICONS[areaLabel];
-          return (
-            <div key={i} className="rounded-2xl border border-[#e6e6e6] bg-white p-5 shadow-sm transition-shadow hover:shadow-md">
-              <div className="mb-3 flex items-center justify-between">
-                <div className="flex items-center gap-2">
-                  {Icon && <Icon className="h-4 w-4 text-[#108474]" />}
-                  <span className="text-sm font-bold text-[#1d1d1f]">{areaLabel}</span>
-                </div>
-                <span className={cn("rounded-full px-2.5 py-0.5 text-[11px] font-medium", badge.cls)}>
+    <div className="space-y-4 animate-fade-in">
+      {lifestyle.map((item, i) => {
+        const areaLabel = getAreaLabel(item.area, locale);
+        const Icon = AREA_ICONS[item.area] ?? AREA_ICONS[areaLabel];
+        return (
+          <ExpandableBox
+            key={i}
+            title={areaLabel}
+            icon={Icon}
+            defaultOpen={i < 2}
+          >
+            <div className="space-y-3">
+              <div className="flex items-center gap-2">
+                <span className="rounded-full bg-[#f5f5f7] px-3 py-1 text-[11px] font-medium text-[#515151]">
                   {getImpactLabel(item.impact, locale)}
                 </span>
               </div>
-              <p className="text-sm leading-relaxed text-[#515151]">{item.tip}</p>
+              <p className="text-sm leading-relaxed text-[#1d1d1f]">{item.tip}</p>
               {item.why && (
-                <p className="mt-2 text-xs leading-relaxed text-[#766a62]">{item.why}</p>
+                <p className="text-xs leading-relaxed text-[#766a62]">{item.why}</p>
               )}
               {item.source && (
-                <p className="mt-1.5 text-[11px] italic text-[#766a62]/60">{item.source}</p>
+                <p className="text-[11px] italic text-[#766a62]/60">{item.source}</p>
               )}
             </div>
-          );
-        })}
-      </div>
+          </ExpandableBox>
+        );
+      })}
 
       {avoid.length > 0 && (
-        <div>
-          <h4 className="mb-3 text-sm font-bold tracking-tight text-[#1d1d1f]">
-            {locale === "en" ? "Avoid" : "Undvik"}
-          </h4>
+        <ExpandableBox
+          title={locale === "en" ? "Avoid" : "Undvik"}
+          defaultOpen
+        >
           <div className="flex flex-wrap gap-2">
             {avoid.map((item, i) => (
-              <span key={i} className="rounded-full border border-red-200 bg-red-50 px-4 py-1.5 text-xs font-medium text-red-700">
+              <span key={i} className="rounded-full border border-[#e6e6e6] bg-[#f5f5f7] px-4 py-1.5 text-xs font-medium text-[#1d1d1f]">
                 {item}
               </span>
             ))}
           </div>
-        </div>
+        </ExpandableBox>
       )}
 
       {onNextTab && (
         <NextStepButton
           label={locale === "en" ? "See your routine" : "Se din rutin"}
-          subtext={locale === "en" ? "Morning & evening steps" : "Morgon- och kvallsrutin"}
+          subtext={locale === "en" ? "Morning & evening steps" : "Morgon- och kvällsrutin"}
           onClick={onNextTab}
         />
       )}
@@ -745,28 +660,31 @@ function RoutineTab({ routine, routineLegacy }: {
   if (morning.length === 0 && evening.length === 0) return null;
 
   return (
-    <div className="space-y-8 animate-fade-in">
+    <div className="space-y-6 animate-fade-in">
       {morning.length > 0 && (
         <div>
           <div className="mb-4 flex items-center gap-2">
-            <Sun className="h-5 w-5 text-[#fcb237]" />
+            <Sun className="h-5 w-5 text-[#108474]" />
             <h3 className="text-lg font-bold tracking-tight text-[#1d1d1f]">
               {locale === "en" ? "Morning routine" : "Morgonrutin"}
             </h3>
           </div>
           <div className="space-y-3">
             {morning.map((s, i) => (
-              <div key={i} className="flex gap-4 rounded-2xl border border-[#e6e6e6] bg-white p-4 transition-shadow hover:shadow-sm">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#108474]/10 text-sm font-bold text-[#108474]">
-                  {i + 1}
-                </div>
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold text-[#1d1d1f]">{s.step}</p>
-                  {s.why && (
-                    <p className="mt-1 text-xs leading-relaxed text-[#766a62]">{s.why}</p>
-                  )}
-                </div>
-              </div>
+              <ExpandableBox
+                key={i}
+                title={`${i + 1}. ${s.step}`}
+                defaultOpen={i === 0}
+              >
+                {s.why && (
+                  <p className="text-xs leading-relaxed text-[#766a62]">{s.why}</p>
+                )}
+                {!s.why && (
+                  <p className="text-xs text-[#766a62]">
+                    {locale === "en" ? "Part of your morning routine" : "Del av din morgonrutin"}
+                  </p>
+                )}
+              </ExpandableBox>
             ))}
           </div>
         </div>
@@ -782,17 +700,20 @@ function RoutineTab({ routine, routineLegacy }: {
           </div>
           <div className="space-y-3">
             {evening.map((s, i) => (
-              <div key={i} className="flex gap-4 rounded-2xl border border-[#e6e6e6] bg-white p-4 transition-shadow hover:shadow-sm">
-                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#766a62]/10 text-sm font-bold text-[#766a62]">
-                  {i + 1}
-                </div>
-                <div className="min-w-0">
-                  <p className="text-sm font-semibold text-[#1d1d1f]">{s.step}</p>
-                  {s.why && (
-                    <p className="mt-1 text-xs leading-relaxed text-[#766a62]">{s.why}</p>
-                  )}
-                </div>
-              </div>
+              <ExpandableBox
+                key={i}
+                title={`${i + 1}. ${s.step}`}
+                defaultOpen={i === 0}
+              >
+                {s.why && (
+                  <p className="text-xs leading-relaxed text-[#766a62]">{s.why}</p>
+                )}
+                {!s.why && (
+                  <p className="text-xs text-[#766a62]">
+                    {locale === "en" ? "Part of your evening routine" : "Del av din kvällsrutin"}
+                  </p>
+                )}
+              </ExpandableBox>
             ))}
           </div>
         </div>
@@ -840,6 +761,7 @@ export function AnalysisTabs({
   };
 
   const isLastTab = activeTab === tabOrder[tabOrder.length - 1];
+  const currentIdx = tabOrder.indexOf(activeTab);
 
   return (
     <div className="space-y-8">
@@ -856,7 +778,7 @@ export function AnalysisTabs({
                 className={cn(
                   "inline-flex items-center gap-1.5 rounded-xl px-3 py-2.5 text-[11px] font-semibold transition-all duration-300 sm:px-4 sm:text-xs",
                   active
-                    ? "bg-white text-[#108474] shadow-sm"
+                    ? "bg-white text-[#1d1d1f] shadow-sm"
                     : "text-[#766a62] hover:text-[#1d1d1f]"
                 )}
               >
@@ -866,6 +788,19 @@ export function AnalysisTabs({
             );
           })}
         </div>
+      </div>
+
+      {/* Step indicator */}
+      <div className="flex items-center justify-center gap-1.5">
+        {tabOrder.map((id, i) => (
+          <div
+            key={id}
+            className={cn(
+              "h-1 rounded-full transition-all duration-300",
+              id === activeTab ? "w-8 bg-[#1d1d1f]" : i < currentIdx ? "w-4 bg-[#108474]" : "w-1.5 bg-[#e6e6e6]"
+            )}
+          />
+        ))}
       </div>
 
       {/* Tab content */}
@@ -893,21 +828,6 @@ export function AnalysisTabs({
           <RoutineTab routine={routine} routineLegacy={routineLegacy} />
         )}
       </div>
-
-      {/* Step indicator on mobile */}
-      {!isLastTab && (
-        <div className="flex items-center justify-center gap-1.5 sm:hidden">
-          {tabOrder.map((id) => (
-            <div
-              key={id}
-              className={cn(
-                "h-1.5 rounded-full transition-all duration-300",
-                id === activeTab ? "w-6 bg-[#108474]" : "w-1.5 bg-[#e6e6e6]"
-              )}
-            />
-          ))}
-        </div>
-      )}
 
       {/* Next analysis hint */}
       {nextAnalysis && (
