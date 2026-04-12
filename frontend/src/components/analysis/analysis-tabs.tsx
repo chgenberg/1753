@@ -17,6 +17,7 @@ import { cn } from "@/lib/utils";
 import { PRODUCTS, type Product } from "@/lib/products";
 import { ProductCard } from "@/components/product-card";
 import { useLocale } from "@/providers/locale-provider";
+import { FaceCanvas as FaceCanvasLazy } from "@/components/skin-scanner/face-canvas";
 
 /* ------------------------------------------------------------------ */
 /*  Types                                                              */
@@ -66,6 +67,8 @@ export interface AnalysisTabsProps {
   avoid: string[];
   nextAnalysis: string;
   hasScan?: boolean;
+  scanImageSrc?: string;
+  scanZoneResults?: import("@/components/skin-scanner/zones").ZoneResult[];
 }
 
 /* ------------------------------------------------------------------ */
@@ -115,12 +118,14 @@ function ScoreRing({ score, label }: { score: number; label?: string }) {
 /*  Tab 1 – Din hy                                                     */
 /* ------------------------------------------------------------------ */
 
-function SkinTab({ score, scoreLabel, summary, skinAnalysis, hasScan }: {
+function SkinTab({ score, scoreLabel, summary, skinAnalysis, hasScan, scanImageSrc, scanZoneResults }: {
   score: number;
   scoreLabel?: string;
   summary: string;
   skinAnalysis?: SkinAnalysis;
   hasScan?: boolean;
+  scanImageSrc?: string;
+  scanZoneResults?: import("@/components/skin-scanner/zones").ZoneResult[];
 }) {
   const { locale } = useLocale();
   return (
@@ -131,12 +136,24 @@ function SkinTab({ score, scoreLabel, summary, skinAnalysis, hasScan }: {
         {summary}
       </p>
 
-      {hasScan && (
+      {hasScan && scanImageSrc && scanZoneResults && (
+        <div className="space-y-3">
+          <div className="flex items-center justify-center gap-2 text-xs font-medium text-[#108474]">
+            <ScanFace className="h-3.5 w-3.5" />
+            {locale === "en" ? "Your face scan results" : "Resultat fran din ansiktsskanning"}
+          </div>
+          <div className="mx-auto max-w-md overflow-hidden rounded-2xl border border-[#e6e6e6] shadow-sm">
+            <FaceCanvasLazy imageSrc={scanImageSrc} results={scanZoneResults} />
+          </div>
+        </div>
+      )}
+
+      {hasScan && !scanImageSrc && (
         <div className="flex items-center justify-center gap-2 rounded-xl bg-[#108474]/5 px-4 py-2.5 text-xs font-medium text-[#108474]">
           <ScanFace className="h-3.5 w-3.5" />
           {locale === "en"
             ? "Includes data from your face scan"
-            : "Inkluderar data från din ansiktsskanning"}
+            : "Inkluderar data fran din ansiktsskanning"}
         </div>
       )}
 
@@ -442,6 +459,8 @@ export function AnalysisTabs({
   avoid,
   nextAnalysis,
   hasScan,
+  scanImageSrc,
+  scanZoneResults,
 }: AnalysisTabsProps) {
   const { locale } = useLocale();
   const [activeTab, setActiveTab] = useState<TabId>("skin");
@@ -488,6 +507,8 @@ export function AnalysisTabs({
             summary={summary}
             skinAnalysis={skinAnalysis}
             hasScan={hasScan}
+            scanImageSrc={scanImageSrc}
+            scanZoneResults={scanZoneResults}
           />
         )}
         {activeTab === "products" && <ProductsTab products={products} />}

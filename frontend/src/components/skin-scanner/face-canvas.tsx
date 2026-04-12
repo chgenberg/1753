@@ -16,13 +16,13 @@ interface FaceCanvasProps {
   className?: string;
 }
 
-const FACE_OVAL = { x: 0.125, y: 0.05, w: 0.75, h: 0.85 };
-
 export function FaceCanvas({ imageSrc, results, className }: FaceCanvasProps) {
   const { locale } = useLocale();
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
+  const imgRef = useRef<HTMLImageElement>(null);
   const [imgDims, setImgDims] = useState({ w: 0, h: 0 });
+  const [displayDims, setDisplayDims] = useState({ w: 0, h: 0 });
   const [revealed, setRevealed] = useState<Set<string>>(new Set());
 
   useEffect(() => {
@@ -47,26 +47,28 @@ export function FaceCanvas({ imageSrc, results, className }: FaceCanvasProps) {
   useEffect(() => {
     const canvas = canvasRef.current;
     const container = containerRef.current;
-    if (!canvas || !container || !imgDims.w) return;
+    const imgEl = imgRef.current;
+    if (!canvas || !container || !imgDims.w || !imgEl) return;
 
-    const rect = container.getBoundingClientRect();
+    const imgRect = imgEl.getBoundingClientRect();
+    const dW = imgRect.width;
+    const dH = imgRect.height;
+    setDisplayDims({ w: dW, h: dH });
+
     const dpr = window.devicePixelRatio || 2;
-    canvas.width = rect.width * dpr;
-    canvas.height = rect.height * dpr;
-    canvas.style.width = `${rect.width}px`;
-    canvas.style.height = `${rect.height}px`;
+    canvas.width = dW * dpr;
+    canvas.height = dH * dpr;
+    canvas.style.width = `${dW}px`;
+    canvas.style.height = `${dH}px`;
 
     const ctx = canvas.getContext("2d")!;
     ctx.scale(dpr, dpr);
-    ctx.clearRect(0, 0, rect.width, rect.height);
+    ctx.clearRect(0, 0, dW, dH);
 
-    const scaleX = rect.width / imgDims.w;
-    const displayH = imgDims.h * scaleX;
-
-    const faceX = FACE_OVAL.x * rect.width;
-    const faceY = FACE_OVAL.y * displayH;
-    const faceW = FACE_OVAL.w * rect.width;
-    const faceH = FACE_OVAL.h * displayH;
+    const faceW = dW * 0.75;
+    const faceH = dH * 0.85;
+    const faceX = (dW - faceW) / 2;
+    const faceY = dH * 0.05;
 
     results.forEach((r) => {
       if (!revealed.has(r.zone.id)) return;
@@ -77,8 +79,8 @@ export function FaceCanvas({ imageSrc, results, className }: FaceCanvasProps) {
       const zoneCenterX = faceX + (rx + rw / 2) * faceW;
       const zoneCenterY = faceY + (ry + rh / 2) * faceH;
 
-      const labelX = zone.anchor === "left" ? 16 : rect.width - 16;
-      const labelY = zone.labelY * displayH;
+      const labelX = zone.anchor === "left" ? 16 : dW - 16;
+      const labelY = zone.labelY * dH;
 
       const color = CONDITION_COLORS[topCondition] || "#108474";
 
@@ -114,18 +116,20 @@ export function FaceCanvas({ imageSrc, results, className }: FaceCanvasProps) {
     <div ref={containerRef} className={cn("relative overflow-hidden", className)}>
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
+        ref={imgRef}
         src={imageSrc}
         alt={locale === "en" ? "Skin analysis" : "Hudanalys"}
         className="block h-auto w-full rounded-2xl"
         onLoad={(e) => {
           const el = e.currentTarget;
           setImgDims({ w: el.naturalWidth, h: el.naturalHeight });
+          setDisplayDims({ w: el.clientWidth, h: el.clientHeight });
         }}
       />
 
       <canvas
         ref={canvasRef}
-        className="pointer-events-none absolute inset-0 h-full w-full"
+        className="pointer-events-none absolute left-0 top-0"
       />
 
       {significantResults.map((r) => {
@@ -136,9 +140,11 @@ export function FaceCanvas({ imageSrc, results, className }: FaceCanvasProps) {
           (locale === "en" ? CONDITION_LABELS_EN : CONDITION_LABELS_SV)[topCondition] ||
           topCondition;
 
-        const top = `${zone.labelY * 100}%`;
+        const topPx = displayDims.h > 0
+          ? `${zone.labelY * displayDims.h}px`
+          : `${zone.labelY * 100}%`;
         const style: React.CSSProperties = {
-          top,
+          top: topPx,
           ...(zone.anchor === "left"
             ? { left: 0, paddingLeft: 6 }
             : { right: 0, paddingRight: 6, textAlign: "right" as const }),

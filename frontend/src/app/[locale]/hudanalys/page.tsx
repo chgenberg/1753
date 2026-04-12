@@ -450,30 +450,54 @@ export default function AnalysisPage() {
                 {a("title")}
               </h1>
               <p className="mx-auto mt-4 max-w-lg text-base leading-relaxed text-muted-foreground">
-                {a("intro")}
+                {locale === "en"
+                  ? "Take a photo of your face, answer five quick questions about your lifestyle, and receive a complete personalised analysis with recommendations."
+                  : "Ta ett foto av ditt ansikte, svara på fem korta frågor om din livsstil och få en komplett personlig analys med rekommendationer."}
               </p>
 
-              <div className="mx-auto mt-10 flex max-w-md flex-col gap-4 sm:flex-row sm:justify-center">
-                <button
-                  onClick={() => setStep(1)}
-                  className="inline-flex h-14 flex-1 items-center justify-center gap-3 rounded-full bg-[#108474] px-8 text-sm font-semibold text-white shadow-lg shadow-[#108474]/20 transition-all hover:bg-[#0d6e62] hover:shadow-xl active:scale-[0.97]"
-                >
-                  <Sparkles className="h-5 w-5" />
-                  {a("startQuiz")}
-                </button>
-                <button
-                  onClick={() => setStep("scan")}
-                  className="inline-flex h-14 flex-1 items-center justify-center gap-3 rounded-full border-2 border-[#108474] px-8 text-sm font-semibold text-[#108474] transition-all hover:bg-[#108474]/5 active:scale-[0.97]"
-                >
-                  <ScanFace className="h-5 w-5" />
-                  {locale === "en" ? "Face scan" : "Ansiktsskanning"}
-                </button>
+              <div className="mx-auto mt-8 grid max-w-sm gap-4 text-left">
+                <div className="flex items-start gap-4 rounded-2xl border border-[#e6e6e6] bg-white p-4">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#108474]/10 text-sm font-bold text-[#108474]">1</div>
+                  <div>
+                    <p className="text-sm font-semibold text-[#1d1d1f]">{locale === "en" ? "Face scan" : "Ansiktsskanning"}</p>
+                    <p className="mt-0.5 text-xs text-[#515151]">{locale === "en" ? "AI analyses your skin zone by zone" : "AI analyserar din hud zon for zon"}</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-4 rounded-2xl border border-[#e6e6e6] bg-white p-4">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#108474]/10 text-sm font-bold text-[#108474]">2</div>
+                  <div>
+                    <p className="text-sm font-semibold text-[#1d1d1f]">{locale === "en" ? "Lifestyle questions" : "Livsstilsfragor"}</p>
+                    <p className="mt-0.5 text-xs text-[#515151]">{locale === "en" ? "Five questions about sleep, diet & stress" : "Fem fragor om somn, kost och stress"}</p>
+                  </div>
+                </div>
+                <div className="flex items-start gap-4 rounded-2xl border border-[#e6e6e6] bg-white p-4">
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#108474]/10 text-sm font-bold text-[#108474]">3</div>
+                  <div>
+                    <p className="text-sm font-semibold text-[#1d1d1f]">{locale === "en" ? "Personalised analysis" : "Personlig analys"}</p>
+                    <p className="mt-0.5 text-xs text-[#515151]">{locale === "en" ? "Complete results with routine, products & lifestyle tips" : "Komplett resultat med rutin, produkter och livsstilsrad"}</p>
+                  </div>
+                </div>
               </div>
 
-              <p className="mx-auto mt-4 max-w-sm text-xs text-[#766a62]">
+              <button
+                onClick={() => setStep("scan")}
+                className="mt-8 inline-flex h-14 items-center justify-center gap-3 rounded-full bg-[#108474] px-10 text-sm font-semibold text-white shadow-lg shadow-[#108474]/20 transition-all hover:bg-[#0d6e62] hover:shadow-xl active:scale-[0.97]"
+              >
+                <ScanFace className="h-5 w-5" />
+                {locale === "en" ? "Start analysis" : "Starta analys"}
+              </button>
+
+              <button
+                onClick={() => setStep(1)}
+                className="mt-3 block mx-auto text-xs font-medium text-[#766a62] underline underline-offset-2 transition-colors hover:text-[#108474]"
+              >
+                {locale === "en" ? "Skip face scan, answer questions only" : "Hoppa over skanning, svara bara pa fragor"}
+              </button>
+
+              <p className="mx-auto mt-6 max-w-sm text-xs text-[#766a62]">
                 {locale === "en"
                   ? "The face scan analyses your skin directly on your device. No image is sent to any server."
-                  : "Ansiktsskanningen analyserar din hy direkt i din enhet. Ingen bild skickas till någon server."}
+                  : "Ansiktsskanningen analyserar din hy direkt i din enhet. Ingen bild skickas till nagon server."}
               </p>
             </div>
           )}
@@ -488,33 +512,30 @@ export default function AnalysisPage() {
                 <ArrowLeft className="h-4 w-4" />
                 {locale === "en" ? "Back" : "Tillbaka"}
               </button>
+
+              <div className="mb-4 text-center">
+                <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
+                  {locale === "en" ? "Step 1 of 3 — Face scan" : "Steg 1 av 3 — Ansiktsskanning"}
+                </p>
+              </div>
+
               <SkinScanner
                 onComplete={(summary) => {
                   setScanSummary(summary);
                   if (summary.consentGiven) {
                     uploadTrainingData(summary);
                   }
+                  setTimeout(() => setStep(1), 1500);
                 }}
               />
+
               {scanSummary && (
-                <div className="mt-8 animate-fade-in space-y-4 text-center">
-                  <div className="mx-auto max-w-sm rounded-2xl border border-[#108474]/20 bg-[#108474]/5 p-6">
-                    <Sparkles className="mx-auto mb-3 h-6 w-6 text-[#108474]" />
-                    <p className="text-sm font-bold tracking-tight text-[#1d1d1f]">
-                      {locale === "en" ? "Want a deeper read?" : "Vill du ha en djupare analys?"}
-                    </p>
-                    <p className="mt-2 text-xs leading-relaxed text-[#515151]">
-                      {locale === "en"
-                        ? "Combine the scan with five short questions about your lifestyle for more personal recommendations from our AI."
-                        : "Kombinera skanningen med fem korta frågor om din livsstil för personliga rekommendationer från vår AI."}
-                    </p>
-                    <button
-                      onClick={() => setStep(1)}
-                      className="mt-5 inline-flex h-12 items-center gap-2 rounded-full bg-[#108474] px-8 text-sm font-semibold text-white shadow-lg shadow-[#108474]/20 transition-all hover:bg-[#0d6e62] hover:shadow-xl active:scale-[0.97]"
-                    >
-                      <Sparkles className="h-4 w-4" />
-                      {locale === "en" ? "Continue to lifestyle questions" : "Fortsätt med livsstilsanalys"}
-                    </button>
+                <div className="mt-6 animate-fade-in text-center">
+                  <div className="mx-auto flex max-w-xs items-center justify-center gap-2 rounded-full bg-[#108474]/5 px-4 py-2.5 text-xs font-medium text-[#108474]">
+                    <Check className="h-3.5 w-3.5" />
+                    {locale === "en"
+                      ? "Scan complete — continuing to questions..."
+                      : "Skanning klar — gar vidare till fragor..."}
                   </div>
                 </div>
               )}
@@ -534,7 +555,11 @@ export default function AnalysisPage() {
               )}
 
               <p className="mb-6 text-center text-xs font-medium uppercase tracking-widest text-muted-foreground">
-                {a("stepOf", { current: step, total: TOTAL_STEPS })}
+                {scanSummary
+                  ? (locale === "en"
+                      ? `Step 2 of 3 — Question ${step} of ${TOTAL_STEPS}`
+                      : `Steg 2 av 3 — Fraga ${step} av ${TOTAL_STEPS}`)
+                  : a("stepOf", { current: step, total: TOTAL_STEPS })}
               </p>
 
               {/* Step 1 - Skin type */}
@@ -786,6 +811,8 @@ export default function AnalysisPage() {
                   avoid={parsed.avoid}
                   nextAnalysis={parsed.nextAnalysis}
                   hasScan={!!scanSummary}
+                  scanImageSrc={scanSummary?.imageBase64 || undefined}
+                  scanZoneResults={scanSummary?.zones || undefined}
                 />
               ) : (
                 <div className="rounded-2xl border border-border bg-white p-6 md:p-8">
