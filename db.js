@@ -67,7 +67,7 @@ async function initSchema() {
     CREATE INDEX IF NOT EXISTS idx_orders_order_number  ON orders (order_number);
     CREATE INDEX IF NOT EXISTS idx_orders_viva_order_code ON orders (viva_order_code);
 
-    CREATE SEQUENCE IF NOT EXISTS ongoing_order_seq START WITH 10000;
+    CREATE SEQUENCE IF NOT EXISTS shared_order_seq START WITH 10000;
 
     CREATE TABLE IF NOT EXISTS users (
       id              UUID PRIMARY KEY,
@@ -344,6 +344,27 @@ async function initSchema() {
       updated_at      TIMESTAMPTZ DEFAULT NOW()
     );
   `);
+
+  // Migrate: rename ongoing_order_seq -> shared_order_seq and ensure it starts at 10000
+  try {
+    const seqCheck = await pool.query(
+      `SELECT last_value FROM shared_order_seq`
+    );
+    const current = Number(seqCheck.rows[0].last_value);
+    if (current < 10000) {
+      await pool.query(`SELECT setval('shared_order_seq', 9999, false)`);
+      console.log("[DB] shared_order_seq reset to start at 10000");
+    }
+  } catch {
+    // Sequence just created by initSchema — setval to start at 10000
+    try {
+      await pool.query(`SELECT setval('shared_order_seq', 9999, false)`);
+      console.log("[DB] shared_order_seq initialized to start at 10000");
+    } catch (e2) {
+      console.warn("[DB] Could not set shared_order_seq:", e2.message);
+    }
+  }
+
   console.log("[DB] Schema ready");
 }
 
@@ -753,10 +774,12 @@ async function markCartRecovered(email) {
   );
 }
 
-async function nextOngoingOrderNumber() {
-  const { rows } = await pool.query("SELECT nextval('ongoing_order_seq') AS num");
+async function nextSharedOrderNumber() {
+  const { rows } = await pool.query("SELECT nextval('shared_order_seq') AS num");
   return String(rows[0].num);
 }
+
+const nextOngoingOrderNumber = nextSharedOrderNumber;
 
 // ---- ADMIN helpers ----
 
@@ -1559,6 +1582,7 @@ module.exports = {
   createAbandonedCart,
   markCartRecovered,
   nextOngoingOrderNumber,
+  nextSharedOrderNumber,
   findUserRole,
   adminListOrders,
   adminGetOrder,

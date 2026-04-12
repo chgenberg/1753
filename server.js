@@ -2607,8 +2607,9 @@ async function handleOrderCompletion(orderId) {
         shouldBePicked: true
       }))
     });
-    ongoingOrderId = ogOrder?.orderId || ogOrder?.orderInfo?.orderId || order.order_number;
-    notes.push(`Ongoing order: ${ongoingOrderId}`);
+    const ongoingInternalId = ogOrder?.orderId || ogOrder?.orderInfo?.orderId;
+    ongoingOrderId = sharedOrderNumber;
+    notes.push(`Ongoing order: ${sharedOrderNumber} (internt: ${ongoingInternalId})`);
   } catch (err) {
     notes.push(`Ongoing order FEL: ${err.message}`);
     console.error("[Order] Ongoing order error:", err);
