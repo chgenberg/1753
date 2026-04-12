@@ -746,7 +746,7 @@ app.get("/api/fortnox/status", adminOnly, async (req, res) => {
     }
 
     const recentOrders = await db.pool.query(
-      `SELECT order_number, status, payment_status, fortnox_invoice_number, ongoing_order_id, internal_notes, processed_at, created_at
+      `SELECT id, order_number, status, payment_status, fortnox_invoice_number, ongoing_order_id, internal_notes, processed_at, created_at
        FROM orders ORDER BY created_at DESC LIMIT 5`
     );
 
@@ -761,6 +761,7 @@ app.get("/api/fortnox/status", adminOnly, async (req, res) => {
       resend: { configured: !!process.env.RESEND_API_KEY },
       ongoing: { configured: !!process.env.ONGOING_BASE_URL },
       recentOrders: recentOrders.rows.map(o => ({
+        id: o.id,
         orderNumber: o.order_number,
         status: o.status,
         paymentStatus: o.payment_status,
@@ -1051,6 +1052,15 @@ app.put("/api/admin/orders/:id/status", adminAuthMiddleware, async (req, res) =>
 });
 
 app.post("/api/admin/orders/:id/retry", adminAuthMiddleware, async (req, res) => {
+  try {
+    const result = await handleOrderCompletion(parseInt(req.params.id));
+    res.json(result);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+app.post("/api/orders/:id/retry", adminOnly, async (req, res) => {
   try {
     const result = await handleOrderCompletion(parseInt(req.params.id));
     res.json(result);
@@ -2549,8 +2559,11 @@ async function handleOrderCompletion(orderId) {
     }
   }
 
-  // 5. Ongoing: create delivery order (REST API uses PUT, consignee inline)
-  try {
+  // 5. Ongoing: create delivery order (skip if already exists from previous attempt)
+  if (order.ongoing_order_id) {
+    ongoingOrderId = order.ongoing_order_id;
+    notes.push(`Ongoing order redan skapad: ${ongoingOrderId}`);
+  } else try {
     const ongoingSeqNumber = await db.nextOngoingOrderNumber();
     const deliveryDate = new Date(Date.now() + 1 * 86400000).toISOString().split("T")[0];
     const ogOrder = await ongoingFetch("/orders", "PUT", {
