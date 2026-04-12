@@ -129,11 +129,11 @@ export function Footer() {
             </h4>
             <div className="flex flex-col gap-3">
               <a
-                href="tel:0732305521"
+                href="tel:+46732305521"
                 className="flex items-center gap-2 text-sm text-brand-600 transition-colors hover:text-brand-900"
               >
                 <Phone className="h-3.5 w-3.5" />
-                0732 - 30 55 21
+                {locale === "en" ? "+46 732 30 55 21" : "0732 - 30 55 21"}
               </a>
               <a
                 href="mailto:info@1753skin.com"

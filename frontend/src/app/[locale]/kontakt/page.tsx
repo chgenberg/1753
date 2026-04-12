@@ -9,7 +9,7 @@ import { apiFetch } from "@/lib/api";
 import { useLocale } from "@/providers/locale-provider";
 
 export default function ContactPage() {
-  const { t } = useLocale();
+  const { t, locale } = useLocale();
   const p = (key: string) => t(`contactPage.${key}`);
   const [form, setForm] = useState({ name: "", email: "", message: "" });
   const [sent, setSent] = useState(false);
@@ -93,10 +93,10 @@ export default function ContactPage() {
               <div>
                 <p className="text-sm font-medium">{p("phoneLabel")}</p>
                 <a
-                  href="tel:0732305521"
+                  href="tel:+46732305521"
                   className="text-sm text-muted-foreground hover:text-brand-900"
                 >
-                  0732 - 30 55 21
+                  {locale === "en" ? "+46 732 30 55 21" : "0732 - 30 55 21"}
                 </a>
               </div>
             </div>
