@@ -353,6 +353,38 @@ function ProductsTab({ products }: { products: ProductRec[] }) {
               -{discount} kr
             </span>
           </div>
+
+          <button
+            onClick={handleAddAll}
+            disabled={added}
+            className={cn(
+              "mt-5 inline-flex items-center gap-2.5 rounded-full px-8 py-3.5 text-sm font-semibold shadow-md transition-all active:scale-[0.97]",
+              added
+                ? "bg-[#108474]/10 text-[#108474] shadow-none"
+                : "bg-[#108474] text-white shadow-[#108474]/20 hover:bg-[#0d6e62] hover:shadow-lg"
+            )}
+          >
+            {added ? (
+              <>
+                <Check className="h-4 w-4" />
+                {locale === "en" ? "Added with 15% off!" : "Tillagda med 15% rabatt!"}
+              </>
+            ) : (
+              <>
+                <Gift className="h-4 w-4" />
+                {locale === "en"
+                  ? `Add all to cart — ${totalAfter} kr`
+                  : `Lägg i varukorgen — ${totalAfter} kr`}
+              </>
+            )}
+          </button>
+          {!added && (
+            <p className="mt-2 text-[11px] text-[#766a62]">
+              {locale === "en"
+                ? "Discount code HUDANALYS15 applied automatically"
+                : "Rabattkoden HUDANALYS15 läggs in automatiskt"}
+            </p>
+          )}
         </div>
       </div>
 
