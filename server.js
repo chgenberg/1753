@@ -1069,6 +1069,22 @@ app.post("/api/orders/:id/retry", adminOnly, async (req, res) => {
   }
 });
 
+app.post("/api/orders/:id/resend-email", adminOnly, async (req, res) => {
+  try {
+    const orderId = parseInt(req.params.id);
+    const order = await db.findOrderByNumber(
+      (await db.pool.query("SELECT order_number FROM orders WHERE id = $1", [orderId])).rows[0]?.order_number
+    );
+    if (!order) return res.status(404).json({ message: "Order hittades inte" });
+    const items = typeof order.items === "string" ? JSON.parse(order.items) : order.items;
+    const result = await sendOrderConfirmation(order, items);
+    res.json(result);
+  } catch (err) {
+    console.error("[Resend-email] Error:", err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // ---- ADMIN: RETURNS ----
 
 app.post("/api/admin/orders/:id/return", adminAuthMiddleware, async (req, res) => {
@@ -2834,7 +2850,7 @@ async function sendOrderConfirmation(order, items) {
     ? `Orderbekräftelse & prenumeration – ${order.order_number}`
     : `Orderbekräftelse – ${order.order_number}`;
 
-  await resend.emails.send({
+  const { data: sendResult, error: sendError } = await resend.emails.send({
     from: fromEmail,
     to: order.customer_email,
     replyTo: "info@1753skin.com",
@@ -2881,7 +2897,12 @@ async function sendOrderConfirmation(order, items) {
     `
   });
 
-  console.log(`[Email] Order confirmation sent to ${order.customer_email} for ${order.order_number}${hasSubscription ? " (subscription)" : ""}`);
+  if (sendError) {
+    console.error(`[Email] Resend API error for ${order.customer_email}:`, JSON.stringify(sendError));
+    throw new Error(`Resend: ${sendError.message || JSON.stringify(sendError)}`);
+  }
+
+  console.log(`[Email] Order confirmation sent to ${order.customer_email} (id: ${sendResult?.id}) for ${order.order_number}${hasSubscription ? " (subscription)" : ""}`);
   return { sent: true };
 }
 
