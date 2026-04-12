@@ -14,7 +14,7 @@ import {
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import { loadModel, classifyRegion, type Prediction } from "./onnx-inference";
+import type { Prediction } from "./onnx-inference";
 import { FaceCanvas } from "./face-canvas";
 import {
   FACE_ZONES,
@@ -136,6 +136,7 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
     setAnalyzingZone("");
 
     try {
+      const { loadModel, classifyRegion } = await import("./onnx-inference");
       const session = await loadModel((pct) => setModelProgress(pct));
       setStep("analyzing");
       setAnalyzingZone(locale === "en" ? "Full face" : "Helhetsbild");
