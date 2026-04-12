@@ -270,7 +270,7 @@ const PRODUCTS_MAP = {
   "fungtastic-mushroom-extract":{ name: "Fungtastic Mushroom Extract", price: 399, priceEur: 32, articleNumber: "4001", vatRate: 0.06 }
 };
 
-const FREE_SHIPPING_THRESHOLD = 0;
+const FREE_SHIPPING_THRESHOLD = 700;
 const SHIPPING_COST = { SEK: 49, EUR: 5 };
 const VIVA_CURRENCY_CODE = { SEK: 752, EUR: 978 };
 
