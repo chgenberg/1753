@@ -23,7 +23,7 @@ export const LEGAL_TERMS_DE: LegalDoc = {
     },
     {
       h: "4. Lieferung",
-      html: `<p>Wir versenden alle Bestellungen mit PostNord Varubrev. Die übliche Lieferzeit beträgt 2–5 Werktage innerhalb Schwedens und 5–10 Werktage für Lieferungen innerhalb der EU. Kostenloser Versand bei Bestellungen über 600 SEK / \u20AC50; andernfalls fällt eine Versandgebühr von 49 SEK / \u20AC5 an.</p>`,
+      html: `<p>Wir versenden alle Bestellungen mit PostNord Varubrev. Die übliche Lieferzeit beträgt 2–5 Werktage innerhalb Schwedens und 5–10 Werktage für Lieferungen innerhalb der EU. Kostenloser Versand bei Bestellungen über 600 SEK / \u20AC50; andernfalls fällt eine Versandgebühr von 55 SEK / \u20AC6 an.</p>`,
     },
     {
       h: "5. Widerrufsrecht",

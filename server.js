@@ -272,7 +272,7 @@ const PRODUCTS_MAP = {
 };
 
 const FREE_SHIPPING_THRESHOLD = { SEK: 700, EUR: 60 };
-const SHIPPING_COST = { SEK: 49, EUR: 5 };
+const SHIPPING_COST = { SEK: 55, EUR: 6 };
 const VIVA_CURRENCY_CODE = { SEK: 752, EUR: 978 };
 
 const DISCOUNT_CODES = {
@@ -1169,79 +1169,6 @@ app.post("/api/admin/orders/:id/cancel", adminAuthMiddleware, async (req, res) =
         const creditNum = creditRes?.Invoice?.DocumentNumber ?? creditRes?.Invoice?.CreditInvoiceReference ?? null;
         if (creditNum) {
           notes.push(`Fortnox kreditfaktura: ${creditNum}`);
-
-          // Bookkeep the credit invoice (externalprint first, then bookkeep)
-          try {
-            await fortnoxFetch(`/invoices/${creditNum}/externalprint`, "PUT");
-            console.log(`[Cancel] Credit invoice ${creditNum} marked as externally printed`);
-          } catch (epErr) {
-            console.warn(`[Cancel] Credit invoice ${creditNum} externalprint skipped: ${epErr.message}`);
-          }
-          try {
-            await fortnoxFetch(`/invoices/${creditNum}/bookkeep`, "PUT");
-            notes.push(`Kreditfaktura ${creditNum} bokförd`);
-            console.log(`[Cancel] Credit invoice ${creditNum} bookkepped`);
-          } catch (bkErr) {
-            notes.push(`Kreditfaktura bokföring FEL: ${bkErr.message}`);
-            console.error(`[Cancel] Credit invoice ${creditNum} bookkeep error:`, bkErr.message);
-          }
-
-          // Zero out balances: register payment on credit invoice to net against original
-          const paymentAmount = order.total_amount + (order.shipping_cost || 0);
-          const today = new Date().toISOString().split("T")[0];
-          try {
-            // Check if original invoice still has a balance
-            let origInvoice;
-            try {
-              const origData = await fortnoxFetch(`/invoices/${order.fortnox_invoice_number}`);
-              origInvoice = origData?.Invoice;
-            } catch (_) {}
-
-            const origBalance = origInvoice?.Balance ?? paymentAmount;
-            console.log(`[Cancel] Original invoice ${order.fortnox_invoice_number} balance: ${origBalance}`);
-
-            // If original invoice still has a balance, register payment to zero it
-            if (origBalance > 0) {
-              const origPay = await fortnoxFetch("/invoicepayments", "POST", {
-                InvoicePayment: { InvoiceNumber: parseInt(order.fortnox_invoice_number), Amount: origBalance, AmountCurrency: origBalance, PaymentDate: today }
-              });
-              const origPayNum = origPay?.InvoicePayment?.Number;
-              if (origPayNum) {
-                await fortnoxFetch(`/invoicepayments/${origPayNum}/bookkeep`, "PUT").catch(e =>
-                  console.warn(`[Cancel] Orig payment bookkeep warning: ${e.message}`)
-                );
-              }
-              console.log(`[Cancel] Original invoice payment registered: ${origBalance}`);
-            }
-
-            // Check credit invoice balance and register payment to zero it
-            let creditInvoice;
-            try {
-              const creditData = await fortnoxFetch(`/invoices/${creditNum}`);
-              creditInvoice = creditData?.Invoice;
-            } catch (_) {}
-
-            const creditBalance = creditInvoice?.Balance ?? -paymentAmount;
-            console.log(`[Cancel] Credit invoice ${creditNum} balance: ${creditBalance}`);
-
-            if (creditBalance !== 0) {
-              const creditPay = await fortnoxFetch("/invoicepayments", "POST", {
-                InvoicePayment: { InvoiceNumber: parseInt(creditNum), Amount: creditBalance, AmountCurrency: creditBalance, PaymentDate: today }
-              });
-              const creditPayNum = creditPay?.InvoicePayment?.Number;
-              if (creditPayNum) {
-                await fortnoxFetch(`/invoicepayments/${creditPayNum}/bookkeep`, "PUT").catch(e =>
-                  console.warn(`[Cancel] Credit payment bookkeep warning: ${e.message}`)
-                );
-              }
-              console.log(`[Cancel] Credit invoice payment registered: ${creditBalance}`);
-            }
-
-            notes.push("Fortnox kvittning bokförd");
-          } catch (payErr) {
-            notes.push(`Fortnox kvittning FEL: ${payErr.message}`);
-            console.error("[Cancel] Fortnox payment netting error:", payErr);
-          }
         } else {
           notes.push("Fortnox kredit: svar saknade dokumentnummer");
         }
@@ -1411,29 +1338,7 @@ app.post("/api/admin/orders/:id/return", adminAuthMiddleware, async (req, res) =
           null;
 
         if (fortnoxCreditNumber) {
-          await fortnoxFetch(`/invoices/${fortnoxCreditNumber}/bookkeep`, "PUT").catch(() => {});
           notes.push(`Fortnox kreditfaktura: ${fortnoxCreditNumber}`);
-
-          const paymentAmount = order.total_amount + (order.shipping_cost || 0);
-          const today = new Date().toISOString().split("T")[0];
-          try {
-            const origPay = await fortnoxFetch("/invoicepayments", "POST", {
-              InvoicePayment: { InvoiceNumber: parseInt(order.fortnox_invoice_number), Amount: paymentAmount, AmountCurrency: paymentAmount, PaymentDate: today }
-            });
-            const origPayNum = origPay?.InvoicePayment?.Number;
-            if (origPayNum) await fortnoxFetch(`/invoicepayments/${origPayNum}/bookkeep`, "PUT").catch(() => {});
-
-            const creditPay = await fortnoxFetch("/invoicepayments", "POST", {
-              InvoicePayment: { InvoiceNumber: parseInt(fortnoxCreditNumber), Amount: -paymentAmount, AmountCurrency: -paymentAmount, PaymentDate: today }
-            });
-            const creditPayNum = creditPay?.InvoicePayment?.Number;
-            if (creditPayNum) await fortnoxFetch(`/invoicepayments/${creditPayNum}/bookkeep`, "PUT").catch(() => {});
-
-            notes.push("Fortnox kvittning bokförd");
-          } catch (payErr) {
-            notes.push(`Fortnox kvittning FEL: ${payErr.message}`);
-            console.error("[Return] Fortnox payment netting error:", payErr);
-          }
         } else {
           notes.push("Fortnox kredit: svar saknade dokumentnummer");
         }
@@ -2924,8 +2829,8 @@ async function handleOrderCompletion(orderId) {
           YourOrderNumber: sharedOrderNumber,
           ExternalInvoiceReference1: sharedOrderNumber,
           Currency: order.currency || "SEK",
-          Freight: order.shipping_cost > 0 ? order.shipping_cost : 0,
-          FreightVAT: 0,
+          Freight: order.shipping_cost > 0 ? Math.round((order.shipping_cost / 1.25) * 100) / 100 : 0,
+          FreightVAT: 25,
           OrderRows: orderRows,
           Remarks: `Order ${sharedOrderNumber} – betald via Viva Wallet`
         }

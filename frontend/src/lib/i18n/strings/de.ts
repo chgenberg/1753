@@ -208,7 +208,7 @@ export const de: Messages = {
       "Abonnements erfordern Kartenzahlung – automatische Belastungen sind mit Swish nicht möglich. Auf der nächsten Seite werden nur Karte und andere Methoden angezeigt, die wiederkehrende Zahlungen unterstützen.",
     payWithTotal: "{amount} bezahlen",
     secureHint: "Sichere Zahlung",
-    shippingPaidAmount: "Versand 5 €",
+    shippingPaidAmount: "Versand 6 €",
     qtyUnit: "Stk.",
     orderAsideTitle: "Deine Bestellung",
     removeDiscountAria: "Rabattcode entfernen",

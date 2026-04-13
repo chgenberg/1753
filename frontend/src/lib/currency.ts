@@ -22,7 +22,7 @@ export function formatPrice(amount: number, locale: Locale): string {
   return `\u20AC${safe.toLocaleString("en-GB")}`;
 }
 
-export const SHIPPING_COST = { SEK: 49, EUR: 5 } as const;
+export const SHIPPING_COST = { SEK: 55, EUR: 6 } as const;
 
 export function getShippingCost(locale: Locale): number {
   return locale === "sv" ? SHIPPING_COST.SEK : SHIPPING_COST.EUR;

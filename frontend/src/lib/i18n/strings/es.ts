@@ -208,7 +208,7 @@ export const es: Messages = {
       "Las suscripciones requieren pago con tarjeta: los cargos automáticos no están disponibles con Swish. En la siguiente página solo verás tarjeta y otros métodos que admiten pagos recurrentes.",
     payWithTotal: "Pagar {amount}",
     secureHint: "Pago seguro",
-    shippingPaidAmount: "Envío \u20AC5",
+    shippingPaidAmount: "Envío \u20AC6",
     qtyUnit: "uds.",
     orderAsideTitle: "Tu pedido",
     removeDiscountAria: "Eliminar código de descuento",

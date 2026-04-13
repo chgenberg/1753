@@ -208,7 +208,7 @@ export const en: Messages = {
       "Subscriptions require card payment – automatic charges are not available with Swish. On the next page you will only see card and other methods that support recurring payments.",
     payWithTotal: "Pay {amount}",
     secureHint: "Secure payment",
-    shippingPaidAmount: "Shipping \u20AC5",
+    shippingPaidAmount: "Shipping \u20AC6",
     qtyUnit: "pcs",
     orderAsideTitle: "Your order",
     removeDiscountAria: "Remove discount code",

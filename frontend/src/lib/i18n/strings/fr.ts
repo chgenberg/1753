@@ -208,7 +208,7 @@ export const fr: Messages = {
       "L'abonnement necessite un paiement par carte – les prelevements automatiques ne sont pas disponibles avec Swish. Sur la page suivante, seuls la carte et les autres moyens compatibles avec les paiements recurrents seront affiches.",
     payWithTotal: "Payer {amount}",
     secureHint: "Paiement securise",
-    shippingPaidAmount: "Livraison 5\u20AC",
+    shippingPaidAmount: "Livraison 6\u20AC",
     qtyUnit: "pcs",
     orderAsideTitle: "Ta commande",
     removeDiscountAria: "Supprimer le code promo",

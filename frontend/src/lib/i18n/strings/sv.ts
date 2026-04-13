@@ -206,7 +206,7 @@ const bundle = {
       "Prenumeration kräver betalning med kort – automatiska dragningar går inte med Swish. På nästa sida visas bara kort och andra metoder som stödjer återkommande betalning.",
     payWithTotal: "Betala {amount}",
     secureHint: "Säker betalning",
-    shippingPaidAmount: "Frakt 49 kr",
+    shippingPaidAmount: "Frakt 55 kr",
     qtyUnit: "st",
     orderAsideTitle: "Din beställning",
     removeDiscountAria: "Ta bort rabattkod",
