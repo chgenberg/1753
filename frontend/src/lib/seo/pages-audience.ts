@@ -4,6 +4,9 @@ export const AUDIENCE_PAGES: LandingPage[] = [
   {
     svSlug: "hudvard-for-man",
     enSlug: "skincare-for-men",
+    esSlug: "cuidado-de-la-piel-para-hombres",
+    deSlug: "hautpflege-fuer-maenner",
+    frSlug: "soin-de-la-peau-pour-hommes",
     category: "audience",
     productIds: ["duo-kit", "ta-da-serum", "au-naturel-makeup-remover"],
     sv: {
@@ -57,11 +60,92 @@ export const AUDIENCE_PAGES: LandingPage[] = [
       ],
       ctaTitle: "Try a routine that takes under a minute",
       ctaSub: "No fuss, no unnecessary steps. The DUO-kit gives your skin what it needs – nothing more, nothing less."
+    },
+    es: {
+      metaTitle: "Cuidado de la piel para hombres – rutina simple, resultados reales | 1753",
+      metaDescription: "La piel masculina es más gruesa, más grasa y más resistente, pero igual necesita cuidado. Descubre una rutina con CBD sin complicaciones. 1753 SKINCARE.",
+      kicker: "Cuidado de la piel para hombres",
+      h1: "Cuidado de la piel para hombres – a tu piel no le importa lo que piense la sociedad",
+      lead: "La piel masculina es distinta a nivel biológico. Más gruesa, más sebacea, más colágeno. Eso no significa que se cuide sola. Significa que necesita lo correcto, no más productos.",
+      problemTitle: "Por qué los hombres han evitado el cuidado de la piel – y por qué toca parar",
+      problemBody: "<p>Seamos honestos: la industria del skincare lleva años ignorando a los hombres, y ellos la han ignorado encantados. El resultado es una generación que se lava la cara con el mismo jabón del cuerpo y lo llama rutina. Funciona – hasta que deja de funcionar.</p><p>La piel masculina produce hasta el doble de sebo que la femenina, tiene más fibras de colágeno y es unos 25 por ciento más gruesa. Suena ventaja, pero también implica poros que se tapan antes, el afeitado genera microirritación crónica y el sol hace más daño bajo la superficie de lo que crees.</p><p>Esto no es vanidad. Es cuidar el órgano más grande que tienes. Una rutina simple de menos de un minuto puede marcar la diferencia entre una piel que envejece antes de tiempo y una que mantiene fuerza. Sin diez pasos, sin cremas perfumadas, sin tonterías. Solo lo que tu piel de verdad necesita.</p>",
+      tipsTitle: "Skincare masculino simple que funciona",
+      tips: [
+        { title: "Que sea simple", body: "No necesitas más de dos pasos: limpiar y aplicar aceite facial. Punto. Hazlo un hábito como cepillarte los dientes – no tiene por qué llevar más tiempo." },
+        { title: "Limpia después de afeitarte", body: "El afeitado desgasta la barrera cutánea. Usa un limpiador suave después para evitar irritación y pelos encarnados. Evita el alcohol que reseca." },
+        { title: "Usa protector solar", body: "Sí, tú también. La piel masculina tiene más colágeno, pero eso no protege del daño UV. El SPF es la medida anti-edad número uno, pase el género." },
+        { title: "El CBD calma tras el afeitado", body: "El CBD tiene propiedades antiinflamatorias ideales para la piel sometida al afeitado diario. Aplica un aceite con CBD justo después para calmar y apoyar la recuperación." }
+      ],
+      solutionTitle: "1753 SKINCARE – hecho para la simplicidad",
+      solutionBody: "<p>Diseñamos los productos para quien quiere resultados sin drama. El DUO-kit te da todo en dos frascos: aceite facial con CBD y serum con CBG. Menos de un minuto, funciona, y no hace falta elegir entre veinte opciones en el estante.</p><p>CBD y CBG trabajan con el sistema propio de la piel para equilibrar el sebo, calmar la inflamación post-afeitado y reforzar la barrera. No es ciencia espacial ni vanidad. Es mantenimiento básico – como el coche o el entreno.</p><p>Sin perfume, sin ingredientes de relleno, sin humo. Solo cannabinoides que hablan el idioma que tu piel entiende.</p>",
+      faq: [
+        { q: "¿De verdad los hombres necesitan skincare?", a: "Sí. La piel masculina puede tener más colágeno y ser más gruesa, pero también produce más sebo y sufre el afeitado diario. Sin cuidado básico, envejece antes y acumula poros obstruidos e irritación." },
+        { q: "¿El skincare con CBD sirve para hombres?", a: "Por supuesto. El CBD interactúa con el sistema endocannabinoide de la piel sin importar el género. Como la piel masculina suele producir más sebo e inflamación, el equilibrio que aporta el CBD encaja muy bien." },
+        { q: "¿Qué tan simple puede ser una rutina?", a: "Dos pasos: limpiar y aplicar aceite facial. Menos de un minuto. Nuestro DUO-kit está pensado exactamente para eso – rutina completa en dos productos." },
+        { q: "¿Ayuda con la irritación del afeitado?", a: "Sí. El CBD tiene efectos antiinflamatorios documentados que calman la piel tras el afeitado. Muchos clientes masculinos notan menos rojez e irritación." }
+      ],
+      ctaTitle: "Prueba una rutina de menos de un minuto",
+      ctaSub: "Sin líos ni pasos de más. El DUO-kit da a tu piel lo que necesita – ni más ni menos."
+    },
+    de: {
+      metaTitle: "Hautpflege für Männer – einfache Routine, echte Ergebnisse | 1753",
+      metaDescription: "Männerhaut ist dicker, fettiger und robuster – braucht aber trotzdem Pflege. Entdecke eine schlichte CBD-Routine ohne Theater. 1753 SKINCARE.",
+      kicker: "Hautpflege für Männer",
+      h1: "Hautpflege für Männer – deine Haut interessiert sich nicht für Meinungen",
+      lead: "Männerhaut ist biologisch anders. Dicker, mehr Talg, mehr Kollagen. Das heißt nicht, dass sie sich selbst versorgt. Sie braucht das Richtige – nicht mehr Produkte.",
+      problemTitle: "Warum Männer Hautpflege gemieden haben – und warum Schluss damit ist",
+      problemBody: "<p>Seien wir ehrlich: Die Beauty-Industrie hat Männer lange ignoriert, und Männer haben zurückgeignoriert. Das Ergebnis: eine Generation, die das Gesicht mit derselben Seife wie den Körper wäscht und das Routine nennt. Es klappt – bis es nicht mehr klappt.</p><p>Männerhaut produziert bis zu doppelt so viel Sebum wie Frauenhaut, hat mehr Kollagenfasern und ist rund 25 Prozent dicker. Klingt nach Vorteil, heißt aber auch: Poren verstopfen leichter, Rasur erzeugt chronische Mikroirritation, und die Sonne richtet unter der Oberfläche mehr Schaden an, als du denkst.</p><p>Es geht nicht um Eitelkeit. Es geht um das größte Organ, das du hast. Eine einfache Routine unter einer Minute kann den Unterschied machen zwischen vorzeitig alternder Haut und Haut, die Kraft behält. Kein Zehn-Schritte-Programm, keine parfümierten Cremes, kein Blödsinn. Nur das, was deine Haut wirklich braucht.</p>",
+      tipsTitle: "Einfache Männer-Hautpflege, die funktioniert",
+      tips: [
+        { title: "Bleib minimalistisch", body: "Du brauchst nicht mehr als zwei Schritte: reinigen und Gesichtsöl auftragen. Punkt. Mach es zur Gewohnheit wie Zähneputzen – es muss nicht länger dauern." },
+        { title: "Nach der Rasur reinigen", body: "Rasur strapaziert die Hautbarriere. Nutze nach der Rasur einen milden Reiniger gegen Irritation und eingewachsene Haare. Meide alkoholhaltige Produkte, die austrocknen." },
+        { title: "Sonnenschutz tragen", body: "Ja, du auch. Mehr Kollagen schützt nicht vor UV-Schaden. Lichtschutz ist die wichtigste Anti-Aging-Maßnahme – unabhängig vom Geschlecht." },
+        { title: "CBD beruhigt nach der Rasur", body: "CBD wirkt entzündungshemmend – ideal für täglich rasierte Haut. Trage direkt nach der Rasur ein CBD-Öl auf, um Irritation zu mildern und die Heilung zu unterstützen." }
+      ],
+      solutionTitle: "1753 SKINCARE – für Einfachheit gebaut",
+      solutionBody: "<p>Wir haben unsere Produkte für Menschen entwickelt, die Ergebnisse ohne Aufwand wollen. Das DUO-kit liefert alles in zwei Flaschen: Gesichtsöl mit CBD und Serum mit CBG. Unter einer Minute, es wirkt, und du musst nicht vor zwanzig Varianten stehen.</p><p>CBD und CBG arbeiten mit dem eigenen System der Haut: Talgbalance, Beruhigung nach der Rasur, stärkere Barriere. Keine Raketenwissenschaft, keine Eitelkeit. Basis-Pflege – wie beim Auto oder Training.</p><p>Kein Duft, keine unnötigen Inhaltsstoffe, kein Quatsch. Nur Cannabinoide, die deine Haut verstehen.</p>",
+      faq: [
+        { q: "Brauchen Männer wirklich Hautpflege?", a: "Ja. Männerhaut hat oft mehr Kollagen und ist dicker, produziert aber auch mehr Talg und erträgt tägliche Rasur. Ohne Basis-Pflege altert sie schneller und neigt zu verstopften Poren und Irritation." },
+        { q: "Ist CBD-Hautpflege für Männer geeignet?", a: "Absolut. CBD spricht mit dem endocannabinoiden System der Haut – unabhängig vom Geschlecht. Da Männerhaut tendenziell mehr Sebum und Entzündung hat, passen die ausgleichenden Eigenschaften besonders gut." },
+        { q: "Wie einfach darf eine Routine sein?", a: "Zwei Schritte: reinigen und Gesichtsöl. Unter einer Minute. Unser DUO-kit ist genau dafür gedacht – komplette Routine in zwei Produkten." },
+        { q: "Hilft es bei Rasurbrand?", a: "Ja. CBD ist dokumentiert entzündungshemmend und beruhigt die Haut nach der Rasur. Viele männliche Kunden berichten von weniger Rötung und Irritation." }
+      ],
+      ctaTitle: "Probiere eine Routine unter einer Minute",
+      ctaSub: "Kein Stress, keine Extra-Schritte. Das DUO-kit gibt deiner Haut, was sie braucht – nicht mehr, nicht weniger."
+    },
+    fr: {
+      metaTitle: "Soin de la peau pour hommes – routine simple, vrais résultats | 1753",
+      metaDescription: "La peau masculine est plus épaisse, plus grasse et plus résistante – elle a tout de même besoin de soins. Une routine CBD simple, sans prise de tête. 1753 SKINCARE.",
+      kicker: "Soin de la peau pour hommes",
+      h1: "Soin de la peau pour hommes – ta peau se fiche de l'avis de la société",
+      lead: "La peau masculine est biologiquement différente. Plus épaisse, plus grasse, plus de collagène. Ça ne veut pas dire qu'elle se débrouille toute seule. Elle a besoin du bon – pas de plus en plus de produits.",
+      problemTitle: "Pourquoi les hommes ont évité les soins – et pourquoi il est temps d'arrêter",
+      problemBody: "<p>Soyons honnêtes : l'industrie du soin a longtemps ignoré les hommes, et les hommes l'ont bien renvoyé l'ascenseur. Résultat : une génération qui lave le visage avec le même savon que le corps et appelle ça une routine. Ça marche – jusqu'à ce que ça casse.</p><p>La peau masculine produit jusqu'à deux fois plus de sébum, a plus de fibres de collagène et est environ 25 % plus épaisse. Ça sonne comme un avantage, mais ça veut aussi dire pores qui se bouchent plus vite, rasage = micro-irritation chronique, et le soleil fait plus de dégâts sous la surface qu'on ne le croit.</p><p>Ce n'est pas de la vanité. C'est prendre soin du plus grand organe que tu as. Une routine simple en moins d'une minute peut faire la différence entre une peau qui vieillit trop tôt et une peau qui garde sa force. Pas dix étapes, pas de crèmes parfumées, pas de blabla. Juste ce dont ta peau a réellement besoin.</p>",
+      tipsTitle: "Un soin masculin simple qui tient la route",
+      tips: [
+        { title: "Reste minimaliste", body: "Il ne te faut pas plus de deux étapes : nettoyer et appliquer une huile visage. Point. Fais-en une habitude comme te brosser les dents – ça ne doit pas prendre plus longtemps." },
+        { title: "Nettoie après le rasage", body: "Le rasage fragilise la barrière. Utilise un nettoyant doux après pour limiter irritation et poils incarnés. Évite l'alcool qui assèche." },
+        { title: "Mets de la crème solaire", body: "Oui, toi aussi. Plus de collagène ne protège pas des UV. La protection solaire est la mesure anti-âge numéro un, quel que soit le genre." },
+        { title: "Le CBD apaise après le rasage", body: "Le CBD a des propriétés anti-inflammatoires parfaites pour une peau rasée tous les jours. Applique une huile au CBD juste après pour calmer et aider la réparation." }
+      ],
+      solutionTitle: "1753 SKINCARE – pensé pour la simplicité",
+      solutionBody: "<p>Nous avons conçu nos produits pour celles et ceux qui veulent des résultats sans prise de tête. Le DUO-kit te donne l'essentiel en deux flacons : huile visage au CBD et sérum au CBG. Moins d'une minute, ça fonctionne, et tu n'as pas vingt options sur l'étagère.</p><p>CBD et CBG travaillent avec le système propre de la peau : équilibre du sébum, calme après rasage, barrière renforcée. Ce n'est pas de la science-fiction ni de la vanité. C'est l'entretien de base – comme la voiture ou l'entraînement.</p><p>Sans parfum, sans ingrédients inutiles, sans blabla. Juste des cannabinoïdes qui parlent le langage de ta peau.</p>",
+      faq: [
+        { q: "Les hommes ont-ils vraiment besoin de soins ?", a: "Oui. La peau masculine a souvent plus de collagène et est plus épaisse, mais elle produit aussi plus de sébum et subit le rasage quotidien. Sans soins de base, elle vieillit plus vite et accumule pores bouchés et irritations." },
+        { q: "Le CBD convient aux hommes ?", a: "Absolument. Le CBD interagit avec le système endocannabinoïde de la peau, quel que soit le genre. Comme la peau masculine produit souvent plus de sébum et d'inflammation, l'effet équilibrant du CBD est particulièrement pertinent." },
+        { q: "À quel point une routine peut-elle être simple ?", a: "Deux étapes : nettoyer et appliquer une huile visage. Moins d'une minute. Notre DUO-kit est fait pour ça – routine complète en deux produits." },
+        { q: "Ça aide contre l'irritation du rasage ?", a: "Oui. Le CBD a des effets anti-inflammatoires documentés qui apaisent la peau après le rasage. Beaucoup de nos clients hommes voient moins de rougeurs et d'irritation." }
+      ],
+      ctaTitle: "Essaie une routine en moins d'une minute",
+      ctaSub: "Sans prise de tête ni étapes inutiles. Le DUO-kit donne à ta peau ce qu'il lui faut – ni plus ni moins."
     }
   },
   {
     svSlug: "hudvard-gravid",
     enSlug: "skincare-pregnancy",
+    esSlug: "cuidado-de-la-piel-embarazo",
+    deSlug: "hautpflege-schwangerschaft",
+    frSlug: "soin-de-la-peau-grossesse",
     category: "audience",
     productIds: ["au-naturel-makeup-remover", "fungtastic-mushroom-extract"],
     sv: {
@@ -117,11 +201,95 @@ export const AUDIENCE_PAGES: LandingPage[] = [
       ],
       ctaTitle: "Safe choices for you and your skin",
       ctaSub: "Pregnancy is about trust – in your body, in your choices, in your products. We're here with natural options you can feel safe with."
+    },
+    es: {
+      metaTitle: "Cuidado de la piel en el embarazo – cuidado seguro y natural | 1753",
+      metaDescription: "El embarazo cambia la piel. Opciones naturales con ingredientes en los que puedes confiar. Consulta siempre a tu médico. 1753 SKINCARE.",
+      kicker: "Cuidado de la piel en el embarazo",
+      h1: "Cuidado de la piel en el embarazo – cuando tu cuerpo reescribe las reglas",
+      lead: "En el embarazo todo cambia, también la piel. Las hormonas cambian el juego y quieres estar segura de lo que te pones. Es sensatez. Es maternidad antes incluso de que nazca el bebé.",
+      problemTitle: "Por qué la piel cambia durante el embarazo",
+      problemBody: "<p>La montaña rusa hormonal del embarazo afecta la piel de formas que pocas marcas cuentan con honestidad. Estrógeno, progesterona y hormonas que estimulan melanocitos crean un cóctel que puede dar desde un glow hasta acné, manchas, sequedad e hipersensibilidad – a veces todo a la vez.</p><p>El melasma, la llamada máscara del embarazo, afecta hasta al 70 por ciento de las embarazadas. Más volumen sanguíneo puede dar rubor y capilares rotos. El sebo puede dispararse o apagarse por completo. La barrera cutánea se debilita y la piel se irrita con más facilidad.</p><p>Mientras, la lista de ingredientes seguros se acorta. Retinol, ácido salicílico en dosis altas, filtros químicos – mucho de lo habitual no encaja en el embarazo. Frustración pura: la piel pide más cuidado que nunca y la caja de herramientas se encoge. Mereces productos lo bastante seguros para usarlos sin miedo.</p>",
+      tipsTitle: "Skincare seguro durante el embarazo",
+      tips: [
+        { title: "Consulta a tu equipo médico", body: "Antes de nuevos productos en el embarazo – incluidos los con CBD – habla con tu matrona o médico. Cada embarazo es distinto y quien te conoce es quien debe decidir contigo." },
+        { title: "Simplifica la rutina", body: "Menos es más. Limpiador suave, aceite hidratante y protección solar suelen bastar. No metas diez novedades a la vez." },
+        { title: "Elige ingredientes suaves", body: "Aceites naturales, extractos de hongos y pantalla mineral suelen ser opciones razonables. Evita ácidos fuertes, retinol y listas kilométricas de sintéticos." },
+        { title: "Protege frente a la pigmentación", body: "Las hormonas vuelven la piel más sensible al sol. SPF mineral a diario y menos sol directo reducen el riesgo de melasma." },
+        { title: "Escucha los cambios", body: "La piel puede cambiar semana a semana. Ajusta la rutina a lo que te dice – lo que iba bien en el segundo trimestre puede no servir en el tercero." }
+      ],
+      solutionTitle: "Opciones naturales en el embarazo",
+      solutionBody: "<p>Transparencia total: te recomendamos consultar a tu médico antes de usar CBD en el embarazo; la evidencia tópica aún es limitada. No es letra pequeña – es hablar claro.</p><p>Lo que sí podemos ofrecer con la conciencia tranquila es Au Naturel, nuestro desmaquillante a base de aceites, y Fungtastic, extracto de hongos con setas adaptógenas que apoyan la piel por dentro. Sin cannabinoides, formulación suave y natural.</p><p>El embarazo es confiar en el cuerpo y elegir con cabeza. Estamos aquí con opciones que te puedan sentar bien, y siempre decimos lo que sabemos – y lo que aún no sabemos.</p>",
+      faq: [
+        { q: "¿Puedo usar skincare con CBD si estoy embarazada?", a: "Te recomendamos hablar con tu matrona o médico antes. La investigación sobre CBD tópico en el embarazo sigue siendo limitada; queremos que te sientas totalmente segura." },
+        { q: "¿Qué productos 1753 encajan en el embarazo?", a: "Au Naturel makeup remover y Fungtastic mushroom extract no llevan cannabinoides y están formulados con ingredientes suaves y naturales. Consulta siempre a tu equipo para consejo personalizado." },
+        { q: "¿Por qué cambia la piel en el embarazo?", a: "Hormonas como estrógeno y progesterona afectan el sebo, la melanina y la barrera. Hasta el 70 por ciento nota cambios de pigmentación y muchas ven cambiar su tipo de piel." },
+        { q: "¿Cuándo vuelve la piel a la normalidad tras el parto?", a: "La mayoría de los cambios hormonales se normalizan entre tres y seis meses. El melasma puede tardar más en aclararse y a veces pide tratamiento activo." }
+      ],
+      ctaTitle: "Elecciones seguras para ti y tu piel",
+      ctaSub: "El embarazo es confianza – en el cuerpo, en tus decisiones, en lo que usas. Aquí tienes opciones naturales con las que puedas estar tranquila."
+    },
+    de: {
+      metaTitle: "Hautpflege in der Schwangerschaft – sichere, natürliche Pflege | 1753",
+      metaDescription: "Die Schwangerschaft verändert die Haut. Finde sanfte, natürliche Optionen mit Inhaltsstoffen, denen du vertraust. Immer mit deiner Ärztin oder deinem Arzt sprechen. 1753 SKINCARE.",
+      kicker: "Hautpflege in der Schwangerschaft",
+      h1: "Hautpflege in der Schwangerschaft – wenn dein Körper die Regeln neu schreibt",
+      lead: "In der Schwangerschaft ändert sich alles – auch die Haut. Hormone setzen neue Bedingungen, und du willst sicher sein, was du aufträgst. Das ist klug. Das ist schon Mutterliebe, bevor das Kind da ist.",
+      problemTitle: "Warum sich die Haut in der Schwangerschaft verändert",
+      problemBody: "<p>Die hormonelle Achterbahn der Schwangerschaft wirkt auf die Haut – und kaum eine Marke spricht ehrlich darüber. Östrogen, Progesteron und melanozytenstimulierende Hormone mischen ein Cocktail aus Glow, Akne, Pigmentflecken, Trockenheit und Überempfindlichkeit – manchmal alles zugleich.</p><p>Melasma, die sogenannte Schwangerschaftsmaske, betrifft bis zu 70 Prozent der Schwangeren. Mehr Blutvolumen kann Rötungen und kapillare Schäden begünstigen. Die Talgproduktion explodiert oder bricht ein. Die Barriere wird brüchiger, die Haut reizbarer.</p><p>Gleichzeitig schrumpft die Liste erlaubter Inhaltsstoffe. Retinol, hochdosierte Salicylsäure, chemische Filter – vieles vom Üblichen passt nicht. Frust pur: Die Haut braucht mehr Pflege denn je, aber die Werkzeugkiste wird kleiner. Du verdienst Produkte, die sicher genug sind, ohne Sorge zu nutzen.</p>",
+      tipsTitle: "Sichere Hautpflege in der Schwangerschaft",
+      tips: [
+        { title: "Sprich mit deiner Hebamme oder Ärztin", body: "Bevor du neue Produkte startest – auch CBD-haltige – immer Rücksprache. Jede Schwangerschaft ist anders, und dein Team kennt deine Situation am besten." },
+        { title: "Vereinfache die Routine", body: "Weniger ist mehr. Milder Reiniger, feuchtigkeitsspendendes Öl und Sonnenschutz reichen oft. Nicht viele Neuheiten auf einmal testen." },
+        { title: "Sanfte Inhaltsstoffe wählen", body: "Natürliche Öle, Pilzextrakte und mineralischer Lichtschutz sind meist solide Wahlen. Starke Säuren, Retinol und endlose INCI-Listen mit Synthetik meiden." },
+        { title: "Pigmentierung im Blick", body: "Hormone machen die Haut sonnenempfindlicher. Täglich mineralischer SPF und weniger direkte Sonne senken das Melasma-Risiko." },
+        { title: "Auf Veränderungen hören", body: "Die Haut kann wöchentlich anders sein. Passe die Routine an die Signale an – was im zweiten Trimester ging, passt im dritten vielleicht nicht mehr." }
+      ],
+      solutionTitle: "Natürliche Optionen in der Schwangerschaft",
+      solutionBody: "<p>Wir sind transparent: Bitte sprich mit deiner Ärztin oder deinem Arzt, bevor du CBD in der Schwangerschaft nutzt – die Forschung zu topischem CBD ist noch dünn. Das ist kein Haftungsabschuss, sondern ehrliche Kommunikation.</p><p>Mit gutem Gewissen bieten wir Au Naturel, unseren Make-up-Entferner auf Ölbasis, und Fungtastic mushroom extract mit adaptogenen Pilzen für Unterstützung von innen. Keine Cannabinoide, sanfte natürliche Formulierung.</p><p>Schwangerschaft heißt: dem Körper vertrauen und kluge Entscheidungen treffen. Wir sind da mit Produkten, bei denen du dich sicher fühlen kannst – und wir sagen offen, was wir wissen und was noch offen ist.</p>",
+      faq: [
+        { q: "Darf ich CBD-Hautpflege in der Schwangerschaft nutzen?", a: "Wir empfehlen, vorher mit Hebamme oder Arzt zu sprechen. Die Daten zu topischem CBD sind begrenzt – uns ist wichtig, dass du dich absolut sicher fühlst." },
+        { q: "Welche 1753-Produkte passen in der Schwangerschaft?", a: "Au Naturel makeup remover und Fungtastic mushroom extract enthalten keine Cannabinoide und sind mild und natürlich formuliert. Immer individuell mit deinem Team klären." },
+        { q: "Warum verändert sich die Haut?", a: "Hormone wie Östrogen und Progesteron beeinflussen Talg, Melanin und die Barriere. Bis zu 70 Prozent bemerken Pigmentveränderungen, viele spüren einen Wechsel des Hauttyps." },
+        { q: "Wann normalisiert sich die Haut nach der Geburt?", a: "Die meisten hormonellen Hautveränderungen gleichen sich in drei bis sechs Monaten aus. Melasma kann länger brauchen und manchmal aktive Pflege erfordern." }
+      ],
+      ctaTitle: "Sichere Entscheidungen für dich und deine Haut",
+      ctaSub: "Schwangerschaft ist Vertrauen – in den Körper, in deine Wahl, in deine Produkte. Wir sind da mit natürlichen Optionen, bei denen du dich wohlfühlst."
+    },
+    fr: {
+      metaTitle: "Soin de la peau pendant la grossesse – soins sûrs et naturels | 1753",
+      metaDescription: "La grossesse change la peau. Des options naturelles avec des ingrédients de confiance. Consulte toujours ton professionnel de santé. 1753 SKINCARE.",
+      kicker: "Soin de la peau pendant la grossesse",
+      h1: "Soin de la peau pendant la grossesse – quand ton corps réécrit les règles",
+      lead: "Pendant la grossesse, tout bouge – y compris la peau. Les hormones changent la donne et tu veux être sûre de ce que tu appliques. C'est lucide. C'est déjà de la parentalité avant la naissance.",
+      problemTitle: "Pourquoi la peau change pendant la grossesse",
+      problemBody: "<p>Le manège hormonal de la grossesse agit sur la peau de façon que peu de marques racontent honnêtement. Œstrogène, progestérone et hormones stimulant les mélanocytes forment un cocktail : éclat, acné, taches, sécheresse, hypersensibilité – parfois tout en même temps.</p><p>Le melasma, ce masque de grossesse, touche jusqu'à 70 % des femmes enceintes. Le volume sanguin peut donner des rougeurs et des petits vaisseaux visibles. Le sébum explose ou s'éteint. La barrière se fragilise, la peau s'irrite plus vite.</p><p>En parallèle, la liste des ingrédients ok se raccourcit. Rétinol, acide salicylique à forte dose, filtres chimiques – beaucoup du classique ne convient pas. Frustration : la peau demande plus de soins que jamais, mais la boîte à outils rétrécit. Tu mérites des produits assez sûrs pour les utiliser sans angoisse.</p>",
+      tipsTitle: "Soins sûrs pendant la grossesse",
+      tips: [
+        { title: "Parle à ton équipe soignante", body: "Avant toute nouveauté – y compris au CBD – consulte ta sage-femme ou ton médecin. Chaque grossesse est unique, et c'est ton suivi qui compte." },
+        { title: "Simplifie la routine", body: "Moins, c'est souvent mieux. Nettoyant doux, huile hydratante, protection solaire suffisent souvent. Évite d'empiler plein de nouveautés d'un coup." },
+        { title: "Choisis des ingrédients doux", body: "Huiles naturelles, extraits de champignons, écran minéral : en général de bons choix. Évite acides agressifs, rétinol et listes INCI interminables de synthétiques." },
+        { title: "Protège contre la pigmentation", body: "Les hormones rendent la peau plus sensible au soleil. SPF minéral au quotidien et moins d'exposition directe limitent le risque de melasma." },
+        { title: "Écoute les changements", body: "La peau évolue d'une semaine à l'autre. Ajuste selon ce qu'elle te dit – ce qui allait au deuxième trimestre peut ne plus aller au troisième." }
+      ],
+      solutionTitle: "Options naturelles pendant la grossesse",
+      solutionBody: "<p>Transparence : nous te recommandons de consulter ton professionnel de santé avant d'utiliser du CBD pendant la grossesse, la recherche topique reste limitée. Ce n'est pas un disclaimer – c'est parler vrai.</p><p>Ce que nous proposons en toute conscience : Au Naturel, notre démaquillant aux huiles naturelles, et Fungtastic mushroom extract avec champignons adaptogènes pour un soutien de l'intérieur. Pas de cannabinoïdes, formule douce et naturelle.</p><p>La grossesse, c'est faire confiance au corps et choisir avec lucidité. Nous sommes là avec des options naturelles rassurantes, en disant ce que nous savons – et ce qui reste à explorer.</p>",
+      faq: [
+        { q: "Puis-je utiliser du CBD sur la peau enceinte ?", a: "Nous te conseillons d'en parler à ta sage-femme ou ton médecin avant. Les données sur le CBD topique restent limitées ; nous voulons que tu te sentes totalement en sécurité." },
+        { q: "Quels produits 1753 pendant la grossesse ?", a: "Au Naturel makeup remover et Fungtastic mushroom extract ne contiennent pas de cannabinoïdes et sont formulés avec des ingrédients doux et naturels. Toujours un avis personnalisé avec ton équipe." },
+        { q: "Pourquoi la peau change-t-elle ?", a: "Des hormones comme œstrogène et progestérone influencent sébum, mélanine et barrière. Jusqu'à 70 % voient des changements de pigmentation ; beaucoup constatent un type de peau différent." },
+        { q: "Quand la peau redevient-elle normale après l'accouchement ?", a: "La plupart des effets hormonaux se stabilisent en trois à six mois. Le melasma peut mettre plus longtemps à s'estomper et parfois demander un soin actif." }
+      ],
+      ctaTitle: "Des choix sûrs pour toi et ta peau",
+      ctaSub: "La grossesse, c'est la confiance – dans le corps, dans tes choix, dans tes produits. Nous sommes là avec des options naturelles qui rassurent."
     }
   },
   {
     svSlug: "hudvard-tonaring",
     enSlug: "skincare-teenagers",
+    esSlug: "cuidado-de-la-piel-adolescentes",
+    deSlug: "hautpflege-teenager",
+    frSlug: "soin-de-la-peau-adolescents",
     category: "audience",
     productIds: ["ta-da-serum", "au-naturel-makeup-remover"],
     sv: {
@@ -177,11 +345,95 @@ export const AUDIENCE_PAGES: LandingPage[] = [
       ],
       ctaTitle: "Start simple – that's the whole point",
       ctaSub: "A routine that takes under a minute and doesn't break the bank. TA-DA Serum and Au Naturel are all you need to get started."
+    },
+    es: {
+      metaTitle: "Cuidado de la piel para adolescentes – un inicio honesto sin líos | 1753",
+      metaDescription: "La piel adolescente no está rota – se está encontrando. Bases de una rutina simple que de verdad ayuda. 1753 SKINCARE.",
+      kicker: "Cuidado de la piel para adolescentes",
+      h1: "Cuidado de la piel para adolescentes – tu piel no es el problema, lo son las hormonas",
+      lead: "La pubertad revuelve todo el cuerpo y la piel suele ser la que lo muestra. Granos, grasa, sequedad – no es porque lo hagas mal. Es porque tu cuerpo se está reconstruyendo.",
+      problemTitle: "Por qué la piel adolescente se comporta así",
+      problemBody: "<p>Cuando arranca la pubertad sube la producción de andrógenos – hormonas que entre otras cosas mandan en el sebo. Las glándulas sebáceas aceleran, los poros se tapan y las bacterias encuentran fiesta. El acné no es un tema de higiene – es hormonal e inflamatorio y afecta hasta al 85 por ciento de los adolescentes.</p><p>Peor aún: muchos ignoran la piel o hacen demasiado. Limpiadores agresivos con alcohol, parches milagro y pinchar esporádico suelen empeorar. La piel responde al exceso de limpieza produciendo aún más sebo – un círculo cruel y frustrante.</p><p>Encima, bombardeo de imágenes de piel imposible. La verdad: la piel adolescente pasa un proceso natural. Necesita apoyo, no castigo. Una rutina simple y pensada marca diferencia sin vaciar la cuenta.</p>",
+      tipsTitle: "Lo básico de una rutina teen",
+      tips: [
+        { title: "No te laves en exceso", body: "Limpia mañana y noche con algo suave. Nada más. Lavar de más dispara más sebo y empeora el cuadro." },
+        { title: "No pinches", body: "Sabemos que pica la tentación, pero exprimir esparce bacterias y deja marcas. Deja que los productos trabajen." },
+        { title: "Empieza con un serum", body: "Un serum ligero con activos absorbe rápido y no deja sensación grasa. Ideal si no te gusta la crema." },
+        { title: "SPF todos los días", body: "El UV empeora marcas y manchas. Busca un protector ligero que no obstruya poros. Tu piel del futuro te lo agradecerá." },
+        { title: "Paciencia", body: "Nada arregla la piel de la noche a la mañana. El ciclo de renovación ronda las cuatro semanas. Dale al menos ese tiempo antes de juzgar." }
+      ],
+      solutionTitle: "TA-DA Serum – un primer paso inteligente",
+      solutionBody: "<p>TA-DA Serum con CBG es un gran primer contacto con el skincare. Ligero, absorbe al instante y nunca se siente pegajoso. El CBG aporta calma e antiinflamación – clave cuando hay inflamación y glándulas hiperactivas.</p><p>Combínalo con Au Naturel para limpiar sin destrozar la barrera. Dos pasos, menos de un minuto. Hasta el adolescente más reacio puede cumplirlo.</p><p>Creemos en empezar simple y crecer desde ahí. Una rutina viable en tiempo y dinero tiene más posibilidades de volverse hábito. Y el hábito – no el producto caro – es lo que cambia el juego.</p>",
+      faq: [
+        { q: "¿A partir de qué edad empezar?", a: "No hay edad mágica; muchos se benefician desde los 12–13 años cuando sube el sebo. Limpieza e hidratación bastan al inicio – rara vez hace falta más." },
+        { q: "¿Los productos con CBG van para adolescentes?", a: "El CBG es un cannabinoide natural, no psicoactivo, con efecto calmante. No hay riesgos conocidos en uso tópico; igual recomendamos que padres o tutores participen en la elección si son muy jóvenes." },
+        { q: "¿CBD/CBG ayudan con el acné?", a: "La investigación sugiere que los cannabinoides pueden modular sebo e inflamación – dos pilares del acné. No sustituye dermatología en casos graves, pero puede complementar." },
+        { q: "¿Cuánto hay que gastar?", a: "Poco. Limpieza + serum bien elegidos van lejos. Es constancia, no precio. Mejor un inicio asequible que frascos caros guardando polvo." }
+      ],
+      ctaTitle: "Empieza simple – de eso va el asunto",
+      ctaSub: "Rutina de menos de un minuto sin arruinarte. TA-DA Serum y Au Naturel son suficientes para arrancar."
+    },
+    de: {
+      metaTitle: "Hautpflege für Teenager – ein ehrlicher Start ohne Schnickschnack | 1753",
+      metaDescription: "Teenagerhaut ist nicht kaputt – sie findet sich. Lerne die Basics einer einfachen Routine, die wirklich hilft. 1753 SKINCARE.",
+      kicker: "Hautpflege für Teenager",
+      h1: "Hautpflege für Teenager – deine Haut ist nicht das Problem, Hormone sind es",
+      lead: "Pubertät wirbelt alles durcheinander, und die Haut zeigt es oft zuerst. Pickel, fettige Haut, Trockenheit – nicht, weil du etwas falsch machst. Dein Körper baut sich gerade um.",
+      problemTitle: "Warum sich Teenagerhaut so verhält",
+      problemBody: "<p>Mit der Pubertät steigt die Androgenproduktion – Hormone, die unter anderem den Talg steuern. Talgdrüsen laufen heiß, Poren verstopfen, Bakterien fühlen sich wohl. Akne ist kein Hygienethema – sie ist hormonal und entzündlich und betrifft bis zu 85 Prozent aller Teenager.</p><p>Schlimmer: Viele ignorieren die Haut komplett oder übertreiben. Aggressive Reiniger mit Alkohol, Quick-Fix-Übernutzung und Herumdrücken schaden oft mehr. Überreinigung triggert mehr Talg – ein Teufelskreis.</p><p>Dazu kommen unrealistische Bilder von perfekter Haut. Fakt: Teenagerhaut durchläuft einen natürlichen Prozess. Sie braucht Unterstützung, keine Strafe. Eine schlichte, durchdachte Routine hilft enorm – ohne Bankrott.</p>",
+      tipsTitle: "Die Basics einer Teen-Routine",
+      tips: [
+        { title: "Nicht überwaschen", body: "Morgens und abends mild reinigen. Nicht mehr. Zu viel Waschen treibt mehr Talg an und verschlechtert alles." },
+        { title: "Nicht ausdrücken", body: "Lockt zwar, verteilt aber Bakterien und hinterlässt Narben. Lass die Produkte arbeiten." },
+        { title: "Mit Serum starten", body: "Ein leichtes Serum mit Wirkstoffen zieht schnell ein und fühlt sich nicht fettig an. Ideal, wenn du Cremes nicht magst." },
+        { title: "Täglich Lichtschutz", body: "UV verschärft Aknenarben und Pigmentierung. Leichte Formel, die nicht verstopft. Deine zukünftige Haut dankt dir." },
+        { title: "Geduld", body: "Kein Produkt wirkt über Nacht. Der Erneuerungszyklus dauert etwa vier Wochen. Gib der Routine mindestens so lange." }
+      ],
+      solutionTitle: "TA-DA Serum – ein kluger erster Schritt",
+      solutionBody: "<p>TA-DA Serum mit CBG ist ein starker Einstieg in die Hautpflege. Leicht, zieht schnell ein, nie klebrig. CBG beruhigt und wirkt entzündungshemmend – relevant bei entzündlicher, überaktiver Teenagerhaut.</p><p>Kombiniere mit Au Naturel für schonende Reinigung ohne Barriere-Kollaps. Zwei Schritte, unter einer Minute. Selbst widerwillige Teenager schaffen das.</p><p>Wir glauben an Start simpel und dann ausbauen. Eine machbare Routine in Zeit und Geld wird eher zur Gewohnheit. Und die Gewohnheit – nicht das teuerste Produkt – macht den Unterschied.</p>",
+      faq: [
+        { q: "Ab welchem Alter starten?", a: "Kein fixes Alter; viele profitieren ab 12–13, wenn der Talg zunimmt. Reinigung und Feuchtigkeit reichen am Anfang – mehr selten nötig." },
+        { q: "Sind CBG-Produkte für Teenager ok?", a: "CBG ist ein natürliches, nicht psychoaktives Cannabinoid mit beruhigender Wirkung. Für topische Nutzung sind keine Risiken bekannt; Eltern sollten bei jüngeren Teenies mitentscheiden." },
+        { q: "Helfen CBD/CBG bei Akne?", a: "Studien deuten darauf hin, dass Cannabinoide Talg und Entzündung beeinflussen können – zwei Kerne der Akne. Ersetzt keine Dermatologie bei schwerer Akne, kann aber ergänzen." },
+        { q: "Wie viel Geld ausgeben?", a: "Nicht viel. Reiniger plus Serum reichen weit. Es geht um Konstanz, nicht Preis. Günstiger Start mit den richtigen Produkten schlägt teure Staubfänger." }
+      ],
+      ctaTitle: "Fang simpel an – genau darum geht's",
+      ctaSub: "Routine unter einer Minute, ohne die Kasse zu plündern. TA-DA Serum und Au Naturel reichen zum Start."
+    },
+    fr: {
+      metaTitle: "Soin de la peau pour ados – un début honnête sans prise de tête | 1753",
+      metaDescription: "La peau d'ado n'est pas cassée – elle se cherche. Les bases d'une routine simple qui aide vraiment. 1753 SKINCARE.",
+      kicker: "Soin de la peau pour ados",
+      h1: "Soin de la peau pour ados – ce n'est pas ta peau le problème, ce sont les hormones",
+      lead: "La puberté secoue tout le corps, et la peau affiche souvent la facture. Boutons, gras, sécheresse – ce n'est pas parce que tu te trompes. Ton corps se reconstruit.",
+      problemTitle: "Pourquoi la peau d'ado réagit comme ça",
+      problemBody: "<p>Avec la puberté, la production d'androgènes augmente – hormones qui pilotent entre autres le sébum. Les glandes s'emballent, les pores se bouchent, les bactéries adorent. L'acné n'est pas un problème d'hygiène – c'est hormonal et inflammatoire, et ça touche jusqu'à 85 % des ados.</p><p>Pire : beaucoup ignorent la peau ou font trop. Nettoyants agressifs à l'alcool, quick fixes en série et gratter les boutons font souvent plus de mal. Sur-nettoyer pousse la peau à produire encore plus de sébum – cercle vicieux épuisant.</p><p>En plus, les images de peau parfaite partout. Vérité : la peau d'ado traverse un processus naturel. Elle a besoin de soutien, pas de punition. Une routine simple et réfléchie change beaucoup de choses – sans ruiner ton budget.</p>",
+      tipsTitle: "Les bases d'une routine ado",
+      tips: [
+        { title: "Ne sur-lave pas", body: "Nettoie matin et soir avec un produit doux. Pas plus. Trop laver déclenche plus de sébum et empire la situation." },
+        { title: "Ne perce pas", body: "Tentant, oui, mais ça propage les bactéries et laisse des cicatrices. Laisse les produits faire le travail." },
+        { title: "Commence par un sérum", body: "Un sérum léger avec actifs pénètre vite sans effet gras. Parfait si tu n'aimes pas les crèmes." },
+        { title: "Crème solaire chaque jour", body: "Les UV aggravent les marques d'acné et les taches. Choisis une formule légère non comédogène. Ta peau future dira merci." },
+        { title: "Patience", body: "Aucun produit ne magie en une nuit. Le cycle de renouvellement fait environ quatre semaines. Donne au moins ce délai avant de juger." }
+      ],
+      solutionTitle: "TA-DA Serum – un premier pas malin",
+      solutionBody: "<p>TA-DA Serum au CBG est une excellente porte d'entrée du soin. Léger, absorption rapide, jamais collant. Le CBG apaise et calme l'inflammation – utile quand les glandes s'emballent.</p><p>Ajoute Au Naturel pour nettoyer sans détruire la barrière. Deux étapes, moins d'une minute. Même les ados les plus réfractaires peuvent tenir le rythme.</p><p>On croit au départ minimaliste, puis on construit. Une routine réaliste en temps et en argent devient plus facilement une habitude. Et c'est l'habitude – pas le produit le plus cher – qui fait la différence.</p>",
+      faq: [
+        { q: "À partir de quel âge commencer ?", a: "Pas d'âge fixe ; beaucoup gagnent avec une routine simple vers 12–13 ans quand le sébum monte. Nettoyage + hydratation suffisent au début – rarement besoin de plus." },
+        { q: "Les produits au CBG conviennent aux ados ?", a: "Le CBG est un cannabinoïde naturel, non psychoactif, apaisant. Pas de risque connu en usage topique ; on recommande que les parents participent au choix pour les plus jeunes." },
+        { q: "CBD/CBG et acné ?", a: "La recherche suggère que les cannabinoïdes peuvent moduler sébum et inflammation – deux piliers de l'acné. Ça ne remplace pas un dermatologue si c'est sévère, mais ça peut compléter." },
+        { q: "Combien dépenser ?", a: "Pas grand-chose. Nettoyant + sérum bien choisis vont loin. C'est la régularité, pas le prix. Mieux vaut un début accessible que des pots chers qui prennent la poussière." }
+      ],
+      ctaTitle: "Commence simple – c'est tout le projet",
+      ctaSub: "Une routine en moins d'une minute sans flamber le budget. TA-DA Serum et Au Naturel suffisent pour démarrer."
     }
   },
   {
     svSlug: "hudvard-mogen-hud",
     enSlug: "skincare-mature-skin",
+    esSlug: "cuidado-de-la-piel-madura",
+    deSlug: "hautpflege-reife-haut",
+    frSlug: "soin-de-la-peau-mature",
     category: "audience",
     productIds: ["duo-ta-da", "ta-da-serum", "fungtastic-mushroom-extract"],
     sv: {
@@ -235,11 +487,92 @@ export const AUDIENCE_PAGES: LandingPage[] = [
       ],
       ctaTitle: "Give your skin what it deserves",
       ctaSub: "Mature skin needs deep nourishment and intelligent support. DUO TA-DA and Fungtastic give your skin the best conditions – on your terms."
+    },
+    es: {
+      metaTitle: "Cuidado de la piel madura – nutrición profunda, no promesas vacías | 1753",
+      metaDescription: "La piel madura pide nutrición y apoyo, no pánico anti-edad. CBD y CBG dan a tu piel lo que de verdad reclama. 1753 SKINCARE.",
+      kicker: "Cuidado de la piel madura",
+      h1: "Cuidado de la piel madura – envejecer no es una enfermedad que curar",
+      lead: "Tu piel ha vivido. Ha reído, llorado, visto sol y viento. No merece productos que tratan la edad como defecto – merece lo que necesita en este capítulo.",
+      problemTitle: "Qué le pasa de verdad a la piel madura",
+      problemBody: "<p>A partir de unos 25 años el colágeno baja alrededor de un uno por ciento al año. A los 50 has perdido cerca de un 25 por ciento. Las fibras de elastina, que dan elasticidad, se desgastan y no se repone al mismo ritmo. La piel se adelgaza, se seca y se vuelve más vulnerable.</p><p>No es solo colágeno. El sistema endocannabinoide de la piel también cambia con la edad. Baja la actividad de los receptores ECS, y eso afecta inflamación, renovación celular y equilibrio hídrico. Por eso la piel madura suele ser más seca, más sensible y tarda más en recuperarse.</p><p>La industria anti-edad vende miedo disfrazado de solución. La piel madura no necesita ser salvada – necesita apoyo. Nutrición profunda, ayuda a la renovación, control de inflamación y barrera fuerte. Ahí está la diferencia real cuando dejas de perseguir una juventud imposible y cuidas la piel que tienes.</p>",
+      tipsTitle: "Skincare inteligente para piel madura",
+      tips: [
+        { title: "Nutrición antes que anti-edad", body: "Deja de perseguir cada moda. Apuesta por aceites y serum que alimenten la barrera y la renovación." },
+        { title: "Apoyo desde dentro", body: "Hongos adaptógenos y suplementos que apoyan el colágeno marcan diferencia por dentro. La piel refleja el cuerpo entero." },
+        { title: "Generosa con el aceite", body: "La piel madura produce menos sebo y pide más nutrición externa. Los aceites con CBD se absorben bien y aportan lo liposoluble que ansía." },
+        { title: "Protege la barrera", body: "Evita lo que la desafía – ácidos fuertes, limpiezas agresivas, retinol en dosis altas. La barrera es más fina: necesita contención, no estrés." }
+      ],
+      solutionTitle: "1753 SKINCARE para piel madura",
+      solutionBody: "<p>DUO TA-DA junta lo mejor: aceite facial con CBD para nutrición profunda y TA-DA Serum con CBG para renovación y barrera. Una dupla que da a la piel madura lo que pide sin ingredientes de relleno.</p><p>El CBD apoya el ECS que declina con los años; el CBG habla con los receptores para calmar inflamación y reforzar la barrera. Suma Fungtastic mushroom extract por dentro – hongos adaptógenos para el equilibrio global.</p><p>No creemos en anti-edad como mantra. Creemos en dar a la piel las mejores condiciones en cada etapa. La piel madura no es un problema – es piel que merece el mejor cuidado.</p>",
+      faq: [
+        { q: "¿A qué edad se considera piel madura?", a: "Depende de cada persona; suele hablarse hacia los 45–50 cuando el colágeno se nota y la barrera cambia. Unos antes, otros después." },
+        { q: "¿El CBD ayuda con las arrugas?", a: "No repone colágeno perdido, pero apoya el ECS ligado a renovación e inflamación. Una piel más sana y equilibrada se ve mejor a cualquier edad." },
+        { q: "¿Hace falta más productos?", a: "No siempre más, sino otros. La piel madura pide texturas más ricas – aceites antes que lociones ligeras, serum activo antes que tónicos acuosos." },
+        { q: "¿Importan dieta y estilo de vida?", a: "Mucho. Sueño, antioxidantes, gestión del estrés y movimiento tienen efecto documentado sobre el envejecimiento cutáneo. Afuera e adentro van juntos." }
+      ],
+      ctaTitle: "Dale a tu piel lo que merece",
+      ctaSub: "Piel madura = nutrición profunda y apoyo listo. DUO TA-DA y Fungtastic te dan las mejores condiciones – a tu manera."
+    },
+    de: {
+      metaTitle: "Hautpflege für reife Haut – tiefe Pflege statt leerer Versprechen | 1753",
+      metaDescription: "Reife Haut braucht Nahrung und Support, kein Anti-Aging-Panikmodus. CBD und CBG geben ihr, was sie wirklich will. 1753 SKINCARE.",
+      kicker: "Hautpflege für reife Haut",
+      h1: "Hautpflege für reife Haut – Altern ist keine Krankheit zum Behandeln",
+      lead: "Deine Haut hat gelebt. Gelacht, geweint, Sonne und Wind gesehen. Sie verdient keine Produkte, die Alter als Problem verkaufen – sondern was sie in diesem Kapitel braucht.",
+      problemTitle: "Was mit reifer Haut wirklich passiert",
+      problemBody: "<p>Ab etwa 25 sinkt die Kollagenproduktion um rund ein Prozent pro Jahr. Mit 50 fehlen etwa 25 Prozent Kollagen. Elastinfasern verlieren Spannkraft und werden nicht im gleichen Tempo ersetzt. Die Haut wird dünner, trockener, anfälliger.</p><p>Es geht nicht nur um Kollagen. Auch das endocannabinoide System der Haut altert. Die ECS-Rezeptoraktivität sinkt – Einfluss auf Entzündung, Zellerneuerung und Feuchtigkeit. Deshalb wirkt reife Haut oft trockener, empfindlicher und heilt langsamer.</p><p>Die Anti-Aging-Industrie verkauft Angst als Lösung. Reife Haut muss nicht gerettet werden – sie braucht Unterstützung. Tiefe Nahrung, Zellerneuerung, Entzündungskontrolle, Barriere-Schutz. Das zählt, wenn du aufhörst, jugendliche Ideale zu jagen und die Haut zu pflegen, die du hast.</p>",
+      tipsTitle: "Kluge Pflege für reife Haut",
+      tips: [
+        { title: "Nahrung vor Anti-Aging-Marketing", body: "Hör auf, jeden Trend zu jagen. Setze auf Öle und Seren, die Barriere und Erneuerung stützen." },
+        { title: "Von innen unterstützen", body: "Adaptogene Pilze und Kollagen-unterstützende Supplements wirken von innen. Die Haut spiegelt den ganzen Körper." },
+        { title: "Großzügig mit Öl", body: "Reife Haut produziert weniger Talg und braucht mehr äußere Nahrung. CBD-Gesichtsöle ziehen gut ein und liefern fettlösliche Pflege." },
+        { title: "Barriere schützen", body: "Meide starke Säuren, aggressive Reiniger, hochdosiertes Retinol. Die Barriere ist dünner – sie braucht Stützung, keinen Stress." }
+      ],
+      solutionTitle: "1753 SKINCARE für reife Haut",
+      solutionBody: "<p>DUO TA-DA vereint das Beste: CBD-Gesichtsöl für tiefe Nahrung und TA-DA Serum mit CBG für Erneuerung und Barriere. Eine Duo, die reifer Haut gibt, was sie braucht – ohne Ballast.</p><p>CBD stützt das ECS, das mit dem Alter nachlässt; CBG spricht Rezeptoren an, mildert Entzündung und stärkt die Barriere. Ergänze mit Fungtastic mushroom extract von innen – adaptogene Pilze für ganzheitliches Gleichgewicht.</p><p>Wir glauben nicht an Anti-Aging als Konzept. Wir glauben an beste Bedingungen in jedem Lebensabschnitt. Reife Haut ist kein Problem – sie verdient beste Pflege.</p>",
+      faq: [
+        { q: "Ab wann gilt Haut als reif?", a: "Individuell verschieden; oft ab 45–50, wenn Kollagenverlust und Barriere-Veränderung spürbar werden. Manche früher, manche später." },
+        { q: "Hilft CBD gegen Falten?", a: "CBD ersetzt kein verlorenes Kollagen, stützt aber das ECS mit Einfluss auf Erneuerung und Entzündung. Gesündere, ausgeglichenere Haut sieht in jedem Alter besser aus." },
+        { q: "Braucht reife Haut mehr Produkte?", a: "Nicht unbedingt mehr, aber andere. Reichhaltiger – Öle statt leichter Lotionen, aktive Seren statt wässriger Toner." },
+        { q: "Zählen Ernährung und Lifestyle?", a: "Absolut. Schlaf, antioxidative Ernährung, Stressmanagement und Bewegung wirken dokumentiert auf Hautalterung. Äußere Pflege plus innerer Lifestyle – beste Kombi." }
+      ],
+      ctaTitle: "Gib deiner Haut, was sie verdient",
+      ctaSub: "Reife Haut braucht tiefe Nahrung und klugen Support. DUO TA-DA und Fungtastic schaffen die besten Bedingungen – nach deinen Regeln."
+    },
+    fr: {
+      metaTitle: "Soin de la peau mature – nutrition profonde, pas de promesses creuses | 1753",
+      metaDescription: "La peau mature veut nutrition et soutien, pas la panique anti-âge. CBD et CBG donnent ce qu'elle demande vraiment. 1753 SKINCARE.",
+      kicker: "Soin de la peau mature",
+      h1: "Soin de la peau mature – vieillir n'est pas une maladie à soigner",
+      lead: "Ta peau a vécu. Elle a ri, pleuré, vu le soleil et le vent. Elle ne mérite pas des produits qui traitent l'âge comme un défaut – elle mérite ce dont elle a besoin maintenant.",
+      problemTitle: "Ce qui se passe vraiment sur une peau mature",
+      problemBody: "<p>Vers 25 ans, la production de collagène baisse d'environ un pour cent par an. À 50 ans, tu as perdu environ 25 % de ton collagène. Les fibres d'élastine perdent leur rebond et ne se renouvellent pas au même rythme. La peau s'amincit, se dessèche, devient plus fragile.</p><p>Ce n'est pas que le collagène. Le système endocannabinoïde de la peau change aussi avec l'âge. L'activité des récepteurs ECS diminue – impact sur inflammation, renouvellement et hydratation. D'où une peau souvent plus sèche, plus sensible, plus lente à guérir.</p><p>L'industrie anti-âge vend la peur en costume de solution. La peau mature n'a pas besoin d'être sauvée – elle a besoin de soutien. Nutrition profonde, aide au renouvellement, maîtrise de l'inflammation, barrière solide. C'est ça qui compte quand tu arrêtes de courir après une jeunesse idéalisée et que tu soignes la peau que tu as.</p>",
+      tipsTitle: "Soins malins pour peau mature",
+      tips: [
+        { title: "Nutrition avant anti-âge", body: "Laisse tomber la chasse aux tendances. Mise sur huiles et sérums qui nourrissent la barrière et le renouvellement." },
+        { title: "Soutien de l'intérieur", body: "Champignons adaptogènes et compléments qui soutiennent le collagène agissent de l'intérieur. La peau reflète tout le corps." },
+        { title: "Généreuse avec l'huile", body: "La peau mature produit moins de sébum et veut plus de nutrition externe. Les huiles au CBD pénètrent bien et apportent ce qui est liposoluble." },
+        { title: "Protège la barrière", body: "Évite ce qui la fragilise – acides forts, nettoyants agressifs, rétinol à forte dose. La barrière est plus fine : elle a besoin d'appui, pas de stress." }
+      ],
+      solutionTitle: "1753 SKINCARE pour peau mature",
+      solutionBody: "<p>DUO TA-DA combine le meilleur : huile visage au CBD pour nutrition profonde et TA-DA Serum au CBG pour renouvellement et barrière. Un duo qui donne à la peau mature exactement ce qu'il faut – sans fioritures.</p><p>Le CBD soutient l'ECS qui décline avec l'âge ; le CBG parle aux récepteurs pour calmer l'inflammation et renforcer la barrière. Ajoute Fungtastic mushroom extract de l'intérieur – champignons adaptogènes pour l'équilibre global.</p><p>Nous ne croyons pas à l'anti-âge comme dogme. Nous croyons aux meilleures conditions à chaque étape. La peau mature n'est pas un problème – elle mérite les meilleurs soins.</p>",
+      faq: [
+        { q: "À partir de quel âge parle-t-on de peau mature ?", a: "Ça varie ; souvent vers 45–50 ans quand la perte de collagène et la barrière se font sentir. Certains plus tôt, d'autres plus tard." },
+        { q: "Le CBD aide contre les rides ?", a: "Il ne remplace pas le collagène perdu, mais soutient l'ECS lié au renouvellement et à l'inflammation. Une peau plus saine et équilibrée paraît meilleure à tout âge." },
+        { q: "Faut-il plus de produits ?", a: "Pas forcément plus, mais autrement. Peau mature aime les textures riches – huiles plutôt que lotions légères, sérums actifs plutôt que toniques aqueux." },
+        { q: "Alimentation et mode de vie comptent ?", a: "Oui. Sommeil, alimentation riche en antioxydants, gestion du stress et mouvement ont un effet documenté sur le vieillissement cutané. Soins externes + hygiène de vie : le duo gagnant." }
+      ],
+      ctaTitle: "Offre à ta peau ce qu'elle mérite",
+      ctaSub: "Peau mature = nutrition profonde et soutien intelligent. DUO TA-DA et Fungtastic créent les meilleures conditions – selon tes règles."
     }
   },
   {
     svSlug: "hudvard-kombinerad-hud",
     enSlug: "skincare-combination-skin",
+    esSlug: "cuidado-de-la-piel-mixta",
+    deSlug: "hautpflege-mischhaut",
+    frSlug: "soin-de-la-peau-mixte",
     category: "audience",
     productIds: ["ta-da-serum", "duo-kit", "au-naturel-makeup-remover"],
     sv: {
@@ -295,11 +628,95 @@ export const AUDIENCE_PAGES: LandingPage[] = [
       ],
       ctaTitle: "Give your skin balance – not compromises",
       ctaSub: "Combination skin needs products that listen. TA-DA Serum and DUO-kit give every zone exactly what it needs."
+    },
+    es: {
+      metaTitle: "Cuidado de la piel mixta – equilibrio sin renuncias | 1753",
+      metaDescription: "La piel mixta no decide – zona T grasa, mejillas secas. Aprende a equilibrar sin elegir bando. Skincare con CBD para piel mixta. 1753 SKINCARE.",
+      kicker: "Cuidado de la piel mixta",
+      h1: "Cuidado de la piel mixta – deja de obligar a tu piel a elegir un solo bando",
+      lead: "Grasa en la frente, seca en las mejillas, normal en la barbilla – quizá. La piel mixta dice que quiere equilibrio, no renuncias. Y la mayoría de productos solo piensan en un tipo a la vez.",
+      problemTitle: "Por qué la piel mixta es más difícil de lo que debería",
+      problemBody: "<p>La piel mixta es el tipo más común y, a la vez, el más ignorado por la industria. Casi todo apunta a seca o grasa y te pide que elijas. Si eres mixta ya sabes que no va así: lo que arregla la T reseca las mejillas; lo que hidrata las mejillas deja la frente brillando.</p><p>Las glándulas de la T (frente, nariz, mentón) son más activas que en mejillas y contorno de ojos. Tienes al menos dos necesidades a la vez. El skincare clásico quiere meterte en una casilla; tu piel se niega.</p><p>Muchos caen en peor ciclo: productos duros en las zonas grasas = más sebo; saltarse hidratación en las secas = más sequedad. La clave no es tratar cada zona con un manual distinto – es dar a la piel herramientas para equilibrarse sola.</p>",
+      tipsTitle: "Cómo equilibrar la piel mixta",
+      tips: [
+        { title: "No castigues la zona T", body: "Limpiadores agresivos ahí disparan más sebo. Misma limpieza suave en todo el rostro y deja que el sistema se calibre." },
+        { title: "Usa serum como base", body: "Un serum ligero que absorbe rápido funciona en toda la cara sin engrasar la T ni resecar las mejillas. El punto medio perfecto." },
+        { title: "Aceite solo donde haga falta", body: "Si la T va bien solo con serum, aplica aceite facial solo en mejillas y zonas secas. No hace falta tratar todo igual." },
+        { title: "Evita cremas pesadas", body: "Las texturas densas tapan poros en la T y a veces ni alimentan bien las mejillas. Productos más ligeros a base de aceite dan mejor control." },
+        { title: "Limpia con suavidad", body: "Limpieza equilibrada mañana y noche gana a lo agresivo. Au Naturel disuelve maquillaje y suciedad sin romper el equilibrio natural." }
+      ],
+      solutionTitle: "CBD – equilibrio natural para piel mixta",
+      solutionBody: "<p>El CBD encaja con piel mixta. Actúa con el sistema endocannabinoide y ayuda a que cada zona encuentre su punto – haya mucho o poco sebo. No es magia: el ECS regula el sebo de forma local.</p><p>TA-DA Serum con CBG es base ideal en todo el rostro: lo bastante ligero para no cargar la T y lo bastante activo para la renovación en todas partes. Añade el aceite CBD del DUO-kit donde necesites más nutrición.</p><p>Lo bueno del enfoque con cannabinoides: no hacen falta dos rutinas paralelas. Productos que escuchan y se adaptan – eso hacen CBD y CBG.</p>",
+      faq: [
+        { q: "¿De verdad tengo piel mixta?", a: "Si tu T (frente, nariz, mentón) se pone brillante u oleosa y las mejillas están secas o normales, probablemente sí. Es el tipo más habitual – buena compañía." },
+        { q: "¿Productos distintos por zona?", a: "No siempre. Con fórmulas que apoyan el equilibrio propio – como las basadas en CBD – puedes usar la misma base y solo reforzar aceite en zonas secas." },
+        { q: "¿Empeora con las estaciones?", a: "Sí. En invierno las zonas secas sufren más y la T sigue grasa; en verano todo puede engrasarse más. Ajusta la rutina según la estación." },
+        { q: "¿Aceite con CBD si la T es grasa?", a: "Sí. Señaliza a las glándulas para equilibrar, no para producir a lo loco. Mucha piel grasa nota menos brillo con aceite CBD, no más." }
+      ],
+      ctaTitle: "Equilibrio para tu piel – no renuncias forzadas",
+      ctaSub: "La piel mixta pide productos que escuchen. TA-DA Serum y DUO-kit dan a cada zona lo que necesita."
+    },
+    de: {
+      metaTitle: "Hautpflege für Mischhaut – Balance ohne Kompromisse | 1753",
+      metaDescription: "Mischhaut kann sich nicht entscheiden – fettige T-Zone, trockene Wangen. Lerne auszubalancieren, ohne eine Seite zu wählen. CBD-Pflege für Mischhaut. 1753 SKINCARE.",
+      kicker: "Hautpflege für Mischhaut",
+      h1: "Hautpflege für Mischhaut – hör auf, deine Haut zu zwingen, eine Seite zu wählen",
+      lead: "Fettig an der Stirn, trocken auf den Wangen, normal am Kinn – vielleicht. Mischhaut sagt: Balance, keine Kompromisse. Die meisten Produkte denken aber nur an einen Hauttyp.",
+      problemTitle: "Warum Mischhaut härter ist, als sie sein müsste",
+      problemBody: "<p>Mischhaut ist der häufigste Hauttyp – und paradoxerweise oft ignoriert. Produkte zielen auf trocken oder fettig und wollen eine Wahl. Hast du Mischhaut, weißt du: Was die T-Zone fixiert, trocknet die Wangen aus; was die Wangen feuchtet, macht die Stirn glänzend.</p><p>Die Talgdrüsen in der T-Zone (Stirn, Nase, Kinn) sind aktiver als an Wangen und Augenpartie. Mindestens zwei Bedürfnisse gleichzeitig. Klassische Pflege steckt dich in eine Schublade – deine Haut passt nicht rein.</p><p>Viele landen im schlimmeren Teufelskreis: harte Produkte auf fettige Zonen = mehr Talg; Feuchtigkeit auf trockene Zonen auslassen = noch trockener. Der Trick ist nicht, jede Zone anders zu quälen – sondern der Haut Werkzeuge zu geben, sich selbst auszubalancieren.</p>",
+      tipsTitle: "Mischhaut ins Gleichgewicht bringen",
+      tips: [
+        { title: "T-Zone nicht überbehandeln", body: "Aggressive Reiniger dort treiben mehr Öl an. Überall dieselbe milde Reinigung – das System kalibriert sich." },
+        { title: "Serum als Basis", body: "Ein leichtes, schnell einziehendes Serum funktioniert im ganzen Gesicht – ohne fettigere T-Zone oder trockenere Wangen. Die goldene Mitte." },
+        { title: "Öl nur wo nötig", body: "Reicht der T-Zone Serum allein, Gesichtsöl nur auf Wangen und trockene Stellen. Nichts zwingt dich, alles identisch zu behandeln." },
+        { title: "Schwere Cremes meiden", body: "Dicke Cremes verstopfen Poren in der T-Zone und reichen oft nicht für die Wangen. Leichtere, ölbasierte Produkte geben bessere Kontrolle." },
+        { title: "Sanft reinigen", body: "Milde, ausgewogene Reinigung morgens und abends schlägt Aggression. Au Naturel löst Make-up und Schmutz ohne das natürliche Gleichgewicht zu stören." }
+      ],
+      solutionTitle: "CBD – natürliche Balance für Mischhaut",
+      solutionBody: "<p>CBD ist praktisch für Mischhaut gemacht. Es arbeitet mit dem ECS und hilft der Haut, ihr Gleichgewicht zu finden – egal ob zu viel oder zu wenig Talg. Keine Magie, Biologie: Das ECS reguliert Talg lokal.</p><p>TA-DA Serum mit CBG ist ideale Basis fürs ganze Gesicht – leicht genug für die T-Zone, aktiv genug für Erneuerung überall. Ergänze mit dem CBD-Öl aus dem DUO-kit auf trockeneren Stellen.</p><p>Der Vorteil cannabinoidbasierter Pflege: keine doppelte Routine nötig. Produkte, die zuhören und sich anpassen – genau das leisten CBD und CBG.</p>",
+      faq: [
+        { q: "Habe ich wirklich Mischhaut?", a: "Wenn deine T-Zone glänzt oder fettig wirkt und die Wangen trocken oder normal sind, sehr wahrscheinlich. Häufigster Hauttyp – du bist nicht allein." },
+        { q: "Unterschiedliche Produkte pro Zone?", a: "Nicht zwingend. Mit Produkten, die das eigene Gleichgewicht stützen – wie CBD-basierten – kannst du überall dieselbe Basis nutzen und bei Bedarf Öl nachlegen." },
+        { q: "Wird Mischhaut jahreszeitabhängig schlimmer?", a: "Ja. Im Winter trocknen trockene Zonen aus, die T-Zone bleibt fettig; im Sommer kann alles öliger werden. Passe die Routine der Jahreszeit an." },
+        { q: "CBD-Öl bei fettiger T-Zone?", a: "Ja. Es signalisiert den Talgdrüsen Balance, nicht Überproduktion. Viele mit fettiger Haut merken weniger Glanz mit CBD-Öl, nicht mehr." }
+      ],
+      ctaTitle: "Balance statt Kompromiss",
+      ctaSub: "Mischhaut braucht Produkte, die zuhören. TA-DA Serum und DUO-kit liefern jeder Zone genau das Richtige."
+    },
+    fr: {
+      metaTitle: "Soin de la peau mixte – équilibre sans compromis | 1753",
+      metaDescription: "La peau mixte hésite – zone T grasse, joues sèches. Apprends à équilibrer sans trancher. Soins CBD pour peau mixte. 1753 SKINCARE.",
+      kicker: "Soin de la peau mixte",
+      h1: "Soin de la peau mixte – arrête d'obliger ta peau à choisir un camp",
+      lead: "Gras au front, sec sur les joues, normal au menton – peut-être. La peau mixte dit qu'elle veut de l'équilibre, pas des compromis à la va-vite. Et la plupart des produits ne visent qu'un type à la fois.",
+      problemTitle: "Pourquoi la peau mixte est plus dure qu'elle ne devrait",
+      problemBody: "<p>La peau mixte est le type le plus courant – et paradoxalement souvent ignorée. Les produits ciblent sec ou gras et te demandent de choisir. Avec une peau mixte, tu sais que ça ne marche pas : ce qui règle la T assèche les joues ; ce qui hydrate les joues transforme le front en miroir.</p><p>Les glandes de la T (front, nez, menton) sont plus actives que sur les joues et le contour des yeux. Au moins deux besoins en même temps. Le soin classique veut te mettre dans une case – ta peau refuse.</p><p>Beaucoup tombent dans un pire cercle : produits agressifs sur les zones grasses = plus de sébum ; zéro hydratation sur les zones sèches = encore plus sec. La clé n'est pas de traiter chaque zone avec une doctrine différente – c'est de donner à la peau les outils pour s'équilibrer elle-même.</p>",
+      tipsTitle: "Comment équilibrer une peau mixte",
+      tips: [
+        { title: "Arrête de sur-traiter la T", body: "Nettoyants agressifs là-bas déclenchent plus de sébum. Même nettoyant doux partout et laisse le système se calibrer." },
+        { title: "Le sérum comme base", body: "Un sérum léger qui pénètre vite marche sur tout le visage sans graisser la T ni dessécher les joues. Le juste milieu." },
+        { title: "Huile seulement où il faut", body: "Si la T tient avec le sérum seul, applique l'huile visage sur joues et zones sèches. Pas d'obligation d'uniformiser le protocole." },
+        { title: "Évite les crèmes épaisses", body: "Les textures lourdes bouchent les pores de la T et manquent souvent de nutrition pour les joues. Des formules plus légères à base d'huile offrent un meilleur contrôle." },
+        { title: "Nettoie en douceur", body: "Nettoyage doux matin et soir bat l'agressivité. Au Naturel dissout maquillage et impuretés sans casser l'équilibre naturel." }
+      ],
+      solutionTitle: "CBD – équilibre naturel pour peau mixte",
+      solutionBody: "<p>Le CBD est fait pour la peau mixte. Il travaille avec l'ECS et aide la peau à trouver son équilibre – trop ou pas assez de sébum. Pas de magie, de la biologie : l'ECS régule le sébum localement.</p><p>TA-DA Serum au CBG est une base idéale sur tout le visage – assez léger pour la T, assez actif pour le renouvellement partout. Complète avec l'huile CBD du DUO-kit sur les zones plus sèches.</p><p>Le beau avec les soins aux cannabinoïdes : pas besoin de deux routines. Des produits qui écoutent et s'adaptent – c'est CBD et CBG.</p>",
+      faq: [
+        { q: "J'ai vraiment la peau mixte ?", a: "Si ta T (front, nez, menton) brille ou graisse et tes joues sont sèches ou normales, très probablement. Type le plus fréquent – tu es loin d'être seule." },
+        { q: "Des produits différents par zone ?", a: "Pas forcément. Avec des formules qui soutiennent l'équilibre naturel – comme au CBD – tu peux utiliser la même base et ajouter de l'huile sur les zones sèches." },
+        { q: "Ça empire avec les saisons ?", a: "Oui. L'hiver assèche plus les zones sèches pendant que la T reste grasse ; l'été peut tout rendre plus gras. Ajuste selon la saison." },
+        { q: "Huile CBD avec une T grasse ?", a: "Oui. Elle signale aux glandes de équiliser, pas de surproduire. Beaucoup de peaux grasses voient moins de brillance avec une huile CBD, pas plus." }
+      ],
+      ctaTitle: "De l'équilibre, pas des compromis forcés",
+      ctaSub: "La peau mixte veut des produits qui écoutent. TA-DA Serum et DUO-kit donnent à chaque zone ce qu'il lui faut."
     }
   },
   {
     svSlug: "hudvard-30-plus",
     enSlug: "skincare-30s",
+    esSlug: "cuidado-de-la-piel-a-los-30",
+    deSlug: "hautpflege-mit-30",
+    frSlug: "soin-de-la-peau-trentenaires",
     category: "audience",
     productIds: ["duo-kit", "ta-da-serum"],
     sv: {
@@ -355,11 +772,95 @@ export const AUDIENCE_PAGES: LandingPage[] = [
       ],
       ctaTitle: "Start now – your future skin will thank you",
       ctaSub: "Your 30s are the best decade to invest in your skin. The DUO-kit gives you everything you need to begin."
+    },
+    es: {
+      metaTitle: "Cuidado de la piel a los 30 – decisiones listas para el futuro | 1753",
+      metaDescription: "Los 30 son cuando construyes la base de cómo se verá tu piel después. Skincare con CBD que invierte en el mañana. 1753 SKINCARE.",
+      kicker: "Cuidado de la piel a los 30",
+      h1: "Cuidado de la piel a los 30 – lo mejor que puedes hacer es empezar ya",
+      lead: "A los 20 la piel perdona casi todo. A los 30 empieza a pasar factura. Es la década en la que la prevención aún paga el doble y cada decisión acertada se nota después.",
+      problemTitle: "Qué cambia en los 30",
+      problemBody: "<p>Los treinta son un punto de inflexión. El colágeno ya baja – unos uno por ciento al año desde los 25. La renovación celular se frena; la piel no se repone tan rápido. Aparecen las primeras líneas finas y de repente productos que antes iban bien empiezan a chocar.</p><p>También se nota el estilo de vida: mal dormir, estrés, dieta irregular y años de SPF irregular dejan huella que ya no se borra sola. Ojeras, tono desigual, falta de luz.</p><p>A la vez, es la mejor década para una rutina seria. La piel aún responde muy bien a activos; lo que hagas ahora marca el largo plazo. Si esperas a los 40 sigue valiendo, pero pierdes diez años de prevención. No se trata de parecer joven – se trata de dar a tu piel las mejores condiciones de aquí en adelante.</p>",
+      tipsTitle: "Arma tu rutina en los 30",
+      tips: [
+        { title: "Invierte en prevención", body: "Prevenir siempre gana a reparar. Rutina estable con SPF, antioxidantes y activos ahora te ahorra líos después." },
+        { title: "Suma activos de verdad", body: "Si solo limpiabas e hidatabas, toca subir nivel. Un serum con CBG apoya renovación y da el extra que la piel empieza a pedir." },
+        { title: "Prioriza el sueño", body: "La piel repara de noche. Dormir mal en los 30 acelera el envejecimiento cutáneo más de lo que cree la gente. Apunta a siete u ocho horas." },
+        { title: "El contorno de ojos cuenta", body: "Ahí la piel es más fina y envejece antes. Sin arrastrar ni frotar – eso daña la delicadeza de la zona." },
+        { title: "Constancia antes que intensidad", body: "Una rutina simple diaria vence a la mega-rutina esporádica. El hábito sostenible es el factor clave." }
+      ],
+      solutionTitle: "DUO-kit – arranque perfecto para una nueva década",
+      solutionBody: "<p>El DUO-kit te da rutina CBD completa en dos pasos: aceite facial y TA-DA Serum con CBG. Pensado para ser fácil cada día y lo bastante activo para notar – justo lo que los 30 exigen.</p><p>El CBD apoya el ECS y ayuda con los primeros cambios. El CBG en TA-DA Serum trabaja renovación e inflamación para que la piel entre mejor en la siguiente década.</p><p>Esto no es anti-edad – es pro-piel. Son herramientas en el momento en que más pesan. Minutos al día que se pagan en años.</p>",
+      faq: [
+        { q: "¿Es pronto a los 30 para hablar de anti-edad?", a: "No nos gusta la etiqueta anti-edad, pero no – los 30 son un gran momento para activos. El colágeno ya baja y prevenir siempre rinde más que remendar." },
+        { q: "¿Con qué producto empiezo?", a: "Con el DUO-kit: aceite CBD + TA-DA Serum con CBG. Cubre nutrición profunda, renovación y control de inflamación." },
+        { q: "¿Veré cambios pronto?", a: "Muchos notan mejor tono, brillo y hidratación en dos a cuatro semanas. Los efectos preventivos a largo plazo se ven en meses y años." },
+        { q: "¿Tengo que cambiar toda la rutina?", a: "No. Suma sin reemplazar todo. Si tu limpiador te gusta, añade TA-DA Serum y aceite. Construye poco a poco." }
+      ],
+      ctaTitle: "Empieza ya – tu piel del futuro lo agradecerá",
+      ctaSub: "Los 30 son la década top para invertir en piel. El DUO-kit tiene lo esencial para comenzar."
+    },
+    de: {
+      metaTitle: "Hautpflege in den 30ern – kluge Entscheidungen für später | 1753",
+      metaDescription: "In den 30ern legst du die Basis, wie deine Haut später aussieht. CBD-Hautpflege, die in die Zukunft investiert. 1753 SKINCARE.",
+      kicker: "Hautpflege in den 30ern",
+      h1: "Hautpflege in den 30ern – das Beste, was du jetzt tun kannst, ist anzufangen",
+      lead: "In den 20ern verzeiht die Haut fast alles. In den 30ern kommt die Rechnung. Das ist das Jahrzehnt, in dem Prävention noch doppelt zahlt und jede kluge Investition sich auszahlt.",
+      problemTitle: "Was sich in den 30ern verändert",
+      problemBody: "<p>Die dreißiger Jahre sind ein Wendepunkt für die Haut. Kollagen sinkt schon – etwa ein Prozent pro Jahr seit 25. Die Zellerneuerung wird langsamer, die Haut regeneriert nicht mehr so flott. Erste feine Linien erscheinen, und plötzlich verträgt die Haut Produkte nicht mehr wie früher.</p><p>Auch der Lifestyle zeigt sich: Schlafmangel, Stress, unregelmäßige Ernährung, jahrelang inkonsistenter Sonnenschutz hinterlassen Spuren, die nicht mehr von selbst verschwinden. Augenschatten, ungleicher Teint, Mattigkeit.</p><p>Gleichzeitig ist es das beste Jahrzehnt für eine ernsthafte Routine. Die Haut reagiert noch stark auf Wirkstoffe; was du jetzt tust, wirkt am langfristigsten. Wartest du bis 40, geht es auch – aber ein Jahrzehnt Prävention ist weg. Es geht nicht um ewige Jugend – sondern um beste Bedingungen nach vorn.</p>",
+      tipsTitle: "Baue deine Routine in den 30ern",
+      tips: [
+        { title: "In Prävention investieren", body: "Vorbeugen schlägt reparieren. Konstante Routine mit Lichtschutz, Antioxidantien und Wirkstoffen spart später Ärger." },
+        { title: "Wirkstoffe ergänzen", body: "Warst du bei Reiniger plus Feuchtigkeit stehen geblieben, ist es Zeit für Aktive. CBG-Serum unterstützt Erneuerung und gibt den Extra-Support, den die Haut jetzt braucht." },
+        { title: "Schlaf priorisieren", body: "Die Haut repariert nachts. Chronischer Schlafmangel in den 30ern altert die Haut stärker, als viele denken. Sieben bis acht Stunden anpeilen." },
+        { title: "Augenpartie ernst nehmen", body: "Dort ist die Haut am dünnsten und altert zuerst. Sanft arbeiten – Reiben schadet." },
+        { title: "Konstanz vor Intensität", body: "Eine einfache tägliche Routine schlägt eine fortgeschrittene, die du nur manchmal machst. Nachhaltige Gewohnheit ist der wichtigste Faktor." }
+      ],
+      solutionTitle: "DUO-kit – perfekter Start in ein neues Jahrzehnt",
+      solutionBody: "<p>Das DUO-kit liefert eine komplette CBD-Routine in zwei Schritten: Gesichtsöl und TA-DA Serum mit CBG. Einfach genug für jeden Tag, aktiv genug für echte Wirkung – genau das, was die 30er verlangen.</p><p>CBD stützt das ECS und hilft, beginnende Veränderungen auszugleichen. CBG im TA-DA Serum arbeitet an Erneuerung und Entzündung – bessere Aussichten fürs nächste Jahrzehnt.</p><p>Das ist kein Anti-Aging-Marketing, sondern pro-Haut. Die besten Tools genau dann, wenn sie den größten Hebel haben. Minuten täglich, die sich über Jahre auszahlen.</p>",
+      faq: [
+        { q: "Sind die 30 zu früh für Anti-Aging?", a: "Wir mögen das Wort nicht, aber nein – 30 ist ideal für Wirkstoffe. Kollagen sinkt schon, und Prävention schlägt Reparatur." },
+        { q: "Mit welchem Produkt starten?", a: "Mit dem DUO-kit: CBD-Öl plus TA-DA Serum mit CBG. Deckt tiefe Nahrung, Erneuerungs-Support und Entzündungskontrolle ab." },
+        { q: "Schnell sichtbare Veränderung?", a: "Viele sehen in zwei bis vier Wochen besseren Teint, mehr Glow, bessere Feuchtigkeit. Langfristige Prävention zeigt sich über Monate und Jahre." },
+        { q: "Ganze Routine umbauen?", a: "Nein. Ergänzen statt alles ersetzen. Magst du deinen Reiniger, nimm TA-DA Serum und Öl dazu. Schritt für Schritt aufbauen." }
+      ],
+      ctaTitle: "Fang jetzt an – deine zukünftige Haut dankt dir",
+      ctaSub: "Die 30er sind das beste Jahrzehnt, in die Haut zu investieren. Das DUO-kit hat alles Nötige zum Start."
+    },
+    fr: {
+      metaTitle: "Soin de la peau à la trentaine – choix malins pour demain | 1753",
+      metaDescription: "La trentaine, c'est quand tu poses les bases de ta peau pour la suite. Soins CBD qui investissent dans l'avenir. 1753 SKINCARE.",
+      kicker: "Soin de la peau à la trentaine",
+      h1: "Soin de la peau à la trentaine – le meilleur move, c'est de commencer",
+      lead: "À la vingtaine, la peau pardonne presque tout. À la trentaine, elle envoie la facture. C'est la décennie où la prévention paie encore double et où chaque bon choix se voit après.",
+      problemTitle: "Ce qui change à la trentaine",
+      problemBody: "<p>La trentaine est un tournant pour la peau. Le collagène baisse déjà – environ un pour cent par an depuis 25 ans. Le renouvellement ralentit ; la peau ne se refait plus aussi vite. Les premières ridules apparaissent, et des produits tolérés avant peuvent soudain poser problème.</p><p>Le mode de vie aussi se lit sur le visage : manque de sommeil, stress, alimentation irrégulière, années de protection solaire irrégulière laissent des traces qui ne partent plus toutes seules. Cernes, teint irrégulier, manque d'éclat.</p><p>En même temps, c'est la meilleure décennie pour une routine sérieuse. La peau réagit encore très bien aux actifs ; ce que tu fais maintenant a le plus gros impact long terme. Attendre la quarantaine marche encore, mais tu perds dix ans de prévention. Ce n'est pas courir après la jeunesse – c'est donner à ta peau les meilleures conditions pour la suite.</p>",
+      tipsTitle: "Construire ta routine à la trentaine",
+      tips: [
+        { title: "Mise sur la prévention", body: "Prévenir bat toujours réparer. Routine régulière avec SPF, antioxydants et actifs maintenant t'évite des soucis plus tard." },
+        { title: "Ajoute des actifs sérieux", body: "Si tu en étais resté à nettoyant + crème, monte d'un cran. Un sérum au CBG soutient le renouvellement et apporte le plus que la peau commence à demander." },
+        { title: "Priorise le sommeil", body: "La peau se répare la nuit. Le manque de sommeil chronique à la trentaine vieillit la peau plus qu'on ne croit. Vise sept à huit heures." },
+        { title: "Le contour des yeux compte", body: "La peau y est la plus fine et vieillit en premier. Pas de frottements agressifs – ça abîme." },
+        { title: "Régularité avant intensité", body: "Une routine simple quotidienne bat une routine avancée faite par à-coups. L'habitude durable est le facteur numéro un." }
+      ],
+      solutionTitle: "DUO-kit – le bon départ pour une nouvelle décennie",
+      solutionBody: "<p>Le DUO-kit offre une routine CBD complète en deux étapes : huile visage et TA-DA Serum au CBG. Assez simple pour chaque jour, assez active pour un vrai effet – exactement ce que la trentaine demande.</p><p>Le CBD soutient l'ECS et aide face aux premiers changements. Le CBG dans TA-DA Serum travaille renouvellement et inflammation pour que la peau affronte la décennie suivante en meilleure forme.</p><p>Ce n'est pas de l'anti-âge – c'est du pro-peau. Les bons outils au moment où ils comptent le plus. Quelques minutes par jour qui se paient sur des années.</p>",
+      faq: [
+        { q: "À 30 ans, c'est tôt pour l'anti-âge ?", a: "On n'aime pas le mot, mais non – la trentaine est idéale pour les actifs. Le collagène baisse déjà et la prévention bat la réparation." },
+        { q: "Par quel produit commencer ?", a: "Le DUO-kit : huile CBD + TA-DA Serum au CBG. Ça couvre nutrition profonde, soutien au renouvellement et maîtrise de l'inflammation." },
+        { q: "Des résultats vite ?", a: "Beaucoup voient un meilleur teint, plus d'éclat et une meilleure hydratation en deux à quatre semaines. Les effets préventifs long terme se voient sur des mois et des années." },
+        { q: "Je dois tout changer ?", a: "Non. Ajoute plutôt que tout remplacer. Si ton nettoyant te va, ajoute TA-DA Serum et l'huile. Monte en puissance progressivement." }
+      ],
+      ctaTitle: "Commence maintenant – ta peau future dira merci",
+      ctaSub: "La trentaine est la meilleure décennie pour investir dans ta peau. Le DUO-kit a l'essentiel pour débuter."
     }
   },
   {
     svSlug: "hudvard-40-plus",
     enSlug: "skincare-40s",
+    esSlug: "cuidado-de-la-piel-a-los-40",
+    deSlug: "hautpflege-mit-40",
+    frSlug: "soin-de-la-peau-quadragenaires",
     category: "audience",
     productIds: ["duo-ta-da", "ta-da-serum", "fungtastic-mushroom-extract"],
     sv: {
@@ -413,11 +914,92 @@ export const AUDIENCE_PAGES: LandingPage[] = [
       ],
       ctaTitle: "Give your skin the upgrade it deserves",
       ctaSub: "Your 40s demand smarter skincare. DUO TA-DA and Fungtastic give your skin the power to flourish in this new chapter."
+    },
+    es: {
+      metaTitle: "Cuidado de la piel a los 40 – hora de subir de nivel | 1753",
+      metaDescription: "A los 40 la piel pide más apoyo e ingredientes más listos. CBD y CBG suben el listón de tu rutina. 1753 SKINCARE.",
+      kicker: "Cuidado de la piel a los 40",
+      h1: "Cuidado de la piel a los 40 – tu piel pide mejora, no revolución caótica",
+      lead: "Los cuarenta son cuando la piel empieza a decir verdades. El colágeno cae más rápido, las hormonas mueven la hidratación y todo lo que hiciste – o no – por tu piel se nota. No es tarde. Es el momento.",
+      problemTitle: "Por qué los 40 son un punto de inflexión",
+      problemBody: "<p>En los cuarenta la pérdida de colágeno acelera. Ya has perdido un 15–20 por ciento desde los 25 y el ritmo sube. Las fibras de elastina pierden elasticidad; la piel no rebota igual. Las líneas finas se marcan más y la gravedad se deja notar.</p><p>Los cambios hormonales pesan más. Bajan los estrógenos y eso golpea retención de agua, grosor y elasticidad. De repente la piel se siente más seca y fina y reacciona a cosas que antes pasaban desapercibidas.</p><p>La renovación celular se ha frenado – de unas 28 días en los 20 a 40–50 días. Las células muertas se quedan más tiempo, el brillo baja y los activos necesitan más tiempo. Pero también significa que los ingredientes correctos marcan más diferencia: la piel ya no se autoabastece igual.</p>",
+      tipsTitle: "Sube de nivel en los 40",
+      tips: [
+        { title: "Pásate a texturas más ricas", body: "Si sigues solo con lociones ligeras y geles, prueba aceites y serum más densos. Menos sebo propio = más nutrición externa." },
+        { title: "Doble limpieza por la noche", body: "Aceite o bálsamo para maquillaje y SPF, luego limpiador suave. Limpia sin destrozar la barrera." },
+        { title: "Apoya el eje hormonal", body: "Hongos adaptógenos y hábitos antiestrés ayudan por dentro. La piel refleja el equilibrio hormonal – en los 40 se nota mucho." },
+        { title: "SPF con rigor", body: "El daño solar acumulado es un motor enorme del fotoenvejecimiento. A los 40 se ve; un SPF constante desde ahora frena el proceso con fuerza." }
+      ],
+      solutionTitle: "DUO TA-DA – dupla potente para piel 40+",
+      solutionBody: "<p>DUO TA-DA es nuestra rutina cannabinoide más completa: aceite facial con CBD para nutrición profunda y TA-DA Serum con 3 por ciento CBG para renovación y barrera concentradas.</p><p>A los 40 ya no basta solo hidratar. Hacen falta activos que hablen con los sistemas de la piel. El CBD apoya el ECS en declive; el CBG actúa en receptores para impulsar procesos que naturalmente frenan.</p><p>Suma Fungtastic mushroom extract por dentro: hongos adaptógenos como chaga y reishi apoyan inflamación y equilibrio hormonal – dos palancas directas en la calidad cutánea a los 40. Estrategia integral.</p>",
+      faq: [
+        { q: "¿Es tarde para empezar skincare a los 40?", a: "Para nada. La piel responde a activos a cualquier edad. No borras el pasado, pero sí cambias mucho el rumbo. Lo ideal era hace diez años; lo segundo mejor es hoy." },
+        { q: "¿Por qué noto más sequedad a los 40?", a: "Menos estrógenos = menos capacidad de retener agua y menos sebo. La piel también se adelgaza y pierde agua más rápido. Texturas más ricas en aceite compensan." },
+        { q: "¿En qué se diferencia DUO TA-DA del DUO-kit?", a: "DUO TA-DA incluye nuestro aceite premium con más CBD más TA-DA Serum. Es la combinación más potente para piel que pide refuerzo extra." },
+        { q: "¿El CBD ayuda con arrugas a los 40?", a: "No devuelve el tiempo, pero apoya renovación e inflamación desde el sistema propio de la piel. Una piel más sana y equilibrada muestra menos las líneas." }
+      ],
+      ctaTitle: "Dale a tu piel la mejora que merece",
+      ctaSub: "Los 40 piden skincare más listo. DUO TA-DA y Fungtastic dan a tu piel fuelle para brillar en este capítulo nuevo."
+    },
+    de: {
+      metaTitle: "Hautpflege in den 40ern – Zeit für ein Upgrade | 1753",
+      metaDescription: "In den 40ern braucht die Haut mehr Support und klügere Inhaltsstoffe. CBD und CBG liefern das Upgrade, das deine Routine verdient. 1753 SKINCARE.",
+      kicker: "Hautpflege in den 40ern",
+      h1: "Hautpflege in den 40ern – deine Haut braucht ein Upgrade, keine Revolution",
+      lead: "In den 40ern erzählt die Haut die Wahrheit. Kollagen sinkt schneller, Hormone verändern die Feuchtigkeit, und alles, was du für die Haut getan – oder nicht getan – hast, wird sichtbar. Es ist nicht zu spät. Es ist Zeit.",
+      problemTitle: "Warum die 40er ein Wendepunkt sind",
+      problemBody: "<p>In den 40ern beschleunigt sich der Kollagenverlust. Seit 25 fehlen dir 15–20 Prozent, und das Tempo steigt. Elastinfasern verlieren Rückstellkraft – die Haut federt nicht mehr wie früher. Feine Linien werden Falten, und die Schwerkraft meldet sich.</p><p>Hormonelle Veränderungen spielen eine größere Rolle. Östrogen sinkt – direkter Einfluss auf Feuchtespeicherung, Dicke und Elastizität. Plötzlich wirkt die Haut trockener und dünner und reagiert auf Dinge, die früher kein Thema waren.</p><p>Die Zellerneuerung ist deutlich langsamer – von etwa 28 Tagen in den 20ern auf 40–50 Tage. Tote Zellen bleiben länger, der Teint wirkt matter, Wirkstoffe brauchen mehr Zeit. Gleichzeitig wirken die richtigen Inhaltsstoffe jetzt stärker, weil die Haut den früheren Selbst-Support verliert.</p>",
+      tipsTitle: "Upgrade deine Routine in den 40ern",
+      tips: [
+        { title: "Zu reicheren Produkten wechseln", body: "Wenn du noch bei leichten Lotions und Gelen bist: Zeit für Öle und kräftigere Seren. Weniger eigener Talg = mehr äußere Nahrung." },
+        { title: "Abends Doppelreinigung", body: "Öl zum Auflösen von Make-up und Lichtschutz, danach milder Reiniger. Sauber ohne Barriere-Müll." },
+        { title: "Hormonsystem unterstützen", body: "Adaptogene Pilze und Anti-Stress-Routinen wirken von innen. Die Haut spiegelt hormonelles Gleichgewicht – in den 40ern besonders deutlich." },
+        { title: "Besonders konsequent zum Lichtschutz", body: "Kumulative UV-Schäden treiben Hautalterung massiv an. In den 40ern sieht man es – konsequenter SPF ab jetzt bremst stark." }
+      ],
+      solutionTitle: "DUO TA-DA – kraftvolles Duo für 40-plus-Haut",
+      solutionBody: "<p>DUO TA-DA ist unsere vollständigste cannabinoidbasierte Routine: CBD-Gesichtsöl für tiefe Nahrung und TA-DA Serum mit 3 Prozent CBG für fokussierte Erneuerung und Barriere.</p><p>In den 40ern reicht Feuchtigkeit allein nicht. Die Haut braucht Aktive, die mit ihren Systemen sprechen. CBD stützt das nachlassende ECS; CBG spricht Rezeptoren an und pusht Prozesse, die natürlich langsamer werden.</p><p>Ergänze mit Fungtastic mushroom extract von innen: adaptogene Pilze wie Chaga und Reishi für Entzündungsbalance und Hormonbalance – zwei Hebel für Hautqualität in den 40ern. Ganzheitlich gedacht.</p>",
+      faq: [
+        { q: "Ist es zu spät, in den 40ern mit Hautpflege zu starten?", a: "Überhaupt nicht. Haut reagiert in jedem Alter auf Wirkstoffe. Vergangenes bleibt, aber der Verlauf ab jetzt kannst du stark beeinflussen. Am besten vor zehn Jahren – der nächstbeste Zeitpunkt ist jetzt." },
+        { q: "Warum wirkt die Haut in den 40ern trockener?", a: "Sinkendes Östrogen schwächt Feuchteretention und Talgproduktion. Die Haut wird dünner, Feuchtigkeit verdunstet schneller. Reichhaltige Öl-Produkte kompensieren." },
+        { q: "Unterschied DUO TA-DA zum DUO-kit?", a: "DUO TA-DA enthält unser Premium-Gesichtsöl mit höherer CBD-Konzentration plus TA-DA Serum. Unsere stärkste Kombi für Haut, die Extra-Support braucht." },
+        { q: "Hilft CBD gegen Falten in den 40ern?", a: "CBD dreht die Uhr nicht zurück, stützt aber Erneuerung und Entzündungskontrolle über das eigene System. Gesündere, ausgeglichenere Haut zeigt Linien weniger dominant." }
+      ],
+      ctaTitle: "Gib deiner Haut das Upgrade, das sie verdient",
+      ctaSub: "Die 40er verlangen klügere Pflege. DUO TA-DA und Fungtastic geben deiner Haut Kraft für dieses neue Kapitel."
+    },
+    fr: {
+      metaTitle: "Soin de la peau à la quarantaine – passer à la vitesse supérieure | 1753",
+      metaDescription: "À la quarantaine, la peau veut plus de soutien et des ingrédients plus malins. CBD et CBG upgradent ta routine. 1753 SKINCARE.",
+      kicker: "Soin de la peau à la quarantaine",
+      h1: "Soin de la peau à la quarantaine – ta peau veut une montée en gamme, pas une révolution",
+      lead: "La quarantaine, c'est quand la peau dit les vraies choses. Le collagène chute plus vite, les hormones bougent l'hydratation, et tout ce que tu as fait – ou pas – pour ta peau se lit sur ton visage. Ce n'est pas trop tard. C'est le bon moment.",
+      problemTitle: "Pourquoi la quarantaine est un tournant",
+      problemBody: "<p>À la quarantaine, la perte de collagène accélère. Tu as déjà perdu 15 à 20 % depuis 25 ans, et le rythme augmente. Les fibres d'élastine perdent leur ressort – la peau ne rebondit plus comme avant. Les ridules deviennent rides plus marquées, et la gravité se rappelle à toi.</p><p>Les changements hormonaux comptent davantage. La baisse d'œstrogène touche rétention d'eau, épaisseur et élasticité. Du jour au lendemain la peau paraît plus sèche, plus fine, et réagit à des choses qui passaient avant.</p><p>Le renouvellement cellulaire a ralenti – d'environ 28 jours à la vingtaine à 40–50 jours. Les cellules mortes s'accumulent, l'éclat baisse, les actifs mettent plus longtemps. Mais les bons ingrédients frappent plus fort maintenant, parce que la peau ne se soutient plus comme avant.</p>",
+      tipsTitle: "Upgrade ta routine à la quarantaine",
+      tips: [
+        { title: "Passe à des textures plus riches", body: "Si tu en es encore aux lotions légères et gels, vise huiles et sérums plus nourrissants. Moins de sébum maison = plus de nutrition externe." },
+        { title: "Double démaquillage le soir", body: "Huile pour dissoudre maquillage et SPF, puis nettoyant doux. Propre sans sacrifier la barrière." },
+        { title: "Soutien hormonal", body: "Champignons adaptogènes et routines anti-stress agissent de l'intérieur. La peau reflète l'équilibre hormonal – à la quarantaine, c'est flagrant." },
+        { title: "SPF sans relâche", body: "Les dégâts solaires cumulés poussent fort le photo-vieillissement. À la quarantaine ça se voit ; un SPF régulier d'ici freine net le processus." }
+      ],
+      solutionTitle: "DUO TA-DA – duo puissant pour peau 40+",
+      solutionBody: "<p>DUO TA-DA, c'est notre routine cannabinoïde la plus complète : huile visage au CBD pour nutrition profonde et TA-DA Serum avec 3 % de CBG pour renouvellement et barrière ciblés.</p><p>À la quarantaine, l'hydratation seule ne suffit plus. Il faut des actifs qui parlent aux systèmes de la peau. Le CBD soutient l'ECS qui faiblit ; le CBG cible les récepteurs pour relancer ce qui ralentit naturellement.</p><p>Ajoute Fungtastic mushroom extract de l'intérieur : champignons adaptogènes comme chaga et reishi pour inflammation et équilibre hormonal – deux leviers directs sur la qualité de peau à la quarantaine. Vision globale.</p>",
+      faq: [
+        { q: "Trop tard pour commencer les soins à la quarantaine ?", a: "Pas du tout. La peau répond aux actifs à tout âge. Tu n'effaces pas le passé, mais tu changes la suite. Le meilleur moment, c'était il y a dix ans ; le suivant, c'est maintenant." },
+        { q: "Pourquoi ma peau est plus sèche après 40 ?", a: "La baisse d'œstrogène réduit rétention d'eau et production de sébum. La peau s'amincit, l'eau s'échappe plus vite. Des produits plus riches en huiles compensent." },
+        { q: "Différence entre DUO TA-DA et DUO-kit ?", a: "DUO TA-DA inclut notre huile premium à plus fort CBD plus TA-DA Serum. Notre combo la plus puissante pour une peau qui veut un soutien maximal." },
+        { q: "Le CBD aide les rides à la quarantaine ?", a: "Il ne remonte pas le temps, mais soutient renouvellement et inflammation via le système propre de la peau. Une peau plus saine et équilibrée montre moins les traits." }
+      ],
+      ctaTitle: "Offre à ta peau l'upgrade qu'elle mérite",
+      ctaSub: "La quarantaine exige des soins plus malins. DUO TA-DA et Fungtastic donnent à ta peau l'énergie pour ce nouveau chapitre."
     }
   },
   {
     svSlug: "hudvard-50-plus",
     enSlug: "skincare-50s",
+    esSlug: "cuidado-de-la-piel-despues-de-los-50",
+    deSlug: "hautpflege-ab-50",
+    frSlug: "soin-de-la-peau-apres-50-ans",
     category: "audience",
     productIds: ["duo-ta-da", "ta-da-serum", "fungtastic-mushroom-extract"],
     sv: {
@@ -471,11 +1053,92 @@ export const AUDIENCE_PAGES: LandingPage[] = [
       ],
       ctaTitle: "Give your skin the best in every chapter",
       ctaSub: "Skin after 50 deserves respect and deep care. DUO TA-DA and Fungtastic give your skin the power to flourish – regardless of age."
+    },
+    es: {
+      metaTitle: "Cuidado de la piel después de los 50 – apoyo, nutrición y respeto | 1753",
+      metaDescription: "La piel después de 50 merece apoyo, no vergüenza. Nutrición profunda con CBD y CBG para piel con historia. 1753 SKINCARE.",
+      kicker: "Cuidado de la piel después de los 50",
+      h1: "Cuidado de la piel después de los 50 – tu piel ha vivido; dale un buen siguiente capítulo",
+      lead: "Pasados los 50 la piel lo ha visto casi todo. Hormonas distintas, menos colágeno, más fina y sensible. Pero también puede estar más bella que nunca – si le das lo que necesita en lugar de perseguir lo que fue.",
+      problemTitle: "La realidad de la piel después de los 50",
+      problemBody: "<p>Después de 50 – sobre todo en y tras la menopausia – la piel cambia en serio. La caída de estrógenos puede hacer perder hasta un 30 por ciento del colágeno en los primeros cinco años. No es un declive suave: es un salto que golpea grosor, elasticidad y retención de agua.</p><p>La barrera se debilita mucho. Menos lípidos = más deshidratación, irritación y daño ambiental. Las heridas cicatrizan más lento, la pigmentación puede marcarse más, la piel se siente frágil como nunca.</p><p>La actividad del sistema endocannabinoide también ha bajado, y eso afecta inflamación y renovación. Piel de invierno tirante, picor, sensación de que nada de lo que antes funcionaba responde – experiencias comunes que la industria rara vez trata con respeto. Tu piel no se ha rendido: solo necesita otro tipo de apoyo.</p>",
+      tipsTitle: "Skincare con mimo después de los 50",
+      tips: [
+        { title: "Máxima nutrición, mínima irritación", body: "La piel es más fina y reactiva. Elige texturas ricas y calmantes; si escuece o quema, ese producto no es para ti. Punto." },
+        { title: "El aceite es aliado", body: "Los aceites aportan lo que la piel ya no produce sola. El aceite con CBD además apoya el ECS que declina con los años." },
+        { title: "Desde dentro cuenta mucho", body: "Adaptógenos, antioxidantes y omega por dieta y suplementos marcan diferencia enorme. La piel refleja al cuerpo entero más que nunca." },
+        { title: "La noche manda", body: "La reparación es nocturna y gana peso con la edad. Por la noche, capas generosas de productos nutritivos y deja trabajar a la piel mientras duermes." }
+      ],
+      solutionTitle: "DUO TA-DA y Fungtastic – trío para fuerza madura",
+      solutionBody: "<p>DUO TA-DA da la nutrición profunda que pide la piel: aceite facial con CBD para el ECS y TA-DA Serum con 3 por ciento CBG para renovación y barrera. Juntos cubren los núcleos de la piel 50+.</p><p>Fungtastic mushroom extract suma por dentro hongos adaptógenos que apoyan respuesta al estrés, inflamación y equilibrio hormonal. Apoyo interno que se nota afuera – sin separar piel del resto del cuerpo.</p><p>Creemos que la piel después de 50 es hermosa. Merece los mejores ingredientes y el cuidado más atento. No para esconder la edad, sino para darle fuerza y confort en cada capítulo nuevo.</p>",
+      faq: [
+        { q: "¿Por qué la piel cambia tanto en la menopausia?", a: "La caída de estrógenos golpea colágeno, retención de agua y barrera. Hasta un 30 por ciento del colágeno puede perderse en los primeros cinco años tras la menopausia." },
+        { q: "¿El skincare con CBD ayuda después de la menopausia?", a: "El CBD apoya el ECS que baja con la edad. Puede mejorar equilibrio hídrico, calmar la piel y apoyar la renovación – necesidades clave después de la menopausia." },
+        { q: "¿Es tarde para empezar después de los 50?", a: "Nunca es tarde. La piel responde a nutrición y activos a cualquier edad. Los resultados pueden verse distintos que a los 20, pero son reales." },
+        { q: "¿Qué tan importante es el apoyo interno?", a: "Muy. La piel 50+ responde especialmente bien a adaptógenos, antioxidantes, omega y buen sueño. Afuera + adentro = mejor resultado." }
+      ],
+      ctaTitle: "Lo mejor para tu piel en cada capítulo",
+      ctaSub: "La piel después de 50 merece respeto y cuidado profundo. DUO TA-DA y Fungtastic le dan fuelle para florecer – a cualquier edad."
+    },
+    de: {
+      metaTitle: "Hautpflege ab 50 – Unterstützung, Nahrung und Respekt | 1753",
+      metaDescription: "Haut ab 50 verdient Support, keine Scham. Tiefe Nahrung mit CBD und CBG für Haut mit Geschichte. 1753 SKINCARE.",
+      kicker: "Hautpflege ab 50",
+      h1: "Hautpflege ab 50 – deine Haut hat gelebt, gib ihr ein starkes nächstes Kapitel",
+      lead: "Ab 50 hat die Haut fast alles gesehen. Hormone verschieben sich, Kollagen sinkt, die Haut ist dünner und empfindlicher. Sie kann aber schöner sein denn je – wenn du ihr gibst, was sie braucht, statt dem nachzujagen, was war.",
+      problemTitle: "Die Realität der Haut ab 50",
+      problemBody: "<p>Ab 50 – besonders bei Frauen in und nach den Wechseljahren – verändert sich die Haut dramatisch. Der Östrogenabfall kann in den ersten fünf Jahren nach der Menopause bis zu 30 Prozent Kollagen kosten. Kein sanfter Abstieg – ein steiler Drop für Dicke, Elastizität und Feuchtespeicherung.</p><p>Die Barriere schwächt sich stark. Weniger Lipide = mehr Dehydrierung, Irritation, Umwelteinflüsse. Wunden heilen langsamer, Pigmentierung kann stärker werden, die Haut wirkt zerbrechlicher als je zuvor.</p><p>Auch das endocannabinoide System ist weniger aktiv – Einfluss auf Entzündung und Erneuerung. Wintertrockenheit, Juckreiz, das Gefühl, nichts wirkt mehr wie früher – häufige Erfahrungen, die die Branche selten respektvoll anspricht. Deine Haut hat nicht aufgegeben – sie braucht nur andere Unterstützung.</p>",
+      tipsTitle: "Achtsame Pflege ab 50",
+      tips: [
+        { title: "Maximale Nahrung, minimale Irritation", body: "Die Haut ist dünner und sensibler. Reichhaltige, beruhigende Produkte; alles, das brennt oder sticht, ist falsch. Punkt." },
+        { title: "Öl ist dein Verbündeter", body: "Gesichtsöle liefern, was die Haut nicht mehr selbst herstellt. CBD-Öl unterstützt zusätzlich das ECS, das mit dem Alter nachlässt." },
+        { title: "Von innen entscheidend", body: "Adaptogene, Antioxidantien und Omega über Ernährung und Supplements machen einen riesigen Unterschied. Die Haut spiegelt den ganzen Körper stärker denn je." },
+        { title: "Die Nachtroutine zählt am meisten", body: "Reparatur läuft nachts und wird mit dem Alter wichtiger. Abends großzügig nahrhaft einpflegen und die Haut arbeiten lassen." }
+      ],
+      solutionTitle: "DUO TA-DA und Fungtastic – Trio für reife Stärke",
+      solutionBody: "<p>DUO TA-DA liefert die tiefe Nahrung, die die Haut will: CBD-Gesichtsöl für das ECS und TA-DA Serum mit 3 Prozent CBG für Erneuerung und Barriere. Zusammen adressieren sie die Kernbedürfnisse ab 50.</p><p>Fungtastic mushroom extract ergänzt von innen mit adaptogenen Pilzen für Stressreaktion, Entzündungsmanagement und Hormonbalance. Innerer Support, der außen sichtbar wird – Haut ist nicht vom Körper trennbar.</p><p>Wir finden Haut ab 50 schön. Sie verdient beste Inhaltsstoffe und aufmerksamste Pflege. Nicht um Alter zu verstecken – sondern Kraft und Komfort in jedem neuen Kapitel.</p>",
+      faq: [
+        { q: "Warum verändert sich die Haut in den Wechseljahren so stark?", a: "Der Östrogenabfall trifft Kollagenproduktion, Feuchtespeicherung und Barriere massiv. Bis zu 30 Prozent Kollagen können in den ersten fünf Jahren nach der Menopause fehlen." },
+        { q: "Hilft CBD-Hautpflege nach den Wechseljahren?", a: "CBD stützt das ECS, das mit dem Alter abnimmt. Es kann Feuchtigkeit, Beruhigung und Erneuerung unterstützen – zentrale Themen danach." },
+        { q: "Zu spät, ab 50 mit Hautpflege zu starten?", a: "Nie zu spät. Haut reagiert in jedem Alter auf Nahrung und Wirkstoffe. Ergebnisse sehen anders aus als mit 20 – sind aber real." },
+        { q: "Wie wichtig ist innerer Support?", a: "Sehr. Haut ab 50 reagiert besonders auf Adaptogene, Antioxidantien, Omega und guten Schlaf. Äußere Pflege plus innerer Support = bestes Ergebnis." }
+      ],
+      ctaTitle: "Gib deiner Haut in jedem Kapitel das Beste",
+      ctaSub: "Haut ab 50 verdient Respekt und tiefe Pflege. DUO TA-DA und Fungtastic geben Kraft zum Aufblühen – in jedem Alter."
+    },
+    fr: {
+      metaTitle: "Soin de la peau après 50 ans – soutien, nutrition et respect | 1753",
+      metaDescription: "La peau après 50 mérite du soutien, pas la honte. Nutrition profonde au CBD et CBG pour une peau qui a vécu. 1753 SKINCARE.",
+      kicker: "Soin de la peau après 50 ans",
+      h1: "Soin de la peau après 50 ans – ta peau a une histoire ; offre-lui la suite qu'elle mérite",
+      lead: "Après 50, la peau a presque tout vu. Hormones différentes, moins de collagène, plus fine et sensible. Elle peut aussi être plus belle que jamais – si tu lui donnes ce dont elle a besoin au lieu de courir après le passé.",
+      problemTitle: "La réalité de la peau après 50 ans",
+      problemBody: "<p>Après 50 ans – surtout pendant et après la ménopause – la peau bascule fort. La chute d'œstrogènes peut faire perdre jusqu'à 30 % du collagène dans les cinq premières années. Ce n'est pas une lente dérive : c'est une chute qui touche épaisseur, élasticité et rétention d'eau.</p><p>La barrière faiblit net. Moins de lipides = plus de déshydratation, d'irritation et de sensibilité environnementale. Les plaies guérissent plus lentement, la pigmentation peut s'accentuer, la peau semble fragile comme jamais.</p><p>L'activité du système endocannabinoïde a encore baissé, avec effet sur inflammation et renouvellement. Peau d'hiver qui tire, démangegements, impression que plus rien ne réagit comme avant – des expériences que l'industrie aborde rarement avec honnêteté. Ta peau n'a pas abandonné : elle a besoin d'un autre soutien.</p>",
+      tipsTitle: "Soins attentionnés après 50 ans",
+      tips: [
+        { title: "Nutrition max, irritation min", body: "La peau est plus fine et réactive. Choisis des formules riches et apaisantes ; si ça pique ou brûle, ce n'est pas le bon produit. Point." },
+        { title: "L'huile est ton alliée", body: "Les huiles visage apportent ce que la peau ne produit plus seule. L'huile au CBD soutient en plus l'ECS qui décline avec l'âge." },
+        { title: "L'intérieur est crucial", body: "Adaptogènes, antioxydants et oméga via alimentation et compléments changent beaucoup de choses. La peau reflète le corps entier plus que jamais." },
+        { title: "La nuit prime", body: "La réparation est nocturne et gagne en importance avec l'âge. Le soir, des couches généreuses de soins nourrissants et laisse la peau travailler pendant ton sommeil." }
+      ],
+      solutionTitle: "DUO TA-DA et Fungtastic – trio pour une force mature",
+      solutionBody: "<p>DUO TA-DA offre la nutrition profonde que la peau réclame : huile visage au CBD pour l'ECS et TA-DA Serum avec 3 % de CBG pour renouvellement et barrière. Ensemble, ils couvrent les besoins centraux après 50 ans.</p><p>Fungtastic mushroom extract complète de l'intérieur avec des champignons adaptogènes qui soutiennent la réponse au stress, la gestion de l'inflammation et l'équilibre hormonal. Un soutien interne visible de l'extérieur – la peau n'est pas séparable du reste du corps.</p><p>Nous croyons que la peau après 50 est belle. Elle mérite les meilleurs ingrédients et les soins les plus réfléchis. Pas pour cacher l'âge, mais pour lui donner force et confort à chaque nouveau chapitre.</p>",
+      faq: [
+        { q: "Pourquoi la peau change-t-elle autant à la ménopause ?", a: "La chute d'œstrogènes frappe collagène, rétention d'eau et barrière. Jusqu'à 30 % du collagène peut disparaître dans les cinq premières années après la ménopause." },
+        { q: "Le CBD aide-t-il après la ménopause ?", a: "Le CBD soutient l'ECS qui faiblit avec l'âge. Il peut aider l'équilibre hydrique, apaiser et soutenir le renouvellement – des besoins clés ensuite." },
+        { q: "Trop tard pour commencer après 50 ans ?", a: "Jamais trop tard. La peau réagit à la nutrition et aux actifs à tout âge. Les gains peuvent différer de ceux de la vingtaine, mais ils sont réels." },
+        { q: "À quel point le soutien interne compte ?", a: "Énormément. La peau après 50 répond particulièrement aux adaptogènes, antioxydants, oméga et bon sommeil. Soins externes + soutien interne = meilleur résultat." }
+      ],
+      ctaTitle: "Le meilleur pour ta peau à chaque chapitre",
+      ctaSub: "La peau après 50 mérite respect et soins profonds. DUO TA-DA et Fungtastic lui donnent l'élan pour s'épanouir – à tout âge."
     }
   },
   {
     svSlug: "hudvard-vinter",
     enSlug: "winter-skincare",
+    esSlug: "cuidado-de-la-piel-invierno",
+    deSlug: "hautpflege-winter",
+    frSlug: "soin-de-la-peau-hiver",
     category: "audience",
     productIds: ["duo-ta-da", "ta-da-serum", "au-naturel-makeup-remover"],
     sv: {
@@ -531,11 +1194,95 @@ export const AUDIENCE_PAGES: LandingPage[] = [
       ],
       ctaTitle: "Prepare your skin for Nordic winter",
       ctaSub: "Swedish winter demands Swedish solutions. DUO TA-DA gives your skin the protection and nourishment it needs to handle the cold."
+    },
+    es: {
+      metaTitle: "Cuidado de la piel en invierno – protege tu piel del frío nórdico | 1753",
+      metaDescription: "El invierno nórdico castiga la piel. Frío, viento y aire interior seco piden rutina a medida. Skincare con CBD para inviernos escandinavos. 1753 SKINCARE.",
+      kicker: "Cuidado de la piel en invierno",
+      h1: "Cuidado de la piel en invierno – el frío nórdico pide cuidado a la altura",
+      lead: "Invierno sueco: bajo cero fuera y aire seco dentro. Tu piel viaja entre dos extremos cada día, y el skincare convencional rara vez está pensado para vivir en el Norte.",
+      problemTitle: "Por qué el invierno es la estación más dura para la piel",
+      problemBody: "<p>El invierno nórdico somete la piel a una doble carga. Fuera: temperaturas bajo cero, viento y baja humedad. Dentro: calefacción con humedad relativa del 20–30 por ciento – menos que el Sahara. La piel salta entre extremos varias veces al día.</p><p>El frío contrae los vasos, baja oxígeno y nutrientes a las células. La barrera sufre cuando los lípidos de la capa externa se endurecen con el frío. Resultado: grietas, descamación, picor, rojez – no porque esté enferma, sino porque el entorno no es el suyo.</p><p>Además, la UV visible baja en invierno y muchos dejan el SPF. Pero la UVA – la que envejece y daña en profundidad – es relativamente estable todo el año. La nieve refleja UV y amplifica la dosis. El invierno no es vacaciones para la piel: es un test de estrés que exige adaptar la rutina.</p>",
+      tipsTitle: "Guía de supervivencia cutánea en invierno",
+      tips: [
+        { title: "Sube de textura", body: "Las lociones ligeras no suelen bastar. Aceites faciales y serum más ricos crean capa protectora y frenan la pérdida de agua." },
+        { title: "Aplica sobre piel húmeda", body: "Aceite y serum sobre piel ligeramente húmeda sellan mejor la hidratación frente al aire seco dentro y fuera." },
+        { title: "Nada de agua hirviendo en la cara", body: "Duchas muy calientes y agua caliente al lavar destruyen los lípidos naturales. Usa agua templada y sé extra suave en invierno." },
+        { title: "Protege lo expuesto", body: "Mejillas, nariz y labios sufren más. Refuerza con aceite antes de salir al frío – como una zona tampón entre piel y clima." },
+        { title: "Humidifica en casa", body: "El aire seco interior hace tanto daño como el frío exterior. Un humidificador en el dormitorio ayuda mucho a la recuperación nocturna." }
+      ],
+      solutionTitle: "Aceite con CBD como escudo invernal",
+      solutionBody: "<p>Los aceites faciales son los mejores aliados del invierno; el aceite con CBD suma doble función: barrera física nutritiva frente a frío y aire seco, y apoyo biológico al ECS, más exigido en este estrés.</p><p>DUO TA-DA es la combinación más protectora: aceite CBD para nutrición y barrera, más TA-DA Serum con CBG para reforzar la barrera desde dentro. Serum primero sobre piel húmeda, luego aceite como sello. Armadura invernal para aguantar el norte.</p><p>Completa con Au Naturel para limpiar sin arrancar los lípidos que la piel necesita conservar. En invierno se trata de construir, no de desgastar.</p>",
+      faq: [
+        { q: "¿Por qué la piel se reseca tanto en invierno?", a: "El aire frío retiene poca humedad, la calefacción interior seca muchísimo y el frío reduce la producción lipídica propia. La tormenta perfecta para deshidratación." },
+        { q: "¿Necesito SPF en invierno?", a: "Sí. La UVA que impulsa el fotoenvejecimiento es relativamente constante todo el año. La nieve refleja UV. En el Norte el SPF importa en todas las estaciones." },
+        { q: "¿El CBD ayuda con la piel de invierno?", a: "Apoya barrera e inflamación – dos frentes clave bajo estrés inverno. Ayuda a retener agua y calma la irritación de frío y aire seco." },
+        { q: "¿Cuándo pasar a rutina de invierno?", a: "Cuando notes que la habitual ya no basta – a menudo ya en octubre en Suecia. En primavera, vuelve gradualmente. Escucha la piel, no solo el calendario." }
+      ],
+      ctaTitle: "Prepara tu piel para el invierno nórdico",
+      ctaSub: "El invierno sueco pide soluciones a su medida. DUO TA-DA da protección y nutrición para aguantar el frío."
+    },
+    de: {
+      metaTitle: "Hautpflege im Winter – schütze deine Haut vor nordischer Kälte | 1753",
+      metaDescription: "Nordischer Winter ist brutal für die Haut. Kälte, Wind und trockene Raumluft brauchen angepasste Routine. CBD-Pflege für skandinavische Winter. 1753 SKINCARE.",
+      kicker: "Hautpflege im Winter",
+      h1: "Hautpflege im Winter – nordische Kälte verlangt nordische Pflege",
+      lead: "Schwedischer Winter: Minusgrade draußen, ausgetrocknete Luft drinnen. Deine Haut pendelt täglich zwischen Extremen, und klassische Pflege ist selten für skandinavische Realität gebaut.",
+      problemTitle: "Warum Winter die härteste Jahreszeit für die Haut ist",
+      problemBody: "<p>Der nordische Winter belastet die Haut doppelt. Draußen: Frost, Wind, niedrige Luftfeuchtigkeit. Drinnen: beheizte Luft mit 20–30 Prozent relativer Feuchtigkeit – trockener als die Sahara. Mehrmals täglich wechselt die Haut zwischen diesen Polen.</p><p>Kälte zieht Gefäße zusammen – weniger Sauerstoff und Nährstoffe für die Zellen. Die Barriere leidet, wenn Lipide in der äußeren Schicht in der Kälte hart werden. Ergebnis: Risse, Schuppen, Juckreiz, Rötung – nicht weil die Haut krank ist, sondern weil die Bedingungen nicht zu ihr passen.</p><p>Dazu: Die sichtbare UV-Intensität sinkt im Winter, viele lassen den Lichtschutz weg. UVA – der Typ, der Alterung und Tiefenschäden treibt – bleibt aber das Jahr relativ konstant. Schnee reflektiert UV und verstärkt die Dosis. Winter ist kein Urlaub für die Haut – ein Stresstest, der Anpassung will.</p>",
+      tipsTitle: "Überlebensguide Haut im Winter",
+      tips: [
+        { title: "Zu reicheren Produkten wechseln", body: "Leichte Lotions reichen oft nicht. Gesichtsöle und kräftigere Seren bilden Schutz und reduzieren Feuchtigkeitsverlust." },
+        { title: "Auf feuchter Haut auftragen", body: "Öl und Serum auf leicht feuchter Haut fixieren Feuchtigkeit besser gegen trockene Luft drinnen und draußen." },
+        { title: "Heißes Wasser im Gesicht meiden", body: "Heiße Duschen und heißes Waschen zerstören die Lipidschicht. Lauwarm und extra sanft im Winter." },
+        { title: "Exponierte Stellen schützen", body: "Wangen, Nase, Lippen sind am verwundbarsten. Vor dem Rausgehen extra Öl – Puffer zwischen Haut und Wetter." },
+        { title: "Luftbefeuchter drinnen", body: "Trockene Raumluft schadet wie Kälte draußen. Ein Befeuchter im Schlafzimmer hilft der nächtlichen Erholung der Haut." }
+      ],
+      solutionTitle: "CBD-Öl als Winterschutz",
+      solutionBody: "<p>Gesichtsöle sind Winters bester Freund; CBD-Öl liefert doppelten Schutz: physisch als nährende Barriere gegen Kälte und trockene Luft, biologisch durch ECS-Support unter Winterstress.</p><p>DUO TA-DA ist die schützendste Kombi: CBD-Öl für tiefe Nahrung und Barriere, plus TA-DA Serum mit CBG zur Barriere-Stärkung von innen. Zuerst Serum auf feuchter Haut, dann Öl als Verschluss. Winterrüstung für nordische Kälte.</p><p>Ergänze mit Au Naturel für schonende Reinigung, ohne die natürlichen Öle herauszuwaschen, die die Haut im Winter braucht. Winterpflege heißt aufbauen, nicht abbauen.</p>",
+      faq: [
+        { q: "Warum wird die Haut im Winter so trocken?", a: "Kalte Luft speichert wenig Feuchtigkeit, beheizte Innenluft ist extrem trocken, und Kälte drosselt die eigene Lipidproduktion. Perfektes Szenario für Dehydrierung." },
+        { q: "Brauche ich im Winter Lichtschutz?", a: "Ja. UVA, die Hautalterung treibt, ist das Jahr relativ gleich. Schnee reflektiert UV. In Skandinavien zählt SPF in jeder Jahreszeit." },
+        { q: "Hilft CBD bei Winterhaut?", a: "CBD stützt Barriere und Entzündungsmanagement – beides unter Winterstress besonders wichtig. Es hilft, Feuchtigkeit zu halten und Irritation von Kälte und trockener Luft zu mildern." },
+        { q: "Wann auf Winterroutine wechseln?", a: "Wenn die gewohnte Routine nicht mehr reicht – oft schon im Oktober in Schweden. Im Frühling langsam zurück. Haut hören, nicht nur Kalender." }
+      ],
+      ctaTitle: "Rüste deine Haut für den nordischen Winter",
+      ctaSub: "Schwedischer Winter braucht passende Antworten. DUO TA-DA liefert Schutz und Nahrung für die Kälte."
+    },
+    fr: {
+      metaTitle: "Soin de la peau en hiver – protège ta peau du froid nordique | 1753",
+      metaDescription: "L'hiver nordique est brutal pour la peau. Froid, vent et air intérieur sec exigent une routine adaptée. Soins CBD pour hivers scandinaves. 1753 SKINCARE.",
+      kicker: "Soin de la peau en hiver",
+      h1: "Soin de la peau en hiver – le froid nordique mérite des soins à la hauteur",
+      lead: "L'hiver suédois, c'est le gel dehors et l'air asséché dedans. Ta peau navigue entre deux extrêmes chaque jour, et le soin classique est rarement pensé pour vivre dans le Nord.",
+      problemTitle: "Pourquoi l'hiver est la saison la plus rude pour la peau",
+      problemBody: "<p>L'hiver nordique impose une double contrainte. Dehors : sous zéro, vent, faible humidité. Dedans : air chauffé à 20–30 % d'humidité relative – plus sec que le Sahara. La peau oscille entre ces pôles plusieurs fois par jour.</p><p>Le froid resserre les vaisseaux – moins d'oxygène et de nutriments pour les cellules. La barrière souffre quand les lipides de la couche externe durcissent au froid. Résultat : gerçures, desquamation, démangeaisons, rougeurs – pas parce qu'elle est malade, mais parce que l'environnement ne lui convient pas.</p><p>En plus, l'intensité UV visible baisse en hiver et beaucoup zappent le SPF. Mais l'UVA – celle qui vieillit et abîme en profondeur – reste relativement stable toute l'année. La neige réfléchit les UV et augmente l'exposition. L'hiver n'est pas des vacances pour la peau : c'est un test de stress qui demande d'adapter la routine.</p>",
+      tipsTitle: "Guide survie peau en hiver",
+      tips: [
+        { title: "Passe à des textures plus riches", body: "Les lotions légères suffisent rarement. Huiles visage et sérums plus denses créent une couche protectrice et limitent la perte d'eau." },
+        { title: "Applique sur peau humide", body: "Huile et sérum sur peau légèrement humide piègent mieux l'hydratation face à l'air sec intérieur et extérieur." },
+        { title: "Évite l'eau brûlante sur le visage", body: "Douches brûlantes et rinçage chaud détruisent la couche lipidique. Eau tiède et douceur renforcée en hiver." },
+        { title: "Protège les zones exposées", body: "Joues, nez, lèvres prennent le plus. Couche d'huile supplémentaire avant de sortir au froid – zone tampon entre peau et météo." },
+        { title: "Humidifie l'intérieur", body: "L'air sec à la maison nuit autant que le froid dehors. Un humidificateur dans la chambre aide la récupération nocturne." }
+      ],
+      solutionTitle: "Huile au CBD comme bouclier hivernal",
+      solutionBody: "<p>Les huiles visage sont les meilleures alliées de l'hiver ; l'huile au CBD double la mise : barrière nourrissante contre froid et air sec, et soutien biologique de l'ECS sollicité par le stress hivernal.</p><p>DUO TA-DA, c'est le combo le plus protecteur : huile CBD pour nutrition et barrière, plus TA-DA Serum au CBG pour renforcer la barrière de l'intérieur. Sérum d'abord sur peau humide, puis huile comme sceau. Armure hivernale pour le nord.</p><p>Complète avec Au Naturel pour nettoyer sans arracher les lipides que la peau doit garder en hiver. L'hiver, on construit – on ne ronge pas la barrière.</p>",
+      faq: [
+        { q: "Pourquoi la peau est-elle si sèche en hiver ?", a: "L'air froid retient peu d'humidité, l'air chauffé est ultra sec, et le froid réduit la production lipidique. Tempête parfaite pour la déshydratation." },
+        { q: "Faut-il du SPF en hiver ?", a: "Oui. L'UVA qui pousse le photo-vieillissement reste relativement stable toute l'année. La neige réfléchit les UV. Au Nord, le SPF compte en toutes saisons." },
+        { q: "Le CBD aide la peau d'hiver ?", a: "Il soutient barrière et gestion de l'inflammation – deux leviers cruciaux sous stress hivernal. Ça aide à retenir l'eau et à calmer l'irritation du froid et de l'air sec." },
+        { q: "Quand passer en routine hiver ?", a: "Quand ta routine habituelle ne suffit plus – souvent dès octobre en Suède. Au printemps, reviens en douceur. Écoute la peau, pas seulement le calendrier." }
+      ],
+      ctaTitle: "Prépare ta peau pour l'hiver nordique",
+      ctaSub: "L'hiver suédois appelle des réponses adaptées. DUO TA-DA apporte protection et nutrition pour affronter le froid."
     }
   },
   {
     svSlug: "hudvard-sommar",
     enSlug: "summer-skincare",
+    esSlug: "cuidado-de-la-piel-verano",
+    deSlug: "hautpflege-sommer",
+    frSlug: "soin-de-la-peau-ete",
     category: "audience",
     productIds: ["ta-da-serum", "au-naturel-makeup-remover", "duo-kit"],
     sv: {
@@ -591,6 +1338,87 @@ export const AUDIENCE_PAGES: LandingPage[] = [
       ],
       ctaTitle: "Give your skin a smart summer",
       ctaSub: "Nordic summer demands light, protective skincare. TA-DA Serum and Au Naturel give your skin balance through the bright months."
+    },
+    es: {
+      metaTitle: "Cuidado de la piel en verano – protege y equilibra bajo el sol nórdico | 1753",
+      metaDescription: "Verano nórdico: días largos y sol fuerte piden skincare a medida. Rutina ligera con CBD que protege sin pesar. 1753 SKINCARE.",
+      kicker: "Cuidado de la piel en verano",
+      h1: "Cuidado de la piel en verano – la paradoja del sol en el Norte",
+      lead: "El verano sueco es magia pura – y también un reto para la piel. Días largos, UV intenso y calor cambian las reglas. Tu rutina de invierno ya no encaja, y es normal.",
+      problemTitle: "Por qué el verano exige otra estrategia",
+      problemBody: "<p>El verano nórdico es singular. Tras meses de oscuridad y frío, la luz explota – y la piel, acostumbrada al invierno, choca con un UV fuerte en los días más largos. En junio Estocolmo puede superar las 18 horas de sol. Maravilloso para el ánimo, exigente para la piel.</p><p>Más UV dispara melanina, radicales libres y daño al ADN en las células. La piel responde con más sebo, sudor y una barrera distinta. Lo que iba bien en invierno puede de pronto pesar, tapar poros y provocar brotes.</p><p>Sigue el mito del bronceado = salud. Una quemadura solar es estrés cutáneo – pedido de ayuda, no señal de bienestar. En el Norte somos más vulnerables tras el invierno y la piel clara sin defensa melanínica aún montada. El verano pide respeto, adaptación y rutina más ligera que proteja sin ahogar.</p>",
+      tipsTitle: "Skincare de verano listo para el Norte",
+      tips: [
+        { title: "Aligera las texturas", body: "Los aceites de invierno pueden pesar con calor. Base en serum ligero y reserva el aceite para la noche, cuando la piel repara. Deja respirar de día." },
+        { title: "SPF sin debate", body: "Cada mañana, haga el tiempo que haga. El UV atraviesa nubes. Renueva cada dos horas al aire libre y tras baño o sudor." },
+        { title: "Limpia bien por la noche", body: "SPF + sudor + más sebo piden limpieza profunda pero suave al acostarse. La doble limpieza brilla en julio y agosto." },
+        { title: "Hidrata tras el sol", body: "El sol deshidrata aunque no quemes. Tras los días al aire libre, productos calmantes e hidratantes. TA-DA Serum aporta apoyo ligero sin sensación pesada." },
+        { title: "Protección desde dentro", body: "Antioxidantes en la dieta – bayas, verduras, fruta – refuerzan la piel frente a radicales que dispara el UV. El verano sueco está lleno de ellos." }
+      ],
+      solutionTitle: "Rutina CBD ligera para verano nórdico",
+      solutionBody: "<p>El verano pide aligerar. TA-DA Serum con CBG es el paso ideal: lo bastante ligero para no cargar en calor, lo bastante activo para renovación y calmar la inflamación que deja el sol.</p><p>Au Naturel funciona genial como limpiador de verano – suave tras días de sudor sin romper la barrera, efectivo disolviendo SPF y el sebo extra del calor. Limpia sin quitar de más.</p><p>Por la noche puedes sumar el aceite CBD del DUO-kit para nutrir mientras la piel repara. Día ligero, noche nutritiva – ritmo alineado con lo que la piel pide en 24 horas.</p>",
+      faq: [
+        { q: "¿Debo cambiar la rutina en verano?", a: "Sí, la mayoría conviene ajustar: texturas más ligeras de día, SPF serio y limpieza más minuciosa por la noche. Con más temperatura y UV, las necesidades cambian." },
+        { q: "¿Puedo usar aceite CBD con sol?", a: "El aceite CBD no sustituye el SPF; no hay riesgos conocidos combinando CBD y exposición solar. Usa protector como siempre y deja el aceite para la noche." },
+        { q: "¿Por qué me salen granos en verano?", a: "Más sebo, sudor y SPF densos pueden obstruir poros. Limpieza nocturna suave pero completa y productos ligeros de día ayudan. TA-DA Serum es ligero y no suele empeorar el tema." },
+        { q: "¿El sol nórdico es tan fuerte como dicen?", a: "Sí. En junio–julio el índice UV en Suecia a menudo rivaliza con el Mediterráneo. Sumas días largos y piel clara tras el invierno: verano exigente para la piel." }
+      ],
+      ctaTitle: "Un verano inteligente para tu piel",
+      ctaSub: "El verano nórdico pide skincare ligero y protector. TA-DA Serum y Au Naturel mantienen el equilibrio en los meses de luz."
+    },
+    de: {
+      metaTitle: "Hautpflege im Sommer – schützen und balancieren in nordischer Sonne | 1753",
+      metaDescription: "Nordischer Sommer mit langen Tagen und starker Sonne braucht angepasste Pflege. Leichte CBD-Routine, die schützt ohne zu beschweren. 1753 SKINCARE.",
+      kicker: "Hautpflege im Sommer",
+      h1: "Hautpflege im Sommer – das Sonnen-Paradox im Norden",
+      lead: "Schwedischer Sommer ist Magie – und eine Herausforderung für die Haut. Lange helle Tage, starke UV-Strahlung und Hitze ändern die Bedingungen. Deine Winterroutine passt nicht mehr – völlig normal.",
+      problemTitle: "Warum der Sommer eine andere Strategie braucht",
+      problemBody: "<p>Der nordische Sommer ist einzigartig. Nach Monaten Dunkelheit und Kälte explodiert das Licht – und Haut, die Winter gewohnt ist, trifft plötzlich starke UV während der längsten Tage. Im Juni kann Stockholm über 18 Stunden Sonne haben. Wunderbar für die Seele, anspruchsvoll für die Haut.</p><p>Mehr UV triggert Melanin, freie Radikale und DNA-Schäden in Hautzellen. Die Haut reagiert mit mehr Talg, Schweiß und veränderter Barriere. Was im Winter perfekt war, wirkt plötzlich zu schwer, verstopft Poren und löst Ausbrüche aus.</p><p>Dazu das Mythos-Bräune-gleich-gesund. Sonnenbrand ist Stressreaktion der Haut – Hilferuf, kein Gesundheitszeichen. Im Norden sind wir nach lichtarmem Winter und blasser Haut besonders verwundbar. Sommer verlangt Respekt, Anpassung und leichtere Routine, die schützt ohne zu wiegen.</p>",
+      tipsTitle: "Kluge Sommer-Hautpflege im Norden",
+      tips: [
+        { title: "Zu leichteren Produkten wechseln", body: "Winteröle können in Hitze zu schwer wirken. Leichte Seren als Basis, Öl nur nachts zur Reparatur. Tagsüber atmen lassen." },
+        { title: "Lichtschutz ist Pflicht", body: "Jeden Morgen, egal wie das Wetter. UV dringt durch Wolken. Alle zwei Stunden neu auftragen draußen, nach Schwimmen oder Schwitzen sofort." },
+        { title: "Abends gründlich reinigen", body: "Lichtschutz, Schweiß und mehr Talg brauchen abends gründliche, milde Reinigung. Doppelreinigung ist im Juli und August Gold wert." },
+        { title: "Nach der Sonne feuchten", body: "Sonne entwässert auch ohne Sonnenbrand. Beruhigende, feuchtigkeitsspendende Pflege nach sonnigen Tagen. TA-DA Serum wirkt leicht und unterstützend." },
+        { title: "Schutz von innen", body: "Antioxidantien über Ernährung – Beeren, Gemüse, Obst – stärken die Haut gegen UV-induzierte Radikale. Der schwedische Sommer liefert reichlich." }
+      ],
+      solutionTitle: "Leichte CBD-Routine für nordischen Sommer",
+      solutionBody: "<p>Der Sommer will Leichtigkeit. TA-DA Serum mit CBG ist der perfekte Sommerschritt: leicht genug für Hitze, aktiv genug für Erneuerung und Beruhigung der UV-bedingten Entzündung.</p><p>Au Naturel ist ein starker Sommer-Reiniger – mild nach schweißtreibenden Tagen ohne Barriere-Stress, effektiv gegen Lichtschutz und extra Talg in der Hitze. Reinigt, ohne auszulaugen.</p><p>Abends kannst du das CBD-Öl aus dem DUO-kit für tiefere Nahrung in der nächtlichen Reparatur dazunehmen. Tags leicht, nachts nährend – Rhythmus, der den Tageszyklen der Haut folgt.</p>",
+      faq: [
+        { q: "Muss ich die Routine im Sommer ändern?", a: "Ja, die meisten sollten anpassen: leichtere Produkte tags, Fokus Lichtschutz, gründlichere Abendreinigung. Bei mehr Temperatur und UV ändern sich die Bedürfnisse." },
+        { q: "CBD-Öl in der Sonne?", a: "CBD-Öl ersetzt keinen Lichtschutz; bekannte Risiken bei Kombination mit Sonne gibt es nicht. SPF wie gewohnt, CBD-Öl eher abends." },
+        { q: "Warum bekomme ich im Sommer Pickel?", a: "Mehr Talg, Schweiß und schwere Sonnencremes können Poren verstopfen. Gründliche, milde Abendreinigung und leichte Tags-Pflege helfen. TA-DA Serum ist leicht genug, um nicht zu verschlimmern." },
+        { q: "Ist nordische Sonne wirklich so stark?", a: "Ja. Juni und Juli erreicht der UV-Index in Schweden oft mediterrane Werte. Plus lange Tage und helle Haut nach dem Winter – anspruchsvoll für die Haut." }
+      ],
+      ctaTitle: "Gib deiner Haut einen klugen Sommer",
+      ctaSub: "Nordischer Sommer verlangt leichte, schützende Pflege. TA-DA Serum und Au Naturel halten die Balance in den hellen Monaten."
+    },
+    fr: {
+      metaTitle: "Soin de la peau en été – protéger et équilibrer sous le soleil nordique | 1753",
+      metaDescription: "Été nordique : longues journées et soleil fort exigent des soins adaptés. Routine CBD légère qui protège sans alourdir. 1753 SKINCARE.",
+      kicker: "Soin de la peau en été",
+      h1: "Soin de la peau en été – le paradoxe du soleil dans le Nord",
+      lead: "L'été suédois est magique – et un défi pour la peau. Journées longues, UV intense et chaleur bougent les repères. Ta routine d'hiver ne colle plus, et c'est naturel.",
+      problemTitle: "Pourquoi l'été impose une autre stratégie",
+      problemBody: "<p>L'été nordique est singulier. Après des mois de noir et de froid, la lumière explose – et la peau, habituée à l'hiver, affronte soudain un UV fort pendant les jours les plus longs. En juin, Stockholm peut dépasser 18 heures de soleil. Bon pour le moral, exigeant pour la peau.</p><p>Plus d'UV déclenche mélanine, radicaux libres et dommages à l'ADN. La peau répond avec plus de sébum, de sueur et une barrière modifiée. Ce qui allait bien en hiver peut soudain peser, boucher les pores et provoquer des poussées.</p><p>Le mythe du bronzage = santé persiste. Coup de soleil = stress cutané – appel à l'aide, pas signe de vitalité. Dans le Nord, après l'hiver clair et la peau pâle sans défense mélaninique montée, on est vulnérables. L'été veut respect, adaptation et routine plus légère qui protège sans étouffer.</p>",
+      tipsTitle: "Soins d'été malins dans le Nord",
+      tips: [
+        { title: "Passe au plus léger", body: "Les huiles d'hiver peuvent suffoquer sous la chaleur. Base en sérum léger, huile seulement la nuit pour la réparation. Laisse respirer le jour." },
+        { title: "SPF non négociable", body: "Chaque matin, quel que soit le ciel. Les UV traversent les nuages. Réapplication toutes les deux heures dehors, tout de suite après bain ou sueur." },
+        { title: "Nettoie à fond le soir", body: "SPF, sueur et sébum en hausse demandent un démaquillage sérieux mais doux. Le double nettoyage vaut de l'or en juillet-août." },
+        { title: "Hydrate après soleil", body: "Le soleil déshydrate même sans coup de soleil. Après les journées dehors, soins apaisants et hydratants. TA-DA Serum soutient sans effet lourd." },
+        { title: "Protège de l'intérieur", body: "Antioxydants via l'alimentation – baies, légumes, fruits – renforcent la peau face aux radicaux créés par les UV. L'été suédois regorge d'aliments riches en antioxydants." }
+      ],
+      solutionTitle: "Routine CBD légère pour l'été nordique",
+      solutionBody: "<p>L'été appelle à alléger. TA-DA Serum au CBG est l'étape idéale : assez léger pour ne pas étouffer sous la chaleur, assez actif pour le renouvellement et calmer l'inflammation induite par le soleil.</p><p>Au Naturel brille en nettoyant d'été – doux après des journées de sueur sans casser la barrière, efficace sur SPF et sébum supplémentaire de la chaleur. Nettoie sans appauvrir.</p><p>Le soir, ajoute l'huile CBD du DUO-kit pour nourrir pendant la réparation nocturne. Jour léger, nuit nourrissante – un rythme qui suit les besoins de la peau sur 24 h.</p>",
+      faq: [
+        { q: "Je dois changer ma routine en été ?", a: "Oui, la plupart gagnent à adapter : textures plus légères le jour, SPF sérieux, démaquillage plus minutieux le soir. Température et UV modifient les besoins." },
+        { q: "Huile CBD au soleil ?", a: "L'huile CBD ne remplace pas le SPF ; pas de risque connu à combiner CBD et soleil. SPF comme d'habitude, huile plutôt le soir." },
+        { q: "Pourquoi des boutons en été ?", a: "Plus de sébum, sueur et écrans solaires épais peuvent boucher les pores. Démaquillage du soir doux mais complet et soins légers le jour aident. TA-DA Serum reste léger." },
+        { q: "Le soleil nordique est vraiment si fort ?", a: "Oui. En juin-juillet, l'indice UV en Suède rivalise souvent avec la Méditerranée. Ajoute journées longues et peau pâle après l'hiver : période exigeante pour la peau." }
+      ],
+      ctaTitle: "Offre à ta peau un été malin",
+      ctaSub: "L'été nordique veut des soins légers et protecteurs. TA-DA Serum et Au Naturel gardent l'équilibre pendant les mois lumineux."
     }
   }
 ];

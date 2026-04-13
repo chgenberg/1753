@@ -20,6 +20,16 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const name = productDisplayName(product, l);
   const desc = productShortDesc(product, l);
 
+  const base = "https://www.1753skin.com";
+  const productLangUrls = {
+    sv: `${base}/sv/produkter/${id}`,
+    en: `${base}/en/products/${id}`,
+    es: `${base}/es/productos/${id}`,
+    de: `${base}/de/produkte/${id}`,
+    fr: `${base}/fr/produits/${id}`,
+  };
+  const canonical = productLangUrls[l] ?? productLangUrls.en;
+
   return {
     title: name,
     description: desc,
@@ -27,6 +37,17 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       title: `${name} – 1753 SKINCARE`,
       description: desc,
       images: [{ url: product.image, width: 800, height: 800, alt: name }],
+    },
+    alternates: {
+      canonical,
+      languages: {
+        sv: productLangUrls.sv,
+        en: productLangUrls.en,
+        es: productLangUrls.es,
+        de: productLangUrls.de,
+        fr: productLangUrls.fr,
+        "x-default": productLangUrls.en,
+      },
     },
   };
 }
@@ -36,6 +57,16 @@ export function generateStaticParams() {
 }
 
 const SITE_ORIGIN = "https://www.1753skin.com";
+
+const COUNTRY_CODE: Record<string, string> = { sv: "SE", en: "GB", es: "ES", de: "DE", fr: "FR" };
+
+function tx(locale: string, sv: string, en: string, es?: string, de?: string, fr?: string): string {
+  if (locale === "sv") return sv;
+  if (locale === "es") return es || en;
+  if (locale === "de") return de || en;
+  if (locale === "fr") return fr || en;
+  return en;
+}
 
 export default async function ProductPage({ params }: Props) {
   const { id, locale } = await params;
@@ -56,7 +87,7 @@ export default async function ProductPage({ params }: Props) {
       description: productShortDesc(product, l),
       image: `${SITE_ORIGIN}${product.image}`,
       sku: product.articleNumber,
-      category: l === "sv" ? "Hudvard" : "Skincare",
+      category: tx(l, "Hudvard", "Skincare", "Cuidado de la piel", "Hautpflege"),
       brand: { "@type": "Brand", name: "1753 SKINCARE" },
       manufacturer: { "@type": "Organization", "@id": "https://www.1753skin.com/#organization" },
       offers: {
@@ -69,7 +100,7 @@ export default async function ProductPage({ params }: Props) {
         shippingDetails: {
           "@type": "OfferShippingDetails",
           shippingRate: { "@type": "MonetaryAmount", value: "0", currency },
-          shippingDestination: { "@type": "DefinedRegion", addressCountry: l === "sv" ? "SE" : "GB" },
+          shippingDestination: { "@type": "DefinedRegion", addressCountry: COUNTRY_CODE[l] || "GB" },
           deliveryTime: {
             "@type": "ShippingDeliveryTime",
             handlingTime: { "@type": "QuantitativeValue", minValue: 1, maxValue: 2, unitCode: "d" },
@@ -97,7 +128,7 @@ export default async function ProductPage({ params }: Props) {
     if (product.ingredients) {
       schema.additionalProperty = {
         "@type": "PropertyValue",
-        name: l === "sv" ? "Ingredienser" : "Ingredients",
+        name: tx(l, "Ingredienser", "Ingredients", "Ingredientes", "Inhaltsstoffe"),
         value: product.ingredients,
       };
     }

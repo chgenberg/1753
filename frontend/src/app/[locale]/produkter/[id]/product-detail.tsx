@@ -31,7 +31,7 @@ import { useLocale } from "@/providers/locale-provider";
 
 export default function ProductDetail({ id }: { id: string }) {
   const { t, path, locale } = useLocale();
-  const loc = locale === "en" ? "en-GB" : "sv-SE";
+  const loc = ({ sv: "sv-SE", en: "en-GB", es: "es-ES", de: "de-DE", fr: "fr-FR" }[locale] || "en-GB");
   const product = getProduct(id);
   const [qty, setQty] = useState(1);
   const [activeImg, setActiveImg] = useState(0);

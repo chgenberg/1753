@@ -271,7 +271,7 @@ const PRODUCTS_MAP = {
   "fungtastic-mushroom-extract":{ name: "Fungtastic Mushroom Extract", price: 399, priceEur: 32, articleNumber: "4001", vatRate: 0.06 }
 };
 
-const FREE_SHIPPING_THRESHOLD = { SEK: 600, EUR: 50 };
+const FREE_SHIPPING_THRESHOLD = { SEK: 700, EUR: 60 };
 const SHIPPING_COST = { SEK: 49, EUR: 5 };
 const VIVA_CURRENCY_CODE = { SEK: 752, EUR: 978 };
 
@@ -1919,7 +1919,7 @@ Fältet "primaryCondition" avgör hur kunden taggas i vårt system. Felaktig tag
 - IGNORERA skanningsdata helt för detta fält – basera ENBART på din visuella bedömning + quiz-svar
 
 == REGLER ==
-- Svara på svenska (om frågor skickas på engelska, svara på engelska)
+- Svara på svenska som standard. Om locale skickas med: "en" → svara på engelska, "es" → svara på spanska, "de" → svara på tyska, "fr" → svara på franska
 - Använd ALDRIG emojis
 - Var specifik och personlig – referera till kundens egna svar genomgående
 - JSON-blocket ska vara det ENDA du svarar med (ingen löptext utanför JSON)
@@ -2009,6 +2009,7 @@ app.post("/api/analysis", async (req, res) => {
     }
 
     const { imageBase64, regions, fullImage, questions, imageScan } = req.body;
+    const locale = req.body.questions?.locale || "sv";
 
     const mainImage = fullImage || imageBase64;
     const hasImage = mainImage && mainImage.startsWith("data:image/");
@@ -2028,6 +2029,10 @@ app.post("/api/analysis", async (req, res) => {
     const researchSnippets = await searchVayu(allConcerns);
 
     let systemPromptFull = ANALYSIS_SYSTEM_PROMPT;
+    const langMap = { en: "English", es: "Spanish", de: "German", fr: "French" };
+    if (locale && langMap[locale]) {
+      systemPromptFull += `\n\n== LANGUAGE ==\nThe user is browsing in ${langMap[locale]}. You MUST write your ENTIRE response in ${langMap[locale]} – all field values in the JSON (summary, details, tips, routine labels, product recommendations text, etc.). Keep JSON keys in English.`;
+    }
     if (bookKnowledge) systemPromptFull += "\n\n== BOKKUNSKAP (Christopher Genbergs bok om holistisk hudvård) ==\n" + bookKnowledge;
     if (researchSnippets) systemPromptFull += researchSnippets;
 
@@ -2863,16 +2868,6 @@ async function handleOrderCompletion(orderId) {
           VAT: Math.round(vat * 100)
         };
       });
-
-      if (order.shipping_cost > 0) {
-        orderRows.push({
-          Description: "Porto/varubrev",
-          OrderedQuantity: 1,
-          DeliveredQuantity: 1,
-          Price: order.shipping_cost,
-          VAT: 0
-        });
-      }
 
       const today = new Date().toISOString().split("T")[0];
       const fxOrder = await fortnoxFetch("/orders", "POST", {
@@ -5207,7 +5202,7 @@ async function seedAutomationFlows() {
           </p>
           ${greenButton("Slutför din beställning", siteUrl + "/kassa")}
           <p style="font-size:13px;color:#766a62;text-align:center">
-            Fri frakt på ordrar över 600 kr.
+            Fri frakt på ordrar över 700 kr.
           </p>
         `
       },
@@ -5390,7 +5385,7 @@ OM 1753 SKINCARE:
 - Adress: Södra Skjutbanevägen 10, 439 55 Åsa
 - Telefon: 0732-30 55 21
 - E-post: info@1753skin.com
-- Fri frakt över 600 kr
+- Fri frakt över 700 kr
 - Personlig rådgivning före och efter köp
 
 ABSOLUT FÖRBJUDET:

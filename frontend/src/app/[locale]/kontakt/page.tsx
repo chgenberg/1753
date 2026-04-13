@@ -96,7 +96,7 @@ export default function ContactPage() {
                   href="tel:+46732305521"
                   className="text-sm text-muted-foreground hover:text-brand-900"
                 >
-                  {locale === "en" ? "+46 732 30 55 21" : "0732 - 30 55 21"}
+                  {locale === "sv" ? "0732 - 30 55 21" : "+46 732 30 55 21"}
                 </a>
               </div>
             </div>

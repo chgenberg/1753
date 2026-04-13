@@ -31,7 +31,14 @@ export function Footer() {
     }
   };
 
-  const guidePath = locale === "sv" ? "/sv/guide/cbd-hudvard" : "/en/guide/cbd-skincare";
+  const guidePathMap: Record<string, string> = {
+    sv: "/sv/guide/cbd-hudvard",
+    en: "/en/guide/cbd-skincare",
+    es: "/es/guide/cbd-skincare",
+    de: "/de/guide/cbd-skincare",
+    fr: "/fr/guide/cbd-skincare",
+  };
+  const guidePath = guidePathMap[locale] || guidePathMap.en;
   const navLinks = [
     { href: path("home"), label: t("header.navHome") },
     { href: path("products"), label: t("header.navProducts") },
@@ -133,7 +140,7 @@ export function Footer() {
                 className="flex items-center gap-2 text-sm text-brand-600 transition-colors hover:text-brand-900"
               >
                 <Phone className="h-3.5 w-3.5" />
-                {locale === "en" ? "+46 732 30 55 21" : "0732 - 30 55 21"}
+                {locale === "sv" ? "0732 - 30 55 21" : "+46 732 305 521"}
               </a>
               <a
                 href="mailto:info@1753skin.com"

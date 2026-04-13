@@ -25,6 +25,14 @@ import {
 } from "./zones";
 import { useLocale } from "@/providers/locale-provider";
 
+function tx(locale: string, sv: string, en: string, es?: string, de?: string, fr?: string): string {
+  if (locale === "sv") return sv;
+  if (locale === "es") return es || en;
+  if (locale === "de") return de || en;
+  if (locale === "fr") return fr || en;
+  return en;
+}
+
 export interface ScanSummary {
   overallTop: Prediction[];
   zones: ZoneResult[];
@@ -79,9 +87,11 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
       }
     } catch {
       setError(
-        locale === "en"
-          ? "Could not start the camera. Please check your permissions."
-          : "Kunde inte starta kameran. Kontrollera att du gett tillstånd."
+        tx(locale,
+          "Kunde inte starta kameran. Kontrollera att du gett tillstånd.",
+          "Could not start the camera. Please check your permissions.",
+          "No se pudo iniciar la cámara. Verifica los permisos.",
+          "Kamera konnte nicht gestartet werden. Bitte Berechtigungen prüfen.")
       );
       setStep("idle");
     }
@@ -143,7 +153,7 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
           import("./face-landmarker"),
         ]);
 
-      setAnalyzingZone(locale === "en" ? "Loading models..." : "Laddar modeller...");
+      setAnalyzingZone(tx(locale, "Laddar modeller...", "Loading models...", "Cargando modelos...", "Modelle werden geladen..."));
 
       const [session] = await Promise.all([
         loadModel((pct) => setModelProgress(pct)),
@@ -151,7 +161,7 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
       ]);
 
       setStep("analyzing");
-      setAnalyzingZone(locale === "en" ? "Detecting face landmarks..." : "Detekterar ansiktslandmärken...");
+      setAnalyzingZone(tx(locale, "Detekterar ansiktslandmärken...", "Detecting face landmarks...", "Detectando puntos faciales...", "Gesichtspunkte werden erkannt..."));
 
       const NORMAL_THRESHOLD = 0.35;
       const ENTROPY_THRESHOLD = 2.0;
@@ -175,7 +185,7 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
         return preds;
       }
 
-      setAnalyzingZone(locale === "en" ? "Full face" : "Helhetsbild");
+      setAnalyzingZone(tx(locale, "Helhetsbild", "Full face", "Rostro completo", "Gesamtes Gesicht"));
       const rawOverall = await classifyRegionTTA(session, canvas, 0, 0, canvas.width, canvas.height);
       const overallPreds = applyNormalFilter(rawOverall);
 
@@ -215,7 +225,7 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
           if (!matchingFaceZone) continue;
           if (mz.w < 20 || mz.h < 20) continue;
 
-          setAnalyzingZone(locale === "en" ? matchingFaceZone.labelEn : matchingFaceZone.labelSv);
+          setAnalyzingZone(locale === "sv" ? matchingFaceZone.labelSv : matchingFaceZone.labelEn);
 
           const rawPreds = await classifyRegionTTA(session, canvas, mz.x, mz.y, mz.w, mz.h);
           const preds = applyNormalFilter(rawPreds);
@@ -234,7 +244,7 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
         const faceY = canvas.height * 0.05;
 
         for (const zone of FACE_ZONES) {
-          setAnalyzingZone(locale === "en" ? zone.labelEn : zone.labelSv);
+          setAnalyzingZone(locale === "sv" ? zone.labelSv : zone.labelEn);
 
           const [rx, ry, rw, rh] = zone.rect;
           const safeX = Math.max(0, Math.round(faceX + rx * faceW));
@@ -269,9 +279,11 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
     } catch (err) {
       console.error("Analysis error:", err);
       setError(
-        locale === "en"
-          ? "Something went wrong during the analysis. Please try again."
-          : "Något gick fel vid analysen. Försök igen."
+        tx(locale,
+          "Något gick fel vid analysen. Försök igen.",
+          "Something went wrong during the analysis. Please try again.",
+          "Algo salió mal durante el análisis. Inténtalo de nuevo.",
+          "Bei der Analyse ist ein Fehler aufgetreten. Bitte erneut versuchen.")
       );
       setStep("captured");
     }
@@ -310,12 +322,14 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
           </div>
           <div>
             <h3 className="text-xl font-bold tracking-tight text-[#1d1d1f]">
-              {locale === "en" ? "Face scan" : "Ansiktsskanning"}
+              {tx(locale, "Ansiktsskanning", "Face scan", "Escaneo facial", "Gesichtsscan")}
             </h3>
             <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-[#515151]">
-              {locale === "en"
-                ? "Take a selfie or upload a photo. Our AI reviews six facial zones directly on your device, completely privately."
-                : "Ta en selfie eller ladda upp ett foto. Vår AI analyserar sex ansiktszoner direkt i din enhet — helt privat."}
+              {tx(locale,
+                "Ta en selfie eller ladda upp ett foto. Vår AI analyserar sex ansiktszoner direkt i din enhet — helt privat.",
+                "Take a selfie or upload a photo. Our AI reviews six facial zones directly on your device, completely privately.",
+                "Toma un selfie o sube una foto. Nuestra IA analiza seis zonas faciales directamente en tu dispositivo, de forma completamente privada.",
+                "Mache ein Selfie oder lade ein Foto hoch. Unsere KI analysiert sechs Gesichtszonen direkt auf deinem Gerät — völlig privat.")}
             </p>
           </div>
 
@@ -325,23 +339,25 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
               className="inline-flex h-12 w-full items-center justify-center gap-2.5 rounded-full bg-[#108474] px-7 text-sm font-semibold text-white shadow-lg shadow-[#108474]/20 transition-all hover:bg-[#0d6e62] hover:shadow-xl active:scale-[0.97] sm:w-auto"
             >
               <Camera className="h-4.5 w-4.5" />
-              {locale === "en" ? "Open camera" : "Öppna kamera"}
+              {tx(locale, "Öppna kamera", "Open camera", "Abrir cámara", "Kamera öffnen")}
             </button>
             <button
               onClick={() => fileRef.current?.click()}
               className="inline-flex h-12 w-full items-center justify-center gap-2.5 rounded-full border-2 border-[#108474] px-7 text-sm font-semibold text-[#108474] transition-all hover:bg-[#108474]/5 active:scale-[0.97] sm:w-auto"
             >
               <ImagePlus className="h-4.5 w-4.5" />
-              {locale === "en" ? "Upload photo" : "Ladda upp foto"}
+              {tx(locale, "Ladda upp foto", "Upload photo", "Subir foto", "Foto hochladen")}
             </button>
           </div>
 
           <div className="flex items-center justify-center gap-2 text-xs text-[#766a62]">
             <Shield className="h-3.5 w-3.5" />
             <span>
-              {locale === "en"
-                ? "Your image never leaves your device"
-                : "Din bild lämnar aldrig din enhet"}
+              {tx(locale,
+                "Din bild lämnar aldrig din enhet",
+                "Your image never leaves your device",
+                "Tu imagen nunca sale de tu dispositivo",
+                "Dein Bild verlässt nie dein Gerät")}
             </span>
           </div>
         </div>
@@ -362,7 +378,7 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
               <div className="h-[70%] w-[55%] rounded-[50%] border-2 border-white/30 shadow-[0_0_0_9999px_rgba(0,0,0,0.3)]" />
             </div>
             <p className="absolute bottom-4 left-0 right-0 text-center text-sm font-medium text-white/80">
-              {locale === "en" ? "Place your face inside the oval" : "Placera ditt ansikte inom ovalen"}
+              {tx(locale, "Placera ditt ansikte inom ovalen", "Place your face inside the oval", "Coloca tu rostro dentro del óvalo", "Platziere dein Gesicht im Oval")}
             </p>
           </div>
 
@@ -372,12 +388,12 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
               className="inline-flex h-10 items-center gap-2 rounded-xl px-5 text-sm font-medium text-[#515151] transition-colors hover:bg-[#f5f5f7]"
             >
               <X className="h-4 w-4" />
-              {locale === "en" ? "Cancel" : "Avbryt"}
+              {tx(locale, "Avbryt", "Cancel", "Cancelar", "Abbrechen")}
             </button>
             <button
               onClick={captureFromCamera}
               className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-white shadow-lg transition-all hover:scale-105 active:scale-90"
-              aria-label={locale === "en" ? "Take photo" : "Ta foto"}
+              aria-label={tx(locale, "Ta foto", "Take photo", "Tomar foto", "Foto aufnehmen")}
             >
               <div className="h-11 w-11 rounded-full border-[3px] border-[#108474]" />
             </button>
@@ -392,7 +408,7 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={imageSrc}
-              alt={locale === "en" ? "Preview" : "Förhandsvisning"}
+              alt={tx(locale, "Förhandsvisning", "Preview", "Vista previa", "Vorschau")}
               className="block h-auto w-full"
             />
           </div>
@@ -418,19 +434,19 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
                 <Square className="mt-0.5 h-5 w-5 flex-shrink-0 text-[#766a62]/50" />
               )}
               <span className="text-xs leading-relaxed text-[#515151]">
-                {locale === "en" ? (
-                  <>
-                    I agree that my image and answers may be used{" "}
-                    <span className="font-semibold text-[#1d1d1f]">anonymously</span> to
-                    improve 1753 SKINCARE&apos;s AI skin analysis. No personal
-                    information is stored.
-                  </>
-                ) : (
+                {locale === "sv" ? (
                   <>
                     Jag godkänner att min bild och mina svar får användas{" "}
                     <span className="font-semibold text-[#1d1d1f]">anonymt</span> för
                     att förbättra 1753 SKINCAREs AI-hudanalys. Ingen personlig
                     information sparas.
+                  </>
+                ) : (
+                  <>
+                    I agree that my image and answers may be used{" "}
+                    <span className="font-semibold text-[#1d1d1f]">anonymously</span> to
+                    improve 1753 SKINCARE&apos;s AI skin analysis. No personal
+                    information is stored.
                   </>
                 )}
               </span>
@@ -441,7 +457,7 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
               className="mx-auto flex items-center gap-1.5 text-[11px] font-medium text-[#766a62]/70 transition-colors hover:text-[#108474]"
             >
               <Lock className="h-3 w-3" />
-              {locale === "en" ? "Security" : "Säkerhet"}
+              {tx(locale, "Säkerhet", "Security", "Seguridad", "Sicherheit")}
             </button>
           </div>
 
@@ -451,14 +467,14 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
               className="inline-flex h-11 items-center gap-2 rounded-full px-6 text-sm font-medium text-[#515151] transition-colors hover:bg-[#f5f5f7]"
             >
               <RefreshCw className="h-4 w-4" />
-              {locale === "en" ? "Use another photo" : "Nytt foto"}
+              {tx(locale, "Nytt foto", "Use another photo", "Otra foto", "Anderes Foto")}
             </button>
             <button
               onClick={runAnalysis}
               className="inline-flex h-12 items-center gap-2.5 rounded-full bg-[#108474] px-8 text-sm font-semibold text-white shadow-lg shadow-[#108474]/20 transition-all hover:bg-[#0d6e62] hover:shadow-xl active:scale-[0.97]"
             >
               <ScanFace className="h-4.5 w-4.5" />
-              {locale === "en" ? "Analyse my skin" : "Analysera min hy"}
+              {tx(locale, "Analysera min hy", "Analyse my skin", "Analizar mi piel", "Meine Haut analysieren")}
             </button>
           </div>
         </div>
@@ -472,16 +488,12 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
           </div>
           <div>
             <h3 className="text-lg font-bold tracking-tight text-[#1d1d1f]">
-              {locale === "en" ? "Loading analysis model" : "Laddar analysmodell"}
+              {tx(locale, "Laddar analysmodell", "Loading analysis model", "Cargando modelo de análisis", "Analysemodell wird geladen")}
             </h3>
             <p className="mt-1 text-sm text-[#515151]">
               {modelProgress < 100
-                ? locale === "en"
-                  ? `${modelProgress}% downloaded`
-                  : `${modelProgress}% nedladdat`
-                : locale === "en"
-                  ? "Preparing model..."
-                  : "Förbereder modellen..."}
+                ? tx(locale, `${modelProgress}% nedladdat`, `${modelProgress}% downloaded`, `${modelProgress}% descargado`, `${modelProgress}% heruntergeladen`)
+                : tx(locale, "Förbereder modellen...", "Preparing model...", "Preparando modelo...", "Modell wird vorbereitet...")}
             </p>
           </div>
           <div className="mx-auto h-2 w-72 overflow-hidden rounded-full bg-[#e6e6e6]">
@@ -491,9 +503,11 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
             />
           </div>
           <p className="text-xs text-[#766a62]">
-            {locale === "en"
-              ? "The first run requires a download (87 MB). After that it is cached locally."
-              : "Första gången kräver nedladdning (87 MB). Cachelagras sedan lokalt."}
+            {tx(locale,
+              "Första gången kräver nedladdning (87 MB). Cachelagras sedan lokalt.",
+              "The first run requires a download (87 MB). After that it is cached locally.",
+              "La primera ejecución requiere una descarga (87 MB). Luego se almacena en caché localmente.",
+              "Beim ersten Mal ist ein Download erforderlich (87 MB). Danach wird lokal zwischengespeichert.")}
           </p>
         </div>
       )}
@@ -511,12 +525,14 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
           </div>
           <div>
             <h3 className="text-lg font-bold tracking-tight text-[#1d1d1f]">
-              {locale === "en" ? "Analysing your skin" : "Analyserar din hy"}
+              {tx(locale, "Analyserar din hy", "Analysing your skin", "Analizando tu piel", "Deine Haut wird analysiert")}
             </h3>
             <p className="mt-2 text-sm text-[#515151]">
-              {locale === "en"
-                ? "Our AI is reviewing six facial zones"
-                : "Sex ansiktszoner granskas av vår AI"}
+              {tx(locale,
+                "Sex ansiktszoner granskas av vår AI",
+                "Our AI is reviewing six facial zones",
+                "Nuestra IA está revisando seis zonas faciales",
+                "Unsere KI prüft sechs Gesichtszonen")}
             </p>
           </div>
           {analyzingZone && (
@@ -541,13 +557,13 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
           {overallTop.length > 0 && (
             <div className="rounded-2xl border border-[#e6e6e6] bg-white p-5 shadow-sm">
               <h4 className="mb-3 text-sm font-bold tracking-tight text-[#1d1d1f]">
-                {locale === "en" ? "Overall read" : "Översiktlig bedömning"}
+                {tx(locale, "Översiktlig bedömning", "Overall read", "Lectura general", "Gesamtbewertung")}
               </h4>
               <div className="flex flex-wrap gap-2">
                 {overallTop.map((pred) => {
                   const color = CONDITION_COLORS[pred.label] || "#108474";
                   const conditionLabels =
-                    locale === "en" ? CONDITION_LABELS_EN : CONDITION_LABELS_SV;
+                    locale === "sv" ? CONDITION_LABELS_SV : CONDITION_LABELS_EN;
                   const localizedLabel = conditionLabels[pred.label] || pred.label;
                   return (
                     <div
@@ -581,7 +597,7 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
           {/* Zone-by-zone breakdown */}
           <div className="space-y-3">
             <h4 className="text-sm font-bold tracking-tight text-[#1d1d1f]">
-              {locale === "en" ? "Zone by zone" : "Zon för zon"}
+              {tx(locale, "Zon för zon", "Zone by zone", "Zona por zona", "Zone für Zone")}
             </h4>
             <div className="grid gap-3 sm:grid-cols-2">
               {results
@@ -590,7 +606,7 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
                   const color =
                     CONDITION_COLORS[r.topCondition] || "#108474";
                   const conditionLabels =
-                    locale === "en" ? CONDITION_LABELS_EN : CONDITION_LABELS_SV;
+                    locale === "sv" ? CONDITION_LABELS_SV : CONDITION_LABELS_EN;
                   const localizedLabel =
                     conditionLabels[r.topCondition] || r.topCondition;
                   return (
@@ -600,7 +616,7 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
                     >
                       <div className="mb-2 flex items-center justify-between">
                         <span className="text-sm font-semibold text-[#1d1d1f]">
-                          {locale === "en" ? r.zone.labelEn : r.zone.labelSv}
+                          {locale === "sv" ? r.zone.labelSv : r.zone.labelEn}
                         </span>
                         <span
                           className="rounded-full px-2.5 py-0.5 text-[11px] font-bold"
@@ -618,10 +634,10 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
                       {r.allPredictions.length > 1 &&
                         r.allPredictions[1].probability > 0.1 && (
                           <p className="mt-1 text-xs text-[#766a62]">
-                            {locale === "en" ? "Also:" : "Även:"}{" "}
-                            {(locale === "en"
-                              ? CONDITION_LABELS_EN[r.allPredictions[1].label]
-                              : CONDITION_LABELS_SV[r.allPredictions[1].label]) ||
+                            {tx(locale, "Även:", "Also:", "También:", "Auch:")}{" "}
+                            {(locale === "sv"
+                              ? CONDITION_LABELS_SV[r.allPredictions[1].label]
+                              : CONDITION_LABELS_EN[r.allPredictions[1].label]) ||
                               r.allPredictions[1].label}{" "}
                             ({Math.round(r.allPredictions[1].probability * 100)}%)
                           </p>
@@ -636,9 +652,11 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
           <div className="space-y-4 text-center">
             <div className="inline-flex items-center gap-2 rounded-full bg-[#108474]/5 px-4 py-2 text-xs font-medium text-[#108474]">
               <Shield className="h-3.5 w-3.5" />
-              {locale === "en"
-                ? "Your image was analysed locally and never left your device"
-                : "Din bild analyserades helt lokalt och har inte lämnat din enhet"}
+              {tx(locale,
+                "Din bild analyserades helt lokalt och har inte lämnat din enhet",
+                "Your image was analysed locally and never left your device",
+                "Tu imagen fue analizada localmente y nunca salió de tu dispositivo",
+                "Dein Bild wurde lokal analysiert und hat dein Gerät nie verlassen")}
             </div>
 
             {!consent && (
@@ -649,17 +667,17 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
               >
                 <Square className="mt-0.5 h-5 w-5 flex-shrink-0 text-[#766a62]/50" />
                 <span className="text-xs leading-relaxed text-[#515151]">
-                  {locale === "en" ? (
-                    <>
-                      I agree that my image and answers may be used{" "}
-                      <span className="font-semibold text-[#1d1d1f]">anonymously</span> to
-                      improve our AI skin analysis.
-                    </>
-                  ) : (
+                  {locale === "sv" ? (
                     <>
                       Jag godkänner att min bild och mina svar får användas{" "}
                       <span className="font-semibold text-[#1d1d1f]">anonymt</span> för
                       att förbättra vår AI-hudanalys.
+                    </>
+                  ) : (
+                    <>
+                      I agree that my image and answers may be used{" "}
+                      <span className="font-semibold text-[#1d1d1f]">anonymously</span> to
+                      improve our AI skin analysis.
                     </>
                   )}
                 </span>
@@ -672,14 +690,16 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
                 className="inline-flex h-10 items-center gap-2 rounded-full border-2 border-[#108474] px-6 text-sm font-semibold text-[#108474] transition-all hover:bg-[#108474]/5 active:scale-[0.97]"
               >
                 <RefreshCw className="h-4 w-4" />
-                {locale === "en" ? "New scan" : "Ny skanning"}
+                {tx(locale, "Ny skanning", "New scan", "Nuevo escaneo", "Neuer Scan")}
               </button>
             </div>
 
             <p className="mx-auto max-w-sm text-[11px] leading-relaxed text-[#766a62]/80">
-              {locale === "en"
-                ? "This analysis is generated with the help of artificial intelligence and does not constitute medical advice, diagnosis or treatment recommendations. If you have ongoing skin concerns, always contact a licensed dermatologist or doctor."
-                : "Denna analys är framtagen med hjälp av artificiell intelligens och utgör inte medicinsk rådgivning, diagnos eller behandlingsrekommendation. Vid hudbesvär, kontakta alltid en legitimerad dermatolog eller läkare."}
+              {tx(locale,
+                "Denna analys är framtagen med hjälp av artificiell intelligens och utgör inte medicinsk rådgivning, diagnos eller behandlingsrekommendation. Vid hudbesvär, kontakta alltid en legitimerad dermatolog eller läkare.",
+                "This analysis is generated with the help of artificial intelligence and does not constitute medical advice, diagnosis or treatment recommendations. If you have ongoing skin concerns, always contact a licensed dermatologist or doctor.",
+                "Este análisis se genera con la ayuda de inteligencia artificial y no constituye asesoramiento médico, diagnóstico o recomendaciones de tratamiento. Si tienes problemas de piel, consulta siempre a un dermatólogo o médico.",
+                "Diese Analyse wurde mit Hilfe künstlicher Intelligenz erstellt und stellt keine medizinische Beratung, Diagnose oder Behandlungsempfehlung dar. Bei Hautproblemen wenden Sie sich immer an einen Dermatologen oder Arzt.")}
             </p>
           </div>
         </div>
@@ -703,60 +723,60 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
                 <Shield className="h-5 w-5 text-[#108474]" />
               </div>
               <h3 className="text-lg font-bold tracking-tight text-[#1d1d1f]">
-                {locale === "en" ? "How we protect your data" : "Så skyddar vi din data"}
+                {tx(locale, "Så skyddar vi din data", "How we protect your data", "Cómo protegemos tus datos", "So schützen wir deine Daten")}
               </h3>
             </div>
 
             <div className="space-y-5 text-[13px] leading-relaxed text-[#515151]">
               <div>
                 <h4 className="mb-1 font-semibold text-[#1d1d1f]">
-                  {locale === "en" ? "Face scan stays on your device" : "Ansiktsskanningen stannar i din enhet"}
+                  {tx(locale, "Ansiktsskanningen stannar i din enhet", "Face scan stays on your device", "El escaneo facial permanece en tu dispositivo", "Der Gesichtsscan bleibt auf deinem Gerät")}
                 </h4>
                 <p>
-                  {locale === "en"
-                    ? "The AI model runs entirely in your browser. Your photo is never uploaded to any server during the scan. The analysis happens locally on your device using machine learning technology (ONNX Runtime Web)."
-                    : "AI-modellen körs helt i din webbläsare. Ditt foto laddas aldrig upp till någon server under skanningen. Analysen sker lokalt på din enhet med maskininlärningsteknik (ONNX Runtime Web)."}
+                  {tx(locale,
+                    "AI-modellen körs helt i din webbläsare. Ditt foto laddas aldrig upp till någon server under skanningen. Analysen sker lokalt på din enhet med maskininlärningsteknik (ONNX Runtime Web).",
+                    "The AI model runs entirely in your browser. Your photo is never uploaded to any server during the scan. The analysis happens locally on your device using machine learning technology (ONNX Runtime Web).")}
                 </p>
               </div>
 
               <div>
                 <h4 className="mb-1 font-semibold text-[#1d1d1f]">
-                  {locale === "en" ? "Optional photo storage with encryption" : "Valfri fotolagring med kryptering"}
+                  {tx(locale, "Valfri fotolagring med kryptering", "Optional photo storage with encryption")}
                 </h4>
                 <p>
-                  {locale === "en"
-                    ? "If you choose to save your photo to track skin changes over time, it is encrypted with AES-256-GCM before being stored. This is the same encryption standard used by banks and healthcare providers. Each image gets a unique encryption key. Only you can view your saved photos when logged in."
-                    : "Om du väljer att spara ditt foto för att följa hudförändringar över tid krypteras det med AES-256-GCM innan det lagras. Detta är samma krypteringsstandard som används av banker och sjukvården. Varje bild får en unik krypteringsnyckel. Bara du kan se dina sparade foton när du är inloggad."}
+                  {tx(locale,
+                    "Om du väljer att spara ditt foto för att följa hudförändringar över tid krypteras det med AES-256-GCM innan det lagras. Detta är samma krypteringsstandard som används av banker och sjukvården. Varje bild får en unik krypteringsnyckel. Bara du kan se dina sparade foton när du är inloggad.",
+                    "If you choose to save your photo to track skin changes over time, it is encrypted with AES-256-GCM before being stored. This is the same encryption standard used by banks and healthcare providers. Each image gets a unique encryption key. Only you can view your saved photos when logged in.")}
                 </p>
               </div>
 
               <div>
                 <h4 className="mb-1 font-semibold text-[#1d1d1f]">
-                  {locale === "en" ? "Training data is anonymised" : "Träningsdata anonymiseras"}
+                  {tx(locale, "Träningsdata anonymiseras", "Training data is anonymised")}
                 </h4>
                 <p>
-                  {locale === "en"
-                    ? "If you consent to help improve our AI, a copy of the scan data is stored separately without any link to your account, name or personal information. This data is used solely to train and improve the skin analysis model."
-                    : "Om du samtycker till att hjälpa förbättra vår AI sparas en kopia av skanningsdatan separat utan koppling till ditt konto, namn eller personlig information. Datan används enbart för att träna och förbättra hudanalysmodellen."}
+                  {tx(locale,
+                    "Om du samtycker till att hjälpa förbättra vår AI sparas en kopia av skanningsdatan separat utan koppling till ditt konto, namn eller personlig information. Datan används enbart för att träna och förbättra hudanalysmodellen.",
+                    "If you consent to help improve our AI, a copy of the scan data is stored separately without any link to your account, name or personal information. This data is used solely to train and improve the skin analysis model.")}
                 </p>
               </div>
 
               <div>
                 <h4 className="mb-1 font-semibold text-[#1d1d1f]">
-                  {locale === "en" ? "You are in control" : "Du har kontroll"}
+                  {tx(locale, "Du har kontroll", "You are in control")}
                 </h4>
                 <p>
-                  {locale === "en"
-                    ? "You can delete all your saved photos at any time from your account under \"My skin journey\". Deletion is immediate and permanent. You can also use the analysis without saving any data at all."
-                    : "Du kan radera alla dina sparade foton när som helst från ditt konto under \"Min hudresa\". Radering sker omedelbart och permanent. Du kan också använda analysen utan att spara någon data alls."}
+                  {tx(locale,
+                    "Du kan radera alla dina sparade foton när som helst från ditt konto under \"Min hudresa\". Radering sker omedelbart och permanent. Du kan också använda analysen utan att spara någon data alls.",
+                    "You can delete all your saved photos at any time from your account under \"My skin journey\". Deletion is immediate and permanent. You can also use the analysis without saving any data at all.")}
                 </p>
               </div>
 
               <div className="rounded-xl bg-[#f5f5f7] px-4 py-3">
                 <p className="text-[11px] text-[#766a62]">
-                  {locale === "en"
-                    ? "1753 SKINCARE processes personal data in accordance with GDPR (EU 2016/679). For questions about your data, contact info@1753skin.com."
-                    : "1753 SKINCARE behandlar personuppgifter i enlighet med GDPR (EU 2016/679). För frågor om din data, kontakta info@1753skin.com."}
+                  {tx(locale,
+                    "1753 SKINCARE behandlar personuppgifter i enlighet med GDPR (EU 2016/679). För frågor om din data, kontakta info@1753skin.com.",
+                    "1753 SKINCARE processes personal data in accordance with GDPR (EU 2016/679). For questions about your data, contact info@1753skin.com.")}
                 </p>
               </div>
             </div>
@@ -765,7 +785,7 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
               onClick={() => setShowSecurity(false)}
               className="mt-6 w-full rounded-full bg-[#108474] py-3 text-sm font-semibold text-white transition-all hover:bg-[#0d6e62]"
             >
-              {locale === "en" ? "Got it" : "Jag förstår"}
+              {tx(locale, "Jag förstår", "Got it", "Entendido", "Verstanden")}
             </button>
           </div>
         </div>

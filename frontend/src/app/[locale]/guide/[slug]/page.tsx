@@ -8,11 +8,21 @@ import { locales, type Locale } from "@/lib/i18n/types";
 import { localizePath } from "@/lib/i18n/navigation";
 import { PRODUCTS } from "@/lib/products";
 import { ALL_LANDING_PAGES } from "@/lib/seo";
-import { getPageBySlug, getContent } from "@/lib/seo/types";
+import { getPageBySlug, getContent, getSlug } from "@/lib/seo/types";
 import { getMessages } from "@/lib/i18n";
 
 const BASE_URL = "https://www.1753skin.com";
 const LP = "/landing-pages";
+
+const OG_LOCALE: Record<string, string> = { sv: "sv_SE", en: "en_GB", es: "es_ES", de: "de_DE", fr: "fr_FR" };
+
+function tx(locale: string, sv: string, en: string, es?: string, de?: string, fr?: string): string {
+  if (locale === "sv") return sv;
+  if (locale === "es") return es || en;
+  if (locale === "de") return de || en;
+  if (locale === "fr") return fr || en;
+  return en;
+}
 
 function getRelatedPages(current: ReturnType<typeof getPageBySlug>, locale: Locale, max = 6) {
   if (!current) return [];
@@ -54,6 +64,9 @@ export async function generateStaticParams() {
   for (const page of ALL_LANDING_PAGES) {
     out.push({ locale: "sv", slug: page.svSlug });
     out.push({ locale: "en", slug: page.enSlug });
+    if (page.esSlug) out.push({ locale: "es", slug: page.esSlug });
+    if (page.deSlug) out.push({ locale: "de", slug: page.deSlug });
+    if (page.frSlug) out.push({ locale: "fr", slug: page.frSlug });
   }
   return out;
 }
@@ -66,19 +79,27 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const images = getImages(page.category);
   const svPath = `/sv/guide/${page.svSlug}`;
   const enPath = `/en/guide/${page.enSlug}`;
+  const langs: Record<string, string> = {
+    sv: `${BASE_URL}${svPath}`,
+    en: `${BASE_URL}${enPath}`,
+  };
+  if (page.esSlug) langs.es = `${BASE_URL}/es/guide/${page.esSlug}`;
+  if (page.deSlug) langs.de = `${BASE_URL}/de/guide/${page.deSlug}`;
+  if (page.frSlug) langs.fr = `${BASE_URL}/fr/guide/${page.frSlug}`;
+  langs["x-default"] = `${BASE_URL}${enPath}`;
   return {
     title: c.metaTitle,
     description: c.metaDescription,
     alternates: {
       canonical: `${BASE_URL}/${locale}/guide/${slug}`,
-      languages: { sv: `${BASE_URL}${svPath}`, en: `${BASE_URL}${enPath}` },
+      languages: langs,
     },
     openGraph: {
       title: c.metaTitle,
       description: c.metaDescription,
       url: `${BASE_URL}/${locale}/guide/${slug}`,
       images: [{ url: `${BASE_URL}${images.hero}`, width: 1200, height: 1200 }],
-      locale: locale === "sv" ? "sv_SE" : "en_GB",
+      locale: OG_LOCALE[locale] || "en_GB",
       type: "article",
     },
   };
@@ -114,13 +135,13 @@ export default async function GuidePage({ params }: Props) {
       {
         "@type": "ListItem",
         position: 1,
-        name: l === "sv" ? "Hem" : "Home",
+        name: tx(l, "Hem", "Home", "Inicio", "Startseite"),
         item: `${BASE_URL}/${l}`,
       },
       {
         "@type": "ListItem",
         position: 2,
-        name: l === "sv" ? "Guide" : "Guide",
+        name: tx(l, "Guide", "Guide", "Guía", "Ratgeber"),
         item: `${BASE_URL}/${l}/guide`,
       },
       {
@@ -181,7 +202,7 @@ export default async function GuidePage({ params }: Props) {
                 href={localizePath(l, "products")}
                 className="inline-flex h-[52px] items-center gap-2 rounded-full bg-[#108474] px-8 text-sm font-medium text-white transition-all duration-300 hover:bg-[#0d6e61] hover:shadow-lg"
               >
-                {l === "sv" ? "Se produkter" : "View products"}
+                {tx(l, "Se produkter", "View products", "Ver productos", "Produkte ansehen")}
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
@@ -189,7 +210,7 @@ export default async function GuidePage({ params }: Props) {
                 className="inline-flex h-[52px] items-center gap-2 rounded-full border border-[#e6e6e6] bg-white/80 px-8 text-sm font-medium text-[#1d1d1f] backdrop-blur-sm transition-all duration-300 hover:border-[#108474] hover:shadow-md"
               >
                 <Sparkles className="h-4 w-4 text-[#108474]" />
-                {l === "sv" ? "Gratis hudanalys" : "Free skin analysis"}
+                {tx(l, "Gratis hudanalys", "Free skin analysis", "Análisis de piel gratis", "Kostenlose Hautanalyse")}
               </Link>
             </div>
           </div>
@@ -273,7 +294,7 @@ export default async function GuidePage({ params }: Props) {
                 href={localizePath(l, "products")}
                 className="mt-8 inline-flex h-[48px] items-center gap-2 rounded-full bg-[#108474] px-8 text-sm font-medium text-white transition-all duration-300 hover:bg-[#0d6e61] hover:shadow-lg"
               >
-                {l === "sv" ? "Se produkter" : "View products"}
+                {tx(l, "Se produkter", "View products", "Ver productos", "Produkte ansehen")}
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
@@ -303,9 +324,7 @@ export default async function GuidePage({ params }: Props) {
         <section className="bg-[#f5f5f7] py-16 md:py-24">
           <div className="mx-auto max-w-[1280px] px-6 md:px-10">
             <h3 className="mb-8 text-center text-xl font-bold tracking-tight text-[#1d1d1f]">
-              {l === "sv"
-                ? "Produkter vi rekommenderar"
-                : "Products we recommend"}
+              {tx(l, "Produkter vi rekommenderar", "Products we recommend", "Productos que recomendamos", "Produkte, die wir empfehlen")}
             </h3>
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {products.map(
@@ -321,7 +340,7 @@ export default async function GuidePage({ params }: Props) {
         <section className="py-16 md:py-24">
           <div className="mx-auto max-w-[1280px] px-6 md:px-10">
             <h2 className="mb-10 text-center text-2xl font-bold tracking-tight text-[#1d1d1f] md:text-3xl">
-              {l === "sv" ? "Vanliga frågor" : "Frequently asked questions"}
+              {tx(l, "Vanliga frågor", "Frequently asked questions", "Preguntas frecuentes", "Häufig gestellte Fragen")}
             </h2>
             <div className="mx-auto max-w-3xl divide-y divide-[#e6e6e6]">
               {c.faq.map((item, i) => (
@@ -348,12 +367,12 @@ export default async function GuidePage({ params }: Props) {
           <section className="border-t border-[#e6e6e6] bg-[#f5f5f7] py-16 md:py-24">
             <div className="mx-auto max-w-[1280px] px-6 md:px-10">
               <h2 className="mb-8 text-center text-2xl font-bold tracking-tight text-[#1d1d1f]">
-                {l === "sv" ? "Relaterade artiklar" : "Related articles"}
+                {tx(l, "Relaterade artiklar", "Related articles", "Artículos relacionados", "Verwandte Artikel")}
               </h2>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {related.map((rp) => {
                   const rc = getContent(rp, l);
-                  const rSlug = l === "sv" ? rp.svSlug : rp.enSlug;
+                  const rSlug = getSlug(rp, l);
                   return (
                     <Link
                       key={rSlug}
@@ -381,7 +400,7 @@ export default async function GuidePage({ params }: Props) {
                   href={`/${l}/guide`}
                   className="inline-flex items-center gap-2 text-sm font-semibold text-[#108474] transition-colors hover:text-[#0d6e62]"
                 >
-                  {l === "sv" ? "Se alla artiklar" : "View all articles"}
+                  {tx(l, "Se alla artiklar", "View all articles", "Ver todos los artículos", "Alle Artikel ansehen")}
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </div>
@@ -405,7 +424,7 @@ export default async function GuidePage({ params }: Props) {
                 href={localizePath(l, "products")}
                 className="inline-flex h-[52px] items-center gap-2 rounded-full bg-[#108474] px-8 text-sm font-medium text-white transition-all duration-300 hover:bg-[#0d6e61]"
               >
-                {l === "sv" ? "Handla nu" : "Shop now"}
+                {tx(l, "Handla nu", "Shop now", "Comprar ahora", "Jetzt kaufen")}
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
@@ -413,7 +432,7 @@ export default async function GuidePage({ params }: Props) {
                 className="inline-flex h-[52px] items-center gap-2 rounded-full border border-white/20 px-8 text-sm font-medium text-white transition-all duration-300 hover:border-white/40 hover:bg-white/5"
               >
                 <Sparkles className="h-4 w-4" />
-                {l === "sv" ? "Gratis hudanalys – 15 metriker" : "Free analysis – 15 metrics"}
+                {tx(l, "Gratis hudanalys – 15 metriker", "Free analysis – 15 metrics", "Análisis gratis – 15 métricas", "Kostenlose Analyse – 15 Metriken")}
               </Link>
             </div>
           </div>

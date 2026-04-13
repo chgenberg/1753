@@ -35,6 +35,15 @@ import { authFetch, API_URL } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/notification";
 import type { Locale } from "@/lib/i18n/types";
+
+function tx(locale: string, sv: string, en: string, es?: string, de?: string, fr?: string): string {
+  if (locale === "sv") return sv;
+  if (locale === "es") return es || en;
+  if (locale === "de") return de || en;
+  if (locale === "fr") return fr || en;
+  return en;
+}
+
 import {
   PRODUCTS,
   getProduct,
@@ -180,7 +189,7 @@ function relativeDate(
   locale: Locale,
   tfn: (key: string, vars?: Record<string, string | number>) => string
 ): string {
-  const loc = locale === "en" ? "en-GB" : "sv-SE";
+  const loc = ({ sv: "sv-SE", en: "en-GB", es: "es-ES", de: "de-DE", fr: "fr-FR" }[locale] || "en-GB");
   const now = new Date();
   const then = new Date(dateStr);
   const diffMs = now.getTime() - then.getTime();
@@ -217,7 +226,7 @@ function OverviewView({
   recsLoading: boolean;
 }) {
   const { t, path, locale } = useLocale();
-  const loc = locale === "en" ? "en-GB" : "sv-SE";
+  const loc = ({ sv: "sv-SE", en: "en-GB", es: "es-ES", de: "de-DE", fr: "fr-FR" }[locale] || "en-GB");
   const d = (key: string, vars?: Record<string, string | number>) => t(`accountDash.${key}`, vars);
   const { addItem } = useCart();
   const { showToast } = useToast();
@@ -399,7 +408,7 @@ function OverviewView({
 
 function ScoreLineChart({ scores, locale }: { scores: { score: number; date: string }[]; locale: string }) {
   if (scores.length < 2) return null;
-  const loc = locale === "en" ? "en-GB" : "sv-SE";
+  const loc = ({ sv: "sv-SE", en: "en-GB", es: "es-ES", de: "de-DE", fr: "fr-FR" }[locale] || "en-GB");
   const data = scores
     .slice()
     .reverse()
@@ -433,7 +442,7 @@ function SnapshotImage({ id, token, className }: { id: number; token: string; cl
 
 function SkinJourneyView({ token }: { token: string }) {
   const { t, path, locale } = useLocale();
-  const loc = locale === "en" ? "en-GB" : "sv-SE";
+  const loc = ({ sv: "sv-SE", en: "en-GB", es: "es-ES", de: "de-DE", fr: "fr-FR" }[locale] || "en-GB");
   const d = (key: string, vars?: Record<string, string | number>) => t(`accountDash.${key}`, vars);
   const [analyses, setAnalyses] = useState<SkinAnalysis[]>([]);
   const [snapshots, setSnapshots] = useState<FaceSnapshot[]>([]);
@@ -453,14 +462,14 @@ function SkinJourneyView({ token }: { token: string }) {
   }, [token]);
 
   const deleteAllSnapshots = async () => {
-    if (!confirm(locale === "en" ? "Delete all saved photos? This cannot be undone." : "Radera alla sparade foton? Detta kan inte ångras.")) return;
+    if (!confirm(tx(locale, "Radera alla sparade foton? Detta kan inte ångras.", "Delete all saved photos? This cannot be undone.", "¿Eliminar todas las fotos guardadas? No se puede deshacer.", "Alle gespeicherten Fotos löschen? Dies kann nicht rückgängig gemacht werden."))) return;
     setDeletingAll(true);
     try {
       await authFetch("/face-snapshots", token, { method: "DELETE" });
       setSnapshots([]);
-      showToast(locale === "en" ? "All photos deleted" : "Alla foton raderade");
+      showToast(tx(locale, "Alla foton raderade", "All photos deleted", "Todas las fotos eliminadas", "Alle Fotos gelöscht"));
     } catch {
-      showToast(locale === "en" ? "Could not delete photos" : "Kunde inte radera foton");
+      showToast(tx(locale, "Kunde inte radera foton", "Could not delete photos", "No se pudieron eliminar las fotos", "Fotos konnten nicht gelöscht werden"));
     } finally {
       setDeletingAll(false);
     }
@@ -543,7 +552,7 @@ function SkinJourneyView({ token }: { token: string }) {
             <div className="flex items-center gap-2">
               <Camera className="h-4 w-4 text-brand-500" />
               <h3 className="text-sm font-bold text-brand-900">
-                {locale === "en" ? "Your skin over time" : "Din hud över tid"}
+                {tx(locale, "Din hud över tid", "Your skin over time", "Tu piel con el tiempo", "Deine Haut im Zeitverlauf")}
               </h3>
             </div>
             <div className="flex items-center gap-2">
@@ -557,14 +566,14 @@ function SkinJourneyView({ token }: { token: string }) {
                       : "bg-brand-50 text-brand-600 hover:bg-brand-100"
                   )}
                 >
-                  {locale === "en" ? "Compare" : "Jämför"}
+                  {tx(locale, "Jämför", "Compare", "Comparar", "Vergleichen")}
                 </button>
               )}
               <button
                 onClick={deleteAllSnapshots}
                 disabled={deletingAll}
                 className="rounded-full p-1.5 text-brand-400 transition-colors hover:bg-red-50 hover:text-red-500"
-                title={locale === "en" ? "Delete all photos" : "Radera alla foton"}
+                title={tx(locale, "Radera alla foton", "Delete all photos", "Eliminar todas las fotos", "Alle Fotos löschen")}
               >
                 <Trash2 className="h-3.5 w-3.5" />
               </button>
@@ -676,7 +685,7 @@ function SkinJourneyView({ token }: { token: string }) {
 
 function OrdersView({ orders, loading, error }: { orders: Order[]; loading: boolean; error: string }) {
   const { t, path, locale } = useLocale();
-  const loc = locale === "en" ? "en-GB" : "sv-SE";
+  const loc = ({ sv: "sv-SE", en: "en-GB", es: "es-ES", de: "de-DE", fr: "fr-FR" }[locale] || "en-GB");
   const d = (key: string, vars?: Record<string, string | number>) => t(`accountDash.${key}`, vars);
   const { addItems } = useCart();
   const { showToast } = useToast();
@@ -808,8 +817,14 @@ function RoutineStep({ step, product, isLast }: { step: string; product: string;
 function RoutineView() {
   const { t, locale } = useLocale();
   const d = (key: string, vars?: Record<string, string | number>) => t(`accountDash.${key}`, vars);
-  const weekLetters =
-    locale === "en" ? ["M", "T", "W", "T", "F", "S", "S"] : ["M", "T", "O", "T", "F", "L", "S"];
+  const weekLettersMap: Record<string, string[]> = {
+    sv: ["M", "T", "O", "T", "F", "L", "S"],
+    en: ["M", "T", "W", "T", "F", "S", "S"],
+    es: ["L", "M", "X", "J", "V", "S", "D"],
+    de: ["M", "D", "M", "D", "F", "S", "S"],
+    fr: ["L", "M", "M", "J", "V", "S", "D"],
+  };
+  const weekLetters = weekLettersMap[locale] || weekLettersMap.en;
 
   const remover = getProduct("au-naturel-makeup-remover");
   const serum = getProduct("ta-da-serum");
@@ -887,7 +902,7 @@ function BenefitsView({
   onPointsUpdate: (pts: number) => void;
 }) {
   const { t, locale } = useLocale();
-  const loc = locale === "en" ? "en-GB" : "sv-SE";
+  const loc = ({ sv: "sv-SE", en: "en-GB", es: "es-ES", de: "de-DE", fr: "fr-FR" }[locale] || "en-GB");
   const d = (key: string, vars?: Record<string, string | number>) => t(`accountDash.${key}`, vars);
   const { showToast } = useToast();
   const [redeeming, setRedeeming] = useState(false);
@@ -1026,7 +1041,7 @@ interface Subscription {
 
 function SubscriptionsView({ token }: { token: string }) {
   const { t, path, locale } = useLocale();
-  const loc = locale === "en" ? "en-GB" : "sv-SE";
+  const loc = ({ sv: "sv-SE", en: "en-GB", es: "es-ES", de: "de-DE", fr: "fr-FR" }[locale] || "en-GB");
   const d = (key: string, vars?: Record<string, string | number>) => t(`accountDash.${key}`, vars);
   const daysWord = t("productDetail.days");
   const { showToast } = useToast();
@@ -1286,7 +1301,7 @@ function SubscriptionsView({ token }: { token: string }) {
 
 function WishlistView({ token }: { token: string }) {
   const { t, path, locale } = useLocale();
-  const loc = locale === "en" ? "en-GB" : "sv-SE";
+  const loc = ({ sv: "sv-SE", en: "en-GB", es: "es-ES", de: "de-DE", fr: "fr-FR" }[locale] || "en-GB");
   const d = (key: string, vars?: Record<string, string | number>) => t(`accountDash.${key}`, vars);
   const [items, setItems] = useState<WishlistItem[]>([]);
   const [loading, setLoading] = useState(true);

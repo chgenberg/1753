@@ -30,8 +30,8 @@ except ImportError:
 # ── Config ──────────────────────────────────────────────────
 DATASET_DIR = Path(__file__).resolve().parent.parent / "data" / "training-dataset"
 MODEL_DIR = Path(__file__).resolve().parent / "_face_model"
-TARGET_PER_CLASS = 1500
-NORMAL_TARGET = 3000
+TARGET_PER_CLASS = 2000
+NORMAL_TARGET = 5000
 
 MIN_IMAGE_BYTES = 5_000
 MIN_IMAGE_DIM = 150

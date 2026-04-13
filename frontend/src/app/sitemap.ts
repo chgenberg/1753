@@ -42,31 +42,27 @@ export default function sitemap(): MetadataRoute.Sitemap {
     }
   }
 
-  out.push({
-    url: `${BASE}/sv/gratis-hudanalys`,
-    lastModified: now,
-    changeFrequency: "weekly",
-    priority: 0.9,
-  });
-  out.push({
-    url: `${BASE}/en/free-skin-analysis`,
-    lastModified: now,
-    changeFrequency: "weekly",
-    priority: 0.9,
-  });
-
-  out.push({
-    url: `${BASE}/sv/guide`,
-    lastModified: now,
-    changeFrequency: "weekly",
-    priority: 0.8,
-  });
-  out.push({
-    url: `${BASE}/en/guide`,
-    lastModified: now,
-    changeFrequency: "weekly",
-    priority: 0.8,
-  });
+  const analysisSlugs: Record<string, string> = {
+    sv: "gratis-hudanalys",
+    en: "free-skin-analysis",
+    es: "analisis-piel-gratis",
+    de: "kostenlose-hautanalyse",
+    fr: "analyse-de-peau-gratuite",
+  };
+  for (const locale of locales) {
+    out.push({
+      url: `${BASE}/${locale}/${analysisSlugs[locale] || analysisSlugs.en}`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.9,
+    });
+    out.push({
+      url: `${BASE}/${locale}/guide`,
+      lastModified: now,
+      changeFrequency: "weekly",
+      priority: 0.8,
+    });
+  }
 
   for (const page of ALL_LANDING_PAGES) {
     out.push({
@@ -81,6 +77,30 @@ export default function sitemap(): MetadataRoute.Sitemap {
       changeFrequency: "monthly",
       priority: 0.6,
     });
+    if (page.esSlug) {
+      out.push({
+        url: `${BASE}/es/guide/${page.esSlug}`,
+        lastModified: now,
+        changeFrequency: "monthly",
+        priority: 0.6,
+      });
+    }
+    if (page.deSlug) {
+      out.push({
+        url: `${BASE}/de/guide/${page.deSlug}`,
+        lastModified: now,
+        changeFrequency: "monthly",
+        priority: 0.6,
+      });
+    }
+    if (page.frSlug) {
+      out.push({
+        url: `${BASE}/fr/guide/${page.frSlug}`,
+        lastModified: now,
+        changeFrequency: "monthly",
+        priority: 0.6,
+      });
+    }
   }
 
   return out;

@@ -6,6 +6,22 @@ import type { Locale } from "@/lib/i18n/types";
 
 const VALUE_ICONS = [Leaf, Heart, Shield, Users] as const;
 
+function tx(locale: string, sv: string, en: string, es?: string, de?: string, fr?: string): string {
+  if (locale === "sv") return sv;
+  if (locale === "es") return es || en;
+  if (locale === "de") return de || en;
+  if (locale === "fr") return fr || en;
+  return en;
+}
+
+const ABOUT_PATH: Record<string, string> = {
+  sv: "/sv/om-oss",
+  en: "/en/about",
+  es: "/es/sobre-nosotros",
+  de: "/de/ueber-uns",
+  fr: "/fr/a-propos",
+};
+
 export default async function AboutPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
   const l = locale as Locale;
@@ -17,7 +33,7 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
     "@type": "Person",
     "@id": "https://www.1753skin.com/#founder",
     name: "Christopher Genberg",
-    jobTitle: l === "sv" ? "Grundare" : "Founder",
+    jobTitle: tx(l, "Grundare", "Founder", "Fundador", "Gründer"),
     worksFor: {
       "@type": "Organization",
       "@id": "https://www.1753skin.com/#organization",
@@ -30,7 +46,7 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
       "Holistic skincare",
       "Nordic skincare",
     ],
-    url: "https://www.1753skin.com" + (l === "sv" ? "/sv/om-oss" : "/en/about"),
+    url: "https://www.1753skin.com" + (ABOUT_PATH[l] || ABOUT_PATH.en),
   };
 
   return (

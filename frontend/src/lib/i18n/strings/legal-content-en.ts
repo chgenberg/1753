@@ -23,7 +23,7 @@ export const LEGAL_TERMS_EN: LegalDoc = {
     },
     {
       h: "4. Delivery",
-      html: `<p>We ship all orders with PostNord Varubrev. Normal delivery time is 2–5 business days within Sweden and 5–10 business days for EU deliveries. Free shipping on orders over 700 SEK / \u20AC60; otherwise a shipping fee of 49 SEK / \u20AC5 applies.</p>`,
+      html: `<p>We ship all orders with PostNord Varubrev. Normal delivery time is 2–5 business days within Sweden and 5–10 business days for EU deliveries. Free shipping on orders over 600 SEK / \u20AC50; otherwise a shipping fee of 49 SEK / \u20AC5 applies.</p>`,
     },
     {
       h: "5. Right of withdrawal",

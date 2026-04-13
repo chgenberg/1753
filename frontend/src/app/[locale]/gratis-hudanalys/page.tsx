@@ -23,6 +23,16 @@ import { TechTabs } from "./tech-tabs";
 const BASE_URL = "https://www.1753skin.com";
 const IMG = "/Landing_page_skinanalys";
 
+const OG_LOCALE: Record<string, string> = { sv: "sv_SE", en: "en_GB", es: "es_ES", de: "de_DE", fr: "fr_FR" };
+
+function tx(locale: string, sv: string, en: string, es?: string, de?: string, fr?: string): string {
+  if (locale === "sv") return sv;
+  if (locale === "es") return es || en;
+  if (locale === "de") return de || en;
+  if (locale === "fr") return fr || en;
+  return en;
+}
+
 const content = {
   sv: {
     metaTitle: "Gratis AI Hudanalys – 15 Hudmetriker, Hudalder och Personlig Rutin | 1753 SKINCARE",
@@ -236,6 +246,264 @@ const content = {
     ctaButton: "Start free skin analysis",
     ctaSecondary: "Learn more about our skincare",
   },
+  es: {
+    metaTitle: "Análisis de Piel con IA Gratis – 15 Métricas, Edad de la Piel y Rutina Personalizada | 1753 SKINCARE",
+    metaDescription:
+      "Obtén un análisis de piel con IA gratis con 15 métricas científicas, edad estimada de la piel, gráfico radar y recomendaciones personalizadas. Precisión MediaPipe en 12 zonas faciales. En menos de 60 segundos.",
+    kicker: "Análisis de piel con IA avanzada",
+    h1: "Análisis de piel gratis – 15 métricas, edad de la piel y gráfico radar en 60 segundos",
+    lead: "Nuestro análisis de piel combina un modelo de IA entrenado específicamente, landmarks faciales de MediaPipe en 12 zonas y preguntas sobre tu estilo de vida para darte una imagen completa de la salud de tu piel. 15 métricas científicas, edad estimada de la piel, tipo Fitzpatrick y un gráfico radar interactivo. Sin registro. Sin coste.",
+    statsLabel: ["imágenes de entrenamiento en nuestro modelo", "métricas de piel analizadas", "zonas faciales mapeadas"],
+    stats: ["14.000+", "15", "12"],
+    processTitle: "Cómo funciona – tres pasos para tu análisis de piel",
+    steps: [
+      { icon: "camera", title: "1. Escanea tu rostro", body: "La cámara se activa directamente en tu navegador. MediaPipe Face Landmarker identifica 478 puntos faciales y divide tu rostro en 12 zonas precisas – frente, mejillas, nariz, mentón, zona ocular, mandíbula, zona T y más. Todo se ejecuta localmente en tu dispositivo." },
+      { icon: "brain", title: "2. Responde cinco preguntas", body: "Tipo de piel, estilo de vida, sueño, alimentación y objetivos para tu piel. Tus respuestas se combinan con el escaneo facial y las imágenes zonales para crear un perfil completo – no solo lo que la IA ve, sino la imagen completa." },
+      { icon: "sparkles", title: "3. Obtén tu análisis personalizado", body: "Recibes 15 métricas detalladas de la piel con puntuaciones y calificaciones, una edad estimada de la piel, tipo de piel Fitzpatrick, gráfico radar interactivo, análisis detallado por zonas, recomendaciones de estilo de vida y sugerencias de productos. Todo presentado en un formato claro y fácil de leer." },
+    ],
+    mirrorSection: {
+      kicker: "Entiende tu piel en profundidad",
+      title: "Tu espejo no miente – pero no te cuenta toda la verdad",
+      body: "Lo que ves en el espejo es solo la superficie. Debajo hay una interacción compleja entre microbioma, sistema endocannabinoide, hormonas y estilo de vida. Nuestra IA mide 15 aspectos separados de tu piel – desde la hidratación y elasticidad hasta la luminosidad y la salud de la barrera – y te da las herramientas para actuar.",
+    },
+    techTitle: "La tecnología detrás del análisis",
+    techIntro: "Haz clic en las pestañas para explorar los cuatro pilares de nuestro análisis de piel.",
+    techTabs: [
+      {
+        id: "model", label: "Modelo de IA entrenado", title: "Modelo entrenado específicamente + precisión MediaPipe",
+        body: "Nuestro clasificador de imágenes ha sido entrenado con más de 14.000 imágenes de piel verificadas – acné, rosácea, hiperpigmentación, piel seca, daño solar, eccema, dermatitis, psoriasis y más. El modelo se ejecuta como ONNX Runtime Web directamente en tu navegador.\n\nMediaPipe Face Landmarker identifica 478 puntos faciales y crea 12 zonas faciales precisas: frente, mejilla izquierda y derecha, nariz, mentón, zonas oculares, zona T, surcos nasolabiales, zona de la boca y mandíbula. Cada zona se analiza individualmente y se envía como imágenes de precisión a GPT-5.4 para un análisis profundo.",
+        highlights: ["14.000+ imágenes de entrenamiento con control de calidad", "MediaPipe Face Landmarker con 478 landmarks", "12 zonas faciales precisas analizadas individualmente", "Se ejecuta localmente – cero datos salen de tu dispositivo durante el escaneo"],
+      },
+      {
+        id: "fusion", label: "Fusión multimodal", title: "Cuatro fuentes de datos – 15 métricas – un resultado holístico",
+        body: "Nuestro análisis combina cuatro fuentes de datos en un sistema de fusión multimodal:\n\n1. El modelo ONNX clasifica cada zona localmente (lo que ve la cámara)\n2. MediaPipe recorta 12 zonas faciales con precisión quirúrgica\n3. Tus respuestas sobre alimentación, sueño y estrés (lo que nos cuentas)\n4. GPT-5.4 Vision analiza la imagen completa + imágenes zonales de forma holística\n\nEl resultado: 15 métricas científicas de la piel (arrugas, poros, pigmentación, enrojecimiento, textura, ojeras, firmeza, hidratación, tono de piel, acné, sensibilidad, daño solar, elasticidad, luminosidad y salud de la barrera) – cada métrica con puntuación de 0–100, calificación y explicación. Además de una edad estimada de la piel y tipo de piel Fitzpatrick.",
+        highlights: ["4 fuentes de datos: ONNX + MediaPipe + estilo de vida + GPT-5.4", "15 métricas individuales de la piel con puntuaciones y calificaciones", "Edad estimada de la piel basada en evaluación visual", "Tipo de piel Fitzpatrick para recomendaciones personalizadas"],
+      },
+      {
+        id: "tracking", label: "Seguimiento en el tiempo", title: "Sigue las 15 métricas semana a semana",
+        body: "Un solo análisis te da una instantánea. El cambio real se ve con el tiempo. Los usuarios registrados pueden guardar las 15 métricas, la edad de la piel y la puntuación en una línea temporal.\n\nObserva cómo métricas específicas como hidratación, elasticidad o luminosidad mejoran cuando cambias tu rutina. También ofrecemos almacenamiento de fotos cifrado (AES-256-GCM) para comparaciones visuales antes/después. Todas las imágenes se cifran con estándar bancario y se pueden eliminar con un clic.",
+        highlights: ["Historial de las 15 métricas y edad de la piel", "Gráfico radar que muestra el progreso a lo largo del tiempo", "Almacenamiento de fotos cifrado (AES-256-GCM)", "Control total – elimina todo con un clic"],
+      },
+      {
+        id: "privacy", label: "Privacidad y seguridad", title: "Tus datos, tus reglas",
+        body: "Hemos diseñado todo el análisis con la privacidad como principio fundamental:\n\nEl escaneo facial y el análisis de MediaPipe se ejecutan 100 % localmente en tu navegador – ninguna imagen sale de tu dispositivo durante el escaneo. Las imágenes zonales y el cuestionario se envían cifrados a GPT-5.4 para el análisis holístico.\n\nEl almacenamiento de fotos es completamente opcional y requiere consentimiento activo. Las imágenes se cifran con AES-256-GCM antes del almacenamiento. Todos los datos del análisis se pueden eliminar permanentemente de tu cuenta en cualquier momento.",
+        highlights: ["Escaneo y MediaPipe se ejecutan 100 % localmente", "Ninguna imagen se sube sin consentimiento", "Cifrado AES-256-GCM para fotos guardadas", "Compatible con GDPR – elimina todo en cualquier momento"],
+      },
+    ],
+    holisticSection: {
+      kicker: "Perspectiva holística",
+      title: "Tu piel refleja todo tu cuerpo",
+      body: "El sueño, la alimentación, el estrés y el ejercicio afectan tu piel tanto como los productos que usas. Nuestro análisis lo tiene todo en cuenta – y lo cuantifica en 15 métricas separadas para que veas exactamente qué necesita atención.",
+    },
+    conditionsTitle: "Qué medimos y analizamos",
+    conditions: [
+      "Arrugas y líneas finas", "Poros y textura", "Pigmentación", "Enrojecimiento y rosácea",
+      "Textura de la piel", "Ojeras", "Firmeza y tono", "Hidratación y humedad",
+      "Uniformidad del tono", "Acné y brotes", "Sensibilidad", "Daño solar",
+      "Elasticidad", "Luminosidad y brillo", "Salud de la barrera", "Microbioma de la piel",
+      "Sistema endocannabinoide", "Edad estimada de la piel",
+    ],
+    whatYouGetTitle: "Qué obtienes en tu análisis",
+    whatYouGet: [
+      { icon: "target", title: "15 métricas de piel con puntuación", body: "Cada métrica – desde hidratación y elasticidad hasta luminosidad y salud de la barrera – se evalúa con una puntuación de 0–100, una calificación (1–5) y una explicación personalizada. Presentado en un gráfico radar interactivo." },
+      { icon: "layers", title: "Análisis facial de 12 zonas", body: "MediaPipe identifica 478 puntos faciales y crea 12 zonas precisas. Cada zona se analiza individualmente – ves exactamente dónde tu piel necesita más atención." },
+      { icon: "heart", title: "Edad de la piel y tipo Fitzpatrick", body: "Obtén una edad estimada de la piel basada en evaluación visual y tu tipo de piel Fitzpatrick para recomendaciones más precisas adaptadas a tu piel." },
+      { icon: "leaf", title: "Rutina, estilo de vida y productos", body: "Rutina personalizada de mañana y noche, recomendaciones de estilo de vida para sueño, alimentación, estrés y ejercicio, más 2–3 productos adaptados a tu perfil de piel con 15 % de descuento." },
+    ],
+    resultsSection: {
+      kicker: "Tus resultados",
+      title: "El análisis es solo el comienzo",
+      body: "Guarda tus 15 métricas, sigue la edad de tu piel y observa cómo el gráfico radar evoluciona con el tiempo. Cada nuevo análisis te da una imagen más clara de tu viaje con la piel – y muestra qué cambios realmente marcan la diferencia.",
+    },
+    faqTitle: "Preguntas frecuentes sobre el análisis de piel",
+    faq: [
+      { q: "¿El análisis de piel es realmente gratis?", a: "Sí, completamente gratis y sin necesidad de registro. Puedes hacer el análisis de forma anónima directamente en tu navegador. El registro solo es necesario si quieres guardar tus 15 métricas y seguir el progreso de tu piel a lo largo del tiempo." },
+      { q: "¿Qué miden las 15 métricas?", a: "Evaluamos arrugas, poros, pigmentación, enrojecimiento, textura, ojeras, firmeza, hidratación, tono de piel, acné, sensibilidad, daño solar, elasticidad, luminosidad y salud de la barrera. Cada métrica recibe una puntuación de 0–100 y una calificación. Los resultados se muestran en un gráfico radar interactivo." },
+      { q: "¿Cómo funciona la estimación de la edad de la piel?", a: "GPT-5.4 Vision analiza tu piel visualmente y estima una edad de la piel basada en signos visibles como arrugas, elasticidad, textura y pigmentación. No es un diagnóstico médico, sino una indicación que te ayuda a entender el estado de tu piel." },
+      { q: "¿Qué es MediaPipe Face Landmarker?", a: "MediaPipe es la tecnología de reconocimiento facial de Google. Identifica 478 puntos tridimensionales en tu rostro y crea 12 zonas precisas que se analizan individualmente. Todo se ejecuta localmente en tu navegador – no se envían datos a Google." },
+      { q: "¿Se sube mi foto a un servidor?", a: "El escaneo y el análisis de MediaPipe se ejecutan 100 por ciento localmente. Las imágenes zonales se envían cifradas a GPT-5.4 para el análisis holístico. Si eliges guardar una foto en tu cuenta, se cifra con AES-256-GCM antes del almacenamiento." },
+      { q: "¿Puede el análisis reemplazar una visita al dermatólogo?", a: "No, y no es la intención. Nuestro análisis proporciona una primera indicación detallada con 15 métricas y consejos personalizados, pero no sustituye una evaluación médica. Ante problemas graves de piel, siempre recomendamos buscar ayuda profesional." },
+      { q: "¿Qué diferencia vuestro análisis de otros análisis de piel online?", a: "La mayoría de los análisis de piel online dan una respuesta simple basada en un selfie. Nuestro análisis combina un modelo ONNX entrenado específicamente (14.000+ imágenes de entrenamiento), MediaPipe Face Landmarker (12 zonas faciales), datos de estilo de vida y GPT-5.4 Vision en un sistema multimodal. El resultado: 15 métricas individuales de la piel, edad estimada, tipo Fitzpatrick, gráfico radar y una rutina personalizada." },
+      { q: "¿Cuánto tiempo tarda el análisis?", a: "Todo el proceso tarda unos 60 segundos: escaneo facial con MediaPipe (10 segundos), cinco preguntas (30 segundos) y análisis con IA mediante GPT-5.4 (20 segundos)." },
+      { q: "¿Funciona en el móvil?", a: "Sí, el análisis está totalmente optimizado para móvil. MediaPipe funciona perfectamente con la cámara frontal, y toda la experiencia está diseñada mobile-first con resultados responsivos." },
+    ],
+    ctaTitle: "¿Lista para entender tu piel?",
+    ctaSub: "15 métricas. Edad de la piel. Gráfico radar. Gratis. En menos de 60 segundos.",
+    ctaButton: "Iniciar análisis de piel gratis",
+    ctaSecondary: "Descubre nuestro cuidado de la piel",
+  },
+  de: {
+    metaTitle: "Kostenlose KI-Hautanalyse – 15 Hautmetriken, Hautalter und Persönliche Routine | 1753 SKINCARE",
+    metaDescription:
+      "Erhalte eine kostenlose KI-Hautanalyse mit 15 wissenschaftlichen Hautmetriken, geschätztem Hautalter, Radardiagramm und personalisierten Empfehlungen. MediaPipe-Präzision in 12 Gesichtszonen. In unter 60 Sekunden.",
+    kicker: "Fortschrittliche KI-Hautanalyse",
+    h1: "Kostenlose Hautanalyse – 15 Metriken, Hautalter und Radardiagramm in 60 Sekunden",
+    lead: "Unsere Hautanalyse kombiniert ein speziell trainiertes KI-Modell, MediaPipe-Gesichtslandmarken in 12 Zonen und Lebensstilfragen, um dir ein vollständiges Bild deiner Hautgesundheit zu geben. 15 wissenschaftliche Metriken, geschätztes Hautalter, Fitzpatrick-Typ und ein interaktives Radardiagramm. Keine Registrierung. Keine Kosten.",
+    statsLabel: ["Trainingsbilder in unserem Modell", "Hautmetriken analysiert", "Gesichtszonen kartiert"],
+    stats: ["14.000+", "15", "12"],
+    processTitle: "So funktioniert es – drei Schritte zu deiner Hautanalyse",
+    steps: [
+      { icon: "camera", title: "1. Scanne dein Gesicht", body: "Die Kamera aktiviert sich direkt in deinem Browser. MediaPipe Face Landmarker identifiziert 478 Gesichtspunkte und teilt dein Gesicht in 12 präzise Zonen ein – Stirn, Wangen, Nase, Kinn, Augenbereich, Kieferlinie, T-Zone und mehr. Alles läuft lokal auf deinem Gerät." },
+      { icon: "brain", title: "2. Beantworte fünf Fragen", body: "Hauttyp, Lebensstil, Schlaf, Ernährung und Hautziele. Deine Antworten werden mit dem Gesichtsscan und den Zonenbildern kombiniert, um ein vollständiges Profil zu erstellen – nicht nur, was die KI sieht, sondern das gesamte Bild." },
+      { icon: "sparkles", title: "3. Erhalte deine persönliche Analyse", body: "Du erhältst 15 detaillierte Hautmetriken mit Punktzahlen und Bewertungen, ein geschätztes Hautalter, Fitzpatrick-Hauttyp, interaktives Radardiagramm, detaillierte Zonenanalyse, Lebensstilempfehlungen und Produktvorschläge. Alles übersichtlich und leicht verständlich präsentiert." },
+    ],
+    mirrorSection: {
+      kicker: "Verstehe deine Haut tiefgründig",
+      title: "Dein Spiegel lügt nicht – aber er erzählt nicht die ganze Wahrheit",
+      body: "Was du im Spiegel siehst, ist nur die Oberfläche. Darunter liegt ein komplexes Zusammenspiel aus Mikrobiom, Endocannabinoid-System, Hormonen und Lebensstil. Unsere KI misst 15 verschiedene Aspekte deiner Haut – von Feuchtigkeit und Elastizität bis zu Strahlkraft und Barriere-Gesundheit – und gibt dir die Werkzeuge, um gezielt zu handeln.",
+    },
+    techTitle: "Die Technologie hinter der Analyse",
+    techIntro: "Klicke auf die Tabs, um die vier Säulen unserer Hautanalyse zu entdecken.",
+    techTabs: [
+      {
+        id: "model", label: "Trainiertes KI-Modell", title: "Speziell trainiertes Modell + MediaPipe-Präzision",
+        body: "Unser Bildklassifizierer wurde mit über 14.000 verifizierten Hautbildern trainiert – Akne, Rosazea, Hyperpigmentierung, trockene Haut, Sonnenschäden, Ekzeme, Dermatitis, Psoriasis und mehr. Das Modell läuft als ONNX Runtime Web direkt in deinem Browser.\n\nMediaPipe Face Landmarker identifiziert 478 Gesichtspunkte und erstellt 12 präzise Gesichtszonen: Stirn, linke und rechte Wange, Nase, Kinn, Augenbereiche, T-Zone, Nasolabialfalten, Mundbereich und Kieferlinie. Jede Zone wird einzeln analysiert und als Präzisionsbilder an GPT-5.4 zur Tiefenanalyse gesendet.",
+        highlights: ["14.000+ Trainingsbilder mit Qualitätskontrolle", "MediaPipe Face Landmarker mit 478 Landmarken", "12 präzise Gesichtszonen einzeln analysiert", "Läuft lokal – null Daten verlassen dein Gerät während des Scans"],
+      },
+      {
+        id: "fusion", label: "Multimodale Fusion", title: "Vier Datenquellen – 15 Metriken – ein ganzheitliches Ergebnis",
+        body: "Unsere Analyse kombiniert vier Datenquellen in einem multimodalen Fusionssystem:\n\n1. Das ONNX-Modell klassifiziert jede Zone lokal (was die Kamera sieht)\n2. MediaPipe beschneidet 12 Gesichtszonen mit chirurgischer Präzision\n3. Deine Lebensstil-Antworten zu Ernährung, Schlaf und Stress (was du uns erzählst)\n4. GPT-5.4 Vision analysiert das Gesamtbild + Zonenbilder ganzheitlich\n\nDas Ergebnis: 15 wissenschaftliche Hautmetriken (Falten, Poren, Pigmentierung, Rötung, Textur, Augenringe, Festigkeit, Feuchtigkeit, Hautton, Akne, Empfindlichkeit, Sonnenschäden, Elastizität, Strahlkraft und Barriere-Gesundheit) – jede Metrik mit einer Punktzahl von 0–100, Bewertung und Erklärung. Dazu ein geschätztes Hautalter und Fitzpatrick-Hauttyp.",
+        highlights: ["4 Datenquellen: ONNX + MediaPipe + Lebensstil + GPT-5.4", "15 individuelle Hautmetriken mit Punktzahlen und Bewertungen", "Geschätztes Hautalter basierend auf visueller Beurteilung", "Fitzpatrick-Hauttyp für personalisierte Empfehlungen"],
+      },
+      {
+        id: "tracking", label: "Verfolgung über Zeit", title: "Verfolge alle 15 Metriken Woche für Woche",
+        body: "Eine einzelne Analyse gibt dir eine Momentaufnahme. Echte Veränderung wird erst über die Zeit sichtbar. Eingeloggte Nutzer können alle 15 Metriken, Hautalter und Hautpunktzahl auf einer Zeitachse speichern.\n\nSieh, wie sich spezifische Metriken wie Feuchtigkeit, Elastizität oder Strahlkraft verbessern, wenn du deine Routine änderst. Wir bieten auch verschlüsselte Fotospeicherung (AES-256-GCM) für visuelle Vorher/Nachher-Vergleiche. Alle Bilder werden nach Bankstandard verschlüsselt und können mit einem Klick gelöscht werden.",
+        highlights: ["Verlauf aller 15 Metriken und des Hautalters", "Radardiagramm zeigt Fortschritt über Zeit", "Verschlüsselte Fotospeicherung (AES-256-GCM)", "Volle Kontrolle – lösche alles mit einem Klick"],
+      },
+      {
+        id: "privacy", label: "Datenschutz und Sicherheit", title: "Deine Daten, deine Regeln",
+        body: "Wir haben die gesamte Analyse mit Datenschutz als Grundprinzip gestaltet:\n\nDer Gesichtsscan und die MediaPipe-Analyse laufen zu 100 % lokal in deinem Browser – kein Bild verlässt dein Gerät während des Scans. Die Zonenbilder und der Fragebogen werden verschlüsselt an GPT-5.4 für die ganzheitliche Analyse gesendet.\n\nDie Fotospeicherung ist vollständig optional und erfordert aktive Zustimmung. Bilder werden vor der Speicherung mit AES-256-GCM verschlüsselt. Alle Analysedaten können jederzeit dauerhaft aus deinem Konto gelöscht werden.",
+        highlights: ["Scan und MediaPipe laufen 100 % lokal", "Kein Bild wird ohne Zustimmung hochgeladen", "AES-256-GCM-Verschlüsselung für gespeicherte Fotos", "GDPR-konform – lösche alles jederzeit"],
+      },
+    ],
+    holisticSection: {
+      kicker: "Ganzheitliche Perspektive",
+      title: "Deine Haut spiegelt deinen ganzen Körper wider",
+      body: "Schlaf, Ernährung, Stress und Bewegung beeinflussen deine Haut genauso stark wie die Produkte, die du verwendest. Unsere Analyse berücksichtigt alles – und quantifiziert es in 15 einzelnen Metriken, damit du genau siehst, was Aufmerksamkeit braucht.",
+    },
+    conditionsTitle: "Was wir messen und analysieren",
+    conditions: [
+      "Falten und feine Linien", "Poren und Textur", "Pigmentierung", "Rötung und Rosazea",
+      "Hauttextur", "Augenringe", "Festigkeit und Straffheit", "Feuchtigkeit und Hydration",
+      "Gleichmäßigkeit des Hauttons", "Akne und Unreinheiten", "Empfindlichkeit", "Sonnenschäden",
+      "Elastizität", "Strahlkraft und Glanz", "Barriere-Gesundheit", "Haut-Mikrobiom",
+      "Endocannabinoid-System", "Geschätztes Hautalter",
+    ],
+    whatYouGetTitle: "Was du bei deiner Analyse bekommst",
+    whatYouGet: [
+      { icon: "target", title: "15 Hautmetriken mit Punktzahlen", body: "Jede Metrik – von Feuchtigkeit und Elastizität bis zu Strahlkraft und Barriere-Gesundheit – wird mit einer Punktzahl von 0–100, einer Bewertung (1–5) und einer persönlichen Erklärung bewertet. Präsentiert in einem interaktiven Radardiagramm." },
+      { icon: "layers", title: "12-Zonen-Gesichtsanalyse", body: "MediaPipe identifiziert 478 Gesichtspunkte und erstellt 12 präzise Zonen. Jede Zone wird einzeln analysiert – du siehst genau, wo deine Haut die meiste Aufmerksamkeit braucht." },
+      { icon: "heart", title: "Hautalter und Fitzpatrick-Typ", body: "Erhalte ein geschätztes Hautalter basierend auf visueller Beurteilung und deinen Fitzpatrick-Hauttyp für präzisere Empfehlungen, die auf deine Haut zugeschnitten sind." },
+      { icon: "leaf", title: "Routine, Lebensstil und Produkte", body: "Persönliche Morgen- und Abendroutine, Lebensstilempfehlungen für Schlaf, Ernährung, Stress und Bewegung, plus 2–3 Produkte passend zu deinem Hautprofil mit 15 % Rabatt." },
+    ],
+    resultsSection: {
+      kicker: "Deine Ergebnisse",
+      title: "Die Analyse ist erst der Anfang",
+      body: "Speichere deine 15 Metriken, verfolge dein Hautalter und beobachte, wie sich das Radardiagramm über die Zeit entwickelt. Jede neue Analyse gibt dir ein klareres Bild deiner Hautreise – und zeigt, welche Veränderungen wirklich einen Unterschied machen.",
+    },
+    faqTitle: "Häufig gestellte Fragen zur Hautanalyse",
+    faq: [
+      { q: "Ist die Hautanalyse wirklich kostenlos?", a: "Ja, komplett kostenlos und ohne Registrierung. Du kannst die Analyse anonym direkt in deinem Browser durchführen. Eine Registrierung ist nur nötig, wenn du deine 15 Metriken speichern und den Fortschritt deiner Haut über die Zeit verfolgen möchtest." },
+      { q: "Was messen die 15 Metriken?", a: "Wir bewerten Falten, Poren, Pigmentierung, Rötung, Textur, Augenringe, Festigkeit, Feuchtigkeit, Hautton, Akne, Empfindlichkeit, Sonnenschäden, Elastizität, Strahlkraft und Barriere-Gesundheit. Jede Metrik erhält eine Punktzahl von 0–100 und eine Bewertung. Die Ergebnisse werden in einem interaktiven Radardiagramm angezeigt." },
+      { q: "Wie funktioniert die Hautalter-Schätzung?", a: "GPT-5.4 Vision analysiert deine Haut visuell und schätzt ein Hautalter basierend auf sichtbaren Zeichen wie Falten, Elastizität, Textur und Pigmentierung. Es ist keine medizinische Diagnose, sondern eine Indikation, die dir hilft, den Zustand deiner Haut zu verstehen." },
+      { q: "Was ist MediaPipe Face Landmarker?", a: "MediaPipe ist Googles Technologie zur Gesichtserkennung. Sie identifiziert 478 dreidimensionale Punkte in deinem Gesicht und erstellt 12 präzise Zonen, die einzeln analysiert werden. Alles läuft lokal in deinem Browser – keine Daten werden an Google gesendet." },
+      { q: "Wird mein Foto auf einen Server hochgeladen?", a: "Der Scan und die MediaPipe-Analyse laufen 100 Prozent lokal. Zonenbilder werden verschlüsselt an GPT-5.4 für die ganzheitliche Analyse gesendet. Wenn du ein Foto in deinem Konto speichern möchtest, wird es vor der Speicherung mit AES-256-GCM verschlüsselt." },
+      { q: "Kann die Analyse einen Besuch beim Hautarzt ersetzen?", a: "Nein, und das ist auch nicht die Absicht. Unsere Analyse liefert eine detaillierte erste Einschätzung mit 15 Metriken und personalisierten Tipps, ersetzt aber keine medizinische Beurteilung. Bei ernsthaften Hautproblemen empfehlen wir immer, professionelle Hilfe zu suchen." },
+      { q: "Was unterscheidet eure Analyse von anderen Online-Hautanalysen?", a: "Die meisten Online-Hautanalysen geben eine einfache Antwort basierend auf einem Selfie. Unsere Analyse kombiniert ein speziell trainiertes ONNX-Modell (14.000+ Trainingsbilder), MediaPipe Face Landmarker (12 Gesichtszonen), Lebensstildaten und GPT-5.4 Vision in einem multimodalen System. Das Ergebnis: 15 individuelle Hautmetriken, geschätztes Hautalter, Fitzpatrick-Typ, Radardiagramm und eine persönliche Routine." },
+      { q: "Wie lange dauert die Analyse?", a: "Der gesamte Prozess dauert etwa 60 Sekunden: Gesichtsscan mit MediaPipe (10 Sekunden), fünf Fragen (30 Sekunden) und KI-Analyse mit GPT-5.4 (20 Sekunden)." },
+      { q: "Funktioniert es auf dem Handy?", a: "Ja, die Analyse ist vollständig für Mobilgeräte optimiert. MediaPipe funktioniert hervorragend mit der Frontkamera, und das gesamte Erlebnis ist mobile-first gestaltet mit responsiven Ergebnissen." },
+    ],
+    ctaTitle: "Bereit, deine Haut zu verstehen?",
+    ctaSub: "15 Metriken. Hautalter. Radardiagramm. Kostenlos. In unter 60 Sekunden.",
+    ctaButton: "Kostenlose Hautanalyse starten",
+    ctaSecondary: "Mehr über unsere Hautpflege erfahren",
+  },
+  fr: {
+    metaTitle: "Analyse de Peau IA Gratuite – 15 Métriques, Âge de la Peau et Routine Personnalisée | 1753 SKINCARE",
+    metaDescription:
+      "Obtiens une analyse de peau IA gratuite avec 15 métriques scientifiques, âge estimé de la peau, graphique radar et recommandations personnalisées. Précision MediaPipe sur 12 zones du visage. En moins de 60 secondes.",
+    kicker: "Analyse de peau IA avancée",
+    h1: "Analyse de peau gratuite – 15 métriques, âge de la peau et graphique radar en 60 secondes",
+    lead: "Notre analyse de peau combine un modèle d'IA spécialement entraîné, les repères faciaux MediaPipe sur 12 zones et des questions sur ton mode de vie pour te donner une image complète de la santé de ta peau. 15 métriques scientifiques, âge estimé de la peau, type Fitzpatrick et un graphique radar interactif. Sans inscription. Sans frais.",
+    statsLabel: ["images d'entraînement dans notre modèle", "métriques de peau analysées", "zones du visage cartographiées"],
+    stats: ["14 000+", "15", "12"],
+    processTitle: "Comment ça marche – trois étapes pour ton analyse de peau",
+    steps: [
+      { icon: "camera", title: "1. Scanne ton visage", body: "La caméra s'active directement dans ton navigateur. MediaPipe Face Landmarker identifie 478 points du visage et divise ton visage en 12 zones précises – front, joues, nez, menton, zone oculaire, mâchoire, zone T et plus. Tout fonctionne localement sur ton appareil." },
+      { icon: "brain", title: "2. Réponds à cinq questions", body: "Type de peau, mode de vie, sommeil, alimentation et objectifs pour ta peau. Tes réponses sont combinées avec le scan facial et les images zonales pour créer un profil complet – pas seulement ce que l'IA voit, mais l'image complète." },
+      { icon: "sparkles", title: "3. Obtiens ton analyse personnalisée", body: "Tu reçois 15 métriques de peau détaillées avec scores et notes, un âge estimé de la peau, type de peau Fitzpatrick, graphique radar interactif, analyse détaillée par zones, recommandations de mode de vie et suggestions de produits. Le tout présenté dans un format clair et facile à lire." },
+    ],
+    mirrorSection: {
+      kicker: "Comprends ta peau en profondeur",
+      title: "Ton miroir ne ment pas – mais il ne te dit pas toute la vérité",
+      body: "Ce que tu vois dans le miroir n'est que la surface. En dessous se cache une interaction complexe entre microbiome, système endocannabinoïde, hormones et mode de vie. Notre IA mesure 15 aspects distincts de ta peau – de l'hydratation et l'élasticité à l'éclat et la santé de la barrière – et te donne les outils pour agir.",
+    },
+    techTitle: "La technologie derrière l'analyse",
+    techIntro: "Clique sur les onglets pour explorer les quatre piliers de notre analyse de peau.",
+    techTabs: [
+      {
+        id: "model", label: "Modèle IA entraîné", title: "Modèle spécialement entraîné + précision MediaPipe",
+        body: "Notre classificateur d'images a été entraîné sur plus de 14 000 images de peau vérifiées – acné, rosacée, hyperpigmentation, peau sèche, dommages solaires, eczéma, dermatite, psoriasis et plus. Le modèle fonctionne en tant que ONNX Runtime Web directement dans ton navigateur.\n\nMediaPipe Face Landmarker identifie 478 points du visage et crée 12 zones faciales précises : front, joue gauche et droite, nez, menton, zones oculaires, zone T, sillons nasogéniens, zone buccale et mâchoire. Chaque zone est analysée individuellement et envoyée comme images de précision à GPT-5.4 pour une analyse approfondie.",
+        highlights: ["14 000+ images d'entraînement avec contrôle qualité", "MediaPipe Face Landmarker avec 478 repères", "12 zones faciales précises analysées individuellement", "Fonctionne localement – zéro donnée ne quitte ton appareil pendant le scan"],
+      },
+      {
+        id: "fusion", label: "Fusion multimodale", title: "Quatre sources de données – 15 métriques – un résultat holistique",
+        body: "Notre analyse combine quatre sources de données dans un système de fusion multimodal :\n\n1. Le modèle ONNX classifie chaque zone localement (ce que la caméra voit)\n2. MediaPipe découpe 12 zones du visage avec une précision chirurgicale\n3. Tes réponses sur l'alimentation, le sommeil et le stress (ce que tu nous dis)\n4. GPT-5.4 Vision analyse l'image complète + les images zonales de manière holistique\n\nLe résultat : 15 métriques scientifiques de la peau (rides, pores, pigmentation, rougeurs, texture, cernes, fermeté, hydratation, teint, acné, sensibilité, dommages solaires, élasticité, éclat et santé de la barrière) – chaque métrique avec un score de 0–100, une note et une explication. Plus un âge estimé de la peau et un type de peau Fitzpatrick.",
+        highlights: ["4 sources de données : ONNX + MediaPipe + mode de vie + GPT-5.4", "15 métriques de peau individuelles avec scores et notes", "Âge estimé de la peau basé sur évaluation visuelle", "Type de peau Fitzpatrick pour des recommandations personnalisées"],
+      },
+      {
+        id: "tracking", label: "Suivi dans le temps", title: "Suis les 15 métriques semaine après semaine",
+        body: "Une seule analyse te donne un instantané. Le vrai changement se voit avec le temps. Les utilisateurs connectés peuvent sauvegarder les 15 métriques, l'âge de la peau et le score cutané sur une chronologie.\n\nObserve comment des métriques spécifiques comme l'hydratation, l'élasticité ou l'éclat s'améliorent quand tu changes ta routine. Nous proposons aussi un stockage photo chiffré (AES-256-GCM) pour des comparaisons visuelles avant/après. Toutes les images sont chiffrées selon les normes bancaires et peuvent être supprimées en un clic.",
+        highlights: ["Historique des 15 métriques et de l'âge de la peau", "Graphique radar montrant la progression dans le temps", "Stockage photo chiffré (AES-256-GCM)", "Contrôle total – supprime tout en un clic"],
+      },
+      {
+        id: "privacy", label: "Confidentialité et sécurité", title: "Tes données, tes règles",
+        body: "Nous avons conçu l'ensemble de l'analyse avec la confidentialité comme principe fondamental :\n\nLe scan facial et l'analyse MediaPipe fonctionnent à 100 % localement dans ton navigateur – aucune image ne quitte ton appareil pendant le scan. Les images zonales et le questionnaire sont envoyés chiffrés à GPT-5.4 pour l'analyse holistique.\n\nLe stockage photo est entièrement optionnel et nécessite un consentement actif. Les images sont chiffrées avec AES-256-GCM avant le stockage. Toutes les données d'analyse peuvent être définitivement supprimées de ton compte à tout moment.",
+        highlights: ["Scan et MediaPipe fonctionnent à 100 % localement", "Aucune image téléchargée sans consentement", "Chiffrement AES-256-GCM pour les photos sauvegardées", "Conforme au GDPR – supprime tout à tout moment"],
+      },
+    ],
+    holisticSection: {
+      kicker: "Perspective holistique",
+      title: "Ta peau reflète tout ton corps",
+      body: "Le sommeil, l'alimentation, le stress et l'exercice affectent ta peau autant que les produits que tu utilises. Notre analyse prend tout en compte – et le quantifie en 15 métriques distinctes pour que tu voies exactement ce qui a besoin d'attention.",
+    },
+    conditionsTitle: "Ce que nous mesurons et analysons",
+    conditions: [
+      "Rides et ridules", "Pores et texture", "Pigmentation", "Rougeurs et rosacée",
+      "Texture de la peau", "Cernes", "Fermeté et tonicité", "Hydratation et humidité",
+      "Uniformité du teint", "Acné et imperfections", "Sensibilité", "Dommages solaires",
+      "Élasticité", "Éclat et luminosité", "Santé de la barrière", "Microbiome cutané",
+      "Système endocannabinoïde", "Âge estimé de la peau",
+    ],
+    whatYouGetTitle: "Ce que tu obtiens dans ton analyse",
+    whatYouGet: [
+      { icon: "target", title: "15 métriques de peau avec scores", body: "Chaque métrique – de l'hydratation et l'élasticité à l'éclat et la santé de la barrière – est évaluée avec un score de 0–100, une note (1–5) et une explication personnalisée. Présenté dans un graphique radar interactif." },
+      { icon: "layers", title: "Analyse faciale en 12 zones", body: "MediaPipe identifie 478 points du visage et crée 12 zones précises. Chaque zone est analysée individuellement – tu vois exactement où ta peau a le plus besoin d'attention." },
+      { icon: "heart", title: "Âge de la peau et type Fitzpatrick", body: "Obtiens un âge estimé de la peau basé sur l'évaluation visuelle et ton type de peau Fitzpatrick pour des recommandations plus précises adaptées à ta peau." },
+      { icon: "leaf", title: "Routine, mode de vie et produits", body: "Routine personnalisée matin et soir, recommandations de mode de vie pour le sommeil, l'alimentation, le stress et l'exercice, plus 2–3 produits adaptés à ton profil de peau avec 15 % de réduction." },
+    ],
+    resultsSection: {
+      kicker: "Tes résultats",
+      title: "L'analyse n'est que le début",
+      body: "Sauvegarde tes 15 métriques, suis l'âge de ta peau et regarde le graphique radar évoluer dans le temps. Chaque nouvelle analyse te donne une image plus claire de ton parcours cutané – et montre quels changements font vraiment la différence.",
+    },
+    faqTitle: "Questions fréquentes sur l'analyse de peau",
+    faq: [
+      { q: "L'analyse de peau est-elle vraiment gratuite ?", a: "Oui, entièrement gratuite et sans inscription. Tu peux faire l'analyse de manière anonyme directement dans ton navigateur. L'inscription n'est nécessaire que si tu veux sauvegarder tes 15 métriques et suivre la progression de ta peau dans le temps." },
+      { q: "Que mesurent les 15 métriques ?", a: "Nous évaluons les rides, pores, pigmentation, rougeurs, texture, cernes, fermeté, hydratation, teint, acné, sensibilité, dommages solaires, élasticité, éclat et santé de la barrière. Chaque métrique reçoit un score de 0–100 et une note. Les résultats sont affichés dans un graphique radar interactif." },
+      { q: "Comment fonctionne l'estimation de l'âge de la peau ?", a: "GPT-5.4 Vision analyse ta peau visuellement et estime un âge de la peau basé sur des signes visibles comme les rides, l'élasticité, la texture et la pigmentation. Ce n'est pas un diagnostic médical, mais une indication qui t'aide à comprendre l'état de ta peau." },
+      { q: "Qu'est-ce que MediaPipe Face Landmarker ?", a: "MediaPipe est la technologie de reconnaissance faciale de Google. Elle identifie 478 points tridimensionnels sur ton visage et crée 12 zones précises qui sont analysées individuellement. Tout fonctionne localement dans ton navigateur – aucune donnée n'est envoyée à Google." },
+      { q: "Ma photo est-elle téléchargée sur un serveur ?", a: "Le scan et l'analyse MediaPipe fonctionnent à 100 pour cent localement. Les images zonales sont envoyées chiffrées à GPT-5.4 pour l'analyse holistique. Si tu choisis de sauvegarder une photo dans ton compte, elle est chiffrée avec AES-256-GCM avant le stockage." },
+      { q: "L'analyse peut-elle remplacer une visite chez le dermatologue ?", a: "Non, et ce n'est pas le but. Notre analyse fournit une première indication détaillée avec 15 métriques et des conseils personnalisés, mais ne remplace pas une évaluation médicale. En cas de problèmes de peau sérieux, nous recommandons toujours de consulter un professionnel." },
+      { q: "Qu'est-ce qui distingue votre analyse des autres analyses de peau en ligne ?", a: "La plupart des analyses de peau en ligne donnent une réponse simple basée sur un selfie. Notre analyse combine un modèle ONNX spécialement entraîné (14 000+ images d'entraînement), MediaPipe Face Landmarker (12 zones du visage), des données de mode de vie et GPT-5.4 Vision dans un système multimodal. Le résultat : 15 métriques de peau individuelles, âge estimé, type Fitzpatrick, graphique radar et une routine personnalisée." },
+      { q: "Combien de temps dure l'analyse ?", a: "L'ensemble du processus prend environ 60 secondes : scan facial avec MediaPipe (10 secondes), cinq questions (30 secondes) et analyse IA avec GPT-5.4 (20 secondes)." },
+      { q: "Ça fonctionne sur mobile ?", a: "Oui, l'analyse est entièrement optimisée pour mobile. MediaPipe fonctionne parfaitement avec la caméra frontale, et toute l'expérience est conçue mobile-first avec des résultats responsifs." },
+    ],
+    ctaTitle: "Prêt(e) à comprendre ta peau ?",
+    ctaSub: "15 métriques. Âge de la peau. Graphique radar. Gratuit. En moins de 60 secondes.",
+    ctaButton: "Lancer l'analyse de peau gratuite",
+    ctaSecondary: "En savoir plus sur nos soins",
+  },
 };
 
 interface Props {
@@ -248,22 +516,35 @@ export async function generateStaticParams() {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
-  const c = content[locale as keyof typeof content] || content.sv;
-  const svPath = "/sv/gratis-hudanalys";
-  const enPath = "/en/free-skin-analysis";
+  const c = content[locale as keyof typeof content] || content.en;
+  const canonicalMap: Record<string, string> = {
+    sv: "/sv/gratis-hudanalys",
+    en: "/en/free-skin-analysis",
+    es: "/es/analisis-de-piel-gratis",
+    de: "/de/kostenlose-hautanalyse",
+    fr: "/fr/analyse-de-peau-gratuite",
+  };
+  const canonical = canonicalMap[locale] || canonicalMap.en;
   return {
     title: c.metaTitle,
     description: c.metaDescription,
     alternates: {
-      canonical: `${BASE_URL}${locale === "en" ? enPath : svPath}`,
-      languages: { sv: `${BASE_URL}${svPath}`, en: `${BASE_URL}${enPath}` },
+      canonical: `${BASE_URL}${canonical}`,
+      languages: {
+        sv: `${BASE_URL}${canonicalMap.sv}`,
+        en: `${BASE_URL}${canonicalMap.en}`,
+        es: `${BASE_URL}${canonicalMap.es}`,
+        de: `${BASE_URL}${canonicalMap.de}`,
+        fr: `${BASE_URL}${canonicalMap.fr}`,
+        "x-default": `${BASE_URL}${canonicalMap.en}`,
+      },
     },
     openGraph: {
       title: c.metaTitle,
       description: c.metaDescription,
-      url: `${BASE_URL}/${locale}/gratis-hudanalys`,
+      url: `${BASE_URL}${canonical}`,
       images: [{ url: `${BASE_URL}${IMG}/1.webp`, width: 1600, height: 1600 }],
-      locale: locale === "sv" ? "sv_SE" : "en_GB",
+      locale: OG_LOCALE[locale] || "en_GB",
       type: "website",
     },
   };
@@ -282,7 +563,7 @@ const iconMap: Record<string, React.FC<{ className?: string }>> = {
 export default async function FreeAnalysisLanding({ params }: Props) {
   const { locale } = await params;
   const l = (locale as Locale) || "sv";
-  const c = content[l as keyof typeof content] || content.sv;
+  const c = content[l as keyof typeof content] || content.en;
   const analysisPath = localizePath(l, "skinAnalysis");
   const productsPath = localizePath(l, "products");
 
@@ -299,21 +580,21 @@ export default async function FreeAnalysisLanding({ params }: Props) {
   const serviceSchema = {
     "@context": "https://schema.org",
     "@type": "Service",
-    name: l === "sv" ? "AI Hudanalys" : "AI Skin Analysis",
+    name: tx(l, "AI Hudanalys", "AI Skin Analysis", "Análisis de Piel con IA", "KI-Hautanalyse", "Analyse de Peau IA"),
     description: c.metaDescription,
     provider: { "@type": "Organization", name: "1753 SKINCARE", url: BASE_URL },
     serviceType: "Skin Analysis",
     isRelatedTo: { "@type": "MedicalSpecialty", name: "Dermatology" },
     offers: { "@type": "Offer", price: "0", priceCurrency: "SEK", availability: "https://schema.org/InStock" },
-    areaServed: { "@type": "Country", name: l === "sv" ? "Sverige" : "Sweden" },
+    areaServed: { "@type": "Country", name: tx(l, "Sverige", "Sweden", "Suecia", "Schweden", "Suède") },
   };
 
   const breadcrumbSchema = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
-      { "@type": "ListItem", position: 1, name: l === "sv" ? "Hem" : "Home", item: `${BASE_URL}/${l}` },
-      { "@type": "ListItem", position: 2, name: l === "sv" ? "Gratis hudanalys" : "Free skin analysis", item: `${BASE_URL}/${l}/gratis-hudanalys` },
+      { "@type": "ListItem", position: 1, name: tx(l, "Hem", "Home", "Inicio", "Startseite", "Accueil"), item: `${BASE_URL}/${l}` },
+      { "@type": "ListItem", position: 2, name: tx(l, "Gratis hudanalys", "Free skin analysis", "Análisis de piel gratis", "Kostenlose Hautanalyse", "Analyse de peau gratuite"), item: `${BASE_URL}/${l}/gratis-hudanalys` },
     ],
   };
 
@@ -350,7 +631,7 @@ export default async function FreeAnalysisLanding({ params }: Props) {
           <div className="relative aspect-[4/5] overflow-hidden rounded-3xl shadow-2xl shadow-black/10 md:aspect-square">
             <Image
               src={`${IMG}/1.webp`}
-              alt={l === "sv" ? "Kvinna som analyserar sin hud" : "Woman analysing her skin"}
+              alt={tx(l, "Kvinna som analyserar sin hud", "Woman analysing her skin", "Mujer analizando su piel", "Frau analysiert ihre Haut", "Femme analysant sa peau")}
               fill
               className="object-cover"
               sizes="(max-width: 768px) 100vw, 50vw"
@@ -402,7 +683,7 @@ export default async function FreeAnalysisLanding({ params }: Props) {
           <div className="relative aspect-[4/5] overflow-hidden rounded-3xl shadow-xl shadow-black/8 md:aspect-[3/4]">
             <Image
               src={`${IMG}/4.webp`}
-              alt={l === "sv" ? "Kvinna tittar i spegeln" : "Woman looking in the mirror"}
+              alt={tx(l, "Kvinna tittar i spegeln", "Woman looking in the mirror", "Mujer mirándose al espejo", "Frau schaut in den Spiegel", "Femme se regardant dans le miroir")}
               fill
               className="object-cover"
               sizes="(max-width: 768px) 100vw, 50vw"
@@ -459,7 +740,7 @@ export default async function FreeAnalysisLanding({ params }: Props) {
           <div className="relative order-1 aspect-[4/5] overflow-hidden rounded-3xl shadow-xl shadow-black/8 md:order-2 md:aspect-[3/4]">
             <Image
               src={`${IMG}/3.webp`}
-              alt={l === "sv" ? "Kvinna i naturen, holistisk hudvård" : "Woman in nature, holistic skincare"}
+              alt={tx(l, "Kvinna i naturen, holistisk hudvård", "Woman in nature, holistic skincare", "Mujer en la naturaleza, cuidado holístico de la piel", "Frau in der Natur, ganzheitliche Hautpflege", "Femme dans la nature, soin holistique de la peau")}
               fill
               className="object-cover"
               sizes="(max-width: 768px) 100vw, 50vw"
@@ -515,7 +796,7 @@ export default async function FreeAnalysisLanding({ params }: Props) {
             <div className="relative hidden overflow-hidden rounded-3xl shadow-xl shadow-black/8 md:col-span-2 md:block">
               <Image
                 src={`${IMG}/5.webp`}
-                alt={l === "sv" ? "Kvinna rör sin hud" : "Woman touching her skin"}
+                alt={tx(l, "Kvinna rör sin hud", "Woman touching her skin", "Mujer tocando su piel", "Frau berührt ihre Haut", "Femme touchant sa peau")}
                 fill
                 className="object-cover"
                 sizes="40vw"
@@ -549,7 +830,7 @@ export default async function FreeAnalysisLanding({ params }: Props) {
           <div className="relative aspect-[4/5] overflow-hidden rounded-3xl shadow-xl shadow-black/8 md:aspect-square">
             <Image
               src={`${IMG}/2.webp`}
-              alt={l === "sv" ? "Kvinna tittar på sina resultat" : "Woman looking at her results"}
+              alt={tx(l, "Kvinna tittar på sina resultat", "Woman looking at her results", "Mujer mirando sus resultados", "Frau betrachtet ihre Ergebnisse", "Femme regardant ses résultats")}
               fill
               className="object-cover"
               sizes="(max-width: 768px) 100vw, 50vw"

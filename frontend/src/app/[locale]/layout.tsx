@@ -34,7 +34,7 @@ export async function generateMetadata({
     description: messages.meta.defaultDescription,
     openGraph: {
       type: "website",
-      locale: locale === "en" ? "en_US" : "sv_SE",
+      locale: ({ en: "en_US", es: "es_ES", de: "de_DE", fr: "fr_FR" } as Record<string, string>)[locale] || "sv_SE",
       siteName: "1753 SKINCARE",
       title: messages.meta.defaultTitle,
       description: messages.meta.defaultDescription,
@@ -47,6 +47,17 @@ export async function generateMetadata({
       images: ["/og-image.jpg"],
     },
     robots: { index: true, follow: true },
+    alternates: {
+      canonical: `https://www.1753skin.com/${locale}`,
+      languages: {
+        sv: "https://www.1753skin.com/sv",
+        en: "https://www.1753skin.com/en",
+        es: "https://www.1753skin.com/es",
+        de: "https://www.1753skin.com/de",
+        fr: "https://www.1753skin.com/fr",
+        "x-default": "https://www.1753skin.com/en",
+      },
+    },
   };
 }
 
@@ -70,10 +81,7 @@ export default async function LocaleLayout({
     url: "https://www.1753skin.com",
     logo: "https://www.1753skin.com/1753.webp",
     image: "https://www.1753skin.com/og-image.jpg",
-    description:
-      locale === "en"
-        ? "Swedish skincare with CBD and CBG. Developed for Nordic skin."
-        : "Svensk hudvard med CBD och CBG. Utvecklad for nordisk hud.",
+    description: messages.meta.defaultDescription,
     foundingDate: "2020",
     founder: {
       "@type": "Person",
@@ -93,7 +101,7 @@ export default async function LocaleLayout({
         telephone: "+46732305521",
         email: "info@1753skin.com",
         contactType: "customer service",
-        availableLanguage: ["Swedish", "English"],
+        availableLanguage: ["Swedish", "English", "Spanish", "German", "French"],
       },
     ],
     sameAs: [
@@ -108,7 +116,7 @@ export default async function LocaleLayout({
     name: "1753 SKINCARE",
     url: "https://www.1753skin.com",
     publisher: { "@id": "https://www.1753skin.com/#organization" },
-    inLanguage: locale === "en" ? "en" : "sv",
+    inLanguage: locale,
   };
 
   const l = locale as Locale;
@@ -116,7 +124,7 @@ export default async function LocaleLayout({
   const itemListSchema = {
     "@context": "https://schema.org",
     "@type": "ItemList",
-    name: l === "en" ? "1753 SKINCARE Products" : "1753 SKINCARE Produkter",
+    name: l === "sv" ? "1753 SKINCARE Produkter" : l === "de" ? "1753 SKINCARE Produkte" : l === "es" ? "1753 SKINCARE Productos" : l === "fr" ? "1753 SKINCARE Produits" : "1753 SKINCARE Products",
     numberOfItems: PRODUCTS.length,
     itemListElement: PRODUCTS.map((p, i) => ({
       "@type": "ListItem",

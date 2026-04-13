@@ -222,6 +222,18 @@ function ExpandableBox({
 }
 
 /* ------------------------------------------------------------------ */
+/*  Locale helper                                                      */
+/* ------------------------------------------------------------------ */
+
+function tx(locale: string, sv: string, en: string, es?: string, de?: string, fr?: string): string {
+  if (locale === "sv") return sv;
+  if (locale === "es") return es || en;
+  if (locale === "de") return de || en;
+  if (locale === "fr") return fr || en;
+  return en;
+}
+
+/* ------------------------------------------------------------------ */
 /*  Helpers                                                            */
 /* ------------------------------------------------------------------ */
 
@@ -291,7 +303,7 @@ function ScoreRing({ score, label, skinAge, fitzpatrick, locale }: {
             <AnimatedNumber value={score} />
           </span>
           <span className="text-[11px] font-medium text-[#766a62]">
-            {locale === "en" ? "of 100" : "av 100"}
+            {tx(locale, "av 100", "of 100", "de 100", "von 100")}
           </span>
         </div>
       </div>
@@ -304,7 +316,7 @@ function ScoreRing({ score, label, skinAge, fitzpatrick, locale }: {
           {skinAge && (
             <div className="flex flex-col items-center rounded-2xl bg-[#f5f5f7] px-5 py-3 sm:items-start">
               <span className="text-[10px] font-medium uppercase tracking-widest text-[#766a62]">
-                {locale === "en" ? "Skin age" : "Hudalder"}
+                {tx(locale, "Hudalder", "Skin age", "Edad de la piel", "Hautalter")}
               </span>
               <span className="text-2xl font-bold tracking-tight text-[#1d1d1f]">
                 <AnimatedNumber value={skinAge} />
@@ -377,7 +389,7 @@ function InlineProductCTA({ products, locale }: { products: ProductRec[]; locale
     <div className="rounded-2xl border border-[#108474]/15 bg-gradient-to-br from-[#108474]/[0.03] to-transparent p-5">
       <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[#108474]">
         <ShoppingBag className="h-3.5 w-3.5" />
-        {locale === "en" ? "Recommended for you" : "Rekommenderat for dig"}
+        {tx(locale, "Rekommenderat for dig", "Recommended for you", "Recomendado para ti", "Empfohlen für dich")}
       </div>
       <div className="mt-3 space-y-2.5">
         {matched.map((p) => (
@@ -401,7 +413,7 @@ function InlineProductCTA({ products, locale }: { products: ProductRec[]; locale
         className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#108474] px-5 py-3 text-xs font-semibold text-white shadow-md shadow-[#108474]/20 transition-all duration-300 hover:bg-[#0d6e62] hover:shadow-lg active:scale-[0.97]"
       >
         <Gift className="h-3.5 w-3.5" />
-        {locale === "en" ? "Add with 15% off" : "Lagg till med 15% rabatt"}
+        {tx(locale, "Lagg till med 15% rabatt", "Add with 15% off", "Añadir con 15% descuento", "Mit 15% Rabatt hinzufügen")}
       </button>
     </div>
   );
@@ -448,7 +460,7 @@ function gradeLabel(grade: number, locale: string): string {
     4: { sv: "Under medel", en: "Below avg" },
     5: { sv: "Behover atgard", en: "Needs attention" },
   };
-  return locale === "en" ? (labels[grade]?.en || "") : (labels[grade]?.sv || "");
+  return locale === "sv" ? (labels[grade]?.sv || "") : (labels[grade]?.en || "");
 }
 
 /* ------------------------------------------------------------------ */
@@ -459,7 +471,7 @@ function MetricCard({ metricKey, metric, locale }: { metricKey: string; metric: 
   const [open, setOpen] = useState(false);
   const info = METRIC_LABELS[metricKey];
   if (!info) return null;
-  const label = locale === "en" ? info.en : info.sv;
+  const label = locale === "sv" ? info.sv : info.en;
   const color = metricScoreColor(metric.score);
   const pct = Math.min(100, Math.max(0, metric.score));
   const Icon = info.icon;
@@ -519,7 +531,7 @@ function SkinRadarChart({ metrics, locale }: { metrics: SkinMetrics; locale: str
     const m = metrics[key];
     const info = METRIC_LABELS[key];
     return {
-      metric: locale === "en" ? (info?.en || key) : (info?.sv || key),
+      metric: locale === "sv" ? (info?.sv || key) : (info?.en || key),
       score: m?.score ?? 50,
       fullMark: 100,
     };
@@ -560,12 +572,12 @@ function FocusAreas({ entries, locale }: { entries: [string, MetricScore][]; loc
   return (
     <div className="space-y-3">
       <h4 className="text-center text-[11px] font-bold uppercase tracking-widest text-[#766a62]">
-        {locale === "en" ? "Focus areas" : "Fokusomraden"}
+        {tx(locale, "Fokusomraden", "Focus areas", "Áreas de enfoque", "Fokusgebiete")}
       </h4>
       <div className="flex flex-wrap justify-center gap-2">
         {entries.map(([key, m]) => {
           const info = METRIC_LABELS[key];
-          const label = locale === "en" ? (info?.en || key) : (info?.sv || key);
+          const label = locale === "sv" ? (info?.sv || key) : (info?.en || key);
           const color = metricScoreColor(m.score);
           const Icon = info?.icon;
           return (
@@ -604,7 +616,7 @@ function SkinTab({ score, scoreLabel, summary, skinAge, fitzpatrick, metrics, sk
   onNextTab?: () => void;
 }) {
   const { locale } = useLocale();
-  const condLabels = locale === "en" ? CONDITION_LABELS_EN : CONDITION_LABELS_SV;
+  const condLabels = locale === "sv" ? CONDITION_LABELS_SV : CONDITION_LABELS_EN;
   const [showAllMetrics, setShowAllMetrics] = useState(false);
 
   const gptZones = (faceZonesGPT ?? []).filter(
@@ -642,7 +654,7 @@ function SkinTab({ score, scoreLabel, summary, skinAge, fitzpatrick, metrics, sk
       {metricEntries.length > 0 && (
         <div className="space-y-4">
           <h4 className="text-[11px] font-bold uppercase tracking-widest text-[#766a62]">
-            {locale === "en" ? "All metrics" : "Alla metriker"}
+            {tx(locale, "Alla metriker", "All metrics", "Todas las métricas", "Alle Metriken")}
           </h4>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
             {displayedMetrics.map(([key, m]) => (
@@ -654,7 +666,7 @@ function SkinTab({ score, scoreLabel, summary, skinAge, fitzpatrick, metrics, sk
               onClick={() => setShowAllMetrics(true)}
               className="mx-auto flex items-center gap-1.5 rounded-full border border-[#e6e6e6] px-5 py-2.5 text-xs font-semibold text-[#108474] transition-all duration-300 hover:border-[#108474]/30 hover:bg-[#108474]/5"
             >
-              {locale === "en" ? `Show all ${metricEntries.length}` : `Visa alla ${metricEntries.length}`}
+              {tx(locale, `Visa alla ${metricEntries.length}`, `Show all ${metricEntries.length}`, `Mostrar todos ${metricEntries.length}`, `Alle ${metricEntries.length} anzeigen`)}
               <ChevronDown className="h-3.5 w-3.5" />
             </button>
           )}
@@ -666,7 +678,7 @@ function SkinTab({ score, scoreLabel, summary, skinAge, fitzpatrick, metrics, sk
         <div className="space-y-4">
           <div className="flex items-center justify-center gap-2 text-[11px] font-bold uppercase tracking-widest text-[#108474]">
             <ScanFace className="h-3.5 w-3.5" />
-            {locale === "en" ? "Your face scan" : "Din ansiktsskanning"}
+            {tx(locale, "Din ansiktsskanning", "Your face scan", "Tu escaneo facial", "Dein Gesichtsscan")}
           </div>
 
           {hasGPTZones ? (
@@ -675,7 +687,7 @@ function SkinTab({ score, scoreLabel, summary, skinAge, fitzpatrick, metrics, sk
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={scanImageSrc}
-                  alt={locale === "en" ? "Face scan" : "Ansiktsskanning"}
+                  alt={tx(locale, "Ansiktsskanning", "Face scan", "Escaneo facial", "Gesichtsscan")}
                   className="block h-auto w-full"
                 />
                 {gptZones.map((z) => {
@@ -729,7 +741,7 @@ function SkinTab({ score, scoreLabel, summary, skinAge, fitzpatrick, metrics, sk
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={scanImageSrc}
-                alt={locale === "en" ? "Face scan" : "Ansiktsskanning"}
+                alt={tx(locale, "Ansiktsskanning", "Face scan", "Escaneo facial", "Gesichtsscan")}
                 className="block h-auto w-full"
               />
             </div>
@@ -740,9 +752,7 @@ function SkinTab({ score, scoreLabel, summary, skinAge, fitzpatrick, metrics, sk
       {hasScan && !scanImageSrc && (
         <div className="flex items-center justify-center gap-2 rounded-2xl bg-[#f5f5f7] px-4 py-3 text-xs font-medium text-[#108474]">
           <ScanFace className="h-3.5 w-3.5" />
-          {locale === "en"
-            ? "Includes data from your face scan"
-            : "Inkluderar data fran din ansiktsskanning"}
+          {tx(locale, "Inkluderar data fran din ansiktsskanning", "Includes data from your face scan", "Incluye datos de tu escaneo facial", "Enthält Daten aus deinem Gesichtsscan")}
         </div>
       )}
 
@@ -750,7 +760,7 @@ function SkinTab({ score, scoreLabel, summary, skinAge, fitzpatrick, metrics, sk
       {skinAnalysis && (
         <div className="space-y-3">
           <ExpandableBox
-            title={locale === "en" ? "Detailed analysis" : "Detaljerad analys"}
+            title={tx(locale, "Detaljerad analys", "Detailed analysis", "Análisis detallado", "Detaillierte Analyse")}
             icon={Sparkles}
             defaultOpen
           >
@@ -762,7 +772,7 @@ function SkinTab({ score, scoreLabel, summary, skinAge, fitzpatrick, metrics, sk
 
           {skinAnalysis.strengths.length > 0 && (
             <ExpandableBox
-              title={locale === "en" ? "Your strengths" : "Dina styrkor"}
+              title={tx(locale, "Dina styrkor", "Your strengths", "Tus fortalezas", "Deine Stärken")}
               icon={Check}
               badge={`${skinAnalysis.strengths.length}`}
               defaultOpen
@@ -780,7 +790,7 @@ function SkinTab({ score, scoreLabel, summary, skinAge, fitzpatrick, metrics, sk
 
           {skinAnalysis.concerns.length > 0 && (
             <ExpandableBox
-              title={locale === "en" ? "Areas to improve" : "Att forbattra"}
+              title={tx(locale, "Att forbattra", "Areas to improve", "Áreas a mejorar", "Verbesserungsbereiche")}
               icon={ShieldCheck}
               badge={`${skinAnalysis.concerns.length}`}
               defaultOpen
@@ -802,13 +812,13 @@ function SkinTab({ score, scoreLabel, summary, skinAge, fitzpatrick, metrics, sk
 
           <div className="grid gap-3 sm:grid-cols-2">
             <ExpandableBox
-              title={locale === "en" ? "Microbiome" : "Mikrobiom"}
+              title={tx(locale, "Mikrobiom", "Microbiome", "Microbioma", "Mikrobiom")}
               icon={ShieldCheck}
             >
               <p className="text-sm leading-relaxed text-[#515151]">{skinAnalysis.microbiome}</p>
             </ExpandableBox>
             <ExpandableBox
-              title={locale === "en" ? "Endocannabinoid system" : "Endocannabinoidsystemet"}
+              title={tx(locale, "Endocannabinoidsystemet", "Endocannabinoid system", "Sistema endocannabinoide", "Endocannabinoid-System")}
               icon={Droplets}
             >
               <p className="text-sm leading-relaxed text-[#515151]">{skinAnalysis.ecs}</p>
@@ -824,8 +834,8 @@ function SkinTab({ score, scoreLabel, summary, skinAge, fitzpatrick, metrics, sk
 
       {onNextTab && (
         <NextStepButton
-          label={locale === "en" ? "See your products" : "Se dina produkter"}
-          subtext={locale === "en" ? "Products matched to your skin" : "Produkter anpassade efter din hud"}
+          label={tx(locale, "Se dina produkter", "See your products", "Ver tus productos", "Deine Produkte ansehen")}
+          subtext={tx(locale, "Produkter anpassade efter din hud", "Products matched to your skin", "Productos adaptados a tu piel", "Produkte für deine Haut")}
           onClick={onNextTab}
         />
       )}
@@ -867,15 +877,13 @@ function ProductsTab({ products, onNextTab }: { products: ProductRec[]; onNextTa
       {/* Discount hero card */}
       <div className="overflow-hidden rounded-3xl bg-[#1d1d1f] p-6 text-center text-white sm:p-8">
         <p className="text-[11px] font-medium uppercase tracking-widest text-white/60">
-          {locale === "en" ? "Thank you for your analysis" : "Tack for din analys"}
+          {tx(locale, "Tack for din analys", "Thank you for your analysis", "Gracias por tu análisis", "Danke für deine Analyse")}
         </p>
         <h3 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">
-          {locale === "en" ? "15% off" : "15% rabatt"}
+          {tx(locale, "15% rabatt", "15% off", "15% descuento", "15% Rabatt")}
         </h3>
         <p className="mt-1 text-sm text-white/70">
-          {locale === "en"
-            ? "On your recommended products"
-            : "Pa dina rekommenderade produkter"}
+          {tx(locale, "Pa dina rekommenderade produkter", "On your recommended products", "En tus productos recomendados", "Auf deine empfohlenen Produkte")}
         </p>
 
         <div className="mx-auto mt-5 inline-flex items-center gap-3 rounded-full bg-white/10 px-5 py-2.5 backdrop-blur-sm">
@@ -900,14 +908,12 @@ function ProductsTab({ products, onNextTab }: { products: ProductRec[]; onNextTa
             {added ? (
               <>
                 <Check className="h-4 w-4" />
-                {locale === "en" ? "Added!" : "Tillagda!"}
+                {tx(locale, "Tillagda!", "Added!", "Añadidos!", "Hinzugefügt!")}
               </>
             ) : (
               <>
                 <Gift className="h-4 w-4" />
-                {locale === "en"
-                  ? `Add all — ${formatPrice(totalAfter, locale)}`
-                  : `Lagg alla i varukorgen — ${formatPrice(totalAfter, locale)}`}
+                {tx(locale, `Lagg alla i varukorgen — ${formatPrice(totalAfter, locale)}`, `Add all — ${formatPrice(totalAfter, locale)}`, `Añadir todo — ${formatPrice(totalAfter, locale)}`, `Alle hinzufügen — ${formatPrice(totalAfter, locale)}`)}
               </>
             )}
           </button>
@@ -922,9 +928,7 @@ function ProductsTab({ products, onNextTab }: { products: ProductRec[]; onNextTa
       {/* Products grid */}
       <div className="space-y-3">
         <p className="text-[11px] font-bold uppercase tracking-widest text-[#766a62]">
-          {locale === "en"
-            ? "Chosen for your skin"
-            : "Utvalda for din hud"}
+          {tx(locale, "Utvalda for din hud", "Chosen for your skin", "Elegidos para tu piel", "Ausgewählt für deine Haut")}
         </p>
 
         <div className="grid gap-5 sm:grid-cols-2">
@@ -936,7 +940,7 @@ function ProductsTab({ products, onNextTab }: { products: ProductRec[]; onNextTa
                   <ChevronRight className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#108474]" />
                   <div>
                     <p className="text-xs font-semibold text-[#1d1d1f]">
-                      {locale === "en" ? "Why this product" : "Varfor just denna"}
+                      {tx(locale, "Varfor just denna", "Why this product", "Por qué este producto", "Warum dieses Produkt")}
                     </p>
                     <p className="mt-1 text-[11px] leading-relaxed text-[#515151]">{p.reason}</p>
                     {p.usage && (
@@ -954,8 +958,8 @@ function ProductsTab({ products, onNextTab }: { products: ProductRec[]; onNextTa
 
       {onNextTab && (
         <NextStepButton
-          label={locale === "en" ? "Your lifestyle tips" : "Dina livsstilsrad"}
-          subtext={locale === "en" ? "Personalised habits for better skin" : "Personliga vanor for battre hud"}
+          label={tx(locale, "Dina livsstilsrad", "Your lifestyle tips", "Tus consejos de estilo de vida", "Deine Lifestyle-Tipps")}
+          subtext={tx(locale, "Personliga vanor for battre hud", "Personalised habits for better skin", "Hábitos personalizados para mejor piel", "Persönliche Gewohnheiten für bessere Haut")}
           onClick={onNextTab}
         />
       )}
@@ -974,20 +978,20 @@ const AREA_ICONS: Record<string, LucideIcon> = {
   "Rorelse": Sun, "Movement": Sun, "Exercise": Sun,
 };
 
-function getAreaLabel(area: string, locale: "sv" | "en") {
+function getAreaLabel(area: string, locale: string) {
   const n = area.toLowerCase();
-  if (n === "somn" || n === "sömn" || n === "sleep") return locale === "en" ? "Sleep" : "Somn";
-  if (n === "kost" || n === "diet") return locale === "en" ? "Diet" : "Kost";
-  if (n === "rorelse" || n === "rörelse" || n === "movement" || n === "exercise") return locale === "en" ? "Exercise" : "Rorelse";
+  if (n === "somn" || n === "sömn" || n === "sleep") return tx(locale, "Somn", "Sleep", "Sueño", "Schlaf");
+  if (n === "kost" || n === "diet") return tx(locale, "Kost", "Diet", "Dieta", "Ernährung");
+  if (n === "rorelse" || n === "rörelse" || n === "movement" || n === "exercise") return tx(locale, "Rorelse", "Exercise", "Ejercicio", "Bewegung");
   if (n === "stress") return "Stress";
   return area;
 }
 
-function getImpactBadge(impact: string, locale: "sv" | "en") {
+function getImpactBadge(impact: string, locale: string) {
   const n = impact.toLowerCase();
-  if (n === "hog" || n === "hög" || n === "high") return { label: locale === "en" ? "High priority" : "Hog prioritet", color: "#108474" };
-  if (n === "medel" || n === "medium") return { label: locale === "en" ? "Medium" : "Medel", color: "#fcb237" };
-  return { label: locale === "en" ? "Lower" : "Bonus", color: "#766a62" };
+  if (n === "hog" || n === "hög" || n === "high") return { label: tx(locale, "Hog prioritet", "High priority", "Prioridad alta", "Hohe Priorität"), color: "#108474" };
+  if (n === "medel" || n === "medium") return { label: tx(locale, "Medel", "Medium", "Medio", "Mittel"), color: "#fcb237" };
+  return { label: tx(locale, "Bonus", "Lower", "Menor", "Niedriger"), color: "#766a62" };
 }
 
 function LifestyleTab({ lifestyle, avoid, products, onNextTab }: { lifestyle: LifestyleItem[]; avoid: string[]; products: ProductRec[]; onNextTab?: () => void }) {
@@ -1021,7 +1025,7 @@ function LifestyleTab({ lifestyle, avoid, products, onNextTab }: { lifestyle: Li
 
       {avoid.length > 0 && (
         <ExpandableBox
-          title={locale === "en" ? "Avoid" : "Undvik"}
+          title={tx(locale, "Undvik", "Avoid", "Evitar", "Vermeiden")}
           defaultOpen
         >
           <div className="flex flex-wrap gap-2">
@@ -1041,8 +1045,8 @@ function LifestyleTab({ lifestyle, avoid, products, onNextTab }: { lifestyle: Li
 
       {onNextTab && (
         <NextStepButton
-          label={locale === "en" ? "See your routine" : "Se din rutin"}
-          subtext={locale === "en" ? "Morning & evening steps" : "Morgon- och kvallsrutin"}
+          label={tx(locale, "Se din rutin", "See your routine", "Ver tu rutina", "Deine Routine ansehen")}
+          subtext={tx(locale, "Morgon- och kvallsrutin", "Morning & evening steps", "Pasos de mañana y noche", "Morgen- und Abendroutine")}
           onClick={onNextTab}
         />
       )}
@@ -1074,7 +1078,7 @@ function RoutineTab({ routine, routineLegacy, products }: {
               <Sun className="h-4 w-4 text-[#fcb237]" />
             </div>
             <h3 className="text-lg font-bold tracking-tight text-[#1d1d1f]">
-              {locale === "en" ? "Morning routine" : "Morgonrutin"}
+              {tx(locale, "Morgonrutin", "Morning routine", "Rutina matutina", "Morgenroutine")}
             </h3>
           </div>
           <div className="space-y-2.5">
@@ -1102,7 +1106,7 @@ function RoutineTab({ routine, routineLegacy, products }: {
               <Moon className="h-4 w-4 text-[#766a62]" />
             </div>
             <h3 className="text-lg font-bold tracking-tight text-[#1d1d1f]">
-              {locale === "en" ? "Evening routine" : "Kvallsrutin"}
+              {tx(locale, "Kvallsrutin", "Evening routine", "Rutina nocturna", "Abendroutine")}
             </h3>
           </div>
           <div className="space-y-2.5">
@@ -1160,10 +1164,10 @@ export function AnalysisTabs({
   const tabOrder: TabId[] = ["skin", "products", "lifestyle", "routine"];
 
   const tabs: { id: TabId; label: string; icon: LucideIcon }[] = [
-    { id: "skin", label: locale === "en" ? "Your skin" : "Din hy", icon: Sparkles },
-    { id: "products", label: locale === "en" ? "Products" : "Produkter", icon: Package },
-    { id: "lifestyle", label: locale === "en" ? "Lifestyle" : "Livsstil", icon: Leaf },
-    { id: "routine", label: locale === "en" ? "Routine" : "Rutin", icon: Moon },
+    { id: "skin", label: tx(locale, "Din hy", "Your skin", "Tu piel", "Deine Haut"), icon: Sparkles },
+    { id: "products", label: tx(locale, "Produkter", "Products", "Productos", "Produkte"), icon: Package },
+    { id: "lifestyle", label: tx(locale, "Livsstil", "Lifestyle", "Estilo de vida", "Lebensstil"), icon: Leaf },
+    { id: "routine", label: tx(locale, "Rutin", "Routine", "Rutina", "Routine"), icon: Moon },
   ];
 
   const goToNextTab = () => {
@@ -1263,7 +1267,7 @@ export function AnalysisTabs({
       {nextAnalysis && (
         <div className="rounded-2xl border border-[#e6e6e6]/80 bg-[#f5f5f7] p-5 text-center">
           <p className="text-[11px] font-bold uppercase tracking-widest text-[#766a62]">
-            {locale === "en" ? "Recommended follow-up" : "Rekommenderad uppfoljning"}
+            {tx(locale, "Rekommenderad uppfoljning", "Recommended follow-up", "Seguimiento recomendado", "Empfohlene Nachuntersuchung")}
           </p>
           <p className="mt-1 text-sm text-[#515151]">{nextAnalysis}</p>
         </div>

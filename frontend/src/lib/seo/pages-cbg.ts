@@ -4,6 +4,9 @@ export const CBG_PAGES: LandingPage[] = [
   {
     svSlug: "cbg-mot-akne",
     enSlug: "cbg-for-acne",
+    esSlug: "cbg-para-el-acne",
+    deSlug: "cbg-gegen-akne",
+    frSlug: "cbg-contre-lacne",
     category: "cbg",
     productIds: ["ta-da-serum", "duo-kit", "au-naturel-makeup-remover"],
     sv: {
@@ -122,10 +125,187 @@ export const CBG_PAGES: LandingPage[] = [
       ctaSub:
         "Give your skin the mother cannabinoid – CBG works with your skin's own systems to calm inflammation and fight bacteria. Natural, effective, without aggression.",
     },
+    es: {
+      metaTitle: "CBG para el acné – el cannabinoide que le faltaba a tu piel",
+      metaDescription:
+        "CBG es la madre de todos los cannabinoides – con propiedades antibacterianas y antiinflamatorias únicas. Descubre cómo calma el acné desde dentro. 1753 SKINCARE.",
+      kicker: "CBG Skincare",
+      h1: "CBG para el acné – el cannabinoide madre que tu piel merece",
+      lead: "Lo has probado todo – limpiadores, ácidos, antibióticos. ¿Pero has probado a darle a tu piel lo que de verdad le falta? CBG, el cannabinoide madre, trabaja con los receptores propios de tu piel para combatir la inflamación y las bacterias del acné de un modo en el que ningún otro ingrediente puede.",
+      problemTitle: "Por qué el acné es mucho más que poros obstruidos",
+      problemBody:
+        "<p>El acné es un proceso inflamatorio que empieza mucho antes de que veas un brote. Dentro de la piel se desencadena una reacción en cadena: las glándulas sebáceas producen demasiado sebo, los poros se tapan y la bacteria Cutibacterium acnes prospera en un entorno pobre en oxígeno. El resultado son puntos negros, pústulas y a veces quistes profundos y dolorosos.</p><p>Pero la historia real es la inflamación. La vida moderna – estrés, falta de sueño, comida ultraprocesada y una rutina de cuidado excesiva – desequilibra el sistema endocannabinoide de la piel. Cuando el ECS no funciona de forma óptima, la piel pierde el control sobre la producción de sebo, la defensa frente a las bacterias y la renovación celular a la vez.</p><p>El tratamiento convencional del acné se centra en matar bacterias y resecar la piel. A corto plazo funciona, pero a menudo crea nuevos problemas: barrera dañada, piel deshidratada que compensa con aún más sebo y un microbioma hecho un caos. Es como apagar un incendio con gasolina. Tu piel no necesita castigo – necesita ayuda para volver al equilibrio.</p>",
+      tipsTitle: "Hábitos diarios que de verdad marcan la diferencia con el acné",
+      tips: [
+        {
+          title: "Deja de lavarte en exceso",
+          body: "Lavarte la cara más de dos veces al día desgasta la barrera cutánea y dispara la producción compensatoria de sebo. Mañana y noche basta. Usa un limpiador suave a base de aceite que respete la protección natural de la piel.",
+        },
+        {
+          title: "Prioriza el sueño frente a más productos",
+          body: "En el sueño profundo la piel se repara y regula la inflamación. Siete u ocho horas de sueño hacen más por el acné que otro sérum más. Deja el móvil fuera del dormitorio y busca una habitación oscura y fresca.",
+        },
+        {
+          title: "Reduce los lácteos",
+          body: "Los estudios muestran vínculo entre consumo de lácteos y acné, probablemente vía IGF-1 y señalización hormonal. Prueba a reducir leche y queso durante cuatro semanas y mira cómo responde tu piel. No es una prohibición, es un experimento.",
+        },
+        {
+          title: "Muévete cada día",
+          body: "El movimiento mejora la circulación y ayuda al cuerpo a eliminar compuestos inflamatorios. Treinta minutos de caminata bastan. Lávate la cara después del ejercicio intenso para evitar brotes relacionados con el sudor.",
+        },
+        {
+          title: "Deja de exprimir granos",
+          body: "Exprimir empuja las bacterias más hondo y dispara el riesgo de cicatrices. Cada vez que tocas una imperfección prolongas la inflamación días. Manos fuera – deja que los productos hagan el trabajo.",
+        },
+      ],
+      solutionTitle: "Cómo actúa el CBG frente al acné – desde dentro de la piel",
+      solutionBody:
+        "<p>CBG – cannabigerol – se llama cannabinoide madre porque de él se sintetizan el resto. Pero el CBG tiene superpoderes propios. A diferencia del CBD, el CBG se une con más directamente a los receptores CB2 de las células inmunes de la piel y las glándulas sebáceas, con un efecto antiinflamatorio más focalizado.</p><p>La investigación muestra que el CBG también tiene propiedades antibacterianas únicas entre los cannabinoides. Inhibe el crecimiento de bacterias grampositivas – el mismo tipo que Cutibacterium acnes. La combinación de control de la inflamación e inhibición bacteriana hace del CBG un ingrediente ideal para pieles con tendencia al acné.</p><p>Nuestro TA-DA Serum lleva un 3% de CBG en aceite de jojoba ecológico, un vehículo que imita el sebo propio de la piel. Combínalo con el DUO-kit para un perfil cannabinoide más amplio con CBD y CBG. Au Naturel limpia los poros en profundidad sin castigar la barrera. Juntos le dan a tu piel lo que necesita para volver a encontrarse.</p>",
+      faq: [
+        {
+          q: "¿Qué diferencia hay entre CBG y CBD para el acné?",
+          a: "El CBD calma y equilibra la producción de sebo. El CBG va más allá – se une con más directamente a los receptores CB2 de la piel y además tiene propiedades antibacterianas únicas que el CBD no tiene. Para el acné se complementan a la perfección, pero el CBG añade una capa antibacteriana que marca la diferencia.",
+        },
+        {
+          q: "¿TA-DA Serum va a dejarme la piel grasa?",
+          a: "No. El aceite de jojoba tiene una estructura molecular parecida al sebo propio, lo que indica a las glándulas sebáceas que dejen de producir de más. Suena contraintuitivo poner aceite en piel con acné, pero el resultado suele ser menos grasa – no más.",
+        },
+        {
+          q: "¿Cuánto tarda el CBG en ayudar con el acné?",
+          a: "La piel se renueva más o menos cada cuatro semanas. Muchas personas notan menos inflamación en dos o tres, pero dale al menos un ciclo completo. El CBG construye efecto con el tiempo – no es un parche rápido, es cuidado de verdad.",
+        },
+        {
+          q: "¿Puedo usar sérum con CBG junto con retinol?",
+          a: "Sí, y de hecho es una combinación inteligente. El CBG puede calmar la irritación que a veces provoca el retinol. Aplica primero el retinol, deja que absorba y luego TA-DA Serum encima como capa calmante y protectora.",
+        },
+      ],
+      ctaTitle: "El acné merece algo mejor que castigo",
+      ctaSub:
+        "Dale a tu piel el cannabinoide madre – el CBG trabaja con los sistemas propios de la piel para calmar la inflamación y combatir bacterias. Natural, efectivo, sin agresión.",
+    },
+    de: {
+      metaTitle: "CBG gegen Akne – das Cannabinoid, dem deine Haut gefehlt hat",
+      metaDescription:
+        "CBG ist die Mutter aller Cannabinoide – mit einzigartigen antibakteriellen und entzündungshemmenden Eigenschaften. Entdecke, wie CBG Akne von innen beruhigt. 1753 SKINCARE.",
+      kicker: "CBG Skincare",
+      h1: "CBG gegen Akne – das Mutter-Cannabinoid, das deine Haut verdient",
+      lead: "Du hast schon alles probiert – Reiniger, Säuren, Antibiotika. Aber hast du deiner Haut schon gegeben, was ihr wirklich fehlt? CBG, das Mutter-Cannabinoid, arbeitet mit den eigenen Rezeptoren deiner Haut, um Entzündungen und Aknebakterien auf eine Art zu bekämpfen, die keine andere Inhaltsstoff kann.",
+      problemTitle: "Warum Akne mehr ist als verstopfte Poren",
+      problemBody:
+        "<p>Akne ist ein entzündlicher Zustand, der lange beginnt, bevor du einen Pickel siehst. In der Haut läuft eine Kettenreaktion ab: Talgdrüsen produzieren zu viel Öl, Poren verstopfen, und das Bakterium Cutibacterium acnes gedeiht in sauerstoffarmer Umgebung. Sichtbar wird es als Mitesser, Pusteln und manchmal tiefe, schmerzhafte Zysten.</p><p>Aber die eigentliche Geschichte ist Entzündung. Modernes Leben – Stress, Schlafmangel, ultraprocessed Food und überzogene Hautpflege – wirft das endocannabinoide System der Haut aus dem Gleichgewicht. Wenn das ECS nicht optimal funktioniert, verliert die Haut gleichzeitig die Kontrolle über Talgproduktion, bakterielle Abwehr und Zellerneuerung.</p><p>Konventionelle Aknebehandlung zielt darauf ab, Bakterien abzutöten und die Haut auszutrocknen. Kurzfristig wirkt das, schafft aber oft neue Probleme: geschädigte Barriere, dehydrierte Haut, die mit noch mehr Talg kompensiert, und ein Mikrobiom im Chaos. Wie ein Feuer mit Benzin löschen. Deine Haut braucht keine Strafe – sie braucht Hilfe, zurück ins Gleichgewicht zu finden.</p>",
+      tipsTitle: "Alltagsgewohnheiten, die bei Akne wirklich etwas bewegen",
+      tips: [
+        {
+          title: "Hör auf, zu überwaschen",
+          body: "Mehr als zweimal täglich zu waschen strapaziert die Hautbarriere und triggert kompensatorische Talgproduktion. Morgens und abends reicht. Nutze einen sanften, ölbasierten Reiniger, der den natürlichen Schutz respektiert.",
+        },
+        {
+          title: "Schlaf vor Produkten",
+          body: "Im Tiefschlaf repariert sich die Haut und reguliert Entzündung. Sieben bis acht Stunden Schlaf tun mehr für Akne als noch ein Serum. Leg das Handy aus dem Schlafzimmer und schaffe ein dunkles, kühles Zimmer.",
+        },
+        {
+          title: "Milchprodukte reduzieren",
+          body: "Studien zeigen einen Zusammenhang zwischen Milchkonsum und Akne, vermutlich über IGF-1 und Hormonsignale. Reduziere vier Wochen lang Milch und Käse und beobachte deine Haut. Kein Verbot – nur ein Experiment.",
+        },
+        {
+          title: "Beweg dich täglich",
+          body: "Bewegung verbessert die Durchblutung und hilft dem Körper, entzündliche Stoffe abzubauen. Dreißig Minuten Spaziergang reichen. Wasche dein Gesicht nach intensivem Training, um schweißbedingte Ausbrüche zu vermeiden.",
+        },
+        {
+          title: "Lass die Finger von Pickeln",
+          body: "Ausdrücken schiebt Bakterien tiefer in die Haut und erhöht das Narbenrisiko massiv. Jedes Anfassen verlängert die Entzündung um Tage. Hände weg – die Produkte sollen arbeiten.",
+        },
+      ],
+      solutionTitle: "So wirkt CBG gegen Akne – von innen in der Haut",
+      solutionBody:
+        "<p>CBG – Cannabigerol – heißt Mutter-Cannabinoid, weil alle anderen Cannabinoide daraus entstehen. Aber CBG hat eigene Superkräfte. Anders als CBD bindet CBG direkter an CB2-Rezeptoren in Immunzellen und Talgdrüsen der Haut – gezielter entzündungshemmend.</p><p>Forschung zeigt: CBG hat antibakterielle Eigenschaften, die unter Cannabinoiden einzigartig sind. Es hemmt grampositive Bakterien – denselben Typ wie Cutibacterium acnes. Die Kombination aus Entzündungskontrolle und Bakterienhemmung macht CBG ideal für akneanfällige Haut.</p><p>Unser TA-DA Serum enthält 3 % CBG in bio-Jojobaöl, einem Träger, der dem eigenen Talg der Haut ähnelt. Ergänze mit dem DUO-kit für ein breiteres Cannabinoidprofil mit CBD und CBG. Au Naturel reinigt tief in den Poren, ohne die Barriere zu ruinieren. Zusammen geben sie deiner Haut alles, um zurückzufinden.</p>",
+      faq: [
+        {
+          q: "Was ist der Unterschied zwischen CBG und CBD bei Akne?",
+          a: "CBD beruhigt und balanciert die Talgproduktion. CBG geht weiter – es bindet direkter an CB2-Rezeptoren der Haut und hat antibakterielle Eigenschaften, die CBD nicht hat. Bei Akne ergänzen sie sich perfekt; CBG legt eine antibakterielle Schicht oben drauf, die wirklich zählt.",
+        },
+        {
+          q: "Macht TA-DA Serum meine Haut fettig?",
+          a: "Nein. Jojobaöl ähnelt strukturell dem eigenen Talg und signalisiert den Talgdrüsen, weniger zu produzieren. Öl auf Aknehaut klingt paradox, aber meist wird die Haut weniger ölig – nicht mehr.",
+        },
+        {
+          q: "Wie lange, bis CBG bei Akne hilft?",
+          a: "Die Haut erneuert sich etwa alle vier Wochen. Viele spüren innerhalb von zwei bis drei Wochen ruhigere Entzündung, gib ihr aber mindestens einen vollen Zyklus. CBG baut seine Wirkung auf – kein Quickfix, sondern echte Pflege.",
+        },
+        {
+          q: "Kann ich CBG-Serum mit Retinol kombinieren?",
+          a: "Ja, das ist sogar schlau. CBG kann die Reizung mildern, die Retinol manchmal auslöst. Zuerst Retinol, einziehen lassen, dann TA-DA Serum als beruhigende, schützende Schicht.",
+        },
+      ],
+      ctaTitle: "Akne verdient mehr als Strafe",
+      ctaSub:
+        "Gib deiner Haut das Mutter-Cannabinoid – CBG arbeitet mit den eigenen Systemen der Haut, um Entzündung zu beruhigen und Bakterien zu bekämpfen. Natürlich, wirksam, ohne Aggression.",
+    },
+    fr: {
+      metaTitle: "CBG contre l'acné – le cannabinoïde qui manquait à ta peau",
+      metaDescription:
+        "CBG est la mère de tous les cannabinoïdes – avec des propriétés antibactériennes et anti-inflammatoires uniques. Découvre comment le CBG apaise l'acné de l'intérieur. 1753 SKINCARE.",
+      kicker: "CBG Skincare",
+      h1: "CBG contre l'acné – le cannabinoïde mère que ta peau mérite",
+      lead: "Tu as tout essayé – nettoyants, acides, antibiotiques. Mais as-tu déjà offert à ta peau ce qui lui manque vraiment ? Le CBG, cannabinoïde mère, travaille avec les récepteurs propres à ta peau pour lutter contre l'inflammation et les bactéries de l'acné comme aucun autre ingrédient.",
+      problemTitle: "Pourquoi l'acné, c'est bien plus que des pores bouchés",
+      problemBody:
+        "<p>L'acné est un état inflammatoire qui commence bien avant le bouton visible. Sous la peau, une réaction en chaîne : les glandes sébacées surproduisent, les pores se bouchent, et la bactérie Cutibacterium acnes prospère dans un milieu pauvre en oxygène. Résultat : points noirs, pustules, parfois kystes profonds et douloureux.</p><p>Mais l'histoire vraie, c'est l'inflammation. La vie moderne – stress, manque de sommeil, aliments ultra-transformés, sur-routine skincare – déséquilibre le système endocannabinoïde de la peau. Quand l'ECS ne tourne pas rond, la peau perd d'un coup le contrôle de la production de sébum, de la défense bactérienne et du renouvellement cellulaire.</p><p>Le traitement classique vise à tuer les bactéries et à assécher la peau. Ça marche court terme mais crée souvent d'autres problèmes : barrière abîmée, peau déshydratée qui compense avec encore plus de sébum, microbiote en vrac. C'est comme éteindre un feu à l'essence. Ta peau n'a pas besoin de punition – elle a besoin d'aide pour retrouver l'équilibre.</p>",
+      tipsTitle: "Habitudes du quotidien qui changent vraiment la donne pour l'acné",
+      tips: [
+        {
+          title: "Arrête de sur-laver",
+          body: "Se laver le visage plus de deux fois par jour fragilise la barrière et déclenche une production de sébum de compensation. Matin et soir suffisent. Utilise un nettoyant doux à base d'huile qui respecte la protection naturelle.",
+        },
+        {
+          title: "Priorise le sommeil aux produits",
+          body: "Pendant le sommeil profond, la peau se répare et modère l'inflammation. Sept à huit heures de sommeil font plus pour l'acné qu'un sérum de plus. Laisse le téléphone hors de la chambre et crée une pièce sombre et fraîche.",
+        },
+        {
+          title: "Réduis les produits laitiers",
+          body: "Les études lient consommation laitière et acné, probablement via l'IGF-1 et les signaux hormonaux. Essaie de réduire lait et fromage pendant quatre semaines et observe. Ce n'est pas une interdiction, c'est un test.",
+        },
+        {
+          title: "Bouge chaque jour",
+          body: "Le mouvement améliore la circulation et aide le corps à évacuer les composés inflammatoires. Trente minutes de marche suffisent. Lave-toi le visage après un effort intense pour limiter les poussées liées à la sueur.",
+        },
+        {
+          title: "Ne perce plus les boutons",
+          body: "Presser enfonce les bactéries et fait exploser le risque de cicatrices. Chaque contact prolonge l'inflammation de jours. Mains hors du visage – laisse les produits faire le boulot.",
+        },
+      ],
+      solutionTitle: "Comment le CBG agit contre l'acné – depuis l'intérieur de la peau",
+      solutionBody:
+        "<p>CBG – cannabigérol – s'appelle cannabinoïde mère parce que les autres cannabinoïdes en sont issus. Mais le CBG a ses propres super-pouvoirs. Contrairement au CBD, le CBG se lie plus directement aux récepteurs CB2 des cellules immunitaires et des glandes sébacées de la peau, pour un effet anti-inflammatoire plus ciblé.</p><p>La recherche montre aussi des propriétés antibactériennes uniques parmi les cannabinoïdes. Il freine les bactéries gram-positives – le même type que Cutibacterium acnes. Combiner modulation de l'inflammation et frein bactérien rend le CBG idéal pour les peaux à tendance acnéique.</p><p>Notre TA-DA Serum contient 3 % de CBG dans de l'huile de jojoba bio, un vecteur qui imite le sébum naturel. Complète avec le DUO-kit pour un profil cannabinoïde plus large, CBD et CBG. Au Naturel nettoie les pores en profondeur sans agresser la barrière. Ensemble, ils donnent à ta peau ce qu'il lui faut pour se retrouver.</p>",
+      faq: [
+        {
+          q: "Quelle différence entre CBG et CBD pour l'acné ?",
+          a: "Le CBD apaise et équilibre la production de sébum. Le CBG va plus loin – liaison plus directe aux récepteurs CB2 de la peau et propriétés antibactériennes que le CBD n'a pas. Pour l'acné, ils se complètent ; le CBG ajoute une couche anti-bactéries qui change la partie.",
+        },
+        {
+          q: "TA-DA Serum va-t-il graisser ma peau ?",
+          a: "Non. L'huile de jojoba ressemble au sébum naturel et indique aux glandes de ne plus surproduire. Mettre de l'huile sur une peau à boutons paraît contre-intuitif, mais le résultat est souvent moins de gras – pas plus.",
+        },
+        {
+          q: "Combien de temps avant que le CBG aide l'acné ?",
+          a: "La peau se renouvelle environ toutes les quatre semaines. Beaucoup voient une inflammation plus calme en deux à trois semaines, mais laisse au moins un cycle complet. Le CBG construit son effet dans la durée – pas de rustine express, du soin sérieux.",
+        },
+        {
+          q: "Je peux utiliser un sérum CBG avec le rétinol ?",
+          a: "Oui, et c'est même malin. Le CBG peut apaiser l'irritation que le rétinol déclenche parfois. Rétinol d'abord, laisse absorber, puis TA-DA Serum par-dessus comme couche apaisante et protectrice.",
+        },
+      ],
+      ctaTitle: "L'acné mérite mieux que la punition",
+      ctaSub:
+        "Offre à ta peau le cannabinoïde mère – le CBG travaille avec les systèmes propres de la peau pour calmer l'inflammation et lutter contre les bactéries. Naturel, efficace, sans agression.",
+    },
   },
   {
     svSlug: "cbg-mot-rosacea",
     enSlug: "cbg-for-rosacea",
+    esSlug: "cbg-para-la-rosacea",
+    deSlug: "cbg-gegen-rosacea",
+    frSlug: "cbg-contre-la-rosacee",
     category: "cbg",
     productIds: ["ta-da-serum", "duo-kit"],
     sv: {
@@ -228,10 +408,163 @@ export const CBG_PAGES: LandingPage[] = [
       ctaSub:
         "CBG speaks your skin's own language. Instead of forcing inflammation down, the mother cannabinoid works with your CB2 receptors to restore calm naturally.",
     },
+    es: {
+      metaTitle: "CBG para la rosácea – calma la piel reactiva con cannabigerol",
+      metaDescription:
+        "La piel con rosácea necesita suavidad, no tratamientos agresivos. El CBG trabaja con los receptores CB2 para reducir el enrojecimiento y la inflamación. 1753 SKINCARE.",
+      kicker: "CBG Skincare",
+      h1: "CBG para la rosácea – el cannabinoide madre que calma la piel reactiva",
+      lead: "La rosácea es piel que reacciona de más – al calor, al estrés, a la comida, incluso a productos que deberían ayudar. El CBG ofrece algo distinto: un ingrediente que habla directamente con el sistema inmune de la piel y le pide que baje el ritmo.",
+      problemTitle: "Qué impulsa la rosácea",
+      problemBody:
+        "<p>La rosácea es un proceso inflamatorio crónico que afecta hasta a uno de cada diez adultos. Se manifiesta con rubor que va y viene, sensación de ardor, vasos visibles y a veces bultos parecidos al acné. No es un simple enrojecimiento – es un sistema inmune que dispara alarmas sin motivo claro.</p><p>Detrás suele haber un sistema inmune innato hiperactivo. El péptido cathelicidina, que normalmente protege frente a infecciones, se produce en exceso y mantiene la inflamación. La barrera cutánea está debilitada: entran irritantes y se va la hidratación. Las terminaciones nerviosas se vuelven hipersensibles y reaccionan al calor, la luz UV y los químicos.</p><p>Lo que frustra es que los tratamientos convencionales a menudo empeoran las cosas. Activos fuertes, alcohol en fórmula y limpiezas agresivas desgastan una barrera ya frágil. La piel con rosácea no pide más – pide menos, pero lo correcto.</p>",
+      tipsTitle: "Estilo de vida que alivia la rosácea",
+      tips: [
+        {
+          title: "Protector solar mineral cada día",
+          body: "La radiación UV es el desencadenante más habitual. Un mineral con óxido de zinc actúa como filtro físico sin la irritación de muchos filtros químicos. Cada mañana, todo el año, llueva o no.",
+        },
+        {
+          title: "Compresas frescas en los brotes",
+          body: "Cuando sube el rubor, aplica una compresa fresca (no helada) cinco o diez minutos. Ayuda a contraer vasos y baja la inflamación un rato. Ten siempre una toalla suave en la nevera.",
+        },
+        {
+          title: "Evita temperaturas extremas",
+          body: "Sauna, duchas muy calientes y frío intenso dilatan vasos en piel con rosácea. Agua templada, sin baños de vapor y bufanda que proteja el rostro en invierno. Mejor prevenir que apagar fuegos.",
+        },
+        {
+          title: "Reduce alimentos que liberan histamina",
+          body: "Vino tinto, quesos curados, embutidos y fermentados pueden disparar histamina y empeorar el rubor. Prueba cuatro semanas reduciéndolos y observa si la piel se aquieta.",
+        },
+      ],
+      solutionTitle: "Por qué el CBG encaja tan bien con la rosácea",
+      solutionBody:
+        "<p>CBG – cannabigerol – interactúa de forma directa con los receptores CB2 de las células inmunes de la piel. Son precisamente esas células las que en la rosácea disparan señales inflamatorias de más. Al modular la señal CB2, el CBG ayuda al sistema inmune a recalibrar – sin aplastarlo por completo como hace la cortisona.</p><p>Además, el CBG ha mostrado propiedades vasorrelajantes: puede ayudar a los vasos a normalizar el tono en lugar de oscilar entre contraídos y dilatados. En piel con vasos permanentemente visibles, es un mecanismo poco habitual.</p><p>TA-DA Serum con 3 % de CBG en aceite de jojoba ecológico está pensado para piel sensible y reactiva así. La jojoba imita el sebo propio y refuerza la barrera sin obstruir. Combínalo con el DUO-kit para un perfil más amplio – CBD y CBG juntos suman un efecto calmante sinérgico.</p>",
+      faq: [
+        {
+          q: "¿El aceite con CBG puede empeorar mi rosácea?",
+          a: "El CBG está entre los activos más suaves que existen. Nuestro TA-DA Serum solo lleva dos ingredientes – CBG y aceite de jojoba ecológico – sin perfume, alcohol ni conservantes. Haz siempre prueba en la nuca primero, pero el riesgo de reacción es mínimo.",
+        },
+        {
+          q: "¿En qué se diferencia el CBG de los antibióticos para rosácea?",
+          a: "Los antibióticos matan bacterias y dan un alivio antiinflamatorio pasajero, pero arrasan el microbioma y pierden fuerza con la resistencia. El CBG modula la respuesta inmune vía receptores CB2 sin tumbar la flora. Es un mecanismo distinto – y más suave.",
+        },
+        {
+          q: "¿Puedo usar CBG con ácido azelaico?",
+          a: "Sí. Ácido azelaico y CBG actúan por vías distintas y se complementan. Primero el azelaico, deja absorber, y TA-DA Serum como último paso. El CBG además puede suavizar el escozor que a veces deja el azelaico.",
+        },
+      ],
+      ctaTitle: "Dale a tu piel reactiva paz de verdad",
+      ctaSub:
+        "El CBG habla el idioma de tu piel. En lugar de forzar la inflamación abajo, el cannabinoide madre trabaja con tus receptores CB2 para recuperar la calma con naturalidad.",
+    },
+    de: {
+      metaTitle: "CBG gegen Rosacea – reaktive Haut mit Cannabigerol beruhigen",
+      metaDescription:
+        "Rosacea-Haut braucht Sanftheit, keine aggressive Therapie. CBG arbeitet mit CB2-Rezeptoren, um Rötung und Entzündung zu mildern. 1753 SKINCARE.",
+      kicker: "CBG Skincare",
+      h1: "CBG gegen Rosacea – das Mutter-Cannabinoid, das reaktive Haut beruhigt",
+      lead: "Rosacea heißt: Haut, die überreagiert – auf Hitze, Stress, Essen, sogar auf Produkte, die helfen sollen. CBG bietet etwas Besonderes: einen Wirkstoff, der direkt mit dem Immunsystem der Haut spricht und es bittet, sich zu beruhigen.",
+      problemTitle: "Was treibt Rosacea an?",
+      problemBody:
+        "<p>Rosacea ist ein chronisch entzündlicher Zustand, der bis zu einem von zehn Erwachsenen betrifft. Sie zeigt sich als wechselnde Rötung, Brennen, sichtbare Gefäße und manchmal akneähnliche Knötchen. Das ist keine normale Röte – das ist ein Immunsystem, das ohne echten Grund Alarm schlägt.</p><p>Dahinter steht oft ein überaktives angeborenes Immunsystem. Das Peptid Cathelicidin, das normalerweise vor Infektionen schützt, wird überproduziert und hält chronische Entzündung am Laufen. Die Hautbarriere ist geschwächt, Irritationen dringen ein, Feuchtigkeit entweicht. Nervenenden werden hypersensibel und reagieren auf Temperatur, UV und Chemikalien.</p><p>Besonders frustrierend: konventionelle Behandlung verschlechtert oft den Zustand. Starke Aktive, alkoholhaltige Produkte und aggressive Reiniger brechen die ohnehin fragile Barriere weiter auf. Rosacea-Haut schreit nicht nach mehr – sie will weniger, aber das Richtige.</p>",
+      tipsTitle: "Lebensstil, der Rosacea erleichtert",
+      tips: [
+        {
+          title: "Täglich mineralischen Sonnenschutz",
+          body: "UV-Strahlung ist der häufigste Rosacea-Trigger. Mineralischer Lichtschutz mit Zinkoxid liegt als physikalischer Filter auf der Haut ohne chemische Reizung. Jeden Morgen, ganzjährig, egal wie das Wetter ist.",
+        },
+        {
+          title: "Kühle Umschläge bei Schüben",
+          body: "Wenn die Rötung hochfährt, leg fünf bis zehn Minuten einen kühlen (nicht eiskalten) Umschlag ans Gesicht. Gefäße ziehen sich zusammen, die Entzündung sinkt kurz. Halte immer ein weiches Handtuch im Kühlschrank.",
+        },
+        {
+          title: "Extreme Temperaturen meiden",
+          body: "Sauna, heiße Duschen und eisige Kälte triggern Vasodilatation bei Rosacea. Lauwarmes Wasser, keine Dampfbäder, Schal vors Gesicht im Winter. Vorbeugen schlägt reagieren.",
+        },
+        {
+          title: "Histaminfreisetzende Lebensmittel reduzieren",
+          body: "Rotwein, gereifter Käse, Wurstwaren und Fermentiertes können Histamin freisetzen und das Flush verschlimmern. Vier Wochen reduzieren und beobachten, ob die Haut ruhiger wird.",
+        },
+      ],
+      solutionTitle: "Warum CBG für Rosacea besonders passt",
+      solutionBody:
+        "<p>CBG – Cannabigerol – interagiert direkt mit CB2-Rezeptoren in Immunzellen der Haut. Genau diese Zellen überproduzieren bei Rosacea entzündliche Botenstoffe. Durch Modulation der CB2-Signalwege hilft CBG dem Immunsystem, neu zu kalibrieren – statt es wie Kortison komplett zu unterdrücken.</p><p>CBG zeigt zudem vasorelaxierende Eigenschaften: Gefäße können ihren Tonus normalisieren statt ständig zwischen eng und weit zu pendeln. Für Rosacea-Haut mit dauerhaft sichtbaren Äderchen ist das ein seltener Mechanismus.</p><p>TA-DA Serum mit 3 % CBG in bio-Jojobaöl ist genau für diese sensible, reaktive Haut gedacht. Jojoba ahmt den eigenen Talg nach und stärkt die Barriere ohne zu verstopfen. Ergänze mit dem DUO-kit für ein breiteres Profil – CBD und CBG zusammen wirken synergisch beruhigend.</p>",
+      faq: [
+        {
+          q: "Kann CBG-Öl meine Rosacea verschlimmern?",
+          a: "CBG gehört zu den sanftesten Aktiven überhaupt. Unser TA-DA Serum enthält nur zwei Inhaltsstoffe – CBG und bio-Jojobaöl – ohne Duft, Alkohol, Konservierung. Immer erst am Hals testen, aber das Reaktionsrisiko ist minimal.",
+        },
+        {
+          q: "Wie unterscheidet sich CBG von Antibiotika bei Rosacea?",
+          a: "Antibiotika töten Bakterien und wirken kurz entzündungshemmend, aber sie leeren das Mikrobiom und verlieren bei Resistenz an Kraft. CBG moduliert die Immunantwort über CB2, ohne die Bakterienflora zu zerstören. Ein grundsätzlich anderer, milderer Mechanismus.",
+        },
+        {
+          q: "Kann ich CBG mit Azelainsäure kombinieren?",
+          a: "Ja. Azelainsäure und CBG greifen auf verschiedenen Wegen ein und ergänzen sich. Zuerst Azelainsäure, einziehen lassen, dann TA-DA Serum als letzter Schritt. CBG kann das Brennen mildern, das Azelainsäure manchmal verursacht.",
+        },
+      ],
+      ctaTitle: "Gib deiner reaktiven Haut echte Ruhe",
+      ctaSub:
+        "CBG spricht die Sprache deiner Haut. Statt Entzündung zu erzwingen, arbeitet das Mutter-Cannabinoid mit deinen CB2-Rezeptoren, um die Ruhe natürlich zurückzubringen.",
+    },
+    fr: {
+      metaTitle: "CBG contre la rosacée – apaiser la peau réactive avec le cannabigérol",
+      metaDescription:
+        "La peau rosacée a besoin de douceur, pas d'agressivité. Le CBG travaille avec les récepteurs CB2 pour atténuer les rougeurs et l'inflammation. 1753 SKINCARE.",
+      kicker: "CBG Skincare",
+      h1: "CBG contre la rosacée – le cannabinoïde mère qui calme la peau réactive",
+      lead: "La rosacée, c'est une peau qui sur-réagit – à la chaleur, au stress, à l'assiette, même aux produits censés aider. Le CBG propose quelque chose d'unique : un actif qui dialogue directement avec le système immunitaire cutané et lui demande de se poser.",
+      problemTitle: "Ce qui fait tourner la rosacée",
+      problemBody:
+        "<p>La rosacée est une inflammation chronique qui touche jusqu'à un adulte sur dix. Flush qui va et vient, brûlure, vaisseaux visibles, parfois papules façon acné. Ce n'est pas une simple rougeur – c'est un système immunitaire qui sonne l'alarme sans raison nette.</p><p>Derrière, souvent un immunité innée survoltée. Le peptide cathelicidine, normalement protecteur, est produit en excès et entretient l'inflammation. La barrière est fragilisée : irritants qui entrent, eau qui file. Les terminaisons nerveuses deviennent hypersensibles au froid-chaud, aux UV, aux molécules irritantes.</p><p>Le pire : les soins classiques aggravent souvent. Actifs costauds, alcool dans la formule, nettoyants agressifs – tout ça érode une barrière déjà fine. La peau rosacée ne réclame pas plus – elle veut moins, mais mieux choisi.</p>",
+      tipsTitle: "Stratégies de vie qui apaisent la rosacée",
+      tips: [
+        {
+          title: "Crème solaire minérale tous les jours",
+          body: "Les UV sont le déclencheur numéro un. Un écran minéral à l'oxyde de zinc reste en filtre physique sur la peau, sans la chimie qui pique. Chaque matin, toute l'année, peu importe la météo.",
+        },
+        {
+          title: "Compresses fraîches pendant les poussées",
+          body: "Quand le flush monte, pose une compresse fraîche (pas glacée) cinq à dix minutes. Les vaisseaux se resserrent, l'inflammation baisse un moment. Garde une serviette douce au frigo.",
+        },
+        {
+          title: "Évite les extrêmes de température",
+          body: "Sauna, douches brûlantes et grand froid dilatent les vaisseaux sur peau rosacée. Eau tiède, pas de hammam, écharpe sur le visage quand il caille. Mieux vaut prévenir que jouer les pompiers.",
+        },
+        {
+          title: "Réduis les aliments libérateurs d'histamine",
+          body: "Vin rouge, fromages affinés, charcuteries et ferments peuvent libérer de l'histamine et empirer les rougeurs. Teste quatre semaines en réduisant et regarde si la peau se calme.",
+        },
+      ],
+      solutionTitle: "Pourquoi le CBG est particulièrement adapté à la rosacée",
+      solutionBody:
+        "<p>CBG – cannabigérol – dialogue en direct avec les récepteurs CB2 des cellules immunitaires de la peau. Ce sont elles qui, en rosacée, surproduisent les médiateurs inflammatoires. En modulant la signalisation CB2, le CBG aide l'immunité à se recaler – sans tout éteindre comme la cortisone.</p><p>Le CBG montre aussi des effets vasorelaxants : les vaisseaux retrouvent un tonus plus stable au lieu d'osciller entre serré et dilaté. Sur une peau avec vaisseaux déjà visibles en permanence, c'est un mécanisme rare.</p><p>TA-DA Serum à 3 % de CBG dans de l'huile de jojoba bio cible ce type de peau sensible et réactive. La jojoba imite le sébum naturel et renforce la barrière sans boucher. Complète avec le DUO-kit pour un spectre plus large – CBD et CBG ensemble, effet calmant synergique.</p>",
+      faq: [
+        {
+          q: "L'huile au CBG peut-elle aggraver ma rosacée ?",
+          a: "Le CBG compte parmi les actifs les plus doux. Notre TA-DA Serum n'a que deux ingrédients – CBG et huile de jojoba bio – sans parfum, alcool ni conservateurs. Patch test au cou d'abord, mais le risque de réaction reste minime.",
+        },
+        {
+          q: "CBG vs antibiotiques pour la rosacée ?",
+          a: "Les antibiotiques tuent les bactéries et donnent un soulagement anti-inflammatoire temporaire, mais ils écrasent le microbiome et perdent en efficacité avec la résistance. Le CBG module la réponse immunitaire via CB2 sans casser la flore. Mécanisme différent – et plus doux.",
+        },
+        {
+          q: "Je peux associer CBG et acide azélaïque ?",
+          a: "Oui. Deux voies différentes, bon complément. Acide azélaïque d'abord, laisse pénétrer, puis TA-DA Serum en dernière couche. Le CBG peut aussi atténuer la piqûre de l'azélaïque.",
+        },
+      ],
+      ctaTitle: "Offre à ta peau réactive une vraie accalmie",
+      ctaSub:
+        "Le CBG parle le langage de ta peau. Au lieu de forcer l'inflammation, le cannabinoïde mère travaille avec tes récepteurs CB2 pour ramener le calme naturellement.",
+    },
   },
   {
     svSlug: "cbg-mot-eksem",
     enSlug: "cbg-for-eczema",
+    esSlug: "cbg-para-el-eczema",
+    deSlug: "cbg-gegen-ekzem",
+    frSlug: "cbg-contre-leczema",
     category: "cbg",
     productIds: ["ta-da-serum", "duo-ta-da", "fungtastic-mushroom-extract"],
     sv: {
@@ -350,10 +683,187 @@ export const CBG_PAGES: LandingPage[] = [
       ctaSub:
         "Eczema needs more than moisturizer. CBG works with your skin's immune cells and supports barrier repair from within. Give your skin the tools it needs to heal.",
     },
+    es: {
+      metaTitle: "CBG para el eccema – alivio natural para la piel que pica",
+      metaDescription:
+        "El eccema señala una barrera en apuros. El CBG refuerza la barrera y calma el picor vía los receptores CB2 propios de la piel. Descubre 1753 SKINCARE.",
+      kicker: "CBG Skincare",
+      h1: "CBG para el eccema – deja de rascarte, empieza a sanar",
+      lead: "El eccema no es tener mala piel. Es una barrera que pierde agua y un sistema inmune que se pasa de revoluciones. El CBG aborda las dos cosas a la vez – hablando con los cannabinoides receptores de tu propia piel.",
+      problemTitle: "Por qué pica el eccema y qué está pasando de verdad",
+      problemBody:
+        "<p>El eccema – dermatitis atópica – afecta hasta al 20 % de los niños y al 10 % de los adultos. Parches secos, con picor, inflamados, que pueden agrietarse, supurar e infectarse. El picor lo destroza todo – sueño, concentración, calidad de vida.</p><p>La base es una barrera defectuosa. En eccema, la piel produce pocas de las grasas y proteínas (incluida filaggrina) que sellan la barrera. Se va la hidratación y entran irritantes. El sistema inmune dispara la alarma, se activan las células T y la inflamación se cronifica.</p><p>El clásico – cremas con corticoide – baja la inflamación pero con uso prolongado adelgaza la piel y no arregla la barrera. Muchos quedan atrapados en brotes, cortisona, mejora y nuevo brote. La piel necesita fuerza desde dentro, no solo apagar fuegos en la superficie.</p>",
+      tipsTitle: "Hábitos diarios que protegen la piel con eccema",
+      tips: [
+        {
+          title: "Hidrata en cuanto sales de la ducha",
+          body: "Aplica hidratación en los tres minutos siguientes, con la piel aún húmeda. Atrapa el agua y refuerza la barrera. Nada de frotar con toalla áspera – seca a toques.",
+        },
+        {
+          title: "Telas naturales y suaves",
+          body: "Lana y sintéticos pueden irritar. Algodón, bambú o seda pegados al cuerpo. Lava la ropa nueva antes de ponértela y evita suavizantes con fragancias.",
+        },
+        {
+          title: "Uñas cortas",
+          body: "De noche el picor lleva a rascarse sin darse cuenta, rompe la piel y abre la puerta a infecciones. Uñas cortas limitan el daño. Guantes de algodón en brotes fuertes pueden ayudar.",
+        },
+        {
+          title: "Cuida la humedad del aire",
+          body: "El aire seco, sobre todo con calefacción en invierno, chupa humedad de la piel con eccema. Un humidificador en el dormitorio al 40–50 % de humedad relativa marca un cambio enorme en la función de barrera.",
+        },
+        {
+          title: "Apoyo inmune por dentro",
+          body: "El eccema va de desequilibrio inmune. Omega-3, vitamina D y hongos adaptógenos como Chaga pueden modular la respuesta. Fungtastic Mushroom Extract apoya el sistema endocannabinoide desde dentro.",
+        },
+      ],
+      solutionTitle: "Cómo ayuda el CBG en el eccema",
+      solutionBody:
+        "<p>El CBG tiene un perfil singular entre cannabinoides. Se une a receptores CB2 en células inmunes de la piel – queratinocitos, mastocitos y linfocitos T – y modula su actividad. En eccema, donde esas células sueltan demasiadas citoquinas inflamatorias (IL-4, IL-13, IL-31), el CBG baja el volumen sin apagar todo el sistema.</p><p>Además, el CBG ha demostrado apoyar la diferenciación de queratinocitos, el proceso que construye una barrera que funciona. Eso es lo que la piel con eccema necesita: no solo menos inflamación, sino reparación activa.</p><p>TA-DA Serum con 3 % de CBG es un tratamiento focal intenso para las zonas afectadas. El paquete DUO TA-DA reúne el arsenal: CBD para equilibrio amplio y CBG para acción dirigida. Fungtastic Mushroom Extract con Chaga apoya el equilibrio inmune por dentro vía ECS – si quieres trabajar por los dos frentes.</p>",
+      faq: [
+        {
+          q: "¿Es seguro el CBG en niños con eccema?",
+          a: "Formulamos con pocas materias primas y sin perfume, alcohol ni conservantes. Consulta siempre al pediatra o dermatólogo antes de nuevos productos en dermatitis atópica. Prueba en una zona pequeña y espera 24 horas.",
+        },
+        {
+          q: "¿Puede el CBG sustituir la cortisona?",
+          a: "El CBG no es medicamento y no recomendamos dejar tratamientos prescritos. Sí puede ser un complemento valioso que fortalezca la barrera y calme la inflamación entre brotes, y con el tiempo quizá reduzca la dependencia del corticoide.",
+        },
+        {
+          q: "¿Por qué jojoba y no una crema hidratante normal?",
+          a: "El aceite de jojoba es en realidad un éster de cera parecido al sebum. Penetra sin dejar película plástica en la superficie. Muchas cremas convencionales llevan petrolatos y fragancias que irritan la piel con eccema.",
+        },
+        {
+          q: "¿El CBG ayuda con el picor?",
+          a: "El picor del eccema va de mediadores inflamatorios, sobre todo IL-31. El CBG modula su producción vía CB2. Muchas personas notan menos picor en la primera semana, pero el efecto pleno se construye con el tiempo.",
+        },
+      ],
+      ctaTitle: "Refuerza la barrera – calma la inflamación",
+      ctaSub:
+        "El eccema pide más que crema. El CBG trabaja con las células inmunes de la piel y apoya la reparación de la barrera desde dentro. Dale a tu piel las herramientas para sanar.",
+    },
+    de: {
+      metaTitle: "CBG gegen Ekzem – natürliche Linderung für juckende, entzündete Haut",
+      metaDescription:
+        "Ekzem signalisiert eine gestresste Hautbarriere. CBG stärkt die Barriere und beruhigt den Juckreiz über CB2-Rezeptoren der Haut. Entdecke 1753 SKINCARE.",
+      kicker: "CBG Skincare",
+      h1: "CBG gegen Ekzem – aufhören zu kratzen, anfangen zu heilen",
+      lead: "Ekzem heißt nicht „schlechte Haut“. Es heißt: undichte Barriere und Immunsystem, das überreagiert. CBG adressiert beides gleichzeitig – indem es mit den eigenen Cannabinoid-Rezeptoren der Haut spricht.",
+      problemTitle: "Warum Ekzem juckt und was wirklich passiert",
+      problemBody:
+        "<p>Ekzem – atopische Dermatitis – betrifft bis zu 20 Prozent der Kinder und 10 Prozent der Erwachsenen. Trockene, juckende, entzündete Stellen, die reißen, nässen, infizieren können. Der Juckreiz ist das Qualvollste – er stört Schlaf, Konzentration, Lebensqualität.</p><p>Grundlage: eine defekte Barriere. Bei Ekzem produziert die Haut zu wenig Lipide und Proteine (inklusive Filaggrin), die die Barriere dicht halten. Feuchtigkeit entweicht, Irritationen dringen ein. Das Immunsystem alarmiert, T-Zellen aktivieren sich, Entzündung wird chronisch.</p><p>Der Klassiker – Kortisoncremes – dämpft Entzündung wirksam, dünnt bei Langzeitgebrauch die Haut aus und löst nicht das Barrierproblem. Viele stecken in Schub, Kortison, Besserung, neuem Schub fest. Die Haut braucht Stärkung von innen, nicht nur Brandbekämpfung obenauf.</p>",
+      tipsTitle: "Alltagsgewohnheiten, die Ekzem-Haut schützen",
+      tips: [
+        {
+          title: "Direkt nach dem Duschen eincremen",
+          body: "Innerhalb von drei Minuten nach dem Duschen eincremen, solange die Haut noch feucht ist. Das bindet Wasser und stärkt die Barriere. Kein Scheuern mit rauem Handtuch – tupfen.",
+        },
+        {
+          title: "Weiche Naturfasern",
+          body: "Wolle und Synthetik können reizen. Baumwolle, Bambus oder Seide direkt auf der Haut. Neue Kleidung vorher waschen und Weichspüler mit Duft meiden.",
+        },
+        {
+          title: "Kurze Nägel",
+          body: "Nächtliches Kratzen schädigt die Haut und öffnet für Infektionen. Kurze Nägel begrenzen den Schaden. Baumwollhandschuhe bei akuten Schüben können helfen.",
+        },
+        {
+          title: "Luftfeuchtigkeit optimieren",
+          body: "Trockene Luft, besonders im Winter mit Heizung, entzieht Ekzem-Haut Feuchtigkeit. Ein Luftbefeuchter im Schlafzimmer bei 40–50 % relativer Luftfeuchtigkeit kann die Barrierefunktion massiv verbessern.",
+        },
+        {
+          title: "Immunsystem von innen stützen",
+          body: "Ekzem wird von immunologischem Ungleichgewicht getrieben. Omega-3-Fettsäuren, Vitamin D und adaptogene Pilze wie Chaga können die Immunantwort modulieren. Fungtastic Mushroom Extract unterstützt das ECS von innen.",
+        },
+      ],
+      solutionTitle: "Wie CBG bei Ekzem hilft",
+      solutionBody:
+        "<p>CBG hat ein einzigartiges Profil unter Cannabinoiden. Es bindet an CB2-Rezeptoren in Immunzellen der Haut – Keratinozyten, Mastzellen, T-Zellen – und moduliert ihre Aktivität. Bei Ekzem, wo diese Zellen zu viele entzündliche Zytokine (IL-4, IL-13, IL-31) produzieren, hilft CBG, die Lautstärke zu senken, ohne das ganze System abzuschalten.</p><p>Zudem unterstützt CBG die Keratinozyten-Differenzierung, den Prozess, der eine funktionierende Barriere aufbaut. Genau das braucht Ekzem-Haut – nicht nur Entzündungsdämpfung, sondern aktive Barrierreparatur.</p><p>TA-DA Serum mit 3 % CBG ist eine konzentrierte Spot-Pflege für betroffene Stellen. Das DUO TA-DA-Paket liefert die volle Ausstattung: CBD für breites Gleichgewicht, CBG für gezielte Wirkung. Fungtastic Mushroom Extract mit Chaga unterstützt das Immunbalance von innen über das ECS – für alle, die von beiden Seiten arbeiten wollen.</p>",
+      faq: [
+        {
+          q: "Ist CBG bei Kindern mit Ekzem sicher?",
+          a: "Unsere Produkte sind minimalistisch formuliert ohne Duft, Alkohol, Konservierung. Sprich immer mit dem Arzt, bevor du bei atopischem Ekzem Neues einführst. Kleinen Patch-Test, 24 Stunden warten.",
+        },
+        {
+          q: "Kann CBG Kortison ersetzen?",
+          a: "CBG ist kein Medikament; abgesetzte Therapien empfehlen wir nicht. Es kann aber wertvolle Ergänzung sein, die die Barriere stärkt und Entzündung zwischen Schüben beruhigt – langfristig kann der Kortisonbedarf sinken.",
+        },
+        {
+          q: "Warum Jojobaöl statt normaler Feuchtigkeitscreme?",
+          a: "Jojobaöl ist technisch ein Wachsester, der dem eigenen Talg ähnelt. Es zieht tief ein, ohne Plastikfilm auf der Oberfläche. Viele konventionelle Cremes enthalten Petrolatum und Duftstoffe, die Ekzem-Haut reizen.",
+        },
+        {
+          q: "Hilft CBG gegen den Juckreiz?",
+          a: "Ekzem-Juckreiz wird von Mediatoren wie IL-31 getrieben. CBG moduliert deren Produktion über CB2. Viele berichten schon in der ersten Woche von weniger Juckreiz; die volle Wirkung baut sich über Wochen auf.",
+        },
+      ],
+      ctaTitle: "Barriere stärken – Entzündung beruhigen",
+      ctaSub:
+        "Ekzem braucht mehr als Creme. CBG arbeitet mit Immunzellen der Haut und unterstützt Barrierreparatur von innen. Gib deiner Haut, was sie zum Heilen braucht.",
+    },
+    fr: {
+      metaTitle: "CBG contre l'eczéma – soulager naturellement la peau qui démange",
+      metaDescription:
+        "L'eczéma dit qu'une barrière est en difficulté. Le CBG renforce la barrière et calme les démangeaisons via les récepteurs CB2 de la peau. Découvre 1753 SKINCARE.",
+      kicker: "CBG Skincare",
+      h1: "CBG contre l'eczéma – arrête de gratter, commence à guérir",
+      lead: "L'eczéma, ce n'est pas une « mauvaise peau ». C'est une barrière qui fuit et un système immunitaire qui s'emballe. Le CBG s'attaque aux deux en parlant aux récepteurs cannabinoïdes de ta peau.",
+      problemTitle: "Pourquoi ça gratte et que se passe-t-il vraiment ?",
+      problemBody:
+        "<p>L'eczéma – dermatite atopique – touche jusqu'à 20 % des enfants et 10 % des adultes. Plaques sèches, qui démangent, inflammées, qui peuvent craquer, suinter, s'infecter. Les démangeaisons pourrissent tout – sommeil, concentration, vie quotidienne.</p><p>La base : une barrière défectueuse. En eczéma, la peau fabrique trop peu de lipides et de protéines (filaggrin comprise) qui scellent la barrière. L'eau file, les irritants entrent. L'immunité hurle, les lymphocytes T s'activent, l'inflammation devient chronique.</p><p>Le grand classique – crèmes corticoïdes – calme l'inflammation mais à la longue amincit la peau et ne répare pas la barrière. Beaucoup tournent en rond : poussée, cortisone, mieux, nouvelle poussée. La peau a besoin de se reconstruire de l'intérieur, pas seulement d'éteindre l'incendie en surface.</p>",
+      tipsTitle: "Gestes du quotidien pour une peau à eczéma",
+      tips: [
+        {
+          title: "Hydrate dès la sortie de la douche",
+          body: "En moins de trois minutes, peau encore humide. Tu emprisonnes l'eau et tu renforces la barrière. Pas de frottage brutal – tamponne.",
+        },
+        {
+          title: "Tissus naturels doux",
+          body: "Laine et synthétiques irritent. Coton, bambou ou soie au contact de la peau. Lave les vêtements neufs avant port et évite les adoucissants parfumés.",
+        },
+        {
+          title: "Ongles courts",
+          body: "La nuit, les grattages inconscients abîment la peau et ouvrent aux infections. Ongles courts limitent les dégâts. Gants en coton pendant les poussées aiguës peuvent aider.",
+        },
+        {
+          title: "Humidifie l'air",
+          body: "L'air sec, surtout l'hiver avec le chauffage, aspire l'eau de la peau eczémateuse. Un humidificateur dans la chambre à 40–50 % d'humidité relative change la donne pour la barrière.",
+        },
+        {
+          title: "Soutien immunitaire par l'intérieur",
+          body: "L'eczéma, c'est aussi un déséquilibre immunitaire. Oméga-3, vitamine D, champignons adaptogènes comme le Chaga modulent la réponse. Fungtastic Mushroom Extract soutient l'ECS de l'intérieur.",
+        },
+      ],
+      solutionTitle: "Comment le CBG aide l'eczéma",
+      solutionBody:
+        "<p>Le CBG a un profil à part parmi les cannabinoïdes. Il se fixe aux récepteurs CB2 des cellules immunitaires de la peau – kératinocytes, mastocytes, lymphocytes T – et module leur activité. En eczéma, où ces cellules crachent trop de cytokines pro-inflammatoires (IL-4, IL-13, IL-31), le CBG baisse le son sans couper le courant.</p><p>Il soutient aussi la différenciation des kératinocytes, le processus qui bâtit une barrière qui tient. C'est exactement ce qu'il faut : pas seulement moins d'inflammation, mais réparation active.</p><p>TA-DA Serum à 3 % de CBG est une prise ciblée sur les zones touchées. Le pack DUO TA-DA donne l'arsenal complet : CBD pour l'équilibre large, CBG pour l'action ciblée. Fungtastic Mushroom Extract au Chaga soutient l'équilibre immunitaire via l'ECS – si tu veux jouer sur les deux tableaux.</p>",
+      faq: [
+        {
+          q: "Le CBG est-il sûr pour les enfants avec eczéma ?",
+          a: "Nos formules sont minimalistes, sans parfum, alcool ni conservateurs. Demande toujours l'avis du médecin avant d'ajouter quelque chose sur une dermatite atopique. Test cutané sur une petite zone, 24 h d'attente.",
+        },
+        {
+          q: "Le CBG remplace la cortisone ?",
+          a: "Le CBG n'est pas un médicament – on ne te dit pas d'arrêter un traitement prescrit. En revanche, excellent complément pour renforcer la barrière et calmer l'inflammation entre les poussées, ce qui peut réduire le corticoïde avec le temps.",
+        },
+        {
+          q: "Pourquoi du jojoba plutôt qu'une crème classique ?",
+          a: "L'huile de jojoba est techniquement un cire ester proche du sébum. Elle pénètre sans film plastique en surface. Beaucoup de crèmes classiques mélangent pétrolatums et parfums qui irritent l'eczéma.",
+        },
+        {
+          q: "Le CBG soulage les démangeaisons ?",
+          a: "Les démangeaisons viennent de médiateurs, surtout IL-31. Le CBG module leur production via CB2. Beaucoup voient une baisse dès la première semaine, mais l'effet complet se construit sur la durée.",
+        },
+      ],
+      ctaTitle: "Renforce la barrière – calme l'inflammation",
+      ctaSub:
+        "L'eczéma veut plus qu'une crème. Le CBG travaille avec les cellules immunes et soutient la réparation de la barrière de l'intérieur. Donne à ta peau ce qu'il lui faut pour guérir.",
+    },
   },
   {
     svSlug: "cbg-mot-inflammation",
     enSlug: "cbg-for-inflammation",
+    esSlug: "cbg-para-la-inflamacion-de-la-piel",
+    deSlug: "cbg-gegen-hautentzundung",
+    frSlug: "cbg-contre-linflammation-cutanee",
     category: "cbg",
     productIds: [
       "ta-da-serum",
@@ -476,10 +986,187 @@ export const CBG_PAGES: LandingPage[] = [
       ctaSub:
         "CBG targets the core of inflammation via the skin's CB2 receptors. Stop chasing symptoms – start addressing the cause.",
     },
+    es: {
+      metaTitle: "CBG para la inflamación de la piel – ataca donde importa",
+      metaDescription:
+        "La inflamación cutánea crónica impulsa la mayoría de los problemas de piel. El CBG va a los receptores CB2 para frenar la inflamación en el origen. 1753 SKINCARE.",
+      kicker: "CBG Skincare",
+      h1: "CBG para la inflamación – llega a la raíz de casi todo lo que molesta en la piel",
+      lead: "Acné, rosácea, eccema, envejecimiento prematuro – casi todo comparte motor: inflamación crónica de bajo grado. El CBG apunta al epicentro en la piel: los receptores CB2 de las células inmunes.",
+      problemTitle: "La inflamación que no ves pero tu piel sí nota",
+      problemBody:
+        "<p>La inflamación es defensa natural del cuerpo. Ante daño o infección, el sistema inmune lanza una cascada de señales: más flujo sanguíneo, llegan células, empieza la reparación. El problema es cuando eso no se apaga nunca.</p><p>La inflamación crónica de bajo grado – a veces llamada «inflammaging» – envejece la piel, rompe colágeno, rompe la barrera y crea terreno fértil para más problemas. La vida moderna es tormenta perfecta: comida ultraprocesada, estrés crónico, falta de sueño, toxinas ambientales y skincare excesivo alimentan la cascada.</p><p>El sistema endocannabinoide (ECS) de la piel existe para regular ese equilibrio. Está en queratinocitos, sebocitos, mastocitos, fibroblastos – casi todo lo que importa para la salud cutánea. Con ECS equilibrado, la inflamación queda acotada. Pero el estilo de vida actual lo desajusta, y la piel paga.</p>",
+      tipsTitle: "Vida antiinflamatoria para una piel mejor",
+      tips: [
+        {
+          title: "Come color cada día",
+          body: "Alimentos ricos en polifenoles – bayas, verduras de hoja oscura, cebolla morada, cúrcuma, té verde – aportan compuestos antiinflamatorios naturales. Apunta a al menos cinco colores al día. El plato debe parecer un arcoíris.",
+        },
+        {
+          title: "Termina la ducha en frío",
+          body: "Cierra cada ducha con 30–60 segundos de agua fría. El frío activa vías antiinflamatorias y refuerza los vasos. Diez segundos incómodos, resto del día mejor.",
+        },
+        {
+          title: "Muévete con intensidad moderada",
+          body: "El ejercicio moderado baja marcadores como PCR e IL-6. El sobreentrenamiento los sube. Equilibrio: caminar a diario, yoga o fuerza ligera. La piel refleja la carga interna del cuerpo.",
+        },
+        {
+          title: "Prioriza recuperar",
+          body: "El estrés crónico sube el cortisol, alimenta la inflamación y rompe colágeno. Una rutina diaria de bajar revoluciones – meditación, bosque, respiración. No es lujo, es mantenimiento.",
+        },
+        {
+          title: "Recorta alcohol",
+          body: "El alcohol dispara inflamación sistémica, altera el microbioma intestinal y deshidrata la piel. Ni uno ni dos vasos dejan huella en marcadores inflamatorios hasta 48 horas. Cada día sin alcohol es un regalo para la piel.",
+        },
+      ],
+      solutionTitle: "CBG – el cannabinoide más focalizado contra la inflamación",
+      solutionBody:
+        "<p>Todos los cannabinoides tienen potencial antiinflamatorio, pero el CBG destaca. La investigación indica que se une con más selectividad a los receptores CB2 – los que están en células inmunes y regulan la respuesta inflamatoria. Eso implica un efecto más preciso que el del CBD, que actúa más amplio.</p><p>El CBG frena citoquinas proinflamatorias como TNF-alfa, IL-1beta e IL-6 en el origen. A la vez estimula señales antiinflamatorias. El resultado no es inmunosupresión sino inmunomodulación – el cuerpo vuelve a reaccionar con medida.</p><p>TA-DA Serum con 3 % de CBG concentra potencia antiinflamatoria directamente en la piel. El paquete DUO TA-DA suma el apoyo ECS más amplio del CBD. Fungtastic Mushroom Extract con Chaga y Lion's Mane refuerza además el sistema inmune global – para quien sabe que la piel empieza por dentro.</p>",
+      faq: [
+        {
+          q: "¿El CBG es mejor que el CBD para la inflamación?",
+          a: "No mejor – distinto. El CBG se liga más directo a CB2; el CBD trabaja el ECS de forma más amplia. Con inflamación cutánea marcada, el CBG suele dar un golpe más dirigido. Lo ideal es combinar – se potencian.",
+        },
+        {
+          q: "¿Notaré efecto al momento?",
+          a: "Mucha gente siente la piel irritada más calmada desde la primera aplicación. El cambio estructural de verdad – marcadores más bajos, barrera más fuerte – se construye en semanas. Vale la pena la paciencia.",
+        },
+        {
+          q: "¿El CBG ayuda con el envejecimiento inflamatorio?",
+          a: "Sí. La inflamación crónica de bajo grado rompe colágeno y elastina. Al modular la cascada vía CB2, el CBG ayuda a conservar la arquitectura de la piel. Anti-edad en el nivel más básico.",
+        },
+        {
+          q: "¿Funciona el CBG tópico y por dentro?",
+          a: "Sí. En tópico (TA-DA Serum) el CBG va directo a CB2 en la piel. Por dentro, Fungtastic Mushroom Extract apoya el ECS sistémico. Juntos atacan por dos caminos.",
+        },
+      ],
+      ctaTitle: "Apaga la inflamación – no solo los síntomas",
+      ctaSub:
+        "El CBG va al núcleo de la inflamación vía receptores CB2. Deja de perseguir síntomas – ve a la causa.",
+    },
+    de: {
+      metaTitle: "CBG gegen Hautentzündung – die Wurzel angehen",
+      metaDescription:
+        "Chronische Hautentzündung treibt die meisten Hautprobleme. CBG zielt auf CB2-Rezeptoren, um Entzündung an der Quelle zu dämpfen. 1753 SKINCARE.",
+      kicker: "CBG Skincare",
+      h1: "CBG gegen Entzündung – zur Wurzel jedes Hautproblems vordringen",
+      lead: "Akne, Rosacea, Ekzem, vorzeitige Alterung – fast jedes Hautproblem teilt einen Motor: chronische, niedriggradige Entzündung. CBG zielt direkt auf das Epizentrum: CB2-Rezeptoren auf Immunzellen.",
+      problemTitle: "Die Entzündung, die du nicht siehst, aber die Haut spürt",
+      problemBody:
+        "<p>Entzündung ist natürliche Abwehr. Bei Verletzung oder Infektion startet das Immunsystem eine Kaskade: mehr Durchblutung, Immunzellen, Reparatur. Das Problem: der Schalter geht nicht mehr aus.</p><p>Chronische, niedriggradige Entzündung – manchmal „Inflammaging“ genannt – treibt Hautalterung, bricht Kollagen, stört die Barriere und schafft Nährboden für weitere Probleme. Modernes Leben ist der perfekte Sturm: Ultra-Processed Food, chronischer Stress, Schlafmangel, Umweltgifte und überzogene Pflege nähren die Kaskade.</p><p>Das endocannabinoide System (ECS) der Haut soll genau dieses Gleichgewicht regeln. Es sitzt in Keratinozyten, Sebozyten, Mastzellen, Fibroblasten – praktisch jeder relevanten Zellart. Ist das ECS im Gleichgewicht, bleibt Entzündung im Rahmen. Moderner Lifestyle stört das – die Haut zahlt.</p>",
+      tipsTitle: "Entzündungsarme Lebensweise für bessere Haut",
+      tips: [
+        {
+          title: "Täglich Farbe auf den Teller",
+          body: "Polyphenolreiche Lebensmittel – Beeren, dunkles Blattgemüse, rote Zwiebel, Kurkuma, grüner Tee – liefern natürliche Anti-inflammatorika. Mindestens fünf Farben pro Tag. Der Teller soll wie ein Regenbogen aussehen.",
+        },
+        {
+          title: "Kaltes Finish unter der Dusche",
+          body: "Beende jede Dusche mit 30–60 Sekunden kaltem Wasser. Kälte aktiviert entzündungshemmende Signalwege und stärkt die Gefäße. Zehn Sekunden unbequem, der Rest des Tages top.",
+        },
+        {
+          title: "Moderat bewegen",
+          body: "Moderates Training senkt Marker wie CRP und IL-6. Übertraining erhöht sie. Balance: tägliche Spaziergänge, Yoga, leichtes Krafttraining. Die Haut spiegelt die innere Belastung.",
+        },
+        {
+          title: "Erholung priorisieren",
+          body: "Chronischer Stress hebt Cortisol, treibt Entzündung und bricht Kollagen. Tägliche Recovery – Meditation, Wald, Atemarbeit. Kein Luxus, sondern Wartung.",
+        },
+        {
+          title: "Alkohol minimieren",
+          body: "Alkohol treibt systemische Entzündung, stört das Darmmikrobiom und dehydriert die Haut. Schon ein bis zwei Gläser beeinflussen Entzündungsmarker bis zu 48 Stunden. Jeder alkoholfreie Tag ist ein Geschenk für die Haut.",
+        },
+      ],
+      solutionTitle: "CBG – das zielgenaueste Cannabinoid gegen Entzündung",
+      solutionBody:
+        "<p>Alle Cannabinoide sind entzündungshemmend, aber CBG sticht heraus. Forschung zeigt: CBG bindet selektiver an CB2-Rezeptoren – jene auf Immunzellen, die die Entzündungsantwort steuern. Das bedeutet präzisere Wirkung als bei CBD, das breiter arbeitet.</p><p>CBG hemmt pro-inflammatorische Zytokine wie TNF-alpha, IL-1beta und IL-6 direkt an der Quelle und stimuliert zugleich anti-inflammatorische Botenstoffe. Das Ergebnis ist keine Immunsuppression, sondern Immunmodulation – der Körper lernt wieder proportional zu reagieren.</p><p>TA-DA Serum mit 3 % CBG liefert konzentrierte entzündungshemmende Kraft direkt in die Haut. Das DUO TA-DA-Paket ergänzt CBDs breiteres ECS-Support. Fungtastic Mushroom Extract mit Chaga und Lion's Mane unterstützt zusätzlich das systemische Immunsystem – für alle, die wissen: Hautgesundheit beginnt innen.</p>",
+      faq: [
+        {
+          q: "Ist CBG besser als CBD bei Entzündung?",
+          a: "Nicht besser – anders. CBG bindet direkter an CB2, CBD arbeitet breiter am gesamten ECS. Bei ausgeprägter Hautentzündung wirkt CBG oft gezielter. Ideal: beides – synergistische Anti-inflammationskraft.",
+        },
+        {
+          q: "Spüre ich sofort etwas?",
+          a: "Viele empfinden gereizte Haut schon nach der ersten Anwendung ruhiger. Echte strukturelle Veränderung – weniger Entzündungsmarker, stärkere Barriere – baut sich über Wochen auf. Geduld zahlt sich aus.",
+        },
+        {
+          q: "Hilft CBG bei inflammatorischer Alterung?",
+          a: "Absolut. Chronische Niedrig-Entzündung bricht Kollagen und Elastin. Über CB2 moduliert CBG die Kaskade und hilft der Haut, ihre Struktur länger zu bewahren. Anti-Aging auf fundamentalem Level.",
+        },
+        {
+          q: "Wirkt CBG topisch und von innen?",
+          a: "Ja. Topisch (TA-DA Serum) zielt CBG auf CB2 in der Haut. Von innen unterstützt Fungtastic Mushroom Extract das systemische ECS. Kombination greift von beiden Seiten.",
+        },
+      ],
+      ctaTitle: "Entzündung löschen – nicht nur Symptome",
+      ctaSub:
+        "CBG zielt auf den Kern der Entzündung über CB2-Rezeptoren der Haut. Hör auf, Symptomen hinterherzujagen – geh an die Ursache.",
+    },
+    fr: {
+      metaTitle: "CBG contre l'inflammation cutanée – viser la cause profonde",
+      metaDescription:
+        "L'inflammation chronique de la peau motive la plupart des soucis cutanés. Le CBG cible les récepteurs CB2 pour calmer à la source. 1753 SKINCARE.",
+      kicker: "CBG Skincare",
+      h1: "CBG contre l'inflammation – remonter à la racine des problèmes de peau",
+      lead: "Acné, rosacée, eczéma, vieillissement précoce – presque tout partage un moteur : inflammation chronique de bas grade. Le CBG vise l'épicentre dans la peau : les récepteurs CB2 des cellules immunitaires.",
+      problemTitle: "L'inflammation invisible que ta peau ressent",
+      problemBody:
+        "<p>L'inflammation, c'est la défense du corps. Blessure ou infection : cascade de signaux, flux sanguin, cellules, réparation. Le souci, c'est quand ça ne s'arrête jamais.</p><p>L'inflammation chronique de bas grade – parfois appelée « inflammaging » – accélère le vieillissement cutané, casse le collagène, fragilise la barrière et nourrit les autres problèmes. La vie moderne cumule : ultra-transformé, stress chronique, manque de sommeil, toxiques, sur-soins. Tout alimente la cascade.</p><p>Le système endocannabinoïde (ECS) de la peau est là pour réguler cet équilibre. Présent dans kératinocytes, sébocytes, mastocytes, fibroblastes – quasiment toutes les cellules qui comptent. ECS équilibré, inflammation tenue. Le mode de vie actuel le déséquilibre – la peau trinque.</p>",
+      tipsTitle: "Mode de vie anti-inflammatoire pour une meilleure peau",
+      tips: [
+        {
+          title: "Mange des couleurs chaque jour",
+          body: "Aliments riches en polyphénols – baies, verts foncés, oignon rouge, curcuma, thé vert – apportent des composés anti-inflammatoires naturels. Vise au moins cinq couleurs par jour. L'assiette doit ressembler à un arc-en-ciel.",
+        },
+        {
+          title: "Finis la douche au froid",
+          body: "Termine chaque douche par 30–60 secondes d'eau froide. Le froid active des voies anti-inflammatoires et tonifie les vaisseaux. Dix secondes inconfortables, journée au top.",
+        },
+        {
+          title: "Bouge modérément",
+          body: "L'exercice modéré fait baisser CRP, IL-6. Le surentraînement les remonte. Trouve l'équilibre : marche quotidienne, yoga, renforcement léger. La peau reflète la charge interne.",
+        },
+        {
+          title: "Priorise la récupération",
+          body: "Le stress chronique monte le cortisol, nourrit l'inflammation et casse le collagène. Une routine quotidienne – méditation, forêt, respiration. Pas du luxe, de l'entretien.",
+        },
+        {
+          title: "Réduis l'alcool",
+          body: "L'alcool pousse l'inflammation systémique, perturbe le microbiote et déshydrate la peau. Même un ou deux verres laissent une trace sur les marqueurs jusqu'à 48 h. Chaque jour sans alcool est un cadeau pour la peau.",
+        },
+      ],
+      solutionTitle: "CBG – le cannabinoïde le plus ciblé contre l'inflammation",
+      solutionBody:
+        "<p>Tous les cannabinoïdes sont anti-inflammatoires, mais le CBG se démarque. La recherche montre une liaison plus sélective aux récepteurs CB2 – ceux des cellules immunitaires qui pilotent la réponse inflammatoire. Effet plus précis que le CBD, qui reste plus large.</p><p>Le CBG freine les cytokines pro-inflammatoires comme TNF-alpha, IL-1beta et IL-6 à la source et stimule les signaux apaisants. Pas d'immunosuppression – de l'immunomodulation : le corps réapprend à réagir à la bonne mesure.</p><p>TA-DA Serum à 3 % de CBG concentre la puissance anti-inflammatoire dans la peau. Le pack DUO TA-DA ajoute le soutien ECS plus large du CBD. Fungtastic Mushroom Extract au Chaga et Lion's Mane soutient aussi l'immunité globale – pour qui sait que la peau commence de l'intérieur.</p>",
+      faq: [
+        {
+          q: "CBG mieux que CBD pour l'inflammation ?",
+          a: "Pas mieux – différent. CBG plus direct sur CB2, CBD plus global sur l'ECS. Inflammation cutanée marquée : le CBG cible souvent plus fin. Idéal : les deux – synergie anti-inflammatoire.",
+        },
+        {
+          q: "Un effet immédiat ?",
+          a: "Beaucoup sentent la peau irritée plus calme dès la première couche. Le vrai changement structurel – marqueurs en baisse, barrière plus solide – se construit sur des semaines. La patience paie.",
+        },
+        {
+          q: "Le CBG aide le vieillissement inflammatoire ?",
+          a: "Oui. L'inflammation chronique de bas grade ronge collagène et élastine. Via CB2, le CBG module la cascade et aide la peau à garder sa structure plus longtemps. Anti-âge au niveau le plus fondamental.",
+        },
+        {
+          q: "CBG en topique et en interne ?",
+          a: "Oui. En topique (TA-DA Serum), le CBG vise CB2 dans la peau. En interne, Fungtastic Mushroom Extract soutient l'ECS systémique. Combiné, ça frappe des deux côtés.",
+        },
+      ],
+      ctaTitle: "Éteins l'inflammation – pas seulement les symptômes",
+      ctaSub:
+        "Le CBG vise le cœur de l'inflammation via les récepteurs CB2 de la peau. Arrête de courir après les symptômes – attaque la cause.",
+    },
   },
   {
     svSlug: "cbg-mot-torr-hud",
     enSlug: "cbg-for-dry-skin",
+    esSlug: "cbg-para-la-piel-seca",
+    deSlug: "cbg-gegen-trockene-haut",
+    frSlug: "cbg-pour-peau-seche",
     category: "cbg",
     productIds: ["ta-da-serum", "duo-kit", "au-naturel-makeup-remover"],
     sv: {
@@ -582,10 +1269,163 @@ export const CBG_PAGES: LandingPage[] = [
       ctaSub:
         "CBG gives your skin building material for a barrier that actually holds. Combined with jojoba oil that the skin recognizes – that's skincare working with biology, not against it.",
     },
+    es: {
+      metaTitle: "CBG para la piel seca – recupera hidratación y barrera con naturalidad",
+      metaDescription:
+        "La piel seca dice que la barrera no retiene. El CBG apoya la producción de lípidos y refuerza la barrera vía receptores CB2. 1753 SKINCARE.",
+      kicker: "CBG Skincare",
+      h1: "CBG para la piel seca – construye una barrera que aguanta",
+      lead: "La sequedad rara vez es beber poca agua. Es una barrera que pierde. El CBG ayuda a que la piel fabrique los lípidos adecuados y levante una barrera que de verdad retiene la humedad – no solo un parche superficial.",
+      problemTitle: "Por qué se reseca la piel",
+      problemBody:
+        "<p>La barrera – estrato córneo – es como un muro: los corneocitos son los ladrillos y los lípidos (ceramidas, colesterol, ácidos grasos) el mortero. Si falla la síntesis de lípidos, aparecen grietas y el TEWL se dispara.</p><p>Las causas se acumulan: la edad baja la producción natural, el frío seca el aire, la calefacción baja la humedad interior, las limpiezas agresivas disuelven lípidos de barrera y el exceso de exfoliación adelgaza la capa protectora. Estrés y mal dormir también cuentan – el cortisol mide y empeora la función de barrera.</p><p>La mayoría de hidratantes atacan el síntoma, no la causa. Ponen una capa oclusiva que frena la evaporación un rato, pero no enseñan a la piel a reparar su propia barrera. Es la diferencia entre cinta adhesiva en una tubería y arreglar la tubería.</p>",
+      tipsTitle: "Estrategias que fortalecen la barrera desde dentro",
+      tips: [
+        {
+          title: "Come más grasa – la buena",
+          body: "Los omega-3 y omega-6 son ladrillos para los lípidos de barrera. Pescado graso, aguacate, nueces y linaza dan material de obra. Una dieta muy baja en grasa se nota al instante en el equilibrio hídrico de la piel.",
+        },
+        {
+          title: "Duchas cortas y templadas",
+          body: "Duchas largas y calientes disuelven lípidos y suben la pérdida de agua. Ocho minutos máximo, agua templada. Menos sensación spa, más piel agradecida.",
+        },
+        {
+          title: "Evita limpiadores con SLS",
+          body: "El lauril sulfato sódico y similares desengrasan demasiado: se llevan la suciedad y también los lípidos de barrera. Cambia a un aceite limpiador como Au Naturel que limpia sin despojar.",
+        },
+        {
+          title: "Humidificador en invierno",
+          body: "El aire interior en invierno puede ser más seco que el desierto. Un humidificador al 40–50 % en el dormitorio cambia el juego. La piel se repara de noche – dale el ambiente adecuado.",
+        },
+      ],
+      solutionTitle: "Cómo el CBG apoya la piel seca en profundidad",
+      solutionBody:
+        "<p>El CBG interactúa con CB2 en los queratinocitos, las células que levantan la barrera. Al modular esos receptores, apoya la síntesis natural de lípidos y la diferenciación. La piel no solo recibe humedad de fuera – mejora su capacidad de retenerla.</p><p>Además, el CBG es antiinflamatorio y calma la inflamación de bajo nivel que suele acompañar piel seca y agrietada. La inflamación rompe más la barrera y cierra el círculo – el CBG lo corta.</p><p>TA-DA Serum lleva CBG en aceite de jojoba ecológico, con ésteres de cera casi idénticos a los lípidos propios. La piel los reconoce y los usa en la obra. El DUO-kit suma The ONE e I LOVE para apoyo CBD+CBG completo. Empieza la limpieza con Au Naturel – aceite MCT que limpia sin tumbar la barrera.</p>",
+      faq: [
+        {
+          q: "¿Con un aceite basta para piel seca?",
+          a: "La piel seca suele faltarle lípidos, no solo agua. Un aceite como la jojoba aporta justo eso. Si quieres, sérum de ácido hialurónico sobre piel húmeda y encima TA-DA Serum para sellar.",
+        },
+        {
+          q: "¿Puedo usar aceite con CBG en el contorno?",
+          a: "Sí. La zona es fina y sensible, pero TA-DA Serum solo tiene CBG y jojoba ecológica – cero irritantes. Toca con el anular, cantidad pequeña. Evita el ojo abierto.",
+        },
+        {
+          q: "¿Sirve el CBG en piel extremadamente seca y agrietada?",
+          a: "El CBG ayuda a reparar la barrera desde dentro, que es la raíz de las grietas. En casos extremos, TA-DA Serum generoso sobre piel húmeda y encima una fina capa de crema habitual como sellado oclusivo.",
+        },
+      ],
+      ctaTitle: "Deja de parchar – empieza a reparar",
+      ctaSub:
+        "El CBG da material para una barrera que de verdad aguanta. Con jojoba que la piel reconoce – skincare a favor de la biología, no en contra.",
+    },
+    de: {
+      metaTitle: "CBG gegen trockene Haut – Feuchtigkeit und Barriere natürlich stärken",
+      metaDescription:
+        "Trockene Haut signalisiert: Die Barriere hält nicht. CBG unterstützt Lipidproduktion und stärkt die Barriere über CB2-Rezeptoren. 1753 SKINCARE.",
+      kicker: "CBG Skincare",
+      h1: "CBG gegen trockene Haut – baue eine Barriere, die hält",
+      lead: "Trockene Haut hat selten mit zu wenig Wassertrinken zu tun. Es geht um eine undichte Barriere. CBG hilft der Haut, die richtigen Lipide zu produzieren und eine Barriere aufzubauen, die Feuchtigkeit wirklich behält – nicht nur oberflächlich flicken.",
+      problemTitle: "Warum wird die Haut trocken?",
+      problemBody:
+        "<p>Die Barriere – Stratum corneum – ist wie eine Mauer: abgestorbene Zellen (Corneozyten) sind die Ziegel, Lipide (Ceramide, Cholesterol, Fettsäuren) der Mörtel. Stört die Lipidproduktion, entstehen Risse und der TEWL steigt stark.</p><p>Die Ursachen sind viele: Alter mindert natürliche Lipidbildung, kalter Winter trocknet die Luft, Heizung senkt die Raumluftfeuchtigkeit, aggressive Reiniger lösen Barrierlipide, übermäßiges Peeling dünnt den Schutz aus. Stress und Schlafmangel spielen mit – Cortisol messbar verschlechtert die Barrierefunktion.</p><p>Die meisten Feuchtigkeitscremes bekämpfen Symptome, nicht Ursachen. Sie legen eine okklusive Schicht auf, die Verdunstung kurz stoppt, helfen der Haut aber nicht, die eigene Barriere zu reparieren. Klebeband am Rohr versus Rohr reparieren.</p>",
+      tipsTitle: "Strategien, die die Barriere von innen stärken",
+      tips: [
+        {
+          title: "Mehr Fett – das richtige",
+          body: "Omega-3 und Omega-6 sind Bausteine der Barrierlipide. Fetter Fisch, Avocado, Walnüsse, Leinsamen liefern Material. Zu fettarme Ernährung sieht man sofort am Feuchtigkeitshaushalt der Haut.",
+        },
+        {
+          title: "Kürzer und kühler duschen",
+          body: "Lange heiße Duschen lösen Barrierlipide und erhöhen Wasserverlust. Unter acht Minuten, lauwarm. Weniger Spa-Gefühl, mehr Dankbarkeit der Haut.",
+        },
+        {
+          title: "SLS-Reiniger meiden",
+          body: "Natriumlaurylsulfat und ähnliche Tenside fetten zu gut ab: Schmutz weg, Barrierlipide mit. Wechsel zu ölbasiertem Reiniger wie Au Naturel – reinigt ohne Auslaugung.",
+        },
+        {
+          title: "Luftbefeuchter im Winter",
+          body: "Innenluft im Winter kann trockener sein als die Wüste. Luftbefeuchter bei 40–50 % im Schlafzimmer macht einen Riesenunterschied. Die Haut repariert nachts – gib ihr das Klima.",
+        },
+      ],
+      solutionTitle: "Wie CBG trockene Haut tiefer unterstützt",
+      solutionBody:
+        "<p>CBG interagiert mit CB2-Rezeptoren in Keratinozyten, den Zellen, die die Barriere bauen. Durch Modulation unterstützt es natürliche Lipidsynthese und Differenzierung. Die Haut bekommt nicht nur Feuchtigkeit von außen – sie verbessert die eigene Retention.</p><p>Zudem wirkt CBG entzündungshemmend und beruhigt die oft begleitende Niedrig-Entzündung bei trockener, rissiger Haut. Entzündung verschlimmert Barriereschäden – CBG durchbricht den Teufelskreis.</p><p>TA-DA Serum trägt CBG in bio-Jojobaöl, dessen Wachsester fast identisch mit eigenen Lipiden sind. Die Haut erkennt sie und baut sie ein. Das DUO-kit ergänzt The ONE und I LOVE für vollen CBD+CBG-Support. Reinigung startet mit Au Naturel – MCT-Öl, das die Barriere nicht aushebelt.</p>",
+      faq: [
+        {
+          q: "Reicht ein Öl für trockene Haut?",
+          a: "Trockene Haut fehlen Lipide, nicht unbedingt Wasser. Jojobaöl liefert genau Barrierlipide. Optional Hyaluronsäure-Serum auf feuchte Haut, darüber TA-DA Serum zum Versiegeln.",
+        },
+        {
+          q: "CBG-Öl um die Augen?",
+          a: "Ja. Die Haut dort ist dünn, aber TA-DA Serum enthält nur CBG und bio-Jojoba – keine Reizstoffe. Sanft mit dem Ringfinger tupfen. Nicht ins Auge.",
+        },
+        {
+          q: "Wirkt CBG bei extrem trockener, rissiger Haut?",
+          a: "CBG hilft, die Barriere von innen zu reparieren – die Wurzel der Risse. Bei extremer Trockenheit TA-DA Serum großzügig auf feuchte Haut, optional dünne Schicht normaler Creme als okklusiver Verschluss.",
+        },
+      ],
+      ctaTitle: "Aufhören zu flicken – anfangen zu reparieren",
+      ctaSub:
+        "CBG liefert Baumaterial für eine Barriere, die wirklich hält. Plus Jojoba, das die Haut erkennt – Pflege mit Biologie, nicht dagegen.",
+    },
+    fr: {
+      metaTitle: "CBG pour peau sèche – rétablir hydratation et barrière naturellement",
+      metaDescription:
+        "La peau sèche dit que la barrière ne tient pas. Le CBG soutient la production de lipides et renforce la barrière via CB2. 1753 SKINCARE.",
+      kicker: "CBG Skincare",
+      h1: "CBG pour peau sèche – bâtis une barrière qui tient",
+      lead: "La sécheresse, ce n'est presque jamais « pas assez d'eau ». C'est une barrière qui fuit. Le CBG aide la peau à fabriquer les bons lipides et à reconstruire une barrière qui retient vraiment l'humidité – pas juste un pansement en surface.",
+      problemTitle: "Pourquoi la peau se dessèche",
+      problemBody:
+        "<p>La barrière – stratum corneum – ressemble à un mur : cornéocytes en briques, lipides (céramides, cholestérol, acides gras) en mortier. Quand la production lipidique déraille, des fissures apparaissent et le TEWL explose.</p><p>Les causes s'accumulent : l'âge réduit les lipides, l'hiver assèche l'air, le chauffage rabaisse l'humidité intérieure, les nettoyants agressifs dissolvent les lipides de barrière, l'exfoliation excessive amincit la couche protectrice. Stress et mauvais sommeil jouent – le cortisol dégrade mesurablement la barrière.</p><p>La plupart des crèmes traitent le symptôme. Elles posent une couche occlusive qui freine l'évaporation un moment, sans aider la peau à réparer sa propre barrière. Scotch sur un tuyau qui fuit versus réparer le tuyau.</p>",
+      tipsTitle: "Stratégies qui renforcent la barrière de l'intérieur",
+      tips: [
+        {
+          title: "Mange plus de bons lipides",
+          body: "Oméga-3 et oméga-6 sont les briques des lipides de barrière. Poisson gras, avocat, noix, graines de lin donnent la matière. Une alimentation trop pauvre en gras se lit tout de suite sur l'équilibre hydrique.",
+        },
+        {
+          title: "Douches plus courtes, plus tièdes",
+          body: "Douches longues et brûlantes dissolvent les lipides et augmentent la perte d'eau. Huit minutes max, eau tiède. Moins effet spa, plus de gratitude cutanée.",
+        },
+        {
+          title: "Évite les nettoyants au SLS",
+          body: "Le lauryl sulfate de sodium et consorts dégraissent trop : saleté partie, lipides de barrière aussi. Passe à une huile lavante comme Au Naturel – nettoie sans dépouiller.",
+        },
+        {
+          title: "Humidificateur l'hiver",
+          body: "L'air intérieur en hiver peut être plus sec que le désert. Humidificateur à 40–50 % dans la chambre : game changer. La peau se répare la nuit – donne-lui le bon climat.",
+        },
+      ],
+      solutionTitle: "Comment le CBG soutient la peau sèche en profondeur",
+      solutionBody:
+        "<p>Le CBG dialogue avec CB2 dans les kératinocytes, cellules de la barrière. En modulant, il soutient la synthèse lipidique naturelle et la différenciation. La peau ne reçoit pas seulement de l'eau de l'extérieur – elle retient mieux par elle-même.</p><p>Anti-inflammatoire, il calme aussi la basse inflammation qui accompagne souvent peau sèche et craquelée. L'inflammation creuse la barrière – cercle vicieux que le CBG coupe.</p><p>TA-DA Serum porte le CBG dans de l'huile de jojoba bio, aux cires proches des lipides cutanés. La peau les intègre directement. Le DUO-kit ajoute The ONE et I LOVE pour le duo CBD+CBG. Démaquillage avec Au Naturel – huile MCT qui nettoie sans casser la barrière.</p>",
+      faq: [
+        {
+          q: "Une huile suffit pour peau sèche ?",
+          a: "Souvent il manque des lipides, pas seulement de l'eau. La jojoba apporte exactement ça. Option : sérum acide hyaluronique sur peau humide, puis TA-DA Serum pour sceller.",
+        },
+        {
+          q: "Huile au CBG autour des yeux ?",
+          a: "Oui. Peau fine, mais TA-DA Serum = CBG + jojoba bio, zéro irritant. Tapote avec l'annulaire. Pas dans l'œil.",
+        },
+        {
+          q: "Le CBG sur peau ultra sèche et crevassée ?",
+          a: "Le CBG aide à réparer la barrière de l'intérieur – racine des crevasses. En extrême : TA-DA Serum généreux sur peau humide, fine couche de crème classique par-dessus en occulsion.",
+        },
+      ],
+      ctaTitle: "Arrête de rafistoler – commence à réparer",
+      ctaSub:
+        "Le CBG donne la matière pour une barrière qui tient vraiment. Avec de la jojoba que la peau reconnaît – des soins avec la biologie, pas contre elle.",
+    },
   },
   {
     svSlug: "cbg-mot-rodnad",
     enSlug: "cbg-for-redness",
+    esSlug: "cbg-para-el-enrojecimiento",
+    deSlug: "cbg-gegen-hautrotung",
+    frSlug: "cbg-contre-les-rougeurs",
     category: "cbg",
     productIds: ["ta-da-serum", "duo-kit"],
     sv: {
@@ -688,10 +1528,163 @@ export const CBG_PAGES: LandingPage[] = [
       ctaSub:
         "CBG works with your blood vessels' and immune system's own mechanisms to reduce redness. No chemical shortcuts – just biology that works.",
     },
+    es: {
+      metaTitle: "CBG para el enrojecimiento – calma vasodilatación e inflamación",
+      metaDescription:
+        "El rubor facial suele venir de inflamación y vasos hiperactivos. El CBG modula los receptores CB2 para devolver la calma. 1753 SKINCARE.",
+      kicker: "CBG Skincare",
+      h1: "CBG para el enrojecimiento – cuando la piel no deja de ponerse roja",
+      lead: "Un rubor que no se va no es piel fina ni mala suerte. Son vasos que reaccionan de más e inflamación que no termina de apagarse. El CBG actúa en ambos frentes – directo sobre los receptores cannabinoides de la piel.",
+      problemTitle: "Por qué enrojece la piel y por qué el color se queda",
+      problemBody:
+        "<p>Un rubor pasajero es normal: los vasos se dilatan para regular temperatura o como parte de la respuesta inmune. El problema es el rubor crónico, cuando los vasos no vuelven a cerrarse bien. Con el tiempo pueden quedar dilatados de forma fija, visibles como hilos rojos.</p><p>Varios mecanismos lo sostienen. Mediadores inflamatorios como prostaglandinas y citoquinas mantienen la dilatación. Las terminaciones nerviosas se vuelven hipersensibles y disparan vasodilatación con mínima provocación: calor, picante, estrés. La barrera también cuenta: dañada, deja pasar irritantes y alimenta el ciclo.</p><p>Los tratamientos clásicos a menudo aprietan vasos (vasoconstrictores) o matan bacterias. Alivio temporal, inflamación de fondo intacta. Y los vasoconstrictores pueden provocar rebote – vasos aún más abiertos cuando cede el efecto.</p>",
+      tipsTitle: "Hábitos inteligentes que bajan el rojo",
+      tips: [
+        {
+          title: "Evita vasodilatadores conocidos",
+          body: "Alcohol, mucha cafeína, comida muy picante y bebidas muy calientes dilatan vasos. No hace falta borrarlo todo: observa qué te dispara y elige con cabeza.",
+        },
+        {
+          title: "Protege de viento y frío",
+          body: "Viento helado y saltos de temperatura castigan los vasos. Bufanda en la cara en invierno y evita salir de un sitio caliente al frío brusco – transición gradual.",
+        },
+        {
+          title: "Simplifica la rutina",
+          body: "Cada producto extra es un posible irritante. Piel propensa al rubor: limpieza suave, un sérum activo (CBG), protector solar. Más no es mejor – a veces menos es más.",
+        },
+        {
+          title: "Entrena sin pasarte de calor",
+          body: "El cardio intenso sube la temperatura y enrojece la cara. Baja intensidad, ambiente fresco, pulveriza agua fría en el entreno. Moverse sí; cocerse, no.",
+        },
+      ],
+      solutionTitle: "Cómo el CBG calma el enrojecimiento en el origen",
+      solutionBody:
+        "<p>La interacción del CBG con CB2 da un doble golpe al rubor. Primero modula la respuesta inmune y baja citoquinas y prostaglandinas proinflamatorias que mantienen los vasos abiertos. Segundo, el CBG ha mostrado efecto vasorrelajante que ayuda a normalizar el tono vascular.</p><p>Es un enfoque distinto a los vasoconstrictores. En lugar de forzar el cierre químico, el CBG ayuda a que los vasos recuperen su equilibrio natural. Sin rebote típico, porque trabaja con el cuerpo, no en su contra.</p><p>TA-DA Serum con 3 % de CBG en jojoba va directo a las zonas rojas. Fórmula mínima – solo dos ingredientes – mínimo riesgo de irritación. El DUO-kit amplía el apoyo cannabinoide con CBD+CBG para equilibrio a largo plazo en todo el rostro.</p>",
+      faq: [
+        {
+          q: "¿Qué tan rápido baja el CBG el rojo?",
+          a: "Mucha gente nota que el rubor agudo se calma antes, a menudo en 20–30 minutos. El fondo rojo crónico baja poco a poco en semanas a medida que cae la inflamación y los vasos se normalizan.",
+        },
+        {
+          q: "¿El CBG quita los vasitos visibles?",
+          a: "No elimina vasos ya fijados de forma permanente – eso suele ser láser. Sí puede frenar que aparezcan más dilataciones permanentes al bajar la inflamación y ayudar al tono de los vasos actuales.",
+        },
+        {
+          q: "¿CBG o niacinamida para rojez?",
+          a: "Vías distintas. La niacinamida refuerza la barrera y tiene algo de antiinflamatorio. El CBG modula la inmunidad vía CB2 y aporta vasorrelajación poco común. Juntas suelen funcionar mejor.",
+        },
+      ],
+      ctaTitle: "Recupera la calma natural de tu piel",
+      ctaSub:
+        "El CBG trabaja con los mecanismos propios de vasos e inmunidad para bajar el rojo. Sin atajos químicos – biología que cumple.",
+    },
+    de: {
+      metaTitle: "CBG gegen Hautrötung – Gefäße und Entzündung beruhigen",
+      metaDescription:
+        "Gesichtsrötung kommt oft von Entzündung und überaktiven Gefäßen. CBG moduliert CB2-Rezeptoren und stellt Ruhe her. 1753 SKINCARE.",
+      kicker: "CBG Skincare",
+      h1: "CBG gegen Rötung – wenn die Haut nicht aufhört zu flushen",
+      lead: "Rötung, die bleibt, hat nichts mit dünner Haut oder Pech zu tun. Es sind Gefäße, die überreagieren, und Entzündung, die nicht ausklingt. CBG adressiert beides – direkt über Cannabinoid-Rezeptoren der Haut.",
+      problemTitle: "Warum wird die Haut rot und warum bleibt es?",
+      problemBody:
+        "<p>Kurzes Flushen ist normal – Gefäße weiten sich für Temperatur oder Immunantwort. Chronische Rötung entsteht, wenn sie nicht richtig wieder zusammenziehen. Mit der Zeit können sie dauerhaft erweitert sein, sichtbar als feine rote Äderchen.</p><p>Mehrere Mechanismen halten das aufrecht. Entzündungsmediatoren wie Prostaglandine und Zytokine halten die Gefäße weit. Nervenenden werden hypersensibel und triggern Vasodilatation bei minimaler Provokation – Hitze, scharfes Essen, Stress. Die Barriere zählt mit: geschädigt, lassen Irritationen den Kreislauf weiterlaufen.</p><p>Konventionelle Therapie zielt oft auf mechanische Vasokonstriktion oder Bakterienabtötung. Kurzfristige Linderung, zugrunde liegende Entzündung bleibt. Vasokonstriktoren können Rebound auslösen – noch mehr Weitung, wenn die Wirkung nachlässt.</p>",
+      tipsTitle: "Clevere Gewohnheiten gegen Rötung",
+      tips: [
+        {
+          title: "Bekannte Vasodilatatoren meiden",
+          body: "Alkohol, viel Koffein, scharfes Essen, sehr heiße Getränke weiten Gefäße. Du musst nicht alles streichen – erkenne deine Trigger und entscheide bewusst.",
+        },
+        {
+          title: "Schutz vor Wind und Kälte",
+          body: "Kalter Wind und Temperatursprünge stressen Gefäße. Schal vors Gesicht im Winter und nicht direkt aus der Wärme in die Kälte – Übergang schaffen.",
+        },
+        {
+          title: "Routine vereinfachen",
+          body: "Jedes Extra-Produkt ist potenzieller Reiz. Rötungsneigung: milder Reiniger, ein aktives Serum (CBG), Sonnenschutz. Mehr ist nicht besser – weniger oft mehr.",
+        },
+        {
+          title: "Sport ohne Überhitzung",
+          body: "Intensives Training hebt Körpertemperatur und flusht das Gesicht. Niedrigere Intensität, kühle Umgebung, kaltes Wasser sprühen. Bewegung ja – Überhitzen nein.",
+        },
+      ],
+      solutionTitle: "Wie CBG Rötung an der Quelle beruhigt",
+      solutionBody:
+        "<p>CBGs Wechselwirkung mit CB2 hat doppelte Wirkung gegen Rötung. Erst moduliert es die Immunantwort und senkt pro-inflammatorische Zytokine und Prostaglandine, die Gefäße offen halten. Zweitens zeigt CBG vasorelaxierende Eigenschaften, die helfen, den Gefäßtonus zu normalisieren.</p><p>Das ist grundsätzlich anders als Vasokonstriktoren. Statt chemisch zuzukneifen, hilft CBG, zum natürlichen Gleichgewicht zurückzufinden. Kein typischer Rebound, weil der Körper mitspielt, nicht dagegen arbeitet.</p><p>TA-DA Serum mit 3 % CBG in Jojoba direkt auf rötungsneige Zonen. Minimalformel – zwei Inhaltsstoffe – minimiert Reizrisiko. Das DUO-kit liefert breiteren Cannabinoid-Support mit CBD+CBG fürs ganze Gesicht langfristig.</p>",
+      faq: [
+        {
+          q: "Wie schnell reduziert CBG Rötung?",
+          a: "Viele spüren, dass akute Rötung schneller nachlässt, oft innerhalb von 20–30 Minuten. Chronischer Hintergrundrot nimmt über Wochen ab, wenn Entzündung sinkt und Gefäße sich normalisieren.",
+        },
+        {
+          q: "Hilft CBG bei sichtbaren Äderchen?",
+          a: "CBG entfernt keine bereits dauerhaft erweiterten Gefäße – dafür braucht es oft Laser. Es kann aber verhindern, dass mehr Gefäße dauerhaft weit werden, indem es Entzündung senkt und den Tonus unterstützt.",
+        },
+        {
+          q: "CBG oder Niacinamid bei Rötung?",
+          a: "Unterschiedliche Wege. Niacinamid stärkt die Barriere und wirkt leicht entzündungshemmend. CBG moduliert Immunantwort über CB2 und hat besondere vasorelaxierende Eigenschaften. Kombination liefert oft das beste Ergebnis.",
+        },
+      ],
+      ctaTitle: "Stelle die natürliche Ruhe deiner Haut wieder her",
+      ctaSub:
+        "CBG arbeitet mit den eigenen Mechanismen von Gefäßen und Immunsystem gegen Rötung. Keine chemischen Abkürzungen – Biologie, die funktioniert.",
+    },
+    fr: {
+      metaTitle: "CBG contre les rougeurs – calmer vasodilatation et inflammation",
+      metaDescription:
+        "Les rougeurs du visage viennent souvent d'inflammation et de vaisseaux survoltés. Le CBG module CB2 pour rétablir le calme. 1753 SKINCARE.",
+      kicker: "CBG Skincare",
+      h1: "CBG contre les rougeurs – quand la peau n'arrête pas de rougir",
+      lead: "Des rougeurs qui restent, ce n'est ni peau fine ni malchance. Ce sont des vaisseaux qui sur-réagissent et une inflammation qui ne s'éteint pas. Le CBG agit sur les deux – en direct sur les récepteurs cannabinoïdes de la peau.",
+      problemTitle: "Pourquoi la peau rougit – et pourquoi ça dure",
+      problemBody:
+        "<p>Un flush passager, c'est normal : les vaisseaux se dilatent pour la température ou l'immunité. La rougeur chronique, c'est quand ils ne se referment plus correctement. Avec le temps, dilatation fixe, filets rouges visibles.</p><p>Plusieurs mécanismes entretiennent ça. Médiateurs inflammatoires – prostaglandines, cytokines – gardent les vaisseaux ouverts. Les terminaisons nerveuses deviennent hypersensibles : chaleur, épices, stress. La barrière compte : abîmée, les irritants nourrissent la boucle.</p><p>Les soins classiques ciblent souvent vasoconstricteurs ou antibactérien. Soulagement court, inflammation de fond intacte. Et les vasoconstricteurs peuvent rebondir – vaisseaux encore plus larges quand ça retombe.</p>",
+      tipsTitle: "Habits malins pour moins rougir",
+      tips: [
+        {
+          title: "Évite les vasodilatateurs connus",
+          body: "Alcool, grosse dose de caféine, plats épicés, boissons brûlantes dilatent tous. Pas besoin de tout supprimer : repère tes déclencheurs et choisis.",
+        },
+        {
+          title: "Protège du vent et du froid",
+          body: "Vent froid et chocs thermiques stressent les vaisseaux. Écharpe sur le visage en hiver, pas de passage brutal chaud-froid.",
+        },
+        {
+          title: "Simplifie la routine",
+          body: "Chaque produit en plus est un irritant potentiel. Peau à rougeurs : nettoyant doux, un sérum actif (CBG), solaire. Plus n'est pas mieux – moins, souvent oui.",
+        },
+        {
+          title: "Bouge sans surchauffer",
+          body: "Cardio intense monte la température et flushe le visage. Intensité modérée, lieu frais, brumisation d'eau froide. Bouger oui – cuire non.",
+        },
+      ],
+      solutionTitle: "Comment le CBG calme les rougeurs à la source",
+      solutionBody:
+        "<p>L'interaction CBG–CB2 donne un double effet. D'abord modulation immunitaire et baisse des cytokines et prostaglandines pro-inflammatoires qui gardent les vaisseaux dilatés. Ensuite effet vasorelaxant documenté pour normaliser le tonus.</p><p>Approche fondamentalement différente des vasoconstricteurs. Au lieu de forcer chimiquement, le CBG aide les vaisseaux à retrouver leur équilibre. Moins de rebond classique, parce que le mécanisme travaille avec le corps.</p><p>TA-DA Serum 3 % CBG dans la jojoba, direct sur les zones rouges. Formule minimale – deux ingrédients – risque d'irritation minimal. Le DUO-kit élargit le soutien cannabinoïde CBD+CBG pour l'équilibre du visage dans la durée.</p>",
+      faq: [
+        {
+          q: "Le CBG réduit les rougeurs en combien de temps ?",
+          a: "Beaucoup voient les flush aigus se calmer vite, souvent en 20–30 minutes. Le fond rouge chronique baisse sur des semaines quand l'inflammation retombe et les vaisseaux se normalisent.",
+        },
+        {
+          q: "Le CBG efface les petits vaisseaux visibles ?",
+          a: "Il ne supprime pas les vaisseaux déjà fixés en permanent – souvent laser. En revanche, il peut limiter l'apparition de nouvelles dilatations en baissant l'inflammation et en aidant le tonus.",
+        },
+        {
+          q: "CBG ou niacinamide pour les rougeurs ?",
+          a: "Mécanismes différents. Niacinamide renforce la barrière et calme un peu. CBG module l'immunité via CB2 avec vasorelaxation distinctive. Les deux ensemble donnent souvent le meilleur résultat.",
+        },
+      ],
+      ctaTitle: "Retrouve le calme naturel de ta peau",
+      ctaSub:
+        "Le CBG s'appuie sur les mécanismes propres des vaisseaux et de l'immunité pour réduire les rougeurs. Pas de raccourcis chimiques – de la biologie qui tient la route.",
+    },
   },
   {
     svSlug: "cbg-mot-kanslig-hud",
     enSlug: "cbg-for-sensitive-skin",
+    esSlug: "cbg-para-piel-sensible",
+    deSlug: "cbg-fur-empfindliche-haut",
+    frSlug: "cbg-peau-sensible",
     category: "cbg",
     productIds: ["ta-da-serum", "duo-ta-da"],
     sv: {
@@ -802,10 +1795,175 @@ export const CBG_PAGES: LandingPage[] = [
       ctaSub:
         "Two ingredients. Zero irritants. CBG in jojoba oil gives sensitive skin exactly what it needs – strength through gentleness.",
     },
+    es: {
+      metaTitle: "CBG para piel sensible – fuerza a través de la suavidad",
+      metaDescription:
+        "La piel sensible necesita menos ingredientes, no más. CBG en jojoba pura refuerza la barrera y calma la reactividad vía CB2. 1753 SKINCARE.",
+      kicker: "CBG Skincare",
+      h1: "CBG para piel sensible – la fuerza más suave del cuidado de la piel",
+      lead: "Piel sensible no es un tipo de piel – es un estado. Y eso significa que puede mejorar. CBG en su forma más limpia, sin añadidos, da justo lo que pide: apoyo sin estrés.",
+      problemTitle: "Por qué la piel se vuelve sensible – ¿y puede cambiar?",
+      problemBody:
+        "<p>La piel sensible reacciona con rojez, escozor, tirantez o sarpullido a cosas que otra piel tolera. Puede ser genética, pero lo habitual es adquirida – barrera debilitada por el exterior.</p><p>Paradójicamente, el skincare excesivo es una causa muy frecuente. Capas de activos – AHA, BHA, retinol, vitamina C, niacinamida – pueden debilitar la barrera y sensibilizar. Los limpiadores con tensioactivos arrancan lípidos. Perfumes y conservantes disparan respuestas inmunes. El sistema nervioso cutáneo se hiperactiva y baja el umbral de reacción.</p><p>La buena noticia: se puede revertir. La barrera se reconstruye, los nervios se calman, la inmunidad se modula. Pero hace falta lo contrario de lo que grita la industria: menos productos, no más. Y que lo que uses esté pensado para fortalecer, no solo para «tratar».</p>",
+      tipsTitle: "Minimalismo para piel sensible",
+      tips: [
+        {
+          title: "Fase de eliminación",
+          body: "Cuatro semanas sin activos fuertes. Solo limpieza suave y un sérum protector. Deja que la piel te muestre su línea base antes de sumar. A menudo descubres que necesitaba mucho menos de lo que creías.",
+        },
+        {
+          title: "Lee el INCI desde el final",
+          body: "Lo último de la lista va en dosis mínima pero suele concentrar perfume, conservantes, colorantes – los sensibilizadores clásicos. Lista corta casi siempre gana a lista larga.",
+        },
+        {
+          title: "Un producto nuevo cada vez",
+          body: "Dos semanas mínimo con cada novedad antes de añadir otra. Si reacciona, sabrás el culpable. Paciencia al principio ahorra meses de detective después.",
+        },
+        {
+          title: "Protege la barrera de verdad",
+          body: "Protector mineral cada día, nunca químico (suele irritar más). Evita calor extremo. Agua templada. Cada gesto que cuida la barrera hace la piel menos reactiva con el tiempo.",
+        },
+      ],
+      solutionTitle: "Por qué el CBG encaja en piel sensible",
+      solutionBody:
+        "<p>El CBG es el cannabinoide activo más suave – y a la vez de los más potentes, por cómo actúa: no provoca reacción como ácidos o retinol, modula los CB2 propios y ayuda a que la célula responda con proporción.</p><p>Para piel sensible eso significa tres cosas: menos inflamación de fondo, mejor barrera por diferenciación de queratinocitos, nervios menos alarmistas. El CBG fortalece sin maltratar de camino.</p><p>TA-DA Serum está pensado para pieles así: solo dos ingredientes – 3 % CBG y aceite de jojoba ecológico. Sin perfumes, conservantes, emulsionantes ni otros sospechosos habituales. DUO TA-DA lleva el espectro CBD+CBG con la misma filosofía mínima.</p>",
+      faq: [
+        {
+          q: "¿Es el CBG lo bastante suave para piel extremadamente sensible?",
+          a: "TA-DA Serum solo lleva CBG y jojoba ecológica – nada en la fórmula que irrite de serie. El CBG calma, no excita. Prueba detrás de la oreja si dudas – las reacciones son rarísimas.",
+        },
+        {
+          q: "Reacciono a todo – ¿por qué el CBG sería distinto?",
+          a: "La mayoría de reacciones vienen de perfume, conservantes, emulsionantes o ácidos – no de aceites puros. TA-DA Serum no lleva eso. Y el CBG dialoga con el sistema propio en lugar de imponer desde fuera.",
+        },
+        {
+          q: "¿El CBG puede hacer mi piel menos sensible con el tiempo?",
+          a: "Sí, esa es la idea. Refuerza la barrera y modula la inmunidad, subiendo el umbral de tolerancia. Tras unas semanas de uso regular mucha gente nota que aguanta más. No es parche exprés – es fortalecimiento real.",
+        },
+        {
+          q: "¿Debo dejar todos los demás productos?",
+          a: "Recomendamos empezar minimal: Au Naturel para limpiar, TA-DA Serum como único activo, protector solar mineral. Cuatro semanas para estabilizar. Luego decides si de verdad necesitas más.",
+        },
+      ],
+      ctaTitle: "La piel sensible merece simplicidad",
+      ctaSub:
+        "Dos ingredientes. Cero irritantes. CBG en jojoba da justo lo que hace falta – fuerza con suavidad.",
+    },
+    de: {
+      metaTitle: "CBG für empfindliche Haut – Stärke durch Sanftheit",
+      metaDescription:
+        "Empfindliche Haut braucht weniger Inhaltsstoffe, nicht mehr. CBG in reinem Jojobaöl stärkt die Barriere und beruhigt Reaktivität über CB2. 1753 SKINCARE.",
+      kicker: "CBG Skincare",
+      h1: "CBG für empfindliche Haut – die sanfteste Kraft in der Pflege",
+      lead: "Empfindliche Haut ist kein Hauttyp – es ist ein Zustand. Und der kann sich bessern. CBG in seiner reinsten Form, ohne Zusätze, gibt genau das, worum sie bittet: Unterstützung ohne Stress.",
+      problemTitle: "Warum wird Haut empfindlich – und kann das wechseln?",
+      problemBody:
+        "<p>Empfindliche Haut reagiert mit Rötung, Brennen, Spannungsgefühl oder Ausschlag auf Dinge, die normale Haut verkraftet. Es kann genetisch sein, meist ist es erworben – geschwächte Barriere durch äußere Einflüsse.</p><p>Paradoxerweise ist überzogene Hautpflege eine der häufigsten Ursachen. Schicht um Schicht Aktive – AHA, BHA, Retinol, Vitamin C, Niacinamid – kann die Barriere schwächen und sensibilisieren. Tensid-Reiniger entfernen Lipide. Duft und Konservierung triggern Immunreaktionen. Das Nervensystem der Haut wird hyperaktiv und senkt die Reizschwelle.</p><p>Die gute Nachricht: Empfindliche Haut kann sich erholen. Barriere lässt sich aufbauen, Nervenenden beruhigen, Immunantwort modulieren. Es braucht das Gegenteil von Industrie-Messaging: weniger Produkte, nicht mehr. Und Formulierungen, die stärken, nicht nur „behandeln“.</p>",
+      tipsTitle: "Minimalismus für empfindliche Haut",
+      tips: [
+        {
+          title: "Eliminationsphase starten",
+          body: "Vier Wochen ohne alle Aktiven. Nur milder Reiniger und schützendes Serum. Lass die Haut die Baseline zeigen, bevor du wieder aufbaust. Oft braucht sie viel weniger als gedacht.",
+        },
+        {
+          title: "INCI von unten lesen",
+          body: "Die letzten Einträge sind gering dosiert, oft aber Duft, Konservierung, Farbstoffe – klassische Sensibilizer. Kurze Liste schlägt lange fast immer.",
+        },
+        {
+          title: "Ein Produkt nach dem anderen",
+          body: "Mindestens zwei Wochen pro Neuheit, bevor das nächste kommt. Bei Reaktion weißt du den Übeltäter. Geduld spart später Monate Troubleshooting.",
+        },
+        {
+          title: "Barriere aktiv schützen",
+          body: "Täglich mineralischer Sonnenschutz, nie chemischer (reizt oft). Überhitzung meiden. Lauwarmes Wasser. Jede Entscheidung für die Barriere macht die Haut langfristig robuster.",
+        },
+      ],
+      solutionTitle: "Warum CBG perfekt für empfindliche Haut ist",
+      solutionBody:
+        "<p>CBG ist das sanftestes aktive Cannabinoid – und paradox eines der stärksten, weil es nicht reizt wie Säuren oder Retinol, sondern CB2 moduliert und Zellen proportionaler auf Reize reagieren lässt.</p><p>Für empfindliche Haut heißt das: niedrigere entzündliche Grundlinie, bessere Barriere durch Keratinozyten-Differenzierung, ruhigere Nervenenden. CBG stärkt ohne auf dem Weg zu stressen.</p><p>TA-DA Serum ist dafür formuliert: nur zwei Inhaltsstoffe – 3 % CBG und bio-Jojobaöl. Keine Düfte, Konservierung, Emulgatoren. DUO TA-DA liefert CBD+CBG im selben Minimalismus.</p>",
+      faq: [
+        {
+          q: "Ist CBG wirklich mild genug für extrem empfindliche Haut?",
+          a: "TA-DA Serum hat nur CBG und bio-Jojoba – nichts, was von Haus aus reizt. CBG wirkt beruhigend, nicht stimulierend. Patch-Test hinter dem Ohr – Reaktionen sind extrem selten.",
+        },
+        {
+          q: "Ich reagiere auf alles – warum sollte CBG anders sein?",
+          a: "Die meisten Reaktionen kommen von Duft, Konservierung, Emulgatoren oder Säuren – nicht von reinen Ölen. TA-DA Serum enthält das nicht. CBG arbeitet mit dem eigenen System statt von außen aufzuzwingen.",
+        },
+        {
+          q: "Kann CBG meine Haut langfristig weniger empfindlich machen?",
+          a: "Ja, genau darum geht es. Barriere stärken, Immunantwort modulieren, Toleranzschwelle heben. Nach wenigen Wochen regulärer Nutzung verträgt die Haut oft mehr. Kein Quickfix – echte Stärkung.",
+        },
+        {
+          q: "Soll ich alle anderen Produkte stoppen?",
+          a: "Wir empfehlen minimalistisch zu starten: Au Naturel zum Reinigen, TA-DA Serum als einziges Aktiv, mineralischer Lichtschutz. Vier Wochen Stabilisierung. Dann entscheiden, ob mehr wirklich nötig ist.",
+        },
+      ],
+      ctaTitle: "Empfindliche Haut verdient Einfachheit",
+      ctaSub:
+        "Zwei Inhaltsstoffe. Null Reizstoffe. CBG in Jojoba gibt genau das, was gebraucht wird – Stärke durch Sanftheit.",
+    },
+    fr: {
+      metaTitle: "CBG peau sensible – la force par la douceur",
+      metaDescription:
+        "La peau sensible veut moins d'ingrédients, pas plus. Le CBG dans de la jojoba pure renforce la barrière et calme la réactivité via CB2. 1753 SKINCARE.",
+      kicker: "CBG Skincare",
+      h1: "CBG peau sensible – la force la plus douce des soins",
+      lead: "Peau sensible n'est pas un « type » – c'est un état. Donc ça peut s'améliorer. Le CBG à l'état pur, sans artifices, offre exactement ce qu'elle demande : du soutien sans stress.",
+      problemTitle: "Pourquoi la peau devient sensible – et est-ce réversible ?",
+      problemBody:
+        "<p>Peau sensible, c'est rougeurs, picotements, tiraillements ou éruptions pour des choses que d'autres tolèrent. Parfois génétique, le plus souvent acquis – barrière fragilisée par l'extérieur.</p><p>Paradoxe : la sur-couche de soins est une cause majeure. Couches d'actifs – AHA, BHA, rétinol, vitamine C, niacinamide – peuvent fragiliser la barrière et sensibiliser. Les tensioactifs arrachent les lipides. Parfums et conservateurs déclenchent l'immunité. Le système nerveux cutané s'emballe et baisse le seuil de tolérance.</p><p>Bonne nouvelle : on peut revenir en arrière. Barrière à rebâtir, nerfs à apaiser, immunité à moduler. Il faut faire l'inverse de ce que vend l'industrie : moins de produits, pas plus. Et des formules qui renforcent, pas seulement qui « traitent ».</p>",
+      tipsTitle: "Minimalisme pour peau sensible",
+      tips: [
+        {
+          title: "Phase d'élimination",
+          body: "Quatre semaines sans actifs agressifs. Nettoyant doux + sérum protecteur. Laisse la peau montrer sa ligne de base avant de réintroduire. Souvent elle demande bien moins que tu crois.",
+        },
+        {
+          title: "Liste INCI par le bas",
+          body: "Les derniers ingrédients sont peu dosés mais souvent parfum, conservateurs, colorants – les sensibilisants classiques. Liste courte bat liste longue presque toujours.",
+        },
+        {
+          title: "Une nouveauté à la fois",
+          body: "Deux semaines minimum par produit avant d'en ajouter un autre. Si ça réagit, tu sais qui est coupable. Patience au début = mois gagnés après.",
+        },
+        {
+          title: "Protège la barrière activement",
+          body: "Solaire minéral chaque jour, jamais chimique (souvent irritant). Pas de surchaleur. Eau tiède. Chaque choix pro-barrière rend la peau moins réactive avec le temps.",
+        },
+      ],
+      solutionTitle: "Pourquoi le CBG est fait pour la peau sensible",
+      solutionBody:
+        "<p>Le CBG est le cannabinoïde actif le plus doux – et pourtant parmi les plus puissants, parce qu'il ne pousse pas une réaction comme acides ou rétinol : il module CB2 et aide les cellules à répondre à la bonne échelle.</p><p>Pour peau sensible : inflammation de fond plus basse, barrière renforcée par meilleure différenciation des kératinocytes, nerfs moins sursautés. Le CBG renforce sans martyriser en chemin.</p><p>TA-DA Serum est pensé pour ça : deux ingrédients – 3 % CBG et huile de jojoba bio. Zéro parfum, conservateurs, émulsifiants. DUO TA-DA : spectre CBD+CBG, même philosophie minimaliste.</p>",
+      faq: [
+        {
+          q: "Le CBG est assez doux pour peau ultra sensible ?",
+          a: "TA-DA Serum = CBG + jojoba bio uniquement. Rien qui irrite par défaut. Le CBG apaise, ne stimule pas. Test derrière l'oreille si doute – réactions ultra rares.",
+        },
+        {
+          q: "Je réagis à tout – pourquoi le CBG serait différent ?",
+          a: "La plupart des réactions viennent parfum, conservateurs, émulsifiants, acides – pas des huiles pures. TA-DA Serum n'en a pas. Le CBG travaille avec le système cutané, pas en impose de l'extérieur.",
+        },
+        {
+          q: "Le CBG peut rendre ma peau moins sensible avec le temps ?",
+          a: "Oui, c'est le but. Barrière plus solide, immunité modulée, seuil de tolérance plus haut. Après quelques semaines d'usage régulier, beaucoup tolèrent davantage. Pas de quick fix – du vrai renfort.",
+        },
+        {
+          q: "J'arrête tous les autres produits ?",
+          a: "On conseille de démarrer minimal : Au Naturel au nettoyage, TA-DA Serum comme seul actif, solaire minéral. Quatre semaines pour stabiliser. Ensuite tu vois si tu as vraiment besoin de plus.",
+        },
+      ],
+      ctaTitle: "La peau sensible mérite la simplicité",
+      ctaSub:
+        "Deux ingrédients. Zéro irritant. CBG dans la jojoba – exactement le nécessaire, la force par la douceur.",
+    },
   },
   {
     svSlug: "cbg-mot-pigmentflackar",
     enSlug: "cbg-for-pigmentation",
+    esSlug: "cbg-para-la-hiperpigmentacion",
+    deSlug: "cbg-gegen-pigmentflecken",
+    frSlug: "cbg-contre-lhyperpigmentation",
     category: "cbg",
     productIds: ["ta-da-serum", "duo-ta-da", "au-naturel-makeup-remover"],
     sv: {
@@ -923,6 +2081,180 @@ export const CBG_PAGES: LandingPage[] = [
       ctaTitle: "Even out – without bleaching away",
       ctaSub:
         "CBG addresses pigmentation at the source by modulating melanocyte signaling pathways. A more even skin tone without aggressive bleaching agents.",
+    },
+    es: {
+      metaTitle: "CBG para la hiperpigmentación – unifica el tono con naturalidad",
+      metaDescription:
+        "Las manchas se alimentan de inflamación y daño solar. El CBG modula la melanina vía receptores CB2 y equilibra el tono. 1753 SKINCARE.",
+      kicker: "CBG Skincare",
+      h1: "CBG para la hiperpigmentación – equilibra el tono desde dentro",
+      lead: "Las manchas cuentan una historia de inflamación, sol y hormonas. En lugar de blanquear a la fuerza con químicos duros, puedes ir a la raíz – con CBG que regula la actividad de los melanocitos a través del sistema endocannabinoide.",
+      problemTitle: "De dónde salen las manchas",
+      problemBody:
+        "<p>Manchas oscuras – hiperpigmentación – aparecen cuando los melanocitos, células que fabrican melanina, se pasan de activos en zonas concretas. Puede ser daño solar (lentigos), hiperpigmentación posinflamatoria tras acné o eccema, o melasma hormonal.</p><p>En todos los casos la inflamación es pieza central. Los UV inflaman y disparan melanina. El acné deja rastros inflamatorios que piden más pigmento a los melanocitos. Hormonas como el estrógeno aumentan la sensibilidad de los melanocitos a señales inflamatorias. El estrés oxidativo empeora el conjunto.</p><p>Los tratamientos típicos – hidroquinona, peeling químico, luz pulsada intensa – frenan melanina o exfolian pigmento. Funcionan, pero irritan y a veces provocan nueva inflamación y nuevas manchas. Hace falta un enfoque más suave y más profundo.</p>",
+      tipsTitle: "Prevenir y reducir manchas",
+      tips: [
+        {
+          title: "El fotoprotector lo es todo",
+          body: "Los UV son el motor número uno. FPS 30+ cada día, todo el año, también junto a ventanas. Aplica generoso y reaplica cada dos horas al sol. Ningún sérum compensa un sol mal gestionado.",
+        },
+        {
+          title: "Calma la inflamación al instante",
+          body: "Cada grano inflamado, rascado de eccema o irritación puede dejar mancha. Cuanto antes bajes la inflamación, menos riesgo de pigmento fijo. CBG directo sobre zonas alteradas puede ayudar a reducir ese riesgo.",
+        },
+        {
+          title: "Antioxidantes dentro y fuera",
+          body: "El estrés oxidativo empuja la melanina. Vitamina C, E y alimentos ricos en polifenoles (bayas, té verde, chocolate negro) ayudan a neutralizar radicales que disparan la pigmentación.",
+        },
+        {
+          title: "Cuidado con la exfoliación",
+          body: "La exfoliación química puede ayudar en manchas superficiales, pero con mesura. Exceso = barrera dañada = hiperpigmentación posinflamatoria – justo lo que quieres evitar. Menos es más.",
+        },
+        {
+          title: "Paciencia con los resultados",
+          body: "El pigmento vive profundo en epidermis y dermis. Tres a seis meses de constancia para ver cambio real. Los blanqueadores rápidos a veces ganan tiempo a cambio de irritación y nuevas manchas.",
+        },
+      ],
+      solutionTitle: "El papel del CBG en el equilibrio del pigmento",
+      solutionBody:
+        "<p>El sistema endocannabinoide también está en melanocitos, y CB2 interviene en regular la síntesis de melanina. La interacción del CBG con esos receptores abre un ángulo nuevo – en lugar de bloquear melanina directamente como la hidroquinona, el CBG modula las vías de señal que la controlan.</p><p>Su potente perfil antiinflamatorio ataca además la causa raíz de muchos tipos de hiperpigmentación. Baja el fuego inflamatorio y se reduce la señal que empuja a los melanocitos a producir de más. Es cortar la corriente en lugar de intentar atenuar a mano.</p><p>TA-DA Serum con 3 % de CBG va directo a las zonas pigmentadas y actúa de forma local sobre CB2 en melanocitos. DUO TA-DA da apoyo CBD+CBG completo para todo el rostro. Au Naturel limpia sin irritar – clave para no reencender la inflamación.</p>",
+      faq: [
+        {
+          q: "¿El CBG blanquea la piel?",
+          a: "No blanquea – modula la actividad de melanocitos vía CB2. El resultado es tono más uniforme, no más claro en general. Conservas tu pigmento natural; se regula el exceso en parches.",
+        },
+        {
+          q: "¿Sirve el CBG para todo tipo de manchas?",
+          a: "Ataca el mecanismo inflamatorio detrás de muchas hiperpigmentaciones. La posinflamatoria suele responder mejor. Sol y melasma pueden mejorar pero llevan más tiempo y exigen fotoprotección estricta.",
+        },
+        {
+          q: "¿Cuánto tarda en verse efecto?",
+          a: "La pigmentación es de las preocupaciones que más tardan. Cuenta tres a seis meses de uso diario más sol controlado. El CBG va con la biología – no es milagro instantáneo, pero el resultado tiende a ser sostenible.",
+        },
+        {
+          q: "¿Puedo combinar CBG con vitamina C?",
+          a: "Sí, gran tándem. La vitamina C frena la tirosinasa necesaria para melanina; el CBG modula vías vía CB2. Niveles distintos, efecto amplificado.",
+        },
+      ],
+      ctaTitle: "Unifica sin blanquear a la fuerza",
+      ctaSub:
+        "El CBG aborda la pigmentación en el origen modulando las señales de los melanocitos. Tono más parejo sin blanqueadores agresivos.",
+    },
+    de: {
+      metaTitle: "CBG gegen Pigmentflecken – Hautton natürlich ausgleichen",
+      metaDescription:
+        "Pigmentierung wird von Entzündung und UV-Schaden getrieben. CBG moduliert Melaninproduktion über CB2-Rezeptoren. 1753 SKINCARE.",
+      kicker: "CBG Skincare",
+      h1: "CBG gegen Pigmentflecken – Hautton von innen balancieren",
+      lead: "Dunkle Flecken erzählen von Entzündung, Sonne und Hormonen. Statt sie mit harten Bleichmitteln wegzuschießen, kannst du den Mechanismus anpacken – mit CBG, das Melanozytenaktivität über das endocannabinoide System reguliert.",
+      problemTitle: "Woher kommen Pigmentflecken?",
+      problemBody:
+        "<p>Dunkle Flecken – Hyperpigmentierung – entstehen, wenn Melanozyten, die Melanin produzieren, in bestimmten Arealen überaktiv werden. Sonnenschäden (Lentigines), postinflammatorische Hyperpigmentierung nach Akne oder Ekzem oder hormonelles Melasma.</p><p>Gemeinsam ist: Entzündung spielt eine zentrale Rolle. UV löst Entzündung aus, die Melaninproduktion triggert. Akne hinterlässt inflammatorische Spuren, die Melanozyten zur Überproduktion anregen. Hormone wie Östrogen erhöhen die Sensibilität der Melanozyten für Entzündungssignale. Oxidativer Stress verschärft alles.</p><p>Standardbehandlungen – Hydrochinon, chemische Peelings, IPL – hemmen Melanin oder exfolieren pigmentierte Haut. Wirkt, kann aber reizen und paradox neue Entzündung und neue Flecken erzeugen. Es braucht einen sanfteren, fundamentaleren Ansatz.</p>",
+      tipsTitle: "Pigmentflecken vorbeugen und mildern",
+      tips: [
+        {
+          title: "Sonnenschutz ist alles",
+          body: "UV ist mit Abstand der wichtigste Treiber. LSF 30+ täglich, ganzjährig, auch innen am Fenster. Großzügig auftragen, in der Sonne alle zwei Stunden nachlegen. Kein Serum ersetzt mangelhaften Lichtschutz.",
+        },
+        {
+          title: "Entzündung sofort behandeln",
+          body: "Jeder entzündete Pickel, gekratztes Ekzem oder Reiz kann Pigmentspuren hinterlassen. Je schneller du die Entzündung beruhigst, desto geringer das Risiko dauerhafter Pigmentierung. CBG direkt auf gereizte Stellen kann helfen.",
+        },
+        {
+          title: "Antioxidantien innen und außen",
+          body: "Oxidativer Stress treibt Melanin. Vitamin C, E und polyphenolreiche Lebensmittel (Beeren, grüner Tee, dunkle Schokolade) helfen, freie Radikale zu neutralisieren.",
+        },
+        {
+          title: "Vorsicht beim Peeling",
+          body: "Chemisches Peeling kann bei oberflächlichen Flecken helfen, muss aber sanft sein. Über-Peeling schädigt die Barriere und triggert postinflammatorische Pigmentierung – genau das Gegenteil vom Ziel. Weniger ist mehr.",
+        },
+        {
+          title: "Geduld bei Ergebnissen",
+          body: "Pigment sitzt tief in Epidermis und Dermis. Drei bis sechs Monate konsequente Behandlung für echten Wandel. Schnelle Bleichmittel liefern schnelle Resultate, oft mit Reizung und neuen Flecken.",
+        },
+      ],
+      solutionTitle: "CBGs Rolle beim Pigmentgleichgewicht",
+      solutionBody:
+        "<p>Das endocannabinoide System existiert auch in Melanozyten, CB2-Rezeptoren beeinflussen die Melaninsynthese. CBGs Interaktion mit diesen Rezeptoren eröffnet einen neuen Winkel – statt Melanin direkt zu blockieren wie Hydrochinon, moduliert CBG die steuernden Signalwege.</p><p>CBGs starke entzündungshemmende Wirkung trifft zudem die Wurzel vieler Hyperpigmentierungsarten. Weniger Entzündung in der Haut, weniger Trigger für Melanozyten-Überproduktion. Wie den Stromkreis unterbrechen statt die Lampe mit den Fingern zu dimmen.</p><p>TA-DA Serum mit 3 % CBG direkt auf pigmentierte Areale, lokal an Melanozyten-CB2. DUO TA-DA liefert vollen CBD+CBG-Support fürs Gesicht. Au Naturel reinigt ohne Reizung – entscheidend, um keine neue Entzündung zu starten.</p>",
+      faq: [
+        {
+          q: "Bleicht CBG die Haut?",
+          a: "Nein – es moduliert Melanozytenaktivität über CB2. Ergebnis: gleichmäßigerer Ton, nicht generell heller. Natürliches Pigment bleibt, Überproduktion in Flecken wird reguliert.",
+        },
+        {
+          q: "Wirkt CBG bei allen Fleckentypen?",
+          a: "Es adressiert den inflammatorischen Mechanismus hinter den meisten Hyperpigmentierungen. Postinflammatorisch reagiert oft am besten. Sonnenflecken und Melasma können sich bessern, brauchen aber länger und strikten Sonnenschutz.",
+        },
+        {
+          q: "Wie lange bis sichtbare Wirkung?",
+          a: "Pigmentierung ist das langsamste Hautthema. Rechne mit drei bis sechs Monaten täglicher Anwendung plus Lichtschutz. CBG arbeitet mit Biologie – kein Quickfix, aber haltbarere Resultate.",
+        },
+        {
+          q: "CBG mit Vitamin C kombinieren?",
+          a: "Absolut, starkes Duo. Vitamin C hemmt Tyrosinase für Melaninsynthese, CBG moduliert Wege über CB2. Verschiedene Ebenen, verstärkende Wirkung.",
+        },
+      ],
+      ctaTitle: "Ausgleichen – ohne aggressives Bleichen",
+      ctaSub:
+        "CBG geht Pigmentierung an der Quelle an, indem es Melanozyten-Signalwege moduliert. Gleichmäßigerer Ton ohne harte Bleichmittel.",
+    },
+    fr: {
+      metaTitle: "CBG contre l'hyperpigmentation – unifier le teint naturellement",
+      metaDescription:
+        "Les taches sont poussées par l'inflammation et les UV. Le CBG module la mélanine via CB2 et harmonise le teint. 1753 SKINCARE.",
+      kicker: "CBG Skincare",
+      h1: "CBG contre l'hyperpigmentation – équilibrer le teint de l'intérieur",
+      lead: "Les taches racontent inflammation, soleil, hormones. Plutôt que de les blanchir à la hache, tu peux viser le mécanisme – avec le CBG qui régule l'activité des mélanocytes via le système endocannabinoïde.",
+      problemTitle: "D'où viennent les taches pigmentaires",
+      problemBody:
+        "<p>Taches sombres – hyperpigmentation – quand les mélanocytes, cellules à mélanine, s'emballent par zones. Dégâts solaires (taches), hyperpigmentation post-inflammatoire après acné ou eczéma, ou melasma hormonal.</p><p>Commun à tout ça : l'inflammation au centre. Les UV inflamment et déclenchent la mélanine. L'acné laisse des traces inflammatoires qui demandent plus de pigment. Les hormones comme l'œstrogène sensibilisent les mélanocytes aux signaux inflammatoires. Le stress oxydatif amplifie.</p><p>Les classiques – hydroquinone, peels chimiques, lumière pulsée intense – inhibent la mélanine ou exfolient. Ça marche, mais ça irrite et peut créer nouvelle inflammation et nouvelles taches. Il faut une approche plus douce et plus fondamentale.</p>",
+      tipsTitle: "Prévenir et réduire les taches",
+      tips: [
+        {
+          title: "La protection solaire, c'est la base",
+          body: "Les UV sont de loin le moteur numéro un. SPF 30+ chaque jour, toute l'année, même près des fenêtres. Généreux, renouvellement toutes les deux heures au soleil. Aucun sérum ne rattrape un solaire bâclé.",
+        },
+        {
+          title: "Traite l'inflammation tout de suite",
+          body: "Chaque bouton inflammé, eczéma gratté ou réaction peut laisser une trace pigmentée. Plus tu calmes vite, moins le risque de tache durable. CBG en direct sur les zones irritées peut réduire le risque.",
+        },
+        {
+          title: "Antioxydants dedans et dehors",
+          body: "Stress oxydatif = mélanine. Vitamines C et E, aliments riches en polyphénols (baies, thé vert, chocolat noir) neutralisent les radicaux qui poussent la pigmentation.",
+        },
+        {
+          title: "Douceur avec l'exfoliation",
+          body: "L'exfoliation chimique peut aider en surface, mais avec mesure. Trop = barrière abîmée = hyperpigmentation post-inflammatoire – exactement ce qu'on évite. Moins, c'est souvent plus.",
+        },
+        {
+          title: "Patience sur les résultats",
+          body: "Le pigment est profond dans épiderme et derme. Trois à six mois de soins réguliers pour un vrai changement. Les dépigmentants rapides livrent vite mais au prix d'irritations et de nouvelles taches.",
+        },
+      ],
+      solutionTitle: "Le rôle du CBG dans l'équilibre pigmentaire",
+      solutionBody:
+        "<p>Le système endocannabinoïde est présent dans les mélanocytes ; CB2 intervient dans la synthèse de mélanine. L'interaction du CBG avec ces récepteurs ouvre un angle neuf – au lieu d'inhiber directement la mélanine comme l'hydroquinone, le CBG module les voies de signalisation.</p><p>Son profil anti-inflammatoire fort attaque aussi la racine de nombreuses hyperpigmentations. Moins d'inflammation cutanée, moins de signal pour que les mélanocytes surproduisent. Couper le courant plutôt que tourner l'ampoule aux doigts.</p><p>TA-DA Serum 3 % CBG en application locale sur les zones, action sur CB2 des mélanocytes. DUO TA-DA : soutien CBD+CBG pour tout le visage. Au Naturel nettoie sans irriter – indispensable pour ne pas rallumer l'inflammation.</p>",
+      faq: [
+        {
+          q: "Le CBG blanchit la peau ?",
+          a: "Non – il module l'activité des mélanocytes via CB2. Résultat : teint plus uniforme, pas nécessairement plus clair globalement. Le pigment naturel reste ; la surproduction localisée est réglée.",
+        },
+        {
+          q: "Le CBG marche sur tous les types de taches ?",
+          a: "Il cible le mécanisme inflammatoire derrière la plupart des hyperpigmentations. La post-inflammatoire répond souvent le mieux. Taches solaires et melasma peuvent s'améliorer mais demandent plus de temps et un solaire strict.",
+        },
+        {
+          q: "Combien de temps pour voir un effet ?",
+          a: "La pigmentation est le souci cutané le plus lent. Compte trois à six mois d'usage quotidien + protection solaire. Le CBG travaille avec la biologie – pas de quick fix, mais des résultats qui durent.",
+        },
+        {
+          q: "CBG + vitamine C ?",
+          a: "Oui, excellent duo. La vitamine C inhibe la tyrosinase pour la mélanine ; le CBG module les voies via CB2. Niveaux différents, effet amplifié.",
+        },
+      ],
+      ctaTitle: "Uniformiser – sans dépigmenter à la brutalité",
+      ctaSub:
+        "Le CBG traite la pigmentation à la source en modulant les signaux des mélanocytes. Teint plus harmonieux sans blanchisseurs agressifs.",
     },
   },
 ];

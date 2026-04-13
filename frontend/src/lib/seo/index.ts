@@ -2,6 +2,7 @@ import type { LandingPage } from "./types";
 import { CBD_PAGES } from "./pages-cbd";
 import { CBG_PAGES } from "./pages-cbg";
 import { CITY_PAGES } from "./pages-cities";
+import { EU_CITY_PAGES } from "./pages-cities-eu";
 import { GENERAL_PAGES } from "./pages-general";
 import { CONDITION_PAGES } from "./pages-conditions";
 import { LIFESTYLE_PAGES } from "./pages-lifestyle";
@@ -12,6 +13,7 @@ export const ALL_LANDING_PAGES: LandingPage[] = [
   ...CBD_PAGES,
   ...CBG_PAGES,
   ...CITY_PAGES,
+  ...EU_CITY_PAGES,
   ...GENERAL_PAGES,
   ...CONDITION_PAGES,
   ...LIFESTYLE_PAGES,
@@ -21,9 +23,15 @@ export const ALL_LANDING_PAGES: LandingPage[] = [
 
 export function findPageBySlug(
   slug: string,
-  locale: "sv" | "en",
+  locale: string,
 ): LandingPage | undefined {
-  return ALL_LANDING_PAGES.find((p) =>
-    locale === "sv" ? p.svSlug === slug : p.enSlug === slug,
-  );
+  return ALL_LANDING_PAGES.find((p) => {
+    switch (locale) {
+      case "es": return (p.esSlug || p.enSlug) === slug;
+      case "de": return (p.deSlug || p.enSlug) === slug;
+      case "fr": return (p.frSlug || p.enSlug) === slug;
+      case "en": return p.enSlug === slug;
+      default: return p.svSlug === slug;
+    }
+  });
 }

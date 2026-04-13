@@ -61,6 +61,74 @@ const EN_SEGMENT: Record<AppRoute, string> = {
   setPassword: "set-password",
 };
 
+const ES_SEGMENT: Record<AppRoute, string> = {
+  home: "",
+  products: "productos",
+  product: "productos",
+  about: "sobre-nosotros",
+  contact: "contacto",
+  checkout: "pagar",
+  skinAnalysis: "analisis-piel",
+  terms: "terminos",
+  privacy: "privacidad",
+  login: "iniciar-sesion",
+  register: "registro",
+  account: "mi-cuenta",
+  writeReview: "escribir-resena",
+  paymentSuccess: "pago/exitoso",
+  paymentFailed: "pago/fallido",
+  loyalty: "fidelidad",
+  setPassword: "establecer-contrasena",
+};
+
+const DE_SEGMENT: Record<AppRoute, string> = {
+  home: "",
+  products: "produkte",
+  product: "produkte",
+  about: "ueber-uns",
+  contact: "kontakt",
+  checkout: "kasse",
+  skinAnalysis: "hautanalyse",
+  terms: "agb",
+  privacy: "datenschutz",
+  login: "anmelden",
+  register: "registrieren",
+  account: "mein-konto",
+  writeReview: "bewertung-schreiben",
+  paymentSuccess: "zahlung/erfolgreich",
+  paymentFailed: "zahlung/fehlgeschlagen",
+  loyalty: "treueprogramm",
+  setPassword: "passwort-setzen",
+};
+
+const FR_SEGMENT: Record<AppRoute, string> = {
+  home: "",
+  products: "produits",
+  product: "produits",
+  about: "a-propos",
+  contact: "contact",
+  checkout: "paiement",
+  skinAnalysis: "analyse-peau",
+  terms: "cgv",
+  privacy: "confidentialite",
+  login: "connexion",
+  register: "inscription",
+  account: "mon-compte",
+  writeReview: "ecrire-avis",
+  paymentSuccess: "paiement/reussi",
+  paymentFailed: "paiement/echoue",
+  loyalty: "fidelite",
+  setPassword: "choisir-mot-de-passe",
+};
+
+const LOCALE_SEGMENTS: Record<string, Record<AppRoute, string>> = {
+  sv: SV_SEGMENT,
+  en: EN_SEGMENT,
+  es: ES_SEGMENT,
+  de: DE_SEGMENT,
+  fr: FR_SEGMENT,
+};
+
 export function localizePath(
   locale: Locale,
   route: AppRoute,
@@ -74,7 +142,7 @@ export function localizePath(
     return path;
   }
 
-  const base = locale === "sv" ? SV_SEGMENT : EN_SEGMENT;
+  const base = LOCALE_SEGMENTS[locale] || SV_SEGMENT;
   let path = `/${locale}`;
 
   if (route === "product" && params?.productId) {

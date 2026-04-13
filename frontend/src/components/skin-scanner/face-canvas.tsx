@@ -10,6 +10,14 @@ import {
 } from "./zones";
 import { useLocale } from "@/providers/locale-provider";
 
+function tx(locale: string, sv: string, en: string, es?: string, de?: string, fr?: string): string {
+  if (locale === "sv") return sv;
+  if (locale === "es") return es || en;
+  if (locale === "de") return de || en;
+  if (locale === "fr") return fr || en;
+  return en;
+}
+
 interface FaceCanvasProps {
   imageSrc: string;
   results: ZoneResult[];
@@ -118,7 +126,7 @@ export function FaceCanvas({ imageSrc, results, className }: FaceCanvasProps) {
       <img
         ref={imgRef}
         src={imageSrc}
-        alt={locale === "en" ? "Skin analysis" : "Hudanalys"}
+        alt={tx(locale, "Hudanalys", "Skin analysis", "Análisis de piel", "Hautanalyse")}
         className="block h-auto w-full rounded-2xl"
         onLoad={(e) => {
           const el = e.currentTarget;
@@ -137,7 +145,7 @@ export function FaceCanvas({ imageSrc, results, className }: FaceCanvasProps) {
         const isRevealed = revealed.has(zone.id);
         const color = CONDITION_COLORS[topCondition] || "#108474";
         const conditionLabel =
-          (locale === "en" ? CONDITION_LABELS_EN : CONDITION_LABELS_SV)[topCondition] ||
+          (locale === "sv" ? CONDITION_LABELS_SV : CONDITION_LABELS_EN)[topCondition] ||
           topCondition;
 
         const topPx = displayDims.h > 0
@@ -179,7 +187,7 @@ export function FaceCanvas({ imageSrc, results, className }: FaceCanvasProps) {
                   {conditionLabel}
                 </p>
                 <p className="text-[10px] leading-tight text-[#515151]">
-                  {(locale === "en" ? zone.labelEn : zone.labelSv)} — {Math.round(confidence * 100)}%
+                  {(locale === "sv" ? zone.labelSv : zone.labelEn)} — {Math.round(confidence * 100)}%
                 </p>
               </div>
             </div>

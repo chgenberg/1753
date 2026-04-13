@@ -160,7 +160,7 @@ function ReviewCard({
 
 export function ReviewsSection({ productId }: { productId: string }) {
   const { t, locale } = useLocale();
-  const loc = locale === "en" ? "en-GB" : "sv-SE";
+  const loc = ({ sv: "sv-SE", en: "en-GB", es: "es-ES", de: "de-DE", fr: "fr-FR" }[locale] || "en-GB");
   const [reviews, setReviews] = useState<Review[]>([]);
   const [stats, setStats] = useState<ReviewStats | null>(null);
   const [loading, setLoading] = useState(true);

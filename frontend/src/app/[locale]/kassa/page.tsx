@@ -10,6 +10,7 @@ import { PRODUCTS, productDisplayName, productPrice } from "@/lib/products";
 import { formatPrice, getCurrency, getShippingCost } from "@/lib/currency";
 import { apiFetch } from "@/lib/api";
 import { useLocale } from "@/providers/locale-provider";
+import type { Locale } from "@/lib/i18n/types";
 import { useAuth } from "@/providers/auth-provider";
 
 function productIdFromCartId(cartId: string) {
@@ -81,7 +82,7 @@ export default function CheckoutPage() {
     : 0;
 
   const discountedSubtotal = subtotal - discountAmount;
-  const FREE_SHIPPING_THRESHOLD = currency === "EUR" ? 60 : 700;
+  const FREE_SHIPPING_THRESHOLD = currency === "EUR" ? 50 : 600;
   const freeShipping = discountedSubtotal >= FREE_SHIPPING_THRESHOLD;
   const shipping = freeShipping ? 0 : getShippingCost(locale);
   const total = discountedSubtotal + shipping;
@@ -727,7 +728,7 @@ function SubscriptionUpsell({
   cartId: string;
   qty: number;
   basePrice: number;
-  locale: "sv" | "en";
+  locale: Locale;
   addItem: (id: string, qty?: number, subscription?: { intervalDays: number }) => void;
   removeItem: (id: string) => void;
 }) {

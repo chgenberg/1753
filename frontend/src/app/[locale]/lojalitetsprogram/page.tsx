@@ -190,7 +190,7 @@ export default function LoyaltyPage() {
                   />
                 </div>
                 <span className="text-xs font-semibold text-brand-500 tabular-nums">
-                  {active.threshold.toLocaleString(locale === "en" ? "en-GB" : "sv-SE")} / {(10000).toLocaleString(locale === "en" ? "en-GB" : "sv-SE")}
+                  {active.threshold.toLocaleString(({ sv: "sv-SE", en: "en-GB", es: "es-ES", de: "de-DE", fr: "fr-FR" }[locale] || "en-GB"))} / {(10000).toLocaleString(({ sv: "sv-SE", en: "en-GB", es: "es-ES", de: "de-DE", fr: "fr-FR" }[locale] || "en-GB"))}
                 </span>
               </div>
             </div>

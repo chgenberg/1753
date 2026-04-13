@@ -121,6 +121,14 @@ interface AnalysisResponse {
 
 const TOTAL_STEPS = 5;
 
+function tx(locale: string, sv: string, en: string, es?: string, de?: string, fr?: string): string {
+  if (locale === "sv") return sv;
+  if (locale === "es") return es || en;
+  if (locale === "de") return de || en;
+  if (locale === "fr") return fr || en;
+  return en;
+}
+
 const CONCERN_ICONS: Record<string, typeof Flame> = {
   acne: Flame,
   dryness: Droplets,
@@ -267,7 +275,7 @@ const ANALYSIS_STEPS_EN = [
 function AnalyzingProgress({ locale }: { locale: string }) {
   const [progress, setProgress] = useState(0);
   const [stepIdx, setStepIdx] = useState(0);
-  const steps = locale === "en" ? ANALYSIS_STEPS_EN : ANALYSIS_STEPS_SV;
+  const steps = locale === "sv" ? ANALYSIS_STEPS_SV : ANALYSIS_STEPS_EN;
 
   useEffect(() => {
     const totalDuration = 47000;
@@ -341,9 +349,7 @@ function AnalyzingProgress({ locale }: { locale: string }) {
       </div>
 
       <p className="mt-4 text-xs text-[#766a62]">
-        {locale === "en"
-          ? "Our AI is building your personalised analysis"
-          : "Vår AI bygger din personliga analys"}
+        {tx(locale, "Vår AI bygger din personliga analys", "Our AI is building your personalised analysis", "Nuestra IA está creando tu análisis personalizado", "Unsere KI erstellt deine persönliche Analyse")}
       </p>
     </div>
   );
@@ -368,7 +374,7 @@ export default function AnalysisPage() {
   const { token, user } = useAuth();
   const a = (key: string, vars?: Record<string, string | number>) =>
     t(`analysisPage.${key}`, vars);
-  const conditionLabels = locale === "en" ? CONDITION_LABELS_EN : CONDITION_LABELS_SV;
+  const conditionLabels = locale === "sv" ? CONDITION_LABELS_SV : CONDITION_LABELS_EN;
 
   const [step, setStep] = useState<Step>("intro");
   const [userEmail, setUserEmail] = useState("");
@@ -523,7 +529,7 @@ export default function AnalysisPage() {
               zones: scanSummary.zones
                 .filter((z) => z.confidence >= 0.50)
                 .map((z) => ({
-                  zone: locale === "en" ? z.zone.labelEn : z.zone.labelSv,
+                  zone: locale === "sv" ? z.zone.labelSv : z.zone.labelEn,
                   condition: z.topCondition,
                   conditionSv: conditionLabels[z.topCondition] || z.topCondition,
                   confidence: Math.round(z.confidence * 100),
@@ -551,9 +557,7 @@ export default function AnalysisPage() {
             },
             goals: answers.goals,
             goalFreeText: answers.sensitivities
-              ? locale === "en"
-                ? `Sensitivities/allergies: ${answers.sensitivities}`
-                : `Känsligheter/allergier: ${answers.sensitivities}`
+              ? tx(locale, `Känsligheter/allergier: ${answers.sensitivities}`, `Sensitivities/allergies: ${answers.sensitivities}`, `Sensibilidades/alergias: ${answers.sensitivities}`, `Empfindlichkeiten/Allergien: ${answers.sensitivities}`)
               : undefined,
             locale,
           },
@@ -661,31 +665,33 @@ export default function AnalysisPage() {
                 {a("title")}
               </h1>
               <p className="mx-auto mt-4 max-w-lg text-base leading-relaxed text-muted-foreground">
-                {locale === "en"
-                  ? "Scan your face with MediaPipe precision across 12 zones, answer five quick questions, and receive 15 scientific skin metrics, estimated skin age, a radar chart and personalised recommendations."
-                  : "Skanna ditt ansikte med MediaPipe-precision i 12 zoner, svara pa fem korta fragor och fa 15 vetenskapliga hudmetriker, estimerad hudalder, radardiagram och personliga rekommendationer."}
+                {tx(locale,
+                  "Skanna ditt ansikte med MediaPipe-precision i 12 zoner, svara pa fem korta fragor och fa 15 vetenskapliga hudmetriker, estimerad hudalder, radardiagram och personliga rekommendationer.",
+                  "Scan your face with MediaPipe precision across 12 zones, answer five quick questions, and receive 15 scientific skin metrics, estimated skin age, a radar chart and personalised recommendations.",
+                  "Escanea tu rostro con precisión MediaPipe en 12 zonas, responde cinco preguntas rápidas y recibe 15 métricas científicas de la piel, edad estimada, gráfico radar y recomendaciones personalizadas.",
+                  "Scanne dein Gesicht mit MediaPipe-Präzision in 12 Zonen, beantworte fünf kurze Fragen und erhalte 15 wissenschaftliche Hautmetriken, geschätztes Hautalter, Radardiagramm und personalisierte Empfehlungen.")}
               </p>
 
               <div className="mx-auto mt-8 grid max-w-sm gap-4 text-left">
                 <div className="flex items-start gap-4 rounded-2xl border border-[#e6e6e6] bg-white p-4">
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#108474]/10 text-sm font-bold text-[#108474]">1</div>
                   <div>
-                    <p className="text-sm font-semibold text-[#1d1d1f]">{locale === "en" ? "Face scan – 12 zones" : "Ansiktsskanning – 12 zoner"}</p>
-                    <p className="mt-0.5 text-xs text-[#515151]">{locale === "en" ? "MediaPipe maps 478 points and analyses each zone" : "MediaPipe kartlagger 478 punkter och analyserar varje zon"}</p>
+                    <p className="text-sm font-semibold text-[#1d1d1f]">{tx(locale, "Ansiktsskanning – 12 zoner", "Face scan – 12 zones", "Escaneo facial – 12 zonas", "Gesichtsscan – 12 Zonen")}</p>
+                    <p className="mt-0.5 text-xs text-[#515151]">{tx(locale, "MediaPipe kartlagger 478 punkter och analyserar varje zon", "MediaPipe maps 478 points and analyses each zone", "MediaPipe mapea 478 puntos y analiza cada zona", "MediaPipe erfasst 478 Punkte und analysiert jede Zone")}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4 rounded-2xl border border-[#e6e6e6] bg-white p-4">
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#108474]/10 text-sm font-bold text-[#108474]">2</div>
                   <div>
-                    <p className="text-sm font-semibold text-[#1d1d1f]">{locale === "en" ? "Lifestyle questions" : "Livsstilsfragor"}</p>
-                    <p className="mt-0.5 text-xs text-[#515151]">{locale === "en" ? "Five questions about sleep, diet & stress" : "Fem fragor om somn, kost och stress"}</p>
+                    <p className="text-sm font-semibold text-[#1d1d1f]">{tx(locale, "Livsstilsfragor", "Lifestyle questions", "Preguntas de estilo de vida", "Lebensstilfragen")}</p>
+                    <p className="mt-0.5 text-xs text-[#515151]">{tx(locale, "Fem fragor om somn, kost och stress", "Five questions about sleep, diet & stress", "Cinco preguntas sobre sueño, dieta y estrés", "Fünf Fragen zu Schlaf, Ernährung und Stress")}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4 rounded-2xl border border-[#e6e6e6] bg-white p-4">
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#108474]/10 text-sm font-bold text-[#108474]">3</div>
                   <div>
-                    <p className="text-sm font-semibold text-[#1d1d1f]">{locale === "en" ? "15 metrics + skin age + radar chart" : "15 metriker + hudalder + radardiagram"}</p>
-                    <p className="mt-0.5 text-xs text-[#515151]">{locale === "en" ? "Plus routine, products & lifestyle tips" : "Plus rutin, produkter och livsstilsrad"}</p>
+                    <p className="text-sm font-semibold text-[#1d1d1f]">{tx(locale, "15 metriker + hudalder + radardiagram", "15 metrics + skin age + radar chart", "15 métricas + edad de la piel + gráfico radar", "15 Metriken + Hautalter + Radardiagramm")}</p>
+                    <p className="mt-0.5 text-xs text-[#515151]">{tx(locale, "Plus rutin, produkter och livsstilsrad", "Plus routine, products & lifestyle tips", "Más rutina, productos y consejos", "Plus Routine, Produkte und Lifestyle-Tipps")}</p>
                   </div>
                 </div>
               </div>
@@ -696,9 +702,7 @@ export default function AnalysisPage() {
                   <div className="space-y-4">
                     <div className="flex items-center justify-center gap-2 rounded-xl bg-[#108474]/5 px-4 py-3 text-xs font-medium text-[#108474]">
                       <Check className="h-3.5 w-3.5" />
-                      {locale === "en"
-                        ? `Logged in as ${user?.name || userEmail}`
-                        : `Inloggad som ${user?.name || userEmail}`}
+                      {tx(locale, `Inloggad som ${user?.name || userEmail}`, `Logged in as ${user?.name || userEmail}`, `Conectado como ${user?.name || userEmail}`, `Angemeldet als ${user?.name || userEmail}`)}
                     </div>
 
                     <button
@@ -706,14 +710,14 @@ export default function AnalysisPage() {
                       className="inline-flex h-14 w-full items-center justify-center gap-3 rounded-full bg-[#108474] px-10 text-sm font-semibold text-white shadow-lg shadow-[#108474]/20 transition-all hover:bg-[#0d6e62] hover:shadow-xl active:scale-[0.97]"
                     >
                       <ScanFace className="h-5 w-5" />
-                      {locale === "en" ? "Start analysis" : "Starta analys"}
+                      {tx(locale, "Starta analys", "Start analysis", "Iniciar análisis", "Analyse starten")}
                     </button>
 
                     <button
                       onClick={() => setStep(1)}
                       className="mt-1 block mx-auto text-xs font-medium text-[#766a62] underline underline-offset-2 transition-colors hover:text-[#108474]"
                     >
-                      {locale === "en" ? "Skip face scan, answer questions only" : "Hoppa över skanning, svara bara på frågor"}
+                      {tx(locale, "Hoppa över skanning, svara bara på frågor", "Skip face scan, answer questions only", "Saltar escaneo, solo responder preguntas", "Scan überspringen, nur Fragen beantworten")}
                     </button>
                   </div>
                 ) : (
@@ -723,11 +727,11 @@ export default function AnalysisPage() {
                         e.preventDefault();
                         setEmailError("");
                         if (!userEmail.trim() || !userEmail.includes("@")) {
-                          setEmailError(locale === "en" ? "Please enter a valid email address." : "Ange en giltig e-postadress.");
+                          setEmailError(tx(locale, "Ange en giltig e-postadress.", "Please enter a valid email address.", "Introduce una dirección de email válida.", "Bitte gib eine gültige E-Mail-Adresse ein."));
                           return;
                         }
                         if (!emailConsent) {
-                          setEmailError(locale === "en" ? "You need to accept the terms to continue." : "Du behöver godkänna villkoren för att fortsätta.");
+                          setEmailError(tx(locale, "Du behöver godkänna villkoren för att fortsätta.", "You need to accept the terms to continue.", "Debes aceptar los términos para continuar.", "Du musst die Bedingungen akzeptieren, um fortzufahren."));
                           return;
                         }
                         setStep("scan");
@@ -736,14 +740,14 @@ export default function AnalysisPage() {
                     >
                       <div>
                         <label className="mb-2 block text-left text-sm font-medium text-[#1d1d1f]">
-                          {locale === "en" ? "Your email" : "Din e-postadress"}
+                          {tx(locale, "Din e-postadress", "Your email", "Tu email", "Deine E-Mail")}
                         </label>
                         <input
                           type="email"
                           required
                           value={userEmail}
                           onChange={(e) => setUserEmail(e.target.value)}
-                          placeholder={locale === "en" ? "name@example.com" : "namn@exempel.se"}
+                          placeholder={tx(locale, "namn@exempel.se", "name@example.com", "nombre@ejemplo.com", "name@beispiel.de")}
                           className="w-full rounded-xl border border-[#e6e6e6] bg-white px-4 py-3 text-sm shadow-sm placeholder:text-[#766a62]/50 focus:border-[#108474] focus:outline-none focus:ring-2 focus:ring-[#108474]/20"
                         />
                       </div>
@@ -764,17 +768,29 @@ export default function AnalysisPage() {
                           <div className="mt-0.5 h-5 w-5 flex-shrink-0 rounded border-2 border-[#766a62]/30" />
                         )}
                         <span className="text-xs leading-relaxed text-[#515151]">
-                          {locale === "en" ? (
-                            <>
-                              I agree to receive personalised skincare tips by email based on my analysis results.
-                              I also agree that my answers may be used <span className="font-semibold text-[#1d1d1f]">anonymously</span> to
-                              improve the AI analysis. I can unsubscribe at any time.
-                            </>
-                          ) : (
+                          {locale === "sv" ? (
                             <>
                               Jag godkänner att få personliga hudvårdstips via e-post baserat på mina analysresultat.
                               Jag godkänner också att mina svar får användas <span className="font-semibold text-[#1d1d1f]">anonymt</span> för
                               att förbättra AI-analysen. Jag kan avregistrera mig när som helst.
+                            </>
+                          ) : locale === "es" ? (
+                            <>
+                              Acepto recibir consejos personalizados de cuidado de la piel por email basados en mis resultados.
+                              También acepto que mis respuestas se utilicen <span className="font-semibold text-[#1d1d1f]">de forma anónima</span> para
+                              mejorar el análisis de IA. Puedo cancelar la suscripción en cualquier momento.
+                            </>
+                          ) : locale === "de" ? (
+                            <>
+                              Ich stimme zu, personalisierte Hautpflegetipps per E-Mail basierend auf meinen Analyseergebnissen zu erhalten.
+                              Ich stimme auch zu, dass meine Antworten <span className="font-semibold text-[#1d1d1f]">anonym</span> zur
+                              Verbesserung der KI-Analyse verwendet werden dürfen. Ich kann mich jederzeit abmelden.
+                            </>
+                          ) : (
+                            <>
+                              I agree to receive personalised skincare tips by email based on my analysis results.
+                              I also agree that my answers may be used <span className="font-semibold text-[#1d1d1f]">anonymously</span> to
+                              improve the AI analysis. I can unsubscribe at any time.
                             </>
                           )}
                         </span>
@@ -789,34 +805,36 @@ export default function AnalysisPage() {
                         className="inline-flex h-14 w-full items-center justify-center gap-3 rounded-full bg-[#108474] px-10 text-sm font-semibold text-white shadow-lg shadow-[#108474]/20 transition-all hover:bg-[#0d6e62] hover:shadow-xl active:scale-[0.97]"
                       >
                         <ScanFace className="h-5 w-5" />
-                        {locale === "en" ? "Start analysis" : "Starta analys"}
+                        {tx(locale, "Starta analys", "Start analysis", "Iniciar análisis", "Analyse starten")}
                       </button>
                     </form>
 
                     <button
                       onClick={() => {
                         if (!userEmail.trim() || !userEmail.includes("@")) {
-                          setEmailError(locale === "en" ? "Please enter a valid email address." : "Ange en giltig e-postadress.");
+                          setEmailError(tx(locale, "Ange en giltig e-postadress.", "Please enter a valid email address.", "Introduce una dirección de email válida.", "Bitte gib eine gültige E-Mail-Adresse ein."));
                           return;
                         }
                         if (!emailConsent) {
-                          setEmailError(locale === "en" ? "You need to accept the terms to continue." : "Du behöver godkänna villkoren för att fortsätta.");
+                          setEmailError(tx(locale, "Du behöver godkänna villkoren för att fortsätta.", "You need to accept the terms to continue.", "Debes aceptar los términos para continuar.", "Du musst die Bedingungen akzeptieren, um fortzufahren."));
                           return;
                         }
                         setStep(1);
                       }}
                       className="mt-3 block mx-auto text-xs font-medium text-[#766a62] underline underline-offset-2 transition-colors hover:text-[#108474]"
                     >
-                      {locale === "en" ? "Skip face scan, answer questions only" : "Hoppa över skanning, svara bara på frågor"}
+                      {tx(locale, "Hoppa över skanning, svara bara på frågor", "Skip face scan, answer questions only", "Saltar escaneo, solo responder preguntas", "Scan überspringen, nur Fragen beantworten")}
                     </button>
                   </>
                 )}
               </div>
 
               <p className="mx-auto mt-6 max-w-sm text-xs text-[#766a62]">
-                {locale === "en"
-                  ? "The face scan analyses your skin directly on your device. No image is sent to any server."
-                  : "Ansiktsskanningen analyserar din hy direkt i din enhet. Ingen bild skickas till någon server."}
+                {tx(locale,
+                  "Ansiktsskanningen analyserar din hy direkt i din enhet. Ingen bild skickas till någon server.",
+                  "The face scan analyses your skin directly on your device. No image is sent to any server.",
+                  "El escaneo facial analiza tu piel directamente en tu dispositivo. Ninguna imagen se envía a ningún servidor.",
+                  "Der Gesichtsscan analysiert deine Haut direkt auf deinem Gerät. Kein Bild wird an einen Server gesendet.")}
               </p>
             </div>
           )}
@@ -829,12 +847,12 @@ export default function AnalysisPage() {
                 className="mb-6 inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium text-[#515151] transition-colors hover:bg-[#f5f5f7]"
               >
                 <ArrowLeft className="h-4 w-4" />
-                {locale === "en" ? "Back" : "Tillbaka"}
+                {tx(locale, "Tillbaka", "Back", "Atrás", "Zurück")}
               </button>
 
               <div className="mb-4 text-center">
                 <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
-                  {locale === "en" ? "Step 1 of 3 — Face scan" : "Steg 1 av 3 — Ansiktsskanning"}
+                  {tx(locale, "Steg 1 av 3 — Ansiktsskanning", "Step 1 of 3 — Face scan", "Paso 1 de 3 — Escaneo facial", "Schritt 1 von 3 — Gesichtsscan")}
                 </p>
               </div>
 
@@ -852,9 +870,11 @@ export default function AnalysisPage() {
                 <div className="mt-6 animate-fade-in text-center">
                   <div className="mx-auto flex max-w-xs items-center justify-center gap-2 rounded-full bg-[#108474]/5 px-4 py-2.5 text-xs font-medium text-[#108474]">
                     <Check className="h-3.5 w-3.5" />
-                    {locale === "en"
-                      ? "Scan complete — continuing to questions..."
-                      : "Skanning klar — går vidare till frågor..."}
+                    {tx(locale,
+                      "Skanning klar — går vidare till frågor...",
+                      "Scan complete — continuing to questions...",
+                      "Escaneo completo — continuando con las preguntas...",
+                      "Scan abgeschlossen — weiter zu den Fragen...")}
                   </div>
                 </div>
               )}
@@ -869,15 +889,17 @@ export default function AnalysisPage() {
               {scanSummary && step === 1 && (
                 <div className="mx-auto mb-5 flex max-w-xs items-center justify-center gap-2 rounded-full bg-[#108474]/5 px-4 py-2 text-xs font-medium text-[#108474]">
                   <ScanFace className="h-3.5 w-3.5" />
-                  {locale === "en" ? "Scan data linked to this analysis" : "Skanningsdata kopplad till analysen"}
+                  {tx(locale, "Skanningsdata kopplad till analysen", "Scan data linked to this analysis", "Datos del escaneo vinculados al análisis", "Scandaten mit dieser Analyse verknüpft")}
                 </div>
               )}
 
               <p className="mb-6 text-center text-xs font-medium uppercase tracking-widest text-muted-foreground">
                 {scanSummary
-                  ? (locale === "en"
-                      ? `Step 2 of 3 — Question ${step} of ${TOTAL_STEPS}`
-                      : `Steg 2 av 3 — Fråga ${step} av ${TOTAL_STEPS}`)
+                  ? tx(locale,
+                      `Steg 2 av 3 — Fråga ${step} av ${TOTAL_STEPS}`,
+                      `Step 2 of 3 — Question ${step} of ${TOTAL_STEPS}`,
+                      `Paso 2 de 3 — Pregunta ${step} de ${TOTAL_STEPS}`,
+                      `Schritt 2 von 3 — Frage ${step} von ${TOTAL_STEPS}`)
                   : a("stepOf", { current: step, total: TOTAL_STEPS })}
               </p>
 
@@ -1154,12 +1176,14 @@ export default function AnalysisPage() {
               {trainingUploaded && (
                 <div className="flex items-center justify-center gap-2 rounded-xl bg-[#fcb237]/10 px-4 py-3 text-xs font-medium text-[#766a62]">
                   <Heart className="h-3.5 w-3.5 text-[#fcb237]" />
-                  {locale === "en"
-                    ? "Thank you for helping us improve our AI skin analysis"
-                    : "Tack för att du bidrar till att förbättra vår AI-hudanalys"}
+                  {tx(locale,
+                    "Tack för att du bidrar till att förbättra vår AI-hudanalys",
+                    "Thank you for helping us improve our AI skin analysis",
+                    "Gracias por ayudarnos a mejorar nuestro análisis de piel con IA",
+                    "Danke, dass du uns hilfst, unsere KI-Hautanalyse zu verbessern")}
                   {trainingCount !== null && (
                     <span className="text-[#766a62]/60">
-                      {" "}&mdash; {locale === "en" ? "contribution" : "bidrag"} #{trainingCount}
+                      {" "}&mdash; {tx(locale, "bidrag", "contribution", "contribución", "Beitrag")} #{trainingCount}
                     </span>
                   )}
                 </div>
@@ -1170,14 +1194,18 @@ export default function AnalysisPage() {
                 <div className="mx-auto max-w-md rounded-2xl border border-brand-200 bg-white p-5 text-center">
                   <Camera className="mx-auto mb-2 h-5 w-5 text-brand-500" />
                   <p className="text-sm font-semibold text-brand-900">
-                    {locale === "en"
-                      ? "Save your photo to track changes over time?"
-                      : "Spara ditt foto för att följa förändringar över tid?"}
+                    {tx(locale,
+                      "Spara ditt foto för att följa förändringar över tid?",
+                      "Save your photo to track changes over time?",
+                      "¿Guardar tu foto para seguir los cambios con el tiempo?",
+                      "Dein Foto speichern, um Veränderungen zu verfolgen?")}
                   </p>
                   <p className="mt-1.5 text-xs leading-relaxed text-brand-500">
-                    {locale === "en"
-                      ? "Your image is encrypted and stored securely. Only you can see it. You can delete it anytime from your account."
-                      : "Din bild krypteras och lagras säkert. Bara du kan se den. Du kan radera den när som helst från ditt konto."}
+                    {tx(locale,
+                      "Din bild krypteras och lagras säkert. Bara du kan se den. Du kan radera den när som helst från ditt konto.",
+                      "Your image is encrypted and stored securely. Only you can see it. You can delete it anytime from your account.",
+                      "Tu imagen se cifra y almacena de forma segura. Solo tú puedes verla. Puedes eliminarla en cualquier momento desde tu cuenta.",
+                      "Dein Bild wird verschlüsselt und sicher gespeichert. Nur du kannst es sehen. Du kannst es jederzeit in deinem Konto löschen.")}
                   </p>
                   <div className="mt-4 flex items-center justify-center gap-3">
                     <button
@@ -1190,13 +1218,13 @@ export default function AnalysisPage() {
                       ) : (
                         <Lock className="h-3.5 w-3.5" />
                       )}
-                      {locale === "en" ? "Save encrypted" : "Spara krypterat"}
+                      {tx(locale, "Spara krypterat", "Save encrypted", "Guardar cifrado", "Verschlüsselt speichern")}
                     </button>
                     <button
                       onClick={() => setSnapshotSaved(true)}
                       className="rounded-full px-5 py-2.5 text-xs font-medium text-brand-500 transition-colors hover:bg-brand-50"
                     >
-                      {locale === "en" ? "No thanks" : "Nej tack"}
+                      {tx(locale, "Nej tack", "No thanks", "No, gracias", "Nein, danke")}
                     </button>
                   </div>
                 </div>
@@ -1205,9 +1233,11 @@ export default function AnalysisPage() {
               {snapshotSaved && token && scanSummary?.imageBase64 && (
                 <div className="flex items-center justify-center gap-2 rounded-xl bg-[#108474]/5 px-4 py-3 text-xs font-medium text-[#108474]">
                   <Check className="h-3.5 w-3.5" />
-                  {locale === "en"
-                    ? "Photo saved to your skin journey"
-                    : "Foto sparat i din hudresa"}
+                  {tx(locale,
+                    "Foto sparat i din hudresa",
+                    "Photo saved to your skin journey",
+                    "Foto guardado en tu viaje de piel",
+                    "Foto in deiner Hautreise gespeichert")}
                 </div>
               )}
 
@@ -1215,9 +1245,11 @@ export default function AnalysisPage() {
               {nlSubscribed && userEmail && (
                 <div className="flex items-center justify-center gap-2 rounded-xl bg-[#108474]/5 px-4 py-3 text-xs font-medium text-[#108474]">
                   <Mail className="h-3.5 w-3.5" />
-                  {locale === "en"
-                    ? `Weekly skincare tips will be sent to ${userEmail}`
-                    : `Veckovisa hudvårdstips skickas till ${userEmail}`}
+                  {tx(locale,
+                    `Veckovisa hudvårdstips skickas till ${userEmail}`,
+                    `Weekly skincare tips will be sent to ${userEmail}`,
+                    `Consejos semanales de cuidado de la piel se enviarán a ${userEmail}`,
+                    `Wöchentliche Hautpflegetipps werden an ${userEmail} gesendet`)}
                 </div>
               )}
 
@@ -1260,9 +1292,11 @@ export default function AnalysisPage() {
 
               {/* Medical disclaimer */}
               <p className="mx-auto max-w-md text-center text-[11px] leading-relaxed text-[#766a62]/80">
-                {locale === "en"
-                  ? "This analysis is generated with the help of artificial intelligence and does not constitute medical advice, diagnosis or treatment recommendations. If you have ongoing skin concerns, always contact a licensed dermatologist or doctor."
-                  : "Denna analys är framtagen med hjälp av artificiell intelligens och utgör inte medicinsk rådgivning, diagnos eller behandlingsrekommendation. Vid hudbesvär, kontakta alltid en legitimerad dermatolog eller läkare."}
+                {tx(locale,
+                  "Denna analys är framtagen med hjälp av artificiell intelligens och utgör inte medicinsk rådgivning, diagnos eller behandlingsrekommendation. Vid hudbesvär, kontakta alltid en legitimerad dermatolog eller läkare.",
+                  "This analysis is generated with the help of artificial intelligence and does not constitute medical advice, diagnosis or treatment recommendations. If you have ongoing skin concerns, always contact a licensed dermatologist or doctor.",
+                  "Este análisis se genera con la ayuda de inteligencia artificial y no constituye asesoramiento médico, diagnóstico ni recomendaciones de tratamiento. Si tienes problemas de piel persistentes, consulta siempre a un dermatólogo o médico autorizado.",
+                  "Diese Analyse wurde mit Hilfe künstlicher Intelligenz erstellt und stellt keine medizinische Beratung, Diagnose oder Behandlungsempfehlung dar. Bei anhaltenden Hautproblemen wende dich immer an einen zugelassenen Dermatologen oder Arzt.")}
               </p>
             </div>
           )}

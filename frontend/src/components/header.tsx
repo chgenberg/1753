@@ -112,30 +112,56 @@ export function Header() {
     return () => window.removeEventListener("keydown", onKey);
   }, [mobileOpen]);
 
-  const otherLocale = locale === "sv" ? "en" : "sv";
+  const localeOrder = ["sv", "en", "es", "de", "fr"] as const;
+  const curIdx = localeOrder.indexOf(locale as typeof localeOrder[number]);
+  const otherLocale = localeOrder[(curIdx + 1) % localeOrder.length];
   const langHref = `/${otherLocale}`;
 
-  const FlagSE = (
-    <svg viewBox="0 0 32 32" className="h-5 w-5 rounded-full" aria-hidden="true">
-      <circle cx="16" cy="16" r="16" fill="#006AA7" />
-      <rect x="0" y="13" width="32" height="6" fill="#FECC02" />
-      <rect x="10" y="0" width="6" height="32" fill="#FECC02" />
-    </svg>
-  );
+  const flags: Record<string, React.ReactNode> = {
+    sv: (
+      <svg viewBox="0 0 32 32" className="h-5 w-5 rounded-full" aria-hidden="true">
+        <circle cx="16" cy="16" r="16" fill="#006AA7" />
+        <rect x="0" y="13" width="32" height="6" fill="#FECC02" />
+        <rect x="10" y="0" width="6" height="32" fill="#FECC02" />
+      </svg>
+    ),
+    en: (
+      <svg viewBox="0 0 32 32" className="h-5 w-5 rounded-full" aria-hidden="true">
+        <circle cx="16" cy="16" r="16" fill="#012169" />
+        <path d="M4 4l24 24M28 4L4 28" stroke="#fff" strokeWidth="4" />
+        <path d="M4 4l24 24M28 4L4 28" stroke="#C8102E" strokeWidth="2" />
+        <rect x="0" y="13" width="32" height="6" fill="#fff" />
+        <rect x="13" y="0" width="6" height="32" fill="#fff" />
+        <rect x="0" y="14" width="32" height="4" fill="#C8102E" />
+        <rect x="14" y="0" width="4" height="32" fill="#C8102E" />
+      </svg>
+    ),
+    es: (
+      <svg viewBox="0 0 32 32" className="h-5 w-5 rounded-full" aria-hidden="true">
+        <circle cx="16" cy="16" r="16" fill="#AA151B" />
+        <rect x="0" y="8" width="32" height="16" fill="#F1BF00" />
+        <rect x="0" y="0" width="32" height="8" fill="#AA151B" />
+        <rect x="0" y="24" width="32" height="8" fill="#AA151B" />
+      </svg>
+    ),
+    de: (
+      <svg viewBox="0 0 32 32" className="h-5 w-5 rounded-full" aria-hidden="true">
+        <circle cx="16" cy="16" r="16" fill="#FFCC00" />
+        <path d="M0 16a16 16 0 0 1 32 0" fill="#000" />
+        <path d="M0 16a16 16 0 0 0 0 5.4h32A16 16 0 0 0 32 16z" fill="#DD0000" />
+      </svg>
+    ),
+    fr: (
+      <svg viewBox="0 0 32 32" className="h-5 w-5 rounded-full" aria-hidden="true">
+        <circle cx="16" cy="16" r="16" fill="#fff" />
+        <path d="M0 5.4A16 16 0 0 0 0 26.6V5.4z" fill="#002395" />
+        <rect x="0" y="0" width="11" height="32" fill="#002395" />
+        <rect x="21" y="0" width="11" height="32" fill="#ED2939" />
+      </svg>
+    ),
+  };
 
-  const FlagGB = (
-    <svg viewBox="0 0 32 32" className="h-5 w-5 rounded-full" aria-hidden="true">
-      <circle cx="16" cy="16" r="16" fill="#012169" />
-      <path d="M4 4l24 24M28 4L4 28" stroke="#fff" strokeWidth="4" />
-      <path d="M4 4l24 24M28 4L4 28" stroke="#C8102E" strokeWidth="2" />
-      <rect x="0" y="13" width="32" height="6" fill="#fff" />
-      <rect x="13" y="0" width="6" height="32" fill="#fff" />
-      <rect x="0" y="14" width="32" height="4" fill="#C8102E" />
-      <rect x="14" y="0" width="4" height="32" fill="#C8102E" />
-    </svg>
-  );
-
-  const targetFlag = otherLocale === "sv" ? FlagSE : FlagGB;
+  const targetFlag = flags[otherLocale] || flags.en;
 
   return (
     <>

@@ -4,6 +4,9 @@ export const GENERAL_PAGES: LandingPage[] = [
   {
     svSlug: "cbd-hudvard",
     enSlug: "cbd-skincare",
+    esSlug: "cuidado-piel-cbd",
+    deSlug: "cbd-hautpflege",
+    frSlug: "soin-peau-cbd",
     category: "general",
     productIds: ["duo-ta-da", "duo-kit", "ta-da-serum"],
     sv: {
@@ -59,11 +62,95 @@ export const GENERAL_PAGES: LandingPage[] = [
       ],
       ctaTitle: "Discover CBD skincare that actually works",
       ctaSub: "Your skin knows what it needs. CBD helps it get there. Try 1753 SKINCARE and feel the difference."
+    },
+    es: {
+      metaTitle: "Cuidado facial con CBD – equilibrio natural para tu piel | 1753",
+      metaDescription: "Descubre cómo el CBD trabaja con el propio sistema de tu piel para un equilibrio real. Sin promesas vacías: ciencia y naturaleza. 1753 SKINCARE.",
+      kicker: "Cuidado con CBD",
+      h1: "Cuidado facial con CBD – tu piel tiene su propio sistema de equilibrio",
+      lead: "¿Sabías que tu piel tiene un sistema integrado para regular la inflamación, la producción de sebo y la renovación celular? Se llama sistema endocannabinoide, y el CBD habla su idioma.",
+      problemTitle: "Por qué el cuidado tradicional a menudo se queda corto",
+      problemBody: "<p>La industria convencional lleva años tratando síntomas en lugar de causas. ¿Piel seca? Más crema. ¿Grasa? Limpiadores más agresivos. ¿Rojez? Tápala. Pero la piel no es una superficie que corregir: es un órgano vivo con sus propios mecanismos de regulación.</p><p>El sistema endocannabinoide (ECS) existe en todo el cuerpo, también en la piel. Gobierna inflamación, producción de sebo, división celular y respuesta inmune en las células cutáneas. Con el ECS equilibrado, la piel funciona como debe. Si no, aparecen acné, sequedad, rojeces y envejecimiento prematuro.</p><p>La mayoría de los productos ignoran el ECS por completo. Aplican sustancias desde fuera sin dialogar con el sistema regulatorio propio. Es como gritar instrucciones a alguien que ya sabe qué hacer, si solo escucharas. El CBD propone otro enfoque: en lugar de forzar la dirección de la piel, ayuda a que encuentre su propio equilibrio.</p>",
+      tipsTitle: "Lo básico del cuidado con CBD",
+      tips: [
+        { title: "Empieza simple", body: "No necesitas diez pasos. Un buen aceite facial con CBD mañana y noche basta. Dale tiempo a la piel para recalibrar: los cambios suelen verse entre cuatro y seis semanas." },
+        { title: "Calidad antes que cantidad", body: "No todo el CBD es igual. Los extractos de espectro completo con terpenos y otros cannabinoides ofrecen un efecto entourage que el aislado no iguala. Pide siempre análisis de terceros." },
+        { title: "Escucha a tu piel", body: "El CBD ayuda a que la piel se comunique mejor. Si notas cambios en cómo responde, sigue las señales. Menos suele ser más en una rutina con CBD." },
+        { title: "Combínalo con tu estilo de vida", body: "El cuidado con CBD rinde mejor como parte de un todo. Sueño, alimentación, estrés y movimiento afectan al ECS por dentro. La piel siempre refleja todo el cuerpo." },
+        { title: "No la satures", body: "No mezcles CBD con demasiados activos a la vez. Deja que la piel note el efecto del CBD sin competencia de ácidos, retinol u otros potentes al principio." }
+      ],
+      solutionTitle: "Cómo 1753 SKINCARE usa CBD",
+      solutionBody: "<p>Hemos construido toda la línea en torno al CBD y CBG de máxima calidad. Nuestros aceites faciales llevan extractos de espectro completo que trabajan con el ECS de la piel para un equilibrio real, no un alivio pasajero.</p><p>The ONE aceite facial con 10 por ciento CBD es la base de nuestra filosofía: un aceite que sirve a todos los tipos de piel apoyando el sistema que ya tienes. I LOVE va más allá con CBD y CBG para un equilibrio más profundo. Y TA-DA Serum con 3 por ciento CBG aporta un apoyo concentrado cuando la piel pide más.</p><p>No creemos en rutinas de diez pasos. Creemos en dar a la piel las herramientas adecuadas y confiar en que sabe qué hacer. Así debería ser el cuidado con CBD: simple, honesto y eficaz.</p>",
+      faq: [
+        { q: "¿Qué es el CBD en cosmética?", a: "El CBD (cannabidiol) es un cannabinoide no psicoactivo del cáñamo que interactúa con el ECS de la piel. Ayuda a regular inflamación, producción de sebo y renovación celular de forma natural." },
+        { q: "¿El cuidado con CBD sirve para todos los tipos de piel?", a: "Sí. Al trabajar con el propio sistema de equilibrio de la piel, se adapta a lo que necesitas: la seca retiene mejor la hidratación; la grasa equilibra el sebo." },
+        { q: "¿Puede el cuidado con CBD colocarte?", a: "No, en absoluto. El CBD no es psicoactivo y es legal en la UE. Nuestros productos no contienen sustancias intoxicantes. Solo beneficios cutáneos, sin subidón." },
+        { q: "¿Cuánto tarda en verse resultado?", a: "El ciclo de renovación ronda los 28 días. Muchas personas notan cambios entre dos y cuatro semanas; el efecto pleno suele verse tras seis u ocho semanas de uso regular." }
+      ],
+      ctaTitle: "Descubre un cuidado con CBD que de verdad funciona",
+      ctaSub: "Tu piel sabe lo que necesita. El CBD la ayuda a llegar ahí. Prueba 1753 SKINCARE y nota la diferencia."
+    },
+    de: {
+      metaTitle: "CBD Hautpflege – natürliches Gleichgewicht für deine Haut | 1753",
+      metaDescription: "Erfahre, wie CBD mit dem eigenen System deiner Haut zusammenarbeitet – echtes Gleichgewicht, keine leeren Versprechen. Wissenschaft und Natur. 1753 SKINCARE.",
+      kicker: "CBD Hautpflege",
+      h1: "CBD Hautpflege – deine Haut hat ein eigenes Balance-System",
+      lead: "Wusstest du, dass deine Haut ein eingebautes System zur Regulierung von Entzündung, Talgproduktion und Zellerneuerung hat? Es heißt Endocannabinoid-System – und CBD spricht seine Sprache.",
+      problemTitle: "Warum klassische Hautpflege oft am Ziel vorbeischießt",
+      problemBody: "<p>Die konventionelle Branche behandelt seit langem Symptome statt Ursachen. Trockene Haut? Mehr Creme. Ölige Haut? Stärkere Reiniger. Rötungen? Abdecken. Aber Haut ist keine Oberfläche zum Korrigieren – sie ist ein lebendes Organ mit eigenen Regelkreisen.</p><p>Das Endocannabinoid-System (ECS) gibt es im ganzen Körper, auch in der Haut. Es steuert Entzündung, Talgproduktion, Zellteilung und Immunantwort in Hautzellen. Ist das ECS im Gleichgewicht, funktioniert die Haut. Wenn nicht, folgen Akne, Trockenheit, Rötungen und vorzeitige Alterung.</p><p>Die meisten Produkte ignorieren das ECS komplett. Sie schichten Wirkstoffe auf, ohne mit dem eigenen Regelsystem zu sprechen. Wie Anweisungen brüllen, obwohl die Haut schon weiß, was sie tut – wenn man nur zuhören würde. CBD bietet einen anderen Weg: statt die Haut zu zwingen, hilft es ihr, ihr eigenes Gleichgewicht zu finden.</p>",
+      tipsTitle: "Die Basics der CBD-Hautpflege",
+      tips: [
+        { title: "Fang einfach an", body: "Du brauchst keine zehn Schritte. Ein gutes Gesichtsöl mit CBD morgens und abends reicht weit. Gib der Haut Zeit zum Neuausrichten – meist vier bis sechs Wochen." },
+        { title: "Qualität vor Menge", body: "Nicht jedes CBD ist gleich. Vollspektrum-Extrakte mit Terpenen und weiteren Cannabinoiden liefern einen Entourage-Effekt, den Isolat nicht erreicht. Immer unabhängige Tests prüfen." },
+        { title: "Hör auf deine Haut", body: "CBD verbessert die „Kommunikation“ der Haut. Wenn sich die Reaktion ändert, folge den Signalen. Weniger ist in einer CBD-Routine oft mehr." },
+        { title: "Mit Lebensstil kombinieren", body: "CBD-Hautpflege wirkt am besten als Teil eines Ganzen. Schlaf, Ernährung, Stress und Bewegung beeinflussen das ECS von innen. Die Haut spiegelt immer den ganzen Körper." },
+        { title: "Nicht überladen", body: "Mische CBD nicht mit zu vielen Aktiven auf einmal. Lass die CBD-Wirkung wirken, ohne Konkurrenz von Säuren, Retinol & Co. am Anfang." }
+      ],
+      solutionTitle: "So setzt 1753 SKINCARE CBD ein",
+      solutionBody: "<p>Unsere gesamte Linie basiert auf hochwertigem CBD und CBG. Unsere Gesichtsöle enthalten Vollspektrum-Extrakte, die mit dem ECS der Haut zusammenarbeiten – echtes Gleichgewicht, keine kurzfristige Beruhigung.</p><p>The ONE Gesichtsöl mit 10 Prozent CBD ist unser Fundament: ein Öl für alle Hauttypen, das das vorhandene System unterstützt. I LOVE geht weiter mit CBD plus CBG für noch tieferes Gleichgewicht. TA-DA Serum mit 3 Prozent CBG liefert konzentrierte Unterstützung, wenn die Haut mehr braucht.</p><p>Wir glauben nicht an Zehn-Schritt-Routinen. Wir glauben an die richtigen Tools – und daran, dass die Haut weiß, was zu tun ist. So soll CBD-Hautpflege sein: schlicht, ehrlich, wirksam.</p>",
+      faq: [
+        { q: "Was ist CBD in der Hautpflege?", a: "CBD (Cannabidiol) ist ein nicht psychoaktives Cannabinoid aus Hanf, das mit dem ECS der Haut interagiert. Es hilft, Entzündung, Talg und Zellerneuerung natürlich zu regulieren." },
+        { q: "Passt CBD-Hautpflege zu allen Hauttypen?", a: "Ja. Weil CBD mit dem eigenen Balance-System arbeitet, passt es sich an: trockene Haut behält Feuchtigkeit besser, ölige Haut bekommt Unterstützung beim Talg-Gleichgewicht." },
+        { q: "Kann CBD-Hautpflege high machen?", a: "Nein, absolut nicht. CBD ist nicht psychoaktiv und in der EU legal. Unsere Produkte enthalten keine berauschenden Stoffe – nur Hautvorteile." },
+        { q: "Wie lange bis zu Ergebnissen?", a: "Der Erneuerungszyklus liegt bei etwa 28 Tagen. Viele sehen nach zwei bis vier Wochen Veränderungen; volle Wirkung oft nach sechs bis acht Wochen regelmäßiger Anwendung." }
+      ],
+      ctaTitle: "Entdecke CBD-Hautpflege, die wirklich funktioniert",
+      ctaSub: "Deine Haut weiß, was sie braucht. CBD hilft ihr dorthin. Probiere 1753 SKINCARE – und spüre den Unterschied."
+    },
+    fr: {
+      metaTitle: "Soin visage au CBD – équilibre naturel pour votre peau | 1753",
+      metaDescription: "Découvrez comment le CBD travaille avec le système propre à votre peau pour un vrai équilibre. Pas de promesses creuses : science et nature. 1753 SKINCARE.",
+      kicker: "Soin au CBD",
+      h1: "Soin visage au CBD – votre peau a son propre système d’équilibre",
+      lead: "Saviez-vous que votre peau dispose d’un système intégré pour réguler l’inflammation, la production de sébum et le renouvellement cellulaire ? C’est le système endocannabinoïde, et le CBD parle sa langue.",
+      problemTitle: "Pourquoi les soins traditionnels ratent souvent le coche",
+      problemBody: "<p>L’industrie conventionnelle traite depuis longtemps les symptômes plutôt que les causes. Peau sèche ? Plus de crème. Peau grasse ? Nettoyants plus agressifs. Rougeurs ? On les masque. Mais la peau n’est pas une surface à corriger : c’est un organe vivant avec ses propres mécanismes de régulation.</p><p>Le système endocannabinoïde (ECS) est présent dans tout le corps, y compris la peau. Il gouverne l’inflammation, le sébum, la division cellulaire et la réponse immunitaire. ECS équilibré, peau qui fonctionne. Sinon : acné, sécheresse, rougeurs, vieillissement prématuré.</p><p>La plupart des soins ignorent totalement l’ECS. Ils appliquent des substances de l’extérieur sans dialoguer avec le système régulateur interne. C’est comme hurler des consignes à quelqu’un qui sait déjà quoi faire – si seulement on écoutait. Le CBD propose autre chose : au lieu de forcer la peau, il l’aide à retrouver son équilibre.</p>",
+      tipsTitle: "Les bases des soins au CBD",
+      tips: [
+        { title: "Commencez simple", body: "Pas besoin de dix étapes. Une huile visage de qualité au CBD matin et soir suffit largement. Laissez à la peau le temps de se recalibrer – comptez quatre à six semaines." },
+        { title: "La qualité avant la quantité", body: "Tous les CBD ne se valent pas. Les extraits full spectrum avec terpènes et autres cannabinoïdes offrent un effet d’entourage qu’un isolat ne peut pas égaler. Exigez des analyses tierces." },
+        { title: "Écoutez votre peau", body: "Le CBD aide la peau à mieux « communiquer ». Si la réponse change, suivez les signaux. Moins, c’est souvent plus dans une routine CBD." },
+        { title: "Combinez avec le mode de vie", body: "Les soins au CBD fonctionnent mieux dans un ensemble. Sommeil, alimentation, stress, mouvement : tout agit sur l’ECS de l’intérieur. La peau reflète tout le corps." },
+        { title: "Évitez la surcharge", body: "Ne mélangez pas le CBD avec trop d’actifs d’un coup. Laissez la peau ressentir le CBD sans concurrence d’acides, rétinol, etc., au début." }
+      ],
+      solutionTitle: "Comment 1753 SKINCARE utilise le CBD",
+      solutionBody: "<p>Toute notre gamme repose sur du CBD et CBG de très haute qualité. Nos huiles visage contiennent des extraits full spectrum qui travaillent avec l’ECS cutané pour un vrai équilibre – pas un soulagement éphémère.</p><p>The ONE huile visage à 10 % de CBD est le socle de notre philosophie : une huile pour tous les types de peau en soutenant le système déjà présent. I LOVE va plus loin avec CBD et CBG pour un équilibre plus profond. TA-DA Serum à 3 % de CBG apporte un soutien concentré quand la peau en a besoin.</p><p>Nous ne croyons pas aux routines en dix étapes. Nous croyons aux bons outils – puis nous faisons confiance à la peau. Voilà le soin au CBD comme il devrait être : simple, honnête, efficace.</p>",
+      faq: [
+        { q: "Qu’est-ce que le CBD dans les soins ?", a: "Le CBD (cannabidiol) est un cannabinoïde non psychoactif du chanvre qui interagit avec l’ECS de la peau. Il aide à réguler inflammation, sébum et renouvellement cellulaire naturellement." },
+        { q: "Le soin au CBD convient-il à toutes les peaux ?", a: "Oui. Parce qu’il travaille avec le propre système d’équilibre de la peau, il s’adapte : peau sèche, meilleure rétention d’hydratation ; peau grasse, aide sur le sébum." },
+        { q: "Le soin au CBD peut-il planer ?", a: "Non, absolument pas. Le CBD n’est pas psychoactif et est légal dans l’UE. Nos produits ne contiennent pas de substances enivrantes – que des bénéfices pour la peau." },
+        { q: "Combien de temps avant des résultats ?", a: "Le cycle de renouvellement fait environ 28 jours. Beaucoup voient des changements en deux à quatre semaines ; l’effet plein souvent après six à huit semaines d’usage régulier." }
+      ],
+      ctaTitle: "Découvrez un soin au CBD qui fonctionne vraiment",
+      ctaSub: "Votre peau sait ce dont elle a besoin. Le CBD l’y aide. Essayez 1753 SKINCARE et sentez la différence."
     }
   },
   {
     svSlug: "cbg-hudvard",
     enSlug: "cbg-skincare",
+    esSlug: "cuidado-piel-cbg",
+    deSlug: "cbg-hautpflege",
+    frSlug: "soin-peau-cbg",
     category: "general",
     productIds: ["ta-da-serum", "duo-ta-da", "duo-kit"],
     sv: {
@@ -117,11 +204,92 @@ export const GENERAL_PAGES: LandingPage[] = [
       ],
       ctaTitle: "Try the mother cannabinoid yourself",
       ctaSub: "CBG is the future of active skincare. TA-DA Serum gives your skin the cannabinoid that all other cannabinoids come from."
+    },
+    es: {
+      metaTitle: "Cuidado facial con CBG – el cannabinoide madre para tu piel | 1753",
+      metaDescription: "El CBG es el cannabinoide madre, con propiedades únicas para la piel. Descubre por qué puede ser lo mejor que nunca oíste nombrar. 1753 SKINCARE.",
+      kicker: "Cuidado con CBG",
+      h1: "Cuidado facial con CBG – el cannabinoide madre que cambia las reglas",
+      lead: "Todo el mundo habla del CBD, pero el CBG – cannabigerol – es el cannabinoide que merece el foco. Se llama cannabinoide madre por algo: todos los demás cannabinoides empiezan como CBG.",
+      problemTitle: "Por qué casi nadie habla del CBG – todavía",
+      problemBody: "<p>El CBG representa solo alrededor de un uno por ciento en la mayoría de las plantas de cannabis, lo que lo ha hecho caro y difícil de conseguir. Mientras el CBD monopolizaba la conversación, el CBG esperaba entre bastidores a pesar de la investigación que muestra propiedades fascinantes para la piel.</p><p>La industria convencional persigue tendencias – retinol, ácido hialurónico, niacinamida – pero a menudo pasa por alto ingredientes que actúan a un nivel más profundo. El CBG interactúa con el ECS de la piel de forma distinta al CBD. Se une directamente a los receptores CB1 y CB2, mientras el CBD actúa más de forma indirecta. Eso convierte al CBG en un complemento potente.</p><p>El problema: pocas marcas invierten en CBG y aún menos ofrecen concentraciones serias. En su lugar, fórmulas diluidas y promesas vagas. Tu piel merece mejor: ingredientes que hablen de verdad con sus sistemas y marquen la diferencia.</p>",
+      tipsTitle: "Saca el máximo partido al CBG",
+      tips: [
+        { title: "Combina CBG y CBD", body: "CBG y CBD tienen mecanismos distintos y se potencian. Juntos amplían el efecto sobre el ECS más que por separado." },
+        { title: "Aplica sobre piel limpia", body: "El CBG se absorbe mejor sin capas de otros productos. Limpia con suavidad, aplica el serum directo y deja que actúe antes de seguir." },
+        { title: "Sé constante", body: "El CBG construye efecto con el tiempo al apoyar el sistema propio de la piel. Uso diario al menos cuatro semanas para resultados claros. Con cannabinoides, la paciencia paga." },
+        { title: "Mañana y noche", body: "La piel repara de noche y se protege de día. El CBG apoya ambos procesos; aplicar mañana y noche optimiza el equilibro las 24 horas." }
+      ],
+      solutionTitle: "TA-DA Serum – CBG concentrado",
+      solutionBody: "<p>Nuestro TA-DA Serum lleva 3 por ciento de CBG, entre las concentraciones más altas del mercado. No es un truco: es una elección deliberada basada en lo que de verdad marca diferencia en la piel.</p><p>El CBG en TA-DA trabaja directamente con los receptores para apoyar la renovación celular, calmar la inflamación y reforzar la barrera. El serum ligero se absorbe rápido sin sensación grasa y funciona de maravilla como base antes del aceite facial.</p><p>Combínalo con nuestro DUO-kit para una rutina completa con CBD y CBG. Es el efecto entourage aplicado en la piel: dos cannabinoides que rinden mejor juntos. El futuro del cuidado empieza con el cannabinoide madre.</p>",
+      faq: [
+        { q: "¿Cuál es la diferencia entre CBG y CBD?", a: "CBG (cannabigerol) es el precursor de los demás cannabinoides y se une directamente a los receptores de la piel; el CBD actúa más en indirecto. Efectos parcialmente distintos y se complementan muy bien." },
+        { q: "¿Por qué el CBG cuesta más que el CBD?", a: "El CBG aparece en concentraciones mucho más bajas en la planta – a menudo solo un uno por ciento frente al 20–25 % del CBD. Se necesita más materia vegetal para la misma cantidad, y eso sube el precio." },
+        { q: "¿Puedo usar CBG si ya uso CBD?", a: "Sí, de hecho se recomienda. Mecanismos distintos y se potencian con el llamado efecto entourage." },
+        { q: "¿El serum de CBG va bien para piel sensible?", a: "Sí. El CBG tiene propiedades calmantes y antiinflamatorias, ideal para pieles sensibles y reactivas. Refuerza la barrera en lugar de agredirla." }
+      ],
+      ctaTitle: "Prueba tú mismo el cannabinoide madre",
+      ctaSub: "El CBG es el futuro de los activos cutáneos. TA-DA Serum da a tu piel el cannabinoide del que salen todos los demás."
+    },
+    de: {
+      metaTitle: "CBG Hautpflege – der Mutter-Cannabinoid für die Haut | 1753",
+      metaDescription: "CBG wird der Mutter-Cannabinoid genannt – mit einzigartigen Eigenschaften für die Haut. Entdecke, warum es das Beste sein kann, von dem du noch nie gehört hast. 1753 SKINCARE.",
+      kicker: "CBG Hautpflege",
+      h1: "CBG Hautpflege – der Mutter-Cannabinoid, der das Spiel verändert",
+      lead: "Alle reden von CBD, aber CBG – Cannabigerol – ist der Cannabinoid, der im Rampenlicht stehen sollte. Er heißt aus gutem Grund Mutter-Cannabinoid: Jeder andere Cannabinoid startet als CBG.",
+      problemTitle: "Warum noch niemand über CBG spricht",
+      problemBody: "<p>CBG macht nur etwa ein Prozent der meisten Cannabispflanzen aus – historisch teuer und schwer zugänglich. Während CBD die Aufmerksamkeit dominierte, wartete CBG im Hintergrund, obwohl die Forschung faszinierende Hauteigenschaften zeigt.</p><p>Die konventionelle Branche jagt Trends – Retinol, Hyaluronsäure, Niacinamide – verpasst aber oft Wirkstoffe, die tiefer wirken. CBG interagiert anders mit dem ECS der Haut als CBD. Es bindet direkt an CB1- und CB2-Rezeptoren, CBD eher indirekt. So wird CBG zu einem starken Ergänzer.</p><p>Das Problem: Wenige Marken investieren in CBG-Forschung, noch weniger bieten sinnvolle Konzentrationen. Stattdessen verdünnte Formeln und vage Versprechen. Deine Haut verdient besser – Inhaltsstoffe, die wirklich mit ihren Systemen sprechen.</p>",
+      tipsTitle: "So holst du das Maximum aus CBG",
+      tips: [
+        { title: "CBG und CBD kombinieren", body: "CBG und CBD haben unterschiedliche Wirkmechanismen und verstärken sich. Zusammen breiterer Effekt auf das ECS als allein." },
+        { title: "Auf gereinigte Haut", body: "CBG zieht am besten ein, wenn die Haut nicht unter anderen Produkten leidet. Sanft reinigen, Serum direkt auftragen, wirken lassen, dann schichten." },
+        { title: "Bleib dran", body: "CBG baut seine Wirkung über Zeit auf, indem es das eigene System der Haut stützt. Täglich mindestens vier Wochen für klare Ergebnisse. Geduld zahlt sich bei Cannabinoiden aus." },
+        { title: "Morgens und abends", body: "Die Haut repariert nachts, schützt tagsüber. CBG unterstützt beides – morgens und abends für optimales Rund-um-die-Uhr-Gleichgewicht." }
+      ],
+      solutionTitle: "TA-DA Serum – konzentriertes CBG",
+      solutionBody: "<p>Unser TA-DA Serum enthält 3 Prozent CBG – eine der höchsten Konzentrationen am Markt. Kein Gimmick, sondern bewusste Entscheidung nach dem, was der Haut wirklich hilft.</p><p>Das CBG in TA-DA arbeitet direkt mit den Rezeptoren für Zellerneuerung, beruhigte Entzündung und stärkere Barriere. Das leichte Serum zieht schnell ein, fühlt sich nicht fettig an und ist ideal unter dem Gesichtsöl.</p><p>Kombiniere mit unserem DUO-kit für CBD und CBG in einer Routine. Entourage-Effekt direkt auf der Haut – zwei Cannabinoiden, die zusammen stärker sind. Die Zukunft der Hautpflege beginnt beim Mutter-Cannabinoid.</p>",
+      faq: [
+        { q: "Unterschied zwischen CBG und CBD?", a: "CBG (Cannabigerol) ist Vorstufe aller anderen Cannabinoiden und bindet direkt an Hautrezeptoren, CBD eher indirekt. Teilweise andere Effekte – sie ergänzen sich ideal." },
+        { q: "Warum ist CBG teurer als CBD?", a: "CBG kommt in der Hanfpflanze viel seltener vor – oft nur ein Prozent gegenüber 20–25 Prozent CBD. Mehr Pflanzenmaterial für dieselbe Menge, höherer Preis." },
+        { q: "CBG trotz CBD nutzen?", a: "Ja, sogar empfohlen. Unterschiedliche Mechanismen, gegenseitige Verstärkung durch den Entourage-Effekt." },
+        { q: "CBG-Serum für empfindliche Haut?", a: "Ja. Beruhigende, entzündungshemmende Eigenschaften – besonders für sensible, reaktive Haut. Stärkt die Barriere statt sie zu reizen." }
+      ],
+      ctaTitle: "Probier den Mutter-Cannabinoid selbst",
+      ctaSub: "CBG ist die Zukunft aktiver Hautpflege. TA-DA Serum liefert den Cannabinoid, aus dem alle anderen entstehen."
+    },
+    fr: {
+      metaTitle: "Soin visage au CBG – le cannabinoïde mère pour la peau | 1753",
+      metaDescription: "Le CBG est surnommé le cannabinoïde mère, avec des propriétés uniques pour la peau. Découvrez pourquoi c’est peut-être le meilleur ingrédient dont vous n’avez jamais entendu parler. 1753 SKINCARE.",
+      kicker: "Soin au CBG",
+      h1: "Soin visage au CBG – le cannabinoïde mère qui change la donne",
+      lead: "Tout le monde parle du CBD, mais le CBG – cannabigérol – mérite les projecteurs. On l’appelle le cannabinoïde mère pour une raison : tous les autres cannabinoïdes commencent comme CBG.",
+      problemTitle: "Pourquoi personne ne parle encore du CBG",
+      problemBody: "<p>Le CBG ne représente qu’environ un pour cent de la plupart des plants de cannabis, ce qui l’a rendu cher et rare. Pendant que le CBD dominait, le CBG attendait en coulisses malgré des recherches fascinantes sur la peau.</p><p>L’industrie conventionnelle court après les tendances – rétinol, acide hyaluronique, niacinamide – mais néglige souvent des actifs qui agissent plus en profondeur. Le CBG interagit différemment avec l’ECS cutané que le CBD. Il se lie directement aux récepteurs CB1 et CB2, le CBD plutôt indirectement. Le CBG devient un complément puissant.</p><p>Le problème : peu de marques investissent dans le CBG, encore moins offrent des concentrations sérieuses. Formules diluées et promesses vagues. Votre peau mérite mieux – des ingrédients qui parlent vraiment à ses systèmes.</p>",
+      tipsTitle: "Tirer le meilleur parti du CBG",
+      tips: [
+        { title: "Combiner CBG et CBD", body: "Mécanismes d’action différents, effets mutuellement renforcés. Ensemble, effet plus large sur l’ECS qu’isolément." },
+        { title: "Appliquer sur peau propre", body: "Le CBG pénètre mieux sans couches d’autres produits. Nettoyer doucement, appliquer le sérum directement, laisser agir avant de superposer." },
+        { title: "Soyez régulier", body: "Le CBG construit son effet dans le temps en soutenant le système propre de la peau. Usage quotidien au moins quatre semaines pour des résultats nets. Avec les cannabinoïdes, la patience paie." },
+        { title: "Matin et soir", body: "La peau répare la nuit, se protège le jour. Le CBG soutient les deux ; matin et soir pour un équilibre optimal jour et nuit." }
+      ],
+      solutionTitle: "TA-DA Serum – CBG concentré",
+      solutionBody: "<p>Notre TA-DA Serum contient 3 % de CBG – parmi les concentrations les plus élevées du marché. Pas un gadget : un choix délibéré fondé sur ce qui change vraiment la peau.</p><p>Le CBG dans TA-DA travaille directement avec les récepteurs pour la rénovation cellulaire, calmer l’inflammation et renforcer la barrière. Sérum léger, absorption rapide, fini non gras, base idéale avant huile visage.</p><p>Associez à notre DUO-kit pour une routine complète CBD + CBG. Effet d’entourage directement sur la peau – deux cannabinoïdes plus forts ensemble. L’avenir des soins commence par le cannabinoïde mère.</p>",
+      faq: [
+        { q: "Différence entre CBG et CBD ?", a: "Le CBG (cannabigérol) est le précurseur des autres cannabinoïdes et se lie directement aux récepteurs cutanés ; le CBD agit plutôt indirectement. Effets partiellement différents – complémentarité idéale." },
+        { q: "Pourquoi le CBG coûte plus cher que le CBD ?", a: "Le CBG est beaucoup plus rare dans le chanvre – souvent ~1 % contre 20–25 % pour le CBD. Il faut plus de matière végétale pour la même quantité, d’où le prix." },
+        { q: "CBG si j’utilise déjà du CBD ?", a: "Oui, c’est même recommandé. Mécanismes différents, effet d’entourage qui renforce l’ensemble." },
+        { q: "Sérum CBG pour peau sensible ?", a: "Oui. Propriétés apaisantes et anti-inflammatoires – particulièrement adapté aux peaux sensibles et réactives. Renforce la barrière au lieu de la défier." }
+      ],
+      ctaTitle: "Essayez vous-même le cannabinoïde mère",
+      ctaSub: "Le CBG est l’avenir des soins actifs. TA-DA Serum donne à votre peau le cannabinoïde dont tous les autres sont issus."
     }
   },
   {
     svSlug: "naturlig-hudvard",
     enSlug: "natural-skincare",
+    esSlug: "cuidado-piel-natural",
+    deSlug: "natuerliche-hautpflege",
+    frSlug: "soin-peau-naturel",
     category: "general",
     productIds: ["duo-kit", "au-naturel-makeup-remover", "ta-da-serum"],
     sv: {
@@ -175,11 +343,92 @@ export const GENERAL_PAGES: LandingPage[] = [
       ],
       ctaTitle: "Choose skincare you can trust",
       ctaSub: "Natural, transparent, and effective. 1753 SKINCARE makes skincare your skin actually understands."
+    },
+    es: {
+      metaTitle: "Cuidado facial natural – puro, honesto, sin concesiones | 1753",
+      metaDescription: "Cuidado natural es respetar la piel, no engañarla. Por qué menos ingredientes de más calidad dan mejores resultados. 1753 SKINCARE.",
+      kicker: "Cuidado natural",
+      h1: "Cuidado facial natural – para quien no acepta medias tintas",
+      lead: "La piel es el órgano más grande y absorbe casi todo lo que le pones. ¿No es razón suficiente para elegir ingredientes que de verdad entiendas?",
+      problemTitle: "Lo poco natural del cuidado moderno",
+      problemBody: "<p>El producto medio lleva entre 15 y 50 ingredientes. Muchos son conservantes sintéticos, siliconas, emulsionantes y fragancias que la piel no necesita ni le van bien. Están ahí para caducidad, textura o un olor que vende – no porque tu piel los pidiera.</p><p>Parabenos, SLS, aceites minerales, compuestos PEG – la lista de dudas en el cuidado convencional es larga. La investigación sobre exposición diaria a largo plazo sigue siendo limitada; el principio de precaución debería aplicarse a lo que frotas en la piel cada día.</p><p>El problema: el cuidado “natural” tiene mala fama por marcas con etiquetas verdes y productos flojos. Greenwashing a mansalva: lo llaman natural y lleva tanta química como el convencional. Lo natural de verdad no es marketing: es integridad en cada fórmula.</p>",
+      tipsTitle: "Cómo elegir cuidado realmente natural",
+      tips: [
+        { title: "Lee el INCI", body: "La lista no miente. Orden decreciente por cantidad. Si los cinco primeros son nombres químicos que no reconoces, replantéate si es tan natural." },
+        { title: "Menos ingredientes, mejor producto", body: "Lo más eficaz suele tener listas cortas. Cada ingrediente con función clara. Si no sabes por qué está, probablemente sobra." },
+        { title: "Evita fragancias sintéticas", body: "La fragancia sintética es una de las causas más frecientes de irritación. Elige sin perfume o con aroma solo de los propios ingredientes." },
+        { title: "Prefiere prensado en frío y extractos suaves", body: "Cómo se obtiene el ingrediente importa. Aceites prensados en frío y extractos suaves conservan más nutrientes que versiones refinadas." },
+        { title: "No te fíes solo del envase", body: "Palabras como natural, clean o green no están reguladas. Cualquiera las usa. Mira certificaciones reales, INCI y transparencia de la marca." }
+      ],
+      solutionTitle: "1753 SKINCARE – natural sin discursos vacíos",
+      solutionBody: "<p>Creamos 1753 SKINCARE cansados del cuidado que promete una cosa y entrega otra. Cada producto tiene INCI corto y transparente: cada componente con un propósito para tu piel – nada más.</p><p>Nuestro Au Naturel Makeup Remover usa MCT oil y CBD para limpiar en profundidad sin romper la barrera. El DUO-kit con The ONE e I LOVE aporta aceites faciales de aceites vegetales enriquecidos con CBD y CBG de espectro completo. Sin siliconas, sin parabenos, sin perfume sintético.</p><p>Creemos que lo natural no debe ser una renuncia. Debe ser la opción obvia – porque funciona mejor, no a pesar de ser natural. Cuando la piel entiende lo que le das, ya no hace falta convencerla para que se sienta bien.</p>",
+      faq: [
+        { q: "¿Es el cuidado natural tan eficaz como el convencional?", a: "Con los ingredientes adecuados, sí. Aceites vegetales y cannabinoides como CBD y CBG tienen efectos documentados. La diferencia: trabajan con la piel en lugar de imponerle algo." },
+        { q: "¿Cómo sé si un producto es de verdad natural?", a: "Lee el INCI. Listas cortas con aceites vegetales, extractos y vitaminas reconocibles son buena señal. Desconfía de listas kilométricas de siglas." },
+        { q: "¿Sirve para piel con problemas?", a: "Por supuesto. Ingredientes naturales como CBD y CBG son antiinflamatorios – muy adecuados para acné, rosácea o eccema." }
+      ],
+      ctaTitle: "Elige un cuidado en el que puedas confiar",
+      ctaSub: "Natural, transparente y eficaz. 1753 SKINCARE: cuidado que tu piel de verdad entiende."
+    },
+    de: {
+      metaTitle: "Natürliche Hautpflege – rein, ehrlich, ohne Kompromisse | 1753",
+      metaDescription: "Natürliche Hautpflege heißt: Haut respektieren, nicht täuschen. Warum weniger, aber bessere Inhaltsstoffe bessere Ergebnisse liefern. 1753 SKINCARE.",
+      kicker: "Natürliche Hautpflege",
+      h1: "Natürliche Hautpflege – für alle, die nicht klein beigeben",
+      lead: "Die Haut ist dein größtes Organ und nimmt fast alles auf, was du aufträgst. Sollte das nicht Grund genug sein, Inhaltsstoffe zu wählen, die du wirklich verstehst?",
+      problemTitle: "Das Unnatürliche an moderner Hautpflege",
+      problemBody: "<p>Das durchschnittliche Produkt enthält 15 bis 50 Inhaltsstoffe. Viele sind synthetische Konservierungsmittel, Silikone, Emulgatoren und Duftstoffe, die die Haut weder braucht noch gut tut. Sie verlängern Haltbarkeit, Textur oder Verkaufsduft – nicht, weil die Haut danach verlangt hat.</p><p>Parabene, SLS, Mineralöle, PEG – die Liste fragwürdiger Stoffe in konventioneller Pflege ist lang. Langzeitforschung zur täglichen Exposition ist begrenzt; Vorsicht sollte gelten für alles, was du täglich einreibst.</p><p>Das Problem: „Natürliche“ Pflege hat durch schwache Produkte mit grünem Label einen schlechten Ruf. Greenwashing überall: heißt natürlich, ist aber genauso synthetisch. Echte Natürlichkeit ist kein Marketing – sie ist Integrität in jeder Formel.</p>",
+      tipsTitle: "Wirklich natürliche Hautpflege wählen",
+      tips: [
+        { title: "INCI lesen", body: "Die Liste lügt nicht. Absteigend nach Menge. Wenn die ersten fünf chemische Namen sind, die du nicht kennst: nachdenken." },
+        { title: "Weniger Inhaltsstoffe, besseres Produkt", body: "Die wirksamsten natürlichen Produkte haben kurze Listen. Jeder Stoff mit klarer Funktion. Wenn du nicht weißt, warum er drin ist, fehlt er vermutlich." },
+        { title: "Parfümierte Produkte meiden", body: "Synthetischer Duft ist eine häufige Reizursache. Unparfümiert oder natürlicher Duft nur aus den Inhaltsstoffen." },
+        { title: "Kaltgepresst und schonend extrahiert", body: "Gewinnung zählt. Kaltgepresste Öle und milde Extrakte behalten mehr Pflanzennährstoffe als raffinierte Varianten." },
+        { title: "Nicht nur dem Etikett vertrauen", body: "Begriffe wie natural, clean, green sind nicht geschützt. Jeder nutzt sie. Schau auf echte Zertifikate, INCI und Transparenz der Marke." }
+      ],
+      solutionTitle: "1753 SKINCARE – natürlich ohne Phrasen",
+      solutionBody: "<p>Wir haben 1753 SKINCARE gegründet, weil uns Hautpflege nervte, die etwas verspricht und etwas anderes liefert. Jedes Produkt hat eine kurze, transparente INCI: jede Komponente mit Zweck für deine Haut – sonst nichts.</p><p>Unser Au Naturel Makeup Remover nutzt MCT oil und CBD für tiefe Reinigung ohne Barriereschaden. Das DUO-kit mit The ONE und I LOVE liefert Gesichtsöle auf Basis natürlicher Pflanzenöle mit Vollspektrum-CBD und CBG. Keine Silikone, keine Parabene, kein synthetischer Duft.</p><p>Natürliche Pflege soll kein Kompromiss sein. Sie soll die naheliegende Wahl sein – weil sie besser wirkt, nicht trotz Natürlichkeit. Wenn die Haut versteht, was sie bekommt, musst du sie nicht mehr überreden.</p>",
+      faq: [
+        { q: "Ist natürliche Hautpflege so wirksam wie konventionelle?", a: "Mit den richtigen Inhaltsstoffen ja. Pflanzenöle und Cannabinoiden wie CBD und CBG sind dokumentiert wirksam. Der Unterschied: Sie arbeiten mit der Haut statt ihr etwas aufzuzwingen." },
+        { q: "Woran erkenne ich echte Natürlichkeit?", a: "INCI lesen. Kurze Listen mit erkennbaren Pflanzenölen, Extrakten, Vitaminen sind gut. Skepsis bei langen Abkürzungslisten." },
+        { q: "Funktioniert das bei Problemhaut?", a: "Ja. Natürliche Inhaltsstoffe wie CBD und CBG sind entzündungshemmend – besonders bei Akne, Rosacea, Ekzem." }
+      ],
+      ctaTitle: "Wähle Hautpflege, der du vertrauen kannst",
+      ctaSub: "Natürlich, transparent, wirksam. 1753 SKINCARE – Pflege, die deine Haut wirklich versteht."
+    },
+    fr: {
+      metaTitle: "Soin visage naturel – pur, honnête, sans compromis | 1753",
+      metaDescription: "Le soin naturel, c’est respecter la peau, pas la tromper. Pourquoi moins d’ingrédients, mais meilleurs, donnent de meilleurs résultats. 1753 SKINCARE.",
+      kicker: "Soin naturel",
+      h1: "Soin visage naturel – pour ceux qui refusent les compromis",
+      lead: "La peau est votre plus grand organe et absorbe la plupart de ce que vous lui appliquez. Ce n’est pas une raison suffisante pour choisir des ingrédients que vous comprenez vraiment ?",
+      problemTitle: "Le côté pas naturel des soins modernes",
+      problemBody: "<p>Le produit moyen compte entre 15 et 50 ingrédients. Beaucoup sont conservateurs de synthèse, silicones, émulsifiants et parfums dont la peau n’a pas besoin. Ils servent la durée, la texture ou une odeur qui vend – pas parce que la peau les a demandés.</p><p>Parabènes, SLS, huiles minérales, PEG – la liste des ingrédients discutables est longue. La recherche sur l’exposition quotidienne à long terme reste limitée ; le principe de précaution devrait s’appliquer à ce que vous frottez sur la peau chaque jour.</p><p>Le problème : le soin « naturel » a mauvaise réputation à cause de marques au vernis vert. Greenwashing partout : étiquette naturelle, contenu aussi synthétique que le classique. Le vrai naturel, ce n’est pas le marketing : c’est l’intégrité de chaque formule.</p>",
+      tipsTitle: "Choisir un soin vraiment naturel",
+      tips: [
+        { title: "Lisez l’INCI", body: "La liste ne ment pas. Ordre décroissant par quantité. Si les cinq premiers sont des noms chimiques inconnus, posez-vous la question." },
+        { title: "Moins d’ingrédients, meilleur produit", body: "Les produits naturels les plus efficaces ont des listes courtes. Chaque ingrédient a un rôle clair. Si vous ne savez pas pourquoi il est là, il n’y a probablement pas lieu d’être." },
+        { title: "Évitez les parfums de synthèse", body: "Le parfum synthétique est une cause fréquente d’irritation. Sans parfum ou odeur naturelle des ingrédients seuls." },
+        { title: "Privilégiez pressage à froid et extraits doux", body: "La manière d’obtenir l’ingrédient compte. Huiles pressées à froid et extraits doux gardent plus de nutriments que les versions raffinées." },
+        { title: "Ne croyez pas l’étiquette", body: "Les mots naturel, clean, green ne sont pas réglementés. Regardez certifications réelles, INCI et transparence de la marque." }
+      ],
+      solutionTitle: "1753 SKINCARE – naturel sans baratin",
+      solutionBody: "<p>Nous avons créé 1753 SKINCARE lassés des soins qui promettent une chose et en livrent une autre. Chaque produit a une INCI courte et transparente : chaque composant sert votre peau – rien d’autre.</p><p>Notre Au Naturel Makeup Remover utilise MCT oil et CBD pour nettoyer en profondeur sans casser la barrière. Le DUO-kit avec The ONE et I LOVE apporte des huiles visage à base d’huiles végétales enrichies en CBD et CBG full spectrum. Pas de silicones, pas de parabènes, pas de parfum de synthèse.</p><p>Nous croyons que le naturel ne doit pas être une concession. Ce doit être le choix évident – parce que ça marche mieux, pas malgré le naturel. Quand la peau comprend ce qu’elle reçoit, inutile de la convaincre.</p>",
+      faq: [
+        { q: "Le soin naturel est-il aussi efficace que le conventionnel ?", a: "Avec les bons ingrédients, oui. Huiles végétales et cannabinoïdes comme CBD et CBG ont des effets documentés. La différence : ils travaillent avec la peau au lieu de lui imposer quelque chose." },
+        { q: "Comment savoir si un produit est vraiment naturel ?", a: "Lisez l’INCI. Listes courtes avec huiles végétales, extraits et vitamines reconnaissables : bon signe. Méfiance devant les listes d’abréviations interminables." },
+        { q: "Et pour une peau à problèmes ?", a: "Absolument. Des ingrédients naturels comme CBD et CBG sont anti-inflammatoires – très adaptés à l’acné, la rosacée ou l’eczéma." }
+      ],
+      ctaTitle: "Choisissez un soin en qui vous avez confiance",
+      ctaSub: "Naturel, transparent, efficace. 1753 SKINCARE : un soin que votre peau comprend vraiment."
     }
   },
   {
     svSlug: "vegansk-hudvard",
     enSlug: "vegan-skincare",
+    esSlug: "cuidado-piel-vegano",
+    deSlug: "vegane-hautpflege",
+    frSlug: "soin-peau-vegan",
     category: "general",
     productIds: ["duo-kit", "ta-da-serum", "au-naturel-makeup-remover"],
     sv: {
@@ -231,11 +480,89 @@ export const GENERAL_PAGES: LandingPage[] = [
       ],
       ctaTitle: "Skincare with a clear conscience",
       ctaSub: "100% vegan, 100% effective. With 1753 SKINCARE, you never have to choose between results and values."
+    },
+    es: {
+      metaTitle: "Cuidado facial vegano – 100% vegetal, sin excepciones | 1753",
+      metaDescription: "Cuidado vegano sin renuncias. Sin ingredientes animales, sin pruebas en animales: fórmulas vegetales puras. 1753 SKINCARE.",
+      kicker: "Cuidado vegano",
+      h1: "Cuidado facial vegano – vegetal de verdad, sin excusas",
+      lead: "No deberías elegir entre un cuidado eficaz y tus valores. El cuidado vegano demuestra que no hace falta: el reino vegetal tiene todo lo que tu piel necesita.",
+      problemTitle: "Lo animal en la industria del cuidado",
+      problemBody: "<p>La industria tiene una historia larga y problemática con ingredientes de origen animal. Lanolina de lana, cera de abeja, carmín de cochinilla, colágeno de pescado, escualeno de hígado de tiburón – lista larga y a menudo escondida tras nombres químicos en el INCI. Mucha gente ignora que lo que usa a diario lleva derivados animales.</p><p>Más allá de los ingredientes está el ensayo en animales. A pesar de la conciencia creciente, muchas empresas siguen probando productos o materias primas en animales, a veces vía terceros o en países donde la ley lo exige. La transparencia es alarmantemente baja.</p><p>No es solo ética: también es resultado. El escualano sintético funciona igual que el de tiburón. Alternativas vegetales a lanolina o cera rinden igual o mejor. Los ingredientes animales siguen por tradición y coste – no por superioridad. Toca preguntar por qué seguimos aceptándolo.</p>",
+      tipsTitle: "Guía de cuidado vegano",
+      tips: [
+        { title: "Aprende los nombres camuflados", body: "Los ingredientes animales se esconden tras nombres químicos. Cera alba es cera de abeja, lanolina viene de la lana, carmín son insectos triturados. Aprende los habituales para leer el INCI con seguridad." },
+        { title: "Busca certificaciones", body: "Sellos como The Vegan Society o Leaping Bunny ayudan. Pero lee siempre el INCI: las certificaciones cuestan, y marcas pequeñas pueden ser veganas sin logo." },
+        { title: "Mira toda la cadena", body: "Un producto puede ser vegano en fórmula final y haberse probado en animales en desarrollo. Pregunta por toda la cadena, no solo el envase final." },
+        { title: "Los aceites vegetales cumplen", body: "Aceite de semilla de cáñamo, jojoba, MCT y otros vegetales aportan ácidos grasos y nutrientes. Lo animal no es superior: es más viejo." }
+      ],
+      solutionTitle: "1753 SKINCARE es 100% vegano",
+      solutionBody: "<p>Desde el día uno, 1753 SKINCARE ha sido totalmente vegano y sin pruebas en animales. No es una moda: es un principio fundacional innegociable.</p><p>Todos nuestros productos se formulan con ingredientes vegetales: aceite de semilla de cáñamo, jojoba, MCT, CBD y CBG de cáñamo ecológico, extractos de hongos y antioxidantes naturales. Sin subproductos animales, sin excepciones, sin trampas.</p><p>El DUO-kit da dos aceites faciales potentes solo del reino vegetal. TA-DA Serum aporta CBG en fórmula vegetal pura. Au Naturel Makeup Remover limpia con MCT oil sin un solo ingrediente animal. Cuidado eficaz y decisiones conscientes van de la mano.</p>",
+      faq: [
+        { q: "¿Todos los productos 1753 SKINCARE son veganos?", a: "Sí, el 100 %. Nunca usamos ingredientes animales ni testamos en animales. Así ha sido desde el principio." },
+        { q: "¿El cuidado vegano es tan eficaz?", a: "Sí, a menudo más. Ingredientes vegetales como CBD, CBG y aceites prensados en frío son ricos en ácidos grasos, antioxidantes y compuestos bioactivos que la piel usa directamente." },
+        { q: "¿Diferencia entre vegano y cruelty-free?", a: "Vegano: sin ingredientes animales. Cruelty-free: sin pruebas en animales. Puede ser uno sin el otro. Nosotros somos ambos – sin concesiones." }
+      ],
+      ctaTitle: "Cuidado con la conciencia tranquila",
+      ctaSub: "100 % vegano, 100 % eficaz. Con 1753 SKINCARE no eliges entre resultados y valores."
+    },
+    de: {
+      metaTitle: "Vegane Hautpflege – 100 % pflanzlich, ohne Ausnahmen | 1753",
+      metaDescription: "Vegane Hautpflege ohne Kompromisse. Keine tierischen Inhaltsstoffe, keine Tierversuche – nur reine pflanzliche Formeln. 1753 SKINCARE.",
+      kicker: "Vegane Hautpflege",
+      h1: "Vegane Hautpflege – pflanzlich, ohne Ausreden",
+      lead: "Du solltest nicht zwischen wirksamer Hautpflege und deinen Werten wählen müssen. Vegane Hautpflege zeigt: Das Pflanzenreich hat alles, was deine Haut braucht.",
+      problemTitle: "Das Tierische in der Branche",
+      problemBody: "<p>Die Hautpflege hat eine lange, problematische Geschichte mit tierischen Inhaltsstoffen. Lanolin aus Wolle, Bienenwachs, Karmin aus Käfern, Kollagen aus Fisch, Squalen aus Haifischleber – die Liste ist lang und oft hinter chemischen Namen versteckt. Viele wissen nicht, dass ihre Alltagsprodukte tierische Derivate enthalten.</p><p>Neben Inhaltsstoffen gibt es Tierversuche. Trotz wachsender Aufmerksamkeit testen viele Firmen weiter – manchmal indirekt über Drittlabore oder in Ländern mit gesetzlicher Pflicht. Transparenz ist erschreckend niedrig.</p><p>Es geht nicht nur um Ethik, sondern auch um Ergebnis. Synthetisches Squalan wirkt wie Hai-Versionen. Pflanzliche Alternativen zu Lanolin und Wachs sind gleichwertig oder besser. Tierische Inhaltsstoffe bleiben aus Tradition und Kosten – nicht aus Überlegenheit. Zeit zu hinterfragen.</p>",
+      tipsTitle: "Leitfaden vegane Hautpflege",
+      tips: [
+        { title: "Versteckte Namen lernen", body: "Tierische Stoffe tarnen sich chemisch. Cera alba ist Bienenwachs, Lanolin von der Wolle, Karmin zerstoßene Insekten. Die gängigsten kennen, um INCI sicher zu lesen." },
+        { title: "Nach Siegeln schauen", body: "The Vegan Society, Leaping Bunny usw. geben Orientierung. Aber immer INCI lesen – Zertifizierung kostet, kleine Marken können vegan sein ohne Logo." },
+        { title: "Die ganze Kette prüfen", body: "Ein Produkt kann in der Endformel vegan sein, aber in der Entwicklung an Tieren getestet. Nach der gesamten Produktion fragen." },
+        { title: "Pflanzenöle liefern", body: "Hanfsamen-, Jojoba-, MCT-Öl und andere Pflanzenöle decken Fettsäuren und Nährstoffe. Tierische Alternativen sind nicht besser – nur älter." }
+      ],
+      solutionTitle: "1753 SKINCARE ist 100 % vegan",
+      solutionBody: "<p>Von Tag eins war 1753 SKINCARE komplett vegan und frei von Tierversuchen. Kein Trend, sondern nicht verhandelbares Fundament.</p><p>Alle Produkte sind pflanzlich formuliert: Hanfsamenöl, Jojoba, MCT, CBD und CBG aus Bio-Hanf, Pilzextrakte, natürliche Antioxidantien. Keine tierischen Nebenprodukte, keine Ausnahmen, keine Schlupflöcher.</p><p>Das DUO-kit liefert zwei starke Gesichtsöle rein aus dem Pflanzenreich. TA-DA Serum bringt CBG in reiner pflanzlicher Formel. Au Naturel Makeup Remover reinigt mit MCT oil ohne ein tierisches Molekül. Wirksame Pflege und bewusste Entscheidungen gehören zusammen.</p>",
+      faq: [
+        { q: "Sind alle 1753 SKINCARE-Produkte vegan?", a: "Ja, 100 Prozent. Nie tierische Inhaltsstoffe, nie Tierversuche – von Anfang an." },
+        { q: "Ist vegane Hautpflege genauso wirksam?", a: "Ja, oft mehr. Pflanzliche Stoffe wie CBD, CBG und kaltgepresste Öle sind reich an Fettsäuren, Antioxidantien und Bioaktivem, das die Haut direkt nutzt." },
+        { q: "Vegan vs. cruelty-free?", a: "Vegan heißt keine tierischen Inhaltsstoffe. Cruelty-free heißt keine Tierversuche. Eines ohne das andere geht. Wir sind beides – ohne Kompromiss." }
+      ],
+      ctaTitle: "Hautpflege mit gutem Gewissen",
+      ctaSub: "100 % vegan, 100 % wirksam. Mit 1753 SKINCARE musst du nie zwischen Ergebnis und Werten wählen."
+    },
+    fr: {
+      metaTitle: "Soin visage vegan – 100 % végétal, sans exception | 1753",
+      metaDescription: "Soin vegan sans compromis. Pas d’ingrédients d’origine animale, pas de tests sur animaux : des formules purement végétales. 1753 SKINCARE.",
+      kicker: "Soin vegan",
+      h1: "Soin visage vegan – végétal pour de vrai, sans excuses",
+      lead: "Vous ne devriez pas avoir à choisir entre des soins efficaces et vos valeurs. Le soin vegan prouve que ce n’est pas nécessaire : le règne végétal a tout ce dont votre peau a besoin.",
+      problemTitle: "Le côté animal de l’industrie des soins",
+      problemBody: "<p>L’industrie a une longue histoire problématique avec les ingrédients d’origine animale. Lanoline de laine, cire d’abeille, carmin de cochenille, collagène de poisson, squale d’huile de foie de requin – liste longue souvent cachée derrière des noms chimiques sur l’INCI. Beaucoup ignorent que leurs produits du quotidien contiennent des dérivés animaux.</p><p>Au-delà des ingrédients : les tests sur animaux. Malgré une prise de conscience croissante, de nombreuses marques testent encore, parfois via des tiers ou dans des pays où la loi l’impose. La transparence est alarmante.</p><p>Ce n’est pas qu’une question d’éthique : c’est aussi le résultat. Le squalane synthétique fait le même travail que la version requin. Les alternatives végétales à la lanoline ou à la cire performent aussi bien ou mieux. Les ingrédients animaux restent par tradition et coût – pas par supériorité. Il est temps de questionner pourquoi on accepte encore ça.</p>",
+      tipsTitle: "Guide du soin vegan",
+      tips: [
+        { title: "Apprenez les noms déguisés", body: "Les ingrédients animaux se cachent derrière des noms chimiques. Cera alba = cire d’abeille, lanoline de la laine, carmin = insectes broyés. Apprenez les plus courants pour lire l’INCI sereinement." },
+        { title: "Cherchez les certifications", body: "The Vegan Society, Leaping Bunny rassurent. Mais lisez toujours l’INCI : les certifications coûtent cher, les petites marques peuvent être veganes sans logo." },
+        { title: "Vérifiez toute la chaîne", body: "Un produit peut être vegan en formule finale mais testé sur animaux en R&D. Posez des questions sur toute la chaîne, pas seulement le flacon fini." },
+        { title: "Les huiles végétales livrent", body: "Huile de graines de chanvre, jojoba, MCT et autres végétaux couvrent acides gras et nutriments. Le animal n’est pas supérieur – juste plus ancien." }
+      ],
+      solutionTitle: "1753 SKINCARE est 100 % vegan",
+      solutionBody: "<p>Dès le premier jour, 1753 SKINCARE est entièrement vegan et sans tests sur animaux. Ce n’est pas une mode : c’est un principe fondateur non négociable.</p><p>Tous nos produits sont formulés avec des ingrédients végétaux : huile de graines de chanvre, jojoba, MCT, CBD et CBG de chanvre bio, extraits de champignons, antioxydants naturels. Pas de sous-produits animaux, pas d’exception, pas de passe-droit.</p><p>Le DUO-kit offre deux huiles visage puissantes 100 % végétales. TA-DA Serum apporte le CBG dans une formule végétale pure. Au Naturel Makeup Remover nettoie au MCT oil sans une seule molécule animale. Soins efficaces et choix conscients vont ensemble.</p>",
+      faq: [
+        { q: "Tous les produits 1753 SKINCARE sont-ils vegan ?", a: "Oui, 100 %. Jamais d’ingrédients animaux, jamais de tests sur animaux – depuis le début." },
+        { q: "Le soin vegan est-il aussi efficace ?", a: "Oui, souvent plus. Des ingrédients végétaux comme CBD, CBG et huiles pressées à froid sont riches en acides gras, antioxydants et composés bioactifs que la peau utilise directement." },
+        { q: "Différence vegan et cruelty-free ?", a: "Vegan : pas d’ingrédients animaux. Cruelty-free : pas de tests sur animaux. L’un sans l’autre est possible. Nous sommes les deux – sans compromis." }
+      ],
+      ctaTitle: "Des soins avec la conscience tranquille",
+      ctaSub: "100 % vegan, 100 % efficace. Avec 1753 SKINCARE, vous ne choisissez jamais entre résultats et valeurs."
     }
   },
   {
     svSlug: "ekologisk-hudvard",
     enSlug: "organic-skincare",
+    esSlug: "cuidado-piel-biologico",
+    deSlug: "bio-hautpflege",
+    frSlug: "soin-peau-bio",
     category: "general",
     productIds: ["duo-ta-da", "au-naturel-makeup-remover", "fungtastic-mushroom-extract"],
     sv: {
@@ -291,11 +618,95 @@ export const GENERAL_PAGES: LandingPage[] = [
       ],
       ctaTitle: "Make a choice that matters",
       ctaSub: "Organic skincare that delivers results without compromising the planet. 1753 SKINCARE – transparent from soil to skin."
+    },
+    es: {
+      metaTitle: "Cuidado facial ecológico – sostenible, limpio, consciente | 1753",
+      metaDescription: "Cuidado ecológico que asume responsabilidad hacia tu piel y el planeta. Ingredientes limpios, producción sostenible, cero greenwashing. 1753 SKINCARE.",
+      kicker: "Cuidado ecológico",
+      h1: "Cuidado facial ecológico – para tu piel y el planeta",
+      lead: "El cuidado ecológico va más allá de lo que te pones en la piel. Es toda la cadena – de la tierra al bote – y que cada paso respete a las dos.",
+      problemTitle: "La epidemia del greenwashing",
+      problemBody: "<p>La palabra ecológico está tan diluida en cosmética que ya casi no significa nada. Hojas verdes en el envase, eco y sustainable en el claim, y que nadie mire el INCI. No hay un estándar universal de “ecológico”, y eso abre la puerta al maquillaje verde.</p><p>Los químicos agrícolas convencionales acaban en las materias primas: pesticidas en aceites vegetales, metales pesados en minerales, disolventes en extractos. En la piel se absorben directo, sin pasar por el filtro hepático. La piel no “detoxifica” como el tubo digestivo.</p><p>La sostenibilidad va más allá del INCI: plástico de más, envíos cruzando el planeta, procesos que malgastan agua – la industria arrastra una deuda ambiental que casi no se nombra. Elegir ecológico es exigir cuenta en toda la cadena, no solo en la etiqueta final.</p>",
+      tipsTitle: "Cómo orientarte en el cuidado ecológico",
+      tips: [
+        { title: "Revisa el origen", body: "¿De dónde vienen las materias primas? Lo certificado ecológico se cultiva sin pesticidas ni fertilizantes sintéticos. Pregunta si la marca puede rastrear hasta la fuente." },
+        { title: "Entiende las certificaciones", body: "COSMOS, Ecocert, Soil Association, USDA Organic tienen reglas distintas. Ninguna es perfecta, pero dan una base de confianza. Aprende las diferencias." },
+        { title: "Piensa el envase", body: "Vidrio, plástico reciclado y envases minimalistas reducen impacto. Evita el sobre-embalaje donde el cartón pesa más que el producto." },
+        { title: "Menos es más sostenible", body: "Cada producto deja huella. Una rutina minimalista de dos o tres piezas de calidad es más sostenible que diez pasos mediocres." },
+        { title: "Apoya marcas transparentes", body: "Las que enseñan cadena de suministro, certificaciones y cómo fabrican merecen confianza. El secretismo nunca es buena señal." }
+      ],
+      solutionTitle: "1753 SKINCARE – ecológico de verdad",
+      solutionBody: "<p>Nuestro cáñamo se cultiva de forma ecológica en Europa sin pesticidas ni fertilizantes sintéticos. CBD y CBG se extraen con CO2 suave que conserva cannabinoides y terpenos sin disolventes químicos.</p><p>Mantenemos fórmulas cortas y con sentido. Cada ingrediente tiene función clara y procede de fuentes responsables. Fungtastic Mushroom Extract usa cuatro especies de hongos cultivadas en condiciones controladas y sostenibles. Au Naturel limpia con MCT oil de coco de producción responsable.</p><p>No somos perfectos ni lo fingimos. Sí somos transparentes sobre qué hay dentro, de dónde viene y cómo se hace. Así debería construirse el cuidado ecológico: sustancia detrás de cada promesa, no solo palabras bonitas en el envase.</p>",
+      faq: [
+        { q: "¿1753 SKINCARE está certificado ecológico?", a: "Nuestro cáñamo es ecológico y usamos ingredientes ecológicos cuando es posible. Priorizamos transparencia en toda la cadena antes que comprar un sello." },
+        { q: "¿Por qué cuesta más el cuidado ecológico?", a: "La agricultura ecológica rinde menos, las certificaciones cuestan y el control de calidad exige más recursos. Pagas calidad real, no producción industrial en serie." },
+        { q: "¿De verdad importa que sea ecológico?", a: "La piel absorbe sin filtro hepático. Ingredientes cultivados sin pesticidas y químicos reducen carga en tu cuerpo y en el entorno." },
+        { q: "¿Puede ser tan potente el cuidado ecológico?", a: "Por supuesto. CBD y CBG son bioactivos potentes con cualquier método de cultivo, pero lo ecológico suele dar extractos más limpios sin residuos que perturben la biología cutánea." }
+      ],
+      ctaTitle: "Elige algo que cuente de verdad",
+      ctaSub: "Cuidado ecológico con resultados sin renunciar al planeta. 1753 SKINCARE – transparente de la tierra a la piel."
+    },
+    de: {
+      metaTitle: "Öko-Hautpflege – nachhaltig, rein, bewusst | 1753",
+      metaDescription: "Öko-Hautpflege mit Verantwortung für Haut und Planet. Saubere Inhaltsstoffe, nachhaltige Produktion, kein Greenwashing. 1753 SKINCARE.",
+      kicker: "Öko-Hautpflege",
+      h1: "Öko-Hautpflege – für deine Haut und den Planeten",
+      lead: "Öko-Hautpflege ist mehr als das, was du aufträgst. Es geht um die ganze Kette – vom Boden bis zur Flasche – und dass jeder Schritt dich und die Umwelt respektiert.",
+      problemTitle: "Die Greenwashing-Epidemie",
+      problemBody: "<p>Der Begriff bio/ökologisch ist in der Kosmetik bis zur Unkenntlichkeit verwässert. Grüne Blätter auf der Verpackung, eco und sustainable – und hoffentlich schaut niemand ins INCI. Es gibt keinen universellen Standard; das Türöffnen für Manipulation.</p><p>Konventionelle Agrarchemie landet in Rohstoffen: Pestizide in Pflanzenölen, Schwermetalle in Mineralstoffen, Lösungsmittel in Extrakten. Auf der Haut werden sie direkt aufgenommen, ohne Leberfilter. Haut entgiftet nicht wie der Verdauungstrakt.</p><p>Nachhaltigkeit geht über Inhaltsstoffe hinaus: unnötiges Plastik, weltweite Transporte, wasserverschwendende Produktion – die Branche trägt eine selten diskutierte Umweltschuld. Öko wählen heißt die ganze Kette in den Blick nehmen, nicht nur das Etikett.</p>",
+      tipsTitle: "Öko-Hautpflege navigieren",
+      tips: [
+        { title: "Herkunft prüfen", body: "Woher kommen die Rohstoffe? Zertifiziert ökologisch angebaut ohne synthetische Pestizide und Dünger. Frag die Marke nach Rückverfolgbarkeit." },
+        { title: "Zertifikate verstehen", body: "COSMOS, Ecocert, Soil Association, USDA Organic – unterschiedliche Regeln. Keins ist perfekt, aber sie geben Basis-Sicherheit. Lerne die Unterschiede." },
+        { title: "Verpackung mitdenken", body: "Glas, Recyclingkunststoff, minimalistische Verpackung senken Impact. Meide Überverpackung, bei der der Karton schwerer ist als der Inhalt." },
+        { title: "Weniger ist nachhaltiger", body: "Jedes Produkt hat einen ökologischen Fußabdruck. Minimalistische Routine mit zwei bis drei Qualitätsprodukten schlägt zehn mittelmäßige Schritte." },
+        { title: "Transparente Marken unterstützen", body: "Marken, die Lieferketten, Zertifikate und Produktion offenlegen, verdienen Vertrauen. Geheimniskrämerei ist kein gutes Zeichen." }
+      ],
+      solutionTitle: "1753 SKINCARE – wirklich ökologisch",
+      solutionBody: "<p>Unser Hanf wird in Europa ökologisch ohne Pestizide und synthetische Dünger angebaut. CBD und CBG werden schonend per CO2 extrahiert – volles Spektrum an Cannabinoiden und Terpenen, ohne chemische Lösungsmittel.</p><p>Unsere Formeln bleiben kurz und sinnvoll. Jeder Inhaltsstoff hat eine klare Funktion und verantwortliche Quelle. Fungtastic Mushroom Extract nutzt vier Pilzarten unter kontrollierten, nachhaltigen Bedingungen. Au Naturel reinigt mit MCT oil aus verantwortlich produzierter Kokosnuss.</p><p>Wir sind nicht perfekt und tun nicht so. Aber wir sind transparent über Inhalt, Herkunft und Herstellung. So sollte Öko-Hautpflege aufgebaut sein – Substanz hinter jedem Versprechen, nicht nur schöne Worte.</p>",
+      faq: [
+        { q: "Ist 1753 SKINCARE öko-zertifiziert?", a: "Unser Hanf ist ökologisch angebaut; wo möglich nutzen wir ökologische Inhaltsstoffe. Wir priorisieren Transparenz über die ganze Kette statt ein Logo zu kaufen." },
+        { q: "Warum ist Öko-Hautpflege teurer?", a: "Ökolandbau erbringt weniger Ertrag, Zertifizierung kostet, Qualitätskontrolle bindet Ressourcen. Du zahlst für echte Qualität statt Massenware." },
+        { q: "Spielt Öko wirklich eine Rolle?", a: "Haut nimmt direkt auf ohne Leberfilter. Anbau ohne Pestizide und Chemie reduziert Belastung für Körper und Umwelt." },
+        { q: "Kann Öko genauso stark wirken?", a: "Ja. CBD und CBG sind starke Bioaktive unabhängig vom Anbau – aber ökologischer Anbau liefert oft sauberere Extrakte ohne störende Rückstände." }
+      ],
+      ctaTitle: "Triff eine Entscheidung, die zählt",
+      ctaSub: "Öko-Hautpflege mit Ergebnissen ohne Planeten-Kompromiss. 1753 SKINCARE – transparent vom Boden bis zur Haut."
+    },
+    fr: {
+      metaTitle: "Soin visage bio – durable, propre, conscient | 1753",
+      metaDescription: "Soins bio qui assument leur responsabilité envers votre peau et la planète. Ingrédients propres, production durable, zéro greenwashing. 1753 SKINCARE.",
+      kicker: "Soin bio",
+      h1: "Soin visage bio – pour votre peau et la planète",
+      lead: "Le soin bio, ce n’est pas seulement ce que vous appliquez. C’est toute la chaîne – du sol au flacon – et le respect à chaque étape.",
+      problemTitle: "L’épidémie de greenwashing",
+      problemBody: "<p>Le mot bio est tellement dilué en cosmétique qu’on ne sait plus ce qu’il veut dire. Feuilles vertes sur l’emballage, eco et durable sur le packaging, en espérant que personne ne lise l’INCI. Pas de norme universelle : la porte ouverte à la manipulation.</p><p>Les produits chimiques agricoles conventionnels finissent dans les matières premières : pesticides dans les huiles végétales, métaux lourds dans les minéraux, solvants dans les extraits. Sur la peau, absorption directe, sans passage par le filtre hépatique. La peau ne « détoxifie » pas comme la digestion.</p><p>La durabilité dépasse les ingrédients : plastique inutile, expéditions mondiales, procédés gourmands en eau – toute l’industrie traîne une dette environnementale rarement discutée. Choisir bio, c’est exiger des comptes sur toute la chaîne, pas seulement sur l’étiquette finale.</p>",
+      tipsTitle: "S’orienter dans les soins bio",
+      tips: [
+        { title: "Vérifiez l’origine", body: "D’où viennent les matières premières ? Le bio certifié pousse sans pesticides ni engrais de synthèse. Demandez si la marque peut remonter à la source." },
+        { title: "Comprenez les certifications", body: "COSMOS, Ecocert, Soil Association, USDA Organic : règles différentes. Aucune n’est parfaite, mais elles donnent une base de confiance. Apprenez les nuances." },
+        { title: "Pensez emballage", body: "Verre, plastique recyclé, packaging minimaliste réduisent l’impact. Évitez le sur-emballage où le carton pèse plus que le contenu." },
+        { title: "Moins, c’est plus durable", body: "Chaque produit a une empreinte. Une routine minimaliste de deux ou trois soins de qualité bat dix étapes médiocres." },
+        { title: "Soutenez les marques transparentes", body: "Celles qui montrent chaînes d’approvisionnement, certifications et modes de production méritent confiance. Le secret n’est jamais bon signe." }
+      ],
+      solutionTitle: "1753 SKINCARE – bio pour de vrai",
+      solutionBody: "<p>Notre chanvre est cultivé bio en Europe sans pesticides ni engrais de synthèse. CBD et CBG sont extraits au CO2 doux, préservant cannabinoïdes et terpènes sans solvants chimiques.</p><p>Nos formules restent courtes et utiles. Chaque ingrédient a un rôle clair et une source responsable. Fungtastic Mushroom Extract utilise quatre espèces de champignons cultivées dans des conditions contrôlées et durables. Au Naturel nettoie au MCT oil de noix de coco produite de façon responsable.</p><p>Nous ne sommes pas parfaits et ne le prétendons pas. Nous sommes transparents sur le contenu, l’origine et la fabrication. C’est sur quoi le soin bio devrait s’appuyer : de la substance derrière chaque promesse, pas que des mots jolis.</p>",
+      faq: [
+        { q: "1753 SKINCARE est-il certifié bio ?", a: "Notre chanvre est cultivé bio ; nous utilisons des ingrédients bio dès que possible. Nous privilégions la transparence sur toute la chaîne plutôt qu’un logo acheté." },
+        { q: "Pourquoi le soin bio coûte plus cher ?", a: "L’agriculture bio rend moins, les certifications coûtent, le contrôle qualité demande plus de ressources. Vous payez une vraie qualité, pas de la production de masse." },
+        { q: "Est-ce que le bio compte vraiment ?", a: "La peau absorbe sans filtre hépatique. Des ingrédients cultivés sans pesticides et produits chimiques réduisent la charge sur le corps et l’environnement." },
+        { q: "Le soin bio peut-il être aussi puissant ?", a: "Absolument. CBD et CBG sont des bioactifs puissants quel que soit le mode de culture, mais le bio donne souvent des extraits plus propres, sans résidus qui perturbent la biologie cutanée." }
+      ],
+      ctaTitle: "Faites un choix qui compte",
+      ctaSub: "Soin bio qui livre des résultats sans sacrifier la planète. 1753 SKINCARE – transparent du sol à la peau."
     }
   },
   {
     svSlug: "cbd-ansiktsolja",
     enSlug: "cbd-face-oil",
+    esSlug: "aceite-facial-cbd",
+    deSlug: "cbd-gesichtsoel",
+    frSlug: "huile-visage-cbd",
     category: "general",
     productIds: ["duo-kit", "duo-ta-da", "ta-da-serum"],
     sv: {
@@ -351,11 +762,95 @@ export const GENERAL_PAGES: LandingPage[] = [
       ],
       ctaTitle: "An oil that does more than you think",
       ctaSub: "CBD face oil that communicates with your skin in a language it understands. Try the DUO-kit and feel the difference."
+    },
+    es: {
+      metaTitle: "Aceite facial con CBD – piel equilibrada en un solo producto | 1753",
+      metaDescription: "Aceite facial con CBD que da a la piel lo que necesita en un paso. Equilibra el sebo, calma rojeces y refuerza la barrera. 1753 SKINCARE.",
+      kicker: "Aceite facial CBD",
+      h1: "Aceite facial con CBD – un aceite que entiende tu piel",
+      lead: "Los aceites faciales están de moda, pero muchos no pillan la idea. Un aceite con CBD no es solo hidratación: es hablar con el propio sistema de tu piel.",
+      problemTitle: "El mito de que el aceite perjudica la piel",
+      problemBody: "<p>Generaciones han oído que el aceite en la cara provoca brotes y poros tapados. Es una simplificación que ha alejado a millones de justo lo que su piel necesita. La verdad: la piel produce su propio aceite – sebum – para protegerse. El problema es el desequilibrio de producción, no el aceite en sí.</p><p>Aceites faciales ligeros y no comedogénicos se funden con la piel y aportan ácidos grasos, antioxidantes y vitaminas liposolubles directo a las células. Refuerzan la barrera en lugar de cargarla. Las hidratantes acuosas evaporan rápido y la piel vuelve a secarse si no hay barrera que retenga la humedad.</p><p>El siguiente nivel son aceites con cannabinoides activos. Un aceite normal nutre desde fuera. Uno con CBD hace eso y además interactúa con el ECS y ayuda a regular el sebo desde dentro. Es la diferencia entre alimentar la piel y darle un idioma con el que comunicarse.</p>",
+      tipsTitle: "Cómo usar aceite facial con CBD",
+      tips: [
+        { title: "Aplica sobre piel húmeda", body: "El aceite penetra mejor si la piel está ligeramente húmeda. Bruma facial o presiona el aceite justo después de limpiar, con la piel aún algo húmeda." },
+        { title: "Tres o cuatro gotas bastan", body: "Más no es mejor. Calienta tres o cuatro gotas entre las palmas y presiona suavemente. No frotes: deja que el aceite se funda." },
+        { title: "Mañana y noche", body: "Úsalo como último paso, mañana y noche. Por la mañana actúa como barrera; por la noche apoya la reparación." },
+        { title: "Combina con serum", body: "Aceite con CBD y TA-DA Serum de CBG son un dúo fuerte. Primero serum, que absorba, luego cierra con aceite para doble efecto cannabinoide." },
+        { title: "Dale tiempo", body: "El ciclo de renovación son unos 28 días. Usa el aceite cuatro a seis semanas a diario antes de juzgar. El cambio real viene de dentro y tarda." }
+      ],
+      solutionTitle: "DUO-kit – dos aceites, equilibrio completo",
+      solutionBody: "<p>Nuestro DUO-kit lleva The ONE e I LOVE – dos aceites que juntos dan un perfil cannabinoide completo. The ONE con 10 % CBD es el caballo de batalla: equilibra, calma y protege. I LOVE suma CBG para un efecto más profundo y amplio.</p><p>Ambos se basan en aceites vegetales prensados en frío con ácidos grasos esenciales y antioxidantes. CBD y CBG de espectro completo aseguran el efecto entourage – la sinergia que la investigación sitúa por encima de los aislados.</p><p>Suma TA-DA Serum para tres pasos que cubren todo sin complicarte: limpiar, serum, aceite. Aceite facial para quien quiere máximo resultado con mínimo esfuerzo.</p>",
+      faq: [
+        { q: "¿El aceite con CBD tapa los poros?", a: "No. Nuestros aceites son no comedogénicos, con aceites ligeros que se absorben sin obstruir. El CBD además ayuda a equilibrar la producción de sebo." },
+        { q: "¿Funciona bajo maquillaje?", a: "Sí. Deja absorber cinco a diez minutos y maquíllate con normalidad. Mucha gente nota que el maquillaje asienta mejor sobre piel nutrida." },
+        { q: "¿Con qué aceite empiezo?", a: "The ONE es un gran inicio: sirve a todos los tipos de piel y da un efecto CBD amplio. Cuando quieras más, suma I LOVE para CBD + CBG." },
+        { q: "¿Aceite con CBD si tengo piel grasa?", a: "Sí. Parece contradictorio, pero el aceite adecuado ayuda a la piel grasa a equilibrar el sebo. El CBD regula el ECS, que gobierna esa producción." }
+      ],
+      ctaTitle: "Un aceite que hace más de lo que crees",
+      ctaSub: "Aceite facial con CBD que habla el idioma de tu piel. Prueba el DUO-kit y nota la diferencia."
+    },
+    de: {
+      metaTitle: "CBD Gesichtsöl – ausgeglichene Haut in einem Produkt | 1753",
+      metaDescription: "CBD-Gesichtsöl liefert der Haut alles in einem Schritt. Reguliert Talg, beruhigt Rötungen, stärkt die Barriere. 1753 SKINCARE.",
+      kicker: "CBD Gesichtsöl",
+      h1: "CBD Gesichtsöl – ein Öl, das deine Haut versteht",
+      lead: "Gesichtsöle sind überall, aber viele verfehlen den Punkt. CBD-Gesichtsöl geht nicht nur um Feuchtigkeit – es geht um Dialog mit dem eigenen System der Haut.",
+      problemTitle: "Der Mythos, Öl schade der Haut",
+      problemBody: "<p>Generationen hörten: Öl im Gesicht verursacht Pickel und verstopfte Poren. Das hielt Millionen von dem fern, was ihre Haut braucht. Fakt: Die Haut produziert eigenes Öl – Sebum – zum Schutz. Problem ist Ungleichgewicht in der Produktion, nicht das Öl selbst.</p><p>Leichte, nicht komedogene Gesichtsöle verschmelzen mit der Haut, liefern Fettsäuren, Antioxidantien und fettlösliche Vitamine direkt in die Zellen. Sie stärken die Barriere statt sie zu belasten. Wasserbasierte Cremes verdunsten schnell; ohne Barriere bleibt die Haut wieder trocken.</p><p>Der nächste Schritt: Gesichtsöle mit aktiven Cannabinoiden. Normales Öl nährt von außen. CBD-Öl tut das plus: Es spricht mit dem ECS und hilft, Talgproduktion von innen zu regulieren. Unterschied zwischen Füttern und einer Sprache geben, mit der sich die Haut austauschen kann.</p>",
+      tipsTitle: "So nutzt du CBD-Gesichtsöl",
+      tips: [
+        { title: "Auf feuchte Haut", body: "Öl zieht am besten auf leicht feuchter Haut ein. Gesichtsspray oder nach der Reinigung leicht feucht auftragen." },
+        { title: "Drei bis vier Tropfen reichen", body: "Mehr ist nicht besser. Tropfen zwischen den Handflächen erwärmen und sanft eindrücken. Nicht reiben – einziehen lassen." },
+        { title: "Morgens und abends", body: "Letzter Schritt morgens und abends. Tagsüber Barriere, nachts Unterstützung für die Reparatur." },
+        { title: "Mit Serum schichten", body: "CBD-Öl und CBG-Serum (TA-DA) sind starkes Team. Zuerst Serum, einziehen lassen, dann mit Öl abschließen – doppelter Cannabinoid-Effekt." },
+        { title: "Zeit geben", body: "Erneuerungszyklus ~28 Tage. Mindestens vier bis sechs Wochen täglich nutzen, bevor du urteilst. Echter Wandel kommt von innen und braucht Zeit." }
+      ],
+      solutionTitle: "DUO-kit – zwei Öle, volles Gleichgewicht",
+      solutionBody: "<p>Unser DUO-kit enthält The ONE und I LOVE – zusammen ein vollständiges Cannabinoid-Profil. The ONE mit 10 % CBD: balanciert, beruhigt, schützt. I LOVE ergänzt CBG für breitere, tiefere Wirkung.</p><p>Beide basieren auf kaltgepressten Pflanzenölen mit essentiellen Fettsäuren und Antioxidantien. Vollspektrum-CBD und -CBG sichern den Entourage-Effekt – Synergie statt Isolat.</p><p>Mit TA-DA Serum: reinigen, Serum, Öl – fertig. Für maximalen Effekt mit minimalem Aufwand.</p>",
+      faq: [
+        { q: "Verstopft CBD-Gesichtsöl die Poren?", a: "Nein. Unsere Öle sind nicht komedogen, leicht, ziehen ein ohne zu verstopfen. CBD unterstützt zudem die Talgbalance." },
+        { q: "Unter Make-up?", a: "Ja. Fünf bis zehn Minuten einziehen lassen, dann wie gewohnt schminken. Viele finden, Make-up sitzt besser auf genährter Haut." },
+        { q: "Womit anfangen?", a: "The ONE ist ideal für alle Hauttypen und breiten CBD-Effekt. Für mehr: I LOVE mit CBD plus CBG dazu." },
+        { q: "Bei öliger Haut?", a: "Ja. Gegenintuitiv, aber das richtige Öl hilft öliger Haut, Sebum auszubalancieren. CBD steuert das ECS, das die Talgproduktion regelt." }
+      ],
+      ctaTitle: "Ein Öl, das mehr kann, als du denkst",
+      ctaSub: "CBD-Gesichtsöl in der Sprache deiner Haut. Probier das DUO-kit – und spüre den Unterschied."
+    },
+    fr: {
+      metaTitle: "Huile visage au CBD – peau équilibrée en un seul produit | 1753",
+      metaDescription: "Huile visage au CBD qui donne à la peau tout ce qu’il lui faut en une étape. Équilibre le sébum, calme les rougeurs, renforce la barrière. 1753 SKINCARE.",
+      kicker: "Huile visage CBD",
+      h1: "Huile visage au CBD – une huile qui comprend votre peau",
+      lead: "Les huiles visage ont explosé, mais beaucoup ratent l’essentiel. Une huile au CBD, ce n’est pas que de l’hydratation : c’est dialoguer avec le système propre à votre peau.",
+      problemTitle: "Le mythe selon lequel l’huile abîme la peau",
+      problemBody: "<p>On a longtemps dit : huile sur le visage égale boutons et pores bouchés. Ça a éloigné des millions de gens de ce dont leur peau avait besoin. Vérité : la peau produit son propre sébum pour se protéger. Le problème, c’est le déséquilibre de production, pas l’huile en soi.</p><p>Des huiles légères non comédogènes fusionnent avec la peau et livrent acides gras, antioxydants et vitamines liposolubles aux cellules. Elles renforcent la barrière au lieu de la surcharger. Les crèmes aqueuses s’évaporent vite ; sans barrière, la peau ressèche.</p><p>L’étape suivante : huiles avec cannabinoïdes actifs. Une huile classique nourrit de l’extérieur. Une huile au CBD fait pareil plus : elle dialogue avec l’ECS et aide à réguler le sébum de l’intérieur. C’est la différence entre nourrir la peau et lui donner un langage.</p>",
+      tipsTitle: "Comment utiliser une huile visage au CBD",
+      tips: [
+        { title: "Sur peau légèrement humide", body: "L’huile pénètre mieux si la peau est un peu humide. Brume ou application juste après la toilette, peau encore légèrement mouillée." },
+        { title: "Trois à quatre gouttes suffisent", body: "Plus n’est pas mieux. Réchauffez entre les paumes, pressez doucement. Pas de frottement : laissez fondre." },
+        { title: "Matin et soir", body: "Dernier pas le matin et le soir. Le jour, barrière ; la nuit, soutien à la réparation." },
+        { title: "Superposer avec un sérum", body: "Huile au CBD et sérum CBG TA-DA font équipe. Sérum d’abord, laisser pénétrer, puis huile pour un double effet cannabinoïde." },
+        { title: "Donnez du temps", body: "Cycle de renouvellement ~28 jours. Utilisez au moins quatre à six semaines quotidiennement avant de juger. Le vrai changement vient de l’intérieur et prend du temps." }
+      ],
+      solutionTitle: "DUO-kit – deux huiles, équilibre complet",
+      solutionBody: "<p>Notre DUO-kit contient The ONE et I LOVE – ensemble, profil cannabinoïde complet. The ONE à 10 % de CBD : équilibre, calme, protège. I LOVE ajoute le CBG pour un effet plus profond et large.</p><p>Base d’huiles végétales pressées à froid, acides gras essentiels, antioxydants. CBD et CBG full spectrum pour l’effet d’entourage – synergie plutôt qu’isolat.</p><p>Avec TA-DA Serum : nettoyer, sérum, huile – terminé. Maximum de résultat, minimum d’effort.</p>",
+      faq: [
+        { q: "L’huile au CBD bouche-t-elle les pores ?", a: "Non. Nos huiles sont non comédogènes, légères, absorbées sans boucher. Le CBD aide aussi à équilibrer le sébum." },
+        { q: "Sous le maquillage ?", a: "Oui. Laissez pénétrer cinq à dix minutes, puis maquillage habituel. Beaucoup trouvent que le maquillage tient mieux sur une peau nourrie." },
+        { q: "Par quelle huile commencer ?", a: "The ONE convient à tous les types de peau et offre un large effet CBD. Pour aller plus loin, ajoutez I LOVE pour CBD + CBG." },
+        { q: "Peau grasse ?", a: "Oui. Contre-intuitif, mais la bonne huile aide la peau grasse à équilibrer le sébum. Le CBD module l’ECS qui gouverne cette production." }
+      ],
+      ctaTitle: "Une huile qui en fait plus que vous ne croyez",
+      ctaSub: "Huile visage au CBD qui parle le langage de votre peau. Essayez le DUO-kit et sentez la différence."
     }
   },
   {
     svSlug: "cbd-serum",
     enSlug: "cbd-serum",
+    esSlug: "serum-cbd",
+    deSlug: "cbd-serum",
+    frSlug: "serum-cbd",
     category: "general",
     productIds: ["ta-da-serum", "duo-ta-da", "duo-kit"],
     sv: {
@@ -409,11 +904,92 @@ export const GENERAL_PAGES: LandingPage[] = [
       ],
       ctaTitle: "Give your skin concentrated power",
       ctaSub: "TA-DA Serum with 3% CBG – the serum that actually delivers on its promise. Straight to your skin's receptors."
+    },
+    es: {
+      metaTitle: "Sérum CBD – potencia concentrada para pieles exigentes | 1753",
+      metaDescription: "El sérum CBD aporta activos concentrados en textura ligera. Diferencia entre sérum y aceite, y cuándo usar cada uno. 1753 SKINCARE.",
+      kicker: "Sérum CBD",
+      h1: "Sérum CBD – cuidado concentrado para quien va en serio",
+      lead: "Un sérum no es un aceite diluido. Es una dosis concentrada de activos en una fórmula pensada para penetrar más. Cuando el activo es CBG, aún más interesante.",
+      problemTitle: "Sérum vs aceite – ¿cuál es la diferencia de verdad?",
+      problemBody: "<p>A la industria le encanta complicar: tónico, esencia, sérum, ampolla, aceite, crema – capas sin explicar por qué. Pero entre sérum y aceite facial hay una diferencia real que cambia cómo la piel recibe los activos.</p><p>Los sérum son más ligeros, con moléculas más pequeñas que penetran más. Llevan activos concentrados a las células que más los necesitan. Los aceites se quedan más cerca de la superficie y actúan como barrera que retiene humedad y nutrientes.</p><p>El problema: muchos sérum van llenos de agua, glicerina y relleno que da sensación de hidratación sin mucho activo. Un sérum CBD de verdad debería hacer una cosa: meter cannabinoides muy concentrados en profundidad, donde tocan los receptores del ECS. Lo demás es relleno.</p>",
+      tipsTitle: "Saca partido a tu rutina con sérum",
+      tips: [
+        { title: "Sérum antes que aceite, siempre", body: "Sérum en piel limpia antes del aceite facial. La textura ligera entra primero; el aceite sella. Al revés, bloqueas la penetración del sérum." },
+        { title: "Poca cantidad, más efecto", body: "Son concentrados: tres a cinco gotas por aplicación. Más gotas no multiplican el efecto, solo desperdician producto." },
+        { title: "Presiona, no frotes", body: "Presiona suave con las yemas. Frotar irrita y reduce absorción. Deja que la piel absorba a su ritmo." },
+        { title: "Combina sérum y aceite", body: "No es o uno u otro: se complementan. Sérum en profundidad, aceite en superficie. Juntos cubren lo que la piel pide." }
+      ],
+      solutionTitle: "TA-DA Serum – 3 % CBG que marca diferencia",
+      solutionBody: "<p>TA-DA Serum no es uno más del montón. Con 3 % de CBG – cannabigerol, el cannabinoide madre – aporta una dosis concentrada que trabaja directo con los receptores. Entre las concentraciones más altas que verás en cosmética.</p><p>Fórmula a propósito simple: sin relleno innecesario, sin perfumes sintéticos, sin diluir en agua. Cada gota lleva CBG con sentido: penetra, apoya renovación celular, calma inflamación y refuerza la barrera.</p><p>Úsalo tras limpiar y sigue con los aceites del DUO-kit para rutina CBD + CBG completa. Sérum en profundidad, aceites en superficie – estrategia en dos pasos que la piel entiende.</p>",
+      faq: [
+        { q: "¿Diferencia entre sérum CBD y aceite CBD?", a: "Sérum: fórmula más ligera, moléculas más pequeñas, más profundidad. Aceite: más cerca de la superficie, protege. Se complementan: sérum entrega activos, aceite los sella." },
+        { q: "¿Puedo usar TA-DA sin aceite facial?", a: "Sí, pero para mejor resultado combina con aceite. El sérum lleva CBG al fondo; el aceite da barrera y nutrición superficial." },
+        { q: "¿Con qué frecuencia?", a: "Mañana y noche para máximo efecto. El CBG trabaja de forma continua con el sistema de la piel; la regularidad mejora resultados." },
+        { q: "¿Sirve para todos los tipos de piel?", a: "Sí. El CBG dialoga con el equilibrio propio de la piel. La textura ligera va bien en seca, grasa y mixta." }
+      ],
+      ctaTitle: "Dale a tu piel potencia concentrada",
+      ctaSub: "TA-DA Serum con 3 % CBG – el sérum que cumple lo que promete. Directo a los receptores."
+    },
+    de: {
+      metaTitle: "CBD Serum – konzentrierte Kraft für anspruchsvolle Haut | 1753",
+      metaDescription: "CBD-Serum liefert konzentrierte Wirkstoffe in leichter Textur. Unterschied Serum vs. Öl – und wann was passt. 1753 SKINCARE.",
+      kicker: "CBD Serum",
+      h1: "CBD Serum – konzentrierte Pflege für alle, die es ernst meinen",
+      lead: "Ein Serum ist kein verdünntes Öl. Es ist konzentrierte Wirkstofflieferung in einer Formel für tiefere Penetration. Wenn der Wirkstoff CBG ist, wird es noch spannender.",
+      problemTitle: "Serum vs. Öl – wo liegt der echte Unterschied?",
+      problemBody: "<p>Die Branche liebt Komplexität: Toner, Essence, Serum, Ampulle, Öl, Creme – Schichten ohne Erklärung. Zwischen Serum und Gesichtsöl gibt es aber einen echten Unterschied, der beeinflusst, wie die Haut Aktive aufnimmt.</p><p>Seren sind leichter, mit kleineren Molekülen für tiefere Eindringtiefe. Sie liefern konzentrierte Aktive direkt an die Zellen, die sie brauchen. Öle bleiben näher an der Oberfläche und wirken als Barriere für Feuchtigkeit und Nährstoffe.</p><p>Das Problem: Viele Seren stecken voller Wasser, Glycerin und Füller – Gefühl von Hydration ohne viel Aktives. Ein echtes CBD-Serum sollte eines tun: hochkonzentrierte Cannabinoide tief bringen, wo sie ECS-Rezeptoren treffen. Alles andere ist Füllmaterial.</p>",
+      tipsTitle: "Serum-Routine maximieren",
+      tips: [
+        { title: "Immer Serum vor Öl", body: "Serum auf gereinigte Haut, dann Gesichtsöl. Leichte Formel zuerst, Öl versiegelt. Umgekehrte Reihenfolge blockiert die Penetration." },
+        { title: "Weniger Menge, mehr Wirkung", body: "Konzentriert – drei bis fünf Tropfen pro Anwendung. Mehr Tropfen verschwenden nur Produkt." },
+        { title: "Eindrücken, nicht reiben", body: "Sanft mit den Fingerspitzen eindrücken. Reiben reizt und mindert Aufnahme. Haut zieht das Serum in ihrem Tempo." },
+        { title: "Serum und Öl kombinieren", body: "Nicht entweder-oder – sie ergänzen sich. Serum in die Tiefe, Öl an der Oberfläche. Zusammen decken sie die Bedürfnisse ab." }
+      ],
+      solutionTitle: "TA-DA Serum – 3 % CBG mit Substanz",
+      solutionBody: "<p>TA-DA Serum ist nicht nur eines von vielen. Mit 3 % CBG – Cannabigerol, Mutter-Cannabinoid – liefert es eine konzentrierte Dosis direkt an die Rezeptoren. Eine der höchsten CBG-Konzentrationen in Hautpflege.</p><p>Bewusst schlanke Formel: kein unnötiger Füller, kein synthetischer Duft, keine Wasserverdünnung. Jeder Tropfen sinnvolles CBG: tief, Zellerneuerung, beruhigte Entzündung, stärkere Barriere.</p><p>Nach der Reinigung auftragen, mit DUO-kit-Ölen fortsetzen für komplette CBD- und CBG-Routine. Serum in die Tiefe, Öle nach außen – zweistufig und verständlich für die Haut.</p>",
+      faq: [
+        { q: "Unterschied CBD-Serum und CBD-Öl?", a: "Serum: leichtere Formel, kleinere Moleküle, tiefer. Öl: näher an der Oberfläche, schützt. Ergänzen sich – Serum liefert Aktive, Öl schließt ein." },
+        { q: "TA-DA ohne Gesichtsöl?", a: "Ja, aber mit Öl ist es besser. Serum bringt CBG in die Tiefe, Öl liefert Barriere und oberflächliche Pflege." },
+        { q: "Wie oft?", a: "Morgens und abends für beste Wirkung. CBG arbeitet kontinuierlich mit dem Hautsystem; Regelmäßigkeit verbessert das Ergebnis." },
+        { q: "Für alle Hauttypen?", a: "Ja. CBG spricht mit dem eigenen Balance-System der Haut. Leichte Textur für trocken, ölig und Mischhaut." }
+      ],
+      ctaTitle: "Schenk deiner Haut konzentrierte Kraft",
+      ctaSub: "TA-DA Serum mit 3 % CBG – das Serum, das hält, was es verspricht. Direkt an die Rezeptoren."
+    },
+    fr: {
+      metaTitle: "Sérum CBD – puissance concentrée pour peaux exigeantes | 1753",
+      metaDescription: "Le sérum CBD apporte des actifs concentrés en texture légère. Différence sérum et huile, et quand utiliser quoi. 1753 SKINCARE.",
+      kicker: "Sérum CBD",
+      h1: "Sérum CBD – soin concentré pour ceux qui vont au bout",
+      lead: "Un sérum n’est pas une huile diluée. C’est une livraison concentrée d’actifs dans une formule faite pour pénétrer plus profondément. Quand l’actif est le CBG, c’est encore plus intéressant.",
+      problemTitle: "Sérum vs huile – quelle est la vraie différence ?",
+      problemBody: "<p>L’industrie adore compliquer : lotion, essence, sérum, ampoule, huile, crème – des couches sans expliquer pourquoi. Pourtant, entre sérum et huile visage, il y a une vraie différence qui change la façon dont la peau reçoit les actifs.</p><p>Les sérum sont plus légers, molécules plus petites, pénétration plus profonde. Ils livrent des actifs concentrés aux cellules qui en ont le plus besoin. Les huiles restent plus près de la surface et font barrière pour retenir hydratation et nutriments.</p><p>Le problème : beaucoup de sérum sont bourrés d’eau, glycérine et charges qui donnent une sensation d’hydratation sans beaucoup d’actif. Un vrai sérum CBD devrait faire une chose : amener des cannabinoïdes très concentrés en profondeur, là où ils touchent les récepteurs de l’ECS. Le reste est remplissage.</p>",
+      tipsTitle: "Tirer le meilleur parti du sérum",
+      tips: [
+        { title: "Sérum avant huile, toujours", body: "Sérum sur peau nettoyée avant l’huile visage. La formule légère passe en premier ; l’huile scelle. L’inverse bloque la pénétration du sérum." },
+        { title: "Peu de produit, plus d’effet", body: "C’est concentré : trois à cinq gouttes par application. Plus de gouttes ne renforcent pas l’effet, elles gaspillent." },
+        { title: "Tapoter, ne pas frotter", body: "Presser doucement du bout des doigts. Frotter irrite et réduit l’absorption. Laissez la peau absorber à son rythme." },
+        { title: "Combiner sérum et huile", body: "Ce n’est pas l’un ou l’autre : ils se complètent. Sérum en profondeur, huile en surface. Ensemble, ils couvrent les besoins." }
+      ],
+      solutionTitle: "TA-DA Serum – 3 % de CBG qui compte",
+      solutionBody: "<p>TA-DA Serum n’est pas un sérum de plus. Avec 3 % de CBG – cannabigérol, cannabinoïde mère – il apporte une dose concentrée qui travaille directement avec les récepteurs. Parmi les taux les plus élevés en soin visage.</p><p>Formule volontairement épurée : pas de remplissage inutile, pas de parfum de synthèse, pas de dilution à l’eau. Chaque goutte de CBG utile : pénétration, renouvellement cellulaire, inflammation calmée, barrière renforcée.</p><p>Utilisez-le après le nettoyage, puis les huiles du DUO-kit pour une routine CBD + CBG complète. Sérum en profondeur, huiles en surface – stratégie en deux temps que la peau comprend.</p>",
+      faq: [
+        { q: "Différence sérum CBD et huile CBD ?", a: "Sérum : formule plus légère, molécules plus petites, plus de profondeur. Huile : plus près de la surface, protège. Ils se complètent – sérum livre les actifs, huile les enferme." },
+        { q: "TA-DA sans huile visage ?", a: "Oui, mais le combo avec huile donne le meilleur résultat. Sérum amène le CBG en profondeur ; huile apporte barrière et nutrition de surface." },
+        { q: "À quelle fréquence ?", a: "Matin et soir pour un effet maximal. Le CBG travaille en continu avec le système cutané ; la régularité améliore le résultat." },
+        { q: "Convient à tous les types de peau ?", a: "Oui. Le CBG dialogue avec l’équilibre propre de la peau. Texture légère adaptée aux peaux sèches, grasses et mixtes." }
+      ],
+      ctaTitle: "Offrez à votre peau une puissance concentrée",
+      ctaSub: "TA-DA Serum avec 3 % de CBG – le sérum qui tient sa promesse. Droit vers les récepteurs."
     }
   },
   {
     svSlug: "cannabinoid-hudvard",
     enSlug: "cannabinoid-skincare",
+    esSlug: "cuidado-piel-cannabinoides",
+    deSlug: "cannabinoid-hautpflege",
+    frSlug: "soin-peau-cannabinoides",
     category: "general",
     productIds: ["duo-ta-da", "ta-da-serum", "duo-kit"],
     sv: {
@@ -467,11 +1043,92 @@ export const GENERAL_PAGES: LandingPage[] = [
       ],
       ctaTitle: "Speak your skin's own language",
       ctaSub: "Cannabinoids communicate directly with the skin's endocannabinoid system. Discover full-spectrum skincare from 1753 SKINCARE."
+    },
+    es: {
+      metaTitle: "Cuidado con cannabinoides – ciencia del ECS y la piel | 1753",
+      metaDescription: "Los cannabinoides hablan con el endocannabinoid system de la piel. Ciencia detrás de CBD, CBG y equilibrio cutáneo. 1753 SKINCARE.",
+      kicker: "Cuidado con cannabinoides",
+      h1: "Cuidado con cannabinoides – la ciencia que tu esteticista no contó",
+      lead: "Tu piel tiene un sistema de señalización propio que controla inflamación, sebo y renovación celular. Los cannabinoides hablan ese idioma. No es moda: es biología.",
+      problemTitle: "El endocannabinoid system – el regulador oculto de la piel",
+      problemBody: "<p>El ECS se descubrió en los 90 y la investigación cutánea sigue joven. El ECS incluye receptores (CB1 y CB2), endocannabinoides que el cuerpo fabrica y enzimas que los degradan. Está en todo el cuerpo – también en queratinocitos, glándulas sebáceas, folículos e inmunidad cutánea.</p><p>En la piel regula tres procesos clave: inflamación, producción de sebo y proliferación celular. Equilibrado, la piel funciona. Si se desbalancea – estrés, toxinas, mala alimentación o cuidado inadecuado – aparecen acné, sequedad, rojeces, eccema y envejecimiento prematuro.</p><p>A pesar de esto, la industria ignora el ECS casi por completo. Se formulan productos sin el sistema que gobierna la salud de la piel. Es hablar sin idioma común. CBD y CBG aportan justo ese idioma que faltaba.</p>",
+      tipsTitle: "Entender cannabinoides en cosmética",
+      tips: [
+        { title: "CBD vs CBG vs CBC", body: "Cada cannabinoide es distinto. CBD actúa más en indirecto y calma inflamación. CBG se une directamente a CB1 y CB2. CBC muestra potencial en renovación celular. Full spectrum da el espectro más amplio." },
+        { title: "El efecto entourage es clave", body: "Los cannabinoides rinden mejor juntos que solos. Terpenos, flavonoides y varios cannabinoides en sinergia superan a un solo compuesto. Elige siempre full spectrum." },
+        { title: "Tópico vs oral", body: "En cosmética se absorben de forma local y tocan receptores del ECS en la piel sin llegar al torrente en cantidad relevante. Efecto focalizado sin impacto sistémico." },
+        { title: "La concentración importa", body: "Cantidades simbólicas no cambian nada. Mira el porcentaje real, no solo que ponga CBD en la etiqueta. Niveles serios empiezan entre uno y tres por ciento." }
+      ],
+      solutionTitle: "Cannabinoides full spectrum de 1753",
+      solutionBody: "<p>1753 SKINCARE parte de que el cuidado debe trabajar con la biología de la piel, no a su lado. Todos nuestros productos llevan cannabinoides de espectro completo – no aislado, no broad-spectrum: perfil vegetal entero con CBD, CBG, terpenos y flavonoides intactos.</p><p>El pack DUO más TA-DA te da perfil completo: The ONE con 10 % CBD, I LOVE con CBD más CBG, TA-DA Serum con 3 % CBG concentrado. Juntos cubren lo que el ECS de tu piel puede recibir y usar.</p><p>Esto no es maquillar síntomas: es hablar con el sistema que manda en la salud cutánea. La ciencia del ECS confirma lo que siempre creímos: la piel sabe lo que necesita; solo hacen falta las herramientas adecuadas.</p>",
+      faq: [
+        { q: "¿Qué es el endocannabinoid system?", a: "El ECS es un sistema de señalización biológico en todo el cuerpo, también en la piel: receptores, endocannabinoides y enzimas que regulan inflamación, sebo y renovación celular." },
+        { q: "¿Son legales los cannabinoides en cosmética?", a: "Sí. CBD y CBG de cáñamo industrial con menos de 0,2 % THC son legales en Suecia y la UE. Nuestros productos no llevan sustancias intoxicantes." },
+        { q: "¿En qué se diferencia del cuidado convencional?", a: "Lo convencional aplica sustancias desde fuera. El cuidado con cannabinoides interactúa con el propio sistema regulatorio (ECS) y ayuda a que funcione mejor desde dentro." },
+        { q: "¿Debo usar todos los cannabinoides?", a: "No, pero la combinación amplía el efecto. CBD y CBG se complementan bien. Empieza con un aceite CBD y suma serum CBG si quieres potenciar el entourage." }
+      ],
+      ctaTitle: "Habla el idioma propio de tu piel",
+      ctaSub: "Los cannabinoides dialogan directo con el endocannabinoid system. Descubre cuidado full spectrum con 1753 SKINCARE."
+    },
+    de: {
+      metaTitle: "Cannabinoid-Hautpflege – die Wissenschaft hinter ECS und Haut | 1753",
+      metaDescription: "Cannabinoide kommunizieren mit dem eigenen Endocannabinoid-System der Haut. Wissenschaft zu CBD, CBG und Hautbalance. 1753 SKINCARE.",
+      kicker: "Cannabinoid-Hautpflege",
+      h1: "Cannabinoid-Hautpflege – die Wissenschaft, von der dein Kosmetiker nicht sprach",
+      lead: "Deine Haut hat ein eigenes Signalsystem für Entzündung, Talg und Zellerneuerung. Cannabinoide sprechen seine Sprache. Das ist keine Trendfrage – es ist Biologie.",
+      problemTitle: "Das Endocannabinoid-System – der versteckte Regulator der Haut",
+      problemBody: "<p>Das ECS wurde in den 1990ern entdeckt; die Hautforschung ist noch jung. Es besteht aus Rezeptoren (CB1 und CB2), körpereigenen Endocannabinoiden und abbauenden Enzymen – im ganzen Körper, auch in Keratinozyten, Talgdrüsen, Follikeln und Immunzellen der Haut.</p><p>Das ECS der Haut steuert drei Kernprozesse: Entzündung, Talgproduktion und Zellproliferation. Im Gleichgewicht funktioniert die Haut. Bei Stress, Umweltgiften, schlechter Ernährung oder unzureichender Pflege folgen Akne, Trockenheit, Rötungen, Ekzem und vorzeitige Alterung.</p><p>Trotzdem ignoriert die Branche das ECS fast vollständig. Produkte ohne Rücksicht auf das System, das Hautgesundheit wirklich steuert. Wie sprechen ohne gemeinsame Sprache. CBD und CBG liefern genau diese fehlende Sprache.</p>",
+      tipsTitle: "Cannabinoide in der Hautpflege verstehen",
+      tips: [
+        { title: "CBD vs. CBG vs. CBC", body: "Jedes Cannabinoid ist einzigartig. CBD wirkt indirekter und beruhigt Entzündung. CBG bindet direkt an CB1 und CB2. CBC zeigt Potenzial für Zellerneuerung. Vollspektrum liefert den breitesten Effekt." },
+        { title: "Entourage-Effekt ist entscheidend", body: "Cannabinoide wirken besser zusammen als allein. Terpene, Flavonoide, mehrere Cannabinoide in Synergie schlagen jedes Einzelmolekül. Immer Vollspektrum wählen." },
+        { title: "Topisch vs. oral", body: "In Hautpflege werden Cannabinoide lokal aufgenommen und sprechen ECS-Rezeptoren in der Haut an, ohne nennenswert ins Blut zu gelangen. Gezielter Effekt ohne systemische Wirkung." },
+        { title: "Konzentration zählt", body: "Symbolische Mengen ändern nichts. Echte Prozente prüfen – nicht nur das Wort CBD auf dem Etikett. Sinnvolle Werte beginnen bei ein bis drei Prozent." }
+      ],
+      solutionTitle: "Vollspektrum-Cannabinoide von 1753",
+      solutionBody: "<p>1753 SKINCARE basiert auf der Idee: Hautpflege soll mit Hautbiologie zusammenarbeiten, nicht an ihr vorbei. Alle Produkte enthalten Vollspektrum-Cannabinoide – kein Isolat, kein Broad-Spectrum, sondern volles Pflanzenprofil mit CBD, CBG, Terpenen und Flavonoiden.</p><p>Das DUO-plus-TA-DA-Bundle liefert komplettes Profil: The ONE mit 10 % CBD, I LOVE mit CBD plus CBG, TA-DA Serum mit 3 % CBG. Zusammen decken sie ab, was das ECS deiner Haut aufnehmen und nutzen kann.</p><p>Das ist keine Symptom-Verdeckung, sondern direkte Kommunikation mit dem System der Hautgesundheit. ECS-Wissenschaft bestätigt, was wir immer geglaubt haben: Die Haut weiß, was sie braucht – sie braucht nur die richtigen Werkzeuge.</p>",
+      faq: [
+        { q: "Was ist das Endocannabinoid-System?", a: "Das ECS ist ein biologisches Signalsystem im ganzen Körper, auch in der Haut: Rezeptoren, Endocannabinoide und Enzyme regulieren Entzündung, Talg und Zellerneuerung." },
+        { q: "Sind Cannabinoide in Hautpflege legal?", a: "Ja. CBD und CBG aus Industriehanf unter 0,2 % THC sind in Schweden und der EU legal. Keine berauschenden Stoffe in unseren Produkten." },
+        { q: "Unterschied zu klassischer Hautpflege?", a: "Konventionell schichtet man Stoffe von außen auf. Cannabinoid-Pflege spricht mit dem eigenen Regelsystem (ECS) und unterstützt optimale Funktion von innen." },
+        { q: "Brauche ich alle Cannabinoide?", a: "Nein, aber Kombinationen wirken breiter. CBD und CBG ergänzen sich. Start mit CBD-Öl, CBG-Serum dazu für maximalen Entourage-Effekt." }
+      ],
+      ctaTitle: "Sprich die eigene Sprache deiner Haut",
+      ctaSub: "Cannabinoide sprechen direkt mit dem ECS. Entdecke Vollspektrum-Hautpflege von 1753 SKINCARE."
+    },
+    fr: {
+      metaTitle: "Soin aux cannabinoïdes – la science de l’ECS et de la peau | 1753",
+      metaDescription: "Les cannabinoïdes dialoguent avec le système endocannabinoïde de la peau. Science du CBD, du CBG et de l’équilibre cutané. 1753 SKINCARE.",
+      kicker: "Soin cannabinoïdes",
+      h1: "Soin aux cannabinoïdes – la science que votre esthéticienne n’a pas dite",
+      lead: "Votre peau dispose d’un système de signalisation qui pilote inflammation, sébum et renouvellement cellulaire. Les cannabinoïdes parlent sa langue. Ce n’est pas une mode : c’est de la biologie.",
+      problemTitle: "Le système endocannabinoïde – le régulateur caché de la peau",
+      problemBody: "<p>L’ECS a été découvert dans les années 1990 ; la recherche cutanée est encore jeune. Il comprend des récepteurs (CB1 et CB2), des endocannabinoïdes produits par l’organisme et des enzymes qui les dégradent – partout dans le corps, y compris dans les kératinocytes, glandes sébacées, follicules et immunité cutanée.</p><p>L’ECS de la peau régule trois processus centraux : inflammation, production de sébum et prolifération cellulaire. À l’équilibre, la peau fonctionne. Hors balance – stress, toxines, alimentation ou soins insuffisants – surviennent acné, sécheresse, rougeurs, eczéma et vieillissement prématuré.</p><p>Malgré cela, l’industrie ignore l’ECS presque totalement. Des produits formulés sans le système qui gouverne la santé de la peau. C’est parler sans langue commune. CBD et CBG apportent précisément cette langue manquante.</p>",
+      tipsTitle: "Comprendre les cannabinoïdes en soin",
+      tips: [
+        { title: "CBD vs CBG vs CBC", body: "Chaque cannabinoïde est unique. Le CBD agit plutôt en indirect et calme l’inflammation. Le CBG se lie directement à CB1 et CB2. Le CBC montre un potentiel pour le renouvellement cellulaire. Le full spectrum offre l’effet le plus large." },
+        { title: "L’effet d’entourage est clé", body: "Les cannabinoïdes fonctionnent mieux ensemble que seuls. Terpènes, flavonoïdes, plusieurs cannabinoïdes en synergie battent tout isolat. Choisissez toujours le full spectrum." },
+        { title: "Topique vs oral", body: "En cosmétique, absorption locale et interaction avec les récepteurs ECS dans la peau, sans quantités significatives dans le sang. Effet ciblé sans impact systémique." },
+        { title: "La concentration compte", body: "Des quantités symboliques ne changent rien. Regardez le pourcentage réel, pas seulement le mot CBD sur l’étiquette. Des niveaux sérieux commencent entre un et trois pour cent." }
+      ],
+      solutionTitle: "Cannabinoïdes full spectrum par 1753",
+      solutionBody: "<p>1753 SKINCARE repose sur une idée : les soins doivent travailler avec la biologie de la peau, pas à côté. Tous nos produits contiennent des cannabinoïdes full spectrum – pas d’isolat, pas de broad spectrum : profil végétal complet avec CBD, CBG, terpènes et flavonoïdes intacts.</p><p>Le bundle DUO plus TA-DA offre un profil complet : The ONE à 10 % de CBD, I LOVE CBD + CBG, TA-DA Serum à 3 % de CBG. Ensemble, ils couvrent ce que l’ECS de votre peau peut recevoir et utiliser.</p><p>Ce n’est pas masquer les symptômes : c’est dialoguer avec le système qui commande la santé cutanée. La science de l’ECS confirme ce que nous pensions : la peau sait ce dont elle a besoin – il lui faut les bons outils.</p>",
+      faq: [
+        { q: "Qu’est-ce que le système endocannabinoïde ?", a: "L’ECS est un système de signalisation biologique dans tout le corps, y compris la peau : récepteurs, endocannabinoïdes et enzymes qui régulent inflammation, sébum et renouvellement cellulaire." },
+        { q: "Les cannabinoïdes en soin sont-ils légaux ?", a: "Oui. CBD et CBG issus du chanvre industriel à moins de 0,2 % de THC sont légaux en Suède et dans l’UE. Nos produits ne contiennent pas de substances enivrantes." },
+        { q: "Différence avec les soins classiques ?", a: "Le conventionnel applique des substances de l’extérieur. Les soins aux cannabinoïdes interagissent avec le propre système régulateur (ECS) et l’aident à fonctionner de l’intérieur." },
+        { q: "Faut-il tous les cannabinoïdes ?", a: "Non, mais la combinaison élargit l’effet. CBD et CBG se complètent. Commencez par une huile CBD, ajoutez un sérum CBG pour maximiser l’entourage." }
+      ],
+      ctaTitle: "Parlez la langue propre à votre peau",
+      ctaSub: "Les cannabinoïdes communiquent directement avec l’ECS. Découvrez les soins full spectrum 1753 SKINCARE."
     }
   },
   {
     svSlug: "hampa-hudvard",
     enSlug: "hemp-skincare",
+    esSlug: "cuidado-piel-canamo",
+    deSlug: "hanf-hautpflege",
+    frSlug: "soin-peau-chanvre",
     category: "general",
     productIds: ["duo-kit", "au-naturel-makeup-remover", "ta-da-serum"],
     sv: {
@@ -527,11 +1184,95 @@ export const GENERAL_PAGES: LandingPage[] = [
       ],
       ctaTitle: "Discover hemp's full potential",
       ctaSub: "Hemp has waited thousands of years to be taken seriously. 1753 SKINCARE shows what it can do for your skin."
+    },
+    es: {
+      metaTitle: "Cuidado con cáñamo – el ingrediente más infravalorado | 1753",
+      metaDescription: "El cáñamo lleva milenios en uso. Ahora revoluciona el cuidado facial. Por qué el aceite de semilla de cáñamo y los cannabinoides son el futuro. 1753 SKINCARE.",
+      kicker: "Cuidado con cáñamo",
+      h1: "Cuidado con cáñamo – el mejor secreto del reino vegetal",
+      lead: "El cáñamo se cultiva desde hace más de 10 000 años para comida, ropa y medicina. Solo ahora entendemos lo que puede hacer por la piel. Spoiler: más de lo que imaginas.",
+      problemTitle: "Cáñamo, cannabis, marihuana – aclarando conceptos",
+      problemBody: "<p>La confusión es enorme y comprensible. Cáñamo y marihuana son la misma especie – Cannabis sativa – pero tan distintos como un chihuahua y un lobo. El cáñamo industrial lleva menos de 0,2 % THC y no intoxica. La marihuana se cultiva para THC alto. Esa frontera sigue generando estigma innecesario en cosmética de cáñamo.</p><p>El aceite de semilla de cáñamo – prensado de las semillas – tiene un perfil único de omega-3, omega-6 y ácido gamma-linolénico casi a juego con los lípidos propios de la piel. De los aceites más afines a la piel. El extracto floral y foliar aporta cannabinoides como CBD y CBG.</p><p>Décadas de leyes mal encaminadas y prejuicio cultural alimentaron el estigma. Donde unos abrazaron el potencial del cáñamo, otros lo mantuvieron a distancia – sin intoxicar ni dañar. Eso por fin cambia, y la cosmética es uno de los terrenos más interesantes.</p>",
+      tipsTitle: "Cáñamo en tu rutina",
+      tips: [
+        { title: "Aceite de semilla como base", body: "Ligero, no comedogénico, rico en ácidos grasos esenciales. Absorción rápida sin sensación grasa: base ideal en aceites faciales." },
+        { title: "CBD del cáñamo, no sintético", body: "Lo mejor para la piel sale de la planta entera, no del laboratorio. Extractos full spectrum conservan terpenos y flavonoides que potencian el efecto." },
+        { title: "Revisa el THC", body: "Marcas serias analizan en laboratorios externos y demuestran THC bajo el límite legal. Pide certificado de análisis si dudas." },
+        { title: "Cáñamo dentro y fuera", body: "Las semillas son superalimento en proteínas y omegas. Comerlas apoya la piel por dentro; el cuidado tópico actúa por fuera – doble vía." },
+        { title: "Evita aceites baratos", body: "La calidad varía mucho. Semilla prensada en frío y cultivo ecológico retiene nutrientes que pierde lo refinado. El precio suele reflejar calidad." }
+      ],
+      solutionTitle: "1753 SKINCARE – construido sobre el cáñamo",
+      solutionBody: "<p>El cáñamo es la base de todo lo que hacemos. Usamos cáñamo ecológico europeo: aceite de semilla como base y CBD y CBG full spectrum de flores y hojas.</p><p>El DUO-kit con The ONE e I LOVE apoya el perfil lipídico único de la semilla enriquecido con altas dosis de CBD y CBG. Aceites faciales con los lípidos y cannabinoides que la piel necesita para funcionar bien.</p><p>Au Naturel Makeup Remover mezcla MCT oil con CBD de cáñamo para limpiar respetando la barrera. TA-DA Serum aporta CBG concentrado de la misma fuente. De la semilla al frasco: el cáñamo no es un ingrediente más, es la filosofía.</p>",
+      faq: [
+        { q: "¿Aceite de semilla es lo mismo que aceite CBD?", a: "No. El de semilla se prensa de las semillas: ácidos grasos, sin cannabinoides. El CBD sale de flores y hojas e incluye cannabinoides como CBD y CBG." },
+        { q: "¿Puede el cuidado con cáñamo dar positivo en drogas?", a: "No. Uso tópico y menos de 0,2 % THC. Lo absorbido por la piel es insignificante y no marca en test." },
+        { q: "¿Cáñamo es marihuana?", a: "No. Ambos son Cannabis sativa, pero el cáñamo lleva menos de 0,2 % THC y no coloca. Como comparar cerveza sin alcohol con licor." },
+        { q: "¿Por qué el aceite de semilla es tan bueno?", a: "Equilibrio singular de omega-3, omega-6 y ácido gamma-linolénico casi igual al de la piel. Muy biocompatible y fácil de absorber." }
+      ],
+      ctaTitle: "Descubre todo el potencial del cáñamo",
+      ctaSub: "El cáñamo esperó milenios a que lo tomaran en serio. 1753 SKINCARE muestra lo que puede hacer por tu piel."
+    },
+    de: {
+      metaTitle: "Hanf-Hautpflege – die unterschätzteste Naturkraft | 1753",
+      metaDescription: "Hanf wird seit Jahrtausenden genutzt. Jetzt revolutioniert er die Hautpflege. Warum Hanfsamenöl und Cannabinoide die Zukunft sind. 1753 SKINCARE.",
+      kicker: "Hanf-Hautpflege",
+      h1: "Hanf-Hautpflege – das bestgehütete Geheimnis des Pflanzenreichs",
+      lead: "Hanf wird seit über 10.000 Jahren für Nahrung, Kleidung und Medizin angebaut. Erst jetzt verstehen wir, was er für die Haut kann. Spoiler: mehr als du denkst.",
+      problemTitle: "Hanf, Cannabis, Marihuana – Klartext",
+      problemBody: "<p>Die Verwirrung ist groß und verständlich. Hanf und Marihuana sind dieselbe Art – Cannabis sativa – aber so verschieden wie Chihuahua und Wolf. Industriehanf unter 0,2 % THC, keine Intoxikation. Marihuana für hohen THC-Gehalt. Diese Grenze schafft unnötigen Stigma um Hanfkosmetik.</p><p>Hanfsamenöl – aus Samen gepresst – hat ein einzigartiges Profil aus Omega-3, Omega-6 und Gamma-Linolensäure, fast perfekt abgestimmt auf die Hautlipide. Eines der hautfreundlichsten Öle. Extrakt aus Blüten und Blättern liefert Cannabinoide wie CBD und CBG.</p><p>Fehlgeleitete Gesetze und kulturelle Vorurteile nähren das Stigma. Wo man Hanfs Potenzial umarmte, hielt man ihn auf Abstand – obwohl er niemanden berauscht oder schädigt. Das ändert sich – und die Hautpflege ist ein spannendes Feld dafür.</p>",
+      tipsTitle: "Hanf in deiner Routine",
+      tips: [
+        { title: "Hanfsamenöl als Basis", body: "Leicht, nicht komedogen, reich an essentiellen Fettsäuren. Schnelle Aufnahme ohne Fettgefühl – ideale Basis für Gesichtsöle." },
+        { title: "CBD aus Hanf, nicht synthetisch", body: "Das Beste kommt von der ganzen Pflanze, nicht aus dem Labor. Vollspektrum-Extrakte behalten Terpene und Flavonoide für stärkere Wirkung." },
+        { title: "THC-Level checken", body: "Seriöse Marken testen extern und zeigen THC unter dem gesetzlichen Limit. Bei Unsicherheit Analysezertifikat anfordern." },
+        { title: "Hanf innen und außen", body: "Samen sind Superfood mit Protein und Omega-Fettsäuren. Essen unterstützt die Haut von innen, topische Pflege von außen – doppelter Effekt." },
+        { title: "Billige Hanföle meiden", body: "Qualität schwankt stark. Kaltgepresstes Bio-Samenöl behält Nährstoffe, die Raffination verliert. Preis spiegelt meist Qualität wider." }
+      ],
+      solutionTitle: "1753 SKINCARE – auf Hanfkraft gebaut",
+      solutionBody: "<p>Hanf ist das Fundament von allem, was wir tun. Bio-Hanf aus Europa: Samenöl als Basis plus Vollspektrum-CBD und -CBG aus Blüten und Blättern.</p><p>Das DUO-kit mit The ONE und I LOVE nutzt das einzigartige Fettsäureprofil des Samenöls, angereichert mit hohen CBD- und CBG-Konzentrationen. Gesichtsöle mit genau den Lipiden und Cannabinoiden, die optimale Hautfunktion braucht.</p><p>Au Naturel Makeup Remover kombiniert MCT oil mit CBD aus Hanf für schonende Reinigung. TA-DA Serum liefert konzentriertes CBG aus derselben Quelle. Vom Samen zur Flasche – Hanf ist nicht nur Zutat, sondern Philosophie.</p>",
+      faq: [
+        { q: "Ist Hanfsamenöl dasselbe wie CBD-Öl?", a: "Nein. Samenöl aus Samen gepresst: Fettsäuren, keine Cannabinoide. CBD-Öl aus Blüten und Blättern mit Cannabinoiden wie CBD und CBG." },
+        { q: "Positiver Drogentest durch Hanfkosmetik?", a: "Nein. Topisch, unter 0,2 % THC. Die durch die Haut aufgenommene Menge ist vernachlässigbar." },
+        { q: "Ist Hanf Marihuana?", a: "Nein. Beides Cannabis sativa, aber Hanf unter 0,2 % THC, keine Rauschwirkung. Wie alkoholfreies Bier vs. Spirituosen." },
+        { q: "Warum ist Hanfsamenöl so gut?", a: "Einzigartiges Gleichgewicht aus Omega-3, Omega-6 und Gamma-Linolensäure, fast wie die Hautlipide. Extrem biokompatibel und gut absorbierbar." }
+      ],
+      ctaTitle: "Entdecke Hanfs volles Potenzial",
+      ctaSub: "Hanf hat Jahrtausende darauf gewartet, ernst genommen zu werden. 1753 SKINCARE zeigt, was er für deine Haut kann."
+    },
+    fr: {
+      metaTitle: "Soin au chanvre – l’ingrédient le plus sous-estimé | 1753",
+      metaDescription: "Le chanvre s’utilise depuis des millénaires. Il révolutionne les soins visage. Pourquoi l’huile de graines et les cannabinoïdes sont l’avenir. 1753 SKINCARE.",
+      kicker: "Soin au chanvre",
+      h1: "Soin au chanvre – le secret le mieux gardé du règne végétal",
+      lead: "On cultive le chanvre depuis plus de 10 000 ans pour l’alimentation, les vêtements et la médecine. À peine commençons-nous à comprendre ce qu’il fait pour la peau. Spoiler : plus que vous ne croyez.",
+      problemTitle: "Chanvre, cannabis, marijuana – mettre les choses au clair",
+      problemBody: "<p>La confusion est immense et compréhensible. Chanvre et marijuana : même espèce – Cannabis sativa – mais aussi différents qu’un chihuahua et un loup. Le chanvre industriel contient moins de 0,2 % de THC et n’enivre pas. La marijuana vise un THC élevé. Cette frontière nourrit encore un stigmate inutile autour des soins au chanvre.</p><p>L’huile de graines de chanvre – pressée des graines – offre un profil unique en oméga-3, oméga-6 et acide gamma-linolénique, presque calqué sur les lipides cutanés. Parmi les huiles les plus compatibles avec la peau. L’extrait fleurs-feuilles apporte cannabinoïdes comme CBD et CBG.</p><p>Des décennies de législation mal orientée et de préjugés culturels ont alimenté le stigmate. Là où certains ont embrassé le potentiel du chanvre, d’autres l’ont tenu à distance – sans intoxication ni danger. Ça change enfin, et la cosmétique est un terrain passionnant pour ce virage.</p>",
+      tipsTitle: "Le chanvre dans votre routine",
+      tips: [
+        { title: "Huile de graines comme base", body: "Légère, non comédogène, riche en acides gras essentiels. Absorption rapide sans effet gras : base idéale pour huiles visage." },
+        { title: "CBD du chanvre, pas synthétique", body: "Le meilleur pour la peau vient de la plante entière, pas du labo. Les extraits full spectrum gardent terpènes et flavonoïdes qui renforcent l’effet." },
+        { title: "Vérifiez le THC", body: "Les marques sérieuses font analyser par des tiers et prouvent un THC sous la limite légale. Demandez un certificat d’analyse en cas de doute." },
+        { title: "Chanvre dedans et dehors", body: "Les graines sont un superaliment riche en protéines et omégas. Les manger soutient la peau de l’intérieur ; les soins topiques agissent de l’extérieur – double effet." },
+        { title: "Évitez les huiles bon marché", body: "La qualité varie énormément. Graines pressées à froid et bio retiennent des nutriments perdus au raffinage. Le prix reflète souvent la qualité." }
+      ],
+      solutionTitle: "1753 SKINCARE – bâti sur la puissance du chanvre",
+      solutionBody: "<p>Le chanvre est le socle de tout ce que nous faisons. Chanvre bio européen : huile de graines comme base, CBD et CBG full spectrum issus des fleurs et feuilles.</p><p>Le DUO-kit avec The ONE et I LOVE s’appuie sur le profil lipidique unique des graines enrichi en CBD et CBG à forte dose. Des huiles visage avec exactement les lipides et cannabinoïdes dont la peau a besoin pour fonctionner au mieux.</p><p>Au Naturel Makeup Remover associe MCT oil et CBD de chanvre pour un nettoyage qui respecte la barrière. TA-DA Serum apporte du CBG concentré de la même source. De la graine au flacon : le chanvre n’est pas qu’un ingrédient, c’est la philosophie.</p>",
+      faq: [
+        { q: "L’huile de graines est-elle la même que l’huile CBD ?", a: "Non. L’huile de graines est pressée des graines : acides gras, pas de cannabinoïdes. L’huile CBD vient des fleurs et feuilles et contient cannabinoïdes comme CBD et CBG." },
+        { q: "Les soins au chanvre donnent-ils positif au dépistage ?", a: "Non. Usage topique, moins de 0,2 % de THC. Les quantités absorbées par la peau sont négligeables." },
+        { q: "Le chanvre, c’est la marijuana ?", a: "Non. Tous deux Cannabis sativa, mais le chanvre sous 0,2 % de THC ne défonce pas. Comparer bière sans alcool et spiritueux." },
+        { q: "Pourquoi l’huile de graines est-elle si bonne ?", a: "Équilibre unique oméga-3, oméga-6 et acide gamma-linolénique, presque calqué sur les lipides cutanés. Très biocompatible et facile à absorber." }
+      ],
+      ctaTitle: "Découvrez tout le potentiel du chanvre",
+      ctaSub: "Le chanvre a attendu des millénaires qu’on le prenne au sérieux. 1753 SKINCARE montre ce qu’il peut faire pour votre peau."
     }
   },
   {
     svSlug: "minimalistisk-hudvard",
     enSlug: "minimalist-skincare",
+    esSlug: "cuidado-piel-minimalista",
+    deSlug: "minimalistische-hautpflege",
+    frSlug: "soin-peau-minimaliste",
     category: "general",
     productIds: ["duo-kit", "ta-da-serum", "au-naturel-makeup-remover"],
     sv: {
@@ -587,11 +1328,95 @@ export const GENERAL_PAGES: LandingPage[] = [
       ],
       ctaTitle: "Fewer steps, better skin",
       ctaSub: "Your skin doesn't need more – it needs right. 1753 SKINCARE makes minimalist skincare that actually delivers."
+    },
+    es: {
+      metaTitle: "Cuidado facial minimalista – menos productos, mejor piel | 1753",
+      metaDescription: "Minimalismo es calidad antes que cantidad. Por qué dos o tres productos acertados ganan a una rutina de diez pasos. 1753 SKINCARE.",
+      kicker: "Cuidado minimalista",
+      h1: "Cuidado facial minimalista – deja de estresar tu piel",
+      lead: "La industria quiere que creas que necesitas diez pasos, veinte productos y un baño como farmacia. Nosotros no. Tu piel sabe lo que necesita – y no es más.",
+      problemTitle: "Cómo la rutina de diez pasos se volvió norma",
+      problemBody: "<p>La ola K-beauty trajo la filosofía de que más es siempre mejor. Doble limpieza, tónico, esencia, sérum, ampolla, sheet mask, contorno, crema, SPF – y eso solo es la mañana. A la industria le encanta: más pasos, más ventas. ¿Y la piel qué opina?</p><p>La investigación muestra que el exceso de cuidado – skincare overload – puede dañar la piel. Demasiados activos a la vez estresan la barrera, irritan y pueden desencadenar dermatitis periorificial – reacción por demasiados productos. Irónico: abusar de lo que promete arreglar crea el mismo problema.</p><p>La piel lleva cientos de miles de años evolucionando para cuidarse sola. Necesita limpieza, protección y apoyo – no un laboratorio cada mañana y noche. El minimalismo no es flojera: es respetar la inteligencia cutánea y darle espacio.</p>",
+      tipsTitle: "Monta una rutina minimalista",
+      tips: [
+        { title: "Limpia suave", body: "Un limpiador suave a base de aceite basta. Espumas y doble limpieza suelen despojar lípidos de la barrera. Limpia por la noche; por la mañana, agua." },
+        { title: "Un sérum, un aceite", body: "Sérum con activos concentrados y aceite facial que proteja. Cubre necesidades sin diez capas de química distinta." },
+        { title: "Quita lo que no echas de menos", body: "Si quitas un producto y la piel no protesta, no lo necesitabas. Elimina paso a paso y mira qué echa de menos de verdad. La mayoría se sorprende." },
+        { title: "Invierte en calidad", body: "Lo que ahorras en cinco productos mediocres inviértelo en dos buenos. Más concentración en menos frascos suele dar mejor resultado." },
+        { title: "Escucha antes de sumar", body: "Cuando la piel reacciona, el reflejo es añadir otro producto. Prueba al revés: quita algo. Los síntomas a menudo dicen que quiere menos." }
+      ],
+      solutionTitle: "1753 SKINCARE – minimalismo como filosofía",
+      solutionBody: "<p>Construimos 1753 SKINCARE en la idea de que la piel no pide más productos, pide mejores. Toda la rutina puede ser tres pasos: limpiar con Au Naturel, sérum con TA-DA, aceite con DUO-kit. Listo.</p><p>Cada fórmula busca el máximo con el mínimo. CBD y CBG en alta concentración que hablan con el ECS permiten que un solo aceite haga lo que tres convencionales intentan – pero en los términos de la piel.</p><p>Minimalismo no es hacer lo menos posible: es hacer exactamente lo necesario y nada más. Respeto por la piel, por tu tiempo y por la idea de que la calidad gana a la cantidad. Menos pasos, mejor resultado, conciencia más limpia.</p>",
+      faq: [
+        { q: "¿Con dos o tres productos basta?", a: "Sí. Limpiador suave, sérum concentrado y aceite facial cubren lo esencial: limpieza, activos y barrera. Lo demás es opcional." },
+        { q: "¿Cómo sé qué puedo dejar?", a: "Quita uno cada vez y espera dos o tres semanas. Si no empeora, no lo necesitabas. Muchos recortan la mitad de la rutina." },
+        { q: "¿Minimalismo es solo pereza?", a: "Al revés: exige más criterio. Elegir tres productos con buenos ingredientes pide más cabeza que comprar todo lo que recomienda un influencer." },
+        { q: "¿No necesito contorno de ojos específico?", a: "Un buen aceite facial vale igual alrededor de los ojos que en el resto. Los contornos suelen ser la misma fórmula en bote pequeño y más caro." }
+      ],
+      ctaTitle: "Menos pasos, mejor piel",
+      ctaSub: "Tu piel no pide más, pide lo correcto. 1753 SKINCARE hace minimalismo que de verdad funciona."
+    },
+    de: {
+      metaTitle: "Minimalistische Hautpflege – weniger Produkte, bessere Haut | 1753",
+      metaDescription: "Minimalismus heißt Qualität vor Quantität. Warum zwei bis drei richtige Produkte eine Zehn-Schritt-Routine schlagen. 1753 SKINCARE.",
+      kicker: "Minimalistische Hautpflege",
+      h1: "Minimalistische Hautpflege – hör auf, deine Haut zu stressen",
+      lead: "Die Branche will, dass du glaubst, du brauchst zehn Schritte, zwanzig Produkte und ein Bad wie eine Apotheke. Wir sehen das anders. Deine Haut weiß, was sie braucht – und das ist nicht mehr.",
+      problemTitle: "Wie die Zehn-Schritt-Routine zur Norm wurde",
+      problemBody: "<p>Die K-Beauty-Welle brachte die Philosophie: mehr ist immer besser. Doppelreinigung, Toner, Essence, Serum, Ampulle, Sheet Mask, Augencreme, Feuchtigkeit, SPF – nur fürs Morgenprogramm. Die Branche liebt es: mehr Schritte, mehr Umsatz. Was sagt die Haut?</p><p>Forschung zeigt: zu viel Pflege – Skincare Overload – kann der Haut schaden. Zu viele Aktive gleichzeitig stressen die Barriere, reizen und können periorifikale Dermatitis auslösen – eine Reaktion auf zu viel Routine. Ironisch: Übernutzung erzeugt genau die Probleme, die die Produkte lösen wollen.</p><p>Hunderttausende Jahre Evolution: Die Haut kann sich selbst versorgen. Sie braucht Reinigung, Schutz, Unterstützung – kein Chemielabor morgens und abends. Minimalismus ist nicht Faulheit, sondern Respekt vor der eigenen Hautintelligenz und Raum zum Arbeiten.</p>",
+      tipsTitle: "Eine minimalistische Routine aufbauen",
+      tips: [
+        { title: "Sanft reinigen", body: "Mildes ölbasiertes Reinigungsprodukt reicht. Schaum und Doppelreinigung entfernen oft Barrierelipide. Abends reinigen, morgens Wasser." },
+        { title: "Ein Serum, ein Öl", body: "Serum mit konzentrierten Aktiven, Gesichtsöl zum Schutz. Deckt Bedürfnisse ab ohne zehn Schichten verschiedener Chemie." },
+        { title: "Weg damit, was du nicht vermisst", body: "Weg ein Produkt – keine Reaktion? Brauchtest du nie. Schritt für Schritt eliminieren. Die meisten staunen." },
+        { title: "In Qualität investieren", body: "Was du bei fünf mittelmäßigen Produkten sparst, steck in zwei gute. Höhere Aktivkonzentration in weniger Produkten liefert oft bessere Ergebnisse." },
+        { title: "Zuhören statt hinzufügen", body: "Reagiert die Haut, will man meist was Neues draufpacken. Probier’s umgekehrt – etwas wegnehmen. Symptome sagen oft: weniger." }
+      ],
+      solutionTitle: "1753 SKINCARE – Minimalismus als Philosophie",
+      solutionBody: "<p>Wir bauten 1753 SKINCARE auf der Idee: Die Haut braucht nicht mehr Produkte, sondern bessere. Die ganze Routine: reinigen mit Au Naturel, Serum mit TA-DA, Öl mit DUO-kit. Fertig.</p><p>Jedes Produkt soll Maximum mit Minimum leisten. Hochdosiertes CBD und CBG, das direkt mit dem ECS spricht, heißt: Ein Öl kann leisten, wofür drei konventionelle Produkte kämpfen – aber zu Bedingungen der Haut.</p><p>Minimalismus heißt nicht so wenig wie möglich tun, sondern genau das Nötige – nicht mehr. Respekt vor Haut, Zeit und der Idee, dass Qualität Quantität schlägt. Weniger Schritte, bessere Ergebnisse, ruhigeres Gewissen.</p>",
+      faq: [
+        { q: "Reichen zwei bis drei Produkte?", a: "Ja. Mildes Reinigungsmittel, konzentriertes Serum, gutes Gesichtsöl decken Grundlagen: Reinigung, Aktive, Barriere. Alles andere optional." },
+        { q: "Womit kann ich aufhören?", a: "Ein Produkt nach dem anderen raus, zwei bis drei Wochen warten. Wird nicht schlechter, brauchtest du es nicht. Oft fällt die halbe Routine weg." },
+        { q: "Ist Minimalismus nur Faulheit?", a: "Gegenteil – es braucht bewusstere Entscheidungen. Drei Produkte mit richtigen Inhaltsstoffen verlangen mehr Wissen als alles zu kaufen, was Influencer empfehlen." },
+        { q: "Brauche ich eine spezielle Augencreme?", a: "Ein gutes Gesichtsöl funktioniert genauso gut um die Augen. Augencremes sind oft dieselbe Formel in kleinerer Verpackung zum höheren Preis." }
+      ],
+      ctaTitle: "Weniger Schritte, bessere Haut",
+      ctaSub: "Deine Haut braucht nicht mehr – sie braucht das Richtige. 1753 SKINCARE liefert minimalistische Pflege, die wirklich hält."
+    },
+    fr: {
+      metaTitle: "Soin visage minimaliste – moins de produits, meilleure peau | 1753",
+      metaDescription: "Le minimalisme, c’est la qualité avant la quantité. Pourquoi deux ou trois bons produits battent une routine en dix étapes. 1753 SKINCARE.",
+      kicker: "Soin minimaliste",
+      h1: "Soin visage minimaliste – arrêtez de stresser votre peau",
+      lead: "L’industrie veut vous faire croire qu’il vous faut dix étapes, vingt produits et une salle de bain façon pharmacie. Nous, non. Votre peau sait ce dont elle a besoin – et ce n’est pas plus.",
+      problemTitle: "Comment la routine en dix étapes est devenue la norme",
+      problemBody: "<p>La vague K-beauty a importé la philosophie du toujours plus. Double nettoyage, lotion, essence, sérum, ampoule, sheet mask, contour des yeux, crème, SPF – et ce n’est que le matin. L’industrie adore : plus d’étapes, plus de ventes. Et la peau, elle en pense quoi ?</p><p>La recherche montre qu’un excès de soins – skincare overload – peut abîmer la peau. Trop d’actifs à la fois stressent la barrière, irritent et peuvent déclencher une dermatite péri-orificielle – réaction à trop de routine. Ironiquement, surconsommer crée les problèmes que les produits prétendent résoudre.</p><p>La peau a évolué pendant des centaines de milliers d’années pour s’auto-entretenir. Elle veut nettoyage, protection, soutien – pas un labo de chimie matin et soir. Le minimalisme n’est pas la paresse : c’est respecter l’intelligence cutanée et lui laisser de l’air.</p>",
+      tipsTitle: "Construire une routine minimaliste",
+      tips: [
+        { title: "Nettoyer doucement", body: "Un nettoyant doux à base d’huile suffit. Mousses et double nettoyage stripent souvent les lipides de barrière. Nettoyer le soir ; le matin, eau." },
+        { title: "Un sérum, une huile", body: "Sérum à actifs concentrés, huile visage protectrice. Ça couvre les besoins sans dix couches de chimie différente." },
+        { title: "Retirez ce dont vous ne manquez pas", body: "Vous retirez un produit et la peau ne réagit pas ? Vous n’en aviez pas besoin. Éliminez étape par étape. La plupart sont surprises." },
+        { title: "Investissez dans la qualité", body: "L’argent économisé sur cinq produits moyens finance deux excellents. Plus de concentration dans moins de flacons donne souvent de meilleurs résultats." },
+        { title: "Écoutez plutôt qu’ajouter", body: "Quand la peau réagit, le réflexe est d’ajouter. Essayez l’inverse : enlever quelque chose. Les symptômes disent souvent qu’elle veut moins." }
+      ],
+      solutionTitle: "1753 SKINCARE – le minimalisme comme philosophie",
+      solutionBody: "<p>Nous avons bâti 1753 SKINCARE sur l’idée que la peau ne veut pas plus de produits, elle veut de meilleurs. Toute la routine peut tenir en trois étapes : nettoyer avec Au Naturel, sérum avec TA-DA, huile avec le DUO-kit. Terminé.</p><p>Chaque produit est formulé pour faire le maximum avec le minimum. CBD et CBG à forte concentration qui dialoguent avec l’ECS : une seule huile peut faire ce que trois produits classiques tentent – mais aux conditions de la peau.</p><p>Le minimalisme, ce n’est pas faire le minimum : c’est faire exactement le nécessaire, rien de plus. Respect de la peau, du temps, et de l’idée que la qualité bat la quantité. Moins d’étapes, meilleurs résultats, conscience plus légère.</p>",
+      faq: [
+        { q: "Deux ou trois produits suffisent-ils vraiment ?", a: "Oui. Nettoyant doux, sérum concentré, huile visage de qualité couvrent l’essentiel : nettoyage, actifs, barrière. Le reste est optionnel." },
+        { q: "Comment savoir ce que je peux arrêter ?", a: "Retirez un produit à la fois, attendez deux à trois semaines. Si rien n’empire, vous n’en aviez pas besoin. Souvent la moitié de la routine part à la poubelle." },
+        { q: "Le minimalisme, c’est de la paresse ?", a: "Au contraire : il faut des choix plus conscients. Choisir trois produits avec les bons ingrédients demande plus de savoir qu’acheter tout ce qu’un influenceur pousse." },
+        { q: "Pas besoin de contour des yeux dédié ?", a: "Une bonne huile visage fonctionne aussi bien autour des yeux. Les contours sont souvent la même formule, petit flacon, prix gonflé." }
+      ],
+      ctaTitle: "Moins d’étapes, meilleure peau",
+      ctaSub: "Votre peau ne veut pas plus – elle veut ce qu’il faut. 1753 SKINCARE : du minimaliste qui tient ses promesses."
     }
   },
   {
     svSlug: "cbd-olja-ansikte",
     enSlug: "cbd-oil-face",
+    esSlug: "aceite-cbd-rostro",
+    deSlug: "cbd-oel-gesicht",
+    frSlug: "huile-cbd-visage",
     category: "general",
     productIds: ["duo-kit", "duo-ta-da", "au-naturel-makeup-remover"],
     sv: {
@@ -647,11 +1472,95 @@ export const GENERAL_PAGES: LandingPage[] = [
       ],
       ctaTitle: "Start your CBD journey today",
       ctaSub: "CBD oil for the face doesn't have to be complicated. Choose your oil, apply to clean skin, and let your skin do the rest."
+    },
+    es: {
+      metaTitle: "Aceite CBD para el rostro – guía completa | 1753 SKINCARE",
+      metaDescription: "Todo sobre aceite CBD facial: cómo elegir, aplicar y combinar para mejores resultados. Guía paso a paso. 1753 SKINCARE.",
+      kicker: "Aceite CBD rostro",
+      h1: "Aceite CBD para el rostro – la única guía que necesitas",
+      lead: "Has oído que el aceite CBD va bien a la piel, pero te preguntas: ¿cómo lo uso? ¿cuál elijo? ¿funciona? Aquí van respuestas claras, sin relleno.",
+      problemTitle: "La jungla de aceites CBD",
+      problemBody: "<p>El mercado de aceites faciales con CBD ha explotado y con él la confusión. Cientos de marcas, claims salvajes e INCI vagos. ¿Aislado o full spectrum? ¿Qué concentración? ¿Aceite de semilla de cáñamo o aceite CBD – es lo mismo? Sin criterio, eliges mal y te frustras.</p><p>Muchos “aceites CBD” solo llevan aceite de semilla: útil, pero sin cannabinoides. Otros usan aislado sin terpenos ni flavonoides del full spectrum y su efecto entourage. Las concentraciones van de niveles homeopáticos a porcentajes serios.</p><p>Y cómo usarlo: ¿sustituye la crema hidratante? ¿Antes o después del sérum? ¿Mañana, noche o ambas? Online abunda la info contradictoria empujada por quien quiere vender su bote, no por dar respuestas honestas.</p>",
+      tipsTitle: "Paso a paso: aceite CBD en el rostro",
+      tips: [
+        { title: "Primero limpia, siempre", body: "El aceite penetra mejor en piel limpia, sin maquillaje, suciedad ni capas viejas. Limpiador suave en aceite y seca a toques sin frotar." },
+        { title: "Sobre piel húmeda", body: "Un poco de humedad reparte mejor el aceite y acelera la absorción. Bruma o aplica tras secar la cara con la toalla." },
+        { title: "Presiona, no frotes", body: "Calienta tres o cuatro gotas en las palmas y presiona suave. Masaje ligero ascendente en mejillas y mandíbula para la circulación." },
+        { title: "Cuello incluido, siempre", body: "El cuello envejece antes y casi siempre se olvida. Baja el aceite del mentón a las clavículas: tres segundos extra, gran diferencia." },
+        { title: "La noche rinde más", body: "La piel repara de noche. Aceite CBD por la noche potencia ese proceso. Si solo eliges un momento, prioriza la noche." }
+      ],
+      solutionTitle: "The ONE e I LOVE – aceites CBD para todas",
+      solutionBody: "<p>The ONE con 10 % CBD es nuestro aceite universal: todo tipo de piel y edad. Equilibra sebo, calma inflamación y refuerza la barrera con una fórmula que la piel entiende al instante.</p><p>I LOVE sube el listón con CBD y CBG. El cannabinoide extra amplía el diálogo con el ECS – ideal si quieres máximo apoyo o retos que piden un perfil cannabinoide más completo.</p><p>Mismo ritual en ambos: limpiar, sérum opcional, tres o cuatro gotas presionadas. Menos de dos minutos. Aceite CBD facial como debería ser: fácil de usar, difícil de liar.</p>",
+      faq: [
+        { q: "¿Cuánto aceite CBD debo usar?", a: "Tres o cuatro gotas bastan para rostro y cuello. Más no mejora el efecto: la piel solo absorbe una cantidad limitada cada vez." },
+        { q: "¿Puedo usarlo alrededor de los ojos?", a: "Sí. Nuestros aceites son suaves. Presiona con el anular: menos presión, más respeto a la piel fina." },
+        { q: "¿Sustituye la crema hidratante?", a: "Para la mayoría, sí. Los aceites aportan nutrición y barrera. En clima extremadamente frío o seco puedes poner una crema ligera debajo." },
+        { q: "¿Puedo mezclarlo con mi crema habitual?", a: "Puedes, pero recomendamos aplicar el aceite aparte para mejor absorción. El CBD encaja mejor con los receptores sin capas intermedias." }
+      ],
+      ctaTitle: "Empieza tu camino con el CBD hoy",
+      ctaSub: "El aceite CBD facial no tiene por qué ser un lío. Elige tu aceite, piel limpia, y deja que la piel haga el resto."
+    },
+    de: {
+      metaTitle: "CBD-Öl fürs Gesicht – kompletter Guide | 1753 SKINCARE",
+      metaDescription: "Alles zu CBD-Öl im Gesicht: Auswahl, Auftrag, Kombination für beste Ergebnisse. Schritt für Schritt. 1753 SKINCARE.",
+      kicker: "CBD Gesichtsöl",
+      h1: "CBD-Öl fürs Gesicht – der einzige Guide, den du brauchst",
+      lead: "Du hast gehört, CBD-Öl ist gut für die Haut – aber wie nutzt du es? Welches nimmst du? Wirkt es wirklich? Hier die Antworten, ohne Schnickschnack.",
+      problemTitle: "Der Dschungel der CBD-Öle",
+      problemBody: "<p>Der Markt für CBD-Gesichtsöle ist explodiert – mit wachsender Verwirrung. Hunderte Marken, wilde Claims, vage INCI-Listen. Isolat oder Vollspektrum? Welche Konzentration? Hanfsamenöl oder CBD-Öl – dasselbe? Ohne Wissen wählst du falsch und wirst enttäuscht.</p><p>Viele „CBD-Öle“ enthalten nur Hanfsamenöl – nützlich, aber ohne Cannabinoide. Andere nutzen CBD-Isolat ohne Terpene und Flavonoide des Vollspektrums und den Entourage-Effekt. Konzentrationen schwanken von homöopathisch bis sinnvoll.</p><p>Dazu die Frage der Anwendung: Ersetzt es die Feuchtigkeitscreme? Vor oder nach Serum? Morgens, abends, beides? Online widerspricht sich vieles – getrieben von Verkauf, nicht von ehrlichen Antworten.</p>",
+      tipsTitle: "Schritt für Schritt: CBD-Öl im Gesicht",
+      tips: [
+        { title: "Zuerst reinigen, immer", body: "CBD-Öl zieht am besten auf reiner Haut ohne Makeup, Schmutz oder alte Schichten. Mildes ölbasiertes Reinigungsprodukt, Haut tupfen ohne Reiben." },
+        { title: "Auf feuchte Haut", body: "Etwas Feuchtigkeit verteilt das Öl gleichmäßiger und beschleunigt Aufnahme. Spray oder direkt nach dem Abtrocknen mit dem Handtuch." },
+        { title: "Eindrücken, nicht reiben", body: "Drei bis vier Tropfen erwärmen, sanft eindrücken. Leichte Aufwärtsbewegungen an Wangen und Kinn für die Durchblutung." },
+        { title: "Hals jedes Mal mit", body: "Der Hals altert schneller, wird fast immer vergessen. Öl vom Kinn zu den Schlüsselbeinen ziehen – drei Sekunden mehr, großer Unterschied." },
+        { title: "Abendroutine wirkt am stärksten", body: "Die Haut repariert nachts am meisten. CBD-Öl abends unterstützt optimal. Morgens auch möglich – aber wenn nur einmal, dann abends." }
+      ],
+      solutionTitle: "The ONE und I LOVE – CBD-Öle für alle",
+      solutionBody: "<p>The ONE mit 10 % CBD ist unser Universalöl – für alle Hauttypen und Alter. Reguliert Talg, beruhigt Entzündung, stärkt die Barriere mit einer Formel, die die Haut sofort versteht.</p><p>I LOVE geht weiter mit CBD und CBG. Das zusätzliche Cannabinoid erweitert die Interaktion mit dem ECS – perfekt für maximalen Support oder spezielle Herausforderungen mit vollständigerem Profil.</p><p>Beide gleich anwenden: reinigen, optional Serum, drei bis vier Tropfen eindrücken. Unter zwei Minuten Gesichtspflege. CBD-Öl fürs Gesicht, wie es sein sollte – einfach, klar.</p>",
+      faq: [
+        { q: "Wie viel CBD-Öl soll ich nutzen?", a: "Drei bis vier Tropfen reichen für Gesicht und Hals. Mehr ist nicht besser – die Haut kann nur begrenzt aufnehmen." },
+        { q: "Rund um die Augen?", a: "Ja. Unsere Öle sind mild genug. Mit dem Ringfinger eintupfen – geringster Druck, schonend für die dünne Haut." },
+        { q: "Ersetzt es Feuchtigkeitscreme?", a: "Für die meisten ja. Gesichtsöle liefern Nährstoffe und Barriere. Bei extrem kaltem oder trockenem Klima leichte Creme darunter." },
+        { q: "Mit normaler Creme mischen?", a: "Geht, aber wir empfehlen separates Auftragen für beste Absorption. CBD spricht am besten mit Rezeptoren ohne Zwischenschichten." }
+      ],
+      ctaTitle: "Starte heute deine CBD-Reise",
+      ctaSub: "CBD-Öl fürs Gesicht muss nicht kompliziert sein. Öl wählen, auf reine Haut – die Haut macht den Rest."
+    },
+    fr: {
+      metaTitle: "Huile CBD visage – guide complet | 1753 SKINCARE",
+      metaDescription: "Tout sur l’huile CBD pour le visage : choisir, appliquer, combiner pour les meilleurs résultats. Pas à pas. 1753 SKINCARE.",
+      kicker: "Huile CBD visage",
+      h1: "Huile CBD pour le visage – le seul guide dont vous avez besoin",
+      lead: "On vous a dit que l’huile CBD est top pour la peau, mais vous vous demandez : comment je m’en sers ? Laquelle choisir ? Ça marche vraiment ? Voici les réponses, sans blabla.",
+      problemTitle: "La jungle des huiles CBD",
+      problemBody: "<p>Le marché des huiles visage au CBD a explosé, et avec lui la confusion. Des centaines de marques, des promesses folles, des listes INCI floues. Isolat ou full spectrum ? Quelle concentration ? Huile de graines de chanvre ou huile CBD – c’est pareil ? Sans repères, on se trompe et on est déçu.</p><p>Beaucoup de produits « CBD » ne contiennent que de l’huile de graines : utile, mais sans cannabinoïdes. D’autres utilisent l’isolat sans terpènes ni flavonoïdes du full spectrum et leur effet d’entourage. Les concentrations vont du niveau homéopathique aux pourcentages sérieux.</p><p>Et comment l’utiliser : remplace-t-elle la crème hydratante ? Avant ou après le sérum ? Matin, soir, les deux ? En ligne, l’info se contredit souvent, poussée par la vente plutôt que par l’honnêteté.</p>",
+      tipsTitle: "Pas à pas : huile CBD sur le visage",
+      tips: [
+        { title: "D’abord nettoyer, toujours", body: "L’huile pénètre mieux sur peau propre, sans maquillage, saleté ou anciennes couches. Nettoyant doux à base d’huile, sécher en tapotant sans frotter." },
+        { title: "Sur peau légèrement humide", body: "Un peu d’humidité répartit l’huile plus uniformément et accélère l’absorption. Brume ou application juste après la serviette." },
+        { title: "Presser, ne pas frotter", body: "Réchauffez trois à quatre gouttes entre les paumes, pressez doucement. Légers mouvements ascendants joues et mâchoire pour la circulation." },
+        { title: "Le cou à chaque fois", body: "Le cou vieillit plus vite et est presque toujours oublié. Descendez du menton aux clavicules – trois secondes de plus, grosse différence." },
+        { title: "Le soir donne le plus d’effet", body: "La peau répare surtout la nuit. Huile CBD le soir optimise ce processus. Matin aussi possible, mais si un seul moment, choisissez le soir." }
+      ],
+      solutionTitle: "The ONE et I LOVE – huiles CBD pour tous",
+      solutionBody: "<p>The ONE à 10 % de CBD est notre huile universelle – tous types de peau, tous âges. Équilibre le sébum, calme l’inflammation, renforce la barrière avec une formule que la peau comprend tout de suite.</p><p>I LOVE va plus loin avec CBD et CBG. Le cannabinoïde supplémentaire élargit l’interaction avec l’ECS – parfait pour un soutien maximal ou des défis qui demandent un profil plus complet.</p><p>Même rituel : nettoyer, sérum optionnel, trois à quatre gouttes pressées. Moins de deux minutes. Huile CBD visage comme elle devrait être : simple, sans ambiguïté.</p>",
+      faq: [
+        { q: "Quelle quantité d’huile CBD ?", a: "Trois à quatre gouttes suffisent pour visage et cou. Plus ne renforce pas l’effet – la peau n’absorbe qu’une quantité limitée à la fois." },
+        { q: "Autour des yeux ?", a: "Oui. Nos huiles sont assez douces. Tapoter avec l’annulaire – pression minimale, respect de la peau fine." },
+        { q: "Remplace-t-elle la crème hydratante ?", a: "Pour la plupart, oui. Les huiles nourrissent et protègent la barrière. Climat très froid ou sec : crème légère en dessous." },
+        { q: "Mélanger avec ma crème habituelle ?", a: "Possible, mais nous recommandons d’appliquer l’huile seule pour une meilleure absorption. Le CBD dialogue mieux avec les récepteurs sans couches intermédiaires." }
+      ],
+      ctaTitle: "Commencez votre parcours CBD aujourd’hui",
+      ctaSub: "L’huile CBD visage n’a pas à être compliquée. Choisissez votre huile, peau propre, et laissez la peau faire le reste."
     }
   },
   {
     svSlug: "svensk-hudvard",
     enSlug: "swedish-skincare",
+    esSlug: "cuidado-piel-sueco",
+    deSlug: "schwedische-hautpflege",
+    frSlug: "soin-peau-suedois",
     category: "general",
     productIds: ["duo-ta-da", "duo-kit", "fungtastic-mushroom-extract"],
     sv: {
@@ -707,6 +1616,87 @@ export const GENERAL_PAGES: LandingPage[] = [
       ],
       ctaTitle: "Discover Swedish skincare that delivers",
       ctaSub: "Lagom, honest, and effective. 1753 SKINCARE does skincare the only way we know – the Swedish way."
+    },
+    es: {
+      metaTitle: "Cuidado facial sueco – filosofía nórdica, calidad global | 1753",
+      metaDescription: "El cuidado sueco se apoya en simplicidad, función y naturaleza. La tradición nórdica de hacer menos – pero mejor. 1753 SKINCARE.",
+      kicker: "Cuidado sueco",
+      h1: "Cuidado facial sueco – lagom no es aburrido, es genial",
+      lead: "Mientras otros persiguen rutinas de diez pasos e ingredientes milagro, Suecia siempre supo: lo mejor para la piel es no pasarse. La filosofía nórdica es equilibrio – y en eso llevamos ventaja.",
+      problemTitle: "Por qué todo el mundo mira a Escandinavia",
+      problemBody: "<p>El diseño nórdico lleva décadas admirado por su minimalismo funcional – no solo muebles y arquitectura. Las marcas suecas de cosmética crecen internacionalmente porque ofrecen lo contrario a una industria hinchada de promesas.</p><p>El entorno escandinavo exige mucho a la piel: saltos bruscos de temperatura entre inviernos gélidos y veranos claros, aire seco por la calefacción, poca luz solar largos meses. Ahí solo sobreviven productos que cumplen en condiciones duras. Lo que aguanta el frío del norte aguanta en cualquier sitio.</p><p>Suecia además tiene tradición de vínculo con la naturaleza – vida al aire libre, allemansrätt, sauna, baños fríos. La idea de que la naturaleza es aliada, no recurso a exprimir, impregna la cultura y el modo de pensar el cuidado. El cuerpo no es una máquina a optimizar: es un sistema vivo con el que colaborar.</p>",
+      tipsTitle: "Filosofía sueca del cuidado, en práctica",
+      tips: [
+        { title: "Lagom – ni de más ni de menos", body: "El lagom encaja en cosmética: bastantes activos para marcar diferencia, sin saturar la piel. Equilibrio en todo." },
+        { title: "La naturaleza como farmacia", body: "Ingredientes nórdicos como espino amarillo, abedul, semilla de cáñamo y hongos llevan generaciones en uso. Adaptados al mismo clima duro que tu piel y cargados de compuestos resistentes." },
+        { title: "Calidad antes que postureo", body: "La cultura de consumo sueca valora función sobre postureo. Elige por lo que hace a tu piel, no por cómo queda el bote en el baño." },
+        { title: "El frío como cuidado", body: "Inmersión fría o acabar la ducha en frío mejora circulación y barrera. Gratis, con respaldo científico, muy sueco. Empieza con diez segundos de agua fría." },
+        { title: "Visión holística", body: "El cuidado sueco siempre miró el conjunto: alimentación, movimiento, vida al aire libre y sueño pesan tanto como lo que te aplicas. La piel refleja cómo vives, no solo el tarro que abres." }
+      ],
+      solutionTitle: "1753 SKINCARE – sueco de verdad desde el inicio",
+      solutionBody: "<p>1753 SKINCARE lleva la filosofía sueca en el ADN. Creemos en lagom: la cantidad justa de los ingredientes adecuados, sin exceso ni relleno. Cada producto hace exactamente lo que debe – ni más ni menos.</p><p>Nuestro cáñamo se cultiva en Europa en condiciones controladas. Fungtastic Mushroom Extract usa hongos nórdicos como chaga y reishi, usados tradicionalmente para salud e inmunidad. Todo formulado con respeto a la tradición escandinava de minimalismo funcional.</p><p>DUO-kit más TA-DA te dan rutina completa a la sueca: tres productos que cubren lo esencial sin un solo paso de más. No intentamos ser todo para todos: solo lo que tu piel necesita, de una marca sueca que valora la honestidad tanto como el resultado.</p>",
+      faq: [
+        { q: "¿Qué separa el cuidado sueco del coreano?", a: "Lo sueco apuesta por minimalismo y función – menos piezas, más calidad. Lo coreano suma pasos y ritual. Es lagom frente a maximalismo." },
+        { q: "¿Funciona fuera de Suecia?", a: "Por supuesto. Productos pensados para clima nórdico – saltos térmicos y aire seco – aguantan cualquier clima. Lo que vale a menos 20 vale en todas partes." },
+        { q: "¿Qué significa 1753?", a: "1753 es la base de nuestra filosofía: una época en que el cuidado era simple, natural y sin aditivos sintéticos de más. Ese espíritu lo llevamos al presente." },
+        { q: "¿El cuidado sueco es siempre natural?", a: "No automáticamente, pero la cercanía a la naturaleza y el diseño funcional empujan hacia lo natural. Nosotros lo llevamos al extremo con fórmulas veganas basadas en CBD." }
+      ],
+      ctaTitle: "Descubre cuidado sueco que cumple",
+      ctaSub: "Lagom, honesto y eficaz. 1753 SKINCARE hace cosmética a nuestra manera – la sueca."
+    },
+    de: {
+      metaTitle: "Schwedische Hautpflege – nordische Philosophie, globale Qualität | 1753",
+      metaDescription: "Schwedische Hautpflege baut auf Einfachheit, Funktion und Natur. Die nordische Tradition: weniger tun – aber besser. 1753 SKINCARE.",
+      kicker: "Schwedische Hautpflege",
+      h1: "Schwedische Hautpflege – Lagom ist nicht langweilig, sondern genial",
+      lead: "Während andere Zehn-Schritt-Routinen und Wunder-Inhaltsstoffe jagen, wusste Schweden schon immer: Das Beste für die Haut ist, nicht zu viel zu tun. Nordische Philosophie ist Balance – und davon verstehen wir etwas.",
+      problemTitle: "Warum alle nach Skandinavien schauen",
+      problemBody: "<p>Nordisches Design wird seit langem für funktionalen Minimalismus bewundert – nicht nur Möbel und Architektur. Schwedische Hautpflegemarken wachsen international, weil sie das Gegenteil der aufgeblasenen, versprechensreichen Branche bieten.</p><p>Die skandinavische Umwelt stellt hohe Anforderungen: extreme Temperatursprünge zwischen eisigen Wintern und hellen Sommern, trockene Heizungsluft, lange Phasen wenig Sonnenlicht. Nur Produkte, die unter harten Bedingungen liefern, überleben. Was im Norden funktioniert, funktioniert überall.</p><p>Schweden hat zudem eine tiefe Naturverbundenheit – Outdoor-Leben, Allemansrätt, Sauna, Kaltbaden. Die Idee, Natur sei Partner statt auszubeutende Ressource, durchzieht Kultur und Hautpflegedenken. Der Körper ist keine Maschine zum Optimieren, sondern ein lebendes System zum Mitwirken.</p>",
+      tipsTitle: "Schwedische Hautpflege-Philosophie in der Praxis",
+      tips: [
+        { title: "Lagom – nicht zu viel, nicht zu wenig", body: "Das schwedische Lagom passt perfekt zur Hautpflege: genug Aktive für Wirkung, nicht so viel, dass die Haut gestresst wird. Balance in allem." },
+        { title: "Natur als Apotheke", body: "Nordische Inhaltsstoffe wie Sanddorn, Birke, Hanfsamen und Pilze werden seit Generationen genutzt. An dasselbe raue Klima angepasst wie deine Haut – robuste, kraftvolle Verbindungen." },
+        { title: "Qualität vor Status", body: "Schwedische Konsumkultur schätzt Funktion vor Show. Wähle nach Wirkung für die Haut, nicht nach Regal-Optik im Bad." },
+        { title: "Kälte als Pflege", body: "Kaltbaden oder kalter Duschabschluss verbessern Durchblutung und Barriere. Kostenlos, forschungsgestützt, sehr schwedisch. Start mit zehn Sekunden kaltem Wasser." },
+        { title: "Ganzheitlicher Blick", body: "Schwedische Hautpflege war immer ganzheitlich – Ernährung, Bewegung, Outdoor, Schlaf zählen genauso wie Produkte. Die Haut spiegelt, wie du lebst, nicht nur, was du aufträgst." }
+      ],
+      solutionTitle: "1753 SKINCARE – stolz schwedisch von Anfang an",
+      solutionBody: "<p>1753 SKINCARE trägt schwedische Hautpflege-Philosophie in der DNA. Wir glauben an Lagom: die richtige Menge der richtigen Inhaltsstoffe, kein Überschuss, kein Füller. Jedes Produkt tut genau das, wofür es da ist – nicht mehr, nicht weniger.</p><p>Unser Hanf wächst in Europa unter kontrollierten Bedingungen. Fungtastic Mushroom Extract nutzt nordische Pilzarten wie Chaga und Reishi, traditionell für Gesundheit und Immunität. Alles formuliert mit Respekt vor skandinavischer Tradition funktionalen Minimalismus.</p><p>DUO-kit plus TA-DA liefern komplette Routine auf schwedisch-lagom: drei Produkte für alles Nötige ohne einen überflüssigen Schritt. Kein Versuch, alles für alle zu sein – genau das, was deine Haut braucht, von einer schwedischen Marke, die Ehrlichkeit so schätzt wie Ergebnisse.</p>",
+      faq: [
+        { q: "Unterschied schwedische vs. koreanische Hautpflege?", a: "Schweden fokussiert Minimalismus und Funktion – weniger Produkte, höhere Qualität. Korea betont mehr Schritte und Rituale. Lagom vs. Maximalismus." },
+        { q: "Funktioniert schwedische Pflege international?", a: "Absolut. Für nordisches Klima entwickelt – extreme Temperaturschwankungen, trockene Luft – meistert jedes Klima. Was bei minus 20 funktioniert, funktioniert überall." },
+        { q: "Was bedeutet 1753?", a: "1753 steht für unser Fundament – eine Zeit, als Hautpflege einfach, naturbasiert und ohne synthetische Zusätze war. Diesen Geist bringen wir in die Moderne." },
+        { q: "Ist schwedische Hautpflege immer natürlich?", a: "Nicht automatisch, aber Nähe zur Natur und funktionales Design fördern einen natürlicheren Ansatz. Wir gehen bis zum Ende mit veganen, CBD-basierten Formeln." }
+      ],
+      ctaTitle: "Entdecke schwedische Hautpflege, die liefert",
+      ctaSub: "Lagom, ehrlich, wirksam. 1753 SKINCARE macht Hautpflege auf unsere Art – die schwedische."
+    },
+    fr: {
+      metaTitle: "Soin visage suédois – philosophie nordique, qualité mondiale | 1753",
+      metaDescription: "Le soin suédois repose sur simplicité, fonction et nature. La tradition nordique : faire moins – mais mieux. 1753 SKINCARE.",
+      kicker: "Soin suédois",
+      h1: "Soin visage suédois – lagom n’est pas ennuyeux, c’est malin",
+      lead: "Pendant qu’ailleurs on court après dix étapes et des ingrédients miracle, la Suède sait depuis longtemps : le mieux pour la peau, c’est ne pas en faire trop. La philosophie nordique, c’est l’équilibre – et là-dessus, on a de l’expérience.",
+      problemTitle: "Pourquoi tout le monde regarde la Scandinavie",
+      problemBody: "<p>Le design nordique est admiré pour son minimalisme fonctionnel – au-delà du mobilier et de l’architecture. Les marques suédoises de soins montent à l’international parce qu’elles proposent l’inverse d’une industrie gonflée de promesses.</p><p>L’environnement scandinave exige beaucoup de la peau : écarts de température entre hivers glacés et étés lumineux, air sec du chauffage, longues périodes de faible soleil. Seuls des produits qui tiennent la route dans la dureté survivent. Ce qui marche dans le froid du nord marche partout.</p><p>La Suède a en plus une tradition profonde de lien avec la nature – vie dehors, allemansrätt, sauna, bains froids. L’idée que la nature est partenaire plutôt que ressource à exploiter imprègne la culture et la façon de penser les soins. Le corps n’est pas une machine à optimiser : c’est un système vivant avec lequel collaborer.</p>",
+      tipsTitle: "La philosophie suédoise des soins, en pratique",
+      tips: [
+        { title: "Lagom – ni trop, ni trop peu", body: "Le principe suédois du lagom colle parfaitement aux soins : assez d’actifs pour faire la différence, pas assez pour stresser la peau. Équilibre partout." },
+        { title: "La nature comme pharmacie", body: "Ingrédients nordiques comme argousier, bouleau, graine de chanvre et champignons : utilisés depuis des générations. Adaptés au même climat rude que votre peau, avec des composés robustes et puissants." },
+        { title: "Qualité avant le statut", body: "La culture de consommation suédoise privilégie la fonction au paraître. Choisissez selon ce que ça fait à votre peau, pas selon le flacon sur l’étagère." },
+        { title: "Le froid comme soin", body: "Bains froids ou fin de douche froide améliorent circulation et barrière. Gratuit, étayé par la recherche, très suédois. Commencez par dix secondes d’eau froide." },
+        { title: "La vision holistique", body: "Les soins suédois ont toujours visé l’ensemble : alimentation, mouvement, vie dehors et sommeil comptent autant que les produits. La peau reflète comment vous vivez, pas seulement ce que vous appliquez." }
+      ],
+      solutionTitle: "1753 SKINCARE – fièrement suédois depuis le début",
+      solutionBody: "<p>1753 SKINCARE porte la philosophie suédoise des soins dans son ADN. Nous croyons au lagom : la juste dose des bons ingrédients, pas d’excès, pas de remplissage. Chaque produit fait exactement ce qu’il doit – ni plus ni moins.</p><p>Notre chanvre pousse en Europe dans des conditions contrôlées. Fungtastic Mushroom Extract s’appuie sur des espèces nordiques comme chaga et reishi, traditionnellement liées à santé et immunité. Tout est formulé dans le respect de la tradition scandinave du minimalisme fonctionnel.</p><p>DUO-kit plus TA-DA : routine complète à la suédoise lagom – trois produits pour tout le nécessaire sans une étape superflue. Pas de volonté d’être tout pour tous : juste ce dont votre peau a besoin, par une marque suédoise qui valorise l’honnêteté autant que les résultats.</p>",
+      faq: [
+        { q: "Qu’est-ce qui distingue le soin suédois du coréen ?", a: "Le suédois mise sur minimalisme et fonctionnalité – moins de produits, plus de qualité. Le coréen insiste sur les étapes et les rituaux. C’est lagom contre maximalisme." },
+        { q: "Le soin suédois fonctionne-t-il ailleurs ?", a: "Absolument. Conçu pour le climat nordique – variations extrêmes et air sec – il tient partout. Ce qui marche à moins 20 marche partout." },
+        { q: "Que signifie 1753 ?", a: "1753 représente le socle de notre philosophie : une époque où les soins étaient simples, naturels et sans additifs de synthèse superflus. Nous ramenons cet esprit dans le moderne." },
+        { q: "Le soin suédois est-il toujours naturel ?", a: "Pas automatiquement, mais la tradition de proximité avec la nature et le design fonctionnel pousse vers plus de naturel. Nous allons jusqu’au bout avec des formules veganes à base de CBD." }
+      ],
+      ctaTitle: "Découvrez un soin suédois qui tient ses promesses",
+      ctaSub: "Lagom, honnête, efficace. 1753 SKINCARE fait les soins à notre façon – la façon suédoise."
     }
   }
 ];
