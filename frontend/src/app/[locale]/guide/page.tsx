@@ -134,8 +134,8 @@ export default async function GuidePage({ params }: Props) {
             </h2>
             <p className="mt-1 text-sm text-[#515151]">
               {isSv
-                ? "Var gratis AI-hudanalys ger dig personliga rekommendationer pa 60 sekunder."
-                : "Our free AI skin analysis gives you personalised recommendations in 60 seconds."}
+                ? "Var gratis AI-hudanalys ger dig 15 hudmetriker, estimerad hudalder och en personlig rutin pa 60 sekunder."
+                : "Our free AI skin analysis gives you 15 skin metrics, estimated skin age and a personal routine in 60 seconds."}
             </p>
           </div>
           <Link

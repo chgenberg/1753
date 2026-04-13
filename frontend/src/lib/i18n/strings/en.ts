@@ -77,7 +77,7 @@ export const en: Messages = {
     closeModalAria: "Close",
     ctaAnalysisTitle: "Not sure what your skin needs?",
     ctaAnalysisSub:
-      "Get a clearer picture of your skin, your lifestyle and what may actually help. Free, fast and private.",
+      "Get 15 scientific skin metrics, estimated skin age and a personal routine – in under 60 seconds. Free and private.",
     ctaAnalysisButton: "Start skin analysis",
     features: [
       {
@@ -599,10 +599,10 @@ export const en: Messages = {
     tooShort: "Password must be at least 6 characters.",
   },
   analysisLayoutSeo: {
-    title: "Skin analysis",
-    description: "Free AI-powered holistic skin analysis from 1753 SKINCARE.",
-    ogTitle: "Skin analysis – 1753 SKINCARE",
-    ogDescription: "Personal recommendations for skin and lifestyle.",
+    title: "Skin Analysis – 15 Metrics and Skin Age",
+    description: "Free AI skin analysis with 15 skin metrics, estimated skin age, radar chart and personal routine. MediaPipe precision across 12 facial zones.",
+    ogTitle: "AI Skin Analysis – 15 Metrics, Skin Age, Radar Chart | 1753 SKINCARE",
+    ogDescription: "Get 15 scientific skin metrics, estimated skin age and personalised recommendations in under 60 seconds. Completely free.",
   },
   accountDash: {
     relativeToday: "Today",

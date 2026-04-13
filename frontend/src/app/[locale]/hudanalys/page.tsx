@@ -56,10 +56,37 @@ interface FaceZoneGPT {
   confidence: "low" | "medium" | "high";
 }
 
+interface MetricScore {
+  score: number;
+  grade: number;
+  detail: string;
+}
+
+interface SkinMetrics {
+  wrinkles?: MetricScore;
+  pores?: MetricScore;
+  pigmentation?: MetricScore;
+  redness?: MetricScore;
+  texture?: MetricScore;
+  dark_circles?: MetricScore;
+  firmness?: MetricScore;
+  hydration?: MetricScore;
+  skin_tone?: MetricScore;
+  acne?: MetricScore;
+  sensitivity?: MetricScore;
+  sun_damage?: MetricScore;
+  elasticity?: MetricScore;
+  radiance?: MetricScore;
+  barrier_health?: MetricScore;
+}
+
 interface AnalysisJSON {
   score: number;
   scoreLabel?: string;
   summary: string;
+  skinAge?: number;
+  fitzpatrick?: string;
+  metrics?: SkinMetrics;
   skinAnalysis?: {
     overview: string;
     strengths: string[];
@@ -532,6 +559,7 @@ export default function AnalysisPage() {
           },
           ...scanContext,
           ...(faceImage ? { fullImage: faceImage } : {}),
+          ...(scanSummary?.zoneCrops?.length ? { zoneCrops: scanSummary.zoneCrops } : {}),
         }),
       });
       setResult(data);
@@ -634,30 +662,30 @@ export default function AnalysisPage() {
               </h1>
               <p className="mx-auto mt-4 max-w-lg text-base leading-relaxed text-muted-foreground">
                 {locale === "en"
-                  ? "Take a photo of your face, answer five quick questions about your lifestyle, and receive a complete personalised analysis with recommendations."
-                  : "Ta ett foto av ditt ansikte, svara på fem korta frågor om din livsstil och få en komplett personlig analys med rekommendationer."}
+                  ? "Scan your face with MediaPipe precision across 12 zones, answer five quick questions, and receive 15 scientific skin metrics, estimated skin age, a radar chart and personalised recommendations."
+                  : "Skanna ditt ansikte med MediaPipe-precision i 12 zoner, svara pa fem korta fragor och fa 15 vetenskapliga hudmetriker, estimerad hudalder, radardiagram och personliga rekommendationer."}
               </p>
 
               <div className="mx-auto mt-8 grid max-w-sm gap-4 text-left">
                 <div className="flex items-start gap-4 rounded-2xl border border-[#e6e6e6] bg-white p-4">
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#108474]/10 text-sm font-bold text-[#108474]">1</div>
                   <div>
-                    <p className="text-sm font-semibold text-[#1d1d1f]">{locale === "en" ? "Face scan" : "Ansiktsskanning"}</p>
-                    <p className="mt-0.5 text-xs text-[#515151]">{locale === "en" ? "AI analyses your skin zone by zone" : "AI analyserar din hud zon för zon"}</p>
+                    <p className="text-sm font-semibold text-[#1d1d1f]">{locale === "en" ? "Face scan – 12 zones" : "Ansiktsskanning – 12 zoner"}</p>
+                    <p className="mt-0.5 text-xs text-[#515151]">{locale === "en" ? "MediaPipe maps 478 points and analyses each zone" : "MediaPipe kartlagger 478 punkter och analyserar varje zon"}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4 rounded-2xl border border-[#e6e6e6] bg-white p-4">
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#108474]/10 text-sm font-bold text-[#108474]">2</div>
                   <div>
-                    <p className="text-sm font-semibold text-[#1d1d1f]">{locale === "en" ? "Lifestyle questions" : "Livsstilsfrågor"}</p>
-                    <p className="mt-0.5 text-xs text-[#515151]">{locale === "en" ? "Five questions about sleep, diet & stress" : "Fem frågor om sömn, kost och stress"}</p>
+                    <p className="text-sm font-semibold text-[#1d1d1f]">{locale === "en" ? "Lifestyle questions" : "Livsstilsfragor"}</p>
+                    <p className="mt-0.5 text-xs text-[#515151]">{locale === "en" ? "Five questions about sleep, diet & stress" : "Fem fragor om somn, kost och stress"}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4 rounded-2xl border border-[#e6e6e6] bg-white p-4">
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#108474]/10 text-sm font-bold text-[#108474]">3</div>
                   <div>
-                    <p className="text-sm font-semibold text-[#1d1d1f]">{locale === "en" ? "Personalised analysis" : "Personlig analys"}</p>
-                    <p className="mt-0.5 text-xs text-[#515151]">{locale === "en" ? "Complete results with routine, products & lifestyle tips" : "Komplett resultat med rutin, produkter och livsstilsråd"}</p>
+                    <p className="text-sm font-semibold text-[#1d1d1f]">{locale === "en" ? "15 metrics + skin age + radar chart" : "15 metriker + hudalder + radardiagram"}</p>
+                    <p className="mt-0.5 text-xs text-[#515151]">{locale === "en" ? "Plus routine, products & lifestyle tips" : "Plus rutin, produkter och livsstilsrad"}</p>
                   </div>
                 </div>
               </div>
@@ -1090,6 +1118,9 @@ export default function AnalysisPage() {
                   score={parsed.score}
                   scoreLabel={parsed.scoreLabel}
                   summary={parsed.summary}
+                  skinAge={parsed.skinAge}
+                  fitzpatrick={parsed.fitzpatrick}
+                  metrics={parsed.metrics}
                   skinAnalysis={parsed.skinAnalysis}
                   products={parsed.products}
                   lifestyle={parsed.lifestyle}

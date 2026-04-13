@@ -1280,6 +1280,18 @@ async function getSkinAnalyses(userId) {
   return rows;
 }
 
+async function getSkinMetricsHistory(userId, limit = 20) {
+  const { rows } = await pool.query(
+    `SELECT id, score, result->'metrics' as metrics, result->'skinAge' as skin_age,
+            result->'fitzpatrick' as fitzpatrick, created_at
+     FROM skin_analyses
+     WHERE user_id = $1 AND result->'metrics' IS NOT NULL
+     ORDER BY created_at DESC LIMIT $2`,
+    [userId, limit]
+  );
+  return rows;
+}
+
 // ---- FACE SNAPSHOTS (encrypted) ----
 
 async function saveFaceSnapshot({ userId, analysisId, imageBuffer }) {
@@ -1769,6 +1781,7 @@ module.exports = {
   saveSkinAnalysis,
   createSkinAnalysis,
   getSkinAnalyses,
+  getSkinMetricsHistory,
   createTrainingUpload,
   countTrainingUploads,
   exportTrainingUploads,

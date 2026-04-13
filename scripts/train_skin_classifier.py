@@ -14,9 +14,8 @@ Dataset structure (ImageFolder format):
     dermatitis/    *.jpg
     dryness/       *.jpg
     eczema/        *.jpg
-    fungal/        *.jpg
     hyperpigmentation/ *.jpg
-    normal/        *.jpg   <-- NEW CLASS
+    normal/        *.jpg
     psoriasis/     *.jpg
     rosacea/       *.jpg
     sun_damage/    *.jpg

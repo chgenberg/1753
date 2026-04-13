@@ -30,6 +30,7 @@ export interface ScanSummary {
   zones: ZoneResult[];
   consentGiven: boolean;
   imageBase64?: string;
+  zoneCrops?: { id: string; dataUrl: string }[];
 }
 
 type ScannerStep = "idle" | "loading-model" | "camera" | "captured" | "analyzing" | "results";
@@ -136,10 +137,21 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
     setAnalyzingZone("");
 
     try {
-      const { loadModel, classifyRegionTTA } = await import("./onnx-inference");
-      const session = await loadModel((pct) => setModelProgress(pct));
+      const [{ loadModel, classifyRegionTTA }, { loadFaceLandmarker, detectFaceZones, cropZoneImages, ZONE_IDS_FOR_GPT }] =
+        await Promise.all([
+          import("./onnx-inference"),
+          import("./face-landmarker"),
+        ]);
+
+      setAnalyzingZone(locale === "en" ? "Loading models..." : "Laddar modeller...");
+
+      const [session] = await Promise.all([
+        loadModel((pct) => setModelProgress(pct)),
+        loadFaceLandmarker(),
+      ]);
+
       setStep("analyzing");
-      setAnalyzingZone(locale === "en" ? "Full face" : "Helhetsbild");
+      setAnalyzingZone(locale === "en" ? "Detecting face landmarks..." : "Detekterar ansiktslandmärken...");
 
       const NORMAL_THRESHOLD = 0.35;
       const ENTROPY_THRESHOLD = 2.0;
@@ -163,48 +175,85 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
         return preds;
       }
 
-      const rawOverall = await classifyRegionTTA(
-        session,
-        canvas,
-        0,
-        0,
-        canvas.width,
-        canvas.height
-      );
+      setAnalyzingZone(locale === "en" ? "Full face" : "Helhetsbild");
+      const rawOverall = await classifyRegionTTA(session, canvas, 0, 0, canvas.width, canvas.height);
       const overallPreds = applyNormalFilter(rawOverall);
 
-      const faceW = canvas.width * 0.75;
-      const faceH = canvas.height * 0.85;
-      const faceX = (canvas.width - faceW) / 2;
-      const faceY = canvas.height * 0.05;
+      // --- MediaPipe face landmark detection ---
+      let mediapipeZones: Awaited<ReturnType<typeof detectFaceZones>> = [];
+      let zoneCrops: { id: string; dataUrl: string }[] = [];
 
+      try {
+        const landmarker = await loadFaceLandmarker();
+        const imgEl = new Image();
+        imgEl.src = canvas.toDataURL("image/jpeg", 0.9);
+        await new Promise<void>((resolve) => { imgEl.onload = () => resolve(); });
+
+        const result = landmarker.detect(imgEl);
+        mediapipeZones = detectFaceZones(result, canvas.width, canvas.height);
+
+        if (mediapipeZones.length > 0) {
+          const cropsWithData = cropZoneImages(canvas, mediapipeZones, 512);
+          zoneCrops = cropsWithData
+            .filter((z) => (ZONE_IDS_FOR_GPT as readonly string[]).includes(z.id) && z.dataUrl)
+            .map((z) => ({ id: z.id, dataUrl: z.dataUrl! }));
+        }
+      } catch (e) {
+        console.warn("MediaPipe face detection failed, falling back to grid zones:", e);
+      }
+
+      // --- ONNX per-zone classification (use MediaPipe zones if available, fallback to grid) ---
       const zoneResults: ZoneResult[] = [];
 
-      for (const zone of FACE_ZONES) {
-        setAnalyzingZone(locale === "en" ? zone.labelEn : zone.labelSv);
+      if (mediapipeZones.length > 0) {
+        const onnxCompatibleZones = mediapipeZones.filter((z) =>
+          ["forehead", "left_cheek", "right_cheek", "nose", "chin", "t_zone"].includes(z.id)
+        );
 
-        const [rx, ry, rw, rh] = zone.rect;
-        const cropX = faceX + rx * faceW;
-        const cropY = faceY + ry * faceH;
-        const cropW = rw * faceW;
-        const cropH = rh * faceH;
+        for (const mz of onnxCompatibleZones) {
+          const matchingFaceZone = FACE_ZONES.find((fz) => fz.id === mz.id);
+          if (!matchingFaceZone) continue;
+          if (mz.w < 20 || mz.h < 20) continue;
 
-        const safeX = Math.max(0, Math.round(cropX));
-        const safeY = Math.max(0, Math.round(cropY));
-        const safeW = Math.min(Math.round(cropW), canvas.width - safeX);
-        const safeH = Math.min(Math.round(cropH), canvas.height - safeY);
+          setAnalyzingZone(locale === "en" ? matchingFaceZone.labelEn : matchingFaceZone.labelSv);
 
-        if (safeW < 20 || safeH < 20) continue;
+          const rawPreds = await classifyRegionTTA(session, canvas, mz.x, mz.y, mz.w, mz.h);
+          const preds = applyNormalFilter(rawPreds);
 
-        const rawPreds = await classifyRegionTTA(session, canvas, safeX, safeY, safeW, safeH);
-        const preds = applyNormalFilter(rawPreds);
+          zoneResults.push({
+            zone: matchingFaceZone,
+            topCondition: preds[0].label,
+            confidence: preds[0].probability,
+            allPredictions: preds,
+          });
+        }
+      } else {
+        const faceW = canvas.width * 0.75;
+        const faceH = canvas.height * 0.85;
+        const faceX = (canvas.width - faceW) / 2;
+        const faceY = canvas.height * 0.05;
 
-        zoneResults.push({
-          zone,
-          topCondition: preds[0].label,
-          confidence: preds[0].probability,
-          allPredictions: preds,
-        });
+        for (const zone of FACE_ZONES) {
+          setAnalyzingZone(locale === "en" ? zone.labelEn : zone.labelSv);
+
+          const [rx, ry, rw, rh] = zone.rect;
+          const safeX = Math.max(0, Math.round(faceX + rx * faceW));
+          const safeY = Math.max(0, Math.round(faceY + ry * faceH));
+          const safeW = Math.min(Math.round(rw * faceW), canvas.width - safeX);
+          const safeH = Math.min(Math.round(rh * faceH), canvas.height - safeY);
+
+          if (safeW < 20 || safeH < 20) continue;
+
+          const rawPreds = await classifyRegionTTA(session, canvas, safeX, safeY, safeW, safeH);
+          const preds = applyNormalFilter(rawPreds);
+
+          zoneResults.push({
+            zone,
+            topCondition: preds[0].label,
+            confidence: preds[0].probability,
+            allPredictions: preds,
+          });
+        }
       }
 
       setResults(zoneResults);
@@ -215,6 +264,7 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
         zones: zoneResults,
         consentGiven: consent,
         imageBase64: imageSrc ?? undefined,
+        zoneCrops: zoneCrops.length > 0 ? zoneCrops : undefined,
       });
     } catch (err) {
       console.error("Analysis error:", err);
