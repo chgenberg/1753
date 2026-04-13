@@ -1998,13 +1998,27 @@ app.post("/api/analysis", async (req, res) => {
       const regionLabels = regions.map(r => r.label).join(", ");
       contentParts.push({
         type: "input_text",
-        text: `Följande bilder visar beskurna ansiktsregioner: ${regionLabels}. Analysera varje region specifikt.`
+        text: `The following images show cropped facial regions: ${regionLabels}. Analyze each region specifically and compare with the ONNX model's per-zone results above.`
       });
       for (const region of regions) {
         if (region.imageBase64 && region.imageBase64.startsWith("data:image/")) {
           contentParts.push({ type: "input_image", image_url: region.imageBase64 });
         }
       }
+    }
+
+    if (imageScan?.skinMetrics) {
+      contentParts.push({
+        type: "input_text",
+        text: `== CLIENT-SIDE SKIN METRICS (computed from ONNX model) ==\n${JSON.stringify(imageScan.skinMetrics, null, 2)}\n\nUse these metrics as a starting point for your analysis. You may adjust them based on your visual assessment. The overall score should be 0-100 (higher = healthier).`
+      });
+    }
+
+    if (imageScan?.overallSeverity) {
+      contentParts.push({
+        type: "input_text",
+        text: `== ONNX SEVERITY ASSESSMENT == Level: ${imageScan.overallSeverity.level}, Confidence: ${imageScan.overallSeverity.confidence}%`
+      });
     }
 
     console.log(`[Analysis] Sending ${contentParts.filter(p => p.type === "input_image").length} image(s), questions=${!!hasQuestions}, scan=${!!hasScan}, research=${!!researchSnippets}, model=${OPENAI_MODEL}`);
@@ -2829,12 +2843,16 @@ async function handleOrderCompletion(orderId) {
           YourOrderNumber: sharedOrderNumber,
           ExternalInvoiceReference1: sharedOrderNumber,
           Currency: order.currency || "SEK",
-          Freight: order.shipping_cost > 0 ? Math.round((order.shipping_cost / 1.25) * 100) / 100 : 0,
+          Freight: order.shipping_cost > 0 ? order.shipping_cost : 0,
           OrderRows: orderRows,
           Remarks: `Order ${sharedOrderNumber} – betald via Viva Wallet`
         }
       });
       fortnoxOrderNumber = fxOrder?.Order?.DocumentNumber;
+      const fxFreight = fxOrder?.Order?.Freight;
+      const fxFreightVAT = fxOrder?.Order?.FreightVAT;
+      const fxTotal = fxOrder?.Order?.Total;
+      console.log(`[Fortnox] Order ${fortnoxOrderNumber}: Freight=${fxFreight}, FreightVAT=${fxFreightVAT}%, Total=${fxTotal}`);
       notes.push(`Fortnox order: ${fortnoxOrderNumber} (ordernr ${sharedOrderNumber})`);
     } catch (err) {
       notes.push(`Fortnox order FEL: ${err.message}`);
@@ -4002,6 +4020,61 @@ Omdöme: ${body || "(inget)"}`;
   }
 }
 
+async function translateReviewToAllLanguages(reviewId) {
+  const apiKey = process.env.OPENAI_API_KEY;
+  if (!apiKey) return;
+
+  try {
+    const { rows } = await db.pool.query(
+      "SELECT id, title, body, reply FROM reviews WHERE id = $1",
+      [reviewId]
+    );
+    if (!rows.length) return;
+    const r = rows[0];
+    if (!r.title && !r.body && !r.reply) return;
+
+    const resp = await fetchWithRetry("https://api.openai.com/v1/chat/completions", {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
+      body: JSON.stringify({
+        model: "gpt-4o-mini",
+        temperature: 0.3,
+        response_format: { type: "json_object" },
+        messages: [
+          {
+            role: "system",
+            content: `Translate this Swedish skincare review into English, Spanish, German, and French.
+Keep reviewer tone. Brand names stay as-is: 1753 SKINCARE, The ONE, I LOVE, TA-DA, DUO, Au Naturel, Fungtastic.
+Swedish place names stay unchanged. Empty fields return "".
+Return JSON: {"title_en":"...","body_en":"...","reply_en":"...","title_es":"...","body_es":"...","reply_es":"...","title_de":"...","body_de":"...","reply_de":"...","title_fr":"...","body_fr":"...","reply_fr":"..."}`
+          },
+          {
+            role: "user",
+            content: JSON.stringify({ title: r.title || "", body: r.body || "", reply: r.reply || "" }),
+          },
+        ],
+      }),
+    });
+
+    if (!resp.ok) {
+      console.error(`[ReviewTranslate] API error ${resp.status} for review #${reviewId}`);
+      return;
+    }
+
+    const data = await resp.json();
+    const t = JSON.parse(data.choices[0].message.content);
+    await db.updateReview(reviewId, {
+      title_en: t.title_en || "", body_en: t.body_en || "", reply_en: t.reply_en || "",
+      title_es: t.title_es || "", body_es: t.body_es || "", reply_es: t.reply_es || "",
+      title_de: t.title_de || "", body_de: t.body_de || "", reply_de: t.reply_de || "",
+      title_fr: t.title_fr || "", body_fr: t.body_fr || "", reply_fr: t.reply_fr || "",
+    });
+    console.log(`[ReviewTranslate] Review #${reviewId} translated to en/es/de/fr`);
+  } catch (err) {
+    console.error(`[ReviewTranslate] Failed for review #${reviewId}:`, err.message);
+  }
+}
+
 async function processReviewReply(review, productName, reviewerName) {
   const rating = review.rating;
   const reply = await generateReviewReply(
@@ -4010,15 +4083,18 @@ async function processReviewReply(review, productName, reviewerName) {
 
   if (!reply) {
     console.warn(`[ReviewAI] No reply generated for review #${review.id}`);
+    translateReviewToAllLanguages(review.id).catch(e => console.error("[ReviewTranslate]", e.message));
     return;
   }
 
   if (rating >= 4) {
     await db.updateReview(review.id, { reply });
     console.log(`[ReviewAI] Auto-replied to ${rating}-star review #${review.id} from ${reviewerName}`);
+    translateReviewToAllLanguages(review.id).catch(e => console.error("[ReviewTranslate]", e.message));
   } else {
     await db.updateReview(review.id, { reply: `[UTKAST] ${reply}` });
     console.log(`[ReviewAI] Draft reply for ${rating}-star review #${review.id}, notifying admin`);
+    translateReviewToAllLanguages(review.id).catch(e => console.error("[ReviewTranslate]", e.message));
 
     // Notify admin
     try {
@@ -4067,7 +4143,8 @@ app.get("/api/reviews/:productId", async (req, res) => {
   try {
     const limit = Math.min(parseInt(req.query.limit) || 10, 50);
     const offset = parseInt(req.query.offset) || 0;
-    const locale = req.query.locale === "en" ? "en" : "sv";
+    const supportedLocales = ["sv", "en", "es", "de", "fr"];
+    const locale = supportedLocales.includes(req.query.locale) ? req.query.locale : "sv";
     const [reviews, stats] = await Promise.all([
       db.findReviewsByProduct(req.params.productId, limit, offset, locale),
       db.getReviewStats(req.params.productId),
@@ -4155,8 +4232,10 @@ app.get("/api/admin/reviews/stats", adminAuthMiddleware, async (req, res) => {
 app.put("/api/admin/reviews/:id/reply", adminAuthMiddleware, async (req, res) => {
   try {
     const { reply } = req.body;
-    const updated = await db.updateReview(parseInt(req.params.id), { reply: reply || "" });
+    const reviewId = parseInt(req.params.id);
+    const updated = await db.updateReview(reviewId, { reply: reply || "" });
     if (!updated) return res.status(404).json({ message: "Recension hittades inte" });
+    translateReviewToAllLanguages(reviewId).catch(e => console.error("[ReviewTranslate]", e.message));
     res.json(updated);
   } catch (err) { res.status(500).json({ message: err.message }); }
 });
@@ -5874,6 +5953,38 @@ async function seedAdminAccounts() {
     console.log(`[Admin] ${admin.email}: account created with role admin`);
   }
 }
+
+// ---- MEDIA GALLERY (public) ----
+
+app.get("/api/gallery", async (req, res) => {
+  try {
+    const fs = require("fs");
+    const galleryDir = path.join(__dirname, "public", "social-media");
+    if (!fs.existsSync(galleryDir)) return res.json({ images: [] });
+
+    const files = fs.readdirSync(galleryDir)
+      .filter(f => /\.(jpg|jpeg|png|webp)$/i.test(f) && !f.startsWith("."))
+      .map(f => {
+        const stat = fs.statSync(path.join(galleryDir, f));
+        const parts = f.replace(/\.\w+$/, "").split("-");
+        const type = parts[0] || "other";
+        const product = parts.length > 2 ? parts.slice(1, -1).join("-") : parts[1] || "";
+        return {
+          filename: f,
+          url: `/social-media/${f}`,
+          type,
+          product,
+          size: stat.size,
+          created: stat.mtime.toISOString(),
+        };
+      })
+      .sort((a, b) => new Date(b.created).getTime() - new Date(a.created).getTime());
+
+    res.json({ images: files });
+  } catch (err) {
+    res.status(500).json({ message: "Kunde inte hämta galleri" });
+  }
+});
 
 // ---- SOCIAL MEDIA ----
 

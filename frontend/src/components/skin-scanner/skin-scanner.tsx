@@ -14,13 +14,13 @@ import {
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
-import type { Prediction } from "./onnx-inference";
+import type { Prediction, SeverityResult, SkinMetrics, ZoneResult as OnnxZoneResult } from "./onnx-inference";
 import { FaceCanvas } from "./face-canvas";
 import {
   FACE_ZONES,
-  CONDITION_LABELS_SV,
-  CONDITION_LABELS_EN,
   CONDITION_COLORS,
+  conditionLabel as getCondLabel,
+  zoneLabel as getZoneLabel,
   type ZoneResult,
 } from "./zones";
 import { useLocale } from "@/providers/locale-provider";
@@ -38,7 +38,9 @@ export interface ScanSummary {
   zones: ZoneResult[];
   consentGiven: boolean;
   imageBase64?: string;
-  zoneCrops?: { id: string; dataUrl: string }[];
+  zoneCrops?: { id: string; dataUrl: string; labelEn?: string }[];
+  overallSeverity?: SeverityResult;
+  skinMetrics?: SkinMetrics;
 }
 
 type ScannerStep = "idle" | "loading-model" | "camera" | "captured" | "analyzing" | "results";
@@ -91,7 +93,8 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
           "Kunde inte starta kameran. Kontrollera att du gett tillstånd.",
           "Could not start the camera. Please check your permissions.",
           "No se pudo iniciar la cámara. Verifica los permisos.",
-          "Kamera konnte nicht gestartet werden. Bitte Berechtigungen prüfen.")
+          "Kamera konnte nicht gestartet werden. Bitte Berechtigungen prüfen.",
+          "Impossible de démarrer la caméra. Vérifiez les autorisations.")
       );
       setStep("idle");
     }
@@ -147,13 +150,13 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
     setAnalyzingZone("");
 
     try {
-      const [{ loadModel, classifyRegionTTA }, { loadFaceLandmarker, detectFaceZones, cropZoneImages, ZONE_IDS_FOR_GPT }] =
+      const [{ loadModel, classifyRegionMultiTaskTTA, computeSkinMetrics, ensembleZones, loadMeta }, { loadFaceLandmarker, detectFaceZones, cropZoneImages, ZONE_IDS_FOR_GPT }] =
         await Promise.all([
           import("./onnx-inference"),
           import("./face-landmarker"),
         ]);
 
-      setAnalyzingZone(tx(locale, "Laddar modeller...", "Loading models...", "Cargando modelos...", "Modelle werden geladen..."));
+      setAnalyzingZone(tx(locale, "Laddar modeller...", "Loading models...", "Cargando modelos...", "Modelle werden geladen...", "Chargement des modèles..."));
 
       const [session] = await Promise.all([
         loadModel((pct) => setModelProgress(pct)),
@@ -161,7 +164,7 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
       ]);
 
       setStep("analyzing");
-      setAnalyzingZone(tx(locale, "Detekterar ansiktslandmärken...", "Detecting face landmarks...", "Detectando puntos faciales...", "Gesichtspunkte werden erkannt..."));
+      setAnalyzingZone(tx(locale, "Detekterar ansiktslandmärken...", "Detecting face landmarks...", "Detectando puntos faciales...", "Gesichtspunkte werden erkannt...", "Détection des points du visage..."));
 
       const NORMAL_THRESHOLD = 0.35;
       const ENTROPY_THRESHOLD = 2.0;
@@ -185,9 +188,10 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
         return preds;
       }
 
-      setAnalyzingZone(tx(locale, "Helhetsbild", "Full face", "Rostro completo", "Gesamtes Gesicht"));
-      const rawOverall = await classifyRegionTTA(session, canvas, 0, 0, canvas.width, canvas.height);
-      const overallPreds = applyNormalFilter(rawOverall);
+      setAnalyzingZone(tx(locale, "Helhetsbild", "Full face", "Rostro completo", "Gesamtes Gesicht", "Visage complet"));
+      const rawOverallResult = await classifyRegionMultiTaskTTA(session, canvas, 0, 0, canvas.width, canvas.height, 5);
+      const overallPreds = applyNormalFilter(rawOverallResult.conditions);
+      const overallSeverity = rawOverallResult.severity;
 
       // --- MediaPipe face landmark detection ---
       let mediapipeZones: Awaited<ReturnType<typeof detectFaceZones>> = [];
@@ -206,7 +210,7 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
           const cropsWithData = cropZoneImages(canvas, mediapipeZones, 512);
           zoneCrops = cropsWithData
             .filter((z) => (ZONE_IDS_FOR_GPT as readonly string[]).includes(z.id) && z.dataUrl)
-            .map((z) => ({ id: z.id, dataUrl: z.dataUrl! }));
+            .map((z) => ({ id: z.id, dataUrl: z.dataUrl!, labelEn: z.labelEn }));
         }
       } catch (e) {
         console.warn("MediaPipe face detection failed, falling back to grid zones:", e);
@@ -225,16 +229,17 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
           if (!matchingFaceZone) continue;
           if (mz.w < 20 || mz.h < 20) continue;
 
-          setAnalyzingZone(locale === "sv" ? matchingFaceZone.labelSv : matchingFaceZone.labelEn);
+          setAnalyzingZone(getZoneLabel(matchingFaceZone, locale));
 
-          const rawPreds = await classifyRegionTTA(session, canvas, mz.x, mz.y, mz.w, mz.h);
-          const preds = applyNormalFilter(rawPreds);
+          const rawResult = await classifyRegionMultiTaskTTA(session, canvas, mz.x, mz.y, mz.w, mz.h, 5);
+          const preds = applyNormalFilter(rawResult.conditions);
 
           zoneResults.push({
             zone: matchingFaceZone,
             topCondition: preds[0].label,
             confidence: preds[0].probability,
             allPredictions: preds,
+            severity: rawResult.severity,
           });
         }
       } else {
@@ -244,7 +249,7 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
         const faceY = canvas.height * 0.05;
 
         for (const zone of FACE_ZONES) {
-          setAnalyzingZone(locale === "sv" ? zone.labelSv : zone.labelEn);
+          setAnalyzingZone(getZoneLabel(zone, locale));
 
           const [rx, ry, rw, rh] = zone.rect;
           const safeX = Math.max(0, Math.round(faceX + rx * faceW));
@@ -254,17 +259,25 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
 
           if (safeW < 20 || safeH < 20) continue;
 
-          const rawPreds = await classifyRegionTTA(session, canvas, safeX, safeY, safeW, safeH);
-          const preds = applyNormalFilter(rawPreds);
+          const rawResult = await classifyRegionMultiTaskTTA(session, canvas, safeX, safeY, safeW, safeH, 5);
+          const preds = applyNormalFilter(rawResult.conditions);
 
           zoneResults.push({
             zone,
             topCondition: preds[0].label,
             confidence: preds[0].probability,
             allPredictions: preds,
+            severity: rawResult.severity,
           });
         }
       }
+
+      const onnxZoneResults: OnnxZoneResult[] = zoneResults.map((zr) => ({
+        zoneId: zr.zone.id,
+        conditions: zr.allPredictions,
+        severity: zr.severity || overallSeverity,
+      }));
+      const skinMetrics = computeSkinMetrics(onnxZoneResults);
 
       setResults(zoneResults);
       setOverallTop(overallPreds.slice(0, 3));
@@ -275,6 +288,8 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
         consentGiven: consent,
         imageBase64: imageSrc ?? undefined,
         zoneCrops: zoneCrops.length > 0 ? zoneCrops : undefined,
+        overallSeverity,
+        skinMetrics,
       });
     } catch (err) {
       console.error("Analysis error:", err);
@@ -283,7 +298,8 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
           "Något gick fel vid analysen. Försök igen.",
           "Something went wrong during the analysis. Please try again.",
           "Algo salió mal durante el análisis. Inténtalo de nuevo.",
-          "Bei der Analyse ist ein Fehler aufgetreten. Bitte erneut versuchen.")
+          "Bei der Analyse ist ein Fehler aufgetreten. Bitte erneut versuchen.",
+          "Une erreur s'est produite pendant l'analyse. Veuillez réessayer.")
       );
       setStep("captured");
     }
@@ -322,14 +338,15 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
           </div>
           <div>
             <h3 className="text-xl font-bold tracking-tight text-[#1d1d1f]">
-              {tx(locale, "Ansiktsskanning", "Face scan", "Escaneo facial", "Gesichtsscan")}
+              {tx(locale, "Ansiktsskanning", "Face scan", "Escaneo facial", "Gesichtsscan", "Scan du visage")}
             </h3>
             <p className="mx-auto mt-2 max-w-sm text-sm leading-relaxed text-[#515151]">
               {tx(locale,
                 "Ta en selfie eller ladda upp ett foto. Vår AI analyserar sex ansiktszoner direkt i din enhet — helt privat.",
                 "Take a selfie or upload a photo. Our AI reviews six facial zones directly on your device, completely privately.",
                 "Toma un selfie o sube una foto. Nuestra IA analiza seis zonas faciales directamente en tu dispositivo, de forma completamente privada.",
-                "Mache ein Selfie oder lade ein Foto hoch. Unsere KI analysiert sechs Gesichtszonen direkt auf deinem Gerät — völlig privat.")}
+                "Mache ein Selfie oder lade ein Foto hoch. Unsere KI analysiert sechs Gesichtszonen direkt auf deinem Gerät — völlig privat.",
+                "Prenez un selfie ou importez une photo. Notre IA analyse six zones du visage directement sur votre appareil — en toute confidentialité.")}
             </p>
           </div>
 
@@ -339,14 +356,14 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
               className="inline-flex h-12 w-full items-center justify-center gap-2.5 rounded-full bg-[#108474] px-7 text-sm font-semibold text-white shadow-lg shadow-[#108474]/20 transition-all hover:bg-[#0d6e62] hover:shadow-xl active:scale-[0.97] sm:w-auto"
             >
               <Camera className="h-4.5 w-4.5" />
-              {tx(locale, "Öppna kamera", "Open camera", "Abrir cámara", "Kamera öffnen")}
+              {tx(locale, "Öppna kamera", "Open camera", "Abrir cámara", "Kamera öffnen", "Ouvrir la caméra")}
             </button>
             <button
               onClick={() => fileRef.current?.click()}
               className="inline-flex h-12 w-full items-center justify-center gap-2.5 rounded-full border-2 border-[#108474] px-7 text-sm font-semibold text-[#108474] transition-all hover:bg-[#108474]/5 active:scale-[0.97] sm:w-auto"
             >
               <ImagePlus className="h-4.5 w-4.5" />
-              {tx(locale, "Ladda upp foto", "Upload photo", "Subir foto", "Foto hochladen")}
+              {tx(locale, "Ladda upp foto", "Upload photo", "Subir foto", "Foto hochladen", "Télécharger une photo")}
             </button>
           </div>
 
@@ -357,7 +374,8 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
                 "Din bild lämnar aldrig din enhet",
                 "Your image never leaves your device",
                 "Tu imagen nunca sale de tu dispositivo",
-                "Dein Bild verlässt nie dein Gerät")}
+                "Dein Bild verlässt nie dein Gerät",
+                "Votre image ne quitte jamais votre appareil")}
             </span>
           </div>
         </div>
@@ -378,7 +396,7 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
               <div className="h-[70%] w-[55%] rounded-[50%] border-2 border-white/30 shadow-[0_0_0_9999px_rgba(0,0,0,0.3)]" />
             </div>
             <p className="absolute bottom-4 left-0 right-0 text-center text-sm font-medium text-white/80">
-              {tx(locale, "Placera ditt ansikte inom ovalen", "Place your face inside the oval", "Coloca tu rostro dentro del óvalo", "Platziere dein Gesicht im Oval")}
+              {tx(locale, "Placera ditt ansikte inom ovalen", "Place your face inside the oval", "Coloca tu rostro dentro del óvalo", "Platziere dein Gesicht im Oval", "Placez votre visage dans l'ovale")}
             </p>
           </div>
 
@@ -388,12 +406,12 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
               className="inline-flex h-10 items-center gap-2 rounded-xl px-5 text-sm font-medium text-[#515151] transition-colors hover:bg-[#f5f5f7]"
             >
               <X className="h-4 w-4" />
-              {tx(locale, "Avbryt", "Cancel", "Cancelar", "Abbrechen")}
+              {tx(locale, "Avbryt", "Cancel", "Cancelar", "Abbrechen", "Annuler")}
             </button>
             <button
               onClick={captureFromCamera}
               className="inline-flex h-14 w-14 items-center justify-center rounded-full bg-white shadow-lg transition-all hover:scale-105 active:scale-90"
-              aria-label={tx(locale, "Ta foto", "Take photo", "Tomar foto", "Foto aufnehmen")}
+              aria-label={tx(locale, "Ta foto", "Take photo", "Tomar foto", "Foto aufnehmen", "Prendre une photo")}
             >
               <div className="h-11 w-11 rounded-full border-[3px] border-[#108474]" />
             </button>
@@ -408,7 +426,7 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img
               src={imageSrc}
-              alt={tx(locale, "Förhandsvisning", "Preview", "Vista previa", "Vorschau")}
+              alt={tx(locale, "Förhandsvisning", "Preview", "Vista previa", "Vorschau", "Aperçu")}
               className="block h-auto w-full"
             />
           </div>
@@ -435,19 +453,15 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
               )}
               <span className="text-xs leading-relaxed text-[#515151]">
                 {locale === "sv" ? (
-                  <>
-                    Jag godkänner att min bild och mina svar får användas{" "}
-                    <span className="font-semibold text-[#1d1d1f]">anonymt</span> för
-                    att förbättra 1753 SKINCAREs AI-hudanalys. Ingen personlig
-                    information sparas.
-                  </>
+                  <>Jag godkänner att min bild och mina svar får användas{" "}<span className="font-semibold text-[#1d1d1f]">anonymt</span> för att förbättra 1753 SKINCAREs AI-hudanalys. Ingen personlig information sparas.</>
+                ) : locale === "es" ? (
+                  <>Acepto que mi imagen y respuestas se utilicen de forma{" "}<span className="font-semibold text-[#1d1d1f]">anónima</span> para mejorar el análisis de piel IA de 1753 SKINCARE. No se almacena información personal.</>
+                ) : locale === "de" ? (
+                  <>Ich stimme zu, dass mein Bild und meine Antworten{" "}<span className="font-semibold text-[#1d1d1f]">anonym</span> zur Verbesserung der KI-Hautanalyse von 1753 SKINCARE verwendet werden. Es werden keine persönlichen Daten gespeichert.</>
+                ) : locale === "fr" ? (
+                  <>J&apos;accepte que mon image et mes réponses soient utilisées de manière{" "}<span className="font-semibold text-[#1d1d1f]">anonyme</span> pour améliorer l&apos;analyse de peau IA de 1753 SKINCARE. Aucune information personnelle n&apos;est stockée.</>
                 ) : (
-                  <>
-                    I agree that my image and answers may be used{" "}
-                    <span className="font-semibold text-[#1d1d1f]">anonymously</span> to
-                    improve 1753 SKINCARE&apos;s AI skin analysis. No personal
-                    information is stored.
-                  </>
+                  <>I agree that my image and answers may be used{" "}<span className="font-semibold text-[#1d1d1f]">anonymously</span> to improve 1753 SKINCARE&apos;s AI skin analysis. No personal information is stored.</>
                 )}
               </span>
             </button>
@@ -457,7 +471,7 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
               className="mx-auto flex items-center gap-1.5 text-[11px] font-medium text-[#766a62]/70 transition-colors hover:text-[#108474]"
             >
               <Lock className="h-3 w-3" />
-              {tx(locale, "Säkerhet", "Security", "Seguridad", "Sicherheit")}
+              {tx(locale, "Säkerhet", "Security", "Seguridad", "Sicherheit", "Sécurité")}
             </button>
           </div>
 
@@ -467,14 +481,14 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
               className="inline-flex h-11 items-center gap-2 rounded-full px-6 text-sm font-medium text-[#515151] transition-colors hover:bg-[#f5f5f7]"
             >
               <RefreshCw className="h-4 w-4" />
-              {tx(locale, "Nytt foto", "Use another photo", "Otra foto", "Anderes Foto")}
+              {tx(locale, "Nytt foto", "Use another photo", "Otra foto", "Anderes Foto", "Autre photo")}
             </button>
             <button
               onClick={runAnalysis}
               className="inline-flex h-12 items-center gap-2.5 rounded-full bg-[#108474] px-8 text-sm font-semibold text-white shadow-lg shadow-[#108474]/20 transition-all hover:bg-[#0d6e62] hover:shadow-xl active:scale-[0.97]"
             >
               <ScanFace className="h-4.5 w-4.5" />
-              {tx(locale, "Analysera min hy", "Analyse my skin", "Analizar mi piel", "Meine Haut analysieren")}
+              {tx(locale, "Analysera min hy", "Analyse my skin", "Analizar mi piel", "Meine Haut analysieren", "Analyser ma peau")}
             </button>
           </div>
         </div>
@@ -488,12 +502,12 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
           </div>
           <div>
             <h3 className="text-lg font-bold tracking-tight text-[#1d1d1f]">
-              {tx(locale, "Laddar analysmodell", "Loading analysis model", "Cargando modelo de análisis", "Analysemodell wird geladen")}
+              {tx(locale, "Laddar analysmodell", "Loading analysis model", "Cargando modelo de análisis", "Analysemodell wird geladen", "Chargement du modèle d'analyse")}
             </h3>
             <p className="mt-1 text-sm text-[#515151]">
               {modelProgress < 100
-                ? tx(locale, `${modelProgress}% nedladdat`, `${modelProgress}% downloaded`, `${modelProgress}% descargado`, `${modelProgress}% heruntergeladen`)
-                : tx(locale, "Förbereder modellen...", "Preparing model...", "Preparando modelo...", "Modell wird vorbereitet...")}
+                ? tx(locale, `${modelProgress}% nedladdat`, `${modelProgress}% downloaded`, `${modelProgress}% descargado`, `${modelProgress}% heruntergeladen`, `${modelProgress}% téléchargé`)
+                : tx(locale, "Förbereder modellen...", "Preparing model...", "Preparando modelo...", "Modell wird vorbereitet...", "Préparation du modèle...")}
             </p>
           </div>
           <div className="mx-auto h-2 w-72 overflow-hidden rounded-full bg-[#e6e6e6]">
@@ -507,7 +521,8 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
               "Första gången kräver nedladdning (87 MB). Cachelagras sedan lokalt.",
               "The first run requires a download (87 MB). After that it is cached locally.",
               "La primera ejecución requiere una descarga (87 MB). Luego se almacena en caché localmente.",
-              "Beim ersten Mal ist ein Download erforderlich (87 MB). Danach wird lokal zwischengespeichert.")}
+              "Beim ersten Mal ist ein Download erforderlich (87 MB). Danach wird lokal zwischengespeichert.",
+              "La première exécution nécessite un téléchargement (87 Mo). Elle est ensuite mise en cache localement.")}
           </p>
         </div>
       )}
@@ -525,14 +540,15 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
           </div>
           <div>
             <h3 className="text-lg font-bold tracking-tight text-[#1d1d1f]">
-              {tx(locale, "Analyserar din hy", "Analysing your skin", "Analizando tu piel", "Deine Haut wird analysiert")}
+              {tx(locale, "Analyserar din hy", "Analysing your skin", "Analizando tu piel", "Deine Haut wird analysiert", "Analyse de votre peau")}
             </h3>
             <p className="mt-2 text-sm text-[#515151]">
               {tx(locale,
                 "Sex ansiktszoner granskas av vår AI",
                 "Our AI is reviewing six facial zones",
                 "Nuestra IA está revisando seis zonas faciales",
-                "Unsere KI prüft sechs Gesichtszonen")}
+                "Unsere KI prüft sechs Gesichtszonen",
+                "Notre IA examine six zones du visage")}
             </p>
           </div>
           {analyzingZone && (
@@ -557,14 +573,12 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
           {overallTop.length > 0 && (
             <div className="rounded-2xl border border-[#e6e6e6] bg-white p-5 shadow-sm">
               <h4 className="mb-3 text-sm font-bold tracking-tight text-[#1d1d1f]">
-                {tx(locale, "Översiktlig bedömning", "Overall read", "Lectura general", "Gesamtbewertung")}
+                {tx(locale, "Översiktlig bedömning", "Overall read", "Lectura general", "Gesamtbewertung", "Évaluation globale")}
               </h4>
               <div className="flex flex-wrap gap-2">
                 {overallTop.map((pred) => {
                   const color = CONDITION_COLORS[pred.label] || "#108474";
-                  const conditionLabels =
-                    locale === "sv" ? CONDITION_LABELS_SV : CONDITION_LABELS_EN;
-                  const localizedLabel = conditionLabels[pred.label] || pred.label;
+                  const localizedLabel = getCondLabel(pred.label, locale);
                   return (
                     <div
                       key={pred.label}
@@ -597,7 +611,7 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
           {/* Zone-by-zone breakdown */}
           <div className="space-y-3">
             <h4 className="text-sm font-bold tracking-tight text-[#1d1d1f]">
-              {tx(locale, "Zon för zon", "Zone by zone", "Zona por zona", "Zone für Zone")}
+              {tx(locale, "Zon för zon", "Zone by zone", "Zona por zona", "Zone für Zone", "Zone par zone")}
             </h4>
             <div className="grid gap-3 sm:grid-cols-2">
               {results
@@ -605,10 +619,7 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
                 .map((r) => {
                   const color =
                     CONDITION_COLORS[r.topCondition] || "#108474";
-                  const conditionLabels =
-                    locale === "sv" ? CONDITION_LABELS_SV : CONDITION_LABELS_EN;
-                  const localizedLabel =
-                    conditionLabels[r.topCondition] || r.topCondition;
+                  const localizedLabel = getCondLabel(r.topCondition, locale);
                   return (
                     <div
                       key={r.zone.id}
@@ -616,7 +627,7 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
                     >
                       <div className="mb-2 flex items-center justify-between">
                         <span className="text-sm font-semibold text-[#1d1d1f]">
-                          {locale === "sv" ? r.zone.labelSv : r.zone.labelEn}
+                          {getZoneLabel(r.zone, locale)}
                         </span>
                         <span
                           className="rounded-full px-2.5 py-0.5 text-[11px] font-bold"
@@ -634,11 +645,8 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
                       {r.allPredictions.length > 1 &&
                         r.allPredictions[1].probability > 0.1 && (
                           <p className="mt-1 text-xs text-[#766a62]">
-                            {tx(locale, "Även:", "Also:", "También:", "Auch:")}{" "}
-                            {(locale === "sv"
-                              ? CONDITION_LABELS_SV[r.allPredictions[1].label]
-                              : CONDITION_LABELS_EN[r.allPredictions[1].label]) ||
-                              r.allPredictions[1].label}{" "}
+                            {tx(locale, "Även:", "Also:", "También:", "Auch:", "Aussi :")}{" "}
+                            {getCondLabel(r.allPredictions[1].label, locale)}{" "}
                             ({Math.round(r.allPredictions[1].probability * 100)}%)
                           </p>
                         )}
@@ -656,7 +664,8 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
                 "Din bild analyserades helt lokalt och har inte lämnat din enhet",
                 "Your image was analysed locally and never left your device",
                 "Tu imagen fue analizada localmente y nunca salió de tu dispositivo",
-                "Dein Bild wurde lokal analysiert und hat dein Gerät nie verlassen")}
+                "Dein Bild wurde lokal analysiert und hat dein Gerät nie verlassen",
+                "Votre image a été analysée entièrement en local et n'a pas quitté votre appareil")}
             </div>
 
             {!consent && (
@@ -668,17 +677,15 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
                 <Square className="mt-0.5 h-5 w-5 flex-shrink-0 text-[#766a62]/50" />
                 <span className="text-xs leading-relaxed text-[#515151]">
                   {locale === "sv" ? (
-                    <>
-                      Jag godkänner att min bild och mina svar får användas{" "}
-                      <span className="font-semibold text-[#1d1d1f]">anonymt</span> för
-                      att förbättra vår AI-hudanalys.
-                    </>
+                    <>Jag godkänner att min bild och mina svar får användas{" "}<span className="font-semibold text-[#1d1d1f]">anonymt</span> för att förbättra vår AI-hudanalys.</>
+                  ) : locale === "es" ? (
+                    <>Acepto que mi imagen y respuestas se utilicen de forma{" "}<span className="font-semibold text-[#1d1d1f]">anónima</span> para mejorar nuestro análisis de piel IA.</>
+                  ) : locale === "de" ? (
+                    <>Ich stimme zu, dass mein Bild und meine Antworten{" "}<span className="font-semibold text-[#1d1d1f]">anonym</span> zur Verbesserung unserer KI-Hautanalyse verwendet werden.</>
+                  ) : locale === "fr" ? (
+                    <>J&apos;accepte que mon image et mes réponses soient utilisées de manière{" "}<span className="font-semibold text-[#1d1d1f]">anonyme</span> pour améliorer notre analyse de peau IA.</>
                   ) : (
-                    <>
-                      I agree that my image and answers may be used{" "}
-                      <span className="font-semibold text-[#1d1d1f]">anonymously</span> to
-                      improve our AI skin analysis.
-                    </>
+                    <>I agree that my image and answers may be used{" "}<span className="font-semibold text-[#1d1d1f]">anonymously</span> to improve our AI skin analysis.</>
                   )}
                 </span>
               </button>
@@ -690,7 +697,7 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
                 className="inline-flex h-10 items-center gap-2 rounded-full border-2 border-[#108474] px-6 text-sm font-semibold text-[#108474] transition-all hover:bg-[#108474]/5 active:scale-[0.97]"
               >
                 <RefreshCw className="h-4 w-4" />
-                {tx(locale, "Ny skanning", "New scan", "Nuevo escaneo", "Neuer Scan")}
+                {tx(locale, "Ny skanning", "New scan", "Nuevo escaneo", "Neuer Scan", "Nouveau scan")}
               </button>
             </div>
 
@@ -699,7 +706,8 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
                 "Denna analys är framtagen med hjälp av artificiell intelligens och utgör inte medicinsk rådgivning, diagnos eller behandlingsrekommendation. Vid hudbesvär, kontakta alltid en legitimerad dermatolog eller läkare.",
                 "This analysis is generated with the help of artificial intelligence and does not constitute medical advice, diagnosis or treatment recommendations. If you have ongoing skin concerns, always contact a licensed dermatologist or doctor.",
                 "Este análisis se genera con la ayuda de inteligencia artificial y no constituye asesoramiento médico, diagnóstico o recomendaciones de tratamiento. Si tienes problemas de piel, consulta siempre a un dermatólogo o médico.",
-                "Diese Analyse wurde mit Hilfe künstlicher Intelligenz erstellt und stellt keine medizinische Beratung, Diagnose oder Behandlungsempfehlung dar. Bei Hautproblemen wenden Sie sich immer an einen Dermatologen oder Arzt.")}
+                "Diese Analyse wurde mit Hilfe künstlicher Intelligenz erstellt und stellt keine medizinische Beratung, Diagnose oder Behandlungsempfehlung dar. Bei Hautproblemen wenden Sie sich immer an einen Dermatologen oder Arzt.",
+                "Cette analyse est générée à l'aide d'intelligence artificielle et ne constitue pas un avis médical, un diagnostic ni des recommandations de traitement. En cas de problèmes de peau, consultez toujours un dermatologue ou un médecin agréé.")}
             </p>
           </div>
         </div>
@@ -723,52 +731,64 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
                 <Shield className="h-5 w-5 text-[#108474]" />
               </div>
               <h3 className="text-lg font-bold tracking-tight text-[#1d1d1f]">
-                {tx(locale, "Så skyddar vi din data", "How we protect your data", "Cómo protegemos tus datos", "So schützen wir deine Daten")}
+                {tx(locale, "Så skyddar vi din data", "How we protect your data", "Cómo protegemos tus datos", "So schützen wir deine Daten", "Comment nous protégeons vos données")}
               </h3>
             </div>
 
             <div className="space-y-5 text-[13px] leading-relaxed text-[#515151]">
               <div>
                 <h4 className="mb-1 font-semibold text-[#1d1d1f]">
-                  {tx(locale, "Ansiktsskanningen stannar i din enhet", "Face scan stays on your device", "El escaneo facial permanece en tu dispositivo", "Der Gesichtsscan bleibt auf deinem Gerät")}
+                  {tx(locale, "Ansiktsskanningen stannar i din enhet", "Face scan stays on your device", "El escaneo facial permanece en tu dispositivo", "Der Gesichtsscan bleibt auf deinem Gerät", "Le scan facial reste sur votre appareil")}
                 </h4>
                 <p>
                   {tx(locale,
                     "AI-modellen körs helt i din webbläsare. Ditt foto laddas aldrig upp till någon server under skanningen. Analysen sker lokalt på din enhet med maskininlärningsteknik (ONNX Runtime Web).",
-                    "The AI model runs entirely in your browser. Your photo is never uploaded to any server during the scan. The analysis happens locally on your device using machine learning technology (ONNX Runtime Web).")}
+                    "The AI model runs entirely in your browser. Your photo is never uploaded to any server during the scan. The analysis happens locally on your device using machine learning technology (ONNX Runtime Web).",
+                    "El modelo de IA se ejecuta por completo en tu navegador. Tu foto nunca se carga en ningún servidor durante el escaneo. El análisis se realiza localmente en tu dispositivo con tecnología de aprendizaje automático (ONNX Runtime Web).",
+                    "Das KI-Modell läuft vollständig in deinem Browser. Dein Foto wird während des Scans niemals auf einen Server hochgeladen. Die Analyse erfolgt lokal auf deinem Gerät mit maschinellem Lernen (ONNX Runtime Web).",
+                    "Le modèle d'IA s'exécute entièrement dans votre navigateur. Votre photo n'est jamais envoyée sur un serveur pendant le scan. L'analyse se fait localement sur votre appareil avec l'apprentissage automatique (ONNX Runtime Web).")}
                 </p>
               </div>
 
               <div>
                 <h4 className="mb-1 font-semibold text-[#1d1d1f]">
-                  {tx(locale, "Valfri fotolagring med kryptering", "Optional photo storage with encryption")}
+                  {tx(locale, "Valfri fotolagring med kryptering", "Optional photo storage with encryption", "Almacenamiento opcional de fotos con cifrado", "Optionale Fotospeicherung mit Verschlüsselung", "Stockage photo optionnel avec chiffrement")}
                 </h4>
                 <p>
                   {tx(locale,
                     "Om du väljer att spara ditt foto för att följa hudförändringar över tid krypteras det med AES-256-GCM innan det lagras. Detta är samma krypteringsstandard som används av banker och sjukvården. Varje bild får en unik krypteringsnyckel. Bara du kan se dina sparade foton när du är inloggad.",
-                    "If you choose to save your photo to track skin changes over time, it is encrypted with AES-256-GCM before being stored. This is the same encryption standard used by banks and healthcare providers. Each image gets a unique encryption key. Only you can view your saved photos when logged in.")}
+                    "If you choose to save your photo to track skin changes over time, it is encrypted with AES-256-GCM before being stored. This is the same encryption standard used by banks and healthcare providers. Each image gets a unique encryption key. Only you can view your saved photos when logged in.",
+                    "Si eliges guardar tu foto para seguir los cambios de la piel con el tiempo, se cifra con AES-256-GCM antes de almacenarse. Es el mismo estándar de cifrado que usan bancos y proveedores sanitarios. Cada imagen tiene una clave única. Solo tú puedes ver tus fotos guardadas cuando has iniciado sesión.",
+                    "Wenn du dein Foto speicherst, um Hautveränderungen über die Zeit zu verfolgen, wird es vor der Speicherung mit AES-256-GCM verschlüsselt. Das ist derselbe Verschlüsselungsstandard wie bei Banken und im Gesundheitswesen. Jedes Bild erhält einen eigenen Schlüssel. Nur du kannst deine gespeicherten Fotos sehen, wenn du angemeldet bist.",
+                    "Si vous choisissez d'enregistrer votre photo pour suivre l'évolution de votre peau, elle est chiffrée en AES-256-GCM avant stockage. C'est la même norme que celle des banques et du secteur santé. Chaque image a une clé unique. Seul vous pouvez voir vos photos enregistrées lorsque vous êtes connecté.")}
                 </p>
               </div>
 
               <div>
                 <h4 className="mb-1 font-semibold text-[#1d1d1f]">
-                  {tx(locale, "Träningsdata anonymiseras", "Training data is anonymised")}
+                  {tx(locale, "Träningsdata anonymiseras", "Training data is anonymised", "Los datos de entrenamiento se anonimizan", "Trainingsdaten werden anonymisiert", "Les données d'entraînement sont anonymisées")}
                 </h4>
                 <p>
                   {tx(locale,
                     "Om du samtycker till att hjälpa förbättra vår AI sparas en kopia av skanningsdatan separat utan koppling till ditt konto, namn eller personlig information. Datan används enbart för att träna och förbättra hudanalysmodellen.",
-                    "If you consent to help improve our AI, a copy of the scan data is stored separately without any link to your account, name or personal information. This data is used solely to train and improve the skin analysis model.")}
+                    "If you consent to help improve our AI, a copy of the scan data is stored separately without any link to your account, name or personal information. This data is used solely to train and improve the skin analysis model.",
+                    "Si aceptas ayudarnos a mejorar nuestra IA, se guarda por separado una copia de los datos del escaneo sin vinculación a tu cuenta, nombre ni datos personales. Solo se usan para entrenar y mejorar el modelo de análisis de piel.",
+                    "Wenn du einwilligst, unsere KI zu verbessern, wird eine Kopie der Scandaten getrennt gespeichert – ohne Verknüpfung mit deinem Konto, Namen oder personenbezogenen Daten. Sie dient ausschließlich dem Training und der Verbesserung des Hautanalysemodells.",
+                    "Si vous acceptez d'aider à améliorer notre IA, une copie des données de scan est conservée séparément, sans lien avec votre compte, votre nom ni vos informations personnelles. Elle sert uniquement à entraîner et améliorer le modèle d'analyse de la peau.")}
                 </p>
               </div>
 
               <div>
                 <h4 className="mb-1 font-semibold text-[#1d1d1f]">
-                  {tx(locale, "Du har kontroll", "You are in control")}
+                  {tx(locale, "Du har kontroll", "You are in control", "Tú tienes el control", "Du hast die Kontrolle", "Vous gardez le contrôle")}
                 </h4>
                 <p>
                   {tx(locale,
                     "Du kan radera alla dina sparade foton när som helst från ditt konto under \"Min hudresa\". Radering sker omedelbart och permanent. Du kan också använda analysen utan att spara någon data alls.",
-                    "You can delete all your saved photos at any time from your account under \"My skin journey\". Deletion is immediate and permanent. You can also use the analysis without saving any data at all.")}
+                    "You can delete all your saved photos at any time from your account under \"My skin journey\". Deletion is immediate and permanent. You can also use the analysis without saving any data at all.",
+                    "Puedes eliminar todas tus fotos guardadas en cualquier momento desde tu cuenta en «Mi viaje de piel». La eliminación es inmediata y permanente. También puedes usar el análisis sin guardar ningún dato.",
+                    "Du kannst alle gespeicherten Fotos jederzeit in deinem Konto unter \"Meine Hautreise\" löschen. Die Löschung ist sofort und dauerhaft. Du kannst die Analyse auch nutzen, ohne Daten zu speichern.",
+                    "Vous pouvez supprimer toutes vos photos enregistrées à tout moment depuis votre compte, sous « Mon parcours peau ». La suppression est immédiate et définitive. Vous pouvez aussi utiliser l'analyse sans enregistrer aucune donnée.")}
                 </p>
               </div>
 
@@ -776,7 +796,10 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
                 <p className="text-[11px] text-[#766a62]">
                   {tx(locale,
                     "1753 SKINCARE behandlar personuppgifter i enlighet med GDPR (EU 2016/679). För frågor om din data, kontakta info@1753skin.com.",
-                    "1753 SKINCARE processes personal data in accordance with GDPR (EU 2016/679). For questions about your data, contact info@1753skin.com.")}
+                    "1753 SKINCARE processes personal data in accordance with GDPR (EU 2016/679). For questions about your data, contact info@1753skin.com.",
+                    "1753 SKINCARE trata los datos personales conforme al RGPD (UE 2016/679). Para preguntas sobre tus datos, contacta con info@1753skin.com.",
+                    "1753 SKINCARE verarbeitet personenbezogene Daten gemäß DSGVO (EU 2016/679). Bei Fragen zu deinen Daten kontaktiere info@1753skin.com.",
+                    "1753 SKINCARE traite les données personnelles conformément au RGPD (UE 2016/679). Pour toute question sur vos données : info@1753skin.com.")}
                 </p>
               </div>
             </div>
@@ -785,7 +808,7 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
               onClick={() => setShowSecurity(false)}
               className="mt-6 w-full rounded-full bg-[#108474] py-3 text-sm font-semibold text-white transition-all hover:bg-[#0d6e62]"
             >
-              {tx(locale, "Jag förstår", "Got it", "Entendido", "Verstanden")}
+              {tx(locale, "Jag förstår", "Got it", "Entendido", "Verstanden", "Compris")}
             </button>
           </div>
         </div>

@@ -181,6 +181,7 @@ def filter_class(class_name: str, dry_run: bool = False) -> dict:
     files = sorted([
         f for f in class_dir.iterdir()
         if f.is_file() and f.suffix.lower() in (".jpg", ".jpeg", ".png", ".webp")
+        and not f.name.startswith("aug_")
         and f.name not in already_processed
     ])
 
@@ -286,6 +287,7 @@ def main():
         count = len([
             f for f in cls_dir.iterdir()
             if f.is_file() and f.suffix.lower() in (".jpg", ".jpeg", ".png", ".webp")
+            and not f.name.startswith("aug_")
         ]) if cls_dir.exists() else 0
         print(f"    {cls}: {count}")
 

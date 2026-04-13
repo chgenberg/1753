@@ -1,36 +1,36 @@
 {
-  "image_size": 224,
+  "image_size": 260,
   "labels": [
     "acne",
     "dermatitis",
     "dryness",
     "eczema",
-    "fungal",
     "hyperpigmentation",
+    "normal",
     "psoriasis",
     "rosacea",
     "sun_damage"
   ],
+  "severity_labels": [
+    "none",
+    "mild",
+    "moderate",
+    "severe"
+  ],
+  "num_condition_classes": 9,
+  "num_severity_classes": 4,
   "label_names_sv": {
     "acne": "Akne",
     "dermatitis": "Dermatit",
     "dryness": "Torr hy",
     "eczema": "Eksem",
-    "fungal": "Svampinfektion",
     "hyperpigmentation": "Hyperpigmentering",
+    "normal": "Normal/frisk hud",
     "psoriasis": "Psoriasis",
     "rosacea": "Rosacea",
     "sun_damage": "Solskada"
   },
-  "mean": [
-    0.485,
-    0.456,
-    0.406
-  ],
-  "std": [
-    0.229,
-    0.224,
-    0.225
-  ],
-  "source_model": "best_model"
+  "mean": [0.485, 0.456, 0.406],
+  "std": [0.229, 0.224, 0.225],
+  "source_model": "efficientnet_b3_multitask"
 }

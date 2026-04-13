@@ -250,6 +250,15 @@ async function initSchema() {
     ALTER TABLE reviews ADD COLUMN IF NOT EXISTS title_en VARCHAR(500) DEFAULT '';
     ALTER TABLE reviews ADD COLUMN IF NOT EXISTS body_en TEXT DEFAULT '';
     ALTER TABLE reviews ADD COLUMN IF NOT EXISTS reply_en TEXT DEFAULT '';
+    ALTER TABLE reviews ADD COLUMN IF NOT EXISTS title_es VARCHAR(500) DEFAULT '';
+    ALTER TABLE reviews ADD COLUMN IF NOT EXISTS body_es TEXT DEFAULT '';
+    ALTER TABLE reviews ADD COLUMN IF NOT EXISTS reply_es TEXT DEFAULT '';
+    ALTER TABLE reviews ADD COLUMN IF NOT EXISTS title_de VARCHAR(500) DEFAULT '';
+    ALTER TABLE reviews ADD COLUMN IF NOT EXISTS body_de TEXT DEFAULT '';
+    ALTER TABLE reviews ADD COLUMN IF NOT EXISTS reply_de TEXT DEFAULT '';
+    ALTER TABLE reviews ADD COLUMN IF NOT EXISTS title_fr VARCHAR(500) DEFAULT '';
+    ALTER TABLE reviews ADD COLUMN IF NOT EXISTS body_fr TEXT DEFAULT '';
+    ALTER TABLE reviews ADD COLUMN IF NOT EXISTS reply_fr TEXT DEFAULT '';
 
     CREATE INDEX IF NOT EXISTS idx_reviews_product ON reviews (product_id);
     CREATE INDEX IF NOT EXISTS idx_reviews_rating ON reviews (product_id, rating);
@@ -1173,19 +1182,24 @@ async function createReview({ product_id, reviewer_name, rating, title, body, re
 async function findReviewsByProduct(productId, limit = 10, offset = 0, locale = "sv") {
   const { rows } = await pool.query(
     `SELECT id, product_id, reviewer_name, rating,
-       title, body, reply, title_en, body_en, reply_en,
+       title, body, reply,
+       title_en, body_en, reply_en,
+       title_es, body_es, reply_es,
+       title_de, body_de, reply_de,
+       title_fr, body_fr, reply_fr,
        verified, review_date, location
      FROM reviews WHERE product_id = $1
      ORDER BY review_date DESC NULLS LAST
      LIMIT $2 OFFSET $3`,
     [productId, limit, offset]
   );
-  if (locale === "en") {
+  if (locale !== "sv") {
+    const suffix = ["en", "es", "de", "fr"].includes(locale) ? locale : "en";
     return rows.map((r) => ({
       ...r,
-      title: r.title_en || r.title,
-      body: r.body_en || r.body,
-      reply: r.reply_en || r.reply,
+      title: r[`title_${suffix}`] || r.title_en || r.title,
+      body: r[`body_${suffix}`] || r.body_en || r.body,
+      reply: r[`reply_${suffix}`] || r.reply_en || r.reply,
     }));
   }
   return rows;

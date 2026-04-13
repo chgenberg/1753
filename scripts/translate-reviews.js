@@ -1,13 +1,14 @@
 #!/usr/bin/env node
 /**
- * Translates all Swedish reviews to English using OpenAI.
- * Adds title_en, body_en, reply_en to the reviews table.
+ * Translates all Swedish reviews to English, Spanish, German, and French
+ * using GPT-4o-mini. All 4 languages in a single API call per batch = cost-effective.
+ *
+ * Cost: ~$0.0003 per review (all 4 languages), ~$0.30 for 1000 reviews.
  *
  * Usage:
  *   DATABASE_URL=... OPENAI_API_KEY=... node scripts/translate-reviews.js
- *
- * Or via Railway:
- *   railway run node scripts/translate-reviews.js
+ *   node scripts/translate-reviews.js --lang es        # only Spanish
+ *   node scripts/translate-reviews.js --retranslate     # redo all
  */
 
 require("dotenv").config();
@@ -15,24 +16,43 @@ const { Pool } = require("pg");
 
 const DATABASE_URL = process.env.DATABASE_URL;
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-const BATCH_SIZE = 20;
+const BATCH_SIZE = 15;
 const MODEL = "gpt-4o-mini";
+
+const LANGUAGES = {
+  en: { name: "English", col_prefix: "en" },
+  es: { name: "Spanish", col_prefix: "es" },
+  de: { name: "German", col_prefix: "de" },
+  fr: { name: "French", col_prefix: "fr" },
+};
 
 if (!DATABASE_URL) { console.error("Missing DATABASE_URL"); process.exit(1); }
 if (!OPENAI_API_KEY) { console.error("Missing OPENAI_API_KEY"); process.exit(1); }
+
+const args = process.argv.slice(2);
+const langFilter = args.includes("--lang") ? args[args.indexOf("--lang") + 1] : null;
+const retranslate = args.includes("--retranslate");
 
 const pool = new Pool({
   connectionString: DATABASE_URL,
   ssl: DATABASE_URL.includes("localhost") ? false : { rejectUnauthorized: false },
 });
 
-async function translateBatch(reviews) {
+const targetLangs = langFilter
+  ? { [langFilter]: LANGUAGES[langFilter] }
+  : LANGUAGES;
+
+async function translateBatch(reviews, langs) {
   const items = reviews.map((r) => ({
     id: r.id,
     title: r.title || "",
     body: r.body || "",
     reply: r.reply || "",
   }));
+
+  const langList = Object.entries(langs)
+    .map(([code, info]) => `${info.name} (suffix: _${code})`)
+    .join(", ");
 
   const res = await fetch("https://api.openai.com/v1/chat/completions", {
     method: "POST",
@@ -47,13 +67,17 @@ async function translateBatch(reviews) {
       messages: [
         {
           role: "system",
-          content: `You translate Swedish skincare product reviews into natural, warm English.
+          content: `You translate Swedish skincare product reviews into multiple languages in one pass.
+Target languages: ${langList}.
+
 Keep the reviewer's personal tone and emotion. Do not over-polish — these are real customer voices.
-Keep brand names (1753 SKINCARE, The ONE, I LOVE, TA-DA, DUO, Au Naturel, Fungtastic) exactly as-is.
+Brand names stay exactly as-is: 1753 SKINCARE, The ONE, I LOVE, TA-DA, DUO, Au Naturel, Fungtastic.
 Swedish place names (e.g. "Skellefteå", "Hägersten") stay unchanged.
 For company replies: keep the warm, personal customer-service tone. "<3" can stay as-is.
-If a field is empty, return an empty string.
-Return a JSON object: { "translations": [ { "id": <number>, "title_en": "...", "body_en": "...", "reply_en": "..." }, ... ] }`,
+If a field is empty, return an empty string for that field.
+
+Return JSON: { "translations": [ { "id": <number>, "title_en": "...", "body_en": "...", "reply_en": "...", "title_es": "...", "body_es": "...", "reply_es": "...", "title_de": "...", "body_de": "...", "reply_de": "...", "title_fr": "...", "body_fr": "...", "reply_fr": "..." }, ... ] }
+Only include the language suffixes you were asked to translate.`,
         },
         {
           role: "user",
@@ -70,30 +94,43 @@ Return a JSON object: { "translations": [ { "id": <number>, "title_en": "...", "
 
   const data = await res.json();
   const content = data.choices[0].message.content;
-  const parsed = JSON.parse(content);
-  return parsed.translations;
+  return JSON.parse(content).translations;
 }
 
-async function updateReview(id, titleEn, bodyEn, replyEn) {
-  await pool.query(
-    `UPDATE reviews SET title_en = $1, body_en = $2, reply_en = $3 WHERE id = $4`,
-    [titleEn || "", bodyEn || "", replyEn || "", id]
-  );
+async function updateReview(id, fields) {
+  const sets = [];
+  const vals = [];
+  let idx = 1;
+  for (const [key, val] of Object.entries(fields)) {
+    sets.push(`${key} = $${idx++}`);
+    vals.push(val || "");
+  }
+  vals.push(id);
+  await pool.query(`UPDATE reviews SET ${sets.join(", ")} WHERE id = $${idx}`, vals);
 }
 
 async function main() {
-  // Ensure columns exist
-  await pool.query(`ALTER TABLE reviews ADD COLUMN IF NOT EXISTS title_en VARCHAR(500) DEFAULT ''`);
-  await pool.query(`ALTER TABLE reviews ADD COLUMN IF NOT EXISTS body_en TEXT DEFAULT ''`);
-  await pool.query(`ALTER TABLE reviews ADD COLUMN IF NOT EXISTS reply_en TEXT DEFAULT ''`);
+  for (const code of Object.keys(targetLangs)) {
+    await pool.query(`ALTER TABLE reviews ADD COLUMN IF NOT EXISTS title_${code} VARCHAR(500) DEFAULT ''`);
+    await pool.query(`ALTER TABLE reviews ADD COLUMN IF NOT EXISTS body_${code} TEXT DEFAULT ''`);
+    await pool.query(`ALTER TABLE reviews ADD COLUMN IF NOT EXISTS reply_${code} TEXT DEFAULT ''`);
+  }
+
+  const langCodes = Object.keys(targetLangs);
+  const emptyConditions = retranslate
+    ? "TRUE"
+    : langCodes.map((c) => `(COALESCE(title_${c},'') = '' AND COALESCE(body_${c},'') = '')`).join(" OR ");
 
   const { rows: allReviews } = await pool.query(
     `SELECT id, title, body, reply FROM reviews
-     WHERE (title_en IS NULL OR title_en = '') AND (COALESCE(title,'') != '' OR COALESCE(body,'') != '')
+     WHERE (COALESCE(title,'') != '' OR COALESCE(body,'') != '')
+       AND (${emptyConditions})
      ORDER BY id`
   );
 
-  console.log(`Found ${allReviews.length} reviews to translate`);
+  console.log(`\n  REVIEW TRANSLATOR — ${langCodes.map(c => targetLangs[c].name).join(", ")}`);
+  console.log(`  Found ${allReviews.length} reviews to translate`);
+  console.log(`  Model: ${MODEL} | Batch size: ${BATCH_SIZE}\n`);
 
   let translated = 0;
   let errors = 0;
@@ -104,38 +141,52 @@ async function main() {
     const totalBatches = Math.ceil(allReviews.length / BATCH_SIZE);
 
     try {
-      const translations = await translateBatch(batch);
+      const translations = await translateBatch(batch, targetLangs);
 
       for (const t of translations) {
-        await updateReview(t.id, t.title_en, t.body_en, t.reply_en);
-        translated++;
+        const fields = {};
+        for (const code of langCodes) {
+          if (t[`title_${code}`] !== undefined) fields[`title_${code}`] = t[`title_${code}`];
+          if (t[`body_${code}`] !== undefined) fields[`body_${code}`] = t[`body_${code}`];
+          if (t[`reply_${code}`] !== undefined) fields[`reply_${code}`] = t[`reply_${code}`];
+        }
+        if (Object.keys(fields).length > 0) {
+          await updateReview(t.id, fields);
+          translated++;
+        }
       }
 
-      console.log(`Batch ${batchNum}/${totalBatches} done (${translated}/${allReviews.length})`);
+      console.log(`  Batch ${batchNum}/${totalBatches} done (${translated}/${allReviews.length})`);
     } catch (err) {
-      console.error(`Batch ${batchNum} failed:`, err.message);
+      console.error(`  Batch ${batchNum} failed:`, err.message);
       errors++;
 
-      // Retry individually
       for (const review of batch) {
         try {
-          const [t] = await translateBatch([review]);
-          await updateReview(t.id, t.title_en, t.body_en, t.reply_en);
-          translated++;
+          const [t] = await translateBatch([review], targetLangs);
+          const fields = {};
+          for (const code of langCodes) {
+            if (t[`title_${code}`] !== undefined) fields[`title_${code}`] = t[`title_${code}`];
+            if (t[`body_${code}`] !== undefined) fields[`body_${code}`] = t[`body_${code}`];
+            if (t[`reply_${code}`] !== undefined) fields[`reply_${code}`] = t[`reply_${code}`];
+          }
+          if (Object.keys(fields).length > 0) {
+            await updateReview(t.id, fields);
+            translated++;
+          }
         } catch (e2) {
-          console.error(`  Review ${review.id} failed:`, e2.message);
+          console.error(`    Review ${review.id} failed:`, e2.message);
           errors++;
         }
       }
     }
 
-    // Rate limit: ~50ms between batches
     if (i + BATCH_SIZE < allReviews.length) {
       await new Promise((r) => setTimeout(r, 200));
     }
   }
 
-  console.log(`\nDone! Translated: ${translated}, Errors: ${errors}`);
+  console.log(`\n  Done! Translated: ${translated}, Errors: ${errors}`);
   await pool.end();
 }
 

@@ -4,8 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { cn } from "@/lib/utils";
 import {
   CONDITION_COLORS,
-  CONDITION_LABELS_SV,
-  CONDITION_LABELS_EN,
+  conditionLabel as getCondLabel,
+  zoneLabel as getZoneLabel,
   type ZoneResult,
 } from "./zones";
 import { useLocale } from "@/providers/locale-provider";
@@ -126,7 +126,7 @@ export function FaceCanvas({ imageSrc, results, className }: FaceCanvasProps) {
       <img
         ref={imgRef}
         src={imageSrc}
-        alt={tx(locale, "Hudanalys", "Skin analysis", "Análisis de piel", "Hautanalyse")}
+        alt={tx(locale, "Hudanalys", "Skin analysis", "Análisis de piel", "Hautanalyse", "Analyse de peau")}
         className="block h-auto w-full rounded-2xl"
         onLoad={(e) => {
           const el = e.currentTarget;
@@ -144,9 +144,7 @@ export function FaceCanvas({ imageSrc, results, className }: FaceCanvasProps) {
         const { zone, topCondition, confidence } = r;
         const isRevealed = revealed.has(zone.id);
         const color = CONDITION_COLORS[topCondition] || "#108474";
-        const conditionLabel =
-          (locale === "sv" ? CONDITION_LABELS_SV : CONDITION_LABELS_EN)[topCondition] ||
-          topCondition;
+        const label = getCondLabel(topCondition, locale);
 
         const topPx = displayDims.h > 0
           ? `${zone.labelY * displayDims.h}px`
@@ -184,10 +182,10 @@ export function FaceCanvas({ imageSrc, results, className }: FaceCanvasProps) {
               />
               <div>
                 <p className="text-xs font-semibold leading-tight" style={{ color }}>
-                  {conditionLabel}
+                  {label}
                 </p>
                 <p className="text-[10px] leading-tight text-[#515151]">
-                  {(locale === "sv" ? zone.labelSv : zone.labelEn)} — {Math.round(confidence * 100)}%
+                  {getZoneLabel(zone, locale)} — {Math.round(confidence * 100)}%
                 </p>
               </div>
             </div>
