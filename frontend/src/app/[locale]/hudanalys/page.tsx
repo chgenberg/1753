@@ -272,10 +272,57 @@ const ANALYSIS_STEPS_EN = [
   { pct: 100, label: "Done!" },
 ];
 
+const ANALYSIS_STEPS_ES = [
+  { pct: 0, label: "Preparando análisis..." },
+  { pct: 8, label: "Procesando datos del escaneo..." },
+  { pct: 18, label: "Analizando tipo y estado de piel..." },
+  { pct: 30, label: "Evaluando factores de estilo de vida..." },
+  { pct: 45, label: "Calculando puntuación de piel..." },
+  { pct: 58, label: "Seleccionando productos para tu piel..." },
+  { pct: 70, label: "Creando rutina personalizada..." },
+  { pct: 82, label: "Compilando recomendaciones..." },
+  { pct: 92, label: "Finalizando tu análisis..." },
+  { pct: 100, label: "¡Listo!" },
+];
+
+const ANALYSIS_STEPS_DE = [
+  { pct: 0, label: "Analyse wird vorbereitet..." },
+  { pct: 8, label: "Scandaten werden verarbeitet..." },
+  { pct: 18, label: "Hauttyp und Zustand werden analysiert..." },
+  { pct: 30, label: "Lebensstilfaktoren werden bewertet..." },
+  { pct: 45, label: "Hautscore wird berechnet..." },
+  { pct: 58, label: "Produkte werden abgeglichen..." },
+  { pct: 70, label: "Persönliche Routine wird erstellt..." },
+  { pct: 82, label: "Lifestyle-Empfehlungen werden zusammengestellt..." },
+  { pct: 92, label: "Analyse wird abgeschlossen..." },
+  { pct: 100, label: "Fertig!" },
+];
+
+const ANALYSIS_STEPS_FR = [
+  { pct: 0, label: "Préparation de l'analyse..." },
+  { pct: 8, label: "Traitement des données du scan..." },
+  { pct: 18, label: "Analyse du type et de l'état de la peau..." },
+  { pct: 30, label: "Évaluation des facteurs de mode de vie..." },
+  { pct: 45, label: "Calcul du score cutané..." },
+  { pct: 58, label: "Sélection des produits pour votre peau..." },
+  { pct: 70, label: "Création d'une routine personnalisée..." },
+  { pct: 82, label: "Compilation des recommandations..." },
+  { pct: 92, label: "Finalisation de votre analyse..." },
+  { pct: 100, label: "Terminé !" },
+];
+
+const ANALYSIS_STEPS_MAP: Record<string, typeof ANALYSIS_STEPS_SV> = {
+  sv: ANALYSIS_STEPS_SV,
+  en: ANALYSIS_STEPS_EN,
+  es: ANALYSIS_STEPS_ES,
+  de: ANALYSIS_STEPS_DE,
+  fr: ANALYSIS_STEPS_FR,
+};
+
 function AnalyzingProgress({ locale }: { locale: string }) {
   const [progress, setProgress] = useState(0);
   const [stepIdx, setStepIdx] = useState(0);
-  const steps = locale === "sv" ? ANALYSIS_STEPS_SV : ANALYSIS_STEPS_EN;
+  const steps = ANALYSIS_STEPS_MAP[locale] || ANALYSIS_STEPS_EN;
 
   useEffect(() => {
     const totalDuration = 47000;

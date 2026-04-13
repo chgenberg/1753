@@ -2925,6 +2925,7 @@ async function handleOrderCompletion(orderId) {
           ExternalInvoiceReference1: sharedOrderNumber,
           Currency: order.currency || "SEK",
           Freight: order.shipping_cost > 0 ? order.shipping_cost : 0,
+          FreightVAT: 0,
           OrderRows: orderRows,
           Remarks: `Order ${sharedOrderNumber} – betald via Viva Wallet`
         }

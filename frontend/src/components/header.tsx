@@ -112,10 +112,35 @@ export function Header() {
     return () => window.removeEventListener("keydown", onKey);
   }, [mobileOpen]);
 
+  const [langOpen, setLangOpen] = useState(false);
+  const langRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (!langOpen) return;
+    const onClick = (e: MouseEvent) => {
+      if (langRef.current && !langRef.current.contains(e.target as Node)) setLangOpen(false);
+    };
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setLangOpen(false);
+    };
+    document.addEventListener("mousedown", onClick);
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.removeEventListener("mousedown", onClick);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [langOpen]);
+
   const localeOrder = ["sv", "en", "es", "de", "fr"] as const;
-  const curIdx = localeOrder.indexOf(locale as typeof localeOrder[number]);
-  const otherLocale = localeOrder[(curIdx + 1) % localeOrder.length];
-  const langHref = `/${otherLocale}`;
+  const otherLocales = localeOrder.filter(l => l !== locale);
+
+  const localeLabels: Record<string, string> = {
+    sv: "Svenska",
+    en: "English",
+    es: "Espanol",
+    de: "Deutsch",
+    fr: "Francais",
+  };
 
   const flags: Record<string, React.ReactNode> = {
     sv: (
@@ -161,7 +186,7 @@ export function Header() {
     ),
   };
 
-  const targetFlag = flags[otherLocale] || flags.en;
+  const currentFlag = flags[locale] || flags.sv;
 
   return (
     <>
@@ -195,16 +220,44 @@ export function Header() {
           </nav>
 
           <div className="flex items-center gap-1">
-            <Link
-              href={langHref}
-              className="group relative flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-brand-50"
-              aria-label={t("header.langSwitch")}
-              title={t("header.langSwitch")}
-            >
-              <span className="overflow-hidden rounded-full ring-1 ring-brand-200/60 transition-all duration-300 group-hover:ring-brand-400 group-hover:shadow-sm">
-                {targetFlag}
-              </span>
-            </Link>
+            <div ref={langRef} className="relative">
+              <button
+                onClick={() => setLangOpen(o => !o)}
+                className="group relative flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-brand-50"
+                aria-label={t("header.langSwitch")}
+                aria-expanded={langOpen}
+              >
+                <span className="overflow-hidden rounded-full ring-1 ring-brand-200/60 transition-all duration-300 group-hover:ring-brand-400 group-hover:shadow-sm">
+                  {currentFlag}
+                </span>
+              </button>
+
+              <div
+                className={cn(
+                  "absolute right-0 top-full mt-2 flex items-center gap-1.5 rounded-2xl border border-brand-100 bg-white/95 px-2.5 py-2 shadow-lg backdrop-blur-xl transition-all duration-300",
+                  langOpen
+                    ? "pointer-events-auto translate-y-0 opacity-100 scale-100"
+                    : "pointer-events-none -translate-y-1 opacity-0 scale-95"
+                )}
+              >
+                {otherLocales.map(l => (
+                  <Link
+                    key={l}
+                    href={`/${l}`}
+                    onClick={() => setLangOpen(false)}
+                    className="group/flag flex flex-col items-center gap-1 rounded-xl px-2 py-1.5 transition-colors hover:bg-brand-50"
+                    title={localeLabels[l]}
+                  >
+                    <span className="overflow-hidden rounded-full ring-1 ring-brand-200/40 transition-all duration-200 group-hover/flag:ring-brand-400 group-hover/flag:shadow-sm">
+                      {flags[l]}
+                    </span>
+                    <span className="text-[10px] font-medium uppercase tracking-wider text-brand-400 transition-colors group-hover/flag:text-brand-700">
+                      {l}
+                    </span>
+                  </Link>
+                ))}
+              </div>
+            </div>
 
             <Link
               href={accountHref}
@@ -264,16 +317,23 @@ export function Header() {
                 {link.label}
               </Link>
             ))}
-            <Link
-              href={langHref}
-              onClick={() => setMobileOpen(false)}
-              className="flex items-center gap-2.5 text-sm font-semibold uppercase tracking-wider text-brand-600"
-            >
-              <span className="overflow-hidden rounded-full ring-1 ring-brand-200/60">
-                {targetFlag}
-              </span>
-              {t("header.langSwitch")}
-            </Link>
+            <div className="flex items-center gap-3">
+              {otherLocales.map(l => (
+                <Link
+                  key={l}
+                  href={`/${l}`}
+                  onClick={() => setMobileOpen(false)}
+                  className="flex flex-col items-center gap-1.5 rounded-xl px-3 py-2 transition-colors hover:bg-brand-50"
+                >
+                  <span className="overflow-hidden rounded-full ring-1 ring-brand-200/60">
+                    {flags[l]}
+                  </span>
+                  <span className="text-[10px] font-medium uppercase tracking-wider text-brand-500">
+                    {l}
+                  </span>
+                </Link>
+              ))}
+            </div>
             <div className="mt-6 h-px w-16 bg-brand-200" />
             <Link
               href={accountHref}

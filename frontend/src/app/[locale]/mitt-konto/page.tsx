@@ -588,7 +588,7 @@ function SkinJourneyView({ token }: { token: string }) {
                   <p className="mt-1.5 text-[11px] text-brand-500">
                     {new Date(snapshots[snapshots.length - 1].created_at).toLocaleDateString(loc, { month: "short", day: "numeric" })}
                     {snapshots[snapshots.length - 1].score !== null && (
-                      <span className="ml-1 font-semibold text-brand-900">{snapshots[snapshots.length - 1].score}p</span>
+                      <span className="ml-1 font-semibold text-brand-900">{snapshots[snapshots.length - 1].score}{locale === "sv" ? "p" : "pts"}</span>
                     )}
                   </p>
                 </div>
@@ -597,16 +597,14 @@ function SkinJourneyView({ token }: { token: string }) {
                   <p className="mt-1.5 text-[11px] text-brand-500">
                     {new Date(snapshots[0].created_at).toLocaleDateString(loc, { month: "short", day: "numeric" })}
                     {snapshots[0].score !== null && (
-                      <span className="ml-1 font-semibold text-brand-900">{snapshots[0].score}p</span>
+                      <span className="ml-1 font-semibold text-brand-900">{snapshots[0].score}{locale === "sv" ? "p" : "pts"}</span>
                     )}
                   </p>
                 </div>
               </div>
               <div className="flex items-center justify-center gap-2 rounded-lg bg-brand-50 px-3 py-2 text-xs text-brand-600">
                 <Lock className="h-3 w-3" />
-                {locale === "en"
-                  ? "Photos are encrypted. Only you can see them."
-                  : "Foton är krypterade. Bara du kan se dem."}
+                {tx(locale, "Foton är krypterade. Bara du kan se dem.", "Photos are encrypted. Only you can see them.", "Las fotos están cifradas. Solo tú puedes verlas.", "Fotos sind verschlüsselt. Nur du kannst sie sehen.", "Les photos sont chiffrées. Vous seul pouvez les voir.")}
               </div>
             </div>
           ) : (

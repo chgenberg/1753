@@ -43,10 +43,11 @@ export function CartDrawer() {
   const hasSubscription = cartProducts.some((p) => p.subscription);
 
   function subscriptionLabel(days: number) {
-    if (locale === "en") {
-      return t("cartDrawer.subscriptionOrdinal", { days });
-    }
-    return `Var ${days}:e dag`;
+    if (locale === "sv") return `Var ${days}:e dag`;
+    if (locale === "es") return `Cada ${days} días`;
+    if (locale === "de") return `Alle ${days} Tage`;
+    if (locale === "fr") return `Tous les ${days} jours`;
+    return t("cartDrawer.subscriptionOrdinal", { days });
   }
 
   return (

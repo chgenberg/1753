@@ -323,9 +323,14 @@ export default function CheckoutPage() {
                 <div className="mt-2 flex items-center gap-2 rounded-xl bg-[#108474]/[0.06] px-3 py-2.5">
                   <Check className="h-4 w-4 shrink-0 text-[#108474]" />
                   <p className="text-xs text-[#108474]">
-                    {locale === "en"
-                      ? `Welcome back${knownMember.name ? `, ${knownMember.name}` : ""}! This order will be linked to your account.`
-                      : `Välkommen tillbaka${knownMember.name ? `, ${knownMember.name}` : ""}! Ordern kopplas automatiskt till ditt konto.`}
+                    {(() => {
+                      const name = knownMember.name ? `, ${knownMember.name}` : "";
+                      if (locale === "sv") return `Välkommen tillbaka${name}! Ordern kopplas automatiskt till ditt konto.`;
+                      if (locale === "es") return `¡Bienvenido de nuevo${name}! El pedido se vinculará a tu cuenta.`;
+                      if (locale === "de") return `Willkommen zurück${name}! Die Bestellung wird mit deinem Konto verknüpft.`;
+                      if (locale === "fr") return `Bon retour${name} ! La commande sera liée à votre compte.`;
+                      return `Welcome back${name}! This order will be linked to your account.`;
+                    })()}
                   </p>
                 </div>
               )}
@@ -482,9 +487,12 @@ export default function CheckoutPage() {
                   </span>
                   <p className="mt-0.5 text-xs leading-relaxed text-brand-500">
                     {hasSubscription
-                      ? (locale === "en"
-                          ? "An account is required to manage your subscription — pause, change or cancel anytime."
-                          : "Ett konto krävs för att hantera din prenumeration — pausa, ändra eller avbryt när som helst.")
+                      ? (locale === "sv"
+                          ? "Ett konto krävs för att hantera din prenumeration — pausa, ändra eller avbryt när som helst."
+                          : locale === "es" ? "Se requiere una cuenta para gestionar tu suscripción: pausar, cambiar o cancelar en cualquier momento."
+                          : locale === "de" ? "Ein Konto ist erforderlich, um dein Abo zu verwalten — jederzeit pausieren, ändern oder kündigen."
+                          : locale === "fr" ? "Un compte est nécessaire pour gérer votre abonnement — mettre en pause, modifier ou annuler à tout moment."
+                          : "An account is required to manage your subscription — pause, change or cancel anytime.")
                       : t("checkout.createAccountHint")}
                   </p>
                 </div>
