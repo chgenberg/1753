@@ -271,7 +271,7 @@ const PRODUCTS_MAP = {
   "fungtastic-mushroom-extract":{ name: "Fungtastic Mushroom Extract", price: 399, priceEur: 32, articleNumber: "4001", vatRate: 0.06 }
 };
 
-const FREE_SHIPPING_THRESHOLD = { SEK: 700, EUR: 60 };
+const FREE_SHIPPING_THRESHOLD = { SEK: 600, EUR: 50 };
 const SHIPPING_COST = { SEK: 49, EUR: 5 };
 const VIVA_CURRENCY_CODE = { SEK: 752, EUR: 978 };
 
@@ -1166,16 +1166,10 @@ app.post("/api/admin/orders/:id/cancel", adminAuthMiddleware, async (req, res) =
         const creditRes = await fortnoxFetch(
           `/invoices/${order.fortnox_invoice_number}/credit`, "PUT"
         );
-        const creditNum = creditRes?.Invoice?.CreditInvoiceReference ?? creditRes?.Invoice?.DocumentNumber ?? null;
-        console.log(`[Cancel] Fortnox credit response: creditNum=${creditNum}, DocumentNumber=${creditRes?.Invoice?.DocumentNumber}, CreditInvoiceReference=${creditRes?.Invoice?.CreditInvoiceReference}`);
+        const creditNum = creditRes?.Invoice?.DocumentNumber ?? creditRes?.Invoice?.CreditInvoiceReference ?? null;
         if (creditNum) {
-          try {
-            await fortnoxFetch(`/invoices/${creditNum}/bookkeep`, "PUT");
-            notes.push(`Fortnox kreditfaktura bokförd: ${creditNum}`);
-          } catch (bookErr) {
-            notes.push(`Fortnox kreditfaktura: ${creditNum} (bokföring FEL: ${bookErr.message})`);
-            console.error("[Cancel] Fortnox credit bookkeep error:", bookErr);
-          }
+          await fortnoxFetch(`/invoices/${creditNum}/bookkeep`, "PUT").catch(() => {});
+          notes.push(`Fortnox kreditfaktura: ${creditNum}`);
 
           const paymentAmount = order.total_amount + (order.shipping_cost || 0);
           const today = new Date().toISOString().split("T")[0];
@@ -1196,21 +1190,11 @@ app.post("/api/admin/orders/:id/cancel", adminAuthMiddleware, async (req, res) =
               if (origPayNum) await fortnoxFetch(`/invoicepayments/${origPayNum}/bookkeep`, "PUT").catch(() => {});
             }
 
-            let creditInvoice;
-            try {
-              const creditData = await fortnoxFetch(`/invoices/${creditNum}`);
-              creditInvoice = creditData?.Invoice;
-            } catch (_) {}
-
-            const creditAlreadyPaid = creditInvoice && (creditInvoice.Balance === 0 || creditInvoice.FinalPayDate);
-
-            if (!creditAlreadyPaid) {
-              const creditPay = await fortnoxFetch("/invoicepayments", "POST", {
-                InvoicePayment: { InvoiceNumber: parseInt(creditNum), Amount: -paymentAmount, AmountCurrency: -paymentAmount, PaymentDate: today }
-              });
-              const creditPayNum = creditPay?.InvoicePayment?.Number;
-              if (creditPayNum) await fortnoxFetch(`/invoicepayments/${creditPayNum}/bookkeep`, "PUT").catch(() => {});
-            }
+            const creditPay = await fortnoxFetch("/invoicepayments", "POST", {
+              InvoicePayment: { InvoiceNumber: parseInt(creditNum), Amount: -paymentAmount, AmountCurrency: -paymentAmount, PaymentDate: today }
+            });
+            const creditPayNum = creditPay?.InvoicePayment?.Number;
+            if (creditPayNum) await fortnoxFetch(`/invoicepayments/${creditPayNum}/bookkeep`, "PUT").catch(() => {});
 
             notes.push("Fortnox kvittning bokförd");
           } catch (payErr) {
@@ -1271,8 +1255,7 @@ app.post("/api/admin/orders/:id/cancel", adminAuthMiddleware, async (req, res) =
         const { Resend } = require("resend");
         const resend = new Resend(apiKey);
         const firstName = order.customer_name?.split(" ")[0] || "";
-        console.log(`[Cancel] Sending cancellation email to ${order.customer_email} from ${fromEmail}`);
-        const emailRes = await resend.emails.send({
+        await resend.emails.send({
           from: fromEmail,
           replyTo: "info@1753skin.com",
           to: order.customer_email,
@@ -1280,6 +1263,9 @@ app.post("/api/admin/orders/:id/cancel", adminAuthMiddleware, async (req, res) =
             ? `Order #${order.order_number} har makulerats`
             : `Order #${order.order_number} has been cancelled`,
           html: emailWrapper(`
+            <div style="text-align:center;padding:32px 0 8px">
+              <img src="https://www.1753skin.com/1753.webp" alt="1753 SKINCARE" width="48" height="48" style="border-radius:12px"/>
+            </div>
             <h1 style="font-size:24px;font-weight:600;color:#1d1d1f;letter-spacing:-0.02em;margin:16px 0;">
               ${isSv ? "Din order har makulerats" : "Your order has been cancelled"}
             </h1>
@@ -1314,15 +1300,7 @@ app.post("/api/admin/orders/:id/cancel", adminAuthMiddleware, async (req, res) =
             </p>
           `)
         });
-        console.log(`[Cancel] Resend response:`, JSON.stringify(emailRes));
-        if (emailRes?.data?.id) {
-          notes.push(`Makuleringsbekräftelse skickad (id: ${emailRes.data.id})`);
-        } else {
-          notes.push(`Makuleringsmail: oväntat svar från Resend – ${JSON.stringify(emailRes)}`);
-        }
-      } else {
-        notes.push("Makuleringsmail EJ skickat: RESEND_API_KEY saknas");
-        console.warn("[Cancel] RESEND_API_KEY not set, skipping cancellation email");
+        notes.push("Makuleringsbekräftelse skickad");
       }
     } catch (emailErr) {
       notes.push(`E-post FEL: ${emailErr.message}`);
@@ -1387,54 +1365,28 @@ app.post("/api/admin/orders/:id/return", adminAuthMiddleware, async (req, res) =
           "PUT"
         );
         fortnoxCreditNumber =
-          creditRes?.Invoice?.CreditInvoiceReference ??
           creditRes?.Invoice?.DocumentNumber ??
+          creditRes?.Invoice?.CreditInvoiceReference ??
           null;
-        console.log(`[Return] Fortnox credit response: creditNum=${fortnoxCreditNumber}, DocumentNumber=${creditRes?.Invoice?.DocumentNumber}, CreditInvoiceReference=${creditRes?.Invoice?.CreditInvoiceReference}`);
 
         if (fortnoxCreditNumber) {
-          try {
-            await fortnoxFetch(`/invoices/${fortnoxCreditNumber}/bookkeep`, "PUT");
-            notes.push(`Fortnox kreditfaktura bokförd: ${fortnoxCreditNumber}`);
-          } catch (bookErr) {
-            notes.push(`Fortnox kreditfaktura: ${fortnoxCreditNumber} (bokföring FEL: ${bookErr.message})`);
-            console.error("[Return] Fortnox credit bookkeep error:", bookErr);
-          }
+          await fortnoxFetch(`/invoices/${fortnoxCreditNumber}/bookkeep`, "PUT").catch(() => {});
+          notes.push(`Fortnox kreditfaktura: ${fortnoxCreditNumber}`);
 
           const paymentAmount = order.total_amount + (order.shipping_cost || 0);
           const today = new Date().toISOString().split("T")[0];
           try {
-            let origInvoice;
-            try {
-              const origData = await fortnoxFetch(`/invoices/${order.fortnox_invoice_number}`);
-              origInvoice = origData?.Invoice;
-            } catch (_) {}
+            const origPay = await fortnoxFetch("/invoicepayments", "POST", {
+              InvoicePayment: { InvoiceNumber: parseInt(order.fortnox_invoice_number), Amount: paymentAmount, AmountCurrency: paymentAmount, PaymentDate: today }
+            });
+            const origPayNum = origPay?.InvoicePayment?.Number;
+            if (origPayNum) await fortnoxFetch(`/invoicepayments/${origPayNum}/bookkeep`, "PUT").catch(() => {});
 
-            const origAlreadyPaid = origInvoice && (origInvoice.Balance === 0 || origInvoice.FinalPayDate);
-
-            if (!origAlreadyPaid) {
-              const origPay = await fortnoxFetch("/invoicepayments", "POST", {
-                InvoicePayment: { InvoiceNumber: parseInt(order.fortnox_invoice_number), Amount: paymentAmount, AmountCurrency: paymentAmount, PaymentDate: today }
-              });
-              const origPayNum = origPay?.InvoicePayment?.Number;
-              if (origPayNum) await fortnoxFetch(`/invoicepayments/${origPayNum}/bookkeep`, "PUT").catch(() => {});
-            }
-
-            let creditInvoice;
-            try {
-              const creditData = await fortnoxFetch(`/invoices/${fortnoxCreditNumber}`);
-              creditInvoice = creditData?.Invoice;
-            } catch (_) {}
-
-            const creditAlreadyPaid = creditInvoice && (creditInvoice.Balance === 0 || creditInvoice.FinalPayDate);
-
-            if (!creditAlreadyPaid) {
-              const creditPay = await fortnoxFetch("/invoicepayments", "POST", {
-                InvoicePayment: { InvoiceNumber: parseInt(fortnoxCreditNumber), Amount: -paymentAmount, AmountCurrency: -paymentAmount, PaymentDate: today }
-              });
-              const creditPayNum = creditPay?.InvoicePayment?.Number;
-              if (creditPayNum) await fortnoxFetch(`/invoicepayments/${creditPayNum}/bookkeep`, "PUT").catch(() => {});
-            }
+            const creditPay = await fortnoxFetch("/invoicepayments", "POST", {
+              InvoicePayment: { InvoiceNumber: parseInt(fortnoxCreditNumber), Amount: -paymentAmount, AmountCurrency: -paymentAmount, PaymentDate: today }
+            });
+            const creditPayNum = creditPay?.InvoicePayment?.Number;
+            if (creditPayNum) await fortnoxFetch(`/invoicepayments/${creditPayNum}/bookkeep`, "PUT").catch(() => {});
 
             notes.push("Fortnox kvittning bokförd");
           } catch (payErr) {
@@ -2912,6 +2864,16 @@ async function handleOrderCompletion(orderId) {
         };
       });
 
+      if (order.shipping_cost > 0) {
+        orderRows.push({
+          Description: "Porto/varubrev",
+          OrderedQuantity: 1,
+          DeliveredQuantity: 1,
+          Price: order.shipping_cost,
+          VAT: 0
+        });
+      }
+
       const today = new Date().toISOString().split("T")[0];
       const fxOrder = await fortnoxFetch("/orders", "POST", {
         Order: {
@@ -2927,7 +2889,6 @@ async function handleOrderCompletion(orderId) {
           ExternalInvoiceReference1: sharedOrderNumber,
           Currency: order.currency || "SEK",
           Freight: order.shipping_cost > 0 ? order.shipping_cost : 0,
-          FreightVAT: 0,
           OrderRows: orderRows,
           Remarks: `Order ${sharedOrderNumber} – betald via Viva Wallet`
         }
@@ -3154,7 +3115,7 @@ async function handleOrderCompletion(orderId) {
   try {
     const emailResult = await sendOrderConfirmation(order, items);
     if (emailResult.sent) {
-      notes.push(`Bekräftelsemail skickat (Resend, id: ${emailResult.emailId || "ok"})`);
+      notes.push("Bekräftelsemail skickat (Resend)");
     } else if (emailResult.skipReason === "no_api_key") {
       notes.push("Bekräftelsemail ej skickat: RESEND_API_KEY saknas i backend");
       console.warn(`[Order] ${order.order_number}: ingen orderbekräftelse via Resend – sätt RESEND_API_KEY`);
@@ -3353,7 +3314,7 @@ async function sendOrderConfirmation(order, items) {
     if (sub) await db.touchSubscriberEmailed(sub.id);
   } catch (_) { /* non-critical */ }
 
-  return { sent: true, emailId: sendResult?.id };
+  return { sent: true };
 }
 
 // ---- SHIPPING CONFIRMATION EMAIL ----
@@ -5246,7 +5207,7 @@ async function seedAutomationFlows() {
           </p>
           ${greenButton("Slutför din beställning", siteUrl + "/kassa")}
           <p style="font-size:13px;color:#766a62;text-align:center">
-            Fri frakt på ordrar över 700 kr.
+            Fri frakt på ordrar över 600 kr.
           </p>
         `
       },
@@ -5429,7 +5390,7 @@ OM 1753 SKINCARE:
 - Adress: Södra Skjutbanevägen 10, 439 55 Åsa
 - Telefon: 0732-30 55 21
 - E-post: info@1753skin.com
-- Fri frakt över 700 kr
+- Fri frakt över 600 kr
 - Personlig rådgivning före och efter köp
 
 ABSOLUT FÖRBJUDET:
