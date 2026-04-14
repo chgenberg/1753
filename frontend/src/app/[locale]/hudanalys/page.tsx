@@ -613,7 +613,6 @@ export default function AnalysisPage() {
   }, [token, scanSummary, result, snapshotSaving, snapshotSaved]);
 
   const analyze = useCallback(async () => {
-    sessionStorage.removeItem("1753_analysis_progress");
     setStep("analyzing");
     setError("");
     try {
@@ -699,6 +698,7 @@ export default function AnalysisPage() {
           answers,
           scanSummary: scanSummary ? { overallTop: scanSummary.overallTop, zones: scanSummary.zones, consentGiven: scanSummary.consentGiven } : null,
         }));
+        sessionStorage.removeItem("1753_analysis_progress");
       } catch { /* quota exceeded */ }
 
       if (scanSummary?.consentGiven) {
@@ -1422,10 +1422,10 @@ export default function AnalysisPage() {
               )}
 
               {/* Navigation */}
-              <div className="mt-10 flex items-center justify-between">
+              <div className="mt-10 flex flex-col-reverse gap-3 md:flex-row md:items-center md:justify-between">
                 <button
                   onClick={goPrev}
-                  className="inline-flex items-center gap-2 rounded-xl px-5 py-2.5 text-sm font-medium text-brand-600 transition-colors hover:bg-brand-50"
+                  className="inline-flex h-12 w-full items-center justify-center gap-2 rounded-full text-sm font-medium text-brand-600 transition-colors hover:bg-brand-50 md:h-auto md:w-auto md:justify-start md:rounded-xl md:px-5 md:py-2.5"
                 >
                   <ArrowLeft className="h-4 w-4" />
                   {a("prev")}
@@ -1433,7 +1433,7 @@ export default function AnalysisPage() {
                 <button
                   onClick={goNext}
                   disabled={!canProceed()}
-                  className="inline-flex items-center gap-2 rounded-full bg-[#108474] px-8 py-3 text-sm font-semibold text-white shadow-md shadow-[#108474]/20 transition-all hover:bg-[#0d6e62] disabled:opacity-40 disabled:shadow-none"
+                  className="inline-flex h-14 w-full items-center justify-center gap-3 rounded-full bg-[#108474] px-10 text-sm font-semibold text-white shadow-lg shadow-[#108474]/20 transition-all hover:bg-[#0d6e62] hover:shadow-xl active:scale-[0.97] disabled:opacity-40 disabled:shadow-none md:h-auto md:w-auto md:px-8 md:py-3 md:shadow-md"
                 >
                   {step === TOTAL_STEPS ? (
                     <>
