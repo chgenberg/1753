@@ -2962,6 +2962,16 @@ async function handleOrderCompletion(orderId) {
         };
       });
 
+      if (order.shipping_cost > 0) {
+        orderRows.push({
+          Description: "Frakt",
+          OrderedQuantity: 1,
+          DeliveredQuantity: 1,
+          Price: 44,
+          VAT: 25
+        });
+      }
+
       const today = new Date().toISOString().split("T")[0];
       const fxOrder = await fortnoxFetch("/orders", "POST", {
         Order: {
@@ -2976,16 +2986,14 @@ async function handleOrderCompletion(orderId) {
           YourOrderNumber: sharedOrderNumber,
           ExternalInvoiceReference1: sharedOrderNumber,
           Currency: order.currency || "SEK",
-          Freight: order.shipping_cost > 0 ? order.shipping_cost : 0,
+          Freight: 0,
           OrderRows: orderRows,
           Remarks: `Order ${sharedOrderNumber} – betald via Viva Wallet`
         }
       });
       fortnoxOrderNumber = fxOrder?.Order?.DocumentNumber;
-      const fxFreight = fxOrder?.Order?.Freight;
-      const fxFreightVAT = fxOrder?.Order?.FreightVAT;
       const fxTotal = fxOrder?.Order?.Total;
-      console.log(`[Fortnox] Order ${fortnoxOrderNumber}: Freight=${fxFreight}, FreightVAT=${fxFreightVAT}%, Total=${fxTotal}`);
+      console.log(`[Fortnox] Order ${fortnoxOrderNumber}: Total=${fxTotal} (frakt som artikelrad)`);
       notes.push(`Fortnox order: ${fortnoxOrderNumber} (ordernr ${sharedOrderNumber})`);
     } catch (err) {
       notes.push(`Fortnox order FEL: ${err.message}`);
