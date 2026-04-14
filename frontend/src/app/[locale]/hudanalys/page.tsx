@@ -787,7 +787,7 @@ export default function AnalysisPage() {
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#108474]/10 text-sm font-bold text-[#108474]">1</div>
                   <div>
                     <p className="text-sm font-semibold text-[#1d1d1f]">{tx(locale, "Ansiktsskanning – 12 zoner", "Face scan – 12 zones", "Escaneo facial – 12 zonas", "Gesichtsscan – 12 Zonen", "Scan du visage – 12 zones")}</p>
-                    <p className="mt-0.5 text-xs text-[#515151]">{tx(locale, "MediaPipe kartlagger 478 punkter och analyserar varje zon", "MediaPipe maps 478 points and analyses each zone", "MediaPipe mapea 478 puntos y analiza cada zona", "MediaPipe erfasst 478 Punkte und analysiert jede Zone", "MediaPipe cartographie 478 points et analyse chaque zone")}</p>
+                    <p className="mt-0.5 text-xs text-[#515151]">{tx(locale, "MediaPipe kartlägger 478 punkter och analyserar varje zon", "MediaPipe maps 478 points and analyses each zone", "MediaPipe mapea 478 puntos y analiza cada zona", "MediaPipe erfasst 478 Punkte und analysiert jede Zone", "MediaPipe cartographie 478 points et analyse chaque zone")}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4 rounded-2xl border border-[#e6e6e6] bg-white p-4">
@@ -800,8 +800,8 @@ export default function AnalysisPage() {
                 <div className="flex items-start gap-4 rounded-2xl border border-[#e6e6e6] bg-white p-4">
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#108474]/10 text-sm font-bold text-[#108474]">3</div>
                   <div>
-                    <p className="text-sm font-semibold text-[#1d1d1f]">{tx(locale, "15 metriker + hudalder + radardiagram", "15 metrics + skin age + radar chart", "15 métricas + edad de la piel + gráfico radar", "15 Metriken + Hautalter + Radardiagramm", "15 métriques + âge de la peau + graphique radar")}</p>
-                    <p className="mt-0.5 text-xs text-[#515151]">{tx(locale, "Plus rutin, produkter och livsstilsrad", "Plus routine, products & lifestyle tips", "Más rutina, productos y consejos", "Plus Routine, Produkte und Lifestyle-Tipps", "Plus routine, produits et conseils de mode de vie")}</p>
+                    <p className="text-sm font-semibold text-[#1d1d1f]">{tx(locale, "15 metriker + hudålder + radardiagram", "15 metrics + skin age + radar chart", "15 métricas + edad de la piel + gráfico radar", "15 Metriken + Hautalter + Radardiagramm", "15 métriques + âge de la peau + graphique radar")}</p>
+                    <p className="mt-0.5 text-xs text-[#515151]">{tx(locale, "Plus rutin, produkter och livsstilsråd", "Plus routine, products & lifestyle tips", "Más rutina, productos y consejos", "Plus Routine, Produkte und Lifestyle-Tipps", "Plus routine, produits et conseils de mode de vie")}</p>
                   </div>
                 </div>
               </div>
