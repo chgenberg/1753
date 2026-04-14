@@ -480,9 +480,14 @@ export default function AnalysisPage() {
       const progress = sessionStorage.getItem("1753_analysis_progress");
       if (progress) {
         const p = JSON.parse(progress);
-        if (p.step) setStep(p.step);
         if (p.answers) setAnswers(p.answers);
         if (p.email) { setUserEmail(p.email); setEmailConsent(true); }
+        if (p.scanSummary) setScanSummary(p.scanSummary);
+        if (p.step === "scan" && p.scanSummary) {
+          setStep(1);
+        } else if (p.step) {
+          setStep(p.step);
+        }
       }
     } catch { /* ignore corrupt data */ }
   }, []);
@@ -490,13 +495,21 @@ export default function AnalysisPage() {
   useEffect(() => {
     if (step === "intro" || step === "result" || step === "analyzing") return;
     try {
+      const scanMeta = scanSummary ? {
+        overallTop: scanSummary.overallTop,
+        zones: scanSummary.zones,
+        consentGiven: scanSummary.consentGiven,
+        overallSeverity: scanSummary.overallSeverity,
+        skinMetrics: scanSummary.skinMetrics,
+      } : undefined;
       sessionStorage.setItem("1753_analysis_progress", JSON.stringify({
         step,
         answers,
         email: userEmail || undefined,
+        scanSummary: scanMeta,
       }));
     } catch { /* storage full or unavailable */ }
-  }, [step, answers, userEmail]);
+  }, [step, answers, userEmail, scanSummary]);
 
   useEffect(() => {
     if (!user) return;
