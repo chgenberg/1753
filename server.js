@@ -2915,15 +2915,24 @@ app.post("/api/vivawallet/webhook", async (req, res) => {
 // ---- ORDER COMPLETION (Fortnox + Ongoing orchestration) ----
 
 async function handleOrderCompletion(orderId) {
-  const order = await db.findOrderByNumber(
-    (await db.pool.query("SELECT order_number FROM orders WHERE id = $1", [orderId])).rows[0]?.order_number
+  // Atomic lock: only one process can claim an unprocessed order
+  const lockResult = await db.pool.query(
+    `UPDATE orders SET processed_at = NOW()
+     WHERE id = $1 AND processed_at IS NULL
+     RETURNING order_number`,
+    [orderId]
   );
-  if (!order) throw new Error(`Order ${orderId} not found`);
 
-  if (order.processed_at) {
-    console.log(`[Order] ${order.order_number} already processed at ${order.processed_at}`);
+  if (lockResult.rowCount === 0) {
+    const existing = await db.pool.query("SELECT order_number, processed_at FROM orders WHERE id = $1", [orderId]);
+    const row = existing.rows[0];
+    if (!row) throw new Error(`Order ${orderId} not found`);
+    console.log(`[Order] ${row.order_number} already processed at ${row.processed_at} (skipped by lock)`);
     return { alreadyProcessed: true };
   }
+
+  const order = await db.findOrderByNumber(lockResult.rows[0].order_number);
+  if (!order) throw new Error(`Order ${orderId} not found after lock`);
 
   const items = typeof order.items === "string" ? JSON.parse(order.items) : order.items;
   const notes = [];
@@ -3142,7 +3151,7 @@ async function handleOrderCompletion(orderId) {
     console.error("[Order] Ongoing order error:", err);
   }
 
-  // 6. Update DB with all references
+  // 6. Update DB with all references (processed_at already set by atomic lock above)
   const fortnoxDone = !!fortnoxInvoiceNumber;
   const ongoingDone = !!ongoingOrderId;
   const allSucceeded = fortnoxDone && ongoingDone;
@@ -3152,7 +3161,6 @@ async function handleOrderCompletion(orderId) {
     fortnox_invoice_number: fortnoxInvoiceNumber ? String(fortnoxInvoiceNumber) : null,
     ongoing_order_id: ongoingOrderId ? String(ongoingOrderId) : null,
     status: allSucceeded ? "fulfilled" : (fortnoxDone || ongoingDone ? "partial" : "confirmed"),
-    processed_at: new Date().toISOString()
   };
 
   await db.updateOrder(order.id, updateFields);

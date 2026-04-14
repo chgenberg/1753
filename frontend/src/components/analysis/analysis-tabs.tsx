@@ -6,10 +6,13 @@ import {
   Check,
   ChevronDown,
   ChevronRight,
+  Download,
   Droplets,
   Eye,
   Gift,
+  HelpCircle,
   Leaf,
+  Loader2,
   Moon,
   Package,
   ScanFace,
@@ -21,6 +24,7 @@ import {
   Zap,
   type LucideIcon,
 } from "lucide-react";
+import { MethodologyModal } from "./methodology-modal";
 import { cn } from "@/lib/utils";
 import type { Locale } from "@/lib/i18n/types";
 import { PRODUCTS, type Product, productDisplayName, productPrice } from "@/lib/products";
@@ -1228,8 +1232,27 @@ export function AnalysisTabs({
 }: AnalysisTabsProps) {
   const { locale } = useLocale();
   const [activeTab, setActiveTab] = useState<TabId>("skin");
+  const [pdfLoading, setPdfLoading] = useState(false);
+  const [methodOpen, setMethodOpen] = useState(false);
   const tabBarRef = useRef<HTMLDivElement>(null);
   const tabOrder: TabId[] = ["skin", "products", "lifestyle", "routine"];
+
+  const handleDownloadPDF = async () => {
+    setPdfLoading(true);
+    try {
+      const { generateAnalysisPDF } = await import("./pdf-export");
+      await generateAnalysisPDF({
+        score, scoreLabel, summary, skinAge, fitzpatrick,
+        metrics, skinAnalysis, products, lifestyle,
+        routine, routineLegacy, avoid, nextAnalysis,
+        hasScan, scanImageSrc, scanZoneResults, faceZonesGPT,
+      }, locale);
+    } catch (err) {
+      console.error("PDF export failed:", err);
+    } finally {
+      setPdfLoading(false);
+    }
+  };
 
   const tabs: { id: TabId; label: string; icon: LucideIcon }[] = [
     { id: "skin", label: tx(locale, "Din hy", "Your skin", "Tu piel", "Deine Haut", "Votre peau"), icon: Sparkles },
@@ -1252,7 +1275,7 @@ export function AnalysisTabs({
     <div className="space-y-6">
       {/* Sticky tab bar */}
       <div ref={tabBarRef} className="sticky top-16 z-30 -mx-6 bg-white/80 px-6 pb-4 pt-2 backdrop-blur-xl md:-mx-10 md:px-10">
-        <div className="flex justify-center">
+        <div className="flex items-center justify-center gap-2">
           <div className="inline-flex w-full max-w-md rounded-2xl border border-[#e6e6e6]/80 bg-[#f5f5f7]/80 p-1 backdrop-blur-sm">
             {tabs.map((tab) => {
               const active = activeTab === tab.id;
@@ -1274,6 +1297,14 @@ export function AnalysisTabs({
               );
             })}
           </div>
+          <button
+            onClick={() => setMethodOpen(true)}
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[#e6e6e6]/80 bg-[#f5f5f7]/80 text-[#766a62] backdrop-blur-sm transition-all duration-300 hover:border-[#108474]/30 hover:bg-[#108474]/10 hover:text-[#108474]"
+            aria-label={tx(locale, "Så fungerar analysen", "How the analysis works", "Cómo funciona el análisis", "So funktioniert die Analyse", "Comment fonctionne l'analyse")}
+            title={tx(locale, "Så fungerar analysen", "How the analysis works", "Cómo funciona el análisis", "So funktioniert die Analyse", "Comment fonctionne l'analyse")}
+          >
+            <HelpCircle className="h-4 w-4" />
+          </button>
         </div>
 
         {/* Progress dots */}
@@ -1292,6 +1323,28 @@ export function AnalysisTabs({
             />
           ))}
         </div>
+      </div>
+
+      {/* Download PDF button */}
+      <div className="flex justify-center">
+        <button
+          onClick={handleDownloadPDF}
+          disabled={pdfLoading}
+          className="inline-flex items-center gap-2 rounded-full border border-[#e6e6e6] bg-white px-5 py-2.5 text-xs font-semibold text-[#1d1d1f] shadow-sm transition-all duration-300 hover:border-[#108474]/30 hover:bg-[#108474]/5 hover:text-[#108474] hover:shadow-md active:scale-[0.97] disabled:opacity-50"
+        >
+          {pdfLoading ? (
+            <Loader2 className="h-3.5 w-3.5 animate-spin" />
+          ) : (
+            <Download className="h-3.5 w-3.5" />
+          )}
+          {tx(locale,
+            pdfLoading ? "Skapar PDF..." : "Ladda ner som PDF",
+            pdfLoading ? "Creating PDF..." : "Download as PDF",
+            pdfLoading ? "Creando PDF..." : "Descargar como PDF",
+            pdfLoading ? "PDF wird erstellt..." : "Als PDF herunterladen",
+            pdfLoading ? "Création du PDF..." : "Télécharger en PDF"
+          )}
+        </button>
       </div>
 
       {/* Tab content */}
@@ -1335,11 +1388,13 @@ export function AnalysisTabs({
       {nextAnalysis && (
         <div className="rounded-2xl border border-[#e6e6e6]/80 bg-[#f5f5f7] p-5 text-center">
           <p className="text-[11px] font-bold uppercase tracking-widest text-[#766a62]">
-            {tx(locale, "Rekommenderad uppfoljning", "Recommended follow-up", "Seguimiento recomendado", "Empfohlene Nachuntersuchung", "Suivi recommandé")}
+            {tx(locale, "Rekommenderad uppföljning", "Recommended follow-up", "Seguimiento recomendado", "Empfohlene Nachuntersuchung", "Suivi recommandé")}
           </p>
           <p className="mt-1 text-sm text-[#515151]">{nextAnalysis}</p>
         </div>
       )}
+
+      <MethodologyModal open={methodOpen} onClose={() => setMethodOpen(false)} />
     </div>
   );
 }
