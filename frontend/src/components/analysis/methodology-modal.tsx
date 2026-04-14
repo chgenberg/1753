@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
+import { createPortal } from "react-dom";
 import {
   X,
   Activity,
@@ -663,7 +664,7 @@ export function MethodologyModal({
 
   if (!open) return null;
 
-  return (
+  return createPortal(
     <div
       className="fixed inset-0 z-[100] flex items-end justify-center sm:items-center"
       role="dialog"
@@ -727,6 +728,7 @@ export function MethodologyModal({
           <TabContent tabId={activeTab} locale={locale} />
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }

@@ -11,6 +11,7 @@ export const en: Messages = {
     navHome: "Home",
     navProducts: "Products",
     navAbout: "About",
+    navAnalysis: "Skin Analysis",
     navContact: "Contact",
     logoAlt: "1753 SKINCARE",
     accountAria: "My account",

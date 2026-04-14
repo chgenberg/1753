@@ -1424,8 +1424,8 @@ export default function AnalysisPage() {
 
           {/* ---- RESULT ---- */}
           {step === "result" && result && (
-            <div className="animate-fade-in space-y-10">
-              <div className="text-center">
+            <div className="space-y-10">
+              <div className="animate-fade-in text-center">
                 <h2 className="text-3xl font-bold tracking-tight">{a("resultTitle")}</h2>
               </div>
 

@@ -94,6 +94,11 @@ async function fetchWithRetry(url, options, maxAttempts = 3) {
   throw lastErr || new Error("Nätverksfel");
 }
 
+// ---- EMAIL i18n HELPER ----
+function emailT(locale, texts) {
+  return texts[locale] || texts.en || texts.sv || Object.values(texts)[0] || "";
+}
+
 // ---- USER STORE (PostgreSQL) ----
 
 function generateToken(user) {
@@ -1213,9 +1218,9 @@ app.post("/api/admin/orders/:id/cancel", adminAuthMiddleware, async (req, res) =
 
     // 5. Send cancellation email
     try {
-      const locale = order.locale || "sv";
-      const isSv = locale.startsWith("sv");
-      const totalKr = (order.total_amount + (order.shipping_cost || 0)).toLocaleString(isSv ? "sv-SE" : "en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
+      const cl = order.locale || "sv";
+      const localeMap = { sv: "sv-SE", en: "en-US", es: "es-ES", de: "de-DE", fr: "fr-FR" };
+      const totalKr = (order.total_amount + (order.shipping_cost || 0)).toLocaleString(localeMap[cl] || "sv-SE", { minimumFractionDigits: 0, maximumFractionDigits: 0 });
       const currencyLabel = (order.currency || "SEK") === "EUR" ? "\u20ac" : "kr";
 
       const apiKey = process.env.RESEND_API_KEY;
@@ -1224,50 +1229,52 @@ app.post("/api/admin/orders/:id/cancel", adminAuthMiddleware, async (req, res) =
         const { Resend } = require("resend");
         const resend = new Resend(apiKey);
         const firstName = order.customer_name?.split(" ")[0] || "";
+        const hi = emailT(cl, { sv: "Hej", en: "Hi", es: "Hola", de: "Hallo", fr: "Bonjour" });
+        const refundNote = order.viva_transaction_id
+          ? ` ${emailT(cl, {
+              sv: `Återbetalningen på <strong>${totalKr} ${currencyLabel}</strong> kommer att synas på ditt konto inom 3–5 bankdagar.`,
+              en: `The refund of <strong>${totalKr} ${currencyLabel}</strong> will appear in your account within 3–5 business days.`,
+              es: `El reembolso de <strong>${totalKr} ${currencyLabel}</strong> aparecerá en tu cuenta en 3–5 días hábiles.`,
+              de: `Die Rückerstattung von <strong>${totalKr} ${currencyLabel}</strong> wird innerhalb von 3–5 Werktagen auf deinem Konto erscheinen.`,
+              fr: `Le remboursement de <strong>${totalKr} ${currencyLabel}</strong> apparaîtra sur votre compte sous 3 à 5 jours ouvrés.`
+            })}` : "";
         await resend.emails.send({
           from: fromEmail,
           replyTo: "info@1753skin.com",
           to: order.customer_email,
-          subject: isSv
-            ? `Order #${order.order_number} har makulerats`
-            : `Order #${order.order_number} has been cancelled`,
+          subject: emailT(cl, { sv: `Order #${order.order_number} har makulerats`, en: `Order #${order.order_number} has been cancelled`, es: `Pedido #${order.order_number} ha sido cancelado`, de: `Bestellung #${order.order_number} wurde storniert`, fr: `Commande #${order.order_number} a été annulée` }),
           html: emailWrapper(`
             <div style="text-align:center;padding:32px 0 8px">
               <img src="https://www.1753skin.com/1753.png" alt="1753 SKINCARE" width="48" height="48" style="border-radius:12px"/>
             </div>
             <h1 style="font-size:24px;font-weight:600;color:#1d1d1f;letter-spacing:-0.02em;margin:16px 0;">
-              ${isSv ? "Din order har makulerats" : "Your order has been cancelled"}
+              ${emailT(cl, { sv: "Din order har makulerats", en: "Your order has been cancelled", es: "Tu pedido ha sido cancelado", de: "Deine Bestellung wurde storniert", fr: "Votre commande a été annulée" })}
             </h1>
             <p style="color:#515151;font-size:15px;line-height:1.6;margin:0 0 24px;">
-              ${isSv
-                ? `Hej ${firstName}${firstName ? ", " : ""}order <strong>#${order.order_number}</strong> har makulerats.${order.viva_transaction_id ? " Återbetalningen på <strong>" + totalKr + " " + currencyLabel + "</strong> kommer att synas på ditt konto inom 3–5 bankdagar." : ""}`
-                : `Hi ${firstName}${firstName ? ", " : ""}order <strong>#${order.order_number}</strong> has been cancelled.${order.viva_transaction_id ? " The refund of <strong>" + totalKr + " " + currencyLabel + "</strong> will appear in your account within 3–5 business days." : ""}`
-              }
+              ${hi} ${firstName}${firstName ? ", " : ""}${emailT(cl, { sv: "order", en: "order", es: "pedido", de: "Bestellung", fr: "commande" })} <strong>#${order.order_number}</strong> ${emailT(cl, { sv: "har makulerats.", en: "has been cancelled.", es: "ha sido cancelado.", de: "wurde storniert.", fr: "a été annulée." })}${refundNote}
             </p>
             <div style="background:#f5f5f7;border-radius:12px;padding:16px 20px;margin:20px 0">
               <table style="width:100%;border-collapse:collapse;">
                 <tr>
-                  <td style="padding:8px 0;color:#766a62;font-size:14px;">${isSv ? "Ordernummer" : "Order number"}</td>
+                  <td style="padding:8px 0;color:#766a62;font-size:14px;">${emailT(cl, { sv: "Ordernummer", en: "Order number", es: "Número de pedido", de: "Bestellnummer", fr: "Numéro de commande" })}</td>
                   <td style="padding:8px 0;text-align:right;font-weight:600;color:#1d1d1f;font-size:14px;">#${order.order_number}</td>
                 </tr>
                 ${order.viva_transaction_id ? `
                 <tr>
-                  <td style="padding:8px 0;color:#766a62;font-size:14px;">${isSv ? "Återbetalat belopp" : "Refunded amount"}</td>
+                  <td style="padding:8px 0;color:#766a62;font-size:14px;">${emailT(cl, { sv: "Återbetalat belopp", en: "Refunded amount", es: "Monto reembolsado", de: "Erstatteter Betrag", fr: "Montant remboursé" })}</td>
                   <td style="padding:8px 0;text-align:right;font-weight:600;color:#108474;font-size:14px;">${totalKr} ${currencyLabel}</td>
                 </tr>` : ""}
                 <tr>
-                  <td style="padding:8px 0;color:#766a62;font-size:14px;">${isSv ? "Status" : "Status"}</td>
-                  <td style="padding:8px 0;text-align:right;font-weight:600;color:#1d1d1f;font-size:14px;">${isSv ? (order.viva_transaction_id ? "Återbetalning påbörjad" : "Makulerad") : (order.viva_transaction_id ? "Refund initiated" : "Cancelled")}</td>
+                  <td style="padding:8px 0;color:#766a62;font-size:14px;">Status</td>
+                  <td style="padding:8px 0;text-align:right;font-weight:600;color:#1d1d1f;font-size:14px;">${order.viva_transaction_id ? emailT(cl, { sv: "Återbetalning påbörjad", en: "Refund initiated", es: "Reembolso iniciado", de: "Rückerstattung eingeleitet", fr: "Remboursement initié" }) : emailT(cl, { sv: "Makulerad", en: "Cancelled", es: "Cancelado", de: "Storniert", fr: "Annulée" })}</td>
                 </tr>
               </table>
             </div>
             <p style="color:#515151;font-size:14px;line-height:1.6;margin:24px 0 0;">
-              ${isSv
-                ? "Har du frågor om din återbetalning? Svara på detta mejl eller kontakta oss på"
-                : "Questions about your refund? Reply to this email or contact us at"}
+              ${emailT(cl, { sv: "Har du frågor om din återbetalning? Svara på detta mejl eller kontakta oss på", en: "Questions about your refund? Reply to this email or contact us at", es: "¿Preguntas sobre tu reembolso? Responde a este email o contáctanos en", de: "Fragen zu deiner Rückerstattung? Antworte auf diese E-Mail oder kontaktiere uns unter", fr: "Des questions sur votre remboursement ? Répondez à cet email ou contactez-nous à" })}
               <a href="mailto:info@1753skin.com" style="color:#108474"> info@1753skin.com</a>.
             </p>
-          `)
+          `, null, cl)
         });
         notes.push("Makuleringsbekräftelse skickad");
       }
@@ -2033,13 +2040,15 @@ app.post("/api/analysis", async (req, res) => {
       }
     } catch {}
 
+    let analysisPassword = null;
     if (!userId && req.body.questions?.email) {
       const email = req.body.questions.email.toLowerCase().trim();
       try {
         let existingUser = await db.findUserByEmail(email);
         if (!existingUser) {
-          const tempPassword = crypto.randomBytes(16).toString("hex");
-          const passwordHash = bcrypt ? await bcrypt.hash(tempPassword, 10) : tempPassword;
+          const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
+          analysisPassword = Array.from(crypto.randomBytes(8), b => chars[b % chars.length]).join("");
+          const passwordHash = bcrypt ? await bcrypt.hash(analysisPassword, 10) : analysisPassword;
           const namePart = email.split("@")[0].replace(/[._-]/g, " ").replace(/\b\w/g, c => c.toUpperCase());
           existingUser = await db.createUser({
             id: crypto.randomUUID(),
@@ -2049,79 +2058,6 @@ app.post("/api/analysis", async (req, res) => {
             passwordHash,
           });
           console.log(`[Analysis] Auto-created account for ${email} (id: ${existingUser.id})`);
-
-          const resetToken = crypto.randomBytes(32).toString("hex");
-          await db.pool.query(
-            "UPDATE users SET password_reset_token = $1, password_reset_expires = NOW() + INTERVAL '7 days' WHERE id = $2",
-            [resetToken, existingUser.id]
-          );
-
-          const apiKey = process.env.RESEND_API_KEY;
-          if (apiKey) {
-            const { Resend } = require("resend");
-            const resend = new Resend(apiKey);
-            const fromAddr = process.env.EMAIL_FROM || "info@1753skin.com";
-            const baseUrl = process.env.FRONTEND_URL || "https://www.1753skin.com";
-
-            const setPasswordSegments = {
-              sv: "valj-losenord", en: "set-password", es: "establecer-contrasena",
-              de: "passwort-setzen", fr: "choisir-mot-de-passe"
-            };
-            const setPasswordPath = setPasswordSegments[locale] || setPasswordSegments.en;
-            const setPasswordUrl = `${baseUrl}/${locale}/${setPasswordPath}?token=${resetToken}`;
-
-            const subjects = {
-              sv: "Välkommen till 1753 SKINCARE — ditt konto",
-              en: "Welcome to 1753 SKINCARE — your account",
-              es: "Bienvenido a 1753 SKINCARE — tu cuenta",
-              de: "Willkommen bei 1753 SKINCARE — dein Konto",
-              fr: "Bienvenue chez 1753 SKINCARE — votre compte"
-            };
-            const greetings = {
-              sv: `Hej ${existingUser.name},`, en: `Hi ${existingUser.name},`,
-              es: `Hola ${existingUser.name},`, de: `Hallo ${existingUser.name},`,
-              fr: `Bonjour ${existingUser.name},`
-            };
-            const bodyTexts = {
-              sv: "Vi har skapat ett konto åt dig baserat på din hudanalys. Här kan du se dina resultat, följa din hudresa och göra nya analyser varje månad.",
-              en: "We've created an account for you based on your skin analysis. Here you can view your results, track your skin journey and run new analyses every month.",
-              es: "Hemos creado una cuenta para ti basada en tu análisis de piel. Aquí puedes ver tus resultados, seguir tu viaje cutáneo y hacer nuevos análisis cada mes.",
-              de: "Wir haben ein Konto für dich basierend auf deiner Hautanalyse erstellt. Hier kannst du deine Ergebnisse einsehen, deine Hautreise verfolgen und jeden Monat neue Analysen durchführen.",
-              fr: "Nous avons créé un compte pour vous basé sur votre analyse cutanée. Ici, vous pouvez consulter vos résultats, suivre votre parcours cutané et effectuer de nouvelles analyses chaque mois."
-            };
-            const btnTexts = {
-              sv: "Sätt ditt lösenord", en: "Set your password",
-              es: "Establece tu contraseña", de: "Passwort festlegen",
-              fr: "Définir votre mot de passe"
-            };
-            const expiryTexts = {
-              sv: "Länken är giltig i 7 dagar.", en: "The link is valid for 7 days.",
-              es: "El enlace es válido durante 7 días.", de: "Der Link ist 7 Tage gültig.",
-              fr: "Le lien est valide pendant 7 jours."
-            };
-
-            const l = locale || "sv";
-
-            await resend.emails.send({
-              from: `1753 SKINCARE <${fromAddr}>`,
-              to: email,
-              subject: subjects[l] || subjects.en,
-              html: `
-                <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;max-width:520px;margin:0 auto;color:#1d1d1f">
-                  <h2 style="font-size:20px;margin-bottom:8px">${greetings[l] || greetings.en}</h2>
-                  <p style="color:#515151;line-height:1.6">${bodyTexts[l] || bodyTexts.en}</p>
-                  <p style="margin-top:20px">
-                    <a href="${setPasswordUrl}" style="display:inline-block;background:#108474;color:#fff;padding:12px 28px;border-radius:980px;text-decoration:none;font-weight:600;font-size:14px">${btnTexts[l] || btnTexts.en}</a>
-                  </p>
-                  <p style="margin-top:16px;color:#766a62;font-size:12px">${expiryTexts[l] || expiryTexts.en}</p>
-                  <div style="margin-top:32px;padding-top:16px;border-top:1px solid #e6e6e6;text-align:center">
-                    <p style="font-size:11px;color:#766a62">1753 SKINCARE<br><a href="${baseUrl}" style="color:#108474">www.1753skin.com</a></p>
-                  </div>
-                </div>
-              `
-            });
-            console.log(`[Analysis] Welcome email sent to ${email} (locale: ${l}, url: ${setPasswordUrl})`);
-          }
         }
         userId = existingUser.id;
       } catch (err) {
@@ -2299,7 +2235,7 @@ app.post("/api/analysis", async (req, res) => {
 
     // Send analysis report email (async, non-blocking)
     if (req.body.questions?.email) {
-      sendAnalysisReport(req.body.questions.email, outputText, req.body.questions?.locale || "sv").catch(err => {
+      sendAnalysisReport(req.body.questions.email, outputText, req.body.questions?.locale || "sv", analysisPassword).catch(err => {
         console.error("[Analysis] Report email error:", err.message);
       });
     }
@@ -3389,17 +3325,17 @@ async function sendOrderConfirmation(order, items) {
   const currency = order.currency || "SEK";
   const isSEK = currency === "SEK";
   const fmt = (amount) => isSEK ? `${Math.round(amount).toLocaleString("sv-SE")} kr` : `€${Number(amount).toFixed(2)}`;
-  const en = (order.locale || "sv") === "en";
-  const localePath = en ? "en" : "sv";
-
+  const l = order.locale || "sv";
+  const localePath = l;
   const hasSubscription = items.some(i => i.subscription || i.intervalDays);
-  const firstName = (order.customer_name || "").split(" ")[0] || (en ? "there" : "du");
+  const firstNameFallback = { sv: "du", en: "there", es: "amigo/a", de: "du", fr: "vous" };
+  const firstName = (order.customer_name || "").split(" ")[0] || (firstNameFallback[l] || "du");
 
   const itemRows = items.map(i => {
     const isSubItem = i.subscription || i.intervalDays;
     const intervalDays = i.subscription?.intervalDays || i.intervalDays;
     const subBadge = isSubItem
-      ? `<br><span style="display:inline-block;margin-top:4px;background:#108474;color:#fff;font-size:10px;font-weight:600;padding:2px 8px;border-radius:4px">${en ? `Subscription every ${intervalDays} days` : `Prenumeration var ${intervalDays}:e dag`}</span>`
+      ? `<br><span style="display:inline-block;margin-top:4px;background:#108474;color:#fff;font-size:10px;font-weight:600;padding:2px 8px;border-radius:4px">${emailT(l, { sv: `Prenumeration var ${intervalDays}:e dag`, en: `Subscription every ${intervalDays} days`, es: `Suscripción cada ${intervalDays} días`, de: `Abo alle ${intervalDays} Tage`, fr: `Abonnement tous les ${intervalDays} jours` })}</span>`
       : "";
     return `<tr>
       <td style="padding:10px 0;border-bottom:1px solid #eee">${i.name}${subBadge}</td>
@@ -3414,44 +3350,52 @@ async function sendOrderConfirmation(order, items) {
   const discountAmount = subtotal > totalAmount ? subtotal - totalAmount : 0;
 
   const summaryRows = [];
-  summaryRows.push(`<tr><td style="padding:4px 0;color:#515151">${en ? "Subtotal" : "Delsumma"}</td><td style="padding:4px 0;text-align:right">${fmt(subtotal)}</td></tr>`);
+  summaryRows.push(`<tr><td style="padding:4px 0;color:#515151">${emailT(l, { sv: "Delsumma", en: "Subtotal", es: "Subtotal", de: "Zwischensumme", fr: "Sous-total" })}</td><td style="padding:4px 0;text-align:right">${fmt(subtotal)}</td></tr>`);
   if (discountAmount > 0) {
-    summaryRows.push(`<tr><td style="padding:4px 0;color:#108474">${en ? "Discount" : "Rabatt"}</td><td style="padding:4px 0;text-align:right;color:#108474">-${fmt(discountAmount)}</td></tr>`);
+    summaryRows.push(`<tr><td style="padding:4px 0;color:#108474">${emailT(l, { sv: "Rabatt", en: "Discount", es: "Descuento", de: "Rabatt", fr: "Remise" })}</td><td style="padding:4px 0;text-align:right;color:#108474">-${fmt(discountAmount)}</td></tr>`);
   }
-  summaryRows.push(`<tr><td style="padding:4px 0;color:#515151">${en ? "Shipping" : "Frakt"}</td><td style="padding:4px 0;text-align:right">${shippingCost > 0 ? fmt(shippingCost) : (en ? "Free shipping" : "Fri frakt")}</td></tr>`);
-  summaryRows.push(`<tr><td style="padding:8px 0 0;font-weight:700;font-size:16px;border-top:2px solid #1d1d1f">${en ? "Total" : "Totalt"}</td><td style="padding:8px 0 0;text-align:right;font-weight:700;font-size:16px;border-top:2px solid #1d1d1f">${fmt(totalAmount + shippingCost)}</td></tr>`);
+  summaryRows.push(`<tr><td style="padding:4px 0;color:#515151">${emailT(l, { sv: "Frakt", en: "Shipping", es: "Envío", de: "Versand", fr: "Livraison" })}</td><td style="padding:4px 0;text-align:right">${shippingCost > 0 ? fmt(shippingCost) : emailT(l, { sv: "Fri frakt", en: "Free shipping", es: "Envío gratis", de: "Kostenloser Versand", fr: "Livraison gratuite" })}</td></tr>`);
+  summaryRows.push(`<tr><td style="padding:8px 0 0;font-weight:700;font-size:16px;border-top:2px solid #1d1d1f">${emailT(l, { sv: "Totalt", en: "Total", es: "Total", de: "Gesamt", fr: "Total" })}</td><td style="padding:8px 0 0;text-align:right;font-weight:700;font-size:16px;border-top:2px solid #1d1d1f">${fmt(totalAmount + shippingCost)}</td></tr>`);
 
   const subscriptionBlock = hasSubscription ? `
     <div style="background:#108474;border-radius:12px;padding:20px 24px;margin:24px 0;color:#fff">
-      <p style="margin:0;font-size:15px;font-weight:700">${en ? "Your subscription is active" : "Din prenumeration är aktiverad"}</p>
+      <p style="margin:0;font-size:15px;font-weight:700">${emailT(l, { sv: "Din prenumeration är aktiverad", en: "Your subscription is active", es: "Tu suscripción está activa", de: "Dein Abo ist aktiv", fr: "Votre abonnement est actif" })}</p>
       <p style="margin:8px 0 0;font-size:13px;line-height:1.6;opacity:0.9">
-        ${en
-          ? "Your next delivery will be sent automatically at your chosen interval with a 15% discount. You can pause, change or cancel anytime from My Account."
-          : "Nästa leverans skickas automatiskt enligt ditt valda intervall med 15% rabatt. Du kan när som helst pausa, ändra intervall eller avbryta via Mitt konto."}
+        ${emailT(l, {
+          sv: "Nästa leverans skickas automatiskt enligt ditt valda intervall med 15% rabatt. Du kan när som helst pausa, ändra intervall eller avbryta via Mitt konto.",
+          en: "Your next delivery will be sent automatically at your chosen interval with a 15% discount. You can pause, change or cancel anytime from My Account.",
+          es: "Tu próxima entrega se enviará automáticamente según el intervalo elegido con un 15% de descuento. Puedes pausar, cambiar o cancelar en cualquier momento desde Mi Cuenta.",
+          de: "Deine nächste Lieferung wird automatisch im gewählten Intervall mit 15% Rabatt versendet. Du kannst jederzeit pausieren, ändern oder kündigen über Mein Konto.",
+          fr: "Votre prochaine livraison sera envoyée automatiquement à l'intervalle choisi avec 15% de réduction. Vous pouvez suspendre, modifier ou annuler à tout moment depuis Mon Compte."
+        })}
       </p>
       <a href="${baseUrl}/${localePath}/mitt-konto" style="display:inline-block;margin-top:14px;background:#fff;color:#108474;padding:10px 24px;border-radius:980px;font-size:13px;font-weight:600;text-decoration:none">
-        ${en ? "Manage subscription" : "Hantera prenumeration"} →
+        ${emailT(l, { sv: "Hantera prenumeration", en: "Manage subscription", es: "Gestionar suscripción", de: "Abo verwalten", fr: "Gérer l'abonnement" })} →
       </a>
     </div>
   ` : "";
 
   const accountBlock = order.user_id ? `
     <div style="background:#f5f5f7;border-radius:12px;padding:16px 20px;margin:20px 0;text-align:center">
-      <p style="margin:0;font-size:13px;color:#766a62">${en ? "Your account" : "Ditt konto"}</p>
+      <p style="margin:0;font-size:13px;color:#766a62">${emailT(l, { sv: "Ditt konto", en: "Your account", es: "Tu cuenta", de: "Dein Konto", fr: "Votre compte" })}</p>
       <p style="margin:6px 0 0;font-size:14px;line-height:1.6;color:#515151">
-        ${en
-          ? "Sign in to My Account to track your order, view delivery status and manage your settings."
-          : "Logga in på Mitt konto för att följa din order, se leveransstatus och hantera dina inställningar."}
+        ${emailT(l, {
+          sv: "Logga in på Mitt konto för att följa din order, se leveransstatus och hantera dina inställningar.",
+          en: "Sign in to My Account to track your order, view delivery status and manage your settings.",
+          es: "Inicia sesión en Mi Cuenta para seguir tu pedido, ver el estado de envío y gestionar tu configuración.",
+          de: "Melde dich in Mein Konto an, um deine Bestellung zu verfolgen, den Lieferstatus zu sehen und deine Einstellungen zu verwalten.",
+          fr: "Connectez-vous à Mon Compte pour suivre votre commande, voir le statut de livraison et gérer vos paramètres."
+        })}
       </p>
       <a href="${baseUrl}/${localePath}/mitt-konto" style="display:inline-block;margin-top:12px;background:#1d1d1f;color:#fff;padding:10px 28px;border-radius:980px;font-size:13px;font-weight:600;text-decoration:none">
-        ${en ? "My Account" : "Mitt konto"}
+        ${emailT(l, { sv: "Mitt konto", en: "My Account", es: "Mi Cuenta", de: "Mein Konto", fr: "Mon Compte" })}
       </a>
     </div>
   ` : "";
 
   const subject = hasSubscription
-    ? (en ? `Order confirmation & subscription – ${order.order_number}` : `Orderbekräftelse & prenumeration – ${order.order_number}`)
-    : (en ? `Order confirmation – ${order.order_number}` : `Orderbekräftelse – ${order.order_number}`);
+    ? emailT(l, { sv: `Orderbekräftelse & prenumeration – ${order.order_number}`, en: `Order confirmation & subscription – ${order.order_number}`, es: `Confirmación de pedido y suscripción – ${order.order_number}`, de: `Bestellbestätigung & Abo – ${order.order_number}`, fr: `Confirmation de commande & abonnement – ${order.order_number}` })
+    : emailT(l, { sv: `Orderbekräftelse – ${order.order_number}`, en: `Order confirmation – ${order.order_number}`, es: `Confirmación de pedido – ${order.order_number}`, de: `Bestellbestätigung – ${order.order_number}`, fr: `Confirmation de commande – ${order.order_number}` });
 
   const { data: sendResult, error: sendError } = await resend.emails.send({
     from: fromEmail,
@@ -3464,24 +3408,28 @@ async function sendOrderConfirmation(order, items) {
           <img src="https://www.1753skin.com/1753.png" alt="1753 SKINCARE" width="48" height="48" style="border-radius:12px"/>
         </div>
         <div style="text-align:center;padding:16px 0 24px">
-          <h1 style="font-size:24px;font-weight:700;margin:0;letter-spacing:-0.02em">${en ? "Thank you for your order!" : "Tack för din beställning!"}</h1>
+          <h1 style="font-size:24px;font-weight:700;margin:0;letter-spacing:-0.02em">${emailT(l, { sv: "Tack för din beställning!", en: "Thank you for your order!", es: "¡Gracias por tu pedido!", de: "Danke für deine Bestellung!", fr: "Merci pour votre commande !" })}</h1>
         </div>
         <p style="font-size:15px;line-height:1.7;color:#515151">
-          ${en
-            ? `Hi ${firstName}, we have received your payment and your order is now being processed. You will receive a separate email with tracking information once your order has shipped.`
-            : `Hej ${firstName}, vi har mottagit din betalning och din order behandlas nu. Du får ett separat mejl med spårningsinformation när din order skickats.`}
+          ${emailT(l, {
+            sv: `Hej ${firstName}, vi har mottagit din betalning och din order behandlas nu. Du får ett separat mejl med spårningsinformation när din order skickats.`,
+            en: `Hi ${firstName}, we have received your payment and your order is now being processed. You will receive a separate email with tracking information once your order has shipped.`,
+            es: `Hola ${firstName}, hemos recibido tu pago y tu pedido está siendo procesado. Recibirás un email aparte con la información de seguimiento cuando tu pedido haya sido enviado.`,
+            de: `Hallo ${firstName}, wir haben deine Zahlung erhalten und deine Bestellung wird jetzt bearbeitet. Du erhältst eine separate E-Mail mit Tracking-Informationen, sobald deine Bestellung versendet wurde.`,
+            fr: `Bonjour ${firstName}, nous avons reçu votre paiement et votre commande est en cours de traitement. Vous recevrez un email séparé avec les informations de suivi lorsque votre commande aura été expédiée.`
+          })}
         </p>
         <div style="background:#f5f5f7;border-radius:12px;padding:16px 20px;margin:20px 0">
-          <p style="margin:0;font-size:13px;color:#766a62">${en ? "Order number" : "Ordernummer"}</p>
+          <p style="margin:0;font-size:13px;color:#766a62">${emailT(l, { sv: "Ordernummer", en: "Order number", es: "Número de pedido", de: "Bestellnummer", fr: "Numéro de commande" })}</p>
           <p style="margin:4px 0 0;font-size:17px;font-weight:600">${order.order_number}</p>
         </div>
         ${subscriptionBlock}
         <table style="width:100%;border-collapse:collapse;font-size:14px;margin:20px 0">
           <thead>
             <tr style="border-bottom:2px solid #1d1d1f">
-              <th style="text-align:left;padding:8px 0;font-weight:600">${en ? "Product" : "Produkt"}</th>
-              <th style="text-align:center;padding:8px 0;font-weight:600">${en ? "Qty" : "Antal"}</th>
-              <th style="text-align:right;padding:8px 0;font-weight:600">${en ? "Price" : "Pris"}</th>
+              <th style="text-align:left;padding:8px 0;font-weight:600">${emailT(l, { sv: "Produkt", en: "Product", es: "Producto", de: "Produkt", fr: "Produit" })}</th>
+              <th style="text-align:center;padding:8px 0;font-weight:600">${emailT(l, { sv: "Antal", en: "Qty", es: "Cant.", de: "Anz.", fr: "Qté" })}</th>
+              <th style="text-align:right;padding:8px 0;font-weight:600">${emailT(l, { sv: "Pris", en: "Price", es: "Precio", de: "Preis", fr: "Prix" })}</th>
             </tr>
           </thead>
           <tbody>${itemRows}</tbody>
@@ -3490,21 +3438,17 @@ async function sendOrderConfirmation(order, items) {
           ${summaryRows.join("")}
         </table>
         <div style="background:#f5f5f7;border-radius:12px;padding:16px 20px;margin:20px 0">
-          <p style="margin:0;font-size:13px;color:#766a62">${en ? "Delivery address" : "Leveransadress"}</p>
+          <p style="margin:0;font-size:13px;color:#766a62">${emailT(l, { sv: "Leveransadress", en: "Delivery address", es: "Dirección de envío", de: "Lieferadresse", fr: "Adresse de livraison" })}</p>
           <p style="margin:4px 0 0;font-size:14px">${order.customer_name}<br>${order.address}<br>${order.zip} ${order.city}</p>
         </div>
         ${accountBlock}
         <div style="margin-top:40px;padding-top:24px;border-top:1px solid #e6e6e6;text-align:center">
           <p style="font-size:13px;color:#766a62;line-height:1.6;margin:0">
-            ${en
-              ? `Questions? Reply to this email or contact us at`
-              : `Har du frågor? Svara på detta mejl eller kontakta oss på`}
+            ${emailT(l, { sv: "Har du frågor? Svara på detta mejl eller kontakta oss på", en: "Questions? Reply to this email or contact us at", es: "¿Preguntas? Responde a este email o contáctanos en", de: "Fragen? Antworte auf diese E-Mail oder kontaktiere uns unter", fr: "Des questions ? Répondez à cet email ou contactez-nous à" })}
             <a href="mailto:info@1753skin.com" style="color:#108474">info@1753skin.com</a>
           </p>
           <p style="font-size:12px;color:#766a62;line-height:1.6;margin:16px 0 0">
-            ${en
-              ? "1753 SKINCARE – Holistic skincare with CBD and CBG"
-              : "1753 SKINCARE – Holistisk hudvård med CBD och CBG"}<br>
+            ${emailT(l, { sv: "1753 SKINCARE – Holistisk hudvård med CBD och CBG", en: "1753 SKINCARE – Holistic skincare with CBD and CBG", es: "1753 SKINCARE – Cuidado holístico con CBD y CBG", de: "1753 SKINCARE – Ganzheitliche Hautpflege mit CBD und CBG", fr: "1753 SKINCARE – Soins holistiques au CBD et CBG" })}<br>
             <a href="https://www.1753skin.com" style="color:#108474">www.1753skin.com</a>
           </p>
         </div>
@@ -3529,7 +3473,7 @@ async function sendOrderConfirmation(order, items) {
 
 // ---- ANALYSIS REPORT EMAIL ----
 
-async function sendAnalysisReport(email, analysisContent, locale) {
+async function sendAnalysisReport(email, analysisContent, locale, accountPassword) {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) return;
 
@@ -3615,11 +3559,41 @@ async function sendAnalysisReport(email, analysisContent, locale) {
   const ctaLabel = isSv ? "Se din fullständiga analys" : isEs ? "Ver tu análisis completo" : isDe ? "Vollständige Analyse ansehen" : isFr ? "Voir votre analyse complète" : "View your full analysis";
   const ctaUrl = `${baseUrl}/${locale}/hudanalys`;
 
+  const accountBlockHtml = accountPassword ? `
+    <div style="background:#f5f5f7;border-radius:16px;padding:20px 24px;margin-bottom:28px;border:1px solid #e6e6e6">
+      <p style="font-size:14px;font-weight:600;color:#1d1d1f;margin:0 0 8px">
+        ${isSv ? "Ditt konto har skapats" : isEs ? "Tu cuenta ha sido creada" : isDe ? "Dein Konto wurde erstellt" : isFr ? "Votre compte a été créé" : "Your account has been created"}
+      </p>
+      <p style="font-size:13px;color:#515151;line-height:1.6;margin:0 0 14px">
+        ${isSv ? "Vi har skapat ett konto åt dig så att du kan följa din hudresa och göra nya analyser." : isEs ? "Hemos creado una cuenta para ti para que puedas seguir tu viaje cutáneo y hacer nuevos análisis." : isDe ? "Wir haben ein Konto für dich erstellt, damit du deine Hautreise verfolgen und neue Analysen durchführen kannst." : isFr ? "Nous avons créé un compte pour vous afin que vous puissiez suivre votre parcours cutané et effectuer de nouvelles analyses." : "We've created an account for you so you can track your skin journey and run new analyses."}
+      </p>
+      <table style="width:100%;border-collapse:collapse">
+        <tr>
+          <td style="padding:8px 12px;background:#fff;border-radius:8px 8px 0 0;border-bottom:1px solid #eee">
+            <span style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#766a62">${isSv ? "E-post" : "Email"}</span><br>
+            <span style="font-size:14px;font-weight:500;color:#1d1d1f">${email}</span>
+          </td>
+        </tr>
+        <tr>
+          <td style="padding:8px 12px;background:#fff;border-radius:0 0 8px 8px">
+            <span style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#766a62">${isSv ? "Lösenord" : isEs ? "Contraseña" : isDe ? "Passwort" : isFr ? "Mot de passe" : "Password"}</span><br>
+            <span style="font-size:16px;font-weight:600;color:#108474;font-family:monospace;letter-spacing:1px">${accountPassword}</span>
+          </td>
+        </tr>
+      </table>
+      <p style="font-size:11px;color:#766a62;margin:12px 0 0">
+        ${isSv ? "Du kan byta lösenord i dina kontoinställningar efter inloggning." : isEs ? "Puedes cambiar tu contraseña en la configuración de tu cuenta después de iniciar sesión." : isDe ? "Du kannst dein Passwort in den Kontoeinstellungen nach dem Einloggen ändern." : isFr ? "Vous pouvez changer votre mot de passe dans les paramètres de votre compte après connexion." : "You can change your password in your account settings after logging in."}
+      </p>
+    </div>
+  ` : "";
+
   const html = `
     <div style="font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Helvetica,Arial,sans-serif;max-width:560px;margin:0 auto;color:#1d1d1f;padding:0 16px">
       <div style="text-align:center;padding:32px 0 24px">
         <img src="https://www.1753skin.com/1753.png" alt="1753 SKINCARE" width="48" height="48" style="border-radius:12px" />
       </div>
+
+      ${accountBlockHtml}
 
       <div style="text-align:center;margin-bottom:24px">
         <div style="display:inline-block;width:120px;height:120px;border-radius:50%;background:linear-gradient(135deg,#108474 0%,#0d6e62 100%);line-height:120px;text-align:center">
@@ -3706,12 +3680,13 @@ async function sendShippingConfirmation(order, items, trackingNumber, trackingUr
   const resend = new Resend(apiKey);
   const fromEmail = process.env.EMAIL_FROM || "order@1753skin.com";
   const baseUrl = process.env.FRONTEND_URL || "https://www.1753skin.com";
-  const en = (order.locale || "sv") === "en";
-  const localePath = en ? "en" : "sv";
+  const l = order.locale || "sv";
+  const localePath = l;
   const currency = order.currency || "SEK";
   const isSEK = currency === "SEK";
   const fmt = (amount) => isSEK ? `${Math.round(amount).toLocaleString("sv-SE")} kr` : `€${Number(amount).toFixed(2)}`;
-  const firstName = (order.customer_name || "").split(" ")[0] || (en ? "there" : "du");
+  const firstNameFallback = { sv: "du", en: "there", es: "amigo/a", de: "du", fr: "vous" };
+  const firstName = (order.customer_name || "").split(" ")[0] || (firstNameFallback[l] || "du");
 
   const itemRows = items.map(i => `<tr>
     <td style="padding:8px 0;border-bottom:1px solid #eee">${i.name}</td>
@@ -3721,23 +3696,21 @@ async function sendShippingConfirmation(order, items, trackingNumber, trackingUr
 
   const trackingBlock = trackingNumber ? `
     <div style="background:#108474;border-radius:12px;padding:20px 24px;margin:24px 0;color:#fff;text-align:center">
-      <p style="margin:0;font-size:13px;opacity:0.9">${en ? "Tracking number" : "Spårningsnummer"}</p>
+      <p style="margin:0;font-size:13px;opacity:0.9">${emailT(l, { sv: "Spårningsnummer", en: "Tracking number", es: "Número de seguimiento", de: "Sendungsnummer", fr: "Numéro de suivi" })}</p>
       <p style="margin:8px 0 0;font-size:20px;font-weight:700;letter-spacing:0.5px">${trackingNumber}</p>
       ${trackingUrl ? `<a href="${trackingUrl}" style="display:inline-block;margin-top:14px;background:#fff;color:#108474;padding:10px 24px;border-radius:980px;font-size:13px;font-weight:600;text-decoration:none">
-        ${en ? "Track your package" : "Spåra ditt paket"} →
+        ${emailT(l, { sv: "Spåra ditt paket", en: "Track your package", es: "Rastrear tu paquete", de: "Paket verfolgen", fr: "Suivre votre colis" })} →
       </a>` : ""}
     </div>
   ` : `
     <div style="background:#f5f5f7;border-radius:12px;padding:16px 20px;margin:20px 0;text-align:center">
       <p style="margin:0;font-size:14px;color:#515151">
-        ${en ? "Tracking information will be available shortly." : "Spårningsinformation blir tillgänglig inom kort."}
+        ${emailT(l, { sv: "Spårningsinformation blir tillgänglig inom kort.", en: "Tracking information will be available shortly.", es: "La información de seguimiento estará disponible en breve.", de: "Tracking-Informationen werden in Kürze verfügbar sein.", fr: "Les informations de suivi seront bientôt disponibles." })}
       </p>
     </div>
   `;
 
-  const subject = en
-    ? `Your order is on its way! – ${order.order_number}`
-    : `Din order är på väg! – ${order.order_number}`;
+  const subject = emailT(l, { sv: `Din order är på väg! – ${order.order_number}`, en: `Your order is on its way! – ${order.order_number}`, es: `¡Tu pedido está en camino! – ${order.order_number}`, de: `Deine Bestellung ist unterwegs! – ${order.order_number}`, fr: `Votre commande est en route ! – ${order.order_number}` });
 
   const { data: sendResult, error: sendError } = await resend.emails.send({
     from: fromEmail,
@@ -3750,45 +3723,49 @@ async function sendShippingConfirmation(order, items, trackingNumber, trackingUr
           <img src="https://www.1753skin.com/1753.png" alt="1753 SKINCARE" width="48" height="48" style="border-radius:12px"/>
         </div>
         <div style="text-align:center;padding:16px 0 24px">
-          <h1 style="font-size:24px;font-weight:700;margin:0;letter-spacing:-0.02em">${en ? "Your order is on its way!" : "Din order är på väg!"}</h1>
+          <h1 style="font-size:24px;font-weight:700;margin:0;letter-spacing:-0.02em">${emailT(l, { sv: "Din order är på väg!", en: "Your order is on its way!", es: "¡Tu pedido está en camino!", de: "Deine Bestellung ist unterwegs!", fr: "Votre commande est en route !" })}</h1>
         </div>
         <p style="font-size:15px;line-height:1.7;color:#515151">
-          ${en
-            ? `Hi ${firstName}, great news! Your order has been packed and shipped. ${trackingNumber ? "You can track your package using the link below." : "We'll send tracking details as soon as they're available."}`
-            : `Hej ${firstName}, goda nyheter! Din order har packats och skickats. ${trackingNumber ? "Du kan spåra ditt paket via länken nedan." : "Vi skickar spårningsdetaljer så snart de finns tillgängliga."}`}
+          ${emailT(l, {
+            sv: `Hej ${firstName}, goda nyheter! Din order har packats och skickats. ${trackingNumber ? "Du kan spåra ditt paket via länken nedan." : "Vi skickar spårningsdetaljer så snart de finns tillgängliga."}`,
+            en: `Hi ${firstName}, great news! Your order has been packed and shipped. ${trackingNumber ? "You can track your package using the link below." : "We'll send tracking details as soon as they're available."}`,
+            es: `Hola ${firstName}, ¡buenas noticias! Tu pedido ha sido empaquetado y enviado. ${trackingNumber ? "Puedes rastrear tu paquete con el enlace de abajo." : "Te enviaremos los detalles de seguimiento en cuanto estén disponibles."}`,
+            de: `Hallo ${firstName}, tolle Nachrichten! Deine Bestellung wurde verpackt und versendet. ${trackingNumber ? "Du kannst dein Paket über den Link unten verfolgen." : "Wir senden dir die Tracking-Daten, sobald sie verfügbar sind."}`,
+            fr: `Bonjour ${firstName}, bonne nouvelle ! Votre commande a été emballée et expédiée. ${trackingNumber ? "Vous pouvez suivre votre colis via le lien ci-dessous." : "Nous vous enverrons les détails de suivi dès qu'ils seront disponibles."}`
+          })}
         </p>
         <div style="background:#f5f5f7;border-radius:12px;padding:16px 20px;margin:20px 0">
-          <p style="margin:0;font-size:13px;color:#766a62">${en ? "Order number" : "Ordernummer"}</p>
+          <p style="margin:0;font-size:13px;color:#766a62">${emailT(l, { sv: "Ordernummer", en: "Order number", es: "Número de pedido", de: "Bestellnummer", fr: "Numéro de commande" })}</p>
           <p style="margin:4px 0 0;font-size:17px;font-weight:600">${order.order_number}</p>
         </div>
         ${trackingBlock}
         <table style="width:100%;border-collapse:collapse;font-size:14px;margin:20px 0">
           <thead>
             <tr style="border-bottom:2px solid #1d1d1f">
-              <th style="text-align:left;padding:8px 0;font-weight:600">${en ? "Product" : "Produkt"}</th>
-              <th style="text-align:center;padding:8px 0;font-weight:600">${en ? "Qty" : "Antal"}</th>
-              <th style="text-align:right;padding:8px 0;font-weight:600">${en ? "Price" : "Pris"}</th>
+              <th style="text-align:left;padding:8px 0;font-weight:600">${emailT(l, { sv: "Produkt", en: "Product", es: "Producto", de: "Produkt", fr: "Produit" })}</th>
+              <th style="text-align:center;padding:8px 0;font-weight:600">${emailT(l, { sv: "Antal", en: "Qty", es: "Cant.", de: "Anz.", fr: "Qté" })}</th>
+              <th style="text-align:right;padding:8px 0;font-weight:600">${emailT(l, { sv: "Pris", en: "Price", es: "Precio", de: "Preis", fr: "Prix" })}</th>
             </tr>
           </thead>
           <tbody>${itemRows}</tbody>
         </table>
         <div style="background:#f5f5f7;border-radius:12px;padding:16px 20px;margin:20px 0">
-          <p style="margin:0;font-size:13px;color:#766a62">${en ? "Delivery address" : "Leveransadress"}</p>
+          <p style="margin:0;font-size:13px;color:#766a62">${emailT(l, { sv: "Leveransadress", en: "Delivery address", es: "Dirección de envío", de: "Lieferadresse", fr: "Adresse de livraison" })}</p>
           <p style="margin:4px 0 0;font-size:14px">${order.customer_name}<br>${order.address}<br>${order.zip} ${order.city}</p>
         </div>
         ${order.user_id ? `
         <div style="text-align:center;margin:20px 0">
           <a href="${baseUrl}/${localePath}/mitt-konto" style="display:inline-block;background:#1d1d1f;color:#fff;padding:12px 32px;border-radius:980px;font-size:14px;font-weight:600;text-decoration:none">
-            ${en ? "My Account" : "Mitt konto"}
+            ${emailT(l, { sv: "Mitt konto", en: "My Account", es: "Mi Cuenta", de: "Mein Konto", fr: "Mon Compte" })}
           </a>
         </div>` : ""}
         <div style="margin-top:40px;padding-top:24px;border-top:1px solid #e6e6e6;text-align:center">
           <p style="font-size:13px;color:#766a62;line-height:1.6;margin:0">
-            ${en ? "Questions? Reply to this email or contact us at" : "Har du frågor? Svara på detta mejl eller kontakta oss på"}
+            ${emailT(l, { sv: "Har du frågor? Svara på detta mejl eller kontakta oss på", en: "Questions? Reply to this email or contact us at", es: "¿Preguntas? Responde a este email o contáctanos en", de: "Fragen? Antworte auf diese E-Mail oder kontaktiere uns unter", fr: "Des questions ? Répondez à cet email ou contactez-nous à" })}
             <a href="mailto:info@1753skin.com" style="color:#108474">info@1753skin.com</a>
           </p>
           <p style="font-size:12px;color:#766a62;line-height:1.6;margin:16px 0 0">
-            ${en ? "1753 SKINCARE – Holistic skincare with CBD and CBG" : "1753 SKINCARE – Holistisk hudvård med CBD och CBG"}<br>
+            ${emailT(l, { sv: "1753 SKINCARE – Holistisk hudvård med CBD och CBG", en: "1753 SKINCARE – Holistic skincare with CBD and CBG", es: "1753 SKINCARE – Cuidado holístico con CBD y CBG", de: "1753 SKINCARE – Ganzheitliche Hautpflege mit CBD und CBG", fr: "1753 SKINCARE – Soins holistiques au CBD et CBG" })}<br>
             <a href="https://www.1753skin.com" style="color:#108474">www.1753skin.com</a>
           </p>
         </div>
@@ -3826,76 +3803,94 @@ async function sendSubscriptionChangeEmail(sub, action, details) {
   if (!email) return { sent: false, skipReason: "no_email" };
 
   const user = sub.user_id ? await db.findUserById(sub.user_id) : null;
-  const locale = user?.locale || "sv";
-  const en = locale === "en";
-  const localePath = en ? "en" : "sv";
-  const firstName = (user?.name || sub.customer_name || "").split(" ")[0] || (en ? "there" : "du");
+  const l = user?.locale || "sv";
+  const localePath = l;
+  const firstNameFallback = { sv: "du", en: "there", es: "amigo/a", de: "du", fr: "vous" };
+  const firstName = (user?.name || sub.customer_name || "").split(" ")[0] || (firstNameFallback[l] || "du");
+  const pn = sub.product_name;
+  const hi = emailT(l, { sv: "Hej", en: "Hi", es: "Hola", de: "Hallo", fr: "Bonjour" });
 
   const actionTexts = {
     paused: {
-      subject: en ? "Your subscription has been paused" : "Din prenumeration är pausad",
-      heading: en ? "Subscription paused" : "Prenumeration pausad",
-      body: en
-        ? `Hi ${firstName}, your subscription for <strong>${sub.product_name}</strong> has been paused. You won't be charged until you resume it. You can resume at any time from My Account.`
-        : `Hej ${firstName}, din prenumeration på <strong>${sub.product_name}</strong> har pausats. Du debiteras inte förrän du återupptar den. Du kan återuppta den när som helst via Mitt konto.`,
+      subject: emailT(l, { sv: "Din prenumeration är pausad", en: "Your subscription has been paused", es: "Tu suscripción ha sido pausada", de: "Dein Abo wurde pausiert", fr: "Votre abonnement a été mis en pause" }),
+      heading: emailT(l, { sv: "Prenumeration pausad", en: "Subscription paused", es: "Suscripción pausada", de: "Abo pausiert", fr: "Abonnement en pause" }),
+      body: emailT(l, {
+        sv: `${hi} ${firstName}, din prenumeration på <strong>${pn}</strong> har pausats. Du debiteras inte förrän du återupptar den. Du kan återuppta den när som helst via Mitt konto.`,
+        en: `${hi} ${firstName}, your subscription for <strong>${pn}</strong> has been paused. You won't be charged until you resume it. You can resume at any time from My Account.`,
+        es: `${hi} ${firstName}, tu suscripción de <strong>${pn}</strong> ha sido pausada. No se te cobrará hasta que la reanudes. Puedes reanudarla en cualquier momento desde Mi Cuenta.`,
+        de: `${hi} ${firstName}, dein Abo für <strong>${pn}</strong> wurde pausiert. Du wirst erst wieder belastet, wenn du es fortsetzt. Du kannst es jederzeit über Mein Konto fortsetzen.`,
+        fr: `${hi} ${firstName}, votre abonnement pour <strong>${pn}</strong> a été mis en pause. Vous ne serez pas facturé(e) jusqu'à sa reprise. Vous pouvez le reprendre à tout moment depuis Mon Compte.`
+      }),
     },
     resumed: {
-      subject: en ? "Your subscription is active again" : "Din prenumeration är aktiv igen",
-      heading: en ? "Subscription resumed" : "Prenumeration återupptagen",
-      body: en
-        ? `Hi ${firstName}, your subscription for <strong>${sub.product_name}</strong> is active again. Your next delivery is scheduled for <strong>${details?.nextCharge || "soon"}</strong>.`
-        : `Hej ${firstName}, din prenumeration på <strong>${sub.product_name}</strong> är aktiv igen. Nästa leverans är planerad till <strong>${details?.nextCharge || "snart"}</strong>.`,
+      subject: emailT(l, { sv: "Din prenumeration är aktiv igen", en: "Your subscription is active again", es: "Tu suscripción está activa de nuevo", de: "Dein Abo ist wieder aktiv", fr: "Votre abonnement est de nouveau actif" }),
+      heading: emailT(l, { sv: "Prenumeration återupptagen", en: "Subscription resumed", es: "Suscripción reanudada", de: "Abo fortgesetzt", fr: "Abonnement repris" }),
+      body: emailT(l, {
+        sv: `${hi} ${firstName}, din prenumeration på <strong>${pn}</strong> är aktiv igen. Nästa leverans är planerad till <strong>${details?.nextCharge || "snart"}</strong>.`,
+        en: `${hi} ${firstName}, your subscription for <strong>${pn}</strong> is active again. Your next delivery is scheduled for <strong>${details?.nextCharge || "soon"}</strong>.`,
+        es: `${hi} ${firstName}, tu suscripción de <strong>${pn}</strong> está activa de nuevo. Tu próxima entrega está programada para <strong>${details?.nextCharge || "pronto"}</strong>.`,
+        de: `${hi} ${firstName}, dein Abo für <strong>${pn}</strong> ist wieder aktiv. Deine nächste Lieferung ist geplant für <strong>${details?.nextCharge || "bald"}</strong>.`,
+        fr: `${hi} ${firstName}, votre abonnement pour <strong>${pn}</strong> est de nouveau actif. Votre prochaine livraison est prévue pour le <strong>${details?.nextCharge || "bientôt"}</strong>.`
+      }),
     },
     cancelled: {
-      subject: en ? "Your subscription has been cancelled" : "Din prenumeration är avbruten",
-      heading: en ? "Subscription cancelled" : "Prenumeration avbruten",
-      body: en
-        ? `Hi ${firstName}, your subscription for <strong>${sub.product_name}</strong> has been cancelled. You won't be charged again. We're sorry to see you go — you can always start a new subscription from our product pages.`
-        : `Hej ${firstName}, din prenumeration på <strong>${sub.product_name}</strong> har avbrutits. Du kommer inte debiteras igen. Vi hoppas att du kommer tillbaka — du kan alltid starta en ny prenumeration via våra produktsidor.`,
+      subject: emailT(l, { sv: "Din prenumeration är avbruten", en: "Your subscription has been cancelled", es: "Tu suscripción ha sido cancelada", de: "Dein Abo wurde gekündigt", fr: "Votre abonnement a été annulé" }),
+      heading: emailT(l, { sv: "Prenumeration avbruten", en: "Subscription cancelled", es: "Suscripción cancelada", de: "Abo gekündigt", fr: "Abonnement annulé" }),
+      body: emailT(l, {
+        sv: `${hi} ${firstName}, din prenumeration på <strong>${pn}</strong> har avbrutits. Du kommer inte debiteras igen. Vi hoppas att du kommer tillbaka — du kan alltid starta en ny prenumeration via våra produktsidor.`,
+        en: `${hi} ${firstName}, your subscription for <strong>${pn}</strong> has been cancelled. You won't be charged again. We're sorry to see you go — you can always start a new subscription from our product pages.`,
+        es: `${hi} ${firstName}, tu suscripción de <strong>${pn}</strong> ha sido cancelada. No se te cobrará de nuevo. Esperamos verte pronto — siempre puedes iniciar una nueva suscripción desde nuestras páginas de productos.`,
+        de: `${hi} ${firstName}, dein Abo für <strong>${pn}</strong> wurde gekündigt. Du wirst nicht mehr belastet. Wir hoffen, dich wiederzusehen — du kannst jederzeit ein neues Abo über unsere Produktseiten starten.`,
+        fr: `${hi} ${firstName}, votre abonnement pour <strong>${pn}</strong> a été annulé. Vous ne serez plus facturé(e). Nous espérons vous revoir — vous pouvez toujours démarrer un nouvel abonnement depuis nos pages produits.`
+      }),
     },
     updated: {
-      subject: en ? "Your subscription has been updated" : "Din prenumeration har uppdaterats",
-      heading: en ? "Subscription updated" : "Prenumeration uppdaterad",
-      body: en
-        ? `Hi ${firstName}, your subscription for <strong>${sub.product_name}</strong> has been updated.${details?.intervalDays ? ` New delivery interval: every <strong>${details.intervalDays} days</strong>.` : ""}${details?.quantity ? ` New quantity: <strong>${details.quantity}</strong>.` : ""}`
-        : `Hej ${firstName}, din prenumeration på <strong>${sub.product_name}</strong> har uppdaterats.${details?.intervalDays ? ` Nytt leveransintervall: var <strong>${details.intervalDays}:e dag</strong>.` : ""}${details?.quantity ? ` Ny mängd: <strong>${details.quantity}</strong>.` : ""}`,
+      subject: emailT(l, { sv: "Din prenumeration har uppdaterats", en: "Your subscription has been updated", es: "Tu suscripción ha sido actualizada", de: "Dein Abo wurde aktualisiert", fr: "Votre abonnement a été mis à jour" }),
+      heading: emailT(l, { sv: "Prenumeration uppdaterad", en: "Subscription updated", es: "Suscripción actualizada", de: "Abo aktualisiert", fr: "Abonnement mis à jour" }),
+      body: emailT(l, {
+        sv: `${hi} ${firstName}, din prenumeration på <strong>${pn}</strong> har uppdaterats.${details?.intervalDays ? ` Nytt leveransintervall: var <strong>${details.intervalDays}:e dag</strong>.` : ""}${details?.quantity ? ` Ny mängd: <strong>${details.quantity}</strong>.` : ""}`,
+        en: `${hi} ${firstName}, your subscription for <strong>${pn}</strong> has been updated.${details?.intervalDays ? ` New delivery interval: every <strong>${details.intervalDays} days</strong>.` : ""}${details?.quantity ? ` New quantity: <strong>${details.quantity}</strong>.` : ""}`,
+        es: `${hi} ${firstName}, tu suscripción de <strong>${pn}</strong> ha sido actualizada.${details?.intervalDays ? ` Nuevo intervalo de entrega: cada <strong>${details.intervalDays} días</strong>.` : ""}${details?.quantity ? ` Nueva cantidad: <strong>${details.quantity}</strong>.` : ""}`,
+        de: `${hi} ${firstName}, dein Abo für <strong>${pn}</strong> wurde aktualisiert.${details?.intervalDays ? ` Neues Lieferintervall: alle <strong>${details.intervalDays} Tage</strong>.` : ""}${details?.quantity ? ` Neue Menge: <strong>${details.quantity}</strong>.` : ""}`,
+        fr: `${hi} ${firstName}, votre abonnement pour <strong>${pn}</strong> a été mis à jour.${details?.intervalDays ? ` Nouvel intervalle de livraison : tous les <strong>${details.intervalDays} jours</strong>.` : ""}${details?.quantity ? ` Nouvelle quantité : <strong>${details.quantity}</strong>.` : ""}`
+      }),
     },
   };
 
-  const t = actionTexts[action];
-  if (!t) return { sent: false, skipReason: "unknown_action" };
+  const tt = actionTexts[action];
+  if (!tt) return { sent: false, skipReason: "unknown_action" };
 
   const { data: sendResult, error: sendError } = await resend.emails.send({
     from: fromEmail,
     to: email,
     replyTo: "info@1753skin.com",
-    subject: t.subject,
+    subject: tt.subject,
     html: `
       <div style="font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Helvetica,Arial,sans-serif;max-width:560px;margin:0 auto;color:#1d1d1f;padding:0 16px">
         <div style="text-align:center;padding:32px 0 8px">
           <img src="https://www.1753skin.com/1753.png" alt="1753 SKINCARE" width="48" height="48" style="border-radius:12px"/>
         </div>
         <div style="text-align:center;padding:16px 0 24px">
-          <h1 style="font-size:24px;font-weight:700;margin:0;letter-spacing:-0.02em">${t.heading}</h1>
+          <h1 style="font-size:24px;font-weight:700;margin:0;letter-spacing:-0.02em">${tt.heading}</h1>
         </div>
-        <p style="font-size:15px;line-height:1.7;color:#515151">${t.body}</p>
+        <p style="font-size:15px;line-height:1.7;color:#515151">${tt.body}</p>
         <div style="background:#f5f5f7;border-radius:12px;padding:16px 20px;margin:24px 0">
-          <p style="margin:0;font-size:13px;color:#766a62">${en ? "Product" : "Produkt"}</p>
-          <p style="margin:4px 0 0;font-size:15px;font-weight:600">${sub.product_name}</p>
+          <p style="margin:0;font-size:13px;color:#766a62">${emailT(l, { sv: "Produkt", en: "Product", es: "Producto", de: "Produkt", fr: "Produit" })}</p>
+          <p style="margin:4px 0 0;font-size:15px;font-weight:600">${pn}</p>
         </div>
         <div style="text-align:center;margin:28px 0">
           <a href="${baseUrl}/${localePath}/mitt-konto"
              style="display:inline-block;padding:14px 32px;background:#1d1d1f;color:#fff;font-size:15px;font-weight:600;border-radius:980px;text-decoration:none">
-            ${en ? "My Account" : "Mitt konto"}
+            ${emailT(l, { sv: "Mitt konto", en: "My Account", es: "Mi Cuenta", de: "Mein Konto", fr: "Mon Compte" })}
           </a>
         </div>
         <div style="margin-top:40px;padding-top:24px;border-top:1px solid #e6e6e6;text-align:center">
           <p style="font-size:13px;color:#766a62;line-height:1.6;margin:0">
-            ${en ? "Questions? Reply to this email or contact us at" : "Har du frågor? Svara på detta mejl eller kontakta oss på"}
+            ${emailT(l, { sv: "Har du frågor? Svara på detta mejl eller kontakta oss på", en: "Questions? Reply to this email or contact us at", es: "¿Preguntas? Responde a este email o contáctanos en", de: "Fragen? Antworte auf diese E-Mail oder kontaktiere uns unter", fr: "Des questions ? Répondez à cet email ou contactez-nous à" })}
             <a href="mailto:info@1753skin.com" style="color:#108474">info@1753skin.com</a>
           </p>
           <p style="font-size:12px;color:#766a62;line-height:1.6;margin:16px 0 0">
-            ${en ? "1753 SKINCARE – Holistic skincare with CBD and CBG" : "1753 SKINCARE – Holistisk hudvård med CBD och CBG"}<br>
+            ${emailT(l, { sv: "1753 SKINCARE – Holistisk hudvård med CBD och CBG", en: "1753 SKINCARE – Holistic skincare with CBD and CBG", es: "1753 SKINCARE – Cuidado holístico con CBD y CBG", de: "1753 SKINCARE – Ganzheitliche Hautpflege mit CBD und CBG", fr: "1753 SKINCARE – Soins holistiques au CBD et CBG" })}<br>
             <a href="https://www.1753skin.com" style="color:#108474">www.1753skin.com</a>
           </p>
         </div>
@@ -3932,7 +3927,8 @@ async function sendPasswordSetupEmail(email, name, resetToken, locale) {
     de: "passwort-setzen", fr: "choisir-mot-de-passe"
   };
   const resetUrl = `${baseUrl}/${l}/${setPasswordSegments[l] || setPasswordSegments.en}?token=${resetToken}`;
-  const firstName = (name || "").split(" ")[0] || (l === "sv" ? "du" : "there");
+  const firstNameFallback = { sv: "du", en: "there", es: "amigo/a", de: "du", fr: "vous" };
+  const firstName = (name || "").split(" ")[0] || (firstNameFallback[l] || "du");
 
   const subjects = {
     sv: "Välkommen till 1753 SKINCARE – Välj ditt lösenord",
@@ -4182,16 +4178,30 @@ async function handleAutoUnsubscribe(email, name) {
       const fromAddr = process.env.EMAIL_FROM || "info@1753skin.com";
       const firstName = name?.split(" ")[0] || "";
 
+      const subLocale = subscriber.locale || "sv";
+      const hiName = firstName ? ` ${firstName}` : "";
       await resend.emails.send({
         from: `1753 SKINCARE <${fromAddr}>`,
         to: email,
-        subject: "Bekräftelse: du är avprenumererad",
+        subject: emailT(subLocale, { sv: "Bekräftelse: du är avprenumererad", en: "Confirmation: you have been unsubscribed", es: "Confirmación: te has dado de baja", de: "Bestätigung: du bist abgemeldet", fr: "Confirmation : vous êtes désabonné(e)" }),
         html: `
           <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;max-width:520px;margin:0 auto;color:#1d1d1f">
-            <h2 style="font-size:20px;margin-bottom:8px">Hej${firstName ? ` ${firstName}` : ""},</h2>
-            <p style="color:#515151;line-height:1.6">Vi har tagit bort dig från vårt nyhetsbrev. Du kommer inte längre att få utskick från oss.</p>
-            <p style="color:#515151;line-height:1.6">Om du ångrar dig är du alltid välkommen tillbaka – du kan prenumerera igen via vår hemsida.</p>
-            <p style="color:#515151;line-height:1.6;margin-top:24px">Varma hälsningar,<br>Christopher & teamet<br>1753 SKINCARE<br>info@1753skin.com</p>
+            <h2 style="font-size:20px;margin-bottom:8px">${emailT(subLocale, { sv: `Hej${hiName},`, en: `Hi${hiName},`, es: `Hola${hiName},`, de: `Hallo${hiName},`, fr: `Bonjour${hiName},` })}</h2>
+            <p style="color:#515151;line-height:1.6">${emailT(subLocale, {
+              sv: "Vi har tagit bort dig från vårt nyhetsbrev. Du kommer inte längre att få utskick från oss.",
+              en: "We have removed you from our newsletter. You will no longer receive emails from us.",
+              es: "Te hemos eliminado de nuestro boletín. Ya no recibirás correos de nuestra parte.",
+              de: "Wir haben dich von unserem Newsletter abgemeldet. Du wirst keine weiteren E-Mails von uns erhalten.",
+              fr: "Nous vous avons retiré(e) de notre newsletter. Vous ne recevrez plus d'emails de notre part."
+            })}</p>
+            <p style="color:#515151;line-height:1.6">${emailT(subLocale, {
+              sv: "Om du ångrar dig är du alltid välkommen tillbaka – du kan prenumerera igen via vår hemsida.",
+              en: "If you change your mind, you're always welcome back — you can subscribe again via our website.",
+              es: "Si cambias de opinión, siempre eres bienvenido/a — puedes suscribirte de nuevo en nuestra web.",
+              de: "Falls du es dir anders überlegst, bist du jederzeit willkommen zurück — du kannst dich über unsere Webseite erneut anmelden.",
+              fr: "Si vous changez d'avis, vous êtes toujours le/la bienvenu(e) — vous pouvez vous réabonner via notre site."
+            })}</p>
+            <p style="color:#515151;line-height:1.6;margin-top:24px">${emailT(subLocale, { sv: "Varma hälsningar", en: "Warm regards", es: "Saludos cordiales", de: "Herzliche Grüße", fr: "Cordialement" })},<br>Christopher & ${emailT(subLocale, { sv: "teamet", en: "the team", es: "el equipo", de: "das Team", fr: "l'équipe" })}<br>1753 SKINCARE<br>info@1753skin.com</p>
           </div>
         `
       });
@@ -4609,7 +4619,8 @@ app.post("/api/auth/forgot-password", async (req, res) => {
 
 // ---- EMAIL TEMPLATES (shared style) ----
 
-function emailWrapper(content, unsubscribeUrl) {
+function emailWrapper(content, unsubscribeUrl, locale) {
+  const wl = locale || "sv";
   return `
   <div style="font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Helvetica,Arial,sans-serif;max-width:560px;margin:0 auto;color:#1d1d1f;padding:0 16px">
     <div style="text-align:center;padding:32px 0 8px">
@@ -4618,10 +4629,10 @@ function emailWrapper(content, unsubscribeUrl) {
     ${content}
     <div style="margin-top:40px;padding-top:24px;border-top:1px solid #e6e6e6;text-align:center">
       <p style="font-size:12px;color:#766a62;line-height:1.6;margin:0">
-        1753 SKINCARE – Holistisk hudvård med CBD och CBG<br>
+        ${emailT(wl, { sv: "1753 SKINCARE – Holistisk hudvård med CBD och CBG", en: "1753 SKINCARE – Holistic skincare with CBD and CBG", es: "1753 SKINCARE – Cuidado holístico con CBD y CBG", de: "1753 SKINCARE – Ganzheitliche Hautpflege mit CBD und CBG", fr: "1753 SKINCARE – Soins holistiques au CBD et CBG" })}<br>
         <a href="https://www.1753skin.com" style="color:#108474">www.1753skin.com</a>
       </p>
-      ${unsubscribeUrl ? `<p style="margin-top:12px;font-size:11px"><a href="${unsubscribeUrl}" style="color:#999;text-decoration:underline">Avprenumerera</a></p>` : ""}
+      ${unsubscribeUrl ? `<p style="margin-top:12px;font-size:11px"><a href="${unsubscribeUrl}" style="color:#999;text-decoration:underline">${emailT(wl, { sv: "Avprenumerera", en: "Unsubscribe", es: "Darse de baja", de: "Abmelden", fr: "Se désabonner" })}</a></p>` : ""}
     </div>
   </div>`;
 }
@@ -5216,11 +5227,12 @@ app.get("/api/newsletter/status", async (req, res) => {
 app.get("/api/newsletter/unsubscribe/:token", async (req, res) => {
   try {
     const subscriber = await db.unsubscribe(req.params.token);
+    const locale = subscriber?.locale || "sv";
     if (subscriber) {
       await db.cancelAutomationsForSubscriber(subscriber.id);
       console.log(`[Newsletter] ${subscriber.email} unsubscribed`);
     }
-    res.redirect("https://www.1753skin.com/?unsubscribed=1");
+    res.redirect(`https://www.1753skin.com/${locale}?unsubscribed=1`);
   } catch (err) {
     console.error("[Newsletter] Unsubscribe error:", err);
     res.redirect("https://www.1753skin.com/");
@@ -5310,13 +5322,16 @@ async function processAutomationQueue() {
         const unsubUrl = `${baseUrl}/api/newsletter/unsubscribe/${item.unsubscribe_token}`;
 
         const ctx = typeof item.context === "string" ? JSON.parse(item.context) : (item.context || {});
+        const subLocale = item.locale || "sv";
+        const firstNameFallback = { sv: "du", en: "there", es: "amigo/a", de: "du", fr: "vous" };
         const html = emailWrapper(
           step.html
-            .replace(/\{\{firstName\}\}/g, item.first_name || "du")
+            .replace(/\{\{firstName\}\}/g, item.first_name || (firstNameFallback[subLocale] || "du"))
             .replace(/\{\{email\}\}/g, item.email)
             .replace(/\{\{reviewToken\}\}/g, ctx.reviewToken || "")
             .replace(/\{\{context\.(\w+)\}\}/g, (_, key) => ctx[key] || ""),
-          unsubUrl
+          unsubUrl,
+          subLocale
         );
 
         const canSend = await db.canEmailSubscriber(item.subscriber_id, 20);
@@ -5575,14 +5590,17 @@ app.post("/api/newsletter/broadcast", async (req, res) => {
 
     for (const sub of subscribers) {
       try {
+        const subL = sub.locale || "sv";
+        const fnFallback = { sv: "du", en: "there", es: "amigo/a", de: "du", fr: "vous" };
         const unsubUrl = `${baseUrl}/api/newsletter/unsubscribe/${sub.unsubscribe_token}`;
         await resend.emails.send({
           from: fromEmail,
           to: sub.email,
           subject,
           html: emailWrapper(
-            html.replace(/\{\{firstName\}\}/g, sub.first_name || "du"),
-            unsubUrl
+            html.replace(/\{\{firstName\}\}/g, sub.first_name || (fnFallback[subL] || "du")),
+            unsubUrl,
+            subL
           )
         });
         sent++;
@@ -5644,14 +5662,17 @@ app.post("/api/newsletter/broadcast-segmented", async (req, res) => {
             continue;
           }
 
+          const subL = sub.locale || "sv";
+          const fnFallback2 = { sv: "du", en: "there", es: "amigo/a", de: "du", fr: "vous" };
           const unsubUrl = `${baseUrl}/api/newsletter/unsubscribe/${sub.unsubscribe_token}`;
           await resend.emails.send({
             from: fromEmail,
             to: sub.email,
             subject,
             html: emailWrapper(
-              html.replace(/\{\{firstName\}\}/g, sub.first_name || "du"),
-              unsubUrl
+              html.replace(/\{\{firstName\}\}/g, sub.first_name || (fnFallback2[subL] || "du")),
+              unsubUrl,
+              subL
             )
           });
           await db.touchSubscriberEmailed(sub.id);
@@ -5696,8 +5717,7 @@ async function seedAutomationFlows() {
             och noga utvalda naturliga ingredienser.
           </p>
           <p style="font-size:15px;line-height:1.7;color:#515151">
-            Som tack för att du gått med får du <strong>10% rabatt</strong> på din första beställning
-            med koden <strong style="color:#108474;font-size:17px">VÄLKOMST10</strong>.
+            Utforska vårt sortiment och hitta din favorit. Vi finns här om du har frågor.
           </p>
           ${greenButton("Utforska produkterna", siteUrl + "/produkter")}
         `

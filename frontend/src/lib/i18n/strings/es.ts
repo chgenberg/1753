@@ -11,6 +11,7 @@ export const es: Messages = {
     navHome: "Inicio",
     navProducts: "Productos",
     navAbout: "Nosotros",
+    navAnalysis: "Análisis de piel",
     navContact: "Contacto",
     logoAlt: "1753 SKINCARE",
     accountAria: "Mi cuenta",

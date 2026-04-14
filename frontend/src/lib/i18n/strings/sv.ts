@@ -10,6 +10,7 @@ const bundle = {
     navHome: "Hem",
     navProducts: "Produkter",
     navAbout: "Om oss",
+    navAnalysis: "Hudanalys",
     navContact: "Kontakt",
     logoAlt: "1753 SKINCARE",
     accountAria: "Mitt konto",
