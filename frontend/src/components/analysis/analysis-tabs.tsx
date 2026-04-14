@@ -1265,7 +1265,10 @@ export function AnalysisTabs({
     const idx = tabOrder.indexOf(activeTab);
     if (idx < tabOrder.length - 1) {
       setActiveTab(tabOrder[idx + 1]);
-      tabBarRef.current?.scrollIntoView({ behavior: "smooth", block: "start" });
+      requestAnimationFrame(() => {
+        tabBarRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+        window.scrollTo({ top: tabBarRef.current?.offsetTop ? tabBarRef.current.offsetTop - 80 : 0, behavior: "smooth" });
+      });
     }
   };
 
