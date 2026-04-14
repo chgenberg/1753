@@ -239,7 +239,7 @@ function ChipSelect({
             type="button"
             onClick={() => onToggle(opt.key)}
             className={cn(
-              "inline-flex items-center justify-center gap-2 rounded-full border-2 px-5 py-2.5 text-sm font-medium transition-all duration-300",
+              "inline-flex h-[52px] items-center justify-center gap-2 rounded-full border-2 px-5 text-sm font-medium transition-all duration-300",
               active
                 ? "border-[#108474] bg-[#108474]/5 text-[#108474]"
                 : "border-brand-100 bg-white text-brand-700 hover:border-brand-200"
@@ -525,6 +525,7 @@ export default function AnalysisPage() {
         consentGiven: scanSummary.consentGiven,
         overallSeverity: scanSummary.overallSeverity,
         skinMetrics: scanSummary.skinMetrics,
+        imageBase64: scanSummary.imageBase64,
       } : undefined;
       sessionStorage.setItem("1753_analysis_progress", JSON.stringify({
         step,
@@ -856,7 +857,7 @@ export default function AnalysisPage() {
 
   return (
     <>
-      <section className="overflow-x-hidden py-16 md:py-24">
+      <section className="py-16 md:py-24">
         <div className="mx-auto max-w-[680px] px-6 md:px-10">
           {/* ---- INTRO ---- */}
           {step === "intro" && (
@@ -909,7 +910,7 @@ export default function AnalysisPage() {
                 )}
 
                 <button
-                  onClick={() => setStep(isReturningUser ? "demographics" : "email")}
+                  onClick={() => { setStep(isReturningUser ? "demographics" : "email"); scrollTop(); }}
                   className="inline-flex h-14 w-full items-center justify-center gap-3 rounded-full bg-[#108474] px-10 text-sm font-semibold text-white shadow-lg shadow-[#108474]/20 transition-all hover:bg-[#0d6e62] hover:shadow-xl active:scale-[0.97]"
                 >
                   <ScanFace className="h-5 w-5" />
@@ -1251,7 +1252,7 @@ export default function AnalysisPage() {
                     <h2 className="text-2xl font-bold tracking-tight">{a("step1Title")}</h2>
                     <p className="mt-1 text-sm text-muted-foreground">{a("step1Sub")}</p>
                   </div>
-                  <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+                  <div className="grid grid-cols-2 gap-3">
                     {skinTypes.map((st) => (
                       <OptionCard
                         key={st.key}
@@ -1448,7 +1449,7 @@ export default function AnalysisPage() {
                       {tx(locale, "Hur ofta använder du solskydd?", "How often do you use sun protection?", "¿Con qué frecuencia usas protección solar?", "Wie oft verwendest du Sonnenschutz?", "À quelle fréquence utilisez-vous une protection solaire ?")}
                     </p>
                   </div>
-                  <div className="grid grid-cols-1 gap-3">
+                  <div className="grid grid-cols-2 gap-3">
                     {[
                       { key: "never", label: tx(locale, "Aldrig", "Never", "Nunca", "Nie", "Jamais"), icon: Sun },
                       { key: "sometimes", label: tx(locale, "Ibland", "Sometimes", "A veces", "Manchmal", "Parfois"), icon: Sun },
