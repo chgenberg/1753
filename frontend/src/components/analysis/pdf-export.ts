@@ -454,12 +454,12 @@ export async function generateAnalysisPDF(
         const cLines = doc.splitTextToSize(issue, cw - 10);
         doc.text(cLines, margin + 6, y);
         if (severity) {
-          const sevX = margin + 6 + doc.getTextWidth(cLines[0]) + 2;
+          const sevY = y + cLines.length * 3.2;
           doc.setFontSize(5);
           doc.setTextColor(...BROWN);
-          doc.text(`(${severity})`, Math.min(sevX, margin + cw - 12), y);
+          doc.text(`(${severity})`, margin + 6, sevY);
         }
-        y += cLines.length * 3.2 + 1.5;
+        y += cLines.length * 3.2 + (severity ? 3.5 : 1.5);
       });
       y += 2;
     }
@@ -526,7 +526,8 @@ export async function generateAnalysisPDF(
       doc.setFontSize(7);
       doc.setFont("helvetica", "bold");
       doc.setTextColor(...DARK);
-      doc.text(item.area, margin + 12, y + 5.5);
+      const areaText = doc.splitTextToSize(item.area, cw - 30);
+      doc.text(areaText.slice(0, 1), margin + 12, y + 5.5);
 
       const impactN = item.impact.toLowerCase();
       const impactColor: [number, number, number] = impactN === "hög" || impactN === "hog" || impactN === "high" ? [...GREEN] : impactN === "medel" || impactN === "medium" ? [...GOLD] : [...BROWN];
@@ -644,9 +645,16 @@ export async function generateAnalysisPDF(
     y += 5;
 
     props.products.forEach((p) => {
+      doc.setFontSize(7.5);
+      doc.setFont("helvetica", "bold");
+      const productName = p.id.replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+      const nameLines = doc.splitTextToSize(productName, cw - 8);
+      const nameH = nameLines.length * 3.2;
+
+      doc.setFontSize(6.5);
       const reasonLines = doc.splitTextToSize(p.reason, cw - 8);
       const usageLines = p.usage ? doc.splitTextToSize(p.usage, cw - 8) : [];
-      const cardH = 10 + reasonLines.length * 2.8 + (usageLines.length > 0 ? usageLines.length * 2.5 + 2 : 0);
+      const cardH = 6 + nameH + reasonLines.length * 2.8 + (usageLines.length > 0 ? usageLines.length * 2.5 + 2 : 0);
       checkSpace(cardH + 3);
 
       drawRoundedRect(doc, margin, y, cw, cardH, 3, WHITE, [230, 230, 230]);
@@ -654,16 +662,16 @@ export async function generateAnalysisPDF(
       doc.setFontSize(7.5);
       doc.setFont("helvetica", "bold");
       doc.setTextColor(...DARK);
-      const productName = p.id.replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase());
-      doc.text(productName, margin + 4, y + 5);
+      doc.text(nameLines, margin + 4, y + 5);
 
       doc.setFontSize(6.5);
       doc.setFont("helvetica", "normal");
       doc.setTextColor(...MUTED);
-      doc.text(reasonLines, margin + 4, y + 9);
+      const reasonY = y + 5 + nameH;
+      doc.text(reasonLines, margin + 4, reasonY);
 
       if (usageLines.length > 0) {
-        const uY = y + 9 + reasonLines.length * 2.8 + 1;
+        const uY = reasonY + reasonLines.length * 2.8 + 1;
         doc.setFontSize(6);
         doc.setTextColor(...BROWN);
         doc.text(usageLines, margin + 4, uY);

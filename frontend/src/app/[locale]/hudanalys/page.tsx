@@ -181,7 +181,7 @@ function OptionCard({
       type="button"
       onClick={onClick}
       className={cn(
-        "group relative flex min-h-[130px] flex-col items-center justify-center gap-2 rounded-2xl border-2 px-5 py-6 text-center transition-all duration-300",
+        "group relative flex h-full min-h-[120px] flex-col items-center justify-center gap-2 rounded-2xl border-2 px-4 py-5 text-center transition-all duration-300",
         selected
           ? "border-[#108474] bg-[#108474]/5 shadow-md shadow-[#108474]/10"
           : "border-brand-100 bg-white hover:border-brand-200 hover:shadow-sm",
@@ -729,6 +729,8 @@ export default function AnalysisPage() {
     }
   }, [answers, a, token, scanSummary, uploadTrainingData, userEmail, nlSubscribed]);
 
+  const scrollTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
+
   const goNext = () => {
     if (step === "email") {
       if (!userEmail.trim() || !userEmail.includes("@")) {
@@ -748,12 +750,14 @@ export default function AnalysisPage() {
     } else if (typeof step === "number" && step === TOTAL_STEPS) {
       analyze();
     }
+    scrollTop();
   };
   const goPrev = () => {
     if (typeof step === "number" && step > 1) setStep((step - 1) as Step);
     else if (step === 1) setStep(scanSummary ? "scan" : "demographics");
     else if (step === "demographics") setStep(isReturningUser ? "intro" : "email");
     else if (step === "email") setStep("intro");
+    scrollTop();
   };
 
   const skinTypes = [
@@ -1369,7 +1373,7 @@ export default function AnalysisPage() {
                       {tx(locale, "Hur ofta använder du solskydd?", "How often do you use sun protection?", "¿Con qué frecuencia usas protección solar?", "Wie oft verwendest du Sonnenschutz?", "À quelle fréquence utilisez-vous une protection solaire ?")}
                     </p>
                   </div>
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                  <div className="grid grid-cols-3 gap-3">
                     {[
                       { key: "never", label: tx(locale, "Aldrig", "Never", "Nunca", "Nie", "Jamais"), icon: Sun },
                       { key: "sometimes", label: tx(locale, "Ibland", "Sometimes", "A veces", "Manchmal", "Parfois"), icon: Sun },

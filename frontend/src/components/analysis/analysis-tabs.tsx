@@ -432,7 +432,7 @@ function InlineProductCTA({ products, locale }: { products: ProductRec[]; locale
         className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#108474] px-5 py-3 text-xs font-semibold text-white shadow-md shadow-[#108474]/20 transition-all duration-300 hover:bg-[#0d6e62] hover:shadow-lg active:scale-[0.97]"
       >
         <Gift className="h-3.5 w-3.5" />
-        {tx(locale, "Lagg till med 15% rabatt", "Add with 15% off", "Añadir con 15% descuento", "Mit 15% Rabatt hinzufügen", "Ajouter avec 15% de réduction")}
+        {tx(locale, "Lägg till med 15% rabatt", "Add with 15% off", "Añadir con 15% descuento", "Mit 15% Rabatt hinzufügen", "Ajouter avec 15% de réduction")}
       </button>
     </div>
   );
@@ -473,11 +473,11 @@ function metricScoreColor(score: number): string {
 
 function gradeLabel(grade: number, locale: string): string {
   const labels: Record<number, { sv: string; en: string; es: string; de: string; fr: string }> = {
-    1: { sv: "Utmarkt", en: "Excellent", es: "Excelente", de: "Ausgezeichnet", fr: "Excellent" },
+    1: { sv: "Utmärkt", en: "Excellent", es: "Excelente", de: "Ausgezeichnet", fr: "Excellent" },
     2: { sv: "Bra", en: "Good", es: "Bueno", de: "Gut", fr: "Bon" },
     3: { sv: "Medel", en: "Average", es: "Promedio", de: "Durchschnitt", fr: "Moyen" },
     4: { sv: "Under medel", en: "Below avg", es: "Bajo promedio", de: "Unterdurchschnitt", fr: "Sous la moyenne" },
-    5: { sv: "Behover atgard", en: "Needs attention", es: "Necesita atención", de: "Braucht Aufmerksamkeit", fr: "Nécessite attention" },
+    5: { sv: "Behöver åtgärd", en: "Needs attention", es: "Necesita atención", de: "Braucht Aufmerksamkeit", fr: "Nécessite attention" },
   };
   const l = labels[grade];
   if (!l) return "";
@@ -685,36 +685,7 @@ function SkinTab({ score, scoreLabel, summary, skinAge, fitzpatrick, metrics, sk
         className="mx-auto max-w-lg text-center text-sm leading-relaxed text-[#515151]"
       />
 
-      {/* Radar chart */}
-      {hasMetrics && <SkinRadarChart metrics={metrics} locale={locale} />}
-
-      {/* Focus areas */}
-      <FocusAreas entries={topConcerns} locale={locale} />
-
-      {/* All metric cards – uniform grid */}
-      {metricEntries.length > 0 && (
-        <div className="space-y-4">
-          <h4 className="text-[11px] font-bold uppercase tracking-widest text-[#766a62]">
-            {tx(locale, "Alla metriker", "All metrics", "Todas las métricas", "Alle Metriken", "Toutes les métriques")}
-          </h4>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
-            {displayedMetrics.map(([key, m]) => (
-              <MetricCard key={key} metricKey={key} metric={m} locale={locale} />
-            ))}
-          </div>
-          {metricEntries.length > 6 && !showAllMetrics && (
-            <button
-              onClick={() => setShowAllMetrics(true)}
-              className="mx-auto flex items-center gap-1.5 rounded-full border border-[#e6e6e6] px-5 py-2.5 text-xs font-semibold text-[#108474] transition-all duration-300 hover:border-[#108474]/30 hover:bg-[#108474]/5"
-            >
-              {tx(locale, `Visa alla ${metricEntries.length}`, `Show all ${metricEntries.length}`, `Mostrar todos ${metricEntries.length}`, `Alle ${metricEntries.length} anzeigen`, `Afficher les ${metricEntries.length}`)}
-              <ChevronDown className="h-3.5 w-3.5" />
-            </button>
-          )}
-        </div>
-      )}
-
-      {/* Face scan image */}
+      {/* Face scan image – shown early so user sees their photo first */}
       {hasScan && scanImageSrc && (
         <div className="space-y-4">
           <div className="flex items-center justify-center gap-2 text-[11px] font-bold uppercase tracking-widest text-[#108474]">
@@ -820,6 +791,35 @@ function SkinTab({ score, scoreLabel, summary, skinAge, fitzpatrick, metrics, sk
         </div>
       )}
 
+      {/* Radar chart */}
+      {hasMetrics && <SkinRadarChart metrics={metrics} locale={locale} />}
+
+      {/* Focus areas */}
+      <FocusAreas entries={topConcerns} locale={locale} />
+
+      {/* All metric cards – uniform grid */}
+      {metricEntries.length > 0 && (
+        <div className="space-y-4">
+          <h4 className="text-[11px] font-bold uppercase tracking-widest text-[#766a62]">
+            {tx(locale, "Alla metriker", "All metrics", "Todas las métricas", "Alle Metriken", "Toutes les métriques")}
+          </h4>
+          <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
+            {displayedMetrics.map(([key, m]) => (
+              <MetricCard key={key} metricKey={key} metric={m} locale={locale} />
+            ))}
+          </div>
+          {metricEntries.length > 6 && !showAllMetrics && (
+            <button
+              onClick={() => setShowAllMetrics(true)}
+              className="mx-auto flex items-center gap-1.5 rounded-full border border-[#e6e6e6] px-5 py-2.5 text-xs font-semibold text-[#108474] transition-all duration-300 hover:border-[#108474]/30 hover:bg-[#108474]/5"
+            >
+              {tx(locale, `Visa alla ${metricEntries.length}`, `Show all ${metricEntries.length}`, `Mostrar todos ${metricEntries.length}`, `Alle ${metricEntries.length} anzeigen`, `Afficher les ${metricEntries.length}`)}
+              <ChevronDown className="h-3.5 w-3.5" />
+            </button>
+          )}
+        </div>
+      )}
+
       {/* Skin analysis details */}
       {skinAnalysis && (
         <div className="space-y-3">
@@ -854,7 +854,7 @@ function SkinTab({ score, scoreLabel, summary, skinAge, fitzpatrick, metrics, sk
 
           {skinAnalysis.concerns.length > 0 && (
             <ExpandableBox
-              title={tx(locale, "Att forbattra", "Areas to improve", "Áreas a mejorar", "Verbesserungsbereiche", "Points à améliorer")}
+              title={tx(locale, "Att förbättra", "Areas to improve", "Áreas a mejorar", "Verbesserungsbereiche", "Points à améliorer")}
               icon={ShieldCheck}
               badge={`${skinAnalysis.concerns.length}`}
               defaultOpen
@@ -1294,8 +1294,8 @@ export function AnalysisTabs({
                       : "text-[#766a62] hover:text-[#1d1d1f]"
                   )}
                 >
-                  <Icon className="h-3.5 w-3.5 shrink-0" />
-                  <span className="hidden min-[380px]:inline">{tab.label}</span>
+                  <Icon className="h-4 w-4 shrink-0 sm:h-3.5 sm:w-3.5" />
+                  <span className="hidden sm:inline">{tab.label}</span>
                 </button>
               );
             })}
