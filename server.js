@@ -127,6 +127,7 @@ function authMiddleware(req, res, next) {
   }
   req.userId = payload.id;
   req.userEmail = payload.email;
+  req.user = payload;
   next();
 }
 
