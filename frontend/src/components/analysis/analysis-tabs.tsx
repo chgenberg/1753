@@ -1286,16 +1286,25 @@ export function AnalysisTabs({
               return (
                 <button
                   key={tab.id}
-                  onClick={() => setActiveTab(tab.id)}
+                  onClick={() => {
+                    setActiveTab(tab.id);
+                    requestAnimationFrame(() => {
+                      tabBarRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+                      window.scrollTo({
+                        top: tabBarRef.current?.offsetTop ? tabBarRef.current.offsetTop - 80 : 0,
+                        behavior: "smooth",
+                      });
+                    });
+                  }}
                   className={cn(
-                    "relative flex flex-1 items-center justify-center gap-1.5 rounded-xl px-2 py-3 text-[11px] font-semibold transition-all duration-300 sm:text-xs",
+                    "relative flex flex-1 items-center justify-center gap-1.5 rounded-xl px-2 py-3 text-[11px] font-semibold transition-all duration-300 md:text-xs",
                     active
                       ? "bg-white text-[#1d1d1f] shadow-sm"
                       : "text-[#766a62] hover:text-[#1d1d1f]"
                   )}
                 >
-                  <Icon className="h-4 w-4 shrink-0 sm:h-3.5 sm:w-3.5" />
-                  <span className="hidden sm:inline">{tab.label}</span>
+                  <Icon className="h-4 w-4 shrink-0 md:h-3.5 md:w-3.5" />
+                  <span className="hidden md:inline">{tab.label}</span>
                 </button>
               );
             })}

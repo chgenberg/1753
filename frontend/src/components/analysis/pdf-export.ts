@@ -197,11 +197,17 @@ function tx(locale: string, sv: string, en: string, es?: string, de?: string, fr
 
 const DATE_LOCALES: Record<string, string> = { sv: "sv-SE", en: "en-US", es: "es-ES", de: "de-DE", fr: "fr-FR" };
 
+const LH_FACTOR = 1.15;
+function lh(fontSize: number): number {
+  return fontSize * 0.3528 * LH_FACTOR;
+}
+
 export async function generateAnalysisPDF(
   props: AnalysisTabsProps,
   locale: string
 ): Promise<void> {
   const doc = new jsPDF({ orientation: "portrait", unit: "mm", format: "a4" });
+  (doc as unknown as { setLineHeightFactor: (f: number) => void }).setLineHeightFactor(LH_FACTOR);
   const pw = 210;
   const margin = 16;
   const cw = pw - margin * 2;
@@ -337,7 +343,7 @@ export async function generateAnalysisPDF(
     doc.setTextColor(...MUTED);
     const lines = doc.splitTextToSize(props.summary, cw - 4);
     doc.text(lines, margin + 2, y);
-    y += lines.length * 3.5 + 4;
+    y += lines.length * lh(8) + 4;
   }
 
   // ── Radar chart ──
@@ -390,7 +396,8 @@ export async function generateAnalysisPDF(
         doc.setFontSize(6.5);
         doc.setFont("helvetica", "bold");
         doc.setTextColor(...DARK);
-        doc.text(metricName(key, locale), cx + 3, cy + 5.5);
+        const titleLines = doc.splitTextToSize(metricName(key, locale), cardW - 6);
+        doc.text(titleLines.slice(0, 1), cx + 3, cy + 5.5);
 
         doc.setFontSize(12);
         doc.setFont("helvetica", "bold");
@@ -430,11 +437,14 @@ export async function generateAnalysisPDF(
       doc.setFontSize(7.5);
       doc.setFont("helvetica", "normal");
       doc.setTextColor(...DARK);
-      const overviewLines = doc.splitTextToSize(props.skinAnalysis.overview.replace(/\\n\\n/g, "\n"), cw - 4);
+      const overviewLines = doc.splitTextToSize(
+        props.skinAnalysis.overview.replace(/\n\n+/g, "\n"),
+        cw - 4
+      ).filter((line: string) => line.trim() !== "");
       overviewLines.forEach((line: string) => {
         checkSpace(4);
         doc.text(line, margin + 2, y);
-        y += 3.2;
+        y += lh(7.5);
       });
       y += 3;
     }
@@ -455,7 +465,7 @@ export async function generateAnalysisPDF(
         doc.setTextColor(...DARK);
         const sLines = doc.splitTextToSize(s, cw - 10);
         doc.text(sLines, margin + 6, y);
-        y += sLines.length * 3.2 + 1.5;
+        y += sLines.length * lh(7) + 1.5;
       });
       y += 2;
     }
@@ -479,12 +489,12 @@ export async function generateAnalysisPDF(
         const cLines = doc.splitTextToSize(issue, cw - 10);
         doc.text(cLines, margin + 6, y);
         if (severity) {
-          const sevY = y + cLines.length * 3.2;
+          const sevY = y + cLines.length * lh(7);
           doc.setFontSize(5);
           doc.setTextColor(...BROWN);
           doc.text(`(${severity})`, margin + 6, sevY);
         }
-        y += cLines.length * 3.2 + (severity ? 3.5 : 1.5);
+        y += cLines.length * lh(7) + (severity ? 3.5 : 1.5);
       });
       y += 2;
     }
@@ -492,7 +502,7 @@ export async function generateAnalysisPDF(
     if (props.skinAnalysis.microbiome) {
       checkSpace(15);
       const mLines = doc.splitTextToSize(props.skinAnalysis.microbiome, cw - 8);
-      const boxH = 10 + mLines.length * 2.8;
+      const boxH = 10 + mLines.length * lh(6.5);
       drawRoundedRect(doc, margin, y, cw, boxH, 3, BG);
       doc.setFontSize(6);
       doc.setFont("helvetica", "bold");
@@ -508,7 +518,7 @@ export async function generateAnalysisPDF(
     if (props.skinAnalysis.ecs) {
       checkSpace(15);
       const eLines = doc.splitTextToSize(props.skinAnalysis.ecs, cw - 8);
-      const eBoxH = 10 + eLines.length * 2.8;
+      const eBoxH = 10 + eLines.length * lh(6.5);
       drawRoundedRect(doc, margin, y, cw, eBoxH, 3, BG);
       doc.setFontSize(6);
       doc.setFont("helvetica", "bold");
@@ -537,7 +547,9 @@ export async function generateAnalysisPDF(
       checkSpace(20);
       const tipLines = doc.splitTextToSize(item.tip, cw - 14);
       const whyLines = item.why ? doc.splitTextToSize(item.why, cw - 14) : [];
-      const cardH = 8 + tipLines.length * 3 + (whyLines.length > 0 ? whyLines.length * 2.8 + 2 : 0);
+      const tipLh = lh(6.5);
+      const whyLh = lh(6);
+      const cardH = 8 + tipLines.length * tipLh + (whyLines.length > 0 ? whyLines.length * whyLh + 2 : 0);
 
       drawRoundedRect(doc, margin, y, cw, cardH, 3, WHITE, [230, 230, 230]);
 
@@ -568,7 +580,7 @@ export async function generateAnalysisPDF(
       doc.text(tipLines, margin + 12, y + 9);
 
       if (whyLines.length > 0) {
-        const whyY = y + 9 + tipLines.length * 3;
+        const whyY = y + 9 + tipLines.length * tipLh;
         doc.setFontSize(6);
         doc.setTextColor(...BROWN);
         doc.text(whyLines, margin + 12, whyY);
@@ -596,7 +608,7 @@ export async function generateAnalysisPDF(
       doc.setTextColor(...DARK);
       const avLines = doc.splitTextToSize(item, cw - 10);
       doc.text(avLines, margin + 6, y);
-      y += avLines.length * 3 + 1.5;
+      y += avLines.length * lh(6.5) + 1.5;
     });
     y += 2;
   }
@@ -626,7 +638,9 @@ export async function generateAnalysisPDF(
       steps.forEach((s, i) => {
         const stepLines = doc.splitTextToSize(s.step, cw - 18);
         const whyLines = s.why ? doc.splitTextToSize(s.why, cw - 18) : [];
-        const cardH = 6 + stepLines.length * 3 + (whyLines.length > 0 ? whyLines.length * 2.5 + 1 : 0);
+        const stepLh = lh(7);
+        const whyLh = lh(6);
+        const cardH = 6 + stepLines.length * stepLh + (whyLines.length > 0 ? whyLines.length * whyLh + 1 : 0);
         checkSpace(cardH + 3);
 
         drawRoundedRect(doc, margin, y, cw, cardH, 3, WHITE, [230, 230, 230]);
@@ -644,7 +658,7 @@ export async function generateAnalysisPDF(
         doc.text(stepLines, margin + 12, y + 5);
 
         if (whyLines.length > 0) {
-          const whyY = y + 5 + stepLines.length * 3;
+          const whyY = y + 5 + stepLines.length * stepLh;
           doc.setFontSize(6);
           doc.setFont("helvetica", "normal");
           doc.setTextColor(...BROWN);
@@ -676,12 +690,15 @@ export async function generateAnalysisPDF(
       doc.setFont("helvetica", "bold");
       const productName = p.id.replace(/-/g, " ").replace(/\b\w/g, c => c.toUpperCase());
       const nameLines = doc.splitTextToSize(productName, cw - 8);
-      const nameH = nameLines.length * 3.2;
+      const nameLh = lh(7.5);
+      const nameH = nameLines.length * nameLh;
 
       doc.setFontSize(6.5);
       const reasonLines = doc.splitTextToSize(p.reason, cw - 8);
       const usageLines = p.usage ? doc.splitTextToSize(p.usage, cw - 8) : [];
-      const cardH = 6 + nameH + reasonLines.length * 2.8 + (usageLines.length > 0 ? usageLines.length * 2.5 + 2 : 0);
+      const reasonLh = lh(6.5);
+      const usageLh = lh(6);
+      const cardH = 6 + nameH + reasonLines.length * reasonLh + (usageLines.length > 0 ? usageLines.length * usageLh + 2 : 0);
       checkSpace(cardH + 3);
 
       drawRoundedRect(doc, margin, y, cw, cardH, 3, WHITE, [230, 230, 230]);
@@ -698,7 +715,7 @@ export async function generateAnalysisPDF(
       doc.text(reasonLines, margin + 4, reasonY);
 
       if (usageLines.length > 0) {
-        const uY = reasonY + reasonLines.length * 2.8 + 1;
+        const uY = reasonY + reasonLines.length * reasonLh + 1;
         doc.setFontSize(6);
         doc.setTextColor(...BROWN);
         doc.text(usageLines, margin + 4, uY);
@@ -719,7 +736,7 @@ export async function generateAnalysisPDF(
     doc.text("1753 SKINCARE — 1753skin.com", margin, 290);
     doc.text(tx(locale, `Sida ${p} av ${pageCount}`, `Page ${p} of ${pageCount}`, `Página ${p} de ${pageCount}`, `Seite ${p} von ${pageCount}`, `Page ${p} sur ${pageCount}`), pw - margin, 290, { align: "right" });
     doc.setFontSize(4.5);
-    doc.text(tx(locale, "Denna analys ersätter inte medicinsk rådgivning.", "This analysis does not replace medical advice.", "Este análisis no sustituye el consejo médico.", "Diese Analyse ersetzt keine medizinische Beratung.", "Cette analyse ne remplace pas un avis médical."), margin, 293);
+    doc.text(tx(locale, "Denna analys ersätter inte medicinsk rådgivning.", "This analysis does not replace medical advice.", "Este análisis no sustituye el consejo médico.", "Diese Analyse ersetzt keine medizinische Beratung.", "Cette analyse ne remplace pas un avis médical."), margin, 293, { maxWidth: cw - 40 });
   }
 
   const filePrefix = tx(locale, "1753-hudanalys", "1753-skin-analysis", "1753-analisis-piel", "1753-hautanalyse", "1753-analyse-cutanee");

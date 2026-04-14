@@ -172,11 +172,11 @@
   }
 
   body {
-    @apply bg-background text-foreground antialiased;
+    @apply bg-background text-foreground antialiased overflow-x-hidden;
   }
 
   html {
-    @apply scroll-smooth;
+    @apply scroll-smooth overflow-x-hidden;
   }
 
   ::selection {

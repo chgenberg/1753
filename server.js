@@ -3281,7 +3281,7 @@ async function sendTeamOrderNotification(order, items) {
   const currencyLabel = (order.currency || "SEK") === "EUR" ? "\u20ac" : "kr";
 
   const itemRows = items.map(i =>
-    `<tr><td style="padding:6px 12px;border-bottom:1px solid #f0f0f0">${i.product_name}</td><td style="padding:6px 12px;border-bottom:1px solid #f0f0f0;text-align:center">${i.quantity}</td><td style="padding:6px 12px;border-bottom:1px solid #f0f0f0;text-align:right">${i.unit_price} ${currencyLabel}</td></tr>`
+    `<tr><td style="padding:6px 12px;border-bottom:1px solid #f0f0f0">${i.name || i.product_name || i.productId || "–"}</td><td style="padding:6px 12px;border-bottom:1px solid #f0f0f0;text-align:center">${i.quantity || i.qty || 1}</td><td style="padding:6px 12px;border-bottom:1px solid #f0f0f0;text-align:right">${i.price ?? i.unit_price ?? "–"} ${currencyLabel}</td></tr>`
   ).join("");
 
   await resend.emails.send({

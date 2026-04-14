@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ArrowLeft,
   ArrowRight,
@@ -462,6 +462,7 @@ export default function AnalysisPage() {
   const [nlSubscribed, setNlSubscribed] = useState(false);
   const [shareCopied, setShareCopied] = useState(false);
   const [isReturningUser, setIsReturningUser] = useState(false);
+  const analyzingRef = useRef(false);
 
   useEffect(() => {
     try {
@@ -483,7 +484,9 @@ export default function AnalysisPage() {
         if (p.answers) setAnswers(p.answers);
         if (p.email) { setUserEmail(p.email); setEmailConsent(true); }
         if (p.scanSummary) setScanSummary(p.scanSummary);
-        if (p.step === "scan" && p.scanSummary) {
+        if (p.step === "analyzing") {
+          setStep(TOTAL_STEPS);
+        } else if (p.step === "scan" && p.scanSummary) {
           setStep(1);
         } else if (p.step) {
           setStep(p.step);
@@ -493,7 +496,7 @@ export default function AnalysisPage() {
   }, []);
 
   useEffect(() => {
-    if (step === "intro" || step === "result" || step === "analyzing") return;
+    if (step === "intro" || step === "result") return;
     try {
       const scanMeta = scanSummary ? {
         overallTop: scanSummary.overallTop,
@@ -613,6 +616,8 @@ export default function AnalysisPage() {
   }, [token, scanSummary, result, snapshotSaving, snapshotSaved]);
 
   const analyze = useCallback(async () => {
+    if (analyzingRef.current) return;
+    analyzingRef.current = true;
     setStep("analyzing");
     setError("");
     try {
@@ -725,9 +730,11 @@ export default function AnalysisPage() {
       const isRateLimit = msg.includes("dagar") || msg.includes("days") || msg.includes("días") || msg.includes("Tagen") || msg.includes("jours");
       const isServerMessage = msg && msg !== "undefined" && !msg.startsWith("API error:");
       setError(isRateLimit || isServerMessage ? msg : a("analysisError"));
-      setStep(7);
+      setStep(TOTAL_STEPS);
+    } finally {
+      analyzingRef.current = false;
     }
-  }, [answers, a, token, scanSummary, uploadTrainingData, userEmail, nlSubscribed]);
+  }, [answers, a, locale, token, scanSummary, uploadTrainingData, userEmail, nlSubscribed]);
 
   const scrollTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
 
@@ -802,7 +809,7 @@ export default function AnalysisPage() {
 
   return (
     <>
-      <section className="py-16 md:py-24">
+      <section className="overflow-x-hidden py-16 md:py-24">
         <div className="mx-auto max-w-[680px] px-6 md:px-10">
           {/* ---- INTRO ---- */}
           {step === "intro" && (
@@ -905,7 +912,7 @@ export default function AnalysisPage() {
                     value={userEmail}
                     onChange={(e) => { setUserEmail(e.target.value); setEmailError(""); }}
                     placeholder={tx(locale, "namn@exempel.se", "name@example.com", "nombre@ejemplo.com", "name@beispiel.de", "nom@exemple.fr")}
-                    className="w-full rounded-xl border border-[#e6e6e6] bg-white px-4 py-3 text-sm shadow-sm placeholder:text-[#766a62]/50 focus:border-[#108474] focus:outline-none focus:ring-2 focus:ring-[#108474]/20"
+                    className="w-full rounded-xl border border-[#e6e6e6] bg-white px-4 py-3 text-base shadow-sm placeholder:text-[#766a62]/50 focus:border-[#108474] focus:outline-none focus:ring-2 focus:ring-[#108474]/20 md:text-sm"
                   />
                 </div>
 
@@ -1352,7 +1359,7 @@ export default function AnalysisPage() {
                         setAnswers((p) => ({ ...p, sensitivities: e.target.value }))
                       }
                       placeholder={a("sensitivitiesPlaceholder")}
-                      className="w-full rounded-xl border border-brand-100 bg-white px-4 py-3 text-sm shadow-sm placeholder:text-brand-400 focus:border-[#108474] focus:outline-none focus:ring-2 focus:ring-[#108474]/20"
+                      className="w-full rounded-xl border border-brand-100 bg-white px-4 py-3 text-base shadow-sm placeholder:text-brand-400 focus:border-[#108474] focus:outline-none focus:ring-2 focus:ring-[#108474]/20 md:text-sm"
                     />
                   </div>
 
