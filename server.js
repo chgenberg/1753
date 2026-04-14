@@ -2207,7 +2207,9 @@ app.post("/api/analysis", async (req, res) => {
       });
     }
 
-    console.log(`[Analysis] Sending ${contentParts.filter(p => p.type === "input_image").length} image(s), questions=${!!hasQuestions}, scan=${!!hasScan}, research=${!!researchSnippets}, model=${OPENAI_MODEL}`);
+    const imageCount = contentParts.filter(p => p.type === "input_image").length;
+    const payloadEstimate = JSON.stringify(contentParts).length;
+    console.log(`[Analysis] Sending ${imageCount} image(s), payload ~${(payloadEstimate / 1024 / 1024).toFixed(1)}MB, questions=${!!hasQuestions}, scan=${!!hasScan}, research=${!!researchSnippets}, model=${OPENAI_MODEL}`);
 
     const response = await fetchWithRetry("https://api.openai.com/v1/responses", {
       method: "POST",
@@ -2302,8 +2304,9 @@ app.post("/api/analysis", async (req, res) => {
       });
     }
   } catch (err) {
-    console.error("[Analysis Error]", err);
-    res.status(err.status || 500).json({ message: err.message || "Analysen misslyckades" });
+    const errMsg = err.message || err.toString?.() || "Analysen misslyckades";
+    console.error("[Analysis Error]", err.status || 500, errMsg);
+    res.status(err.status || 500).json({ message: errMsg });
   }
 });
 
@@ -3564,29 +3567,38 @@ async function sendAnalysisReport(email, analysisContent, locale) {
     const issue = typeof c === "string" ? c : c.issue;
     const sev = typeof c === "string" ? "" : c.severity || "";
     const sevColor = sev === "severe" ? "#c44" : sev === "moderate" ? "#e8a020" : "#108474";
-    return `<div style="display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid #f0f0f0">
-      ${sev ? `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${sevColor}"></span>` : ""}
-      <span style="font-size:14px;color:#1d1d1f">${issue}</span>
-    </div>`;
+    return `<tr>
+      <td style="padding:12px 0;border-bottom:1px solid #f0f0f0;width:24px;vertical-align:top;padding-top:17px">
+        ${sev ? `<span style="display:inline-block;width:10px;height:10px;border-radius:50%;background:${sevColor}"></span>` : ""}
+      </td>
+      <td style="padding:12px 0;border-bottom:1px solid #f0f0f0;font-size:14px;color:#1d1d1f;line-height:1.5">${issue}</td>
+    </tr>`;
   }).join("") : "";
 
-  const productsHtml = parsed.products?.slice(0, 3).map(p => `
-    <div style="padding:12px 0;border-bottom:1px solid #f0f0f0">
-      <p style="font-size:14px;font-weight:600;color:#1d1d1f;margin:0">${p.id}</p>
-      <p style="font-size:12px;color:#515151;margin:4px 0 0">${p.reason}</p>
-    </div>
-  `).join("") || "";
+  const productsHtml = parsed.products?.slice(0, 3).map(p => {
+    const productName = (p.id && PRODUCTS_MAP[p.id]?.name) || p.name || p.id || "";
+    const reasonParagraphs = (p.reason || "").split(/\n\n|\n/).filter(Boolean).map(para =>
+      `<p style="font-size:13px;color:#515151;line-height:1.6;margin:6px 0 0">${para.trim()}</p>`
+    ).join("");
+    return `<div style="padding:16px 0;border-bottom:1px solid #f0f0f0">
+      <p style="font-size:15px;font-weight:600;color:#1d1d1f;margin:0">${productName}</p>
+      ${reasonParagraphs}
+    </div>`;
+  }).join("") || "";
 
-  const lifestyleHtml = parsed.lifestyle?.slice(0, 3).map(l => `
-    <div style="padding:10px 0;border-bottom:1px solid #f0f0f0">
-      <p style="font-size:13px;font-weight:600;color:#1d1d1f;margin:0">${l.area}</p>
-      <p style="font-size:12px;color:#515151;margin:2px 0 0">${l.tip}</p>
-    </div>
-  `).join("") || "";
+  const lifestyleHtml = parsed.lifestyle?.slice(0, 3).map(l => {
+    const tipParagraphs = (l.tip || "").split(/\n\n|\n/).filter(Boolean).map(para =>
+      `<p style="font-size:13px;color:#515151;line-height:1.6;margin:4px 0 0">${para.trim()}</p>`
+    ).join("");
+    return `<div style="padding:14px 0;border-bottom:1px solid #f0f0f0">
+      <p style="font-size:14px;font-weight:600;color:#1d1d1f;margin:0">${l.area}</p>
+      ${tipParagraphs}
+    </div>`;
+  }).join("") || "";
 
   const routineHtml = parsed.routine ? `
-    <div style="margin:20px 0">
-      <h3 style="font-size:15px;font-weight:600;color:#1d1d1f;margin:0 0 12px">${isSv ? "Din rutin" : isEs ? "Tu rutina" : isDe ? "Deine Routine" : isFr ? "Votre routine" : "Your routine"}</h3>
+    <div style="margin:28px 0">
+      <h3 style="font-size:16px;font-weight:600;color:#1d1d1f;margin:0 0 14px">${isSv ? "Din rutin" : isEs ? "Tu rutina" : isDe ? "Deine Routine" : isFr ? "Votre routine" : "Your routine"}</h3>
       <div style="display:flex;gap:16px">
         <div style="flex:1">
           <p style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:#766a62;margin:0 0 8px">${isSv ? "Morgon" : isEs ? "Mañana" : isDe ? "Morgen" : isFr ? "Matin" : "Morning"}</p>
@@ -3619,26 +3631,40 @@ async function sendAnalysisReport(email, analysisContent, locale) {
       ${skinAgeHtml}
 
       <div style="margin:24px 0">
-        <p style="font-size:14px;line-height:1.6;color:#515151">${parsed.summary}</p>
+        ${(() => {
+          const raw = parsed.summary || "";
+          let paragraphs = raw.split(/\n\n|\n/).filter(Boolean);
+          if (paragraphs.length <= 1 && raw.length > 200) {
+            const sentences = raw.match(/[^.!?]+[.!?]+/g) || [raw];
+            const mid = Math.ceil(sentences.length / 2);
+            paragraphs = [
+              sentences.slice(0, mid).join(" ").trim(),
+              sentences.slice(mid).join(" ").trim(),
+            ].filter(Boolean);
+          }
+          return paragraphs.map(para =>
+            `<p style="font-size:14px;line-height:1.7;color:#515151;margin:0 0 14px">${para.trim()}</p>`
+          ).join("");
+        })()}
       </div>
 
       ${concernsHtml ? `
-        <div style="margin:24px 0">
-          <h3 style="font-size:15px;font-weight:600;color:#1d1d1f;margin:0 0 12px">${isSv ? "Fokusområden" : isEs ? "Áreas de enfoque" : isDe ? "Fokusgebiete" : isFr ? "Domaines d'attention" : "Focus areas"}</h3>
-          ${concernsHtml}
+        <div style="margin:28px 0">
+          <h3 style="font-size:16px;font-weight:600;color:#1d1d1f;margin:0 0 14px">${isSv ? "Fokusområden" : isEs ? "Áreas de enfoque" : isDe ? "Fokusgebiete" : isFr ? "Domaines d'attention" : "Focus areas"}</h3>
+          <table style="width:100%;border-collapse:collapse">${concernsHtml}</table>
         </div>
       ` : ""}
 
       ${productsHtml ? `
-        <div style="margin:24px 0">
-          <h3 style="font-size:15px;font-weight:600;color:#1d1d1f;margin:0 0 12px">${isSv ? "Rekommenderade produkter" : isEs ? "Productos recomendados" : isDe ? "Empfohlene Produkte" : isFr ? "Produits recommandés" : "Recommended products"}</h3>
+        <div style="margin:28px 0">
+          <h3 style="font-size:16px;font-weight:600;color:#1d1d1f;margin:0 0 14px">${isSv ? "Rekommenderade produkter" : isEs ? "Productos recomendados" : isDe ? "Empfohlene Produkte" : isFr ? "Produits recommandés" : "Recommended products"}</h3>
           ${productsHtml}
         </div>
       ` : ""}
 
       ${lifestyleHtml ? `
-        <div style="margin:24px 0">
-          <h3 style="font-size:15px;font-weight:600;color:#1d1d1f;margin:0 0 12px">${isSv ? "Livsstilsråd" : isEs ? "Consejos de estilo de vida" : isDe ? "Lifestyle-Tipps" : isFr ? "Conseils mode de vie" : "Lifestyle tips"}</h3>
+        <div style="margin:28px 0">
+          <h3 style="font-size:16px;font-weight:600;color:#1d1d1f;margin:0 0 14px">${isSv ? "Livsstilsråd" : isEs ? "Consejos de estilo de vida" : isDe ? "Lifestyle-Tipps" : isFr ? "Conseils mode de vie" : "Lifestyle tips"}</h3>
           ${lifestyleHtml}
         </div>
       ` : ""}

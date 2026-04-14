@@ -116,83 +116,108 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
     setStep("captured");
   }, [stopCamera]);
 
+  const drawToCanvas = useCallback(
+    (source: HTMLImageElement | ImageBitmap) => {
+      const canvas = canvasRef.current;
+      if (!canvas) return;
+      const MAX_DIM = 2048;
+      let w = "naturalWidth" in source ? source.naturalWidth : source.width;
+      let h = "naturalHeight" in source ? source.naturalHeight : source.height;
+      if (w > MAX_DIM || h > MAX_DIM) {
+        const scale = MAX_DIM / Math.max(w, h);
+        w = Math.round(w * scale);
+        h = Math.round(h * scale);
+      }
+      canvas.width = w;
+      canvas.height = h;
+      const ctx = canvas.getContext("2d")!;
+      ctx.drawImage(source, 0, 0, w, h);
+      const jpegDataUrl = canvas.toDataURL("image/jpeg", 0.85);
+      setImageSrc(jpegDataUrl);
+      setStep("captured");
+    },
+    []
+  );
+
   const handleFileUpload = useCallback(
     async (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       if (!file) return;
+      setError(null);
 
       const isHeic =
         file.type === "image/heic" ||
         file.type === "image/heif" ||
         /\.hei[cf]$/i.test(file.name);
 
-      let blob: Blob = file;
-      if (isHeic) {
+      // Strategy 1: createImageBitmap — handles most formats including
+      // HEIC on Safari/iOS where the browser has native decoding support.
+      if (typeof createImageBitmap !== "undefined") {
         try {
-          const heic2any = (await import("heic2any")).default;
-          const converted = await heic2any({
-            blob: file,
-            toType: "image/jpeg",
-            quality: 0.92,
-          });
-          blob = Array.isArray(converted) ? converted[0] : converted;
-        } catch {
-          setError(
-            tx(
-              locale,
-              "Kunde inte konvertera HEIC-bilden. Prova att ta ett nytt foto direkt i appen.",
-              "Could not convert HEIC image. Try taking a new photo directly in the app.",
-              "No se pudo convertir la imagen HEIC. Intenta tomar una nueva foto directamente.",
-              "HEIC-Bild konnte nicht konvertiert werden. Versuche ein neues Foto direkt aufzunehmen.",
-              "Impossible de convertir l'image HEIC. Essayez de prendre une nouvelle photo."
-            )
-          );
+          const bmp = await createImageBitmap(file);
+          drawToCanvas(bmp);
+          bmp.close();
           return;
+        } catch {
+          // Browser couldn't decode the file natively; fall through.
         }
       }
 
+      // Strategy 2: For HEIC files that the browser can't decode natively,
+      // try the heic2any WASM library as a fallback.
+      if (isHeic) {
+        try {
+          const mod = await import("heic2any");
+          const convert = mod.default || mod;
+          const converted = await (convert as (opts: { blob: Blob; toType: string; quality: number }) => Promise<Blob | Blob[]>)({
+            blob: file,
+            toType: "image/jpeg",
+            quality: 0.85,
+          });
+          const jpegBlob = Array.isArray(converted) ? converted[0] : converted;
+          if (typeof createImageBitmap !== "undefined") {
+            const bmp = await createImageBitmap(jpegBlob);
+            drawToCanvas(bmp);
+            bmp.close();
+          } else {
+            const url = URL.createObjectURL(jpegBlob);
+            const img = new Image();
+            await new Promise<void>((resolve, reject) => {
+              img.onload = () => resolve();
+              img.onerror = () => reject(new Error("img decode failed"));
+              img.src = url;
+            });
+            drawToCanvas(img);
+            URL.revokeObjectURL(url);
+          }
+          return;
+        } catch {
+          // heic2any failed; fall through to FileReader path.
+        }
+      }
+
+      // Strategy 3: Classic FileReader + Image() path.
       const reader = new FileReader();
       reader.onload = () => {
         const img = new Image();
-        img.onload = () => {
-          const canvas = canvasRef.current;
-          if (!canvas) return;
-
-          const MAX_DIM = 2048;
-          let w = img.naturalWidth;
-          let h = img.naturalHeight;
-          if (w > MAX_DIM || h > MAX_DIM) {
-            const scale = MAX_DIM / Math.max(w, h);
-            w = Math.round(w * scale);
-            h = Math.round(h * scale);
-          }
-
-          canvas.width = w;
-          canvas.height = h;
-          const ctx = canvas.getContext("2d")!;
-          ctx.drawImage(img, 0, 0, w, h);
-
-          const jpegDataUrl = canvas.toDataURL("image/jpeg", 0.92);
-          setImageSrc(jpegDataUrl);
-          setStep("captured");
-        };
+        img.onload = () => drawToCanvas(img);
         img.onerror = () => {
           setError(
             tx(
               locale,
-              "Bilden kunde inte laddas. Prova ett annat format (JPEG eller PNG).",
-              "Image could not be loaded. Try another format (JPEG or PNG).",
-              "La imagen no se pudo cargar. Prueba otro formato (JPEG o PNG).",
-              "Das Bild konnte nicht geladen werden. Versuche ein anderes Format (JPEG oder PNG).",
-              "L'image n'a pas pu être chargée. Essayez un autre format (JPEG ou PNG)."
+              "Bilden kunde inte laddas. Prova JPEG eller PNG, eller ta ett foto direkt med kameran.",
+              "Image could not be loaded. Try JPEG or PNG, or take a photo with the camera.",
+              "La imagen no se pudo cargar. Prueba JPEG o PNG, o toma una foto con la cámara.",
+              "Das Bild konnte nicht geladen werden. Versuche JPEG/PNG oder nimm ein Foto mit der Kamera auf.",
+              "L'image n'a pas pu être chargée. Essayez JPEG/PNG ou prenez une photo avec la caméra."
             )
           );
         };
         img.src = reader.result as string;
       };
-      reader.readAsDataURL(blob);
+      reader.readAsDataURL(file);
     },
-    [locale]
+    [locale, drawToCanvas]
   );
 
   const runAnalysis = useCallback(async () => {
@@ -378,7 +403,7 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
       <input
         ref={fileRef}
         type="file"
-        accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif"
+        accept="image/jpeg,image/png,image/webp,.jpg,.jpeg,.png,.webp"
         className="hidden"
         onChange={handleFileUpload}
       />
@@ -424,11 +449,11 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
             <Shield className="h-3.5 w-3.5" />
             <span>
               {tx(locale,
-                "Din bild lämnar aldrig din enhet",
-                "Your image never leaves your device",
-                "Tu imagen nunca sale de tu dispositivo",
-                "Dein Bild verlässt nie dein Gerät",
-                "Votre image ne quitte jamais votre appareil")}
+                "Ansiktsskanningen sker lokalt — all data krypteras",
+                "Face scan runs locally — all data is encrypted",
+                "El escaneo facial se ejecuta localmente — todos los datos se cifran",
+                "Der Gesichtsscan läuft lokal — alle Daten werden verschlüsselt",
+                "Le scan du visage s'exécute localement — toutes les données sont chiffrées")}
             </span>
           </div>
         </div>

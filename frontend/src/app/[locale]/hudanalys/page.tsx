@@ -686,12 +686,11 @@ export default function AnalysisPage() {
         }).then(() => setNlSubscribed(true)).catch(() => {});
       }
     } catch (err: unknown) {
-      const msg = err instanceof Error ? err.message : "";
-      if (msg.includes("dagar") || msg.includes("days") || msg.includes("días") || msg.includes("Tagen") || msg.includes("jours")) {
-        setError(msg);
-      } else {
-        setError(a("analysisError"));
-      }
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error("[HudAnalys] Analysis submission failed:", msg);
+      const isRateLimit = msg.includes("dagar") || msg.includes("days") || msg.includes("días") || msg.includes("Tagen") || msg.includes("jours");
+      const isServerMessage = msg && msg !== "undefined" && !msg.startsWith("API error:");
+      setError(isRateLimit || isServerMessage ? msg : a("analysisError"));
       setStep(7);
     }
   }, [answers, a, token, scanSummary, uploadTrainingData, userEmail, nlSubscribed]);
@@ -828,11 +827,11 @@ export default function AnalysisPage() {
 
               <p className="mx-auto mt-6 max-w-sm text-xs text-[#766a62]">
                 {tx(locale,
-                  "Ansiktsskanningen analyserar din hy direkt i din enhet. Ingen bild skickas till någon server.",
-                  "The face scan analyses your skin directly on your device. No image is sent to any server.",
-                  "El escaneo facial analiza tu piel directamente en tu dispositivo. Ninguna imagen se envía a ningún servidor.",
-                  "Der Gesichtsscan analysiert deine Haut direkt auf deinem Gerät. Kein Bild wird an einen Server gesendet.",
-                  "Le scan du visage analyse votre peau directement sur votre appareil. Aucune image n'est envoyée à un serveur.")}
+                  "Ansiktsskanningen analyserar din hy direkt i din enhet. Din bild delas sedan krypterat med vår AI för en djupare analys.",
+                  "The face scan analyses your skin directly on your device. Your image is then shared encrypted with our AI for a deeper analysis.",
+                  "El escaneo facial analiza tu piel directamente en tu dispositivo. Tu imagen se comparte cifrada con nuestra IA para un análisis más profundo.",
+                  "Der Gesichtsscan analysiert deine Haut direkt auf deinem Gerät. Dein Bild wird dann verschlüsselt an unsere KI für eine tiefere Analyse weitergegeben.",
+                  "Le scan du visage analyse votre peau directement sur votre appareil. Votre image est ensuite partagée de manière chiffrée avec notre IA pour une analyse approfondie.")}
               </p>
             </div>
           )}
