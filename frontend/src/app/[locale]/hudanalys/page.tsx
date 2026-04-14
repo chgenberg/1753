@@ -466,17 +466,37 @@ export default function AnalysisPage() {
   useEffect(() => {
     try {
       const saved = sessionStorage.getItem("1753_analysis_result");
-      if (!saved) return;
-      const data = JSON.parse(saved);
-      if (data.result && data.parsed) {
-        setResult(data.result);
-        setParsed(data.parsed);
-        if (data.answers) setAnswers(data.answers);
-        if (data.scanSummary) setScanSummary(data.scanSummary);
-        setStep("result");
+      if (saved) {
+        const data = JSON.parse(saved);
+        if (data.result && data.parsed) {
+          setResult(data.result);
+          setParsed(data.parsed);
+          if (data.answers) setAnswers(data.answers);
+          if (data.scanSummary) setScanSummary(data.scanSummary);
+          setStep("result");
+          return;
+        }
+      }
+      const progress = sessionStorage.getItem("1753_analysis_progress");
+      if (progress) {
+        const p = JSON.parse(progress);
+        if (p.step) setStep(p.step);
+        if (p.answers) setAnswers(p.answers);
+        if (p.email) { setUserEmail(p.email); setEmailConsent(true); }
       }
     } catch { /* ignore corrupt data */ }
   }, []);
+
+  useEffect(() => {
+    if (step === "intro" || step === "result" || step === "analyzing") return;
+    try {
+      sessionStorage.setItem("1753_analysis_progress", JSON.stringify({
+        step,
+        answers,
+        email: userEmail || undefined,
+      }));
+    } catch { /* storage full or unavailable */ }
+  }, [step, answers, userEmail]);
 
   useEffect(() => {
     if (!user) return;
@@ -580,6 +600,7 @@ export default function AnalysisPage() {
   }, [token, scanSummary, result, snapshotSaving, snapshotSaved]);
 
   const analyze = useCallback(async () => {
+    sessionStorage.removeItem("1753_analysis_progress");
     setStep("analyzing");
     setError("");
     try {
@@ -1640,6 +1661,7 @@ export default function AnalysisPage() {
                 <button
                   onClick={() => {
                     sessionStorage.removeItem("1753_analysis_result");
+                    sessionStorage.removeItem("1753_analysis_progress");
                     setStep("intro");
                     setResult(null);
                     setParsed(null);

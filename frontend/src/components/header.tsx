@@ -3,6 +3,7 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname } from "next/navigation";
 import { ShoppingBag, User, X } from "lucide-react";
 import { useCart } from "@/providers/cart-provider";
 import { useAuth } from "@/providers/auth-provider";
@@ -71,6 +72,7 @@ export function Header() {
   const { totalItems, toggleCart } = useCart();
   const { isLoggedIn } = useAuth();
   const { t, path, locale } = useLocale();
+  const pathname = usePathname();
   const [progress, setProgress] = useState(0);
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -209,15 +211,21 @@ export function Header() {
           </Link>
 
           <nav className="hidden items-center gap-10 md:flex">
-            {nav.map((link) => (
-              <MagneticLink
-                key={link.href}
-                href={link.href}
-                className="text-[13px] font-semibold uppercase tracking-[0.08em] text-brand-900"
-              >
-                {link.label}
-              </MagneticLink>
-            ))}
+            {nav.map((link) => {
+              const isActive = pathname === link.href;
+              return (
+                <MagneticLink
+                  key={link.href}
+                  href={link.href}
+                  className={cn(
+                    "text-[13px] font-semibold uppercase tracking-[0.08em]",
+                    isActive ? "text-brand-700 pointer-events-none" : "text-brand-900"
+                  )}
+                >
+                  {link.label}
+                </MagneticLink>
+              );
+            })}
           </nav>
 
           <div className="flex items-center gap-1">
@@ -307,17 +315,26 @@ export function Header() {
             </button>
           </div>
           <nav className="flex flex-1 flex-col items-center justify-center gap-6">
-            {nav.map((link, i) => (
-              <Link
-                key={link.href}
-                href={link.href}
-                onClick={() => setMobileOpen(false)}
-                className="text-2xl font-bold tracking-tight text-brand-900 opacity-0 animate-fade-in"
-                style={{ animationDelay: `${i * 80}ms` }}
-              >
-                {link.label}
-              </Link>
-            ))}
+            {nav.map((link, i) => {
+              const isActive = pathname === link.href;
+              return (
+                <Link
+                  key={link.href}
+                  href={isActive ? "#" : link.href}
+                  onClick={(e) => {
+                    if (isActive) e.preventDefault();
+                    setMobileOpen(false);
+                  }}
+                  className={cn(
+                    "text-2xl font-bold tracking-tight opacity-0 animate-fade-in",
+                    isActive ? "text-brand-700" : "text-brand-900"
+                  )}
+                  style={{ animationDelay: `${i * 80}ms` }}
+                >
+                  {link.label}
+                </Link>
+              );
+            })}
             <div className="flex items-center gap-3">
               {otherLocales.map(l => (
                 <Link
