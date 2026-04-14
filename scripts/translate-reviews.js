@@ -17,7 +17,7 @@ const { Pool } = require("pg");
 const DATABASE_URL = process.env.DATABASE_URL;
 const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
 const BATCH_SIZE = 15;
-const MODEL = "gpt-4o-mini";
+const MODEL = "gpt-5.4-mini";
 
 const LANGUAGES = {
   en: { name: "English", col_prefix: "en" },

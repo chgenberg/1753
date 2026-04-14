@@ -6,6 +6,7 @@ import {
   ArrowRight,
   Camera,
   Check,
+  ChevronDown,
   Droplets,
   Flame,
   Heart,
@@ -19,6 +20,7 @@ import {
   Sparkles,
   Sun,
   Target,
+  User,
   Zap,
 } from "lucide-react";
 import { AnalysisTabs } from "@/components/analysis/analysis-tabs";
@@ -32,9 +34,11 @@ import {
   CONDITION_LABELS_SV,
 } from "@/components/skin-scanner/zones";
 
-type Step = "intro" | "scan" | 1 | 2 | 3 | 4 | 5 | "analyzing" | "result";
+type Step = "intro" | "email" | "demographics" | "scan" | 1 | 2 | 3 | 4 | 5 | 6 | 7 | "analyzing" | "result";
 
 interface QuizAnswers {
+  age: number;
+  gender: string;
   skinType: string;
   concerns: string[];
   routine: string[];
@@ -45,6 +49,8 @@ interface QuizAnswers {
   exercise: string;
   goals: string[];
   sensitivities: string;
+  sunProtection: string;
+  hormonal: string;
 }
 
 interface FaceZoneGPT {
@@ -119,7 +125,7 @@ interface AnalysisResponse {
   analysisId?: number;
 }
 
-const TOTAL_STEPS = 5;
+const TOTAL_STEPS = 7;
 
 function tx(locale: string, sv: string, en: string, es?: string, de?: string, fr?: string): string {
   if (locale === "sv") return sv;
@@ -428,6 +434,8 @@ export default function AnalysisPage() {
   const [emailConsent, setEmailConsent] = useState(false);
   const [emailError, setEmailError] = useState("");
   const [answers, setAnswers] = useState<QuizAnswers>({
+    age: 0,
+    gender: "",
     skinType: "",
     concerns: [],
     routine: [],
@@ -438,7 +446,10 @@ export default function AnalysisPage() {
     exercise: "",
     goals: [],
     sensitivities: "",
+    sunProtection: "",
+    hormonal: "",
   });
+  const [gdprExpanded, setGdprExpanded] = useState(false);
   const [scanSummary, setScanSummary] = useState<ScanSummary | null>(null);
   const [result, setResult] = useState<AnalysisResponse | null>(null);
   const [parsed, setParsed] = useState<AnalysisJSON | null>(null);
@@ -448,6 +459,7 @@ export default function AnalysisPage() {
   const [snapshotSaved, setSnapshotSaved] = useState(false);
   const [snapshotSaving, setSnapshotSaving] = useState(false);
   const [nlSubscribed, setNlSubscribed] = useState(false);
+  const [shareCopied, setShareCopied] = useState(false);
   const [isReturningUser, setIsReturningUser] = useState(false);
 
   useEffect(() => {
@@ -486,6 +498,10 @@ export default function AnalysisPage() {
 
   const canProceed = useCallback((): boolean => {
     switch (step) {
+      case "email":
+        return !!userEmail.trim() && userEmail.includes("@") && emailConsent;
+      case "demographics":
+        return answers.age > 0 && !!answers.gender;
       case 1:
         return !!answers.skinType;
       case 2:
@@ -496,10 +512,14 @@ export default function AnalysisPage() {
         return !!answers.stress && !!answers.diet && !!answers.water && !!answers.exercise;
       case 5:
         return answers.goals.length > 0;
+      case 6:
+        return !!answers.sunProtection;
+      case 7:
+        return true;
       default:
         return true;
     }
-  }, [step, answers]);
+  }, [step, answers, userEmail, emailConsent]);
 
   const uploadTrainingData = useCallback(async (
     scan: ScanSummary,
@@ -597,6 +617,8 @@ export default function AnalysisPage() {
         headers,
         body: JSON.stringify({
           questions: {
+            age: answers.age,
+            gender: answers.gender,
             skinType: answers.skinType,
             concerns: answers.concerns,
             routine: answers.routine.join(", "),
@@ -611,6 +633,9 @@ export default function AnalysisPage() {
             goalFreeText: answers.sensitivities
               ? tx(locale, `Känsligheter/allergier: ${answers.sensitivities}`, `Sensitivities/allergies: ${answers.sensitivities}`, `Sensibilidades/alergias: ${answers.sensitivities}`, `Empfindlichkeiten/Allergien: ${answers.sensitivities}`, `Sensibilités/allergies : ${answers.sensitivities}`)
               : undefined,
+            sunProtection: answers.sunProtection,
+            hormonal: answers.hormonal,
+            email: userEmail,
             locale,
           },
           ...scanContext,
@@ -658,19 +683,42 @@ export default function AnalysisPage() {
           }),
         }).then(() => setNlSubscribed(true)).catch(() => {});
       }
-    } catch {
-      setError(a("analysisError"));
-      setStep(5);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : "";
+      if (msg.includes("dagar") || msg.includes("days") || msg.includes("días") || msg.includes("Tagen") || msg.includes("jours")) {
+        setError(msg);
+      } else {
+        setError(a("analysisError"));
+      }
+      setStep(7);
     }
   }, [answers, a, token, scanSummary, uploadTrainingData, userEmail, nlSubscribed]);
 
   const goNext = () => {
-    if (typeof step === "number" && step < TOTAL_STEPS) setStep((step + 1) as Step);
-    else if (typeof step === "number" && step === TOTAL_STEPS) analyze();
+    if (step === "email") {
+      if (!userEmail.trim() || !userEmail.includes("@")) {
+        setEmailError(tx(locale, "Ange en giltig e-postadress.", "Please enter a valid email address.", "Introduce una dirección de email válida.", "Bitte gib eine gültige E-Mail-Adresse ein.", "Veuillez entrer une adresse e-mail valide."));
+        return;
+      }
+      if (!emailConsent) {
+        setEmailError(tx(locale, "Du behöver godkänna villkoren för att fortsätta.", "You need to accept the terms to continue.", "Debes aceptar los términos para continuar.", "Du musst die Bedingungen akzeptieren, um fortzufahren.", "Vous devez accepter les conditions pour continuer."));
+        return;
+      }
+      setEmailError("");
+      setStep("demographics");
+    } else if (step === "demographics") {
+      setStep("scan");
+    } else if (typeof step === "number" && step < TOTAL_STEPS) {
+      setStep((step + 1) as Step);
+    } else if (typeof step === "number" && step === TOTAL_STEPS) {
+      analyze();
+    }
   };
   const goPrev = () => {
     if (typeof step === "number" && step > 1) setStep((step - 1) as Step);
-    else if (step === 1) setStep("intro");
+    else if (step === 1) setStep(scanSummary ? "scan" : "demographics");
+    else if (step === "demographics") setStep(isReturningUser ? "intro" : "email");
+    else if (step === "email") setStep("intro");
   };
 
   const skinTypes = [
@@ -727,11 +775,11 @@ export default function AnalysisPage() {
               </h1>
               <p className="mx-auto mt-4 max-w-lg text-base leading-relaxed text-muted-foreground">
                 {tx(locale,
-                  "Skanna ditt ansikte med MediaPipe-precision i 12 zoner, svara pa fem korta fragor och fa 15 vetenskapliga hudmetriker, estimerad hudalder, radardiagram och personliga rekommendationer.",
-                  "Scan your face with MediaPipe precision across 12 zones, answer five quick questions, and receive 15 scientific skin metrics, estimated skin age, a radar chart and personalised recommendations.",
-                  "Escanea tu rostro con precisión MediaPipe en 12 zonas, responde cinco preguntas rápidas y recibe 15 métricas científicas de la piel, edad estimada, gráfico radar y recomendaciones personalizadas.",
-                  "Scanne dein Gesicht mit MediaPipe-Präzision in 12 Zonen, beantworte fünf kurze Fragen und erhalte 15 wissenschaftliche Hautmetriken, geschätztes Hautalter, Radardiagramm und personalisierte Empfehlungen.",
-                  "Scannez votre visage avec la précision MediaPipe sur 12 zones, répondez à cinq questions rapides et recevez 15 métriques cutanées scientifiques, un âge estimé de la peau, un graphique radar et des recommandations personnalisées.")}
+                  "Skanna ditt ansikte med MediaPipe-precision i 12 zoner, svara på sju korta frågor och få 15 vetenskapliga hudmetriker, estimerad hudålder, radardiagram och personliga rekommendationer.",
+                  "Scan your face with MediaPipe precision across 12 zones, answer seven quick questions, and receive 15 scientific skin metrics, estimated skin age, a radar chart and personalised recommendations.",
+                  "Escanea tu rostro con precisión MediaPipe en 12 zonas, responde siete preguntas rápidas y recibe 15 métricas científicas de la piel, edad estimada, gráfico radar y recomendaciones personalizadas.",
+                  "Scanne dein Gesicht mit MediaPipe-Präzision in 12 Zonen, beantworte sieben kurze Fragen und erhalte 15 wissenschaftliche Hautmetriken, geschätztes Hautalter, Radardiagramm und personalisierte Empfehlungen.",
+                  "Scannez votre visage avec la précision MediaPipe sur 12 zones, répondez à sept questions rapides et recevez 15 métriques cutanées scientifiques, un âge estimé de la peau, un graphique radar et des recommandations personnalisées.")}
               </p>
 
               <div className="mx-auto mt-8 grid max-w-sm gap-4 text-left">
@@ -745,8 +793,8 @@ export default function AnalysisPage() {
                 <div className="flex items-start gap-4 rounded-2xl border border-[#e6e6e6] bg-white p-4">
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#108474]/10 text-sm font-bold text-[#108474]">2</div>
                   <div>
-                    <p className="text-sm font-semibold text-[#1d1d1f]">{tx(locale, "Livsstilsfragor", "Lifestyle questions", "Preguntas de estilo de vida", "Lebensstilfragen", "Questions sur le mode de vie")}</p>
-                    <p className="mt-0.5 text-xs text-[#515151]">{tx(locale, "Fem fragor om somn, kost och stress", "Five questions about sleep, diet & stress", "Cinco preguntas sobre sueño, dieta y estrés", "Fünf Fragen zu Schlaf, Ernährung und Stress", "Cinq questions sur le sommeil, l'alimentation et le stress")}</p>
+                    <p className="text-sm font-semibold text-[#1d1d1f]">{tx(locale, "Livsstilsfrågor", "Lifestyle questions", "Preguntas de estilo de vida", "Lebensstilfragen", "Questions sur le mode de vie")}</p>
+                    <p className="mt-0.5 text-xs text-[#515151]">{tx(locale, "Sju frågor om hud, livsstil och mål", "Seven questions about skin, lifestyle & goals", "Siete preguntas sobre piel, estilo de vida y objetivos", "Sieben Fragen zu Haut, Lebensstil und Zielen", "Sept questions sur la peau, le mode de vie et les objectifs")}</p>
                   </div>
                 </div>
                 <div className="flex items-start gap-4 rounded-2xl border border-[#e6e6e6] bg-white p-4">
@@ -758,137 +806,21 @@ export default function AnalysisPage() {
                 </div>
               </div>
 
-              {/* Email collection -- skip for logged-in users */}
-              <div className="mx-auto mt-8 max-w-sm">
-                {isReturningUser ? (
-                  <div className="space-y-4">
-                    <div className="flex items-center justify-center gap-2 rounded-xl bg-[#108474]/5 px-4 py-3 text-xs font-medium text-[#108474]">
-                      <Check className="h-3.5 w-3.5" />
-                      {tx(locale, `Inloggad som ${user?.name || userEmail}`, `Logged in as ${user?.name || userEmail}`, `Conectado como ${user?.name || userEmail}`, `Angemeldet als ${user?.name || userEmail}`, `Connecté en tant que ${user?.name || userEmail}`)}
-                    </div>
-
-                    <button
-                      onClick={() => setStep("scan")}
-                      className="inline-flex h-14 w-full items-center justify-center gap-3 rounded-full bg-[#108474] px-10 text-sm font-semibold text-white shadow-lg shadow-[#108474]/20 transition-all hover:bg-[#0d6e62] hover:shadow-xl active:scale-[0.97]"
-                    >
-                      <ScanFace className="h-5 w-5" />
-                      {tx(locale, "Starta analys", "Start analysis", "Iniciar análisis", "Analyse starten", "Démarrer l'analyse")}
-                    </button>
-
-                    <button
-                      onClick={() => setStep(1)}
-                      className="mt-1 block mx-auto text-xs font-medium text-[#766a62] underline underline-offset-2 transition-colors hover:text-[#108474]"
-                    >
-                      {tx(locale, "Hoppa över skanning, svara bara på frågor", "Skip face scan, answer questions only", "Saltar escaneo, solo responder preguntas", "Scan überspringen, nur Fragen beantworten", "Passer le scan, répondre uniquement aux questions")}
-                    </button>
+              <div className="mx-auto mt-8 max-w-sm space-y-4">
+                {isReturningUser && (
+                  <div className="flex items-center justify-center gap-2 rounded-xl bg-[#108474]/5 px-4 py-3 text-xs font-medium text-[#108474]">
+                    <Check className="h-3.5 w-3.5" />
+                    {tx(locale, `Inloggad som ${user?.name || userEmail}`, `Logged in as ${user?.name || userEmail}`, `Conectado como ${user?.name || userEmail}`, `Angemeldet als ${user?.name || userEmail}`, `Connecté en tant que ${user?.name || userEmail}`)}
                   </div>
-                ) : (
-                  <>
-                    <form
-                      onSubmit={(e) => {
-                        e.preventDefault();
-                        setEmailError("");
-                        if (!userEmail.trim() || !userEmail.includes("@")) {
-                          setEmailError(tx(locale, "Ange en giltig e-postadress.", "Please enter a valid email address.", "Introduce una dirección de email válida.", "Bitte gib eine gültige E-Mail-Adresse ein.", "Veuillez entrer une adresse e-mail valide."));
-                          return;
-                        }
-                        if (!emailConsent) {
-                          setEmailError(tx(locale, "Du behöver godkänna villkoren för att fortsätta.", "You need to accept the terms to continue.", "Debes aceptar los términos para continuar.", "Du musst die Bedingungen akzeptieren, um fortzufahren.", "Vous devez accepter les conditions pour continuer."));
-                          return;
-                        }
-                        setStep("scan");
-                      }}
-                      className="space-y-4"
-                    >
-                      <div>
-                        <label className="mb-2 block text-left text-sm font-medium text-[#1d1d1f]">
-                          {tx(locale, "Din e-postadress", "Your email", "Tu email", "Deine E-Mail", "Votre e-mail")}
-                        </label>
-                        <input
-                          type="email"
-                          required
-                          value={userEmail}
-                          onChange={(e) => setUserEmail(e.target.value)}
-                          placeholder={tx(locale, "namn@exempel.se", "name@example.com", "nombre@ejemplo.com", "name@beispiel.de", "nom@exemple.fr")}
-                          className="w-full rounded-xl border border-[#e6e6e6] bg-white px-4 py-3 text-sm shadow-sm placeholder:text-[#766a62]/50 focus:border-[#108474] focus:outline-none focus:ring-2 focus:ring-[#108474]/20"
-                        />
-                      </div>
-
-                      <button
-                        type="button"
-                        onClick={() => setEmailConsent((c) => !c)}
-                        className={cn(
-                          "flex w-full items-start gap-3 rounded-2xl border-2 px-4 py-3 text-left transition-all duration-300",
-                          emailConsent
-                            ? "border-[#108474]/30 bg-[#108474]/5"
-                            : "border-transparent bg-[#f5f5f7] hover:border-[#e6e6e6]"
-                        )}
-                      >
-                        {emailConsent ? (
-                          <Check className="mt-0.5 h-5 w-5 flex-shrink-0 text-[#108474]" />
-                        ) : (
-                          <div className="mt-0.5 h-5 w-5 flex-shrink-0 rounded border-2 border-[#766a62]/30" />
-                        )}
-                        <span className="text-xs leading-relaxed text-[#515151]">
-                          {locale === "sv" ? (
-                            <>
-                              Jag godkänner att få personliga hudvårdstips via e-post baserat på mina analysresultat.
-                              Jag godkänner också att mina svar får användas <span className="font-semibold text-[#1d1d1f]">anonymt</span> för
-                              att förbättra AI-analysen. Jag kan avregistrera mig när som helst.
-                            </>
-                          ) : locale === "es" ? (
-                            <>
-                              Acepto recibir consejos personalizados de cuidado de la piel por email basados en mis resultados.
-                              También acepto que mis respuestas se utilicen <span className="font-semibold text-[#1d1d1f]">de forma anónima</span> para
-                              mejorar el análisis de IA. Puedo cancelar la suscripción en cualquier momento.
-                            </>
-                          ) : locale === "de" ? (
-                            <>
-                              Ich stimme zu, personalisierte Hautpflegetipps per E-Mail basierend auf meinen Analyseergebnissen zu erhalten.
-                              Ich stimme auch zu, dass meine Antworten <span className="font-semibold text-[#1d1d1f]">anonym</span> zur
-                              Verbesserung der KI-Analyse verwendet werden dürfen. Ich kann mich jederzeit abmelden.
-                            </>
-                          ) : (
-                            <>
-                              I agree to receive personalised skincare tips by email based on my analysis results.
-                              I also agree that my answers may be used <span className="font-semibold text-[#1d1d1f]">anonymously</span> to
-                              improve the AI analysis. I can unsubscribe at any time.
-                            </>
-                          )}
-                        </span>
-                      </button>
-
-                      {emailError && (
-                        <p className="rounded-xl bg-red-50 px-4 py-2 text-xs text-red-700">{emailError}</p>
-                      )}
-
-                      <button
-                        type="submit"
-                        className="inline-flex h-14 w-full items-center justify-center gap-3 rounded-full bg-[#108474] px-10 text-sm font-semibold text-white shadow-lg shadow-[#108474]/20 transition-all hover:bg-[#0d6e62] hover:shadow-xl active:scale-[0.97]"
-                      >
-                        <ScanFace className="h-5 w-5" />
-                        {tx(locale, "Starta analys", "Start analysis", "Iniciar análisis", "Analyse starten", "Démarrer l'analyse")}
-                      </button>
-                    </form>
-
-                    <button
-                      onClick={() => {
-                        if (!userEmail.trim() || !userEmail.includes("@")) {
-                          setEmailError(tx(locale, "Ange en giltig e-postadress.", "Please enter a valid email address.", "Introduce una dirección de email válida.", "Bitte gib eine gültige E-Mail-Adresse ein.", "Veuillez entrer une adresse e-mail valide."));
-                          return;
-                        }
-                        if (!emailConsent) {
-                          setEmailError(tx(locale, "Du behöver godkänna villkoren för att fortsätta.", "You need to accept the terms to continue.", "Debes aceptar los términos para continuar.", "Du musst die Bedingungen akzeptieren, um fortzufahren.", "Vous devez accepter les conditions pour continuer."));
-                          return;
-                        }
-                        setStep(1);
-                      }}
-                      className="mt-3 block mx-auto text-xs font-medium text-[#766a62] underline underline-offset-2 transition-colors hover:text-[#108474]"
-                    >
-                      {tx(locale, "Hoppa över skanning, svara bara på frågor", "Skip face scan, answer questions only", "Saltar escaneo, solo responder preguntas", "Scan überspringen, nur Fragen beantworten", "Passer le scan, répondre uniquement aux questions")}
-                    </button>
-                  </>
                 )}
+
+                <button
+                  onClick={() => setStep(isReturningUser ? "demographics" : "email")}
+                  className="inline-flex h-14 w-full items-center justify-center gap-3 rounded-full bg-[#108474] px-10 text-sm font-semibold text-white shadow-lg shadow-[#108474]/20 transition-all hover:bg-[#0d6e62] hover:shadow-xl active:scale-[0.97]"
+                >
+                  <ScanFace className="h-5 w-5" />
+                  {tx(locale, "Starta analys", "Start analysis", "Iniciar análisis", "Analyse starten", "Démarrer l'analyse")}
+                </button>
               </div>
 
               <p className="mx-auto mt-6 max-w-sm text-xs text-[#766a62]">
@@ -902,8 +834,8 @@ export default function AnalysisPage() {
             </div>
           )}
 
-          {/* ---- FACE SCAN ---- */}
-          {step === "scan" && (
+          {/* ---- EMAIL STEP ---- */}
+          {step === "email" && (
             <div className="animate-fade-in">
               <button
                 onClick={() => setStep("intro")}
@@ -913,9 +845,238 @@ export default function AnalysisPage() {
                 {tx(locale, "Tillbaka", "Back", "Atrás", "Zurück", "Retour")}
               </button>
 
+              <div className="text-center">
+                <h2 className="text-2xl font-bold tracking-tight">
+                  {tx(locale, "Din e-postadress", "Your email", "Tu email", "Deine E-Mail", "Votre e-mail")}
+                </h2>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  {tx(locale, "Vi skickar dina resultat och personliga tips hit.", "We'll send your results and personalised tips here.", "Enviaremos tus resultados y consejos personalizados aquí.", "Wir senden deine Ergebnisse und persönliche Tipps hierhin.", "Nous enverrons vos résultats et conseils personnalisés ici.")}
+                </p>
+              </div>
+
+              <div className="mx-auto mt-8 max-w-sm space-y-4">
+                <div>
+                  <label className="mb-2 block text-left text-sm font-medium text-[#1d1d1f]">
+                    {tx(locale, "E-postadress", "Email address", "Dirección de email", "E-Mail-Adresse", "Adresse e-mail")}
+                  </label>
+                  <input
+                    type="email"
+                    required
+                    value={userEmail}
+                    onChange={(e) => { setUserEmail(e.target.value); setEmailError(""); }}
+                    placeholder={tx(locale, "namn@exempel.se", "name@example.com", "nombre@ejemplo.com", "name@beispiel.de", "nom@exemple.fr")}
+                    className="w-full rounded-xl border border-[#e6e6e6] bg-white px-4 py-3 text-sm shadow-sm placeholder:text-[#766a62]/50 focus:border-[#108474] focus:outline-none focus:ring-2 focus:ring-[#108474]/20"
+                  />
+                </div>
+
+                <button
+                  type="button"
+                  onClick={() => { setEmailConsent((c) => !c); setEmailError(""); }}
+                  className={cn(
+                    "flex w-full items-start gap-3 rounded-2xl border-2 px-4 py-3 text-left transition-all duration-300",
+                    emailConsent
+                      ? "border-[#108474]/30 bg-[#108474]/5"
+                      : "border-transparent bg-[#f5f5f7] hover:border-[#e6e6e6]"
+                  )}
+                >
+                  {emailConsent ? (
+                    <Check className="mt-0.5 h-5 w-5 flex-shrink-0 text-[#108474]" />
+                  ) : (
+                    <div className="mt-0.5 h-5 w-5 flex-shrink-0 rounded border-2 border-[#766a62]/30" />
+                  )}
+                  <span className="text-xs leading-relaxed text-[#515151]">
+                    {locale === "sv" ? (
+                      <>
+                        Jag godkänner att ett konto skapas med min e-postadress för att spara mina analysresultat.
+                        Jag godkänner också att få personliga hudvårdstips via e-post och att mina svar och bilder får användas{" "}
+                        <span className="font-semibold text-[#1d1d1f]">anonymt</span> för att förbättra AI-analysen.
+                        Jag kan avregistrera mig och radera mitt konto när som helst.
+                      </>
+                    ) : locale === "es" ? (
+                      <>
+                        Acepto que se cree una cuenta con mi email para guardar mis resultados de análisis.
+                        También acepto recibir consejos personalizados por email y que mis respuestas e imágenes se utilicen{" "}
+                        <span className="font-semibold text-[#1d1d1f]">de forma anónima</span> para mejorar el análisis de IA.
+                        Puedo cancelar la suscripción y eliminar mi cuenta en cualquier momento.
+                      </>
+                    ) : locale === "de" ? (
+                      <>
+                        Ich stimme zu, dass mit meiner E-Mail-Adresse ein Konto erstellt wird, um meine Analyseergebnisse zu speichern.
+                        Ich stimme auch zu, personalisierte Hautpflegetipps per E-Mail zu erhalten und dass meine Antworten und Bilder{" "}
+                        <span className="font-semibold text-[#1d1d1f]">anonym</span> zur Verbesserung der KI-Analyse verwendet werden dürfen.
+                        Ich kann mich jederzeit abmelden und mein Konto löschen.
+                      </>
+                    ) : locale === "fr" ? (
+                      <>
+                        J&apos;accepte qu&apos;un compte soit créé avec mon e-mail pour sauvegarder mes résultats d&apos;analyse.
+                        J&apos;accepte également de recevoir des conseils personnalisés par e-mail et que mes réponses et images soient utilisées{" "}
+                        <span className="font-semibold text-[#1d1d1f]">de manière anonyme</span> pour améliorer l&apos;analyse IA.
+                        Je peux me désinscrire et supprimer mon compte à tout moment.
+                      </>
+                    ) : (
+                      <>
+                        I agree that an account is created with my email to save my analysis results.
+                        I also agree to receive personalised skincare tips by email and that my answers and images may be used{" "}
+                        <span className="font-semibold text-[#1d1d1f]">anonymously</span> to improve the AI analysis.
+                        I can unsubscribe and delete my account at any time.
+                      </>
+                    )}
+                  </span>
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => setGdprExpanded((v) => !v)}
+                  className="inline-flex items-center gap-1.5 text-xs font-medium text-[#766a62] transition-colors hover:text-[#108474]"
+                >
+                  <ChevronDown className={cn("h-3.5 w-3.5 transition-transform", gdprExpanded && "rotate-180")} />
+                  {tx(locale, "Läs mer om datahantering", "Read more about data handling", "Leer más sobre el manejo de datos", "Mehr zur Datenverarbeitung", "En savoir plus sur le traitement des données")}
+                </button>
+
+                {gdprExpanded && (
+                  <div className="rounded-2xl border border-[#e6e6e6] bg-[#f5f5f7] p-4 text-xs leading-relaxed text-[#515151] space-y-3 animate-fade-in">
+                    <p className="font-semibold text-[#1d1d1f]">{tx(locale,
+                      "Så hanterar vi dina uppgifter",
+                      "How we handle your data",
+                      "Cómo manejamos tus datos",
+                      "So gehen wir mit deinen Daten um",
+                      "Comment nous gérons vos données")}</p>
+                    <p>{tx(locale,
+                      "Din ansiktsbild analyseras först lokalt på din enhet med vår ONNX-modell — bilden lämnar aldrig din telefon i detta steg. Därefter skickas bilden krypterat (TLS 1.3) till GPT-5.4 för en fördjupad analys. OpenAI lagrar inte bilden efter analysen.",
+                      "Your face image is first analysed locally on your device using our ONNX model — the image never leaves your phone in this step. It is then sent encrypted (TLS 1.3) to GPT-5.4 for a deeper analysis. OpenAI does not store the image after analysis.",
+                      "Tu imagen facial se analiza primero localmente en tu dispositivo con nuestro modelo ONNX — la imagen nunca sale de tu teléfono en este paso. Luego se envía cifrada (TLS 1.3) a GPT-5.4 para un análisis más profundo. OpenAI no almacena la imagen después del análisis.",
+                      "Dein Gesichtsbild wird zunächst lokal auf deinem Gerät mit unserem ONNX-Modell analysiert — das Bild verlässt dein Telefon in diesem Schritt nie. Anschließend wird es verschlüsselt (TLS 1.3) an GPT-5.4 für eine tiefere Analyse gesendet. OpenAI speichert das Bild nicht nach der Analyse.",
+                      "Votre image faciale est d'abord analysée localement sur votre appareil avec notre modèle ONNX — l'image ne quitte jamais votre téléphone à cette étape. Elle est ensuite envoyée chiffrée (TLS 1.3) à GPT-5.4 pour une analyse approfondie. OpenAI ne stocke pas l'image après l'analyse.")}</p>
+                    <p>{tx(locale,
+                      "Om du godkänner kan din bild användas anonymt för att träna och förbättra vår AI-modell. Bilderna lagras krypterade (AES-256) på våra servrar i EU och är helt avidentifierade — de kopplas aldrig till ditt namn, e-post eller konto. Ingen bild delas med tredje part.",
+                      "If you consent, your image may be used anonymously to train and improve our AI model. Images are stored encrypted (AES-256) on our EU servers and are fully de-identified — they are never linked to your name, email or account. No image is shared with third parties.",
+                      "Si das tu consentimiento, tu imagen puede usarse anónimamente para entrenar y mejorar nuestro modelo de IA. Las imágenes se almacenan cifradas (AES-256) en nuestros servidores en la UE y están completamente desidentificadas — nunca se vinculan a tu nombre, email o cuenta. Ninguna imagen se comparte con terceros.",
+                      "Wenn du zustimmst, kann dein Bild anonym verwendet werden, um unser KI-Modell zu trainieren und zu verbessern. Die Bilder werden verschlüsselt (AES-256) auf unseren EU-Servern gespeichert und sind vollständig de-identifiziert — sie werden nie mit deinem Namen, deiner E-Mail oder deinem Konto verknüpft. Kein Bild wird mit Dritten geteilt.",
+                      "Si vous consentez, votre image peut être utilisée anonymement pour entraîner et améliorer notre modèle IA. Les images sont stockées chiffrées (AES-256) sur nos serveurs dans l'UE et sont entièrement désidentifiées — elles ne sont jamais liées à votre nom, email ou compte. Aucune image n'est partagée avec des tiers.")}</p>
+                    <p>{tx(locale,
+                      "Ett konto skapas automatiskt med din e-postadress så att dina analysresultat sparas. Du kan logga in när som helst för att se din hudresa, jämföra resultat över tid och göra nya analyser (en gång per månad). Ditt lösenord kan du sätta via länken i välkomstmejlet.",
+                      "An account is automatically created with your email so your analysis results are saved. You can log in anytime to view your skin journey, compare results over time, and run new analyses (once per month). You can set your password via the link in the welcome email.",
+                      "Se crea automáticamente una cuenta con tu email para guardar tus resultados. Puedes iniciar sesión en cualquier momento para ver tu viaje de piel, comparar resultados y hacer nuevos análisis (una vez al mes). Puedes establecer tu contraseña a través del enlace en el email de bienvenida.",
+                      "Mit deiner E-Mail-Adresse wird automatisch ein Konto erstellt, damit deine Analyseergebnisse gespeichert werden. Du kannst dich jederzeit einloggen, um deine Hautreise zu sehen, Ergebnisse zu vergleichen und neue Analysen durchzuführen (einmal pro Monat). Dein Passwort kannst du über den Link in der Willkommens-E-Mail festlegen.",
+                      "Un compte est créé automatiquement avec votre email pour sauvegarder vos résultats. Vous pouvez vous connecter à tout moment pour voir votre parcours peau, comparer les résultats et faire de nouvelles analyses (une fois par mois). Vous pouvez définir votre mot de passe via le lien dans l'email de bienvenue.")}</p>
+                    <p>{tx(locale,
+                      "Du kan få personliga hudvårdstips via e-post baserat på din analys. Du kan avregistrera dig när som helst. All data hanteras enligt GDPR. Kontakta oss på info@1753skin.com för frågor eller radering av data.",
+                      "You may receive personalised skincare tips by email based on your analysis. You can unsubscribe anytime. All data is handled per GDPR. Contact us at info@1753skin.com for questions or data deletion.",
+                      "Puedes recibir consejos personalizados por email basados en tu análisis. Puedes cancelar la suscripción en cualquier momento. Todos los datos se manejan según el RGPD. Contáctanos en info@1753skin.com para preguntas o eliminación de datos.",
+                      "Du kannst personalisierte Hautpflegetipps per E-Mail basierend auf deiner Analyse erhalten. Du kannst dich jederzeit abmelden. Alle Daten werden gemäß DSGVO behandelt. Kontaktiere uns unter info@1753skin.com für Fragen oder Datenlöschung.",
+                      "Vous pouvez recevoir des conseils personnalisés par email basés sur votre analyse. Vous pouvez vous désabonner à tout moment. Toutes les données sont traitées conformément au RGPD. Contactez-nous à info@1753skin.com pour toute question ou suppression de données.")}</p>
+                  </div>
+                )}
+
+                {emailError && (
+                  <p className="rounded-xl bg-red-50 px-4 py-2 text-xs text-red-700">{emailError}</p>
+                )}
+
+                <button
+                  onClick={goNext}
+                  disabled={!canProceed()}
+                  className="inline-flex h-14 w-full items-center justify-center gap-3 rounded-full bg-[#108474] px-10 text-sm font-semibold text-white shadow-lg shadow-[#108474]/20 transition-all hover:bg-[#0d6e62] hover:shadow-xl active:scale-[0.97] disabled:opacity-40 disabled:shadow-none"
+                >
+                  {tx(locale, "Fortsätt", "Continue", "Continuar", "Weiter", "Continuer")}
+                  <ArrowRight className="h-4 w-4" />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* ---- DEMOGRAPHICS STEP ---- */}
+          {step === "demographics" && (
+            <div className="animate-fade-in">
+              <button
+                onClick={goPrev}
+                className="mb-6 inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium text-[#515151] transition-colors hover:bg-[#f5f5f7]"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                {tx(locale, "Tillbaka", "Back", "Atrás", "Zurück", "Retour")}
+              </button>
+
+              <div className="text-center">
+                <h2 className="text-2xl font-bold tracking-tight">
+                  {tx(locale, "Berätta lite om dig", "Tell us about yourself", "Cuéntanos sobre ti", "Erzähl uns von dir", "Parlez-nous de vous")}
+                </h2>
+                <p className="mt-2 text-sm text-muted-foreground">
+                  {tx(locale, "Ålder och kön hjälper oss att ge bättre rekommendationer.", "Age and gender help us give better recommendations.", "La edad y el género nos ayudan a dar mejores recomendaciones.", "Alter und Geschlecht helfen uns, bessere Empfehlungen zu geben.", "L'âge et le genre nous aident à donner de meilleures recommandations.")}
+                </p>
+              </div>
+
+              <div className="mx-auto mt-8 max-w-sm space-y-6">
+                <SelectField
+                  label={tx(locale, "Åldersgrupp", "Age range", "Rango de edad", "Altersgruppe", "Tranche d'âge")}
+                  value={answers.age > 0 ? String(answers.age) : ""}
+                  onChange={(v) => setAnswers((p) => ({ ...p, age: Number(v) }))}
+                  options={[
+                    { value: "21", label: "18–25" },
+                    { value: "30", label: "26–35" },
+                    { value: "40", label: "36–45" },
+                    { value: "50", label: "46–55" },
+                    { value: "60", label: "56–65" },
+                    { value: "70", label: "66+" },
+                  ]}
+                />
+
+                <div>
+                  <p className="mb-3 text-sm font-medium text-brand-900">
+                    {tx(locale, "Kön", "Gender", "Género", "Geschlecht", "Genre")}
+                  </p>
+                  <div className="grid grid-cols-2 gap-3">
+                    {[
+                      { key: "female", label: tx(locale, "Kvinna", "Woman", "Mujer", "Frau", "Femme") },
+                      { key: "male", label: tx(locale, "Man", "Man", "Hombre", "Mann", "Homme") },
+                      { key: "other", label: tx(locale, "Annat", "Other", "Otro", "Andere", "Autre") },
+                      { key: "prefer-not", label: tx(locale, "Vill ej ange", "Prefer not to say", "Prefiero no decir", "Möchte ich nicht angeben", "Je préfère ne pas dire") },
+                    ].map((g) => (
+                      <OptionCard
+                        key={g.key}
+                        selected={answers.gender === g.key}
+                        onClick={() => setAnswers((p) => ({ ...p, gender: g.key }))}
+                        title={g.label}
+                        icon={User}
+                        className="min-h-[80px]"
+                      />
+                    ))}
+                  </div>
+                </div>
+
+                <button
+                  onClick={goNext}
+                  disabled={!canProceed()}
+                  className="inline-flex h-14 w-full items-center justify-center gap-3 rounded-full bg-[#108474] px-10 text-sm font-semibold text-white shadow-lg shadow-[#108474]/20 transition-all hover:bg-[#0d6e62] hover:shadow-xl active:scale-[0.97] disabled:opacity-40 disabled:shadow-none"
+                >
+                  {tx(locale, "Fortsätt till skanning", "Continue to scan", "Continuar al escaneo", "Weiter zum Scan", "Continuer vers le scan")}
+                  <ArrowRight className="h-4 w-4" />
+                </button>
+
+                {canProceed() && (
+                  <button
+                    onClick={() => setStep(1)}
+                    className="block mx-auto text-xs font-medium text-[#766a62] underline underline-offset-2 transition-colors hover:text-[#108474]"
+                  >
+                    {tx(locale, "Hoppa över skanning, svara bara på frågor", "Skip face scan, answer questions only", "Saltar escaneo, solo responder preguntas", "Scan überspringen, nur Fragen beantworten", "Passer le scan, répondre uniquement aux questions")}
+                  </button>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* ---- FACE SCAN ---- */}
+          {step === "scan" && (
+            <div className="animate-fade-in">
+              <button
+                onClick={() => setStep("demographics")}
+                className="mb-6 inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium text-[#515151] transition-colors hover:bg-[#f5f5f7]"
+              >
+                <ArrowLeft className="h-4 w-4" />
+                {tx(locale, "Tillbaka", "Back", "Atrás", "Zurück", "Retour")}
+              </button>
+
               <div className="mb-4 text-center">
                 <p className="text-xs font-medium uppercase tracking-widest text-muted-foreground">
-                  {tx(locale, "Steg 1 av 3 — Ansiktsskanning", "Step 1 of 3 — Face scan", "Paso 1 de 3 — Escaneo facial", "Schritt 1 von 3 — Gesichtsscan", "Étape 1 sur 3 — Scan du visage")}
+                  {tx(locale, "Steg 1 av 4 — Ansiktsskanning", "Step 1 of 4 — Face scan", "Paso 1 de 4 — Escaneo facial", "Schritt 1 von 4 — Gesichtsscan", "Étape 1 sur 4 — Scan du visage")}
                 </p>
               </div>
 
@@ -960,11 +1121,11 @@ export default function AnalysisPage() {
               <p className="mb-6 text-center text-xs font-medium uppercase tracking-widest text-muted-foreground">
                 {scanSummary
                   ? tx(locale,
-                      `Steg 2 av 3 — Fråga ${step} av ${TOTAL_STEPS}`,
-                      `Step 2 of 3 — Question ${step} of ${TOTAL_STEPS}`,
-                      `Paso 2 de 3 — Pregunta ${step} de ${TOTAL_STEPS}`,
-                      `Schritt 2 von 3 — Frage ${step} von ${TOTAL_STEPS}`,
-                      `Étape 2 sur 3 — Question ${step} sur ${TOTAL_STEPS}`)
+                      `Steg 3 av 4 — Fråga ${step} av ${TOTAL_STEPS}`,
+                      `Step 3 of 4 — Question ${step} of ${TOTAL_STEPS}`,
+                      `Paso 3 de 4 — Pregunta ${step} de ${TOTAL_STEPS}`,
+                      `Schritt 3 von 4 — Frage ${step} von ${TOTAL_STEPS}`,
+                      `Étape 3 sur 4 — Question ${step} sur ${TOTAL_STEPS}`)
                   : a("stepOf", { current: step, total: TOTAL_STEPS })}
               </p>
 
@@ -1158,6 +1319,69 @@ export default function AnalysisPage() {
                 </div>
               )}
 
+              {/* Step 6 - Sun habits */}
+              {step === 6 && (
+                <div className="space-y-6">
+                  <div className="text-center">
+                    <h2 className="text-2xl font-bold tracking-tight">
+                      {tx(locale, "Solskydd", "Sun protection", "Protección solar", "Sonnenschutz", "Protection solaire")}
+                    </h2>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      {tx(locale, "Hur ofta använder du solskydd?", "How often do you use sun protection?", "¿Con qué frecuencia usas protección solar?", "Wie oft verwendest du Sonnenschutz?", "À quelle fréquence utilisez-vous une protection solaire ?")}
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                    {[
+                      { key: "never", label: tx(locale, "Aldrig", "Never", "Nunca", "Nie", "Jamais"), icon: Sun },
+                      { key: "sometimes", label: tx(locale, "Ibland", "Sometimes", "A veces", "Manchmal", "Parfois"), icon: Sun },
+                      { key: "daily", label: tx(locale, "Dagligen", "Daily", "Diariamente", "Täglich", "Quotidiennement"), icon: Sun },
+                    ].map((opt) => (
+                      <OptionCard
+                        key={opt.key}
+                        selected={answers.sunProtection === opt.key}
+                        onClick={() => setAnswers((p) => ({ ...p, sunProtection: opt.key }))}
+                        title={opt.label}
+                        icon={opt.icon}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Step 7 - Hormonal */}
+              {step === 7 && (
+                <div className="space-y-6">
+                  <div className="text-center">
+                    <h2 className="text-2xl font-bold tracking-tight">
+                      {tx(locale, "Hormonell påverkan", "Hormonal influence", "Influencia hormonal", "Hormoneller Einfluss", "Influence hormonale")}
+                    </h2>
+                    <p className="mt-1 text-sm text-muted-foreground">
+                      {tx(locale, "Upplever du förändringar i huden kopplade till hormoner?", "Do you experience skin changes related to hormones?", "¿Experimentas cambios en la piel relacionados con hormonas?", "Erlebst du hormonbedingte Hautveränderungen?", "Ressentez-vous des changements cutanés liés aux hormones ?")}
+                    </p>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    {[
+                      { key: "yes", label: tx(locale, "Ja", "Yes", "Sí", "Ja", "Oui") },
+                      { key: "no", label: tx(locale, "Nej", "No", "No", "Nein", "Non") },
+                      { key: "unsure", label: tx(locale, "Vet ej", "Not sure", "No sé", "Weiß nicht", "Je ne sais pas") },
+                      { key: "not-applicable", label: tx(locale, "Ej relevant", "Not applicable", "No aplica", "Nicht zutreffend", "Non applicable") },
+                    ].map((opt) => (
+                      <OptionCard
+                        key={opt.key}
+                        selected={answers.hormonal === opt.key}
+                        onClick={() => setAnswers((p) => ({ ...p, hormonal: opt.key }))}
+                        title={opt.label}
+                        className="min-h-[80px]"
+                      />
+                    ))}
+                  </div>
+
+                  {error && (
+                    <p className="rounded-xl bg-red-50 px-4 py-3 text-sm text-red-700">{error}</p>
+                  )}
+                </div>
+              )}
+
               {/* Navigation */}
               <div className="mt-10 flex items-center justify-between">
                 <button
@@ -1234,6 +1458,89 @@ export default function AnalysisPage() {
                         .join("")
                     }}
                   />
+                </div>
+              )}
+
+              {/* Share result */}
+              {parsed && (
+                <div className="mx-auto max-w-md rounded-2xl border border-[#e6e6e6] bg-white p-6 text-center">
+                  <Sparkles className="mx-auto mb-3 h-6 w-6 text-[#108474]" />
+                  <h3 className="text-lg font-bold tracking-tight text-[#1d1d1f]">
+                    {tx(locale, "Dela ditt resultat", "Share your result", "Comparte tu resultado", "Teile dein Ergebnis", "Partagez votre résultat")}
+                  </h3>
+                  <p className="mt-1 text-xs text-[#515151]">
+                    {tx(locale,
+                      "Visa dina vänner hur gammal din hud egentligen är",
+                      "Show your friends how old your skin really is",
+                      "Muestra a tus amigos la edad real de tu piel",
+                      "Zeige deinen Freunden, wie alt deine Haut wirklich ist",
+                      "Montrez à vos amis l'âge réel de votre peau")}
+                  </p>
+
+                  {/* Share card preview */}
+                  <div className="mx-auto mt-4 max-w-xs overflow-hidden rounded-2xl border border-[#e6e6e6] bg-gradient-to-br from-[#f5f5f7] to-white p-5">
+                    <p className="text-[10px] font-semibold uppercase tracking-widest text-[#766a62]">1753 SKINCARE</p>
+                    <div className="mt-3 flex items-center justify-center gap-6">
+                      <div className="text-center">
+                        <p className="text-3xl font-bold text-[#108474]">{parsed.score}</p>
+                        <p className="mt-0.5 text-[10px] text-[#766a62]">{tx(locale, "Hudpoäng", "Skin score", "Puntuación", "Hautscore", "Score")}</p>
+                      </div>
+                      {parsed.skinAge && (
+                        <>
+                          <div className="h-10 w-px bg-[#e6e6e6]" />
+                          <div className="text-center">
+                            <p className="text-3xl font-bold text-[#1d1d1f]">{parsed.skinAge}</p>
+                            <p className="mt-0.5 text-[10px] text-[#766a62]">{tx(locale, "Biologisk hudålder", "Biological skin age", "Edad biológica", "Biologisches Hautalter", "Âge biologique")}</p>
+                          </div>
+                        </>
+                      )}
+                    </div>
+                    <p className="mt-3 text-[10px] text-[#766a62]">
+                      {tx(locale,
+                        "Testa din hud gratis på 1753skin.com/hudanalys",
+                        "Test your skin free at 1753skin.com/skin-analysis",
+                        "Analiza tu piel gratis en 1753skin.com/analisis",
+                        "Teste deine Haut kostenlos auf 1753skin.com/hautanalyse",
+                        "Testez votre peau gratuitement sur 1753skin.com/analyse")}
+                    </p>
+                  </div>
+
+                  {/* Share buttons */}
+                  <div className="mt-4 flex items-center justify-center gap-3">
+                    <button
+                      onClick={() => {
+                        const shareText = tx(locale,
+                          `Min hud fick ${parsed.score}/100 poäng${parsed.skinAge ? ` och en biologisk hudålder på ${parsed.skinAge} år` : ""}! Testa din hud gratis:`,
+                          `My skin scored ${parsed.score}/100${parsed.skinAge ? ` with a biological skin age of ${parsed.skinAge}` : ""}! Test yours free:`,
+                          `Mi piel obtuvo ${parsed.score}/100${parsed.skinAge ? ` con una edad biológica de ${parsed.skinAge} años` : ""}! Prueba gratis:`,
+                          `Meine Haut hat ${parsed.score}/100 Punkte${parsed.skinAge ? ` mit einem biologischen Hautalter von ${parsed.skinAge} Jahren` : ""}! Teste kostenlos:`,
+                          `Ma peau a obtenu ${parsed.score}/100${parsed.skinAge ? ` avec un âge biologique de ${parsed.skinAge} ans` : ""}! Testez gratuitement :`);
+                        const shareUrl = `https://www.1753skin.com/${locale}/hudanalys`;
+                        if (navigator.share) {
+                          navigator.share({ title: "1753 SKINCARE", text: shareText, url: shareUrl }).catch(() => {});
+                        } else {
+                          navigator.clipboard.writeText(`${shareText} ${shareUrl}`).then(() => {
+                            setShareCopied(true);
+                            setTimeout(() => setShareCopied(false), 2500);
+                          }).catch(() => {});
+                        }
+                      }}
+                      className="inline-flex items-center gap-2 rounded-full bg-[#108474] px-6 py-2.5 text-xs font-semibold text-white transition-all hover:bg-[#0d6e62]"
+                    >
+                      <ArrowRight className="h-3.5 w-3.5" />
+                      {shareCopied
+                        ? tx(locale, "Kopierat!", "Copied!", "¡Copiado!", "Kopiert!", "Copié !")
+                        : tx(locale, "Dela", "Share", "Compartir", "Teilen", "Partager")}
+                    </button>
+                    <a
+                      href={`https://www.instagram.com/`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center gap-2 rounded-full border-2 border-[#e6e6e6] px-5 py-2 text-xs font-medium text-[#515151] transition-all hover:border-[#108474] hover:text-[#108474]"
+                    >
+                      Instagram
+                    </a>
+                  </div>
                 </div>
               )}
 
@@ -1341,6 +1648,8 @@ export default function AnalysisPage() {
                     setEmailConsent(false);
                     setEmailError("");
                     setAnswers({
+                      age: 0,
+                      gender: "",
                       skinType: "",
                       concerns: [],
                       routine: [],
@@ -1351,6 +1660,8 @@ export default function AnalysisPage() {
                       exercise: "",
                       goals: [],
                       sensitivities: "",
+                      sunProtection: "",
+                      hormonal: "",
                     });
                   }}
                   className="inline-flex items-center gap-2 rounded-full border-2 border-[#108474] px-8 py-3 text-sm font-semibold text-[#108474] transition-all hover:bg-[#108474]/5"

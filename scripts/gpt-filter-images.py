@@ -25,7 +25,7 @@ import requests
 # ── Config ──────────────────────────────────────────────────
 DATASET_DIR = Path(__file__).resolve().parent.parent / "data" / "training-dataset"
 BATCH_SIZE = 10
-MODEL = "gpt-4o-mini"
+MODEL = "gpt-5.4-mini"
 MAX_RETRIES = 3
 RETRY_DELAY = 5
 

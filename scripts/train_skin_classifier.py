@@ -27,6 +27,8 @@ import argparse
 import json
 import os
 import sys
+import ssl
+ssl._create_default_https_context = ssl._create_unverified_context
 
 import torch
 import torch.nn as nn
@@ -43,7 +45,7 @@ ONNX_OUTPUT = os.path.join(PROJECT_ROOT, "frontend", "public", "models", "skin_c
 META_OUTPUT = os.path.join(PROJECT_ROOT, "frontend", "public", "models", "model_meta.json")
 SEVERITY_FILE = os.path.join(DATASET_DIR, "_severity_annotations.json")
 
-IMAGE_SIZE = 260
+IMAGE_SIZE = 224
 IMAGENET_MEAN = [0.485, 0.456, 0.406]
 IMAGENET_STD = [0.229, 0.224, 0.225]
 
@@ -99,24 +101,22 @@ class SkinDatasetMultiTask(Dataset):
 
 
 class SkinClassifierMultiTask(nn.Module):
-    """EfficientNet with dual heads: condition classification + severity."""
+    """MobileNetV3 with dual heads: condition classification + severity."""
 
-    def __init__(self, num_conditions, num_severities=4, backbone="b3"):
+    def __init__(self, num_conditions, num_severities=4, backbone="mobilenet_v3"):
         super().__init__()
         if backbone == "b3":
             base = models.efficientnet_b3(weights=models.EfficientNet_B3_Weights.DEFAULT)
             feat_dim = base.classifier[1].in_features
-        elif backbone == "b4":
-            base = models.efficientnet_b4(weights=models.EfficientNet_B4_Weights.DEFAULT)
-            feat_dim = base.classifier[1].in_features
+            self.features = base.features
+            self.avgpool = base.avgpool
         else:
-            base = models.efficientnet_b0(weights=models.EfficientNet_B0_Weights.DEFAULT)
-            feat_dim = base.classifier[1].in_features
+            base = models.mobilenet_v3_large(weights=models.MobileNet_V3_Large_Weights.DEFAULT)
+            feat_dim = base.classifier[0].in_features
+            self.features = base.features
+            self.avgpool = base.avgpool
 
-        self.features = base.features
-        self.avgpool = base.avgpool
         self.dropout = nn.Dropout(p=0.3)
-
         self.condition_head = nn.Linear(feat_dim, num_conditions)
         self.severity_head = nn.Linear(feat_dim, num_severities)
 
@@ -135,7 +135,8 @@ class SkinClassifierMultiTask(nn.Module):
 def train_epoch(model, loader, cond_criterion, sev_criterion, optimizer, device):
     model.train()
     total_loss, correct, total = 0, 0, 0
-    for images, cond_labels, sev_labels in loader:
+    num_batches = len(loader)
+    for batch_idx, (images, cond_labels, sev_labels) in enumerate(loader):
         images = images.to(device)
         cond_labels = cond_labels.to(device)
         sev_labels = sev_labels.to(device)
@@ -158,6 +159,8 @@ def train_epoch(model, loader, cond_criterion, sev_criterion, optimizer, device)
         total_loss += loss.item() * images.size(0)
         correct += (cond_logits.argmax(1) == cond_labels).sum().item()
         total += images.size(0)
+        if (batch_idx + 1) % 200 == 0:
+            print(f"    batch {batch_idx+1}/{num_batches} | loss: {total_loss/total:.4f} | acc: {correct/total:.3f}", flush=True)
     return total_loss / total, correct / total
 
 
@@ -210,7 +213,7 @@ def export_onnx(model, labels, device, backbone):
         "num_severity_classes": len(SEVERITY_CLASSES),
         "mean": IMAGENET_MEAN,
         "std": IMAGENET_STD,
-        "source_model": f"efficientnet_{backbone}_multitask",
+        "source_model": f"{backbone}_multitask",
     }
     with open(META_OUTPUT, "w") as f:
         json.dump(meta, f, indent=2)
@@ -219,10 +222,10 @@ def export_onnx(model, labels, device, backbone):
 
 def main():
     parser = argparse.ArgumentParser(description="Train skin classifier")
-    parser.add_argument("--epochs", type=int, default=25)
-    parser.add_argument("--batch-size", type=int, default=24)
-    parser.add_argument("--lr", type=float, default=5e-5)
-    parser.add_argument("--model", type=str, default="b3", choices=["b0", "b3", "b4"])
+    parser.add_argument("--epochs", type=int, default=15)
+    parser.add_argument("--batch-size", type=int, default=128)
+    parser.add_argument("--lr", type=float, default=1e-4)
+    parser.add_argument("--model", type=str, default="mobilenet_v3", choices=["b0", "b3", "b4", "mobilenet_v3"])
     parser.add_argument("--resume", type=str, default=None)
     parser.add_argument("--export-only", action="store_true")
     args = parser.parse_args()
@@ -233,7 +236,8 @@ def main():
 
     device = torch.device("mps" if torch.backends.mps.is_available() else "cuda" if torch.cuda.is_available() else "cpu")
     print(f"Device: {device}")
-    print(f"Model: EfficientNet-{args.model.upper()}")
+    model_name = "MobileNetV3-Large" if args.model == "mobilenet_v3" else f"EfficientNet-{args.model.upper()}"
+    print(f"Model: {model_name}")
 
     severity_map = {}
     if os.path.exists(SEVERITY_FILE):
@@ -284,8 +288,9 @@ def main():
 
     val_dataset.dataset.dataset.transform = get_transforms(training=False)
 
-    train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, num_workers=2, pin_memory=True)
-    val_loader = DataLoader(val_dataset, batch_size=args.batch_size, shuffle=False, num_workers=2, pin_memory=True)
+    nw = 0 if sys.platform == "darwin" else 4
+    train_loader = DataLoader(train_dataset, batch_size=args.batch_size, shuffle=True, num_workers=nw, pin_memory=False)
+    val_loader = DataLoader(val_dataset, batch_size=args.batch_size, shuffle=False, num_workers=nw, pin_memory=False)
 
     class_weights = []
     total_samples = sum(class_counts.values())

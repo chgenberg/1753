@@ -88,6 +88,7 @@ interface SkinAnalysis {
   answers: Record<string, unknown> | null;
   result: {
     summary?: string;
+    skinAge?: number;
     lifestyle?: { area: string; tip: string; impact: string }[];
     products?: { id: string; reason: string }[];
     avoid?: string[];
@@ -462,14 +463,14 @@ function SkinJourneyView({ token }: { token: string }) {
   }, [token]);
 
   const deleteAllSnapshots = async () => {
-    if (!confirm(tx(locale, "Radera alla sparade foton? Detta kan inte ångras.", "Delete all saved photos? This cannot be undone.", "¿Eliminar todas las fotos guardadas? No se puede deshacer.", "Alle gespeicherten Fotos löschen? Dies kann nicht rückgängig gemacht werden."))) return;
+    if (!confirm(tx(locale, "Radera alla sparade foton? Detta kan inte ångras.", "Delete all saved photos? This cannot be undone.", "¿Eliminar todas las fotos guardadas? No se puede deshacer.", "Alle gespeicherten Fotos löschen? Dies kann nicht rückgängig gemacht werden.", "Supprimer toutes les photos enregistrées ? Cette action est irréversible."))) return;
     setDeletingAll(true);
     try {
       await authFetch("/face-snapshots", token, { method: "DELETE" });
       setSnapshots([]);
-      showToast(tx(locale, "Alla foton raderade", "All photos deleted", "Todas las fotos eliminadas", "Alle Fotos gelöscht"));
+      showToast(tx(locale, "Alla foton raderade", "All photos deleted", "Todas las fotos eliminadas", "Alle Fotos gelöscht", "Toutes les photos supprimées"));
     } catch {
-      showToast(tx(locale, "Kunde inte radera foton", "Could not delete photos", "No se pudieron eliminar las fotos", "Fotos konnten nicht gelöscht werden"));
+      showToast(tx(locale, "Kunde inte radera foton", "Could not delete photos", "No se pudieron eliminar las fotos", "Fotos konnten nicht gelöscht werden", "Impossible de supprimer les photos"));
     } finally {
       setDeletingAll(false);
     }
@@ -521,15 +522,21 @@ function SkinJourneyView({ token }: { token: string }) {
           : d("analysesDone", { count: analyses.length })}
       </p>
 
-      <div className="flex flex-wrap items-center gap-6">
+      <div className="flex flex-wrap items-center gap-4">
         {latestScore !== null && (
-          <div className="rounded-xl bg-brand-50 p-6 text-center">
+          <div className="rounded-xl bg-brand-50 p-5 text-center">
             <p className="text-3xl font-bold text-brand-900">{latestScore}</p>
             <p className="text-xs text-brand-600">{d("latestScore")}</p>
           </div>
         )}
+        {analyses[0]?.result?.skinAge && (
+          <div className="rounded-xl bg-[#108474]/5 p-5 text-center">
+            <p className="text-3xl font-bold text-[#108474]">{analyses[0].result.skinAge}</p>
+            <p className="text-xs text-[#108474]/70">{tx(locale, "Biologisk hudålder", "Biological skin age", "Edad biológica", "Biologisches Hautalter", "Âge biologique")}</p>
+          </div>
+        )}
         {diff !== null && diff !== 0 && (
-          <div className={cn("rounded-xl p-6 text-center", diff > 0 ? "bg-green-50" : "bg-red-50")}>
+          <div className={cn("rounded-xl p-5 text-center", diff > 0 ? "bg-green-50" : "bg-red-50")}>
             <p className={cn("text-3xl font-bold", diff > 0 ? "text-green-700" : "text-red-700")}>
               {diff > 0 ? "+" : ""}
               {diff}
@@ -538,6 +545,39 @@ function SkinJourneyView({ token }: { token: string }) {
           </div>
         )}
       </div>
+
+      {/* Next analysis countdown */}
+      {(() => {
+        const latestDate = analyses[0]?.created_at ? new Date(analyses[0].created_at) : null;
+        if (!latestDate) return null;
+        const nextDate = new Date(latestDate.getTime() + 30 * 24 * 60 * 60 * 1000);
+        const daysLeft = Math.max(0, Math.ceil((nextDate.getTime() - Date.now()) / (24 * 60 * 60 * 1000)));
+        const canAnalyze = daysLeft <= 0;
+        return (
+          <div className={cn("rounded-xl border p-4", canAnalyze ? "border-[#108474]/30 bg-[#108474]/5" : "border-border bg-white")}>
+            <div className="flex items-center gap-3">
+              <CalendarClock className={cn("h-5 w-5", canAnalyze ? "text-[#108474]" : "text-brand-400")} />
+              <div>
+                <p className="text-sm font-semibold text-brand-900">
+                  {canAnalyze
+                    ? tx(locale, "Du kan göra en ny analys nu", "You can run a new analysis now", "Puedes hacer un nuevo análisis ahora", "Du kannst jetzt eine neue Analyse machen", "Vous pouvez faire une nouvelle analyse maintenant")
+                    : tx(locale, `Nästa analys om ${daysLeft} dagar`, `Next analysis in ${daysLeft} days`, `Próximo análisis en ${daysLeft} días`, `Nächste Analyse in ${daysLeft} Tagen`, `Prochaine analyse dans ${daysLeft} jours`)}
+                </p>
+                <p className="text-xs text-brand-500">
+                  {canAnalyze
+                    ? tx(locale, "Jämför din hudresa och se förbättringar", "Compare your skin journey and see improvements", "Compara tu viaje de piel y ve mejoras", "Vergleiche deine Hautreise und sieh Verbesserungen", "Comparez votre parcours peau et voyez les améliorations")
+                    : tx(locale, `Tillgänglig ${nextDate.toLocaleDateString(loc, { day: "numeric", month: "long" })}`, `Available ${nextDate.toLocaleDateString(loc, { day: "numeric", month: "long" })}`, `Disponible el ${nextDate.toLocaleDateString(loc, { day: "numeric", month: "long" })}`, `Verfügbar am ${nextDate.toLocaleDateString(loc, { day: "numeric", month: "long" })}`, `Disponible le ${nextDate.toLocaleDateString(loc, { day: "numeric", month: "long" })}`)}
+                </p>
+              </div>
+              {canAnalyze && (
+                <a href={path("skinAnalysis")} className="ml-auto">
+                  <Button size="sm" className="rounded-full">{tx(locale, "Starta", "Start", "Iniciar", "Starten", "Démarrer")}</Button>
+                </a>
+              )}
+            </div>
+          </div>
+        );
+      })()}
 
       {scoredAnalyses.length >= 2 && (
         <ChartCard title={d("skinScoreOverTime")} subtitle={d("skinScoreChartSub", { count: scoredAnalyses.length })}>
@@ -552,7 +592,7 @@ function SkinJourneyView({ token }: { token: string }) {
             <div className="flex items-center gap-2">
               <Camera className="h-4 w-4 text-brand-500" />
               <h3 className="text-sm font-bold text-brand-900">
-                {tx(locale, "Din hud över tid", "Your skin over time", "Tu piel con el tiempo", "Deine Haut im Zeitverlauf")}
+                {tx(locale, "Din hud över tid", "Your skin over time", "Tu piel con el tiempo", "Deine Haut im Zeitverlauf", "Votre peau au fil du temps")}
               </h3>
             </div>
             <div className="flex items-center gap-2">
@@ -566,14 +606,14 @@ function SkinJourneyView({ token }: { token: string }) {
                       : "bg-brand-50 text-brand-600 hover:bg-brand-100"
                   )}
                 >
-                  {tx(locale, "Jämför", "Compare", "Comparar", "Vergleichen")}
+                  {tx(locale, "Jämför", "Compare", "Comparar", "Vergleichen", "Comparer")}
                 </button>
               )}
               <button
                 onClick={deleteAllSnapshots}
                 disabled={deletingAll}
                 className="rounded-full p-1.5 text-brand-400 transition-colors hover:bg-red-50 hover:text-red-500"
-                title={tx(locale, "Radera alla foton", "Delete all photos", "Eliminar todas las fotos", "Alle Fotos löschen")}
+                title={tx(locale, "Radera alla foton", "Delete all photos", "Eliminar todas las fotos", "Alle Fotos löschen", "Supprimer toutes les photos")}
               >
                 <Trash2 className="h-3.5 w-3.5" />
               </button>
@@ -635,19 +675,28 @@ function SkinJourneyView({ token }: { token: string }) {
               </div>
               <div className="flex-1 rounded-xl border border-border bg-white p-4 transition-all hover:shadow-sm">
                 <div className="flex items-center justify-between">
-                  <p className="text-sm font-bold">
+                  <div className="flex items-center gap-3">
                     {a.score !== null && (
-                      <span className="mr-2 text-[#108474]">
+                      <span className="text-sm font-bold text-[#108474]">
                         {a.score} {t("accountDash.scorePoints")}
                       </span>
                     )}
-                    {new Date(a.created_at).toLocaleDateString(loc, {
-                      year: "numeric",
-                      month: "long",
-                      day: "numeric",
-                    })}
-                  </p>
-                  <span className="text-xs text-muted-foreground">{relativeDate(a.created_at, locale, t)}</span>
+                    {a.result?.skinAge && (
+                      <span className="rounded-full bg-[#108474]/10 px-2 py-0.5 text-[11px] font-medium text-[#108474]">
+                        {tx(locale, `Hudålder: ${a.result.skinAge}`, `Skin age: ${a.result.skinAge}`, `Edad piel: ${a.result.skinAge}`, `Hautalter: ${a.result.skinAge}`, `Âge peau: ${a.result.skinAge}`)}
+                      </span>
+                    )}
+                  </div>
+                  <div className="text-right">
+                    <p className="text-xs font-medium text-brand-900">
+                      {new Date(a.created_at).toLocaleDateString(loc, {
+                        year: "numeric",
+                        month: "short",
+                        day: "numeric",
+                      })}
+                    </p>
+                    <span className="text-[11px] text-muted-foreground">{relativeDate(a.created_at, locale, t)}</span>
+                  </div>
                 </div>
                 {summary && (
                   <p className="mt-2 text-sm text-brand-600">{summary}</p>

@@ -14,10 +14,10 @@ export const EU_CITY_PAGES: LandingPage[] = [
     productIds: ["duo-kit", "ta-da-serum", "au-naturel-makeup-remover"],
     sv: {
       metaTitle: "Hudvård Köpenhamn – CBD-hudvård | 1753 SKINCARE",
-      metaDescription: "Naturlig CBD-hudvård för dig i Köpenhamn. Beställ online med fri frakt över €50. Skydda din hud mot det danska kustklimatet.",
+      metaDescription: "Naturlig CBD-hudvård för dig i Köpenhamn. Beställ online med fri frakt över €60. Skydda din hud mot det danska kustklimatet.",
       kicker: "Hudvård i Köpenhamn",
       h1: "Naturlig hudvård för dig i Köpenhamn",
-      lead: "Köpenhamns unika mix av havsvind, cykelkultur och skandinavisk mörker ger din hud unika utmaningar. Beställ online – fri frakt över €50, leverans inom 2–4 arbetsdagar.",
+      lead: "Köpenhamns unika mix av havsvind, cykelkultur och skandinavisk mörker ger din hud unika utmaningar. Beställ online – fri frakt över €60, leverans inom 2–4 arbetsdagar.",
       problemTitle: "Köpenhamnshudens utmaningar",
       problemBody: "<p>Köpenhamn är en stad i ständig kontakt med havet. Vinden från Öresund bär med sig salt och fukt som torkar ut huden när den avdunstar. Som Europas mest cykelintensiva stad spenderar köpenhamnare timmar i den öppna luften – vind, regn och kyla mot ett oskyddat ansikte, dag efter dag.</p><p>Danska vintrar är mörka och fuktiga. Bristen på solljus från november till mars innebär utbredd D-vitaminbrist, vilket direkt påverkar hudens immunförsvar och läkningsförmåga. Inomhus är luften torr från uppvärmning, och den snabba växlingen mellan kall fukt ute och torr värme inne stressar hudbarriären.</p><p>Köpenhamns kranvatten är dessutom mycket hårt – bland det hårdaste i Norden – och kalkavlagringar kan irritera känslig hud vid varje tvätt.</p>",
       tipsTitle: "Hudvårdstips för köpenhamnare",
@@ -29,22 +29,22 @@ export const EU_CITY_PAGES: LandingPage[] = [
         { title: "Ät den nordiska kosten", body: "Sill, råg, rotfrukter och fermenterade mejeriprodukter ger omega-3 och probiotika som stödjer huden inifrån." }
       ],
       solutionTitle: "CBD-hudvård levererad till Köpenhamn",
-      solutionBody: "<p>1753 SKINCARE skickar från Sverige – de flesta beställningar når Köpenhamn inom 2–4 arbetsdagar. Fri frakt på beställningar över €50.</p><p>Vår DUO-kit med The ONE och I LOVE ger din hud den balans som Köpenhamns klimat kräver. CBD och CBG stärker hudbarriären mot vind, salt och temperaturväxlingar. TA-DA Serum ger extra skydd under de mörka vintermånaderna, och Au Naturel Makeup Remover rengör bort dagens smuts utan att stressa huden.</p>",
+      solutionBody: "<p>1753 SKINCARE skickar från Sverige – de flesta beställningar når Köpenhamn inom 2–4 arbetsdagar. Fri frakt på beställningar över €60.</p><p>Vår DUO-kit med The ONE och I LOVE ger din hud den balans som Köpenhamns klimat kräver. CBD och CBG stärker hudbarriären mot vind, salt och temperaturväxlingar. TA-DA Serum ger extra skydd under de mörka vintermånaderna, och Au Naturel Makeup Remover rengör bort dagens smuts utan att stressa huden.</p>",
       faq: [
-        { q: "Levererar ni till Danmark?", a: "Ja, vi skickar från Sverige och de flesta beställningar når Köpenhamn inom 2–4 arbetsdagar. Fri frakt över €50." },
+        { q: "Levererar ni till Danmark?", a: "Ja, vi skickar från Sverige och de flesta beställningar når Köpenhamn inom 2–4 arbetsdagar. Fri frakt över €60." },
         { q: "Är CBD-hudvård lagligt i Danmark?", a: "Ja, CBD i hudvårdsprodukter är fullt lagligt i Danmark och hela EU." },
         { q: "Vilken produkt passar bäst för Köpenhamns klimat?", a: "DUO-kit ger en bra bas. Komplettera med TA-DA Serum under vintern för extra barriärskydd mot vind och kyla." },
         { q: "Kan jag returnera produkter?", a: "Ja, vi har 30 dagars öppet köp. Kontakta oss så löser vi det." }
       ],
       ctaTitle: "Ge din hud det danska klimatet kräver",
-      ctaSub: "Naturlig CBD-hudvård från Sverige till Köpenhamn. Fri frakt över €50."
+      ctaSub: "Naturlig CBD-hudvård från Sverige till Köpenhamn. Fri frakt över €60."
     },
     en: {
       metaTitle: "Skincare Copenhagen – CBD skincare | 1753 SKINCARE",
-      metaDescription: "Natural CBD skincare for Copenhagen. Order online with free shipping over €50. Protect your skin from Danish coastal winds and dark Scandinavian winters.",
+      metaDescription: "Natural CBD skincare for Copenhagen. Order online with free shipping over €60. Protect your skin from Danish coastal winds and dark Scandinavian winters.",
       kicker: "Skincare in Copenhagen",
       h1: "Natural skincare for Copenhagen",
-      lead: "Copenhagen's unique mix of sea wind, cycling culture, and Scandinavian darkness gives your skin challenges found nowhere else. Order online – free shipping over €50, delivered within 2–4 business days.",
+      lead: "Copenhagen's unique mix of sea wind, cycling culture, and Scandinavian darkness gives your skin challenges found nowhere else. Order online – free shipping over €60, delivered within 2–4 business days.",
       problemTitle: "What Copenhagen does to your skin",
       problemBody: "<p>Copenhagen is a city in constant contact with the sea. Wind from the Øresund carries salt and moisture that dries out the skin as it evaporates. As Europe's most cycle-intensive city, Copenhageners spend hours exposed to the elements – wind, rain, and cold against an unprotected face, day after day.</p><p>Danish winters are dark and damp. The lack of sunlight from November to March means widespread vitamin D deficiency, which directly affects the skin's immune response and healing capacity. Indoors, the air is dry from heating, and the rapid shift between cold humidity outside and dry warmth inside stresses the skin barrier constantly.</p><p>Copenhagen's tap water is also extremely hard – among the hardest in Scandinavia – and calcium deposits can irritate sensitive skin with every wash.</p>",
       tipsTitle: "Skincare tips for Copenhageners",
@@ -56,15 +56,15 @@ export const EU_CITY_PAGES: LandingPage[] = [
         { title: "Eat the Nordic diet", body: "Herring, rye, root vegetables, and fermented dairy provide omega-3s and probiotics that support your skin from within." }
       ],
       solutionTitle: "CBD skincare delivered to Copenhagen",
-      solutionBody: "<p>1753 SKINCARE ships from Sweden – most orders reach Copenhagen within 2–4 business days. Free shipping on orders over €50.</p><p>Our DUO-kit with The ONE and I LOVE gives your skin the balance Copenhagen's climate demands. CBD and CBG strengthen the skin barrier against wind, salt, and temperature shifts. TA-DA Serum provides extra protection during the dark winter months, and Au Naturel Makeup Remover cleans away the day's grime without stressing the skin.</p>",
+      solutionBody: "<p>1753 SKINCARE ships from Sweden – most orders reach Copenhagen within 2–4 business days. Free shipping on orders over €60.</p><p>Our DUO-kit with The ONE and I LOVE gives your skin the balance Copenhagen's climate demands. CBD and CBG strengthen the skin barrier against wind, salt, and temperature shifts. TA-DA Serum provides extra protection during the dark winter months, and Au Naturel Makeup Remover cleans away the day's grime without stressing the skin.</p>",
       faq: [
-        { q: "Do you ship to Denmark?", a: "Yes, we ship from Sweden and most orders reach Copenhagen within 2–4 business days. Free shipping over €50." },
+        { q: "Do you ship to Denmark?", a: "Yes, we ship from Sweden and most orders reach Copenhagen within 2–4 business days. Free shipping over €60." },
         { q: "Is CBD skincare legal in Denmark?", a: "Yes, CBD in skincare products is fully legal in Denmark and throughout the EU." },
         { q: "Which product is best for Copenhagen's climate?", a: "The DUO-kit provides a great base. Add TA-DA Serum in winter for extra barrier protection against wind and cold." },
         { q: "Can I return products?", a: "Yes, we offer a 30-day return policy. Contact us and we'll sort it out." }
       ],
       ctaTitle: "Give your skin what Copenhagen's climate demands",
-      ctaSub: "Natural CBD skincare from Sweden to Copenhagen. Free shipping over €50."
+      ctaSub: "Natural CBD skincare from Sweden to Copenhagen. Free shipping over €60."
     },
     es: {
       metaTitle: "Cuidado de la piel Copenhague – cosmética con CBD | 1753 SKINCARE",
@@ -158,10 +158,10 @@ export const EU_CITY_PAGES: LandingPage[] = [
     productIds: ["duo-kit", "ta-da-serum", "fungtastic-mushroom-extract"],
     sv: {
       metaTitle: "Hudvård Oslo – CBD-hudvård | 1753 SKINCARE",
-      metaDescription: "Naturlig CBD-hudvård för dig i Oslo. Beställ online med fri frakt över €50. Skydda din hud mot norska vintrar och fjordklimatet.",
+      metaDescription: "Naturlig CBD-hudvård för dig i Oslo. Beställ online med fri frakt över €60. Skydda din hud mot norska vintrar och fjordklimatet.",
       kicker: "Hudvård i Oslo",
       h1: "Naturlig hudvård för dig i Oslo",
-      lead: "Oslo ligger inklämt mellan fjorden och skogarna – vackert men tufft för huden. Extrema temperaturskillnader, torr fjällvind och Norges mörkaste månader utmanar din hudbarriär. Fri frakt över €50.",
+      lead: "Oslo ligger inklämt mellan fjorden och skogarna – vackert men tufft för huden. Extrema temperaturskillnader, torr fjällvind och Norges mörkaste månader utmanar din hudbarriär. Fri frakt över €60.",
       problemTitle: "Oslohudens utmaningar",
       problemBody: "<p>Oslo har ett av Nordens mest extrema klimat för stadsbor. Vintrarna bjuder på temperaturer ned mot minus tjugo, medan somrarna kan nå trettio grader. Den snabba växlingen mellan årstiderna – och mellan iskall uteluft och övervärmd inomhusmiljö – ger huden aldrig chans att anpassa sig.</p><p>Den norska huvudstaden omges av skog, men stadsluften är inte alltid ren. Vintermånaderna skapar inversioner där kall luft fångar partiklar och avgaser nära marken, särskilt i centrala Oslo. E18:s trafikstråk genom staden bidrar med partiklar som belastar huden dagligen.</p><p>Mörkerperioden är lång – från november till februari får Oslo bara några timmar dagsljus. D-vitaminbristen påverkar hudens läkningsförmåga, och många upplever torrare och gråare hy under vintern.</p>",
       tipsTitle: "Hudvårdstips för oslobor",
@@ -173,22 +173,22 @@ export const EU_CITY_PAGES: LandingPage[] = [
         { title: "D-vitamin är nödvändigt", body: "Under mörkerperioden behöver de flesta oslobor tillskott. D-vitamin påverkar hudens immunförsvar direkt." }
       ],
       solutionTitle: "CBD-hudvård levererad till Oslo",
-      solutionBody: "<p>Vi skickar från Sverige – de flesta beställningar når Oslo inom 2–4 arbetsdagar. Fri frakt över €50.</p><p>DUO-kit med The ONE och I LOVE ger oslohudens barriär det stöd den behöver mot extrema temperaturväxlingar. TA-DA Serum med koncentrerad CBG är perfekt för de iskalla vintermånaderna. Fungtastic Mushroom Extract stärker immunförsvaret inifrån – extra viktigt under den mörka norska vintern.</p>",
+      solutionBody: "<p>Vi skickar från Sverige – de flesta beställningar når Oslo inom 2–4 arbetsdagar. Fri frakt över €60.</p><p>DUO-kit med The ONE och I LOVE ger oslohudens barriär det stöd den behöver mot extrema temperaturväxlingar. TA-DA Serum med koncentrerad CBG är perfekt för de iskalla vintermånaderna. Fungtastic Mushroom Extract stärker immunförsvaret inifrån – extra viktigt under den mörka norska vintern.</p>",
       faq: [
-        { q: "Levererar ni till Norge?", a: "Ja, vi skickar från Sverige och når Oslo inom 2–4 arbetsdagar. Fri frakt över €50." },
+        { q: "Levererar ni till Norge?", a: "Ja, vi skickar från Sverige och når Oslo inom 2–4 arbetsdagar. Fri frakt över €60." },
         { q: "Är CBD-hudvård lagligt i Norge?", a: "Ja, CBD i hudvårdsprodukter är lagligt i Norge." },
         { q: "Vilken produkt passar Oslos klimat bäst?", a: "DUO-kit som bas, TA-DA Serum för vintern, och Fungtastic för immunförsvaret under mörkerperioden." },
         { q: "Hur lång tid tar leveransen?", a: "Normalt 2–4 arbetsdagar från Sverige till Oslo." }
       ],
       ctaTitle: "Ge din hud det norska klimatet kräver",
-      ctaSub: "Naturlig CBD-hudvård från Sverige till Oslo. Fri frakt över €50."
+      ctaSub: "Naturlig CBD-hudvård från Sverige till Oslo. Fri frakt över €60."
     },
     en: {
       metaTitle: "Skincare Oslo – CBD skincare | 1753 SKINCARE",
-      metaDescription: "Natural CBD skincare for Oslo. Order online with free shipping over €50. Protect your skin from harsh Norwegian winters and fjord climate extremes.",
+      metaDescription: "Natural CBD skincare for Oslo. Order online with free shipping over €60. Protect your skin from harsh Norwegian winters and fjord climate extremes.",
       kicker: "Skincare in Oslo",
       h1: "Natural skincare for Oslo",
-      lead: "Oslo sits wedged between the fjord and the forests – beautiful but brutal on the skin. Extreme temperature swings, dry mountain wind, and Norway's darkest months challenge your skin barrier year-round. Free shipping over €50.",
+      lead: "Oslo sits wedged between the fjord and the forests – beautiful but brutal on the skin. Extreme temperature swings, dry mountain wind, and Norway's darkest months challenge your skin barrier year-round. Free shipping over €60.",
       problemTitle: "What Oslo does to your skin",
       problemBody: "<p>Oslo has one of the most extreme climates in Scandinavia for city dwellers. Winters bring temperatures down to minus twenty, while summers can reach thirty degrees. The rapid shift between seasons – and between freezing outdoor air and overheated indoor spaces – never gives the skin a chance to adapt.</p><p>The Norwegian capital is surrounded by forest, but city air is not always clean. Winter months create inversions where cold air traps particles and exhaust near the ground, especially in central Oslo. The E18 traffic corridor through the city contributes particles that stress the skin daily.</p><p>The dark period is long – from November to February, Oslo gets only a few hours of daylight. Vitamin D deficiency affects the skin's healing capacity, and many experience drier, duller complexions during winter.</p>",
       tipsTitle: "Skincare tips for Osloites",
@@ -200,15 +200,15 @@ export const EU_CITY_PAGES: LandingPage[] = [
         { title: "Vitamin D is essential", body: "During the dark period, most Oslo residents need supplements. Vitamin D directly affects the skin's immune response." }
       ],
       solutionTitle: "CBD skincare delivered to Oslo",
-      solutionBody: "<p>We ship from Sweden – most orders reach Oslo within 2–4 business days. Free shipping on orders over €50.</p><p>The DUO-kit with The ONE and I LOVE gives Oslo skin the barrier support it needs against extreme temperature swings. TA-DA Serum with concentrated CBG is perfect for the freezing winter months. Fungtastic Mushroom Extract strengthens immunity from within – extra important during the dark Norwegian winter.</p>",
+      solutionBody: "<p>We ship from Sweden – most orders reach Oslo within 2–4 business days. Free shipping on orders over €60.</p><p>The DUO-kit with The ONE and I LOVE gives Oslo skin the barrier support it needs against extreme temperature swings. TA-DA Serum with concentrated CBG is perfect for the freezing winter months. Fungtastic Mushroom Extract strengthens immunity from within – extra important during the dark Norwegian winter.</p>",
       faq: [
-        { q: "Do you ship to Norway?", a: "Yes, we ship from Sweden and most orders reach Oslo within 2–4 business days. Free shipping over €50." },
+        { q: "Do you ship to Norway?", a: "Yes, we ship from Sweden and most orders reach Oslo within 2–4 business days. Free shipping over €60." },
         { q: "Is CBD skincare legal in Norway?", a: "Yes, CBD in skincare products is legal in Norway." },
         { q: "Which product is best for Oslo's climate?", a: "The DUO-kit as a base, TA-DA Serum for winter, and Fungtastic for immunity during the dark period." },
         { q: "How long does shipping take?", a: "Typically 2–4 business days from Sweden to Oslo." }
       ],
       ctaTitle: "Give your skin what Norway's climate demands",
-      ctaSub: "Natural CBD skincare from Sweden to Oslo. Free shipping over €50."
+      ctaSub: "Natural CBD skincare from Sweden to Oslo. Free shipping over €60."
     },
     es: {
       metaTitle: "Cuidado de la piel Oslo – cosmética con CBD | 1753 SKINCARE",
@@ -302,10 +302,10 @@ export const EU_CITY_PAGES: LandingPage[] = [
     productIds: ["duo-kit", "ta-da-serum", "fungtastic-mushroom-extract"],
     sv: {
       metaTitle: "Hudvård Helsingfors – CBD-hudvård | 1753 SKINCARE",
-      metaDescription: "Naturlig CBD-hudvård för dig i Helsingfors. Beställ online med fri frakt över €50. Skydda din hud mot finska vintrar och Östersjöklimatet.",
+      metaDescription: "Naturlig CBD-hudvård för dig i Helsingfors. Beställ online med fri frakt över €60. Skydda din hud mot finska vintrar och Östersjöklimatet.",
       kicker: "Hudvård i Helsingfors",
       h1: "Naturlig hudvård för dig i Helsingfors",
-      lead: "Helsingfors vintrar är bland de hårdaste i EU. Månader av mörker, temperaturer långt under noll och torr inomhusluft utmanar din hud dagligen. Fri frakt över €50, leverans inom 3–5 arbetsdagar.",
+      lead: "Helsingfors vintrar är bland de hårdaste i EU. Månader av mörker, temperaturer långt under noll och torr inomhusluft utmanar din hud dagligen. Fri frakt över €60, leverans inom 3–5 arbetsdagar.",
       problemTitle: "Helsingforshudens utmaningar",
       problemBody: "<p>Helsingfors ligger vid Finska viken och utsätts för Östersjöns bistra vindar. Vintrarna är långa och mörka – från november till mars dominerar mörker och temperaturer som regelbundet faller under minus femton. Den extrema kylan dränerar huden på fukt, och den torra inomhusluften i finska lägenheter förvärrar torkan ytterligare.</p><p>Bastukulturen är en del av det finska DNA:t, och det är fantastiskt – men snabba temperaturväxlingar från hundra grader i bastun till kall luft utomhus stressar hudbarriären. Finsk kranvatten är mjukt, vilket är bra, men D-vitaminbristen under den extremt långa vintern är en av de värsta i Europa.</p>",
       tipsTitle: "Hudvårdstips för helsingforsbor",
@@ -317,22 +317,22 @@ export const EU_CITY_PAGES: LandingPage[] = [
         { title: "Skydda huden i kylan", body: "Under minus tio grader fryser fukten på huden bokstavligen. En skyddande olja är nödvändig innan du går ut." }
       ],
       solutionTitle: "CBD-hudvård levererad till Helsingfors",
-      solutionBody: "<p>Vi skickar från Sverige – leverans till Helsingfors inom 3–5 arbetsdagar. Fri frakt över €50.</p><p>DUO-kit ger den finska huden barriärskydd mot extrema temperaturväxlingar. TA-DA Serum med CBG är oumbärligt under de iskalla månaderna. Fungtastic Mushroom Extract stärker immunförsvaret – och finländare vet redan att svampar är kraftfulla.</p>",
+      solutionBody: "<p>Vi skickar från Sverige – leverans till Helsingfors inom 3–5 arbetsdagar. Fri frakt över €60.</p><p>DUO-kit ger den finska huden barriärskydd mot extrema temperaturväxlingar. TA-DA Serum med CBG är oumbärligt under de iskalla månaderna. Fungtastic Mushroom Extract stärker immunförsvaret – och finländare vet redan att svampar är kraftfulla.</p>",
       faq: [
-        { q: "Levererar ni till Finland?", a: "Ja, vi skickar från Sverige och når Helsingfors inom 3–5 arbetsdagar. Fri frakt över €50." },
+        { q: "Levererar ni till Finland?", a: "Ja, vi skickar från Sverige och når Helsingfors inom 3–5 arbetsdagar. Fri frakt över €60." },
         { q: "Är CBD-hudvård lagligt i Finland?", a: "Ja, CBD i hudvårdsprodukter är fullt lagligt i Finland och hela EU." },
         { q: "Vilken produkt för finska vintrar?", a: "TA-DA Serum är ett måste under de kallaste månaderna. Komplettera med DUO-kit som daglig bas." },
         { q: "Hur lång tid tar leveransen?", a: "3–5 arbetsdagar från Sverige till Helsingfors." }
       ],
       ctaTitle: "Ge din hud det finska klimatet kräver",
-      ctaSub: "Naturlig CBD-hudvård från Sverige till Helsingfors. Fri frakt över €50."
+      ctaSub: "Naturlig CBD-hudvård från Sverige till Helsingfors. Fri frakt över €60."
     },
     en: {
       metaTitle: "Skincare Helsinki – CBD skincare | 1753 SKINCARE",
-      metaDescription: "Natural CBD skincare for Helsinki. Order online with free shipping over €50. Protect your skin from harsh Finnish winters and extreme cold.",
+      metaDescription: "Natural CBD skincare for Helsinki. Order online with free shipping over €60. Protect your skin from harsh Finnish winters and extreme cold.",
       kicker: "Skincare in Helsinki",
       h1: "Natural skincare for Helsinki",
-      lead: "Helsinki winters are among the harshest in the EU. Months of darkness, temperatures far below zero, and bone-dry indoor air challenge your skin daily. Free shipping over €50, delivered within 3–5 business days.",
+      lead: "Helsinki winters are among the harshest in the EU. Months of darkness, temperatures far below zero, and bone-dry indoor air challenge your skin daily. Free shipping over €60, delivered within 3–5 business days.",
       problemTitle: "What Helsinki does to your skin",
       problemBody: "<p>Helsinki sits on the Gulf of Finland, exposed to bitter Baltic Sea winds. Winters are long and dark – from November to March, darkness dominates and temperatures regularly drop below minus fifteen. The extreme cold drains moisture from the skin, and the dry indoor air in Finnish apartments makes the dehydration worse.</p><p>Sauna culture is part of Finnish DNA, and it's wonderful – but rapid temperature shifts from a hundred degrees in the sauna to cold outdoor air stress the skin barrier. Finnish tap water is soft, which is good, but the vitamin D deficiency during the extremely long winter is among the worst in Europe.</p>",
       tipsTitle: "Skincare tips for Helsinki residents",
@@ -344,15 +344,15 @@ export const EU_CITY_PAGES: LandingPage[] = [
         { title: "Protect your skin in the cold", body: "Below minus ten, moisture on the skin literally freezes. A protective oil is essential before stepping outside." }
       ],
       solutionTitle: "CBD skincare delivered to Helsinki",
-      solutionBody: "<p>We ship from Sweden – delivery to Helsinki within 3–5 business days. Free shipping on orders over €50.</p><p>The DUO-kit gives Finnish skin the barrier protection it needs against extreme temperature swings. TA-DA Serum with CBG is indispensable during the freezing months. Fungtastic Mushroom Extract strengthens immunity – and Finns already know that mushrooms are powerful.</p>",
+      solutionBody: "<p>We ship from Sweden – delivery to Helsinki within 3–5 business days. Free shipping on orders over €60.</p><p>The DUO-kit gives Finnish skin the barrier protection it needs against extreme temperature swings. TA-DA Serum with CBG is indispensable during the freezing months. Fungtastic Mushroom Extract strengthens immunity – and Finns already know that mushrooms are powerful.</p>",
       faq: [
-        { q: "Do you ship to Finland?", a: "Yes, we ship from Sweden and most orders reach Helsinki within 3–5 business days. Free shipping over €50." },
+        { q: "Do you ship to Finland?", a: "Yes, we ship from Sweden and most orders reach Helsinki within 3–5 business days. Free shipping over €60." },
         { q: "Is CBD skincare legal in Finland?", a: "Yes, CBD in skincare products is fully legal in Finland and throughout the EU." },
         { q: "Which product for Finnish winters?", a: "TA-DA Serum is a must during the coldest months. Complement with the DUO-kit as your daily base." },
         { q: "How long does shipping take?", a: "3–5 business days from Sweden to Helsinki." }
       ],
       ctaTitle: "Give your skin what Finnish winters demand",
-      ctaSub: "Natural CBD skincare from Sweden to Helsinki. Free shipping over €50."
+      ctaSub: "Natural CBD skincare from Sweden to Helsinki. Free shipping over €60."
     },
     es: {
       metaTitle: "Cuidado de la piel Helsinki – cosmética con CBD | 1753 SKINCARE",
@@ -446,10 +446,10 @@ export const EU_CITY_PAGES: LandingPage[] = [
     productIds: ["duo-ta-da", "duo-kit", "fungtastic-mushroom-extract"],
     sv: {
       metaTitle: "Hudvård Reykjavik – CBD-hudvård | 1753 SKINCARE",
-      metaDescription: "Naturlig CBD-hudvård för dig i Reykjavik. Beställ online med fri frakt över €50. Skydda din hud mot Islands extrema klimat.",
+      metaDescription: "Naturlig CBD-hudvård för dig i Reykjavik. Beställ online med fri frakt över €60. Skydda din hud mot Islands extrema klimat.",
       kicker: "Hudvård i Reykjavik",
       h1: "Naturlig hudvård för dig i Reykjavik",
-      lead: "Reykjavik har Europas mest extrema klimat – hård vind, vulkanisk luft, mörker och kyla testar din hud varje dag. Fri frakt över €50.",
+      lead: "Reykjavik har Europas mest extrema klimat – hård vind, vulkanisk luft, mörker och kyla testar din hud varje dag. Fri frakt över €60.",
       problemTitle: "Reykjavikhudens utmaningar",
       problemBody: "<p>Islands huvudstad utsätts för väder som ingen annan europeisk stad upplever. Vinden är konstant och ofta våldsam – genomsnittliga vindhastigheter är bland de högsta i Europa. Vulkanisk aktivitet tillför svavel och fina partiklar till luften, och geotermisk energi innebär att vattnet ofta luktar svavel.</p><p>Vintrarna är mörka men inte lika kalla som man tror – Golfströmmen håller temperaturen runt noll. Men vinden gör att det känns mycket kallare, och den konstanta blåsten dränerar huden på fukt effektivare än ren kyla. Islands vatten är extremt mjukt och rent, men den geotermiska uppvärmningen ger en unik inomhusmiljö.</p>",
       tipsTitle: "Hudvårdstips för reykjavikbor",
@@ -461,22 +461,22 @@ export const EU_CITY_PAGES: LandingPage[] = [
         { title: "Applicera olja före sömn", body: "Nattetid reparerar huden sig – ge den bästa förutsättningarna med en rik nattrutin." }
       ],
       solutionTitle: "CBD-hudvård levererad till Island",
-      solutionBody: "<p>Vi skickar från Sverige – leverans till Reykjavik inom 5–7 arbetsdagar. Fri frakt över €50.</p><p>DUO TA-DA med koncentrerade oljor ger maximal barriär mot Islands extrema vind. DUO-kit stärker och balanserar. Fungtastic Mushroom Extract stödjer immunförsvaret under de mörkaste månaderna.</p>",
+      solutionBody: "<p>Vi skickar från Sverige – leverans till Reykjavik inom 5–7 arbetsdagar. Fri frakt över €60.</p><p>DUO TA-DA med koncentrerade oljor ger maximal barriär mot Islands extrema vind. DUO-kit stärker och balanserar. Fungtastic Mushroom Extract stödjer immunförsvaret under de mörkaste månaderna.</p>",
       faq: [
-        { q: "Levererar ni till Island?", a: "Ja, leverans till Reykjavik inom 5–7 arbetsdagar. Fri frakt över €50." },
+        { q: "Levererar ni till Island?", a: "Ja, leverans till Reykjavik inom 5–7 arbetsdagar. Fri frakt över €60." },
         { q: "Är CBD-hudvård lagligt på Island?", a: "Ja, CBD i hudvårdsprodukter är lagligt på Island." },
         { q: "Vilken produkt mot Islands vind?", a: "DUO TA-DA ger den rikaste barriären mot vindtorka. Använd dagligen." },
         { q: "Hur lång tid tar leveransen?", a: "5–7 arbetsdagar från Sverige till Reykjavik." }
       ],
       ctaTitle: "Ge din hud det Islands klimat kräver",
-      ctaSub: "Naturlig CBD-hudvård från Sverige till Reykjavik. Fri frakt över €50."
+      ctaSub: "Naturlig CBD-hudvård från Sverige till Reykjavik. Fri frakt över €60."
     },
     en: {
       metaTitle: "Skincare Reykjavik – CBD skincare | 1753 SKINCARE",
-      metaDescription: "Natural CBD skincare for Reykjavik. Order online with free shipping over €50. Protect your skin from Iceland's extreme wind, volcanic air, and dark winters.",
+      metaDescription: "Natural CBD skincare for Reykjavik. Order online with free shipping over €60. Protect your skin from Iceland's extreme wind, volcanic air, and dark winters.",
       kicker: "Skincare in Reykjavik",
       h1: "Natural skincare for Reykjavik",
-      lead: "Reykjavik has Europe's most extreme climate – relentless wind, volcanic air, darkness, and cold test your skin every single day. Free shipping over €50.",
+      lead: "Reykjavik has Europe's most extreme climate – relentless wind, volcanic air, darkness, and cold test your skin every single day. Free shipping over €60.",
       problemTitle: "What Reykjavik does to your skin",
       problemBody: "<p>Iceland's capital faces weather no other European city experiences. The wind is constant and often violent – average wind speeds are among the highest in Europe. Volcanic activity adds sulfur and fine particles to the air, and geothermal energy means the water often smells of sulfur.</p><p>Winters are dark but not as cold as you might think – the Gulf Stream keeps temperatures around zero. But the wind makes it feel much colder, and the constant blowing strips moisture from the skin more effectively than pure cold. Iceland's water is extremely soft and clean, but the geothermal heating creates a unique indoor environment.</p>",
       tipsTitle: "Skincare tips for Reykjavik residents",
@@ -488,15 +488,15 @@ export const EU_CITY_PAGES: LandingPage[] = [
         { title: "Apply oil before sleep", body: "Nighttime is when your skin repairs itself – give it the best conditions with a rich evening routine." }
       ],
       solutionTitle: "CBD skincare delivered to Iceland",
-      solutionBody: "<p>We ship from Sweden – delivery to Reykjavik within 5–7 business days. Free shipping on orders over €50.</p><p>DUO TA-DA with concentrated oils provides maximum barrier protection against Iceland's extreme wind. The DUO-kit strengthens and balances. Fungtastic Mushroom Extract supports immunity during the darkest months.</p>",
+      solutionBody: "<p>We ship from Sweden – delivery to Reykjavik within 5–7 business days. Free shipping on orders over €60.</p><p>DUO TA-DA with concentrated oils provides maximum barrier protection against Iceland's extreme wind. The DUO-kit strengthens and balances. Fungtastic Mushroom Extract supports immunity during the darkest months.</p>",
       faq: [
-        { q: "Do you ship to Iceland?", a: "Yes, delivery to Reykjavik within 5–7 business days. Free shipping over €50." },
+        { q: "Do you ship to Iceland?", a: "Yes, delivery to Reykjavik within 5–7 business days. Free shipping over €60." },
         { q: "Is CBD skincare legal in Iceland?", a: "Yes, CBD in skincare products is legal in Iceland." },
         { q: "Which product for Iceland's wind?", a: "DUO TA-DA provides the richest barrier against wind dehydration. Use it daily." },
         { q: "How long does shipping take?", a: "5–7 business days from Sweden to Reykjavik." }
       ],
       ctaTitle: "Give your skin what Iceland's climate demands",
-      ctaSub: "Natural CBD skincare from Sweden to Reykjavik. Free shipping over €50."
+      ctaSub: "Natural CBD skincare from Sweden to Reykjavik. Free shipping over €60."
     },
     es: {
       metaTitle: "Cuidado de la piel Reikiavik – cosmética con CBD | 1753 SKINCARE",
@@ -593,10 +593,10 @@ export const EU_CITY_PAGES: LandingPage[] = [
     productIds: ["duo-kit", "au-naturel-makeup-remover", "ta-da-serum"],
     sv: {
       metaTitle: "Hudvård Berlin – CBD-hudvård | 1753 SKINCARE",
-      metaDescription: "Naturlig CBD-hudvård för dig i Berlin. Beställ online med fri frakt över €50. Skydda din hud mot Berlins föroreningar och hårda vatten.",
+      metaDescription: "Naturlig CBD-hudvård för dig i Berlin. Beställ online med fri frakt över €60. Skydda din hud mot Berlins föroreningar och hårda vatten.",
       kicker: "Hudvård i Berlin",
       h1: "Naturlig hudvård för dig i Berlin",
-      lead: "Berlin är rått, kreativt och kompromisslöst – precis som ditt hudvårdsbehov. Föroreningar, extremt hårt vatten och ett kontinentalt klimat med kalla vintrar och heta somrar testar din hud. Fri frakt över €50.",
+      lead: "Berlin är rått, kreativt och kompromisslöst – precis som ditt hudvårdsbehov. Föroreningar, extremt hårt vatten och ett kontinentalt klimat med kalla vintrar och heta somrar testar din hud. Fri frakt över €60.",
       problemTitle: "Berlinhudens utmaningar",
       problemBody: "<p>Berlin har Tysklands hårdaste kranvatten. Kalkhalten är extrem och belastar huden vid varje dusch och tvätt – torrhet, irritation och igentäppta porer är vanliga klagomål. Den som flyttat till Berlin från en stad med mjukare vatten märker skillnaden direkt.</p><p>Klimatet är kontinentalt med kalla, gråa vintrar och överraskande heta somrar. Temperaturen kan variera från minus femton i januari till trettifem i juli. Den ständiga växlingen stressar hudbarriären. Berlins trafikföroreningar – särskilt längs huvudstråken som Frankfurter Allee och Kottbusser Damm – belastar huden med fina partiklar och oxidativ stress.</p><p>Lägg till Berlins nattliv – sena kvällar, rökmaskiner i klubbar, för lite sömn – och du har en hud som skriker efter hjälp.</p>",
       tipsTitle: "Hudvårdstips för berlinare",
@@ -608,22 +608,22 @@ export const EU_CITY_PAGES: LandingPage[] = [
         { title: "Prioritera sömn", body: "Berlin aldrig sover, men din hud behöver det. Åtta timmar sömn är den mest underskattade hudvårdsprodukten." }
       ],
       solutionTitle: "CBD-hudvård levererad till Berlin",
-      solutionBody: "<p>Vi skickar från Sverige – leverans till Berlin inom 3–5 arbetsdagar. Fri frakt över €50.</p><p>DUO-kit ger hudbarriären det stöd den behöver mot Berlins hårda vatten. Au Naturel Makeup Remover rengör bort partiklar och smuts effektivt men milt. TA-DA Serum ger extra skydd under kalla vintermånader.</p>",
+      solutionBody: "<p>Vi skickar från Sverige – leverans till Berlin inom 3–5 arbetsdagar. Fri frakt över €60.</p><p>DUO-kit ger hudbarriären det stöd den behöver mot Berlins hårda vatten. Au Naturel Makeup Remover rengör bort partiklar och smuts effektivt men milt. TA-DA Serum ger extra skydd under kalla vintermånader.</p>",
       faq: [
-        { q: "Levererar ni till Tyskland?", a: "Ja, leverans till Berlin inom 3–5 arbetsdagar. Fri frakt över €50." },
+        { q: "Levererar ni till Tyskland?", a: "Ja, leverans till Berlin inom 3–5 arbetsdagar. Fri frakt över €60." },
         { q: "Är CBD-hudvård lagligt i Tyskland?", a: "Ja, CBD i hudvård är fullt lagligt i Tyskland." },
         { q: "Vilken produkt mot Berlins hårda vatten?", a: "DUO-kit stärker barriären som hårt vatten försvagar. Au Naturel rengör utan att torka ut." },
         { q: "Hur lång tid tar leveransen?", a: "3–5 arbetsdagar från Sverige till Berlin." }
       ],
       ctaTitle: "Ge din hud det Berlin kräver",
-      ctaSub: "Naturlig CBD-hudvård från Sverige till Berlin. Fri frakt över €50."
+      ctaSub: "Naturlig CBD-hudvård från Sverige till Berlin. Fri frakt över €60."
     },
     en: {
       metaTitle: "Skincare Berlin – CBD skincare | 1753 SKINCARE",
-      metaDescription: "Natural CBD skincare for Berlin. Order online with free shipping over €50. Protect your skin from Berlin's hard water, pollution, and continental climate extremes.",
+      metaDescription: "Natural CBD skincare for Berlin. Order online with free shipping over €60. Protect your skin from Berlin's hard water, pollution, and continental climate extremes.",
       kicker: "Skincare in Berlin",
       h1: "Natural skincare for Berlin",
-      lead: "Berlin is raw, creative, and uncompromising – just like your skincare needs. Pollution, extremely hard water, and a continental climate with freezing winters and scorching summers test your skin constantly. Free shipping over €50.",
+      lead: "Berlin is raw, creative, and uncompromising – just like your skincare needs. Pollution, extremely hard water, and a continental climate with freezing winters and scorching summers test your skin constantly. Free shipping over €60.",
       problemTitle: "What Berlin does to your skin",
       problemBody: "<p>Berlin has the hardest tap water in Germany. Calcium levels are extreme and stress the skin with every shower and wash – dryness, irritation, and clogged pores are common complaints. Anyone who has moved to Berlin from a city with softer water notices the difference immediately.</p><p>The climate is continental with cold, grey winters and surprisingly hot summers. Temperatures can range from minus fifteen in January to thirty-five in July. The constant shifting stresses the skin barrier. Berlin's traffic pollution – especially along main arteries like Frankfurter Allee and Kottbusser Damm – loads the skin with fine particles and oxidative stress.</p><p>Add Berlin's nightlife – late nights, smoke machines in clubs, too little sleep – and you have skin that's crying out for help.</p>",
       tipsTitle: "Skincare tips for Berliners",
@@ -635,15 +635,15 @@ export const EU_CITY_PAGES: LandingPage[] = [
         { title: "Prioritize sleep", body: "Berlin never sleeps, but your skin needs to. Eight hours of sleep is the most underrated skincare product." }
       ],
       solutionTitle: "CBD skincare delivered to Berlin",
-      solutionBody: "<p>We ship from Sweden – delivery to Berlin within 3–5 business days. Free shipping on orders over €50.</p><p>The DUO-kit gives your skin barrier the support it needs against Berlin's hard water. Au Naturel Makeup Remover cleans away particles and grime effectively but gently. TA-DA Serum provides extra protection during the cold winter months.</p>",
+      solutionBody: "<p>We ship from Sweden – delivery to Berlin within 3–5 business days. Free shipping on orders over €60.</p><p>The DUO-kit gives your skin barrier the support it needs against Berlin's hard water. Au Naturel Makeup Remover cleans away particles and grime effectively but gently. TA-DA Serum provides extra protection during the cold winter months.</p>",
       faq: [
-        { q: "Do you ship to Germany?", a: "Yes, delivery to Berlin within 3–5 business days. Free shipping over €50." },
+        { q: "Do you ship to Germany?", a: "Yes, delivery to Berlin within 3–5 business days. Free shipping over €60." },
         { q: "Is CBD skincare legal in Germany?", a: "Yes, CBD in skincare is fully legal in Germany." },
         { q: "Which product for Berlin's hard water?", a: "The DUO-kit strengthens the barrier that hard water weakens. Au Naturel cleanses without drying out." },
         { q: "How long does shipping take?", a: "3–5 business days from Sweden to Berlin." }
       ],
       ctaTitle: "Give your skin what Berlin demands",
-      ctaSub: "Natural CBD skincare from Sweden to Berlin. Free shipping over €50."
+      ctaSub: "Natural CBD skincare from Sweden to Berlin. Free shipping over €60."
     },
     es: {
       metaTitle: "Cuidado de la piel Berlín – cosmética con CBD | 1753 SKINCARE",
@@ -737,10 +737,10 @@ export const EU_CITY_PAGES: LandingPage[] = [
     productIds: ["duo-kit", "ta-da-serum", "fungtastic-mushroom-extract"],
     sv: {
       metaTitle: "Hudvård München – CBD-hudvård | 1753 SKINCARE",
-      metaDescription: "Naturlig CBD-hudvård för dig i München. Beställ online med fri frakt över €50. Skydda din hud mot alpklimatet och bayerska vintrar.",
+      metaDescription: "Naturlig CBD-hudvård för dig i München. Beställ online med fri frakt över €60. Skydda din hud mot alpklimatet och bayerska vintrar.",
       kicker: "Hudvård i München",
       h1: "Naturlig hudvård för dig i München",
-      lead: "Münchens alprelaterade klimat med Föhn-vindar, kalla vintrar och stark sommar-UV skapar unika hudutmaningar. Fri frakt över €50.",
+      lead: "Münchens alprelaterade klimat med Föhn-vindar, kalla vintrar och stark sommar-UV skapar unika hudutmaningar. Fri frakt över €60.",
       problemTitle: "Münchenhudens utmaningar",
       problemBody: "<p>München ligger vid foten av Alperna, och det märks. Föhn-vinden – varm, torr luft som faller ned från bergen – kan sänka luftfuktigheten dramatiskt på bara timmar. Många münchenare upplever huvudvärk och torr, irriterad hud under Föhn-dagar.</p><p>Vintrarna är kalla med temperaturer som regelbundet sjunker under minus tio, medan somrarna bjuder på stark UV-strålning tack vare den höga altituden. Münchens vatten är hårt men av hög kvalitet – det kommer direkt från Alperna.</p>",
       tipsTitle: "Hudvårdstips för münchenare",
@@ -752,22 +752,22 @@ export const EU_CITY_PAGES: LandingPage[] = [
         { title: "Bada i Eisbach", body: "Kallbad stärker cirkulationen och ger huden en boost. Men återfukta alltid efteråt." }
       ],
       solutionTitle: "CBD-hudvård levererad till München",
-      solutionBody: "<p>Vi skickar från Sverige – leverans till München inom 3–5 arbetsdagar. Fri frakt över €50.</p><p>DUO-kit balanserar huden mot klimatväxlingar. TA-DA Serum ger barriärskydd under kalla vintrar och torra Föhn-dagar. Fungtastic Mushroom Extract stödjer immunförsvaret.</p>",
+      solutionBody: "<p>Vi skickar från Sverige – leverans till München inom 3–5 arbetsdagar. Fri frakt över €60.</p><p>DUO-kit balanserar huden mot klimatväxlingar. TA-DA Serum ger barriärskydd under kalla vintrar och torra Föhn-dagar. Fungtastic Mushroom Extract stödjer immunförsvaret.</p>",
       faq: [
-        { q: "Levererar ni till München?", a: "Ja, 3–5 arbetsdagar från Sverige. Fri frakt över €50." },
+        { q: "Levererar ni till München?", a: "Ja, 3–5 arbetsdagar från Sverige. Fri frakt över €60." },
         { q: "Är CBD lagligt i Tyskland?", a: "Ja, CBD i hudvård är fullt lagligt i Tyskland." },
         { q: "Vilken produkt för Föhn-dagar?", a: "TA-DA Serum ger extra fukt och barriärskydd när Föhn-vinden torkar ut allt." },
         { q: "Hur lång tid tar leveransen?", a: "3–5 arbetsdagar." }
       ],
       ctaTitle: "Ge din hud det alpklimatet kräver",
-      ctaSub: "Naturlig CBD-hudvård från Sverige till München. Fri frakt över €50."
+      ctaSub: "Naturlig CBD-hudvård från Sverige till München. Fri frakt över €60."
     },
     en: {
       metaTitle: "Skincare Munich – CBD skincare | 1753 SKINCARE",
-      metaDescription: "Natural CBD skincare for Munich. Order online with free shipping over €50. Protect your skin from Alpine climate shifts and Föhn winds.",
+      metaDescription: "Natural CBD skincare for Munich. Order online with free shipping over €60. Protect your skin from Alpine climate shifts and Föhn winds.",
       kicker: "Skincare in Munich",
       h1: "Natural skincare for Munich",
-      lead: "Munich's Alpine-influenced climate with Föhn winds, cold winters, and strong summer UV creates unique skin challenges. Free shipping over €50.",
+      lead: "Munich's Alpine-influenced climate with Föhn winds, cold winters, and strong summer UV creates unique skin challenges. Free shipping over €60.",
       problemTitle: "What Munich does to your skin",
       problemBody: "<p>Munich sits at the foot of the Alps, and your skin knows it. The Föhn wind – warm, dry air descending from the mountains – can drop humidity levels dramatically within hours. Many Munich residents experience headaches and dry, irritated skin during Föhn days.</p><p>Winters are cold with temperatures regularly dropping below minus ten, while summers bring strong UV radiation thanks to the higher altitude. Munich's water is hard but high quality – it comes directly from the Alps.</p>",
       tipsTitle: "Skincare tips for Munich residents",
@@ -779,15 +779,15 @@ export const EU_CITY_PAGES: LandingPage[] = [
         { title: "Swim in the Eisbach", body: "Cold water bathing strengthens circulation and gives the skin a boost. But always moisturize afterward." }
       ],
       solutionTitle: "CBD skincare delivered to Munich",
-      solutionBody: "<p>We ship from Sweden – delivery to Munich within 3–5 business days. Free shipping on orders over €50.</p><p>The DUO-kit balances the skin against climate fluctuations. TA-DA Serum provides barrier protection during cold winters and dry Föhn days. Fungtastic Mushroom Extract supports immunity.</p>",
+      solutionBody: "<p>We ship from Sweden – delivery to Munich within 3–5 business days. Free shipping on orders over €60.</p><p>The DUO-kit balances the skin against climate fluctuations. TA-DA Serum provides barrier protection during cold winters and dry Föhn days. Fungtastic Mushroom Extract supports immunity.</p>",
       faq: [
-        { q: "Do you ship to Munich?", a: "Yes, 3–5 business days from Sweden. Free shipping over €50." },
+        { q: "Do you ship to Munich?", a: "Yes, 3–5 business days from Sweden. Free shipping over €60." },
         { q: "Is CBD legal in Germany?", a: "Yes, CBD in skincare is fully legal in Germany." },
         { q: "Which product for Föhn days?", a: "TA-DA Serum provides extra moisture and barrier protection when the Föhn wind dries everything out." },
         { q: "How long does shipping take?", a: "3–5 business days." }
       ],
       ctaTitle: "Give your skin what Alpine climate demands",
-      ctaSub: "Natural CBD skincare from Sweden to Munich. Free shipping over €50."
+      ctaSub: "Natural CBD skincare from Sweden to Munich. Free shipping over €60."
     },
     es: {
       metaTitle: "Cuidado de la piel Múnich – cosmética con CBD | 1753 SKINCARE",
@@ -881,10 +881,10 @@ export const EU_CITY_PAGES: LandingPage[] = [
     productIds: ["duo-kit", "au-naturel-makeup-remover", "ta-da-serum"],
     sv: {
       metaTitle: "Hudvård Amsterdam – CBD-hudvård | 1753 SKINCARE",
-      metaDescription: "Naturlig CBD-hudvård för dig i Amsterdam. Beställ online med fri frakt över €50. Skydda din hud mot fukt, vind och holländsk cykelkultur.",
+      metaDescription: "Naturlig CBD-hudvård för dig i Amsterdam. Beställ online med fri frakt över €60. Skydda din hud mot fukt, vind och holländsk cykelkultur.",
       kicker: "Hudvård i Amsterdam",
       h1: "Naturlig hudvård för dig i Amsterdam",
-      lead: "Amsterdam – kanaler, cyklar och evig fukt. Nordsjövinden, det hårda vattnet och ett klimat som aldrig riktigt bestämmer sig utmanar din hud året runt. Fri frakt över €50.",
+      lead: "Amsterdam – kanaler, cyklar och evig fukt. Nordsjövinden, det hårda vattnet och ett klimat som aldrig riktigt bestämmer sig utmanar din hud året runt. Fri frakt över €60.",
       problemTitle: "Amsterdamhudens utmaningar",
       problemBody: "<p>Amsterdam ligger under havsnivån och det märks på klimatet. Luftfuktigheten är hög året runt, men det betyder inte att huden är återfuktad – tvärtom. Nordsjövinden bär med sig salt och piskande regn som bryter ned hudbarriären. Amsterdams cyklister – vilket är alla – utsätter sina ansikten för elementen timmar varje dag.</p><p>Holländskt kranvatten är medelhårt och kalkhalten kan irritera känslig hud. Vintrarna är inte extremt kalla men rått fuktiga, med temperaturer runt noll och en genomträngande fukt som gör kylan mer bitande. Somrarna är milda men oförutsägbara.</p>",
       tipsTitle: "Hudvårdstips för amsterdamare",
@@ -896,22 +896,22 @@ export const EU_CITY_PAGES: LandingPage[] = [
         { title: "Använd fuktare vintertid", body: "Holländska hem med centralvärme blir torra inomhus. En luftfuktare skyddar hudbarriären nattetid." }
       ],
       solutionTitle: "CBD-hudvård levererad till Amsterdam",
-      solutionBody: "<p>Vi skickar från Sverige – leverans till Amsterdam inom 3–5 arbetsdagar. Fri frakt över €50.</p><p>DUO-kit stärker barriären mot vind och fuktväxlingar. Au Naturel rengör bort dagens smuts. TA-DA Serum ger extra fukt under blåsiga månader.</p>",
+      solutionBody: "<p>Vi skickar från Sverige – leverans till Amsterdam inom 3–5 arbetsdagar. Fri frakt över €60.</p><p>DUO-kit stärker barriären mot vind och fuktväxlingar. Au Naturel rengör bort dagens smuts. TA-DA Serum ger extra fukt under blåsiga månader.</p>",
       faq: [
-        { q: "Levererar ni till Nederländerna?", a: "Ja, 3–5 arbetsdagar. Fri frakt över €50." },
+        { q: "Levererar ni till Nederländerna?", a: "Ja, 3–5 arbetsdagar. Fri frakt över €60." },
         { q: "Är CBD-hudvård lagligt i Nederländerna?", a: "Absolut – Nederländerna har en av Europas mest progressiva inställningar till CBD." },
         { q: "Vilken produkt för Amsterdams klimat?", a: "DUO-kit som daglig bas, Au Naturel för rengöring efter cykling." },
         { q: "Hur lång tid tar leveransen?", a: "3–5 arbetsdagar från Sverige." }
       ],
       ctaTitle: "Ge din hud det Amsterdams klimat kräver",
-      ctaSub: "Naturlig CBD-hudvård från Sverige till Amsterdam. Fri frakt över €50."
+      ctaSub: "Naturlig CBD-hudvård från Sverige till Amsterdam. Fri frakt över €60."
     },
     en: {
       metaTitle: "Skincare Amsterdam – CBD skincare | 1753 SKINCARE",
-      metaDescription: "Natural CBD skincare for Amsterdam. Order online with free shipping over €50. Protect your skin from North Sea winds, humidity, and hard Dutch water.",
+      metaDescription: "Natural CBD skincare for Amsterdam. Order online with free shipping over €60. Protect your skin from North Sea winds, humidity, and hard Dutch water.",
       kicker: "Skincare in Amsterdam",
       h1: "Natural skincare for Amsterdam",
-      lead: "Amsterdam – canals, bicycles, and eternal dampness. North Sea wind, hard water, and a climate that never quite makes up its mind challenge your skin year-round. Free shipping over €50.",
+      lead: "Amsterdam – canals, bicycles, and eternal dampness. North Sea wind, hard water, and a climate that never quite makes up its mind challenge your skin year-round. Free shipping over €60.",
       problemTitle: "What Amsterdam does to your skin",
       problemBody: "<p>Amsterdam sits below sea level and the climate reflects it. Humidity is high year-round, but that doesn't mean your skin is hydrated – quite the opposite. North Sea wind carries salt and lashing rain that breaks down the skin barrier. Amsterdam's cyclists – which is everyone – expose their faces to the elements for hours every day.</p><p>Dutch tap water is moderately hard and the calcium content can irritate sensitive skin. Winters aren't extremely cold but rawly damp, with temperatures around zero and a penetrating moisture that makes the cold more biting. Summers are mild but unpredictable.</p>",
       tipsTitle: "Skincare tips for Amsterdammers",
@@ -923,15 +923,15 @@ export const EU_CITY_PAGES: LandingPage[] = [
         { title: "Use a humidifier in winter", body: "Dutch homes with central heating become dry indoors. A humidifier protects the skin barrier at night." }
       ],
       solutionTitle: "CBD skincare delivered to Amsterdam",
-      solutionBody: "<p>We ship from Sweden – delivery to Amsterdam within 3–5 business days. Free shipping on orders over €50.</p><p>The DUO-kit strengthens the barrier against wind and humidity fluctuations. Au Naturel cleans away the day's grime. TA-DA Serum provides extra moisture during blustery months.</p>",
+      solutionBody: "<p>We ship from Sweden – delivery to Amsterdam within 3–5 business days. Free shipping on orders over €60.</p><p>The DUO-kit strengthens the barrier against wind and humidity fluctuations. Au Naturel cleans away the day's grime. TA-DA Serum provides extra moisture during blustery months.</p>",
       faq: [
-        { q: "Do you ship to the Netherlands?", a: "Yes, 3–5 business days. Free shipping over €50." },
+        { q: "Do you ship to the Netherlands?", a: "Yes, 3–5 business days. Free shipping over €60." },
         { q: "Is CBD skincare legal in the Netherlands?", a: "Absolutely – the Netherlands has one of Europe's most progressive attitudes toward CBD." },
         { q: "Which product for Amsterdam's climate?", a: "The DUO-kit as a daily base, Au Naturel for cleansing after cycling." },
         { q: "How long does shipping take?", a: "3–5 business days from Sweden." }
       ],
       ctaTitle: "Give your skin what Amsterdam's climate demands",
-      ctaSub: "Natural CBD skincare from Sweden to Amsterdam. Free shipping over €50."
+      ctaSub: "Natural CBD skincare from Sweden to Amsterdam. Free shipping over €60."
     },
     es: {
       metaTitle: "Cuidado de la piel Ámsterdam – cosmética con CBD | 1753 SKINCARE",
@@ -1025,10 +1025,10 @@ export const EU_CITY_PAGES: LandingPage[] = [
     productIds: ["duo-kit", "ta-da-serum", "au-naturel-makeup-remover"],
     sv: {
       metaTitle: "Hudvård Wien – CBD-hudvård | 1753 SKINCARE",
-      metaDescription: "Naturlig CBD-hudvård för dig i Wien. Beställ online med fri frakt över €50. Skydda din hud mot Wiens kontinentala klimat.",
+      metaDescription: "Naturlig CBD-hudvård för dig i Wien. Beställ online med fri frakt över €60. Skydda din hud mot Wiens kontinentala klimat.",
       kicker: "Hudvård i Wien",
       h1: "Naturlig hudvård för dig i Wien",
-      lead: "Wien – Europas mest livskvalitativa stad, men med ett kontinentalt klimat som utmanar din hud. Kalla vintrar, heta somrar och stadens unika Pannoniska vindmönster. Fri frakt över €50.",
+      lead: "Wien – Europas mest livskvalitativa stad, men med ett kontinentalt klimat som utmanar din hud. Kalla vintrar, heta somrar och stadens unika Pannoniska vindmönster. Fri frakt över €60.",
       problemTitle: "Wienhudens utmaningar",
       problemBody: "<p>Wien har ett utpräglat kontinentalt klimat med kalla, torra vintrar och varma somrar som kan nå trettifem grader. Temperaturskillnaderna mellan årstiderna är stora, och huden utsätts för konstanta anpassningar. Wienervinden – Pannonisk luft från den ungerska slätten – kan vara torr och varm på sommaren, kall och bitande på vintern.</p><p>Stadens vattenkvalitet är utmärkt – alpvatten direkt från bergen – men den torra inomhusluften i Wiens äldre byggnader med radiatorvärme kan vara brutal för huden vintertid.</p>",
       tipsTitle: "Hudvårdstips för wienare",
@@ -1040,22 +1040,22 @@ export const EU_CITY_PAGES: LandingPage[] = [
         { title: "Luftfuktare på vintern", body: "Gammal radiatorvärme torkar ut luften. En luftfuktare i sovrummet gör stor skillnad." }
       ],
       solutionTitle: "CBD-hudvård levererad till Wien",
-      solutionBody: "<p>Vi skickar från Sverige – leverans till Wien inom 3–5 arbetsdagar. Fri frakt över €50.</p><p>DUO-kit balanserar huden mot Wiens klimatextremer. TA-DA Serum ger extra fukt vintertid. Au Naturel rengör milt efter dagar i stadsluften.</p>",
+      solutionBody: "<p>Vi skickar från Sverige – leverans till Wien inom 3–5 arbetsdagar. Fri frakt över €60.</p><p>DUO-kit balanserar huden mot Wiens klimatextremer. TA-DA Serum ger extra fukt vintertid. Au Naturel rengör milt efter dagar i stadsluften.</p>",
       faq: [
-        { q: "Levererar ni till Österrike?", a: "Ja, 3–5 arbetsdagar. Fri frakt över €50." },
+        { q: "Levererar ni till Österrike?", a: "Ja, 3–5 arbetsdagar. Fri frakt över €60." },
         { q: "Är CBD-hudvård lagligt i Österrike?", a: "Ja, CBD i hudvård är lagligt i Österrike." },
         { q: "Vilken produkt för Wiens vintrar?", a: "TA-DA Serum ger extra barriärskydd mot torr kyla. DUO-kit som daglig bas." },
         { q: "Hur lång tid tar leveransen?", a: "3–5 arbetsdagar från Sverige till Wien." }
       ],
       ctaTitle: "Ge din hud det Wien kräver",
-      ctaSub: "Naturlig CBD-hudvård från Sverige till Wien. Fri frakt över €50."
+      ctaSub: "Naturlig CBD-hudvård från Sverige till Wien. Fri frakt över €60."
     },
     en: {
       metaTitle: "Skincare Vienna – CBD skincare | 1753 SKINCARE",
-      metaDescription: "Natural CBD skincare for Vienna. Order online with free shipping over €50. Protect your skin from Vienna's continental climate extremes.",
+      metaDescription: "Natural CBD skincare for Vienna. Order online with free shipping over €60. Protect your skin from Vienna's continental climate extremes.",
       kicker: "Skincare in Vienna",
       h1: "Natural skincare for Vienna",
-      lead: "Vienna – Europe's most liveable city, but with a continental climate that challenges your skin. Cold winters, hot summers, and the city's unique Pannonian wind patterns. Free shipping over €50.",
+      lead: "Vienna – Europe's most liveable city, but with a continental climate that challenges your skin. Cold winters, hot summers, and the city's unique Pannonian wind patterns. Free shipping over €60.",
       problemTitle: "What Vienna does to your skin",
       problemBody: "<p>Vienna has a pronounced continental climate with cold, dry winters and warm summers that can reach thirty-five degrees. The temperature differences between seasons are significant, and the skin faces constant adjustment. The Vienna wind – Pannonian air from the Hungarian plain – can be hot and dry in summer, cold and biting in winter.</p><p>The city's water quality is excellent – Alpine water straight from the mountains – but the dry indoor air in Vienna's older buildings with radiator heating can be brutal for the skin in winter.</p>",
       tipsTitle: "Skincare tips for Viennese residents",
@@ -1067,15 +1067,15 @@ export const EU_CITY_PAGES: LandingPage[] = [
         { title: "Humidifier in winter", body: "Old radiator heating dries out the air. A bedroom humidifier makes a significant difference." }
       ],
       solutionTitle: "CBD skincare delivered to Vienna",
-      solutionBody: "<p>We ship from Sweden – delivery to Vienna within 3–5 business days. Free shipping on orders over €50.</p><p>The DUO-kit balances the skin against Vienna's climate extremes. TA-DA Serum provides extra moisture in winter. Au Naturel cleanses gently after days in urban air.</p>",
+      solutionBody: "<p>We ship from Sweden – delivery to Vienna within 3–5 business days. Free shipping on orders over €60.</p><p>The DUO-kit balances the skin against Vienna's climate extremes. TA-DA Serum provides extra moisture in winter. Au Naturel cleanses gently after days in urban air.</p>",
       faq: [
-        { q: "Do you ship to Austria?", a: "Yes, 3–5 business days. Free shipping over €50." },
+        { q: "Do you ship to Austria?", a: "Yes, 3–5 business days. Free shipping over €60." },
         { q: "Is CBD skincare legal in Austria?", a: "Yes, CBD in skincare is legal in Austria." },
         { q: "Which product for Vienna's winters?", a: "TA-DA Serum provides extra barrier protection against dry cold. DUO-kit as your daily base." },
         { q: "How long does shipping take?", a: "3–5 business days from Sweden to Vienna." }
       ],
       ctaTitle: "Give your skin what Vienna demands",
-      ctaSub: "Natural CBD skincare from Sweden to Vienna. Free shipping over €50."
+      ctaSub: "Natural CBD skincare from Sweden to Vienna. Free shipping over €60."
     },
     es: {
       metaTitle: "Cuidado de la piel Viena – cosmética con CBD | 1753 SKINCARE",
@@ -1169,10 +1169,10 @@ export const EU_CITY_PAGES: LandingPage[] = [
     productIds: ["duo-kit", "au-naturel-makeup-remover", "fungtastic-mushroom-extract"],
     sv: {
       metaTitle: "Hudvård Bryssel – CBD-hudvård | 1753 SKINCARE",
-      metaDescription: "Naturlig CBD-hudvård för dig i Bryssel. Beställ online med fri frakt över €50. Skydda din hud mot Bryssels fuktiga klimat.",
+      metaDescription: "Naturlig CBD-hudvård för dig i Bryssel. Beställ online med fri frakt över €60. Skydda din hud mot Bryssels fuktiga klimat.",
       kicker: "Hudvård i Bryssel",
       h1: "Naturlig hudvård för dig i Bryssel",
-      lead: "Bryssel – Europas politiska hjärta med ett klimat som svänger mellan regniga grå dagar och överraskande milda perioder. Fri frakt över €50.",
+      lead: "Bryssel – Europas politiska hjärta med ett klimat som svänger mellan regniga grå dagar och överraskande milda perioder. Fri frakt över €60.",
       problemTitle: "Brysselhudens utmaningar",
       problemBody: "<p>Bryssel har ett maritimt klimat med rikligt med regn och molnighet. Huden utsätts för konstant fukt utifrån men kan ändå bli uttorkad av uppvärmd inomhusluft. Belgiens trafikföroreningar – särskilt i den trånga Brysselregionen – belastar huden med fina partiklar.</p><p>Bryssels stressiga internationella arbetsmiljö bidrar till förhöjda kortisolnivåer som påverkar hudens hälsa direkt.</p>",
       tipsTitle: "Hudvårdstips för brysselboar",
@@ -1184,22 +1184,22 @@ export const EU_CITY_PAGES: LandingPage[] = [
         { title: "Hantera EU-stressen", body: "Bryssel är en stressad stad. Meditation, motion och bra sömn – din hud reflekterar din livsstil." }
       ],
       solutionTitle: "CBD-hudvård levererad till Bryssel",
-      solutionBody: "<p>Vi skickar från Sverige – leverans till Bryssel inom 3–5 arbetsdagar. Fri frakt över €50.</p><p>DUO-kit stärker barriären. Au Naturel rengör bort föroreningar. Fungtastic stödjer immunförsvaret i den grå belgiska vintern.</p>",
+      solutionBody: "<p>Vi skickar från Sverige – leverans till Bryssel inom 3–5 arbetsdagar. Fri frakt över €60.</p><p>DUO-kit stärker barriären. Au Naturel rengör bort föroreningar. Fungtastic stödjer immunförsvaret i den grå belgiska vintern.</p>",
       faq: [
-        { q: "Levererar ni till Belgien?", a: "Ja, 3–5 arbetsdagar. Fri frakt över €50." },
+        { q: "Levererar ni till Belgien?", a: "Ja, 3–5 arbetsdagar. Fri frakt över €60." },
         { q: "Är CBD-hudvård lagligt i Belgien?", a: "Ja, CBD i hudvård är lagligt i Belgien." },
         { q: "Vilken produkt för Bryssels klimat?", a: "DUO-kit som bas, Au Naturel för daglig rengöring." },
         { q: "Hur lång tid tar leveransen?", a: "3–5 arbetsdagar." }
       ],
       ctaTitle: "Ge din hud det Bryssel kräver",
-      ctaSub: "Naturlig CBD-hudvård från Sverige till Bryssel. Fri frakt över €50."
+      ctaSub: "Naturlig CBD-hudvård från Sverige till Bryssel. Fri frakt över €60."
     },
     en: {
       metaTitle: "Skincare Brussels – CBD skincare | 1753 SKINCARE",
-      metaDescription: "Natural CBD skincare for Brussels. Order online with free shipping over €50. Protect your skin from Brussels' damp climate and urban pollution.",
+      metaDescription: "Natural CBD skincare for Brussels. Order online with free shipping over €60. Protect your skin from Brussels' damp climate and urban pollution.",
       kicker: "Skincare in Brussels",
       h1: "Natural skincare for Brussels",
-      lead: "Brussels – Europe's political heart with a climate that swings between rainy grey days and surprisingly mild spells. Free shipping over €50.",
+      lead: "Brussels – Europe's political heart with a climate that swings between rainy grey days and surprisingly mild spells. Free shipping over €60.",
       problemTitle: "What Brussels does to your skin",
       problemBody: "<p>Brussels has a maritime climate with plenty of rain and overcast skies. The skin is exposed to constant outdoor moisture but can still become dehydrated from heated indoor air. Belgium's traffic pollution – especially in the congested Brussels region – loads the skin with fine particles.</p><p>Brussels' stressful international work environment contributes to elevated cortisol levels that affect skin health directly.</p>",
       tipsTitle: "Skincare tips for Brussels residents",
@@ -1211,15 +1211,15 @@ export const EU_CITY_PAGES: LandingPage[] = [
         { title: "Manage the EU stress", body: "Brussels is a stressed city. Meditation, exercise, and good sleep – your skin reflects your lifestyle." }
       ],
       solutionTitle: "CBD skincare delivered to Brussels",
-      solutionBody: "<p>We ship from Sweden – delivery to Brussels within 3–5 business days. Free shipping on orders over €50.</p><p>The DUO-kit strengthens the barrier. Au Naturel cleans away pollution. Fungtastic supports immunity during the grey Belgian winter.</p>",
+      solutionBody: "<p>We ship from Sweden – delivery to Brussels within 3–5 business days. Free shipping on orders over €60.</p><p>The DUO-kit strengthens the barrier. Au Naturel cleans away pollution. Fungtastic supports immunity during the grey Belgian winter.</p>",
       faq: [
-        { q: "Do you ship to Belgium?", a: "Yes, 3–5 business days. Free shipping over €50." },
+        { q: "Do you ship to Belgium?", a: "Yes, 3–5 business days. Free shipping over €60." },
         { q: "Is CBD skincare legal in Belgium?", a: "Yes, CBD in skincare is legal in Belgium." },
         { q: "Which product for Brussels' climate?", a: "DUO-kit as your base, Au Naturel for daily cleansing." },
         { q: "How long does shipping take?", a: "3–5 business days." }
       ],
       ctaTitle: "Give your skin what Brussels demands",
-      ctaSub: "Natural CBD skincare from Sweden to Brussels. Free shipping over €50."
+      ctaSub: "Natural CBD skincare from Sweden to Brussels. Free shipping over €60."
     },
     es: {
       metaTitle: "Cuidado de la piel Bruselas – cosmética con CBD | 1753 SKINCARE",
@@ -1316,10 +1316,10 @@ export const EU_CITY_PAGES: LandingPage[] = [
     productIds: ["duo-kit", "au-naturel-makeup-remover", "ta-da-serum"],
     sv: {
       metaTitle: "Hudvård London – CBD-hudvård | 1753 SKINCARE",
-      metaDescription: "Naturlig CBD-hudvård för dig i London. Beställ online med fri frakt över €50. Skydda din hud mot Londons föroreningar och extremt hårda vatten.",
+      metaDescription: "Naturlig CBD-hudvård för dig i London. Beställ online med fri frakt över €60. Skydda din hud mot Londons föroreningar och extremt hårda vatten.",
       kicker: "Hudvård i London",
       h1: "Naturlig hudvård för dig i London",
-      lead: "London – världsmetropolens mörka hemlighet är dess extremt hårda vatten och luftföroreningar som förstör din hud i det tysta. Fri frakt över €50 (cirka £45), leverans inom 5–7 arbetsdagar.",
+      lead: "London – världsmetropolens mörka hemlighet är dess extremt hårda vatten och luftföroreningar som förstör din hud i det tysta. Fri frakt över €60 (cirka £45), leverans inom 5–7 arbetsdagar.",
       problemTitle: "Londonhudens utmaningar",
       problemBody: "<p>Londons kranvatten är bland det hårdaste i Europa. Kalkhalten är så hög att den lämnar vita avlagringar på allt den rör – inklusive din hud. Torr hud, eksem och irritation är vanligare i London än i nästan vilken annan europeisk storstad som helst, och vattnet är en stor bov.</p><p>Luftkvaliteten i centrala London har förbättrats men är fortfarande problematisk. Oxford Street, Piccadilly och de flesta huvudleder har partikelhalter som överstiger WHO:s riktlinjer. Tube – Londons tunnelbana – har extremt höga metallpartikelhalter i luften, liknande Stockholms tunnelbana men i ännu större skala.</p><p>Det grå, fuktiga klimatet med molniga dagar och regn bidrar till D-vitaminbrist hos en stor del av befolkningen, vilket påverkar hudens immunförsvar och läkningsförmåga.</p>",
       tipsTitle: "Hudvårdstips för londonbor",
@@ -1331,22 +1331,22 @@ export const EU_CITY_PAGES: LandingPage[] = [
         { title: "Ät från Borough Market", body: "Fermenterade grönsaker, ekologiskt kött, vildlax – Borough Market har allt huden behöver inifrån." }
       ],
       solutionTitle: "CBD-hudvård levererad till London",
-      solutionBody: "<p>Vi skickar från Sverige – leverans till London inom 5–7 arbetsdagar. Fri frakt över €50 (cirka £45).</p><p>DUO-kit stärker hudbarriären mot Londons hårda vatten. Au Naturel Makeup Remover rengör bort partiklar och smuts från the Tube utan att stressa huden. TA-DA Serum ger extra barriärskydd under kalla, fuktiga vintermånader.</p>",
+      solutionBody: "<p>Vi skickar från Sverige – leverans till London inom 5–7 arbetsdagar. Fri frakt över €60 (cirka £45).</p><p>DUO-kit stärker hudbarriären mot Londons hårda vatten. Au Naturel Makeup Remover rengör bort partiklar och smuts från the Tube utan att stressa huden. TA-DA Serum ger extra barriärskydd under kalla, fuktiga vintermånader.</p>",
       faq: [
-        { q: "Levererar ni till Storbritannien?", a: "Ja, leverans inom 5–7 arbetsdagar. Fri frakt över €50 (cirka £45)." },
+        { q: "Levererar ni till Storbritannien?", a: "Ja, leverans inom 5–7 arbetsdagar. Fri frakt över €60 (cirka £45)." },
         { q: "Är CBD-hudvård lagligt i UK?", a: "Ja, CBD i hudvårdsprodukter är fullt lagligt i Storbritannien." },
         { q: "Vilken produkt för Londons hårda vatten?", a: "DUO-kit stärker barriären som hårt vatten försvagar dagligen." },
         { q: "Finns det tull vid leverans?", a: "Beställningar under £135 importeras normalt tullfritt. En liten importmoms kan tillkomma." }
       ],
       ctaTitle: "Ge din hud det London kräver",
-      ctaSub: "Naturlig CBD-hudvård från Sverige till London. Fri frakt över €50."
+      ctaSub: "Naturlig CBD-hudvård från Sverige till London. Fri frakt över €60."
     },
     en: {
       metaTitle: "Skincare London – CBD skincare | 1753 SKINCARE",
-      metaDescription: "Natural CBD skincare for London. Order online with free shipping over €50. Protect your skin from London's extremely hard water and urban pollution.",
+      metaDescription: "Natural CBD skincare for London. Order online with free shipping over €60. Protect your skin from London's extremely hard water and urban pollution.",
       kicker: "Skincare in London",
       h1: "Natural skincare for London",
-      lead: "London – the world capital's dirty secret is its extremely hard water and air pollution that silently destroys your skin. Free shipping over €50 (approximately £45), delivered within 5–7 business days.",
+      lead: "London – the world capital's dirty secret is its extremely hard water and air pollution that silently destroys your skin. Free shipping over €60 (approximately £45), delivered within 5–7 business days.",
       problemTitle: "What London does to your skin",
       problemBody: "<p>London's tap water is among the hardest in Europe. Calcium levels are so high they leave white deposits on everything they touch – including your skin. Dry skin, eczema, and irritation are more common in London than in almost any other major European city, and the water is a major culprit.</p><p>Air quality in central London has improved but remains problematic. Oxford Street, Piccadilly, and most main roads have particle levels exceeding WHO guidelines. The Tube – London's Underground – has extremely high airborne metal particle levels, similar to Stockholm's subway but on an even larger scale.</p><p>The grey, damp climate with overcast days and rain contributes to vitamin D deficiency in a large portion of the population, which affects the skin's immune response and healing capacity.</p>",
       tipsTitle: "Skincare tips for Londoners",
@@ -1358,15 +1358,15 @@ export const EU_CITY_PAGES: LandingPage[] = [
         { title: "Eat from Borough Market", body: "Fermented vegetables, organic meat, wild salmon – Borough Market has everything your skin needs from within." }
       ],
       solutionTitle: "CBD skincare delivered to London",
-      solutionBody: "<p>We ship from Sweden – delivery to London within 5–7 business days. Free shipping on orders over €50 (approximately £45).</p><p>The DUO-kit strengthens the skin barrier against London's hard water. Au Naturel Makeup Remover cleans away particles and grime from the Tube without stressing the skin. TA-DA Serum provides extra barrier protection during cold, damp winter months.</p>",
+      solutionBody: "<p>We ship from Sweden – delivery to London within 5–7 business days. Free shipping on orders over €60 (approximately £45).</p><p>The DUO-kit strengthens the skin barrier against London's hard water. Au Naturel Makeup Remover cleans away particles and grime from the Tube without stressing the skin. TA-DA Serum provides extra barrier protection during cold, damp winter months.</p>",
       faq: [
-        { q: "Do you ship to the UK?", a: "Yes, delivery within 5–7 business days. Free shipping over €50 (approximately £45)." },
+        { q: "Do you ship to the UK?", a: "Yes, delivery within 5–7 business days. Free shipping over €60 (approximately £45)." },
         { q: "Is CBD skincare legal in the UK?", a: "Yes, CBD in skincare products is fully legal in the United Kingdom." },
         { q: "Which product for London's hard water?", a: "The DUO-kit strengthens the barrier that hard water weakens on a daily basis." },
         { q: "Are there customs charges?", a: "Orders under £135 are normally imported duty-free. A small import VAT may apply." }
       ],
       ctaTitle: "Give your skin what London demands",
-      ctaSub: "Natural CBD skincare from Sweden to London. Free shipping over €50."
+      ctaSub: "Natural CBD skincare from Sweden to London. Free shipping over €60."
     },
     es: {
       metaTitle: "Cuidado de la piel Londres – cosmética con CBD | 1753 SKINCARE",
@@ -1460,10 +1460,10 @@ export const EU_CITY_PAGES: LandingPage[] = [
     productIds: ["duo-kit", "ta-da-serum", "fungtastic-mushroom-extract"],
     sv: {
       metaTitle: "Hudvård Dublin – CBD-hudvård | 1753 SKINCARE",
-      metaDescription: "Naturlig CBD-hudvård för dig i Dublin. Beställ online med fri frakt över €50. Skydda din hud mot det irländska regnklimatet.",
+      metaDescription: "Naturlig CBD-hudvård för dig i Dublin. Beställ online med fri frakt över €60. Skydda din hud mot det irländska regnklimatet.",
       kicker: "Hudvård i Dublin",
       h1: "Naturlig hudvård för dig i Dublin",
-      lead: "Dublin – vacker, grön och blöt. Det irländska klimatets konstanta regn, vind och begränsade sol utmanar din hud. Fri frakt över €50.",
+      lead: "Dublin – vacker, grön och blöt. Det irländska klimatets konstanta regn, vind och begränsade sol utmanar din hud. Fri frakt över €60.",
       problemTitle: "Dublinhudens utmaningar",
       problemBody: "<p>Dublin har ett oceaniskt klimat med regn i genomsnitt varannan dag. Den konstanta fukten och Atlantvinden skapar en miljö där huden aldrig riktigt torkar – men inte heller återfuktas ordentligt. Vinden bär med sig salt från Irländska sjön som bryter ned hudbarriären.</p><p>Solljus är en bristvara. Dublin har i genomsnitt bara 1400 soltimmar per år – bland de lägsta i EU. D-vitaminbristen är utbredd och påverkar hudens hälsa direkt.</p>",
       tipsTitle: "Hudvårdstips för dublinare",
@@ -1475,22 +1475,22 @@ export const EU_CITY_PAGES: LandingPage[] = [
         { title: "Skydda huden i regnvinden", body: "Dubbla doser av rengöring och återfuktning under blåsiga regniga dagar." }
       ],
       solutionTitle: "CBD-hudvård levererad till Dublin",
-      solutionBody: "<p>Vi skickar från Sverige – leverans till Dublin inom 3–5 arbetsdagar. Fri frakt över €50.</p><p>DUO-kit stärker barriären mot vind och salt. TA-DA Serum ger extra fukt. Fungtastic stödjer immunförsvaret i det grå irländska klimatet.</p>",
+      solutionBody: "<p>Vi skickar från Sverige – leverans till Dublin inom 3–5 arbetsdagar. Fri frakt över €60.</p><p>DUO-kit stärker barriären mot vind och salt. TA-DA Serum ger extra fukt. Fungtastic stödjer immunförsvaret i det grå irländska klimatet.</p>",
       faq: [
-        { q: "Levererar ni till Irland?", a: "Ja, 3–5 arbetsdagar inom EU. Fri frakt över €50." },
+        { q: "Levererar ni till Irland?", a: "Ja, 3–5 arbetsdagar inom EU. Fri frakt över €60." },
         { q: "Är CBD-hudvård lagligt i Irland?", a: "Ja, CBD i hudvård är fullt lagligt i Irland." },
         { q: "Vilken produkt för Dublins klimat?", a: "DUO-kit som bas, TA-DA Serum för extra barriärskydd mot vinden." },
         { q: "Hur lång tid tar leveransen?", a: "3–5 arbetsdagar." }
       ],
       ctaTitle: "Ge din hud det Dublins klimat kräver",
-      ctaSub: "Naturlig CBD-hudvård från Sverige till Dublin. Fri frakt över €50."
+      ctaSub: "Naturlig CBD-hudvård från Sverige till Dublin. Fri frakt över €60."
     },
     en: {
       metaTitle: "Skincare Dublin – CBD skincare | 1753 SKINCARE",
-      metaDescription: "Natural CBD skincare for Dublin. Order online with free shipping over €50. Protect your skin from Ireland's constant rain, wind, and limited sunlight.",
+      metaDescription: "Natural CBD skincare for Dublin. Order online with free shipping over €60. Protect your skin from Ireland's constant rain, wind, and limited sunlight.",
       kicker: "Skincare in Dublin",
       h1: "Natural skincare for Dublin",
-      lead: "Dublin – beautiful, green, and wet. The Irish climate's constant rain, wind, and limited sun challenge your skin daily. Free shipping over €50.",
+      lead: "Dublin – beautiful, green, and wet. The Irish climate's constant rain, wind, and limited sun challenge your skin daily. Free shipping over €60.",
       problemTitle: "What Dublin does to your skin",
       problemBody: "<p>Dublin has an oceanic climate with rain on average every other day. The constant moisture and Atlantic wind create an environment where the skin never truly dries – but isn't properly hydrated either. The wind carries salt from the Irish Sea that breaks down the skin barrier.</p><p>Sunlight is scarce. Dublin averages only 1,400 sunshine hours per year – among the lowest in the EU. Vitamin D deficiency is widespread and directly affects skin health.</p>",
       tipsTitle: "Skincare tips for Dubliners",
@@ -1502,15 +1502,15 @@ export const EU_CITY_PAGES: LandingPage[] = [
         { title: "Protect your skin in the rain-wind", body: "Double up on cleansing and moisturizing during blustery, rainy days." }
       ],
       solutionTitle: "CBD skincare delivered to Dublin",
-      solutionBody: "<p>We ship from Sweden – delivery to Dublin within 3–5 business days. Free shipping on orders over €50.</p><p>The DUO-kit strengthens the barrier against wind and salt. TA-DA Serum provides extra moisture. Fungtastic supports immunity in Ireland's grey climate.</p>",
+      solutionBody: "<p>We ship from Sweden – delivery to Dublin within 3–5 business days. Free shipping on orders over €60.</p><p>The DUO-kit strengthens the barrier against wind and salt. TA-DA Serum provides extra moisture. Fungtastic supports immunity in Ireland's grey climate.</p>",
       faq: [
-        { q: "Do you ship to Ireland?", a: "Yes, 3–5 business days within the EU. Free shipping over €50." },
+        { q: "Do you ship to Ireland?", a: "Yes, 3–5 business days within the EU. Free shipping over €60." },
         { q: "Is CBD skincare legal in Ireland?", a: "Yes, CBD in skincare is fully legal in Ireland." },
         { q: "Which product for Dublin's climate?", a: "The DUO-kit as your base, TA-DA Serum for extra barrier protection against the wind." },
         { q: "How long does shipping take?", a: "3–5 business days." }
       ],
       ctaTitle: "Give your skin what Dublin's climate demands",
-      ctaSub: "Natural CBD skincare from Sweden to Dublin. Free shipping over €50."
+      ctaSub: "Natural CBD skincare from Sweden to Dublin. Free shipping over €60."
     },
     es: {
       metaTitle: "Cuidado de la piel Dublín – cosmética con CBD | 1753 SKINCARE",
@@ -1604,10 +1604,10 @@ export const EU_CITY_PAGES: LandingPage[] = [
     productIds: ["duo-kit", "au-naturel-makeup-remover", "ta-da-serum"],
     sv: {
       metaTitle: "Hudvård Paris – CBD-hudvård | 1753 SKINCARE",
-      metaDescription: "Naturlig CBD-hudvård för dig i Paris. Beställ online med fri frakt över €50. Skydda din hud mot Parisisk föroreningar och hårt vatten.",
+      metaDescription: "Naturlig CBD-hudvård för dig i Paris. Beställ online med fri frakt över €60. Skydda din hud mot Parisisk föroreningar och hårt vatten.",
       kicker: "Hudvård i Paris",
       h1: "Naturlig hudvård för dig i Paris",
-      lead: "Paris – modets huvudstad med smutsiga hemligheter. Luftföroreningar, extremt hårt vatten och stressat storstadsliv utmanar din hud. Fri frakt över €50.",
+      lead: "Paris – modets huvudstad med smutsiga hemligheter. Luftföroreningar, extremt hårt vatten och stressat storstadsliv utmanar din hud. Fri frakt över €60.",
       problemTitle: "Parishudens utmaningar",
       problemBody: "<p>Paris har bland Europas högsta föroreningsnivåer. Trafikens dieselavgaser, särskilt längs Périphérique och i centrala arrondissement, belastar huden med fina partiklar och kvävedioxid. Parisisk luft är mätbart sämre än de flesta andra EU-huvudstäder.</p><p>Kranvattnet i Paris är mycket hårt – kalkhalten är hög och torkar ut huden vid varje tvätt. Vintrarna är kalla och gråa, somrarna allt hetare med värmeböljor som blivit vanligare. Parisiskt stressliv – métro-boulot-dodo – höjer kortisolnivåerna kroniskt.</p>",
       tipsTitle: "Hudvårdstips för parisbor",
@@ -1619,22 +1619,22 @@ export const EU_CITY_PAGES: LandingPage[] = [
         { title: "Mindfulness mot stress", body: "Paris lever i högt tempo. Stresshantering är den mest underskattade hudvårdsrutinen." }
       ],
       solutionTitle: "CBD-hudvård levererad till Paris",
-      solutionBody: "<p>Vi skickar från Sverige – leverans till Paris inom 3–5 arbetsdagar. Fri frakt över €50.</p><p>DUO-kit stärker barriären mot hårt vatten och föroreningar. Au Naturel rengör bort smog och smuts. TA-DA Serum ger extra fukt under kalla vintermånader.</p>",
+      solutionBody: "<p>Vi skickar från Sverige – leverans till Paris inom 3–5 arbetsdagar. Fri frakt över €60.</p><p>DUO-kit stärker barriären mot hårt vatten och föroreningar. Au Naturel rengör bort smog och smuts. TA-DA Serum ger extra fukt under kalla vintermånader.</p>",
       faq: [
-        { q: "Levererar ni till Frankrike?", a: "Ja, 3–5 arbetsdagar. Fri frakt över €50." },
+        { q: "Levererar ni till Frankrike?", a: "Ja, 3–5 arbetsdagar. Fri frakt över €60." },
         { q: "Är CBD-hudvård lagligt i Frankrike?", a: "Ja, CBD i hudvård har varit fullt lagligt i Frankrike sedan 2022." },
         { q: "Vilken produkt mot Parisisk smog?", a: "Au Naturel Makeup Remover rengör bort föroreningar effektivt men milt." },
         { q: "Hur lång tid tar leveransen?", a: "3–5 arbetsdagar." }
       ],
       ctaTitle: "Ge din hud det Paris kräver",
-      ctaSub: "Naturlig CBD-hudvård från Sverige till Paris. Fri frakt över €50."
+      ctaSub: "Naturlig CBD-hudvård från Sverige till Paris. Fri frakt över €60."
     },
     en: {
       metaTitle: "Skincare Paris – CBD skincare | 1753 SKINCARE",
-      metaDescription: "Natural CBD skincare for Paris. Order online with free shipping over €50. Protect your skin from Parisian pollution and extremely hard water.",
+      metaDescription: "Natural CBD skincare for Paris. Order online with free shipping over €60. Protect your skin from Parisian pollution and extremely hard water.",
       kicker: "Skincare in Paris",
       h1: "Natural skincare for Paris",
-      lead: "Paris – the fashion capital with dirty secrets. Air pollution, extremely hard water, and stressful city life challenge your skin daily. Free shipping over €50.",
+      lead: "Paris – the fashion capital with dirty secrets. Air pollution, extremely hard water, and stressful city life challenge your skin daily. Free shipping over €60.",
       problemTitle: "What Paris does to your skin",
       problemBody: "<p>Paris has among the highest pollution levels in Europe. Diesel exhaust from traffic, especially along the Périphérique and in central arrondissements, loads the skin with fine particles and nitrogen dioxide. Parisian air is measurably worse than most other EU capitals.</p><p>Tap water in Paris is very hard – calcium levels are high and dehydrate the skin with every wash. Winters are cold and grey, summers increasingly hotter with heat waves becoming more common. The Parisian stress cycle – métro-boulot-dodo – chronically elevates cortisol levels.</p>",
       tipsTitle: "Skincare tips for Parisians",
@@ -1646,15 +1646,15 @@ export const EU_CITY_PAGES: LandingPage[] = [
         { title: "Mindfulness against stress", body: "Paris lives at a fast pace. Stress management is the most underrated skincare routine." }
       ],
       solutionTitle: "CBD skincare delivered to Paris",
-      solutionBody: "<p>We ship from Sweden – delivery to Paris within 3–5 business days. Free shipping on orders over €50.</p><p>The DUO-kit strengthens the barrier against hard water and pollution. Au Naturel cleans away smog and grime. TA-DA Serum provides extra moisture during cold winter months.</p>",
+      solutionBody: "<p>We ship from Sweden – delivery to Paris within 3–5 business days. Free shipping on orders over €60.</p><p>The DUO-kit strengthens the barrier against hard water and pollution. Au Naturel cleans away smog and grime. TA-DA Serum provides extra moisture during cold winter months.</p>",
       faq: [
-        { q: "Do you ship to France?", a: "Yes, 3–5 business days. Free shipping over €50." },
+        { q: "Do you ship to France?", a: "Yes, 3–5 business days. Free shipping over €60." },
         { q: "Is CBD skincare legal in France?", a: "Yes, CBD in skincare has been fully legal in France since 2022." },
         { q: "Which product for Parisian smog?", a: "Au Naturel Makeup Remover cleans away pollution effectively but gently." },
         { q: "How long does shipping take?", a: "3–5 business days." }
       ],
       ctaTitle: "Give your skin what Paris demands",
-      ctaSub: "Natural CBD skincare from Sweden to Paris. Free shipping over €50."
+      ctaSub: "Natural CBD skincare from Sweden to Paris. Free shipping over €60."
     },
     es: {
       metaTitle: "Cuidado de la piel París – cosmética con CBD | 1753 SKINCARE",
@@ -1751,10 +1751,10 @@ export const EU_CITY_PAGES: LandingPage[] = [
     productIds: ["duo-kit", "au-naturel-makeup-remover", "ta-da-serum"],
     sv: {
       metaTitle: "Hudvård Barcelona – CBD-hudvård | 1753 SKINCARE",
-      metaDescription: "Naturlig CBD-hudvård för dig i Barcelona. Beställ online med fri frakt över €50. Skydda din hud mot medelhavssolen och stadsluften.",
+      metaDescription: "Naturlig CBD-hudvård för dig i Barcelona. Beställ online med fri frakt över €60. Skydda din hud mot medelhavssolen och stadsluften.",
       kicker: "Hudvård i Barcelona",
       h1: "Naturlig hudvård för dig i Barcelona",
-      lead: "Barcelona – sol, hav och stadsliv. Men den intensiva UV-strålningen, havsbrisen med salt och trafikföroreningar utmanar din hud mer än du tror. Fri frakt över €50.",
+      lead: "Barcelona – sol, hav och stadsliv. Men den intensiva UV-strålningen, havsbrisen med salt och trafikföroreningar utmanar din hud mer än du tror. Fri frakt över €60.",
       problemTitle: "Barcelonahudens utmaningar",
       problemBody: "<p>Barcelona har över 2500 soltimmar per år – fantastiskt för livskvaliteten, men krävande för huden. Kumulativ UV-exponering driver prematur åldring, pigmentförändringar och uttorkning. Havsluften från Medelhavet bär med sig salt som torkar ut huden.</p><p>Barcelonas trafikföroreningar är bland de värsta i Spanien. Eixample-kvarterens täta stadsstruktur fångar avgaser, och sommarvärmen förvärrar ozon- och partikelhalterna. Luftkonditionering inomhus torkar ut huden ytterligare.</p>",
       tipsTitle: "Hudvårdstips för barcelonabor",
@@ -1766,22 +1766,22 @@ export const EU_CITY_PAGES: LandingPage[] = [
         { title: "Undvik mitt-på-dagen-solen", body: "Mellan klockan 12 och 16 är UV-strålningen som starkast. Sök skugga." }
       ],
       solutionTitle: "CBD-hudvård levererad till Barcelona",
-      solutionBody: "<p>Vi skickar från Sverige – leverans till Barcelona inom 3–5 arbetsdagar. Fri frakt över €50.</p><p>DUO-kit ger antioxidantskydd mot UV-skador. Au Naturel rengör bort salt och föroreningar. TA-DA Serum ger intensiv återfuktning efter solen.</p>",
+      solutionBody: "<p>Vi skickar från Sverige – leverans till Barcelona inom 3–5 arbetsdagar. Fri frakt över €60.</p><p>DUO-kit ger antioxidantskydd mot UV-skador. Au Naturel rengör bort salt och föroreningar. TA-DA Serum ger intensiv återfuktning efter solen.</p>",
       faq: [
-        { q: "Levererar ni till Spanien?", a: "Ja, 3–5 arbetsdagar. Fri frakt över €50." },
+        { q: "Levererar ni till Spanien?", a: "Ja, 3–5 arbetsdagar. Fri frakt över €60." },
         { q: "Är CBD-hudvård lagligt i Spanien?", a: "Ja, CBD i hudvård är lagligt i Spanien." },
         { q: "Vilken produkt för Barcelonas sol?", a: "DUO-kit för dagligt antioxidantskydd, TA-DA Serum för återfuktning." },
         { q: "Hur lång tid tar leveransen?", a: "3–5 arbetsdagar." }
       ],
       ctaTitle: "Ge din hud det Barcelonas sol kräver",
-      ctaSub: "Naturlig CBD-hudvård från Sverige till Barcelona. Fri frakt över €50."
+      ctaSub: "Naturlig CBD-hudvård från Sverige till Barcelona. Fri frakt över €60."
     },
     en: {
       metaTitle: "Skincare Barcelona – CBD skincare | 1753 SKINCARE",
-      metaDescription: "Natural CBD skincare for Barcelona. Order online with free shipping over €50. Protect your skin from Mediterranean sun, sea salt, and urban pollution.",
+      metaDescription: "Natural CBD skincare for Barcelona. Order online with free shipping over €60. Protect your skin from Mediterranean sun, sea salt, and urban pollution.",
       kicker: "Skincare in Barcelona",
       h1: "Natural skincare for Barcelona",
-      lead: "Barcelona – sun, sea, and city life. But the intense UV radiation, salty sea breeze, and traffic pollution challenge your skin more than you think. Free shipping over €50.",
+      lead: "Barcelona – sun, sea, and city life. But the intense UV radiation, salty sea breeze, and traffic pollution challenge your skin more than you think. Free shipping over €60.",
       problemTitle: "What Barcelona does to your skin",
       problemBody: "<p>Barcelona gets over 2,500 sunshine hours per year – fantastic for quality of life, but demanding on the skin. Cumulative UV exposure drives premature aging, pigmentation changes, and dehydration. The sea air from the Mediterranean carries salt that dries out the skin.</p><p>Barcelona's traffic pollution is among the worst in Spain. The dense urban grid of the Eixample district traps exhaust fumes, and summer heat worsens ozone and particle levels. Air conditioning indoors dries the skin out further.</p>",
       tipsTitle: "Skincare tips for Barcelona residents",
@@ -1793,15 +1793,15 @@ export const EU_CITY_PAGES: LandingPage[] = [
         { title: "Avoid midday sun", body: "Between 12 and 4 PM, UV radiation is at its strongest. Seek shade." }
       ],
       solutionTitle: "CBD skincare delivered to Barcelona",
-      solutionBody: "<p>We ship from Sweden – delivery to Barcelona within 3–5 business days. Free shipping on orders over €50.</p><p>The DUO-kit provides antioxidant protection against UV damage. Au Naturel cleans away salt and pollution. TA-DA Serum provides intensive moisture recovery after the sun.</p>",
+      solutionBody: "<p>We ship from Sweden – delivery to Barcelona within 3–5 business days. Free shipping on orders over €60.</p><p>The DUO-kit provides antioxidant protection against UV damage. Au Naturel cleans away salt and pollution. TA-DA Serum provides intensive moisture recovery after the sun.</p>",
       faq: [
-        { q: "Do you ship to Spain?", a: "Yes, 3–5 business days. Free shipping over €50." },
+        { q: "Do you ship to Spain?", a: "Yes, 3–5 business days. Free shipping over €60." },
         { q: "Is CBD skincare legal in Spain?", a: "Yes, CBD in skincare is legal in Spain." },
         { q: "Which product for Barcelona's sun?", a: "DUO-kit for daily antioxidant protection, TA-DA Serum for moisture recovery." },
         { q: "How long does shipping take?", a: "3–5 business days." }
       ],
       ctaTitle: "Give your skin what Barcelona's sun demands",
-      ctaSub: "Natural CBD skincare from Sweden to Barcelona. Free shipping over €50."
+      ctaSub: "Natural CBD skincare from Sweden to Barcelona. Free shipping over €60."
     },
     es: {
       metaTitle: "Cuidado de la piel Barcelona – cosmética con CBD | 1753 SKINCARE",
@@ -1895,10 +1895,10 @@ export const EU_CITY_PAGES: LandingPage[] = [
     productIds: ["duo-kit", "ta-da-serum", "au-naturel-makeup-remover"],
     sv: {
       metaTitle: "Hudvård Madrid – CBD-hudvård | 1753 SKINCARE",
-      metaDescription: "Naturlig CBD-hudvård för dig i Madrid. Beställ online med fri frakt över €50. Skydda din hud mot Madrids torra hetta och extrema klimat.",
+      metaDescription: "Naturlig CBD-hudvård för dig i Madrid. Beställ online med fri frakt över €60. Skydda din hud mot Madrids torra hetta och extrema klimat.",
       kicker: "Hudvård i Madrid",
       h1: "Naturlig hudvård för dig i Madrid",
-      lead: "Madrid – Europas högst belägna huvudstad med ett av kontinentens mest extrema klimat. Brännande somrar, kalla vintrar och extremt torr luft. Fri frakt över €50.",
+      lead: "Madrid – Europas högst belägna huvudstad med ett av kontinentens mest extrema klimat. Brännande somrar, kalla vintrar och extremt torr luft. Fri frakt över €60.",
       problemTitle: "Madridhudens utmaningar",
       problemBody: "<p>Madrid har ett kontinentalt medelhavsklimat med extrema temperaturskillnader. Somrarna når regelbundet fyrtio grader och luftfuktigheten kan sjunka till under tjugo procent. Vintrarna är kalla – ja, det snöar i Madrid – med temperaturer under noll. Uttrycket 'nueve meses de invierno, tres de infierno' beskriver det perfekt.</p><p>Den torra luften året runt dränerar huden på fukt. Madrids höga altitud (650 m) innebär starkare UV-strålning. Luftkonditionering på sommaren och centralvärme på vintern skapar ytterligare torka inomhus.</p>",
       tipsTitle: "Hudvårdstips för madridbor",
@@ -1910,22 +1910,22 @@ export const EU_CITY_PAGES: LandingPage[] = [
         { title: "Drick vatten konstant", body: "Uttorkning är Madrids ständiga risk. Hydrering inifrån är avgörande för huden." }
       ],
       solutionTitle: "CBD-hudvård levererad till Madrid",
-      solutionBody: "<p>Vi skickar från Sverige – leverans till Madrid inom 3–5 arbetsdagar. Fri frakt över €50.</p><p>DUO-kit ger grundläggande barriärskydd. TA-DA Serum med CBG ger intensiv fukt som Madrids torra klimat kräver. Au Naturel rengör milt utan att torka ut ytterligare.</p>",
+      solutionBody: "<p>Vi skickar från Sverige – leverans till Madrid inom 3–5 arbetsdagar. Fri frakt över €60.</p><p>DUO-kit ger grundläggande barriärskydd. TA-DA Serum med CBG ger intensiv fukt som Madrids torra klimat kräver. Au Naturel rengör milt utan att torka ut ytterligare.</p>",
       faq: [
-        { q: "Levererar ni till Spanien?", a: "Ja, 3–5 arbetsdagar. Fri frakt över €50." },
+        { q: "Levererar ni till Spanien?", a: "Ja, 3–5 arbetsdagar. Fri frakt över €60." },
         { q: "Är CBD-hudvård lagligt i Spanien?", a: "Ja, CBD i hudvård är lagligt i Spanien." },
         { q: "Vilken produkt för Madrids torra klimat?", a: "TA-DA Serum ger intensiv fukt. DUO-kit som daglig bas." },
         { q: "Hur lång tid tar leveransen?", a: "3–5 arbetsdagar." }
       ],
       ctaTitle: "Ge din hud det Madrid kräver",
-      ctaSub: "Naturlig CBD-hudvård från Sverige till Madrid. Fri frakt över €50."
+      ctaSub: "Naturlig CBD-hudvård från Sverige till Madrid. Fri frakt över €60."
     },
     en: {
       metaTitle: "Skincare Madrid – CBD skincare | 1753 SKINCARE",
-      metaDescription: "Natural CBD skincare for Madrid. Order online with free shipping over €50. Protect your skin from Madrid's scorching heat and extremely dry air.",
+      metaDescription: "Natural CBD skincare for Madrid. Order online with free shipping over €60. Protect your skin from Madrid's scorching heat and extremely dry air.",
       kicker: "Skincare in Madrid",
       h1: "Natural skincare for Madrid",
-      lead: "Madrid – Europe's highest capital with one of the continent's most extreme climates. Scorching summers, cold winters, and extremely dry air year-round. Free shipping over €50.",
+      lead: "Madrid – Europe's highest capital with one of the continent's most extreme climates. Scorching summers, cold winters, and extremely dry air year-round. Free shipping over €60.",
       problemTitle: "What Madrid does to your skin",
       problemBody: "<p>Madrid has a continental Mediterranean climate with extreme temperature swings. Summers regularly reach forty degrees and humidity can drop below twenty percent. Winters are cold – yes, it snows in Madrid – with temperatures below zero. The local saying 'nueve meses de invierno, tres de infierno' describes it perfectly.</p><p>The dry air year-round drains moisture from the skin. Madrid's high altitude (650m) means stronger UV radiation. Air conditioning in summer and central heating in winter create additional dryness indoors.</p>",
       tipsTitle: "Skincare tips for Madrid residents",
@@ -1937,15 +1937,15 @@ export const EU_CITY_PAGES: LandingPage[] = [
         { title: "Drink water constantly", body: "Dehydration is Madrid's constant risk. Hydrating from within is essential for the skin." }
       ],
       solutionTitle: "CBD skincare delivered to Madrid",
-      solutionBody: "<p>We ship from Sweden – delivery to Madrid within 3–5 business days. Free shipping on orders over €50.</p><p>The DUO-kit provides fundamental barrier protection. TA-DA Serum with CBG delivers the intense moisture Madrid's dry climate demands. Au Naturel cleanses gently without further dehydrating.</p>",
+      solutionBody: "<p>We ship from Sweden – delivery to Madrid within 3–5 business days. Free shipping on orders over €60.</p><p>The DUO-kit provides fundamental barrier protection. TA-DA Serum with CBG delivers the intense moisture Madrid's dry climate demands. Au Naturel cleanses gently without further dehydrating.</p>",
       faq: [
-        { q: "Do you ship to Spain?", a: "Yes, 3–5 business days. Free shipping over €50." },
+        { q: "Do you ship to Spain?", a: "Yes, 3–5 business days. Free shipping over €60." },
         { q: "Is CBD skincare legal in Spain?", a: "Yes, CBD in skincare is legal in Spain." },
         { q: "Which product for Madrid's dry climate?", a: "TA-DA Serum provides intense moisture. DUO-kit as your daily base." },
         { q: "How long does shipping take?", a: "3–5 business days." }
       ],
       ctaTitle: "Give your skin what Madrid demands",
-      ctaSub: "Natural CBD skincare from Sweden to Madrid. Free shipping over €50."
+      ctaSub: "Natural CBD skincare from Sweden to Madrid. Free shipping over €60."
     },
     es: {
       metaTitle: "Cuidado de la piel Madrid – cosmética con CBD | 1753 SKINCARE",
@@ -2039,10 +2039,10 @@ export const EU_CITY_PAGES: LandingPage[] = [
     productIds: ["duo-kit", "au-naturel-makeup-remover", "fungtastic-mushroom-extract"],
     sv: {
       metaTitle: "Hudvård Rom – CBD-hudvård | 1753 SKINCARE",
-      metaDescription: "Naturlig CBD-hudvård för dig i Rom. Beställ online med fri frakt över €50. Skydda din hud mot Roms sol, föroreningar och stadsliv.",
+      metaDescription: "Naturlig CBD-hudvård för dig i Rom. Beställ online med fri frakt över €60. Skydda din hud mot Roms sol, föroreningar och stadsliv.",
       kicker: "Hudvård i Rom",
       h1: "Naturlig hudvård för dig i Rom",
-      lead: "Rom – den eviga staden med eviga hudutmaningar. Intensiv sol, trafikföroreningar och het sommarluft testar din hud. Fri frakt över €50.",
+      lead: "Rom – den eviga staden med eviga hudutmaningar. Intensiv sol, trafikföroreningar och het sommarluft testar din hud. Fri frakt över €60.",
       problemTitle: "Romhudens utmaningar",
       problemBody: "<p>Rom har ett varmt medelhavsklimat med heta, torra somrar och milda vintrar. UV-strålningen är stark från april till oktober, och kumulativ solexponering driver prematur hudåldring. Romtrafiken – scooters, bilar, bussar i trånga gator – skapar föroreningsnivåer som överskrider EU-gränsvärden regelbundet.</p><p>Sommarens värmeböljor med temperaturer över fyrtio grader stressar huden enormt. Luftkonditionering inomhus torkar ut ytterligare. Roms kranvatten kommer från akvedukter och är generellt bra, men varierar mellan stadsdelar.</p>",
       tipsTitle: "Hudvårdstips för rombor",
@@ -2054,22 +2054,22 @@ export const EU_CITY_PAGES: LandingPage[] = [
         { title: "Hydrering inifrån", body: "Roms somrar kräver minst två liter vatten dagligen. Dehydrerad kropp ger dehydrerad hud." }
       ],
       solutionTitle: "CBD-hudvård levererad till Rom",
-      solutionBody: "<p>Vi skickar från Sverige – leverans till Rom inom 3–5 arbetsdagar. Fri frakt över €50.</p><p>DUO-kit ger antioxidantskydd. Au Naturel rengör bort föroreningar milt. Fungtastic stödjer hudens motståndskraft inifrån.</p>",
+      solutionBody: "<p>Vi skickar från Sverige – leverans till Rom inom 3–5 arbetsdagar. Fri frakt över €60.</p><p>DUO-kit ger antioxidantskydd. Au Naturel rengör bort föroreningar milt. Fungtastic stödjer hudens motståndskraft inifrån.</p>",
       faq: [
-        { q: "Levererar ni till Italien?", a: "Ja, 3–5 arbetsdagar. Fri frakt över €50." },
+        { q: "Levererar ni till Italien?", a: "Ja, 3–5 arbetsdagar. Fri frakt över €60." },
         { q: "Är CBD-hudvård lagligt i Italien?", a: "Ja, CBD i hudvård är lagligt i Italien." },
         { q: "Vilken produkt för Roms klimat?", a: "DUO-kit för dagligt skydd, Au Naturel för rengöring av föroreningar." },
         { q: "Hur lång tid tar leveransen?", a: "3–5 arbetsdagar." }
       ],
       ctaTitle: "Ge din hud det Rom kräver",
-      ctaSub: "Naturlig CBD-hudvård från Sverige till Rom. Fri frakt över €50."
+      ctaSub: "Naturlig CBD-hudvård från Sverige till Rom. Fri frakt över €60."
     },
     en: {
       metaTitle: "Skincare Rome – CBD skincare | 1753 SKINCARE",
-      metaDescription: "Natural CBD skincare for Rome. Order online with free shipping over €50. Protect your skin from Roman sun, pollution, and Mediterranean heat.",
+      metaDescription: "Natural CBD skincare for Rome. Order online with free shipping over €60. Protect your skin from Roman sun, pollution, and Mediterranean heat.",
       kicker: "Skincare in Rome",
       h1: "Natural skincare for Rome",
-      lead: "Rome – the eternal city with eternal skin challenges. Intense sun, traffic pollution, and scorching summer air test your skin daily. Free shipping over €50.",
+      lead: "Rome – the eternal city with eternal skin challenges. Intense sun, traffic pollution, and scorching summer air test your skin daily. Free shipping over €60.",
       problemTitle: "What Rome does to your skin",
       problemBody: "<p>Rome has a warm Mediterranean climate with hot, dry summers and mild winters. UV radiation is strong from April to October, and cumulative sun exposure drives premature skin aging. Roman traffic – scooters, cars, buses in narrow streets – creates pollution levels that regularly exceed EU limits.</p><p>Summer heat waves with temperatures above forty degrees stress the skin enormously. Air conditioning indoors dehydrates further. Rome's tap water comes from aqueducts and is generally good, but varies between neighborhoods.</p>",
       tipsTitle: "Skincare tips for Roman residents",
@@ -2081,15 +2081,15 @@ export const EU_CITY_PAGES: LandingPage[] = [
         { title: "Hydrate from within", body: "Roman summers demand at least two liters of water daily. A dehydrated body means dehydrated skin." }
       ],
       solutionTitle: "CBD skincare delivered to Rome",
-      solutionBody: "<p>We ship from Sweden – delivery to Rome within 3–5 business days. Free shipping on orders over €50.</p><p>The DUO-kit provides antioxidant protection. Au Naturel gently cleans away pollution. Fungtastic supports skin resilience from within.</p>",
+      solutionBody: "<p>We ship from Sweden – delivery to Rome within 3–5 business days. Free shipping on orders over €60.</p><p>The DUO-kit provides antioxidant protection. Au Naturel gently cleans away pollution. Fungtastic supports skin resilience from within.</p>",
       faq: [
-        { q: "Do you ship to Italy?", a: "Yes, 3–5 business days. Free shipping over €50." },
+        { q: "Do you ship to Italy?", a: "Yes, 3–5 business days. Free shipping over €60." },
         { q: "Is CBD skincare legal in Italy?", a: "Yes, CBD in skincare is legal in Italy." },
         { q: "Which product for Rome's climate?", a: "DUO-kit for daily protection, Au Naturel for pollution cleansing." },
         { q: "How long does shipping take?", a: "3–5 business days." }
       ],
       ctaTitle: "Give your skin what Rome demands",
-      ctaSub: "Natural CBD skincare from Sweden to Rome. Free shipping over €50."
+      ctaSub: "Natural CBD skincare from Sweden to Rome. Free shipping over €60."
     },
     es: {
       metaTitle: "Cuidado de la piel Roma – cosmética con CBD | 1753 SKINCARE",
@@ -2183,10 +2183,10 @@ export const EU_CITY_PAGES: LandingPage[] = [
     productIds: ["duo-kit", "au-naturel-makeup-remover", "ta-da-serum"],
     sv: {
       metaTitle: "Hudvård Milano – CBD-hudvård | 1753 SKINCARE",
-      metaDescription: "Naturlig CBD-hudvård för dig i Milano. Beställ online med fri frakt över €50. Skydda din hud mot Po-dalens föroreningar och fukt.",
+      metaDescription: "Naturlig CBD-hudvård för dig i Milano. Beställ online med fri frakt över €60. Skydda din hud mot Po-dalens föroreningar och fukt.",
       kicker: "Hudvård i Milano",
       h1: "Naturlig hudvård för dig i Milano",
-      lead: "Milano – modehuvudstaden med Europas sämsta luftkvalitet. Po-dalens dimma, föroreningar och fuktiga somrar utmanar din hud. Fri frakt över €50.",
+      lead: "Milano – modehuvudstaden med Europas sämsta luftkvalitet. Po-dalens dimma, föroreningar och fuktiga somrar utmanar din hud. Fri frakt över €60.",
       problemTitle: "Milanohudens utmaningar",
       problemBody: "<p>Milano ligger i Po-dalen, omringad av Alperna och Apenninerna. Denna geografiska fälla gör att luftföroreningar stannar kvar – Milano har konsekvent bland Europas sämsta luftkvalitet. Vinterns dimma blandas med avgaser och skapar en grå smog som belastar huden dag efter dag.</p><p>Somrarna är kvävande heta och fuktiga med temperaturer runt trettiofem grader och hög luftfuktighet. Vintrarna är rått kalla med dimma. Huden utsätts för konstant stress – fukt, föroreningar och temperaturväxlingar.</p>",
       tipsTitle: "Hudvårdstips för milanobor",
@@ -2198,22 +2198,22 @@ export const EU_CITY_PAGES: LandingPage[] = [
         { title: "Anpassa efter säsong", body: "Milanos sommrar och vintrar kräver helt olika rutiner. Lättare produkter på sommaren, rikare på vintern." }
       ],
       solutionTitle: "CBD-hudvård levererad till Milano",
-      solutionBody: "<p>Vi skickar från Sverige – leverans till Milano inom 3–5 arbetsdagar. Fri frakt över €50.</p><p>DUO-kit ger dagligt antioxidantskydd mot föroreningar. Au Naturel rengör bort smog effektivt. TA-DA Serum ger extra fukt under torra vintermånader.</p>",
+      solutionBody: "<p>Vi skickar från Sverige – leverans till Milano inom 3–5 arbetsdagar. Fri frakt över €60.</p><p>DUO-kit ger dagligt antioxidantskydd mot föroreningar. Au Naturel rengör bort smog effektivt. TA-DA Serum ger extra fukt under torra vintermånader.</p>",
       faq: [
-        { q: "Levererar ni till Italien?", a: "Ja, 3–5 arbetsdagar. Fri frakt över €50." },
+        { q: "Levererar ni till Italien?", a: "Ja, 3–5 arbetsdagar. Fri frakt över €60." },
         { q: "Vilken produkt mot Milanos föroreningar?", a: "Au Naturel Makeup Remover rengör bort dagliga föroreningar. DUO-kit stärker barriären." },
         { q: "Är CBD lagligt i Italien?", a: "Ja, CBD i hudvård är lagligt i Italien." },
         { q: "Hur lång tid tar leveransen?", a: "3–5 arbetsdagar." }
       ],
       ctaTitle: "Ge din hud det Milano kräver",
-      ctaSub: "Naturlig CBD-hudvård från Sverige till Milano. Fri frakt över €50."
+      ctaSub: "Naturlig CBD-hudvård från Sverige till Milano. Fri frakt över €60."
     },
     en: {
       metaTitle: "Skincare Milan – CBD skincare | 1753 SKINCARE",
-      metaDescription: "Natural CBD skincare for Milan. Order online with free shipping over €50. Protect your skin from the Po Valley's notorious pollution and humidity.",
+      metaDescription: "Natural CBD skincare for Milan. Order online with free shipping over €60. Protect your skin from the Po Valley's notorious pollution and humidity.",
       kicker: "Skincare in Milan",
       h1: "Natural skincare for Milan",
-      lead: "Milan – the fashion capital with Europe's worst air quality. The Po Valley's fog, pollution, and humid summers challenge your skin. Free shipping over €50.",
+      lead: "Milan – the fashion capital with Europe's worst air quality. The Po Valley's fog, pollution, and humid summers challenge your skin. Free shipping over €60.",
       problemTitle: "What Milan does to your skin",
       problemBody: "<p>Milan sits in the Po Valley, surrounded by the Alps and the Apennines. This geographical trap means air pollution lingers – Milan consistently has among Europe's worst air quality. Winter fog mixes with exhaust fumes, creating a grey smog that stresses the skin day after day.</p><p>Summers are stiflingly hot and humid with temperatures around thirty-five degrees and high humidity. Winters are rawly cold with fog. The skin faces constant stress – humidity, pollution, and temperature shifts.</p>",
       tipsTitle: "Skincare tips for Milan residents",
@@ -2225,15 +2225,15 @@ export const EU_CITY_PAGES: LandingPage[] = [
         { title: "Adapt to the season", body: "Milan's summers and winters demand completely different routines. Lighter products in summer, richer in winter." }
       ],
       solutionTitle: "CBD skincare delivered to Milan",
-      solutionBody: "<p>We ship from Sweden – delivery to Milan within 3–5 business days. Free shipping on orders over €50.</p><p>The DUO-kit provides daily antioxidant protection against pollution. Au Naturel effectively cleans away smog. TA-DA Serum provides extra moisture during dry winter months.</p>",
+      solutionBody: "<p>We ship from Sweden – delivery to Milan within 3–5 business days. Free shipping on orders over €60.</p><p>The DUO-kit provides daily antioxidant protection against pollution. Au Naturel effectively cleans away smog. TA-DA Serum provides extra moisture during dry winter months.</p>",
       faq: [
-        { q: "Do you ship to Italy?", a: "Yes, 3–5 business days. Free shipping over €50." },
+        { q: "Do you ship to Italy?", a: "Yes, 3–5 business days. Free shipping over €60." },
         { q: "Which product for Milan's pollution?", a: "Au Naturel Makeup Remover cleans away daily pollution. The DUO-kit strengthens the barrier." },
         { q: "Is CBD legal in Italy?", a: "Yes, CBD in skincare is legal in Italy." },
         { q: "How long does shipping take?", a: "3–5 business days." }
       ],
       ctaTitle: "Give your skin what Milan demands",
-      ctaSub: "Natural CBD skincare from Sweden to Milan. Free shipping over €50."
+      ctaSub: "Natural CBD skincare from Sweden to Milan. Free shipping over €60."
     },
     es: {
       metaTitle: "Cuidado de la piel Milán – cosmética con CBD | 1753 SKINCARE",
@@ -2327,10 +2327,10 @@ export const EU_CITY_PAGES: LandingPage[] = [
     productIds: ["duo-kit", "ta-da-serum", "au-naturel-makeup-remover"],
     sv: {
       metaTitle: "Hudvård Lissabon – CBD-hudvård | 1753 SKINCARE",
-      metaDescription: "Naturlig CBD-hudvård för dig i Lissabon. Beställ online med fri frakt över €50. Skydda din hud mot Atlantsolen och Lissabons bris.",
+      metaDescription: "Naturlig CBD-hudvård för dig i Lissabon. Beställ online med fri frakt över €60. Skydda din hud mot Atlantsolen och Lissabons bris.",
       kicker: "Hudvård i Lissabon",
       h1: "Naturlig hudvård för dig i Lissabon",
-      lead: "Lissabon – sol, Atlanten och kullersten. Den intensiva portugisiska solen och Atlantvinden utmanar din hud året runt. Fri frakt över €50.",
+      lead: "Lissabon – sol, Atlanten och kullersten. Den intensiva portugisiska solen och Atlantvinden utmanar din hud året runt. Fri frakt över €60.",
       problemTitle: "Lissabonhudens utmaningar",
       problemBody: "<p>Lissabon har över 2800 soltimmar per år – bland de mest solrika huvudstäderna i Europa. Den kumulativa UV-exponeringen driver prematur åldring och pigmentförändringar. Atlantvinden ger en uppfriskande bris men torkar ut huden, särskilt på de berömda kullarna.</p><p>Somrarna är heta och torra, men inte lika extrema som Madrid. Vintrarna är milda men regniga. Lissabons vatten är generellt mjukt och av god kvalitet.</p>",
       tipsTitle: "Hudvårdstips för lissabonbor",
@@ -2342,22 +2342,22 @@ export const EU_CITY_PAGES: LandingPage[] = [
         { title: "Portugisiskt olivolja", body: "Bland världens bästa. Använd den generöst – i mat och på huden." }
       ],
       solutionTitle: "CBD-hudvård levererad till Lissabon",
-      solutionBody: "<p>Vi skickar från Sverige – leverans till Lissabon inom 3–5 arbetsdagar. Fri frakt över €50.</p><p>DUO-kit ger antioxidantskydd mot UV. TA-DA Serum ger intensiv fukt efter sol och vind. Au Naturel rengör milt och effektivt.</p>",
+      solutionBody: "<p>Vi skickar från Sverige – leverans till Lissabon inom 3–5 arbetsdagar. Fri frakt över €60.</p><p>DUO-kit ger antioxidantskydd mot UV. TA-DA Serum ger intensiv fukt efter sol och vind. Au Naturel rengör milt och effektivt.</p>",
       faq: [
-        { q: "Levererar ni till Portugal?", a: "Ja, 3–5 arbetsdagar. Fri frakt över €50." },
+        { q: "Levererar ni till Portugal?", a: "Ja, 3–5 arbetsdagar. Fri frakt över €60." },
         { q: "Är CBD-hudvård lagligt i Portugal?", a: "Ja, CBD i hudvård är lagligt i Portugal." },
         { q: "Vilken produkt för Lissabons sol?", a: "DUO-kit som dagligt skydd, TA-DA Serum för intensiv fukt." },
         { q: "Hur lång tid tar leveransen?", a: "3–5 arbetsdagar." }
       ],
       ctaTitle: "Ge din hud det Lissabon kräver",
-      ctaSub: "Naturlig CBD-hudvård från Sverige till Lissabon. Fri frakt över €50."
+      ctaSub: "Naturlig CBD-hudvård från Sverige till Lissabon. Fri frakt över €60."
     },
     en: {
       metaTitle: "Skincare Lisbon – CBD skincare | 1753 SKINCARE",
-      metaDescription: "Natural CBD skincare for Lisbon. Order online with free shipping over €50. Protect your skin from the Atlantic sun and Lisbon's ocean breeze.",
+      metaDescription: "Natural CBD skincare for Lisbon. Order online with free shipping over €60. Protect your skin from the Atlantic sun and Lisbon's ocean breeze.",
       kicker: "Skincare in Lisbon",
       h1: "Natural skincare for Lisbon",
-      lead: "Lisbon – sun, Atlantic, and cobblestones. The intense Portuguese sun and Atlantic wind challenge your skin year-round. Free shipping over €50.",
+      lead: "Lisbon – sun, Atlantic, and cobblestones. The intense Portuguese sun and Atlantic wind challenge your skin year-round. Free shipping over €60.",
       problemTitle: "What Lisbon does to your skin",
       problemBody: "<p>Lisbon gets over 2,800 sunshine hours per year – among the sunniest capitals in Europe. The cumulative UV exposure drives premature aging and pigmentation changes. The Atlantic wind provides a refreshing breeze but dries out the skin, especially on the famous hills.</p><p>Summers are hot and dry, but not as extreme as Madrid. Winters are mild but rainy. Lisbon's water is generally soft and good quality.</p>",
       tipsTitle: "Skincare tips for Lisbon residents",
@@ -2369,15 +2369,15 @@ export const EU_CITY_PAGES: LandingPage[] = [
         { title: "Portuguese olive oil", body: "Among the world's best. Use it generously – in food and on the skin." }
       ],
       solutionTitle: "CBD skincare delivered to Lisbon",
-      solutionBody: "<p>We ship from Sweden – delivery to Lisbon within 3–5 business days. Free shipping on orders over €50.</p><p>The DUO-kit provides antioxidant protection against UV. TA-DA Serum delivers intense moisture after sun and wind. Au Naturel cleanses gently and effectively.</p>",
+      solutionBody: "<p>We ship from Sweden – delivery to Lisbon within 3–5 business days. Free shipping on orders over €60.</p><p>The DUO-kit provides antioxidant protection against UV. TA-DA Serum delivers intense moisture after sun and wind. Au Naturel cleanses gently and effectively.</p>",
       faq: [
-        { q: "Do you ship to Portugal?", a: "Yes, 3–5 business days. Free shipping over €50." },
+        { q: "Do you ship to Portugal?", a: "Yes, 3–5 business days. Free shipping over €60." },
         { q: "Is CBD skincare legal in Portugal?", a: "Yes, CBD in skincare is legal in Portugal." },
         { q: "Which product for Lisbon's sun?", a: "DUO-kit for daily protection, TA-DA Serum for intense moisture." },
         { q: "How long does shipping take?", a: "3–5 business days." }
       ],
       ctaTitle: "Give your skin what Lisbon demands",
-      ctaSub: "Natural CBD skincare from Sweden to Lisbon. Free shipping over €50."
+      ctaSub: "Natural CBD skincare from Sweden to Lisbon. Free shipping over €60."
     },
     es: {
       metaTitle: "Cuidado de la piel Lisboa – cosmética con CBD | 1753 SKINCARE",
@@ -2471,10 +2471,10 @@ export const EU_CITY_PAGES: LandingPage[] = [
     productIds: ["duo-kit", "au-naturel-makeup-remover", "ta-da-serum"],
     sv: {
       metaTitle: "Hudvård Aten – CBD-hudvård | 1753 SKINCARE",
-      metaDescription: "Naturlig CBD-hudvård för dig i Aten. Beställ online med fri frakt över €50. Skydda din hud mot grekisk sol, värme och stadsföroreningar.",
+      metaDescription: "Naturlig CBD-hudvård för dig i Aten. Beställ online med fri frakt över €60. Skydda din hud mot grekisk sol, värme och stadsföroreningar.",
       kicker: "Hudvård i Aten",
       h1: "Naturlig hudvård för dig i Aten",
-      lead: "Aten – antikens vagga med moderna hudutmaningar. Intensiv sol, urban smog och extrem sommarvärme. Fri frakt över €50.",
+      lead: "Aten – antikens vagga med moderna hudutmaningar. Intensiv sol, urban smog och extrem sommarvärme. Fri frakt över €60.",
       problemTitle: "Atenhudens utmaningar",
       problemBody: "<p>Aten har en av Europas mest intensiva kombinationer av sol och föroreningar. UV-strålningen är stark från mars till oktober, och staden omges av berg som fångar avgaser och smog i ett bassängliknande mönster – det berömda 'nefos'. Somrarna når regelbundet fyrtio grader.</p><p>Luftkonditionering är en nödvändighet men torkar ut huden brutalt. Atens vatten har variabel kvalitet beroende på stadsdel.</p>",
       tipsTitle: "Hudvårdstips för atenbor",
@@ -2486,22 +2486,22 @@ export const EU_CITY_PAGES: LandingPage[] = [
         { title: "Rengör bort smogen", body: "Atens luftföroreningar sätter sig på huden. Dubbelrengöring varje kväll." }
       ],
       solutionTitle: "CBD-hudvård levererad till Aten",
-      solutionBody: "<p>Vi skickar från Sverige – leverans till Aten inom 3–5 arbetsdagar. Fri frakt över €50.</p><p>DUO-kit ger antioxidantskydd. Au Naturel rengör bort föroreningar. TA-DA Serum ger intensiv fukt.</p>",
+      solutionBody: "<p>Vi skickar från Sverige – leverans till Aten inom 3–5 arbetsdagar. Fri frakt över €60.</p><p>DUO-kit ger antioxidantskydd. Au Naturel rengör bort föroreningar. TA-DA Serum ger intensiv fukt.</p>",
       faq: [
-        { q: "Levererar ni till Grekland?", a: "Ja, 3–5 arbetsdagar. Fri frakt över €50." },
+        { q: "Levererar ni till Grekland?", a: "Ja, 3–5 arbetsdagar. Fri frakt över €60." },
         { q: "Är CBD-hudvård lagligt i Grekland?", a: "Ja, CBD i hudvård är lagligt i Grekland sedan 2018." },
         { q: "Vilken produkt för Atens klimat?", a: "DUO-kit dagligen, Au Naturel för rengöring, TA-DA Serum för fukt." },
         { q: "Hur lång tid tar leveransen?", a: "3–5 arbetsdagar." }
       ],
       ctaTitle: "Ge din hud det Aten kräver",
-      ctaSub: "Naturlig CBD-hudvård från Sverige till Aten. Fri frakt över €50."
+      ctaSub: "Naturlig CBD-hudvård från Sverige till Aten. Fri frakt över €60."
     },
     en: {
       metaTitle: "Skincare Athens – CBD skincare | 1753 SKINCARE",
-      metaDescription: "Natural CBD skincare for Athens. Order online with free shipping over €50. Protect your skin from Greek sun, heat, and urban smog.",
+      metaDescription: "Natural CBD skincare for Athens. Order online with free shipping over €60. Protect your skin from Greek sun, heat, and urban smog.",
       kicker: "Skincare in Athens",
       h1: "Natural skincare for Athens",
-      lead: "Athens – cradle of civilization with modern skin challenges. Intense sun, urban smog, and extreme summer heat. Free shipping over €50.",
+      lead: "Athens – cradle of civilization with modern skin challenges. Intense sun, urban smog, and extreme summer heat. Free shipping over €60.",
       problemTitle: "What Athens does to your skin",
       problemBody: "<p>Athens has one of Europe's most intense combinations of sun and pollution. UV radiation is strong from March to October, and the city is surrounded by mountains that trap exhaust fumes and smog in a basin-like pattern – the famous 'nefos'. Summers regularly reach forty degrees.</p><p>Air conditioning is a necessity but brutally dries out the skin. Athens' water quality varies depending on the neighborhood.</p>",
       tipsTitle: "Skincare tips for Athens residents",
@@ -2513,15 +2513,15 @@ export const EU_CITY_PAGES: LandingPage[] = [
         { title: "Cleanse away the smog", body: "Athens' air pollution settles on the skin. Double cleanse every evening." }
       ],
       solutionTitle: "CBD skincare delivered to Athens",
-      solutionBody: "<p>We ship from Sweden – delivery to Athens within 3–5 business days. Free shipping on orders over €50.</p><p>The DUO-kit provides antioxidant protection. Au Naturel cleans away pollution. TA-DA Serum delivers intense moisture.</p>",
+      solutionBody: "<p>We ship from Sweden – delivery to Athens within 3–5 business days. Free shipping on orders over €60.</p><p>The DUO-kit provides antioxidant protection. Au Naturel cleans away pollution. TA-DA Serum delivers intense moisture.</p>",
       faq: [
-        { q: "Do you ship to Greece?", a: "Yes, 3–5 business days. Free shipping over €50." },
+        { q: "Do you ship to Greece?", a: "Yes, 3–5 business days. Free shipping over €60." },
         { q: "Is CBD skincare legal in Greece?", a: "Yes, CBD in skincare has been legal in Greece since 2018." },
         { q: "Which product for Athens' climate?", a: "DUO-kit daily, Au Naturel for cleansing, TA-DA Serum for moisture." },
         { q: "How long does shipping take?", a: "3–5 business days." }
       ],
       ctaTitle: "Give your skin what Athens demands",
-      ctaSub: "Natural CBD skincare from Sweden to Athens. Free shipping over €50."
+      ctaSub: "Natural CBD skincare from Sweden to Athens. Free shipping over €60."
     },
     es: {
       metaTitle: "Cuidado de la piel Atenas – cosmética con CBD | 1753 SKINCARE",
@@ -2618,10 +2618,10 @@ export const EU_CITY_PAGES: LandingPage[] = [
     productIds: ["duo-kit", "ta-da-serum", "au-naturel-makeup-remover"],
     sv: {
       metaTitle: "Hudvård Prag – CBD-hudvård | 1753 SKINCARE",
-      metaDescription: "Naturlig CBD-hudvård för dig i Prag. Beställ online med fri frakt över €50. Skydda din hud mot Prags kontinentala klimat och vinterinversioner.",
+      metaDescription: "Naturlig CBD-hudvård för dig i Prag. Beställ online med fri frakt över €60. Skydda din hud mot Prags kontinentala klimat och vinterinversioner.",
       kicker: "Hudvård i Prag",
       h1: "Naturlig hudvård för dig i Prag",
-      lead: "Prag – en av Europas vackraste städer med ett klimat som utmanar huden. Kalla vintrar med smog, heta somrar och hårt vatten. Fri frakt över €50.",
+      lead: "Prag – en av Europas vackraste städer med ett klimat som utmanar huden. Kalla vintrar med smog, heta somrar och hårt vatten. Fri frakt över €60.",
       problemTitle: "Praghudens utmaningar",
       problemBody: "<p>Prag har ett kontinentalt klimat med kalla, fuktiga vintrar och varma somrar. Vinterinversioner fångar föroreningar i Moldau-dalen och skapar perioder med dålig luftkvalitet. Temperaturer kan sjunka till minus femton på vintern och nå trettio på sommaren.</p><p>Prags kranvatten är medelhårt och den torra inomhusluften i äldre byggnader förvärrar hudtorrheten vintertid.</p>",
       tipsTitle: "Hudvårdstips för pragbor",
@@ -2633,22 +2633,22 @@ export const EU_CITY_PAGES: LandingPage[] = [
         { title: "Luftfuktare vintertid", body: "Prags äldre lägenheter med radiatorvärme blir extremt torra." }
       ],
       solutionTitle: "CBD-hudvård levererad till Prag",
-      solutionBody: "<p>Vi skickar från Sverige – leverans till Prag inom 3–5 arbetsdagar. Fri frakt över €50.</p><p>DUO-kit balanserar huden. TA-DA Serum ger fukt under torra vintrar. Au Naturel rengör bort vintersmog.</p>",
+      solutionBody: "<p>Vi skickar från Sverige – leverans till Prag inom 3–5 arbetsdagar. Fri frakt över €60.</p><p>DUO-kit balanserar huden. TA-DA Serum ger fukt under torra vintrar. Au Naturel rengör bort vintersmog.</p>",
       faq: [
-        { q: "Levererar ni till Tjeckien?", a: "Ja, 3–5 arbetsdagar. Fri frakt över €50." },
+        { q: "Levererar ni till Tjeckien?", a: "Ja, 3–5 arbetsdagar. Fri frakt över €60." },
         { q: "Är CBD-hudvård lagligt i Tjeckien?", a: "Ja, Tjeckien har progressiva lagar och CBD i hudvård är fullt lagligt." },
         { q: "Vilken produkt för Prags vintrar?", a: "TA-DA Serum för fukt, Au Naturel mot föroreningar." },
         { q: "Hur lång tid tar leveransen?", a: "3–5 arbetsdagar." }
       ],
       ctaTitle: "Ge din hud det Prag kräver",
-      ctaSub: "Naturlig CBD-hudvård från Sverige till Prag. Fri frakt över €50."
+      ctaSub: "Naturlig CBD-hudvård från Sverige till Prag. Fri frakt över €60."
     },
     en: {
       metaTitle: "Skincare Prague – CBD skincare | 1753 SKINCARE",
-      metaDescription: "Natural CBD skincare for Prague. Order online with free shipping over €50. Protect your skin from Prague's continental climate and winter inversions.",
+      metaDescription: "Natural CBD skincare for Prague. Order online with free shipping over €60. Protect your skin from Prague's continental climate and winter inversions.",
       kicker: "Skincare in Prague",
       h1: "Natural skincare for Prague",
-      lead: "Prague – one of Europe's most beautiful cities with a climate that challenges the skin. Cold winters with smog, hot summers, and hard water. Free shipping over €50.",
+      lead: "Prague – one of Europe's most beautiful cities with a climate that challenges the skin. Cold winters with smog, hot summers, and hard water. Free shipping over €60.",
       problemTitle: "What Prague does to your skin",
       problemBody: "<p>Prague has a continental climate with cold, damp winters and warm summers. Winter inversions trap pollution in the Vltava valley, creating periods of poor air quality. Temperatures can drop to minus fifteen in winter and reach thirty in summer.</p><p>Prague's tap water is moderately hard and the dry indoor air in older buildings worsens skin dehydration in winter.</p>",
       tipsTitle: "Skincare tips for Prague residents",
@@ -2660,15 +2660,15 @@ export const EU_CITY_PAGES: LandingPage[] = [
         { title: "Humidifier in winter", body: "Prague's older apartments with radiator heating become extremely dry." }
       ],
       solutionTitle: "CBD skincare delivered to Prague",
-      solutionBody: "<p>We ship from Sweden – delivery to Prague within 3–5 business days. Free shipping on orders over €50.</p><p>The DUO-kit balances the skin. TA-DA Serum provides moisture during dry winters. Au Naturel cleans away winter smog.</p>",
+      solutionBody: "<p>We ship from Sweden – delivery to Prague within 3–5 business days. Free shipping on orders over €60.</p><p>The DUO-kit balances the skin. TA-DA Serum provides moisture during dry winters. Au Naturel cleans away winter smog.</p>",
       faq: [
-        { q: "Do you ship to the Czech Republic?", a: "Yes, 3–5 business days. Free shipping over €50." },
+        { q: "Do you ship to the Czech Republic?", a: "Yes, 3–5 business days. Free shipping over €60." },
         { q: "Is CBD skincare legal in the Czech Republic?", a: "Yes, the Czech Republic has progressive laws and CBD in skincare is fully legal." },
         { q: "Which product for Prague's winters?", a: "TA-DA Serum for moisture, Au Naturel against pollution." },
         { q: "How long does shipping take?", a: "3–5 business days." }
       ],
       ctaTitle: "Give your skin what Prague demands",
-      ctaSub: "Natural CBD skincare from Sweden to Prague. Free shipping over €50."
+      ctaSub: "Natural CBD skincare from Sweden to Prague. Free shipping over €60."
     },
     es: {
       metaTitle: "Cuidado de la piel Praga – cosmética con CBD | 1753 SKINCARE",
@@ -2762,10 +2762,10 @@ export const EU_CITY_PAGES: LandingPage[] = [
     productIds: ["duo-kit", "ta-da-serum", "fungtastic-mushroom-extract"],
     sv: {
       metaTitle: "Hudvård Budapest – CBD-hudvård | 1753 SKINCARE",
-      metaDescription: "Naturlig CBD-hudvård för dig i Budapest. Beställ online med fri frakt över €50. Skydda din hud mot Budapests kontinentala extremer.",
+      metaDescription: "Naturlig CBD-hudvård för dig i Budapest. Beställ online med fri frakt över €60. Skydda din hud mot Budapests kontinentala extremer.",
       kicker: "Hudvård i Budapest",
       h1: "Naturlig hudvård för dig i Budapest",
-      lead: "Budapest – termalbadens stad med ett av Centraleuropas tuffaste klimat för huden. Extrema temperaturer, föroreningar och hård Donau-fukt. Fri frakt över €50.",
+      lead: "Budapest – termalbadens stad med ett av Centraleuropas tuffaste klimat för huden. Extrema temperaturer, föroreningar och hård Donau-fukt. Fri frakt över €60.",
       problemTitle: "Budapesthudens utmaningar",
       problemBody: "<p>Budapest har ett extremt kontinentalt klimat. Vintrarna är kalla med temperaturer som faller till minus femton, somrarna heta med regelbundna värmeböljor över trettiofem grader. Donau-fukten gör kylan bitande på vintern och sommarvärmen kvävande.</p><p>Luftkvaliteten i Budapest varierar – vinterinversioner fångar partiklar i Donau-dalen. Stadens vatten är hårt med hög kalkhalt. Termalbadskulturen är fantastisk men kräver eftervård.</p>",
       tipsTitle: "Hudvårdstips för budapestbor",
@@ -2777,22 +2777,22 @@ export const EU_CITY_PAGES: LandingPage[] = [
         { title: "Luftfuktare hemma", body: "Ungerska lägenheter med centralvärme blir extremt torra vintertid." }
       ],
       solutionTitle: "CBD-hudvård levererad till Budapest",
-      solutionBody: "<p>Vi skickar från Sverige – leverans till Budapest inom 3–5 arbetsdagar. Fri frakt över €50.</p><p>DUO-kit balanserar huden. TA-DA Serum ger fukt under extrema vintrar. Fungtastic stödjer immunförsvaret.</p>",
+      solutionBody: "<p>Vi skickar från Sverige – leverans till Budapest inom 3–5 arbetsdagar. Fri frakt över €60.</p><p>DUO-kit balanserar huden. TA-DA Serum ger fukt under extrema vintrar. Fungtastic stödjer immunförsvaret.</p>",
       faq: [
-        { q: "Levererar ni till Ungern?", a: "Ja, 3–5 arbetsdagar. Fri frakt över €50." },
+        { q: "Levererar ni till Ungern?", a: "Ja, 3–5 arbetsdagar. Fri frakt över €60." },
         { q: "Är CBD-hudvård lagligt i Ungern?", a: "Ja, CBD i hudvård är lagligt i Ungern." },
         { q: "Vilken produkt för Budapests klimat?", a: "DUO-kit som bas, TA-DA Serum för vintern." },
         { q: "Hur lång tid tar leveransen?", a: "3–5 arbetsdagar." }
       ],
       ctaTitle: "Ge din hud det Budapest kräver",
-      ctaSub: "Naturlig CBD-hudvård från Sverige till Budapest. Fri frakt över €50."
+      ctaSub: "Naturlig CBD-hudvård från Sverige till Budapest. Fri frakt över €60."
     },
     en: {
       metaTitle: "Skincare Budapest – CBD skincare | 1753 SKINCARE",
-      metaDescription: "Natural CBD skincare for Budapest. Order online with free shipping over €50. Protect your skin from Budapest's continental extremes and thermal bath dehydration.",
+      metaDescription: "Natural CBD skincare for Budapest. Order online with free shipping over €60. Protect your skin from Budapest's continental extremes and thermal bath dehydration.",
       kicker: "Skincare in Budapest",
       h1: "Natural skincare for Budapest",
-      lead: "Budapest – the city of thermal baths with one of Central Europe's toughest climates for the skin. Extreme temperatures, pollution, and Danube humidity. Free shipping over €50.",
+      lead: "Budapest – the city of thermal baths with one of Central Europe's toughest climates for the skin. Extreme temperatures, pollution, and Danube humidity. Free shipping over €60.",
       problemTitle: "What Budapest does to your skin",
       problemBody: "<p>Budapest has an extreme continental climate. Winters are cold with temperatures dropping to minus fifteen, summers hot with regular heat waves above thirty-five degrees. Danube humidity makes the cold biting in winter and the summer heat suffocating.</p><p>Air quality in Budapest varies – winter inversions trap particles in the Danube valley. The city's water is hard with high calcium content. The thermal bath culture is wonderful but requires aftercare.</p>",
       tipsTitle: "Skincare tips for Budapest residents",
@@ -2804,15 +2804,15 @@ export const EU_CITY_PAGES: LandingPage[] = [
         { title: "Humidifier at home", body: "Hungarian apartments with central heating become extremely dry in winter." }
       ],
       solutionTitle: "CBD skincare delivered to Budapest",
-      solutionBody: "<p>We ship from Sweden – delivery to Budapest within 3–5 business days. Free shipping on orders over €50.</p><p>The DUO-kit balances the skin. TA-DA Serum provides moisture during extreme winters. Fungtastic supports immunity.</p>",
+      solutionBody: "<p>We ship from Sweden – delivery to Budapest within 3–5 business days. Free shipping on orders over €60.</p><p>The DUO-kit balances the skin. TA-DA Serum provides moisture during extreme winters. Fungtastic supports immunity.</p>",
       faq: [
-        { q: "Do you ship to Hungary?", a: "Yes, 3–5 business days. Free shipping over €50." },
+        { q: "Do you ship to Hungary?", a: "Yes, 3–5 business days. Free shipping over €60." },
         { q: "Is CBD skincare legal in Hungary?", a: "Yes, CBD in skincare is legal in Hungary." },
         { q: "Which product for Budapest's climate?", a: "DUO-kit as your base, TA-DA Serum for winter." },
         { q: "How long does shipping take?", a: "3–5 business days." }
       ],
       ctaTitle: "Give your skin what Budapest demands",
-      ctaSub: "Natural CBD skincare from Sweden to Budapest. Free shipping over €50."
+      ctaSub: "Natural CBD skincare from Sweden to Budapest. Free shipping over €60."
     },
     es: {
       metaTitle: "Cuidado de la piel Budapest – cosmética con CBD | 1753 SKINCARE",
@@ -2906,10 +2906,10 @@ export const EU_CITY_PAGES: LandingPage[] = [
     productIds: ["duo-kit", "ta-da-serum", "au-naturel-makeup-remover"],
     sv: {
       metaTitle: "Hudvård Warszawa – CBD-hudvård | 1753 SKINCARE",
-      metaDescription: "Naturlig CBD-hudvård för dig i Warszawa. Beställ online med fri frakt över €50. Skydda din hud mot polska vintrar och stadsföroreningar.",
+      metaDescription: "Naturlig CBD-hudvård för dig i Warszawa. Beställ online med fri frakt över €60. Skydda din hud mot polska vintrar och stadsföroreningar.",
       kicker: "Hudvård i Warszawa",
       h1: "Naturlig hudvård för dig i Warszawa",
-      lead: "Warszawa – Polens dynamiska huvudstad med extrema årstider och växande föroreningsproblem. Fri frakt över €50.",
+      lead: "Warszawa – Polens dynamiska huvudstad med extrema årstider och växande föroreningsproblem. Fri frakt över €60.",
       problemTitle: "Warszawahudens utmaningar",
       problemBody: "<p>Warszawa har ett kontinentalt klimat med kalla vintrar ned mot minus tjugo och varma somrar runt trettiofem grader. Polens kolberoende skapar luftföroreningar som under vintern kan nå alarmerande nivåer. Smog-varningar är vanliga i polska städer.</p><p>Det hårda vattnet och den torra inomhusluften förvärrar hudens torrhet vintertid.</p>",
       tipsTitle: "Hudvårdstips för warszawabor",
@@ -2921,22 +2921,22 @@ export const EU_CITY_PAGES: LandingPage[] = [
         { title: "Luftfuktare", body: "Torra lägenheter vintertid. En luftfuktare gör enorm skillnad." }
       ],
       solutionTitle: "CBD-hudvård levererad till Warszawa",
-      solutionBody: "<p>Vi skickar från Sverige – leverans till Warszawa inom 3–5 arbetsdagar. Fri frakt över €50.</p><p>DUO-kit stärker barriären. TA-DA Serum ger fukt i kylan. Au Naturel rengör bort smog.</p>",
+      solutionBody: "<p>Vi skickar från Sverige – leverans till Warszawa inom 3–5 arbetsdagar. Fri frakt över €60.</p><p>DUO-kit stärker barriären. TA-DA Serum ger fukt i kylan. Au Naturel rengör bort smog.</p>",
       faq: [
-        { q: "Levererar ni till Polen?", a: "Ja, 3–5 arbetsdagar. Fri frakt över €50." },
+        { q: "Levererar ni till Polen?", a: "Ja, 3–5 arbetsdagar. Fri frakt över €60." },
         { q: "Är CBD-hudvård lagligt i Polen?", a: "Ja, CBD i hudvård är lagligt i Polen." },
         { q: "Vilken produkt för polska vintrar?", a: "TA-DA Serum för fukt, Au Naturel mot smog." },
         { q: "Hur lång tid tar leveransen?", a: "3–5 arbetsdagar." }
       ],
       ctaTitle: "Ge din hud det Warszawa kräver",
-      ctaSub: "Naturlig CBD-hudvård från Sverige till Warszawa. Fri frakt över €50."
+      ctaSub: "Naturlig CBD-hudvård från Sverige till Warszawa. Fri frakt över €60."
     },
     en: {
       metaTitle: "Skincare Warsaw – CBD skincare | 1753 SKINCARE",
-      metaDescription: "Natural CBD skincare for Warsaw. Order online with free shipping over €50. Protect your skin from harsh Polish winters and urban smog.",
+      metaDescription: "Natural CBD skincare for Warsaw. Order online with free shipping over €60. Protect your skin from harsh Polish winters and urban smog.",
       kicker: "Skincare in Warsaw",
       h1: "Natural skincare for Warsaw",
-      lead: "Warsaw – Poland's dynamic capital with extreme seasons and growing pollution challenges. Free shipping over €50.",
+      lead: "Warsaw – Poland's dynamic capital with extreme seasons and growing pollution challenges. Free shipping over €60.",
       problemTitle: "What Warsaw does to your skin",
       problemBody: "<p>Warsaw has a continental climate with cold winters down to minus twenty and warm summers around thirty-five degrees. Poland's coal dependency creates air pollution that during winter can reach alarming levels. Smog warnings are common in Polish cities.</p><p>Hard water and dry indoor air worsen skin dehydration in winter.</p>",
       tipsTitle: "Skincare tips for Warsaw residents",
@@ -2948,15 +2948,15 @@ export const EU_CITY_PAGES: LandingPage[] = [
         { title: "Humidifier", body: "Dry apartments in winter. A humidifier makes an enormous difference." }
       ],
       solutionTitle: "CBD skincare delivered to Warsaw",
-      solutionBody: "<p>We ship from Sweden – delivery to Warsaw within 3–5 business days. Free shipping on orders over €50.</p><p>The DUO-kit strengthens the barrier. TA-DA Serum provides moisture in the cold. Au Naturel cleans away smog.</p>",
+      solutionBody: "<p>We ship from Sweden – delivery to Warsaw within 3–5 business days. Free shipping on orders over €60.</p><p>The DUO-kit strengthens the barrier. TA-DA Serum provides moisture in the cold. Au Naturel cleans away smog.</p>",
       faq: [
-        { q: "Do you ship to Poland?", a: "Yes, 3–5 business days. Free shipping over €50." },
+        { q: "Do you ship to Poland?", a: "Yes, 3–5 business days. Free shipping over €60." },
         { q: "Is CBD skincare legal in Poland?", a: "Yes, CBD in skincare is legal in Poland." },
         { q: "Which product for Polish winters?", a: "TA-DA Serum for moisture, Au Naturel against smog." },
         { q: "How long does shipping take?", a: "3–5 business days." }
       ],
       ctaTitle: "Give your skin what Warsaw demands",
-      ctaSub: "Natural CBD skincare from Sweden to Warsaw. Free shipping over €50."
+      ctaSub: "Natural CBD skincare from Sweden to Warsaw. Free shipping over €60."
     },
     es: {
       metaTitle: "Cuidado de la piel Varsovia – cosmética con CBD | 1753 SKINCARE",
@@ -3050,10 +3050,10 @@ export const EU_CITY_PAGES: LandingPage[] = [
     productIds: ["duo-kit", "ta-da-serum", "fungtastic-mushroom-extract"],
     sv: {
       metaTitle: "Hudvård Tallinn – CBD-hudvård | 1753 SKINCARE",
-      metaDescription: "Naturlig CBD-hudvård för dig i Tallinn. Beställ online med fri frakt över €50. Skydda din hud mot baltisk kyla och mörka vintrar.",
+      metaDescription: "Naturlig CBD-hudvård för dig i Tallinn. Beställ online med fri frakt över €60. Skydda din hud mot baltisk kyla och mörka vintrar.",
       kicker: "Hudvård i Tallinn",
       h1: "Naturlig hudvård för dig i Tallinn",
-      lead: "Tallinn – den digitala pionjären med ett baltiskt klimat som utmanar din hud. Kalla Östersjövintrar, mörker och vind. Fri frakt över €50.",
+      lead: "Tallinn – den digitala pionjären med ett baltiskt klimat som utmanar din hud. Kalla Östersjövintrar, mörker och vind. Fri frakt över €60.",
       problemTitle: "Tallinnhudens utmaningar",
       problemBody: "<p>Tallinn har ett baltiskt klimat med långa, kalla vintrar och korta somrar. Östersjövinden är konstant och bitande, särskilt i den gamla medeltidsstaden. Vintrarna är mörka med begränsat dagsljus från november till februari. Temperaturer sjunker regelbundet under minus femton.</p><p>D-vitaminbristen är utbredd och påverkar hudens hälsa direkt. Estniskt vatten är generellt mjukt och av god kvalitet.</p>",
       tipsTitle: "Hudvårdstips för tallinnbor",
@@ -3065,22 +3065,22 @@ export const EU_CITY_PAGES: LandingPage[] = [
         { title: "Estnisk svart bröd", body: "Rågbröd ger fiber och B-vitaminer som stödjer huden inifrån." }
       ],
       solutionTitle: "CBD-hudvård levererad till Tallinn",
-      solutionBody: "<p>Vi skickar från Sverige – leverans till Tallinn inom 3–5 arbetsdagar. Fri frakt över €50.</p><p>DUO-kit stärker barriären mot baltisk vind. TA-DA Serum ger fukt under iskalla vintrar. Fungtastic stödjer immunförsvaret i mörkret.</p>",
+      solutionBody: "<p>Vi skickar från Sverige – leverans till Tallinn inom 3–5 arbetsdagar. Fri frakt över €60.</p><p>DUO-kit stärker barriären mot baltisk vind. TA-DA Serum ger fukt under iskalla vintrar. Fungtastic stödjer immunförsvaret i mörkret.</p>",
       faq: [
-        { q: "Levererar ni till Estland?", a: "Ja, 3–5 arbetsdagar. Fri frakt över €50." },
+        { q: "Levererar ni till Estland?", a: "Ja, 3–5 arbetsdagar. Fri frakt över €60." },
         { q: "Är CBD-hudvård lagligt i Estland?", a: "Ja, CBD i hudvård är lagligt i Estland." },
         { q: "Vilken produkt för baltiska vintrar?", a: "TA-DA Serum för fukt, Fungtastic för immunförsvaret." },
         { q: "Hur lång tid tar leveransen?", a: "3–5 arbetsdagar." }
       ],
       ctaTitle: "Ge din hud det baltiska klimatet kräver",
-      ctaSub: "Naturlig CBD-hudvård från Sverige till Tallinn. Fri frakt över €50."
+      ctaSub: "Naturlig CBD-hudvård från Sverige till Tallinn. Fri frakt över €60."
     },
     en: {
       metaTitle: "Skincare Tallinn – CBD skincare | 1753 SKINCARE",
-      metaDescription: "Natural CBD skincare for Tallinn. Order online with free shipping over €50. Protect your skin from Baltic cold and dark Estonian winters.",
+      metaDescription: "Natural CBD skincare for Tallinn. Order online with free shipping over €60. Protect your skin from Baltic cold and dark Estonian winters.",
       kicker: "Skincare in Tallinn",
       h1: "Natural skincare for Tallinn",
-      lead: "Tallinn – the digital pioneer with a Baltic climate that challenges your skin. Cold Baltic Sea winters, darkness, and wind. Free shipping over €50.",
+      lead: "Tallinn – the digital pioneer with a Baltic climate that challenges your skin. Cold Baltic Sea winters, darkness, and wind. Free shipping over €60.",
       problemTitle: "What Tallinn does to your skin",
       problemBody: "<p>Tallinn has a Baltic climate with long, cold winters and short summers. The Baltic Sea wind is constant and biting, especially in the medieval Old Town. Winters are dark with limited daylight from November to February. Temperatures regularly drop below minus fifteen.</p><p>Vitamin D deficiency is widespread and directly affects skin health. Estonian water is generally soft and good quality.</p>",
       tipsTitle: "Skincare tips for Tallinn residents",
@@ -3092,15 +3092,15 @@ export const EU_CITY_PAGES: LandingPage[] = [
         { title: "Estonian black bread", body: "Rye bread provides fiber and B-vitamins that support the skin from within." }
       ],
       solutionTitle: "CBD skincare delivered to Tallinn",
-      solutionBody: "<p>We ship from Sweden – delivery to Tallinn within 3–5 business days. Free shipping on orders over €50.</p><p>The DUO-kit strengthens the barrier against Baltic wind. TA-DA Serum provides moisture during freezing winters. Fungtastic supports immunity in the darkness.</p>",
+      solutionBody: "<p>We ship from Sweden – delivery to Tallinn within 3–5 business days. Free shipping on orders over €60.</p><p>The DUO-kit strengthens the barrier against Baltic wind. TA-DA Serum provides moisture during freezing winters. Fungtastic supports immunity in the darkness.</p>",
       faq: [
-        { q: "Do you ship to Estonia?", a: "Yes, 3–5 business days. Free shipping over €50." },
+        { q: "Do you ship to Estonia?", a: "Yes, 3–5 business days. Free shipping over €60." },
         { q: "Is CBD skincare legal in Estonia?", a: "Yes, CBD in skincare is legal in Estonia." },
         { q: "Which product for Baltic winters?", a: "TA-DA Serum for moisture, Fungtastic for immunity." },
         { q: "How long does shipping take?", a: "3–5 business days." }
       ],
       ctaTitle: "Give your skin what the Baltic climate demands",
-      ctaSub: "Natural CBD skincare from Sweden to Tallinn. Free shipping over €50."
+      ctaSub: "Natural CBD skincare from Sweden to Tallinn. Free shipping over €60."
     },
     es: {
       metaTitle: "Cuidado de la piel Tallin – cosmética con CBD | 1753 SKINCARE",
@@ -3194,10 +3194,10 @@ export const EU_CITY_PAGES: LandingPage[] = [
     productIds: ["duo-kit", "ta-da-serum", "fungtastic-mushroom-extract"],
     sv: {
       metaTitle: "Hudvård Riga – CBD-hudvård | 1753 SKINCARE",
-      metaDescription: "Naturlig CBD-hudvård för dig i Riga. Beställ online med fri frakt över €50. Skydda din hud mot lettiska vintrar och Daugavas fukt.",
+      metaDescription: "Naturlig CBD-hudvård för dig i Riga. Beställ online med fri frakt över €60. Skydda din hud mot lettiska vintrar och Daugavas fukt.",
       kicker: "Hudvård i Riga",
       h1: "Naturlig hudvård för dig i Riga",
-      lead: "Riga – Art Nouveau-metropolen vid Daugava med kalla baltiska vintrar och fuktigt klimat. Fri frakt över €50.",
+      lead: "Riga – Art Nouveau-metropolen vid Daugava med kalla baltiska vintrar och fuktigt klimat. Fri frakt över €60.",
       problemTitle: "Rigahudens utmaningar",
       problemBody: "<p>Riga har ett fuktigt kontinentalt klimat med långa, kalla vintrar och korta somrar. Daugava-älven bidrar till hög luftfuktighet, men inomhus är luften torr från uppvärmning. Vintrarna når regelbundet minus femton till minus tjugo, och mörkerperioden är lång.</p><p>Vinden från Rigabukten är bitande och torkar ut huden effektivt. D-vitaminbrist är utbredd.</p>",
       tipsTitle: "Hudvårdstips för rigabor",
@@ -3209,22 +3209,22 @@ export const EU_CITY_PAGES: LandingPage[] = [
         { title: "Lettisk råg och fisk", body: "Rågbröd, strömming och fermenterade grönsaker – bra hudmat." }
       ],
       solutionTitle: "CBD-hudvård levererad till Riga",
-      solutionBody: "<p>Vi skickar från Sverige – leverans till Riga inom 3–5 arbetsdagar. Fri frakt över €50.</p><p>DUO-kit stärker barriären. TA-DA Serum ger fukt i kylan. Fungtastic stödjer immunförsvaret.</p>",
+      solutionBody: "<p>Vi skickar från Sverige – leverans till Riga inom 3–5 arbetsdagar. Fri frakt över €60.</p><p>DUO-kit stärker barriären. TA-DA Serum ger fukt i kylan. Fungtastic stödjer immunförsvaret.</p>",
       faq: [
-        { q: "Levererar ni till Lettland?", a: "Ja, 3–5 arbetsdagar. Fri frakt över €50." },
+        { q: "Levererar ni till Lettland?", a: "Ja, 3–5 arbetsdagar. Fri frakt över €60." },
         { q: "Är CBD lagligt i Lettland?", a: "Ja, CBD i hudvård är lagligt i Lettland." },
         { q: "Vilken produkt för Rigas klimat?", a: "DUO-kit som bas, TA-DA Serum för vintern." },
         { q: "Hur lång tid tar leveransen?", a: "3–5 arbetsdagar." }
       ],
       ctaTitle: "Ge din hud det Riga kräver",
-      ctaSub: "Naturlig CBD-hudvård från Sverige till Riga. Fri frakt över €50."
+      ctaSub: "Naturlig CBD-hudvård från Sverige till Riga. Fri frakt över €60."
     },
     en: {
       metaTitle: "Skincare Riga – CBD skincare | 1753 SKINCARE",
-      metaDescription: "Natural CBD skincare for Riga. Order online with free shipping over €50. Protect your skin from Latvian winters and Daugava River humidity.",
+      metaDescription: "Natural CBD skincare for Riga. Order online with free shipping over €60. Protect your skin from Latvian winters and Daugava River humidity.",
       kicker: "Skincare in Riga",
       h1: "Natural skincare for Riga",
-      lead: "Riga – the Art Nouveau metropolis on the Daugava with cold Baltic winters and a damp climate. Free shipping over €50.",
+      lead: "Riga – the Art Nouveau metropolis on the Daugava with cold Baltic winters and a damp climate. Free shipping over €60.",
       problemTitle: "What Riga does to your skin",
       problemBody: "<p>Riga has a humid continental climate with long, cold winters and short summers. The Daugava River contributes to high humidity, but indoors the air is dry from heating. Winters regularly reach minus fifteen to minus twenty, and the dark period is long.</p><p>Wind from the Gulf of Riga is biting and effectively dehydrates the skin. Vitamin D deficiency is widespread.</p>",
       tipsTitle: "Skincare tips for Riga residents",
@@ -3236,15 +3236,15 @@ export const EU_CITY_PAGES: LandingPage[] = [
         { title: "Latvian rye and fish", body: "Rye bread, Baltic herring, and fermented vegetables – great skin food." }
       ],
       solutionTitle: "CBD skincare delivered to Riga",
-      solutionBody: "<p>We ship from Sweden – delivery to Riga within 3–5 business days. Free shipping on orders over €50.</p><p>The DUO-kit strengthens the barrier. TA-DA Serum provides moisture in the cold. Fungtastic supports immunity.</p>",
+      solutionBody: "<p>We ship from Sweden – delivery to Riga within 3–5 business days. Free shipping on orders over €60.</p><p>The DUO-kit strengthens the barrier. TA-DA Serum provides moisture in the cold. Fungtastic supports immunity.</p>",
       faq: [
-        { q: "Do you ship to Latvia?", a: "Yes, 3–5 business days. Free shipping over €50." },
+        { q: "Do you ship to Latvia?", a: "Yes, 3–5 business days. Free shipping over €60." },
         { q: "Is CBD legal in Latvia?", a: "Yes, CBD in skincare is legal in Latvia." },
         { q: "Which product for Riga's climate?", a: "DUO-kit as your base, TA-DA Serum for winter." },
         { q: "How long does shipping take?", a: "3–5 business days." }
       ],
       ctaTitle: "Give your skin what Riga demands",
-      ctaSub: "Natural CBD skincare from Sweden to Riga. Free shipping over €50."
+      ctaSub: "Natural CBD skincare from Sweden to Riga. Free shipping over €60."
     },
     es: {
       metaTitle: "Cuidado de la piel Riga – cosmética con CBD | 1753 SKINCARE",
@@ -3341,10 +3341,10 @@ export const EU_CITY_PAGES: LandingPage[] = [
     productIds: ["duo-kit", "au-naturel-makeup-remover", "ta-da-serum"],
     sv: {
       metaTitle: "Hudvård Hamburg – CBD-hudvård | 1753 SKINCARE",
-      metaDescription: "Naturlig CBD-hudvård för dig i Hamburg. Beställ online med fri frakt över €50. Skydda din hud mot Nordsjöns fukt och hamnstadens föroreningar.",
+      metaDescription: "Naturlig CBD-hudvård för dig i Hamburg. Beställ online med fri frakt över €60. Skydda din hud mot Nordsjöns fukt och hamnstadens föroreningar.",
       kicker: "Hudvård i Hamburg",
       h1: "Naturlig hudvård för dig i Hamburg",
-      lead: "Hamburg – hamnstad, Elbphilharmonie och Nordsjövind. Fukt, salt och stadsluft utmanar din hud. Fri frakt över €50.",
+      lead: "Hamburg – hamnstad, Elbphilharmonie och Nordsjövind. Fukt, salt och stadsluft utmanar din hud. Fri frakt över €60.",
       problemTitle: "Hamburghudens utmaningar",
       problemBody: "<p>Hamburg är Tysklands port till världen – och till Nordsjöns fuktiga, salta luft. Elbefloden och hamnen bidrar till konstant hög luftfuktighet, men inomhus är luften torr. Vinden från Nordsjön bär salt som torkar ut huden. Hamburgs klimat är maritimt med milda men gråa vintrar och svalare somrar.</p><p>Hamnens industriella verksamhet och stadens trafik bidrar med partiklar som belastar huden. Hamburgs vatten är medelhårt.</p>",
       tipsTitle: "Hudvårdstips för hamburgare",
@@ -3356,22 +3356,22 @@ export const EU_CITY_PAGES: LandingPage[] = [
         { title: "Luftfuktare vintertid", body: "Trots utomhusfukt blir tyska hem torra inomhus. En fuktare hjälper." }
       ],
       solutionTitle: "CBD-hudvård levererad till Hamburg",
-      solutionBody: "<p>Vi skickar från Sverige – leverans till Hamburg inom 3–5 arbetsdagar. Fri frakt över €50.</p><p>DUO-kit stärker barriären mot vind och salt. Au Naturel rengör bort hamnpartiklar. TA-DA Serum ger extra fukt.</p>",
+      solutionBody: "<p>Vi skickar från Sverige – leverans till Hamburg inom 3–5 arbetsdagar. Fri frakt över €60.</p><p>DUO-kit stärker barriären mot vind och salt. Au Naturel rengör bort hamnpartiklar. TA-DA Serum ger extra fukt.</p>",
       faq: [
-        { q: "Levererar ni till Hamburg?", a: "Ja, 3–5 arbetsdagar. Fri frakt över €50." },
+        { q: "Levererar ni till Hamburg?", a: "Ja, 3–5 arbetsdagar. Fri frakt över €60." },
         { q: "Är CBD lagligt i Tyskland?", a: "Ja, CBD i hudvård är fullt lagligt i Tyskland." },
         { q: "Vilken produkt för Hamburgs klimat?", a: "DUO-kit som bas, Au Naturel för daglig rengöring." },
         { q: "Hur lång tid tar leveransen?", a: "3–5 arbetsdagar." }
       ],
       ctaTitle: "Ge din hud det Hamburg kräver",
-      ctaSub: "Naturlig CBD-hudvård från Sverige till Hamburg. Fri frakt över €50."
+      ctaSub: "Naturlig CBD-hudvård från Sverige till Hamburg. Fri frakt över €60."
     },
     en: {
       metaTitle: "Skincare Hamburg – CBD skincare | 1753 SKINCARE",
-      metaDescription: "Natural CBD skincare for Hamburg. Order online with free shipping over €50. Protect your skin from North Sea humidity and port city pollution.",
+      metaDescription: "Natural CBD skincare for Hamburg. Order online with free shipping over €60. Protect your skin from North Sea humidity and port city pollution.",
       kicker: "Skincare in Hamburg",
       h1: "Natural skincare for Hamburg",
-      lead: "Hamburg – port city, Elbphilharmonie, and North Sea wind. Humidity, salt, and urban air challenge your skin. Free shipping over €50.",
+      lead: "Hamburg – port city, Elbphilharmonie, and North Sea wind. Humidity, salt, and urban air challenge your skin. Free shipping over €60.",
       problemTitle: "What Hamburg does to your skin",
       problemBody: "<p>Hamburg is Germany's gateway to the world – and to the North Sea's damp, salty air. The Elbe River and harbor contribute to constantly high outdoor humidity, but indoors the air is dry. Wind from the North Sea carries salt that dehydrates the skin. Hamburg's climate is maritime with mild but grey winters and cooler summers.</p><p>The harbor's industrial activity and city traffic contribute particles that stress the skin. Hamburg's water is moderately hard.</p>",
       tipsTitle: "Skincare tips for Hamburg residents",
@@ -3383,15 +3383,15 @@ export const EU_CITY_PAGES: LandingPage[] = [
         { title: "Humidifier in winter", body: "Despite outdoor humidity, German homes become dry indoors. A humidifier helps." }
       ],
       solutionTitle: "CBD skincare delivered to Hamburg",
-      solutionBody: "<p>We ship from Sweden – delivery to Hamburg within 3–5 business days. Free shipping on orders over €50.</p><p>The DUO-kit strengthens the barrier against wind and salt. Au Naturel cleans away harbor particles. TA-DA Serum provides extra moisture.</p>",
+      solutionBody: "<p>We ship from Sweden – delivery to Hamburg within 3–5 business days. Free shipping on orders over €60.</p><p>The DUO-kit strengthens the barrier against wind and salt. Au Naturel cleans away harbor particles. TA-DA Serum provides extra moisture.</p>",
       faq: [
-        { q: "Do you ship to Hamburg?", a: "Yes, 3–5 business days. Free shipping over €50." },
+        { q: "Do you ship to Hamburg?", a: "Yes, 3–5 business days. Free shipping over €60." },
         { q: "Is CBD legal in Germany?", a: "Yes, CBD in skincare is fully legal in Germany." },
         { q: "Which product for Hamburg's climate?", a: "DUO-kit as your base, Au Naturel for daily cleansing." },
         { q: "How long does shipping take?", a: "3–5 business days." }
       ],
       ctaTitle: "Give your skin what Hamburg demands",
-      ctaSub: "Natural CBD skincare from Sweden to Hamburg. Free shipping over €50."
+      ctaSub: "Natural CBD skincare from Sweden to Hamburg. Free shipping over €60."
     },
     es: {
       metaTitle: "Cuidado de la piel Hamburgo – cosmética con CBD | 1753 SKINCARE",
@@ -3485,10 +3485,10 @@ export const EU_CITY_PAGES: LandingPage[] = [
     productIds: ["duo-kit", "ta-da-serum", "fungtastic-mushroom-extract"],
     sv: {
       metaTitle: "Hudvård Zürich – CBD-hudvård | 1753 SKINCARE",
-      metaDescription: "Naturlig CBD-hudvård för dig i Zürich. Beställ online med fri frakt över €50. Skydda din hud mot alpklimatet och Föhn-vinden.",
+      metaDescription: "Naturlig CBD-hudvård för dig i Zürich. Beställ online med fri frakt över €60. Skydda din hud mot alpklimatet och Föhn-vinden.",
       kicker: "Hudvård i Zürich",
       h1: "Naturlig hudvård för dig i Zürich",
-      lead: "Zürich – Alpernas finansmetropol med ett klimat som växlar mellan Föhn-torka och fuktig dimma. Fri frakt över €50.",
+      lead: "Zürich – Alpernas finansmetropol med ett klimat som växlar mellan Föhn-torka och fuktig dimma. Fri frakt över €60.",
       problemTitle: "Zürichhudens utmaningar",
       problemBody: "<p>Zürich ligger vid foten av Alperna och Zürichsjön. Föhn-vinden – varm, torr luft från bergen – kan sänka luftfuktigheten dramatiskt. Vintrarna är kalla med dimma som hänger över sjön i veckor. Somrarna är varma och fuktiga. Temperaturväxlingarna mellan årstiderna och under Föhn-perioder stressar huden.</p><p>Zürichs vatten är mjukt och av utmärkt kvalitet – en fördel. Men den schweiziska perfektion som präglar arbetslivet bidrar till stress som påverkar huden.</p>",
       tipsTitle: "Hudvårdstips för zürichbor",
@@ -3500,22 +3500,22 @@ export const EU_CITY_PAGES: LandingPage[] = [
         { title: "Hantera finansstressen", body: "Zürich är en intensiv stad. Stresshantering gynnar huden direkt." }
       ],
       solutionTitle: "CBD-hudvård levererad till Zürich",
-      solutionBody: "<p>Vi skickar från Sverige – leverans till Zürich inom 3–5 arbetsdagar. Fri frakt över €50.</p><p>DUO-kit balanserar huden. TA-DA Serum ger extra fukt under Föhn. Fungtastic stödjer immunförsvaret.</p>",
+      solutionBody: "<p>Vi skickar från Sverige – leverans till Zürich inom 3–5 arbetsdagar. Fri frakt över €60.</p><p>DUO-kit balanserar huden. TA-DA Serum ger extra fukt under Föhn. Fungtastic stödjer immunförsvaret.</p>",
       faq: [
-        { q: "Levererar ni till Schweiz?", a: "Ja, 3–5 arbetsdagar. Fri frakt över €50." },
+        { q: "Levererar ni till Schweiz?", a: "Ja, 3–5 arbetsdagar. Fri frakt över €60." },
         { q: "Är CBD lagligt i Schweiz?", a: "Ja, Schweiz har Europas mest liberala CBD-lagstiftning." },
         { q: "Vilken produkt för Föhn-dagar?", a: "TA-DA Serum ger extra fukt och barriärskydd." },
         { q: "Hur lång tid tar leveransen?", a: "3–5 arbetsdagar." }
       ],
       ctaTitle: "Ge din hud det Zürich kräver",
-      ctaSub: "Naturlig CBD-hudvård från Sverige till Zürich. Fri frakt över €50."
+      ctaSub: "Naturlig CBD-hudvård från Sverige till Zürich. Fri frakt över €60."
     },
     en: {
       metaTitle: "Skincare Zurich – CBD skincare | 1753 SKINCARE",
-      metaDescription: "Natural CBD skincare for Zurich. Order online with free shipping over €50. Protect your skin from Alpine Föhn winds and Swiss climate shifts.",
+      metaDescription: "Natural CBD skincare for Zurich. Order online with free shipping over €60. Protect your skin from Alpine Föhn winds and Swiss climate shifts.",
       kicker: "Skincare in Zurich",
       h1: "Natural skincare for Zurich",
-      lead: "Zurich – the Alpine finance capital with a climate that swings between Föhn dryness and damp fog. Free shipping over €50.",
+      lead: "Zurich – the Alpine finance capital with a climate that swings between Föhn dryness and damp fog. Free shipping over €60.",
       problemTitle: "What Zurich does to your skin",
       problemBody: "<p>Zurich sits at the foot of the Alps by Lake Zurich. The Föhn wind – warm, dry air from the mountains – can drop humidity levels dramatically. Winters are cold with fog that hangs over the lake for weeks. Summers are warm and humid. Temperature fluctuations between seasons and during Föhn periods stress the skin.</p><p>Zurich's water is soft and excellent quality – an advantage. But the Swiss perfectionism that defines working life contributes stress that affects the skin.</p>",
       tipsTitle: "Skincare tips for Zurich residents",
@@ -3527,15 +3527,15 @@ export const EU_CITY_PAGES: LandingPage[] = [
         { title: "Manage the finance stress", body: "Zurich is an intense city. Stress management benefits the skin directly." }
       ],
       solutionTitle: "CBD skincare delivered to Zurich",
-      solutionBody: "<p>We ship from Sweden – delivery to Zurich within 3–5 business days. Free shipping on orders over €50.</p><p>The DUO-kit balances the skin. TA-DA Serum provides extra moisture during Föhn. Fungtastic supports immunity.</p>",
+      solutionBody: "<p>We ship from Sweden – delivery to Zurich within 3–5 business days. Free shipping on orders over €60.</p><p>The DUO-kit balances the skin. TA-DA Serum provides extra moisture during Föhn. Fungtastic supports immunity.</p>",
       faq: [
-        { q: "Do you ship to Switzerland?", a: "Yes, 3–5 business days. Free shipping over €50." },
+        { q: "Do you ship to Switzerland?", a: "Yes, 3–5 business days. Free shipping over €60." },
         { q: "Is CBD legal in Switzerland?", a: "Yes, Switzerland has Europe's most liberal CBD legislation." },
         { q: "Which product for Föhn days?", a: "TA-DA Serum provides extra moisture and barrier protection." },
         { q: "How long does shipping take?", a: "3–5 business days." }
       ],
       ctaTitle: "Give your skin what Zurich demands",
-      ctaSub: "Natural CBD skincare from Sweden to Zurich. Free shipping over €50."
+      ctaSub: "Natural CBD skincare from Sweden to Zurich. Free shipping over €60."
     },
     es: {
       metaTitle: "Cuidado de la piel Zúrich – cosmética con CBD | 1753 SKINCARE",
@@ -3632,10 +3632,10 @@ export const EU_CITY_PAGES: LandingPage[] = [
     productIds: ["duo-kit", "ta-da-serum", "fungtastic-mushroom-extract"],
     sv: {
       metaTitle: "Hudvård Manchester – CBD-hudvård | 1753 SKINCARE",
-      metaDescription: "Naturlig CBD-hudvård för dig i Manchester. Beställ online med fri frakt över €50. Skydda din hud mot Manchesters berömda regn.",
+      metaDescription: "Naturlig CBD-hudvård för dig i Manchester. Beställ online med fri frakt över €60. Skydda din hud mot Manchesters berömda regn.",
       kicker: "Hudvård i Manchester",
       h1: "Naturlig hudvård för dig i Manchester",
-      lead: "Manchester – musik, fotboll och regn. Nordengelska klimatets konstanta fukt och begränsade sol utmanar din hud. Fri frakt över €50 (cirka £45).",
+      lead: "Manchester – musik, fotboll och regn. Nordengelska klimatets konstanta fukt och begränsade sol utmanar din hud. Fri frakt över €60 (cirka £45).",
       problemTitle: "Manchesterhudens utmaningar",
       problemBody: "<p>Manchester har ett av Storbritanniens blötaste klimat. Regn faller nästan varannan dag, och den konstanta fukten kombinerat med vind från Penninska bergen skapar en miljö som sliter på hudbarriären. Trots utomhusfukten är inomhusluften torr från uppvärmning.</p><p>Solljus är en bristvara – Manchester har färre soltimmar än London. D-vitaminbrist är utbredd. Manchesters industriella arv bidrar med restföroreningar i stadsluften.</p>",
       tipsTitle: "Hudvårdstips för manchesterbor",
@@ -3647,22 +3647,22 @@ export const EU_CITY_PAGES: LandingPage[] = [
         { title: "Luftfuktare hemma", body: "Engelska rad-hus med centralvärme blir torra inomhus." }
       ],
       solutionTitle: "CBD-hudvård levererad till Manchester",
-      solutionBody: "<p>Vi skickar från Sverige – leverans till Manchester inom 5–7 arbetsdagar. Fri frakt över €50 (cirka £45).</p><p>DUO-kit stärker barriären mot regn och vind. TA-DA Serum ger fukt. Fungtastic stödjer immunförsvaret i det grå klimatet.</p>",
+      solutionBody: "<p>Vi skickar från Sverige – leverans till Manchester inom 5–7 arbetsdagar. Fri frakt över €60 (cirka £45).</p><p>DUO-kit stärker barriären mot regn och vind. TA-DA Serum ger fukt. Fungtastic stödjer immunförsvaret i det grå klimatet.</p>",
       faq: [
-        { q: "Levererar ni till Manchester?", a: "Ja, 5–7 arbetsdagar. Fri frakt över €50 (cirka £45)." },
+        { q: "Levererar ni till Manchester?", a: "Ja, 5–7 arbetsdagar. Fri frakt över €60 (cirka £45)." },
         { q: "Är CBD lagligt i UK?", a: "Ja, CBD i hudvård är fullt lagligt i Storbritannien." },
         { q: "Vilken produkt för regnet?", a: "DUO-kit som dagligt barriärskydd." },
         { q: "Hur lång tid tar leveransen?", a: "5–7 arbetsdagar." }
       ],
       ctaTitle: "Ge din hud det Manchester kräver",
-      ctaSub: "Naturlig CBD-hudvård från Sverige till Manchester. Fri frakt över €50."
+      ctaSub: "Naturlig CBD-hudvård från Sverige till Manchester. Fri frakt över €60."
     },
     en: {
       metaTitle: "Skincare Manchester – CBD skincare | 1753 SKINCARE",
-      metaDescription: "Natural CBD skincare for Manchester. Order online with free shipping over €50. Protect your skin from Manchester's famous rain and limited sunlight.",
+      metaDescription: "Natural CBD skincare for Manchester. Order online with free shipping over €60. Protect your skin from Manchester's famous rain and limited sunlight.",
       kicker: "Skincare in Manchester",
       h1: "Natural skincare for Manchester",
-      lead: "Manchester – music, football, and rain. The northern English climate's constant dampness and limited sun challenge your skin. Free shipping over €50 (approximately £45).",
+      lead: "Manchester – music, football, and rain. The northern English climate's constant dampness and limited sun challenge your skin. Free shipping over €60 (approximately £45).",
       problemTitle: "What Manchester does to your skin",
       problemBody: "<p>Manchester has one of the UK's wettest climates. Rain falls almost every other day, and the constant dampness combined with wind from the Pennine hills creates an environment that wears down the skin barrier. Despite outdoor moisture, indoor air is dry from heating.</p><p>Sunlight is scarce – Manchester has fewer sunshine hours than London. Vitamin D deficiency is widespread. Manchester's industrial heritage contributes residual pollution to the urban air.</p>",
       tipsTitle: "Skincare tips for Mancunians",
@@ -3674,15 +3674,15 @@ export const EU_CITY_PAGES: LandingPage[] = [
         { title: "Humidifier at home", body: "English terraced houses with central heating become dry indoors." }
       ],
       solutionTitle: "CBD skincare delivered to Manchester",
-      solutionBody: "<p>We ship from Sweden – delivery to Manchester within 5–7 business days. Free shipping on orders over €50 (approximately £45).</p><p>The DUO-kit strengthens the barrier against rain and wind. TA-DA Serum provides moisture. Fungtastic supports immunity in the grey climate.</p>",
+      solutionBody: "<p>We ship from Sweden – delivery to Manchester within 5–7 business days. Free shipping on orders over €60 (approximately £45).</p><p>The DUO-kit strengthens the barrier against rain and wind. TA-DA Serum provides moisture. Fungtastic supports immunity in the grey climate.</p>",
       faq: [
-        { q: "Do you ship to Manchester?", a: "Yes, 5–7 business days. Free shipping over €50 (approximately £45)." },
+        { q: "Do you ship to Manchester?", a: "Yes, 5–7 business days. Free shipping over €60 (approximately £45)." },
         { q: "Is CBD legal in the UK?", a: "Yes, CBD in skincare is fully legal in the United Kingdom." },
         { q: "Which product for the rain?", a: "DUO-kit as daily barrier protection." },
         { q: "How long does shipping take?", a: "5–7 business days." }
       ],
       ctaTitle: "Give your skin what Manchester demands",
-      ctaSub: "Natural CBD skincare from Sweden to Manchester. Free shipping over €50."
+      ctaSub: "Natural CBD skincare from Sweden to Manchester. Free shipping over €60."
     },
     es: {
       metaTitle: "Cuidado de la piel Mánchester – cosmética con CBD | 1753 SKINCARE",
@@ -3776,10 +3776,10 @@ export const EU_CITY_PAGES: LandingPage[] = [
     productIds: ["duo-kit", "ta-da-serum", "fungtastic-mushroom-extract"],
     sv: {
       metaTitle: "Hudvård Edinburgh – CBD-hudvård | 1753 SKINCARE",
-      metaDescription: "Naturlig CBD-hudvård för dig i Edinburgh. Beställ online med fri frakt över €50. Skydda din hud mot skotsk vind och kyla.",
+      metaDescription: "Naturlig CBD-hudvård för dig i Edinburgh. Beställ online med fri frakt över €60. Skydda din hud mot skotsk vind och kyla.",
       kicker: "Hudvård i Edinburgh",
       h1: "Naturlig hudvård för dig i Edinburgh",
-      lead: "Edinburgh – vackert, historiskt och blåsigt. Skotsk vind, kyla och begränsat solljus utmanar din hud. Fri frakt över €50 (cirka £45).",
+      lead: "Edinburgh – vackert, historiskt och blåsigt. Skotsk vind, kyla och begränsat solljus utmanar din hud. Fri frakt över €60 (cirka £45).",
       problemTitle: "Edinburghhudens utmaningar",
       problemBody: "<p>Edinburgh ligger på Skottlands östkust, exponerad för bitande Nordsjövind. Staden är byggd på kullar, och vinden kanaliseras genom gator och gränder – särskilt Royal Mile. Vintrarna är kalla och mörka, somrarna korta och svala. Regn och dimma är vanliga.</p><p>Skottlands begränsade solljus gör D-vitaminbrist till ett folkhälsoproblem. Edinburgh har dock mjukt vatten – en fördel jämfört med södra England.</p>",
       tipsTitle: "Hudvårdstips för edinburghbor",
@@ -3791,22 +3791,22 @@ export const EU_CITY_PAGES: LandingPage[] = [
         { title: "Varm te-ritual", body: "Varm te värmer inifrån och örteteer kan ge antioxidanter." }
       ],
       solutionTitle: "CBD-hudvård levererad till Edinburgh",
-      solutionBody: "<p>Vi skickar från Sverige – leverans till Edinburgh inom 5–7 arbetsdagar. Fri frakt över €50 (cirka £45).</p><p>DUO-kit stärker barriären mot skotsk vind. TA-DA Serum ger extra fukt. Fungtastic stödjer immunförsvaret under de mörka månaderna.</p>",
+      solutionBody: "<p>Vi skickar från Sverige – leverans till Edinburgh inom 5–7 arbetsdagar. Fri frakt över €60 (cirka £45).</p><p>DUO-kit stärker barriären mot skotsk vind. TA-DA Serum ger extra fukt. Fungtastic stödjer immunförsvaret under de mörka månaderna.</p>",
       faq: [
-        { q: "Levererar ni till Skottland?", a: "Ja, 5–7 arbetsdagar. Fri frakt över €50 (cirka £45)." },
+        { q: "Levererar ni till Skottland?", a: "Ja, 5–7 arbetsdagar. Fri frakt över €60 (cirka £45)." },
         { q: "Är CBD lagligt i UK?", a: "Ja, CBD i hudvård är fullt lagligt." },
         { q: "Vilken produkt för skotsk vind?", a: "DUO-kit som bas, TA-DA Serum för extra skydd." },
         { q: "Hur lång tid tar leveransen?", a: "5–7 arbetsdagar." }
       ],
       ctaTitle: "Ge din hud det Edinburgh kräver",
-      ctaSub: "Naturlig CBD-hudvård från Sverige till Edinburgh. Fri frakt över €50."
+      ctaSub: "Naturlig CBD-hudvård från Sverige till Edinburgh. Fri frakt över €60."
     },
     en: {
       metaTitle: "Skincare Edinburgh – CBD skincare | 1753 SKINCARE",
-      metaDescription: "Natural CBD skincare for Edinburgh. Order online with free shipping over €50. Protect your skin from Scottish wind, cold, and limited sunlight.",
+      metaDescription: "Natural CBD skincare for Edinburgh. Order online with free shipping over €60. Protect your skin from Scottish wind, cold, and limited sunlight.",
       kicker: "Skincare in Edinburgh",
       h1: "Natural skincare for Edinburgh",
-      lead: "Edinburgh – beautiful, historic, and windswept. Scottish wind, cold, and limited sunlight challenge your skin. Free shipping over €50 (approximately £45).",
+      lead: "Edinburgh – beautiful, historic, and windswept. Scottish wind, cold, and limited sunlight challenge your skin. Free shipping over €60 (approximately £45).",
       problemTitle: "What Edinburgh does to your skin",
       problemBody: "<p>Edinburgh sits on Scotland's east coast, exposed to biting North Sea wind. The city is built on hills, and the wind channels through streets and closes – especially the Royal Mile. Winters are cold and dark, summers short and cool. Rain and mist are common.</p><p>Scotland's limited sunlight makes vitamin D deficiency a public health issue. Edinburgh does have soft water, however – an advantage compared to southern England.</p>",
       tipsTitle: "Skincare tips for Edinburgh residents",
@@ -3818,15 +3818,15 @@ export const EU_CITY_PAGES: LandingPage[] = [
         { title: "Warm tea ritual", body: "Warm tea warms from within, and herbal teas can provide antioxidants." }
       ],
       solutionTitle: "CBD skincare delivered to Edinburgh",
-      solutionBody: "<p>We ship from Sweden – delivery to Edinburgh within 5–7 business days. Free shipping on orders over €50 (approximately £45).</p><p>The DUO-kit strengthens the barrier against Scottish wind. TA-DA Serum provides extra moisture. Fungtastic supports immunity during the dark months.</p>",
+      solutionBody: "<p>We ship from Sweden – delivery to Edinburgh within 5–7 business days. Free shipping on orders over €60 (approximately £45).</p><p>The DUO-kit strengthens the barrier against Scottish wind. TA-DA Serum provides extra moisture. Fungtastic supports immunity during the dark months.</p>",
       faq: [
-        { q: "Do you ship to Scotland?", a: "Yes, 5–7 business days. Free shipping over €50 (approximately £45)." },
+        { q: "Do you ship to Scotland?", a: "Yes, 5–7 business days. Free shipping over €60 (approximately £45)." },
         { q: "Is CBD legal in the UK?", a: "Yes, CBD in skincare is fully legal." },
         { q: "Which product for Scottish wind?", a: "DUO-kit as your base, TA-DA Serum for extra protection." },
         { q: "How long does shipping take?", a: "5–7 business days." }
       ],
       ctaTitle: "Give your skin what Edinburgh demands",
-      ctaSub: "Natural CBD skincare from Sweden to Edinburgh. Free shipping over €50."
+      ctaSub: "Natural CBD skincare from Sweden to Edinburgh. Free shipping over €60."
     },
     es: {
       metaTitle: "Cuidado de la piel Edimburgo – cosmética con CBD | 1753 SKINCARE",
@@ -3920,10 +3920,10 @@ export const EU_CITY_PAGES: LandingPage[] = [
     productIds: ["duo-kit", "ta-da-serum", "au-naturel-makeup-remover"],
     sv: {
       metaTitle: "Hudvård Lyon – CBD-hudvård | 1753 SKINCARE",
-      metaDescription: "Naturlig CBD-hudvård för dig i Lyon. Beställ online med fri frakt över €50. Skydda din hud mot Lyons kontinentala klimat.",
+      metaDescription: "Naturlig CBD-hudvård för dig i Lyon. Beställ online med fri frakt över €60. Skydda din hud mot Lyons kontinentala klimat.",
       kicker: "Hudvård i Lyon",
       h1: "Naturlig hudvård för dig i Lyon",
-      lead: "Lyon – Frankrikes gastronomiska huvudstad med ett kontinentalt klimat som utmanar huden. Kalla vintrar, varma somrar och föroreningar i Rhône-dalen. Fri frakt över €50.",
+      lead: "Lyon – Frankrikes gastronomiska huvudstad med ett kontinentalt klimat som utmanar huden. Kalla vintrar, varma somrar och föroreningar i Rhône-dalen. Fri frakt över €60.",
       problemTitle: "Lyonhudens utmaningar",
       problemBody: "<p>Lyon har ett halvkontinentalt klimat – kallare vintrar och varmare somrar än Paris. Rhône-dalen kan fånga föroreningar under inversioner, särskilt vintertid. Somrarna når regelbundet trettiofem grader med hög luftfuktighet. Stadsvinden – le mistral – blåser ibland upp genom dalen och torkar ut huden brutalt.</p>",
       tipsTitle: "Hudvårdstips för lyonbor",
@@ -3935,22 +3935,22 @@ export const EU_CITY_PAGES: LandingPage[] = [
         { title: "Rengör ordentligt", body: "Rhône-dalens föroreningar kräver daglig rengöring." }
       ],
       solutionTitle: "CBD-hudvård levererad till Lyon",
-      solutionBody: "<p>Vi skickar från Sverige – leverans till Lyon inom 3–5 arbetsdagar. Fri frakt över €50.</p><p>DUO-kit balanserar huden genom säsongerna. TA-DA Serum ger fukt. Au Naturel rengör bort föroreningar.</p>",
+      solutionBody: "<p>Vi skickar från Sverige – leverans till Lyon inom 3–5 arbetsdagar. Fri frakt över €60.</p><p>DUO-kit balanserar huden genom säsongerna. TA-DA Serum ger fukt. Au Naturel rengör bort föroreningar.</p>",
       faq: [
-        { q: "Levererar ni till Lyon?", a: "Ja, 3–5 arbetsdagar. Fri frakt över €50." },
+        { q: "Levererar ni till Lyon?", a: "Ja, 3–5 arbetsdagar. Fri frakt över €60." },
         { q: "Är CBD lagligt i Frankrike?", a: "Ja, CBD i hudvård är lagligt i Frankrike sedan 2022." },
         { q: "Vilken produkt för Lyons klimat?", a: "DUO-kit som bas, anpassa säsongsvis." },
         { q: "Hur lång tid tar leveransen?", a: "3–5 arbetsdagar." }
       ],
       ctaTitle: "Ge din hud det Lyon kräver",
-      ctaSub: "Naturlig CBD-hudvård från Sverige till Lyon. Fri frakt över €50."
+      ctaSub: "Naturlig CBD-hudvård från Sverige till Lyon. Fri frakt över €60."
     },
     en: {
       metaTitle: "Skincare Lyon – CBD skincare | 1753 SKINCARE",
-      metaDescription: "Natural CBD skincare for Lyon. Order online with free shipping over €50. Protect your skin from Lyon's continental climate and Rhône Valley pollution.",
+      metaDescription: "Natural CBD skincare for Lyon. Order online with free shipping over €60. Protect your skin from Lyon's continental climate and Rhône Valley pollution.",
       kicker: "Skincare in Lyon",
       h1: "Natural skincare for Lyon",
-      lead: "Lyon – France's gastronomic capital with a continental climate that challenges the skin. Cold winters, hot summers, and Rhône Valley pollution. Free shipping over €50.",
+      lead: "Lyon – France's gastronomic capital with a continental climate that challenges the skin. Cold winters, hot summers, and Rhône Valley pollution. Free shipping over €60.",
       problemTitle: "What Lyon does to your skin",
       problemBody: "<p>Lyon has a semi-continental climate – colder winters and warmer summers than Paris. The Rhône Valley can trap pollution during inversions, especially in winter. Summers regularly reach thirty-five degrees with high humidity. The city wind – le mistral – occasionally blows up through the valley and brutally dehydrates the skin.</p>",
       tipsTitle: "Skincare tips for Lyon residents",
@@ -3962,15 +3962,15 @@ export const EU_CITY_PAGES: LandingPage[] = [
         { title: "Cleanse properly", body: "Rhône Valley pollution demands daily cleansing." }
       ],
       solutionTitle: "CBD skincare delivered to Lyon",
-      solutionBody: "<p>We ship from Sweden – delivery to Lyon within 3–5 business days. Free shipping on orders over €50.</p><p>The DUO-kit balances the skin through the seasons. TA-DA Serum provides moisture. Au Naturel cleans away pollution.</p>",
+      solutionBody: "<p>We ship from Sweden – delivery to Lyon within 3–5 business days. Free shipping on orders over €60.</p><p>The DUO-kit balances the skin through the seasons. TA-DA Serum provides moisture. Au Naturel cleans away pollution.</p>",
       faq: [
-        { q: "Do you ship to Lyon?", a: "Yes, 3–5 business days. Free shipping over €50." },
+        { q: "Do you ship to Lyon?", a: "Yes, 3–5 business days. Free shipping over €60." },
         { q: "Is CBD legal in France?", a: "Yes, CBD in skincare has been legal in France since 2022." },
         { q: "Which product for Lyon's climate?", a: "DUO-kit as your base, adapt seasonally." },
         { q: "How long does shipping take?", a: "3–5 business days." }
       ],
       ctaTitle: "Give your skin what Lyon demands",
-      ctaSub: "Natural CBD skincare from Sweden to Lyon. Free shipping over €50."
+      ctaSub: "Natural CBD skincare from Sweden to Lyon. Free shipping over €60."
     },
     es: {
       metaTitle: "Cuidado de la piel Lyon – cosmética con CBD | 1753 SKINCARE",
@@ -4067,10 +4067,10 @@ export const EU_CITY_PAGES: LandingPage[] = [
     productIds: ["duo-kit", "au-naturel-makeup-remover", "ta-da-serum"],
     sv: {
       metaTitle: "Hudvård Valencia – CBD-hudvård | 1753 SKINCARE",
-      metaDescription: "Naturlig CBD-hudvård för dig i Valencia. Beställ online med fri frakt över €50. Skydda din hud mot medelhavssolen och havsfukten.",
+      metaDescription: "Naturlig CBD-hudvård för dig i Valencia. Beställ online med fri frakt över €60. Skydda din hud mot medelhavssolen och havsfukten.",
       kicker: "Hudvård i Valencia",
       h1: "Naturlig hudvård för dig i Valencia",
-      lead: "Valencia – sol, paella och Medelhavet. Intensiv UV-strålning, havssalt och hög luftfuktighet utmanar din hud. Fri frakt över €50.",
+      lead: "Valencia – sol, paella och Medelhavet. Intensiv UV-strålning, havssalt och hög luftfuktighet utmanar din hud. Fri frakt över €60.",
       problemTitle: "Valenciahudens utmaningar",
       problemBody: "<p>Valencia har över 2600 soltimmar per år och ett varmt medelhavsklimat. UV-strålningen är intensiv, och kombinationen av sol och havssalt torkar ut huden effektivt. Somrarna är heta och fuktiga, vintrarna milda. Luftkonditionering inomhus skapar ytterligare uttorkning.</p>",
       tipsTitle: "Hudvårdstips för valenciabor",
@@ -4082,22 +4082,22 @@ export const EU_CITY_PAGES: LandingPage[] = [
         { title: "Hydrering", body: "Valencias somrar kräver konstant vätskeintag." }
       ],
       solutionTitle: "CBD-hudvård levererad till Valencia",
-      solutionBody: "<p>Vi skickar från Sverige – leverans till Valencia inom 3–5 arbetsdagar. Fri frakt över €50.</p><p>DUO-kit ger antioxidantskydd. Au Naturel rengör bort salt och smuts. TA-DA Serum ger fukt efter solen.</p>",
+      solutionBody: "<p>Vi skickar från Sverige – leverans till Valencia inom 3–5 arbetsdagar. Fri frakt över €60.</p><p>DUO-kit ger antioxidantskydd. Au Naturel rengör bort salt och smuts. TA-DA Serum ger fukt efter solen.</p>",
       faq: [
-        { q: "Levererar ni till Valencia?", a: "Ja, 3–5 arbetsdagar. Fri frakt över €50." },
+        { q: "Levererar ni till Valencia?", a: "Ja, 3–5 arbetsdagar. Fri frakt över €60." },
         { q: "Är CBD lagligt i Spanien?", a: "Ja, CBD i hudvård är lagligt." },
         { q: "Vilken produkt för sol och hav?", a: "DUO-kit dagligen, TA-DA Serum för extra fukt." },
         { q: "Hur lång tid tar leveransen?", a: "3–5 arbetsdagar." }
       ],
       ctaTitle: "Ge din hud det Valencia kräver",
-      ctaSub: "Naturlig CBD-hudvård från Sverige till Valencia. Fri frakt över €50."
+      ctaSub: "Naturlig CBD-hudvård från Sverige till Valencia. Fri frakt över €60."
     },
     en: {
       metaTitle: "Skincare Valencia – CBD skincare | 1753 SKINCARE",
-      metaDescription: "Natural CBD skincare for Valencia. Order online with free shipping over €50. Protect your skin from Mediterranean sun and sea salt.",
+      metaDescription: "Natural CBD skincare for Valencia. Order online with free shipping over €60. Protect your skin from Mediterranean sun and sea salt.",
       kicker: "Skincare in Valencia",
       h1: "Natural skincare for Valencia",
-      lead: "Valencia – sun, paella, and the Mediterranean. Intense UV radiation, sea salt, and high humidity challenge your skin. Free shipping over €50.",
+      lead: "Valencia – sun, paella, and the Mediterranean. Intense UV radiation, sea salt, and high humidity challenge your skin. Free shipping over €60.",
       problemTitle: "What Valencia does to your skin",
       problemBody: "<p>Valencia gets over 2,600 sunshine hours per year with a warm Mediterranean climate. UV radiation is intense, and the combination of sun and sea salt effectively dehydrates the skin. Summers are hot and humid, winters mild. Air conditioning indoors creates additional dehydration.</p>",
       tipsTitle: "Skincare tips for Valencia residents",
@@ -4109,15 +4109,15 @@ export const EU_CITY_PAGES: LandingPage[] = [
         { title: "Hydration", body: "Valencia's summers demand constant fluid intake." }
       ],
       solutionTitle: "CBD skincare delivered to Valencia",
-      solutionBody: "<p>We ship from Sweden – delivery to Valencia within 3–5 business days. Free shipping on orders over €50.</p><p>The DUO-kit provides antioxidant protection. Au Naturel cleans away salt and grime. TA-DA Serum provides moisture after the sun.</p>",
+      solutionBody: "<p>We ship from Sweden – delivery to Valencia within 3–5 business days. Free shipping on orders over €60.</p><p>The DUO-kit provides antioxidant protection. Au Naturel cleans away salt and grime. TA-DA Serum provides moisture after the sun.</p>",
       faq: [
-        { q: "Do you ship to Valencia?", a: "Yes, 3–5 business days. Free shipping over €50." },
+        { q: "Do you ship to Valencia?", a: "Yes, 3–5 business days. Free shipping over €60." },
         { q: "Is CBD legal in Spain?", a: "Yes, CBD in skincare is legal." },
         { q: "Which product for sun and sea?", a: "DUO-kit daily, TA-DA Serum for extra moisture." },
         { q: "How long does shipping take?", a: "3–5 business days." }
       ],
       ctaTitle: "Give your skin what Valencia demands",
-      ctaSub: "Natural CBD skincare from Sweden to Valencia. Free shipping over €50."
+      ctaSub: "Natural CBD skincare from Sweden to Valencia. Free shipping over €60."
     },
     es: {
       metaTitle: "Cuidado de la piel Valencia – cosmética con CBD | 1753 SKINCARE",
@@ -4211,10 +4211,10 @@ export const EU_CITY_PAGES: LandingPage[] = [
     productIds: ["duo-kit", "ta-da-serum", "fungtastic-mushroom-extract"],
     sv: {
       metaTitle: "Hudvård Porto – CBD-hudvård | 1753 SKINCARE",
-      metaDescription: "Naturlig CBD-hudvård för dig i Porto. Beställ online med fri frakt över €50. Skydda din hud mot Atlantvinden och portugisisk sol.",
+      metaDescription: "Naturlig CBD-hudvård för dig i Porto. Beställ online med fri frakt över €60. Skydda din hud mot Atlantvinden och portugisisk sol.",
       kicker: "Hudvård i Porto",
       h1: "Naturlig hudvård för dig i Porto",
-      lead: "Porto – portvin, Atlanten och azulejos. Atlantvinden och UV-strålningen utmanar din hud dagligen. Fri frakt över €50.",
+      lead: "Porto – portvin, Atlanten och azulejos. Atlantvinden och UV-strålningen utmanar din hud dagligen. Fri frakt över €60.",
       problemTitle: "Portohudens utmaningar",
       problemBody: "<p>Porto ligger vid Atlantkusten med ett mildare, fuktigare klimat än Lissabon. Atlantvinden är konstant och bär salt som torkar ut huden. Vintrarna är regniga och milda, somrarna varma men sällan extrema. UV-strålningen är ändå stark tack vare Portos sydliga läge.</p>",
       tipsTitle: "Hudvårdstips för portobor",
@@ -4226,22 +4226,22 @@ export const EU_CITY_PAGES: LandingPage[] = [
         { title: "Portvin med måtta", body: "Resveratrol i rött vin ger antioxidanter. Lagom mängd." }
       ],
       solutionTitle: "CBD-hudvård levererad till Porto",
-      solutionBody: "<p>Vi skickar från Sverige – leverans till Porto inom 3–5 arbetsdagar. Fri frakt över €50.</p><p>DUO-kit stärker barriären mot vind och salt. TA-DA Serum ger fukt. Fungtastic stödjer immunförsvaret.</p>",
+      solutionBody: "<p>Vi skickar från Sverige – leverans till Porto inom 3–5 arbetsdagar. Fri frakt över €60.</p><p>DUO-kit stärker barriären mot vind och salt. TA-DA Serum ger fukt. Fungtastic stödjer immunförsvaret.</p>",
       faq: [
-        { q: "Levererar ni till Porto?", a: "Ja, 3–5 arbetsdagar. Fri frakt över €50." },
+        { q: "Levererar ni till Porto?", a: "Ja, 3–5 arbetsdagar. Fri frakt över €60." },
         { q: "Är CBD lagligt i Portugal?", a: "Ja, CBD i hudvård är lagligt." },
         { q: "Vilken produkt för Portos klimat?", a: "DUO-kit som bas, TA-DA Serum för extra fukt." },
         { q: "Hur lång tid tar leveransen?", a: "3–5 arbetsdagar." }
       ],
       ctaTitle: "Ge din hud det Porto kräver",
-      ctaSub: "Naturlig CBD-hudvård från Sverige till Porto. Fri frakt över €50."
+      ctaSub: "Naturlig CBD-hudvård från Sverige till Porto. Fri frakt över €60."
     },
     en: {
       metaTitle: "Skincare Porto – CBD skincare | 1753 SKINCARE",
-      metaDescription: "Natural CBD skincare for Porto. Order online with free shipping over €50. Protect your skin from Atlantic winds and Portuguese sun.",
+      metaDescription: "Natural CBD skincare for Porto. Order online with free shipping over €60. Protect your skin from Atlantic winds and Portuguese sun.",
       kicker: "Skincare in Porto",
       h1: "Natural skincare for Porto",
-      lead: "Porto – port wine, the Atlantic, and azulejos. Atlantic wind and UV radiation challenge your skin daily. Free shipping over €50.",
+      lead: "Porto – port wine, the Atlantic, and azulejos. Atlantic wind and UV radiation challenge your skin daily. Free shipping over €60.",
       problemTitle: "What Porto does to your skin",
       problemBody: "<p>Porto sits on the Atlantic coast with a milder, more humid climate than Lisbon. The Atlantic wind is constant and carries salt that dries out the skin. Winters are rainy and mild, summers warm but rarely extreme. UV radiation is still strong thanks to Porto's southern location.</p>",
       tipsTitle: "Skincare tips for Porto residents",
@@ -4253,15 +4253,15 @@ export const EU_CITY_PAGES: LandingPage[] = [
         { title: "Port wine in moderation", body: "Resveratrol in red wine provides antioxidants. In moderation." }
       ],
       solutionTitle: "CBD skincare delivered to Porto",
-      solutionBody: "<p>We ship from Sweden – delivery to Porto within 3–5 business days. Free shipping on orders over €50.</p><p>The DUO-kit strengthens the barrier against wind and salt. TA-DA Serum provides moisture. Fungtastic supports immunity.</p>",
+      solutionBody: "<p>We ship from Sweden – delivery to Porto within 3–5 business days. Free shipping on orders over €60.</p><p>The DUO-kit strengthens the barrier against wind and salt. TA-DA Serum provides moisture. Fungtastic supports immunity.</p>",
       faq: [
-        { q: "Do you ship to Porto?", a: "Yes, 3–5 business days. Free shipping over €50." },
+        { q: "Do you ship to Porto?", a: "Yes, 3–5 business days. Free shipping over €60." },
         { q: "Is CBD legal in Portugal?", a: "Yes, CBD in skincare is legal." },
         { q: "Which product for Porto's climate?", a: "DUO-kit as your base, TA-DA Serum for extra moisture." },
         { q: "How long does shipping take?", a: "3–5 business days." }
       ],
       ctaTitle: "Give your skin what Porto demands",
-      ctaSub: "Natural CBD skincare from Sweden to Porto. Free shipping over €50."
+      ctaSub: "Natural CBD skincare from Sweden to Porto. Free shipping over €60."
     },
     es: {
       metaTitle: "Cuidado de la piel Oporto – cosmética con CBD | 1753 SKINCARE",
@@ -4355,10 +4355,10 @@ export const EU_CITY_PAGES: LandingPage[] = [
     productIds: ["duo-kit", "au-naturel-makeup-remover", "ta-da-serum"],
     sv: {
       metaTitle: "Hudvård Florens – CBD-hudvård | 1753 SKINCARE",
-      metaDescription: "Naturlig CBD-hudvård för dig i Florens. Beställ online med fri frakt över €50. Skydda din hud mot toskansk sol och stadsvärme.",
+      metaDescription: "Naturlig CBD-hudvård för dig i Florens. Beställ online med fri frakt över €60. Skydda din hud mot toskansk sol och stadsvärme.",
       kicker: "Hudvård i Florens",
       h1: "Naturlig hudvård för dig i Florens",
-      lead: "Florens – Renässansens vagga med ett klimat som utmanar huden. Het sommar i Arno-dalen, kall vinter och stadsföroreningar. Fri frakt över €50.",
+      lead: "Florens – Renässansens vagga med ett klimat som utmanar huden. Het sommar i Arno-dalen, kall vinter och stadsföroreningar. Fri frakt över €60.",
       problemTitle: "Florenshudens utmaningar",
       problemBody: "<p>Florens ligger i en dal omgiven av kullar – vackert men det fångar värmen på sommaren. Temperaturer över fyrtio grader är vanliga juli–augusti. Vintrarna är kalla och fuktiga med dimma. Arno-dalens geografi fångar föroreningar under inversioner.</p>",
       tipsTitle: "Hudvårdstips för florensbor",
@@ -4370,22 +4370,22 @@ export const EU_CITY_PAGES: LandingPage[] = [
         { title: "Drick vatten", body: "Florens fontäner ger gratis rent vatten. Utnyttja dem." }
       ],
       solutionTitle: "CBD-hudvård levererad till Florens",
-      solutionBody: "<p>Vi skickar från Sverige – leverans till Florens inom 3–5 arbetsdagar. Fri frakt över €50.</p><p>DUO-kit ger antioxidantskydd. Au Naturel rengör bort föroreningar. TA-DA Serum ger fukt.</p>",
+      solutionBody: "<p>Vi skickar från Sverige – leverans till Florens inom 3–5 arbetsdagar. Fri frakt över €60.</p><p>DUO-kit ger antioxidantskydd. Au Naturel rengör bort föroreningar. TA-DA Serum ger fukt.</p>",
       faq: [
-        { q: "Levererar ni till Florens?", a: "Ja, 3–5 arbetsdagar. Fri frakt över €50." },
+        { q: "Levererar ni till Florens?", a: "Ja, 3–5 arbetsdagar. Fri frakt över €60." },
         { q: "Är CBD lagligt i Italien?", a: "Ja, CBD i hudvård är lagligt." },
         { q: "Vilken produkt för Florens?", a: "DUO-kit dagligen, Au Naturel för rengöring." },
         { q: "Hur lång tid tar leveransen?", a: "3–5 arbetsdagar." }
       ],
       ctaTitle: "Ge din hud det Florens kräver",
-      ctaSub: "Naturlig CBD-hudvård från Sverige till Florens. Fri frakt över €50."
+      ctaSub: "Naturlig CBD-hudvård från Sverige till Florens. Fri frakt över €60."
     },
     en: {
       metaTitle: "Skincare Florence – CBD skincare | 1753 SKINCARE",
-      metaDescription: "Natural CBD skincare for Florence. Order online with free shipping over €50. Protect your skin from Tuscan sun and Arno Valley heat.",
+      metaDescription: "Natural CBD skincare for Florence. Order online with free shipping over €60. Protect your skin from Tuscan sun and Arno Valley heat.",
       kicker: "Skincare in Florence",
       h1: "Natural skincare for Florence",
-      lead: "Florence – cradle of the Renaissance with a climate that challenges the skin. Hot Arno Valley summers, cold winters, and urban pollution. Free shipping over €50.",
+      lead: "Florence – cradle of the Renaissance with a climate that challenges the skin. Hot Arno Valley summers, cold winters, and urban pollution. Free shipping over €60.",
       problemTitle: "What Florence does to your skin",
       problemBody: "<p>Florence sits in a valley surrounded by hills – beautiful but it traps heat in summer. Temperatures above forty degrees are common in July and August. Winters are cold and damp with fog. The Arno Valley geography traps pollution during inversions.</p>",
       tipsTitle: "Skincare tips for Florence residents",
@@ -4397,15 +4397,15 @@ export const EU_CITY_PAGES: LandingPage[] = [
         { title: "Drink water", body: "Florence's fountains provide free clean water. Use them." }
       ],
       solutionTitle: "CBD skincare delivered to Florence",
-      solutionBody: "<p>We ship from Sweden – delivery to Florence within 3–5 business days. Free shipping on orders over €50.</p><p>The DUO-kit provides antioxidant protection. Au Naturel cleans away pollution. TA-DA Serum provides moisture.</p>",
+      solutionBody: "<p>We ship from Sweden – delivery to Florence within 3–5 business days. Free shipping on orders over €60.</p><p>The DUO-kit provides antioxidant protection. Au Naturel cleans away pollution. TA-DA Serum provides moisture.</p>",
       faq: [
-        { q: "Do you ship to Florence?", a: "Yes, 3–5 business days. Free shipping over €50." },
+        { q: "Do you ship to Florence?", a: "Yes, 3–5 business days. Free shipping over €60." },
         { q: "Is CBD legal in Italy?", a: "Yes, CBD in skincare is legal." },
         { q: "Which product for Florence?", a: "DUO-kit daily, Au Naturel for cleansing." },
         { q: "How long does shipping take?", a: "3–5 business days." }
       ],
       ctaTitle: "Give your skin what Florence demands",
-      ctaSub: "Natural CBD skincare from Sweden to Florence. Free shipping over €50."
+      ctaSub: "Natural CBD skincare from Sweden to Florence. Free shipping over €60."
     },
     es: {
       metaTitle: "Cuidado de la piel Florencia – cosmética con CBD | 1753 SKINCARE",
@@ -4502,10 +4502,10 @@ export const EU_CITY_PAGES: LandingPage[] = [
     productIds: ["duo-kit", "au-naturel-makeup-remover", "ta-da-serum"],
     sv: {
       metaTitle: "Hudvård Krakow – CBD-hudvård | 1753 SKINCARE",
-      metaDescription: "Naturlig CBD-hudvård för dig i Krakow. Beställ online med fri frakt över €50. Skydda din hud mot Krakows smog och kalla vintrar.",
+      metaDescription: "Naturlig CBD-hudvård för dig i Krakow. Beställ online med fri frakt över €60. Skydda din hud mot Krakows smog och kalla vintrar.",
       kicker: "Hudvård i Krakow",
       h1: "Naturlig hudvård för dig i Krakow",
-      lead: "Krakow – Polens kulturella hjärta med Europas värsta vintersmog. Kolföroreningar, kalla vintrar och hårt vatten. Fri frakt över €50.",
+      lead: "Krakow – Polens kulturella hjärta med Europas värsta vintersmog. Kolföroreningar, kalla vintrar och hårt vatten. Fri frakt över €60.",
       problemTitle: "Krakowhudens utmaningar",
       problemBody: "<p>Krakow ligger i Wisła-dalen, omringad av kullar som fångar föroreningar. Under vintern skapar koleldning en av Europas värsta smog-situationer – partikelhalterna kan överstiga WHO:s gränsvärden mångfalt. Vintrarna är kalla, somrarna varma. Krakows vatten är hårt.</p>",
       tipsTitle: "Hudvårdstips för krakowbor",
@@ -4517,22 +4517,22 @@ export const EU_CITY_PAGES: LandingPage[] = [
         { title: "Wieliczka saltgruva", body: "Det terapeutiska mikroklimet i saltgruvan kan gynna andning och hud." }
       ],
       solutionTitle: "CBD-hudvård levererad till Krakow",
-      solutionBody: "<p>Vi skickar från Sverige – leverans till Krakow inom 3–5 arbetsdagar. Fri frakt över €50.</p><p>DUO-kit stärker barriären. Au Naturel rengör bort smog. TA-DA Serum ger fukt i kylan.</p>",
+      solutionBody: "<p>Vi skickar från Sverige – leverans till Krakow inom 3–5 arbetsdagar. Fri frakt över €60.</p><p>DUO-kit stärker barriären. Au Naturel rengör bort smog. TA-DA Serum ger fukt i kylan.</p>",
       faq: [
-        { q: "Levererar ni till Krakow?", a: "Ja, 3–5 arbetsdagar. Fri frakt över €50." },
+        { q: "Levererar ni till Krakow?", a: "Ja, 3–5 arbetsdagar. Fri frakt över €60." },
         { q: "Är CBD lagligt i Polen?", a: "Ja, CBD i hudvård är lagligt." },
         { q: "Vilken produkt mot smog?", a: "Au Naturel för rengöring, DUO-kit för skydd." },
         { q: "Hur lång tid tar leveransen?", a: "3–5 arbetsdagar." }
       ],
       ctaTitle: "Ge din hud det Krakow kräver",
-      ctaSub: "Naturlig CBD-hudvård från Sverige till Krakow. Fri frakt över €50."
+      ctaSub: "Naturlig CBD-hudvård från Sverige till Krakow. Fri frakt över €60."
     },
     en: {
       metaTitle: "Skincare Krakow – CBD skincare | 1753 SKINCARE",
-      metaDescription: "Natural CBD skincare for Krakow. Order online with free shipping over €50. Protect your skin from Krakow's notorious winter smog and cold.",
+      metaDescription: "Natural CBD skincare for Krakow. Order online with free shipping over €60. Protect your skin from Krakow's notorious winter smog and cold.",
       kicker: "Skincare in Krakow",
       h1: "Natural skincare for Krakow",
-      lead: "Krakow – Poland's cultural heart with Europe's worst winter smog. Coal pollution, freezing winters, and hard water. Free shipping over €50.",
+      lead: "Krakow – Poland's cultural heart with Europe's worst winter smog. Coal pollution, freezing winters, and hard water. Free shipping over €60.",
       problemTitle: "What Krakow does to your skin",
       problemBody: "<p>Krakow sits in the Vistula Valley, surrounded by hills that trap pollution. During winter, coal heating creates one of Europe's worst smog situations – particle levels can exceed WHO limits many times over. Winters are cold, summers warm. Krakow's water is hard.</p>",
       tipsTitle: "Skincare tips for Krakow residents",
@@ -4544,15 +4544,15 @@ export const EU_CITY_PAGES: LandingPage[] = [
         { title: "Wieliczka salt mine", body: "The therapeutic microclimate in the salt mine can benefit breathing and skin." }
       ],
       solutionTitle: "CBD skincare delivered to Krakow",
-      solutionBody: "<p>We ship from Sweden – delivery to Krakow within 3–5 business days. Free shipping on orders over €50.</p><p>The DUO-kit strengthens the barrier. Au Naturel cleans away smog. TA-DA Serum provides moisture in the cold.</p>",
+      solutionBody: "<p>We ship from Sweden – delivery to Krakow within 3–5 business days. Free shipping on orders over €60.</p><p>The DUO-kit strengthens the barrier. Au Naturel cleans away smog. TA-DA Serum provides moisture in the cold.</p>",
       faq: [
-        { q: "Do you ship to Krakow?", a: "Yes, 3–5 business days. Free shipping over €50." },
+        { q: "Do you ship to Krakow?", a: "Yes, 3–5 business days. Free shipping over €60." },
         { q: "Is CBD legal in Poland?", a: "Yes, CBD in skincare is legal." },
         { q: "Which product against smog?", a: "Au Naturel for cleansing, DUO-kit for protection." },
         { q: "How long does shipping take?", a: "3–5 business days." }
       ],
       ctaTitle: "Give your skin what Krakow demands",
-      ctaSub: "Natural CBD skincare from Sweden to Krakow. Free shipping over €50."
+      ctaSub: "Natural CBD skincare from Sweden to Krakow. Free shipping over €60."
     },
     es: {
       metaTitle: "Cuidado de la piel Cracovia – cosmética con CBD | 1753 SKINCARE",
@@ -4646,10 +4646,10 @@ export const EU_CITY_PAGES: LandingPage[] = [
     productIds: ["duo-kit", "ta-da-serum", "fungtastic-mushroom-extract"],
     sv: {
       metaTitle: "Hudvård Vilnius – CBD-hudvård | 1753 SKINCARE",
-      metaDescription: "Naturlig CBD-hudvård för dig i Vilnius. Beställ online med fri frakt över €50. Skydda din hud mot baltiska vintrar och torr kyla.",
+      metaDescription: "Naturlig CBD-hudvård för dig i Vilnius. Beställ online med fri frakt över €60. Skydda din hud mot baltiska vintrar och torr kyla.",
       kicker: "Hudvård i Vilnius",
       h1: "Naturlig hudvård för dig i Vilnius",
-      lead: "Vilnius – Litauens barockpärla med kalla baltiska vintrar och korta somrar. Fri frakt över €50.",
+      lead: "Vilnius – Litauens barockpärla med kalla baltiska vintrar och korta somrar. Fri frakt över €60.",
       problemTitle: "Vilniushudens utmaningar",
       problemBody: "<p>Vilnius har ett kontinentalt baltiskt klimat med kalla vintrar ned mot minus tjugo och korta, varma somrar. Staden ligger längre från havet än Riga och Tallinn, vilket ger ännu kallare vintrar. Mörkerperioden är lång, D-vitaminbristen utbredd, och den torra uppvärmda inomhusluften förvärrar hudens torrhet.</p>",
       tipsTitle: "Hudvårdstips för vilniusbor",
@@ -4661,22 +4661,22 @@ export const EU_CITY_PAGES: LandingPage[] = [
         { title: "Litauisk bastukultur", body: "Pirtis med björkris – traditionell och bra för huden." }
       ],
       solutionTitle: "CBD-hudvård levererad till Vilnius",
-      solutionBody: "<p>Vi skickar från Sverige – leverans till Vilnius inom 3–5 arbetsdagar. Fri frakt över €50.</p><p>DUO-kit stärker barriären. TA-DA Serum ger fukt i kylan. Fungtastic stödjer immunförsvaret.</p>",
+      solutionBody: "<p>Vi skickar från Sverige – leverans till Vilnius inom 3–5 arbetsdagar. Fri frakt över €60.</p><p>DUO-kit stärker barriären. TA-DA Serum ger fukt i kylan. Fungtastic stödjer immunförsvaret.</p>",
       faq: [
-        { q: "Levererar ni till Litauen?", a: "Ja, 3–5 arbetsdagar. Fri frakt över €50." },
+        { q: "Levererar ni till Litauen?", a: "Ja, 3–5 arbetsdagar. Fri frakt över €60." },
         { q: "Är CBD lagligt i Litauen?", a: "Ja, CBD i hudvård är lagligt." },
         { q: "Vilken produkt för baltiska vintrar?", a: "TA-DA Serum för fukt, Fungtastic för immunförsvaret." },
         { q: "Hur lång tid tar leveransen?", a: "3–5 arbetsdagar." }
       ],
       ctaTitle: "Ge din hud det Vilnius kräver",
-      ctaSub: "Naturlig CBD-hudvård från Sverige till Vilnius. Fri frakt över €50."
+      ctaSub: "Naturlig CBD-hudvård från Sverige till Vilnius. Fri frakt över €60."
     },
     en: {
       metaTitle: "Skincare Vilnius – CBD skincare | 1753 SKINCARE",
-      metaDescription: "Natural CBD skincare for Vilnius. Order online with free shipping over €50. Protect your skin from Baltic winters and dry cold.",
+      metaDescription: "Natural CBD skincare for Vilnius. Order online with free shipping over €60. Protect your skin from Baltic winters and dry cold.",
       kicker: "Skincare in Vilnius",
       h1: "Natural skincare for Vilnius",
-      lead: "Vilnius – Lithuania's baroque jewel with cold Baltic winters and short summers. Free shipping over €50.",
+      lead: "Vilnius – Lithuania's baroque jewel with cold Baltic winters and short summers. Free shipping over €60.",
       problemTitle: "What Vilnius does to your skin",
       problemBody: "<p>Vilnius has a continental Baltic climate with cold winters down to minus twenty and short, warm summers. The city sits further from the sea than Riga and Tallinn, making winters even colder. The dark period is long, vitamin D deficiency widespread, and dry heated indoor air worsens skin dehydration.</p>",
       tipsTitle: "Skincare tips for Vilnius residents",
@@ -4688,15 +4688,15 @@ export const EU_CITY_PAGES: LandingPage[] = [
         { title: "Lithuanian sauna culture", body: "Pirtis with birch branches – traditional and great for the skin." }
       ],
       solutionTitle: "CBD skincare delivered to Vilnius",
-      solutionBody: "<p>We ship from Sweden – delivery to Vilnius within 3–5 business days. Free shipping on orders over €50.</p><p>The DUO-kit strengthens the barrier. TA-DA Serum provides moisture in the cold. Fungtastic supports immunity.</p>",
+      solutionBody: "<p>We ship from Sweden – delivery to Vilnius within 3–5 business days. Free shipping on orders over €60.</p><p>The DUO-kit strengthens the barrier. TA-DA Serum provides moisture in the cold. Fungtastic supports immunity.</p>",
       faq: [
-        { q: "Do you ship to Lithuania?", a: "Yes, 3–5 business days. Free shipping over €50." },
+        { q: "Do you ship to Lithuania?", a: "Yes, 3–5 business days. Free shipping over €60." },
         { q: "Is CBD legal in Lithuania?", a: "Yes, CBD in skincare is legal." },
         { q: "Which product for Baltic winters?", a: "TA-DA Serum for moisture, Fungtastic for immunity." },
         { q: "How long does shipping take?", a: "3–5 business days." }
       ],
       ctaTitle: "Give your skin what Vilnius demands",
-      ctaSub: "Natural CBD skincare from Sweden to Vilnius. Free shipping over €50."
+      ctaSub: "Natural CBD skincare from Sweden to Vilnius. Free shipping over €60."
     },
     es: {
       metaTitle: "Cuidado de la piel Vilna – cosmética con CBD | 1753 SKINCARE",

@@ -87,7 +87,7 @@ export default async function ProductPage({ params }: Props) {
       description: productShortDesc(product, l),
       image: `${SITE_ORIGIN}${product.image}`,
       sku: product.articleNumber,
-      category: tx(l, "Hudvard", "Skincare", "Cuidado de la piel", "Hautpflege"),
+      category: tx(l, "Hudvard", "Skincare", "Cuidado de la piel", "Hautpflege", "Soins de la peau"),
       brand: { "@type": "Brand", name: "1753 SKINCARE" },
       manufacturer: { "@type": "Organization", "@id": "https://www.1753skin.com/#organization" },
       offers: {
@@ -128,7 +128,7 @@ export default async function ProductPage({ params }: Props) {
     if (product.ingredients) {
       schema.additionalProperty = {
         "@type": "PropertyValue",
-        name: tx(l, "Ingredienser", "Ingredients", "Ingredientes", "Inhaltsstoffe"),
+        name: tx(l, "Ingredienser", "Ingredients", "Ingredientes", "Inhaltsstoffe", "Ingrédients"),
         value: product.ingredients,
       };
     }

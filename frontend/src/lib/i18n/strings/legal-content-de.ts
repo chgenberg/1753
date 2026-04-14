@@ -11,7 +11,7 @@ export const LEGAL_TERMS_DE: LegalDoc = {
   sections: [
     {
       h: "1. Allgemeines",
-      html: `<p>Diese Bedingungen gelten für Käufe über 1753skincare.com. Die Website wird betrieben von Floranie International AB, Organisationsnummer 559266-5735, Södra Skjutbanevägen 10, 439 55 Åsa, Sweden. Mit Abschluss eines Kaufs akzeptieren Sie diese Bedingungen.</p>`,
+      html: `<p>Diese Bedingungen gelten für Käufe über 1753skincare.com. Die Website wird betrieben von Floranie International AB, Organisationsnummer 559266-5735, Södra Skjutbanevägen 10, 439 55 Åsa, Schweden. Mit Abschluss eines Kaufs akzeptieren Sie diese Bedingungen.</p>`,
     },
     {
       h: "2. Preise",
@@ -23,7 +23,7 @@ export const LEGAL_TERMS_DE: LegalDoc = {
     },
     {
       h: "4. Lieferung",
-      html: `<p>Wir versenden alle Bestellungen mit PostNord Varubrev. Die übliche Lieferzeit beträgt 2–5 Werktage innerhalb Schwedens und 5–10 Werktage für Lieferungen innerhalb der EU. Kostenloser Versand bei Bestellungen über 600 SEK / \u20AC50; andernfalls fällt eine Versandgebühr von 55 SEK / \u20AC6 an.</p>`,
+      html: `<p>Wir versenden alle Bestellungen mit PostNord Varubrev. Die übliche Lieferzeit beträgt 2–5 Werktage innerhalb Schwedens und 5–10 Werktage für Lieferungen innerhalb der EU. Kostenloser Versand bei Bestellungen über 700 SEK / \u20AC60; andernfalls fällt eine Versandgebühr von 55 SEK / \u20AC6 an.</p>`,
     },
     {
       h: "5. Widerrufsrecht",
@@ -43,7 +43,7 @@ export const LEGAL_TERMS_DE: LegalDoc = {
     },
     {
       h: "9. Kontakt",
-      html: `<p>Floranie International AB<br />Södra Skjutbanevägen 10, 439 55 Åsa, Sweden<br /><a href="mailto:hej@1753skincare.com" class="font-medium text-brand-900 underline underline-offset-2">hej@1753skincare.com</a><br /><a href="tel:0732305521" class="font-medium text-brand-900 underline underline-offset-2">0732-30 55 21</a></p>`,
+      html: `<p>Floranie International AB<br />Södra Skjutbanevägen 10, 439 55 Åsa, Schweden<br /><a href="mailto:hej@1753skincare.com" class="font-medium text-brand-900 underline underline-offset-2">hej@1753skincare.com</a><br /><a href="tel:0732305521" class="font-medium text-brand-900 underline underline-offset-2">0732-30 55 21</a></p>`,
     },
   ],
 };
@@ -57,7 +57,7 @@ export const LEGAL_PRIVACY_DE: LegalDoc = {
   sections: [
     {
       h: "1. Verantwortlicher",
-      html: `<p>Floranie International AB, Organisationsnummer 559266-5735, Södra Skjutbanevägen 10, 439 55 Åsa, Sweden (&quot;wir&quot;, &quot;uns&quot;, &quot;1753 SKINCARE&quot;) ist Verantwortlicher für Ihre personenbezogenen Daten.</p>`,
+      html: `<p>Floranie International AB, Organisationsnummer 559266-5735, Södra Skjutbanevägen 10, 439 55 Åsa, Schweden (&quot;wir&quot;, &quot;uns&quot;, &quot;1753 SKINCARE&quot;) ist Verantwortlicher für Ihre personenbezogenen Daten.</p>`,
     },
     {
       h: "2. Welche Daten wir erheben",

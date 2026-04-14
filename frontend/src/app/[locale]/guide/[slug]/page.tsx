@@ -135,13 +135,13 @@ export default async function GuidePage({ params }: Props) {
       {
         "@type": "ListItem",
         position: 1,
-        name: tx(l, "Hem", "Home", "Inicio", "Startseite"),
+        name: tx(l, "Hem", "Home", "Inicio", "Startseite", "Accueil"),
         item: `${BASE_URL}/${l}`,
       },
       {
         "@type": "ListItem",
         position: 2,
-        name: tx(l, "Guide", "Guide", "Guía", "Ratgeber"),
+        name: tx(l, "Guide", "Guide", "Guía", "Ratgeber", "Guide"),
         item: `${BASE_URL}/${l}/guide`,
       },
       {
@@ -202,7 +202,7 @@ export default async function GuidePage({ params }: Props) {
                 href={localizePath(l, "products")}
                 className="inline-flex h-[52px] items-center gap-2 rounded-full bg-[#108474] px-8 text-sm font-medium text-white transition-all duration-300 hover:bg-[#0d6e61] hover:shadow-lg"
               >
-                {tx(l, "Se produkter", "View products", "Ver productos", "Produkte ansehen")}
+                {tx(l, "Se produkter", "View products", "Ver productos", "Produkte ansehen", "Voir les produits")}
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
@@ -210,7 +210,7 @@ export default async function GuidePage({ params }: Props) {
                 className="inline-flex h-[52px] items-center gap-2 rounded-full border border-[#e6e6e6] bg-white/80 px-8 text-sm font-medium text-[#1d1d1f] backdrop-blur-sm transition-all duration-300 hover:border-[#108474] hover:shadow-md"
               >
                 <Sparkles className="h-4 w-4 text-[#108474]" />
-                {tx(l, "Gratis hudanalys", "Free skin analysis", "Análisis de piel gratis", "Kostenlose Hautanalyse")}
+                {tx(l, "Gratis hudanalys", "Free skin analysis", "Análisis de piel gratis", "Kostenlose Hautanalyse", "Analyse de peau gratuite")}
               </Link>
             </div>
           </div>
@@ -294,7 +294,7 @@ export default async function GuidePage({ params }: Props) {
                 href={localizePath(l, "products")}
                 className="mt-8 inline-flex h-[48px] items-center gap-2 rounded-full bg-[#108474] px-8 text-sm font-medium text-white transition-all duration-300 hover:bg-[#0d6e61] hover:shadow-lg"
               >
-                {tx(l, "Se produkter", "View products", "Ver productos", "Produkte ansehen")}
+                {tx(l, "Se produkter", "View products", "Ver productos", "Produkte ansehen", "Voir les produits")}
                 <ArrowRight className="h-4 w-4" />
               </Link>
             </div>
@@ -324,7 +324,7 @@ export default async function GuidePage({ params }: Props) {
         <section className="bg-[#f5f5f7] py-16 md:py-24">
           <div className="mx-auto max-w-[1280px] px-6 md:px-10">
             <h3 className="mb-8 text-center text-xl font-bold tracking-tight text-[#1d1d1f]">
-              {tx(l, "Produkter vi rekommenderar", "Products we recommend", "Productos que recomendamos", "Produkte, die wir empfehlen")}
+              {tx(l, "Produkter vi rekommenderar", "Products we recommend", "Productos que recomendamos", "Produkte, die wir empfehlen", "Produits que nous recommandons")}
             </h3>
             <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
               {products.map(
@@ -340,7 +340,7 @@ export default async function GuidePage({ params }: Props) {
         <section className="py-16 md:py-24">
           <div className="mx-auto max-w-[1280px] px-6 md:px-10">
             <h2 className="mb-10 text-center text-2xl font-bold tracking-tight text-[#1d1d1f] md:text-3xl">
-              {tx(l, "Vanliga frågor", "Frequently asked questions", "Preguntas frecuentes", "Häufig gestellte Fragen")}
+              {tx(l, "Vanliga frågor", "Frequently asked questions", "Preguntas frecuentes", "Häufig gestellte Fragen", "Questions fréquentes")}
             </h2>
             <div className="mx-auto max-w-3xl divide-y divide-[#e6e6e6]">
               {c.faq.map((item, i) => (
@@ -367,7 +367,7 @@ export default async function GuidePage({ params }: Props) {
           <section className="border-t border-[#e6e6e6] bg-[#f5f5f7] py-16 md:py-24">
             <div className="mx-auto max-w-[1280px] px-6 md:px-10">
               <h2 className="mb-8 text-center text-2xl font-bold tracking-tight text-[#1d1d1f]">
-                {tx(l, "Relaterade artiklar", "Related articles", "Artículos relacionados", "Verwandte Artikel")}
+                {tx(l, "Relaterade artiklar", "Related articles", "Artículos relacionados", "Verwandte Artikel", "Articles connexes")}
               </h2>
               <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                 {related.map((rp) => {
@@ -400,7 +400,7 @@ export default async function GuidePage({ params }: Props) {
                   href={`/${l}/guide`}
                   className="inline-flex items-center gap-2 text-sm font-semibold text-[#108474] transition-colors hover:text-[#0d6e62]"
                 >
-                  {tx(l, "Se alla artiklar", "View all articles", "Ver todos los artículos", "Alle Artikel ansehen")}
+                  {tx(l, "Se alla artiklar", "View all articles", "Ver todos los artículos", "Alle Artikel ansehen", "Voir tous les articles")}
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </div>
@@ -424,7 +424,7 @@ export default async function GuidePage({ params }: Props) {
                 href={localizePath(l, "products")}
                 className="inline-flex h-[52px] items-center gap-2 rounded-full bg-[#108474] px-8 text-sm font-medium text-white transition-all duration-300 hover:bg-[#0d6e61]"
               >
-                {tx(l, "Handla nu", "Shop now", "Comprar ahora", "Jetzt kaufen")}
+                {tx(l, "Handla nu", "Shop now", "Comprar ahora", "Jetzt kaufen", "Acheter maintenant")}
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
@@ -432,7 +432,7 @@ export default async function GuidePage({ params }: Props) {
                 className="inline-flex h-[52px] items-center gap-2 rounded-full border border-white/20 px-8 text-sm font-medium text-white transition-all duration-300 hover:border-white/40 hover:bg-white/5"
               >
                 <Sparkles className="h-4 w-4" />
-                {tx(l, "Gratis hudanalys – 15 metriker", "Free analysis – 15 metrics", "Análisis gratis – 15 métricas", "Kostenlose Analyse – 15 Metriken")}
+                {tx(l, "Gratis hudanalys – 15 metriker", "Free analysis – 15 metrics", "Análisis gratis – 15 métricas", "Kostenlose Analyse – 15 Metriken", "Analyse gratuite – 15 métriques")}
               </Link>
             </div>
           </div>

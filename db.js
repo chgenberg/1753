@@ -678,6 +678,15 @@ async function unsubscribe(token) {
   return rows[0] || null;
 }
 
+async function unsubscribeByEmail(email) {
+  const { rows } = await pool.query(
+    `UPDATE subscribers SET status = 'unsubscribed', unsubscribed_at = NOW()
+     WHERE email = $1 AND status = 'active' RETURNING *`,
+    [email.toLowerCase()]
+  );
+  return rows[0] || null;
+}
+
 async function findActiveSubscribers() {
   const { rows } = await pool.query(
     "SELECT * FROM subscribers WHERE status = 'active' ORDER BY created_at DESC"
@@ -1745,6 +1754,7 @@ module.exports = {
   findSubscriberByEmail,
   findSubscriberByToken,
   unsubscribe,
+  unsubscribeByEmail,
   findActiveSubscribers,
   findSubscribersBySkinCondition,
   getSubscriberSkinSegments,

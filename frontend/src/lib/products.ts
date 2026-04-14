@@ -142,7 +142,7 @@ export const PRODUCTS: Product[] = [
     size: null,
     guarantee:
       "Fri frakt.",
-    guaranteeEn: "Free shipping over €50.",
+    guaranteeEn: "Free shipping over €60.",
     vatRate: 0.25,
   },
   {
@@ -277,7 +277,7 @@ export const PRODUCTS: Product[] = [
     sizes: ["30 ml"],
     guarantee:
       "Fri frakt.",
-    guaranteeEn: "Free shipping over €50.",
+    guaranteeEn: "Free shipping over €60.",
     vatRate: 0.25,
   },
   {
@@ -433,7 +433,7 @@ export const PRODUCTS: Product[] = [
     sizeEn: "2 × 10 ml glass bottles with dropper",
     guarantee:
       "Fri frakt.",
-    guaranteeEn: "Free shipping over €50.",
+    guaranteeEn: "Free shipping over €60.",
     vatRate: 0.25,
   },
   {
@@ -552,7 +552,7 @@ export const PRODUCTS: Product[] = [
     sizes: ["100 ml"],
     guarantee:
       "Fri frakt.",
-    guaranteeEn: "Free shipping over €50.",
+    guaranteeEn: "Free shipping over €60.",
     vatRate: 0.25,
   },
   {
@@ -677,7 +677,7 @@ export const PRODUCTS: Product[] = [
     sizes: ["60 kapslar"],
     guarantee:
       "Fri frakt.",
-    guaranteeEn: "Free shipping over €50.",
+    guaranteeEn: "Free shipping over €60.",
     vatRate: 0.12,
   },
 ];

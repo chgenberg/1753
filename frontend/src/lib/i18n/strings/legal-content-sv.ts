@@ -23,7 +23,7 @@ export const LEGAL_TERMS_SV: LegalDoc = {
     },
     {
       h: "4. Leverans",
-      html: `<p>Vi skickar alla ordrar med Postnord Varubrev. Normal leveranstid är 2–5 arbetsdagar inom Sverige. Fri frakt vid köp över 600 kr; i övrigt tillkommer en fraktavgift på 55 kr.</p>`,
+      html: `<p>Vi skickar alla ordrar med Postnord Varubrev. Normal leveranstid är 2–5 arbetsdagar inom Sverige. Fri frakt vid köp över 700 kr; i övrigt tillkommer en fraktavgift på 55 kr.</p>`,
     },
     {
       h: "5. Ångerrätt",

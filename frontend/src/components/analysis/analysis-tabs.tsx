@@ -89,6 +89,7 @@ export interface FaceZoneGPT {
   y: number;
   condition: string;
   confidence: "low" | "medium" | "high";
+  description?: string;
 }
 
 export interface MetricScore {
@@ -624,6 +625,8 @@ function SkinTab({ score, scoreLabel, summary, skinAge, fitzpatrick, metrics, sk
   const condLabels = (key: string) => getCondLabel(key, locale);
   const [showAllMetrics, setShowAllMetrics] = useState(false);
 
+  const [activeZoneIdx, setActiveZoneIdx] = useState<number | null>(null);
+
   const gptZones = (faceZonesGPT ?? []).filter(
     (z) => z.confidence !== "low" && z.condition !== "normal"
   );
@@ -688,42 +691,59 @@ function SkinTab({ score, scoreLabel, summary, skinAge, fitzpatrick, metrics, sk
 
           {hasGPTZones ? (
             <div className="mx-auto max-w-md">
-              <div className="relative overflow-hidden rounded-2xl border border-[#e6e6e6]/80 shadow-sm">
+              {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events, jsx-a11y/no-static-element-interactions */}
+              <div
+                className="relative overflow-hidden rounded-2xl border border-[#e6e6e6]/80 shadow-sm"
+                onClick={(e) => {
+                  if (e.target === e.currentTarget) setActiveZoneIdx(null);
+                }}
+              >
                 {/* eslint-disable-next-line @next/next/no-img-element */}
                 <img
                   src={scanImageSrc}
                   alt={tx(locale, "Ansiktsskanning", "Face scan", "Escaneo facial", "Gesichtsscan", "Scan facial")}
                   className="block h-auto w-full"
+                  onClick={() => setActiveZoneIdx(null)}
                 />
-                {gptZones.map((z) => {
-                  const label = condLabels(z.condition) || z.label;
-                  const isLeft = z.x < 50;
+                {gptZones.map((z, i) => {
+                  const isActive = activeZoneIdx === i;
+                  const confColor = z.confidence === "high" ? "#108474" : z.confidence === "medium" ? "#e8a020" : "#766a62";
                   return (
-                    <div
+                    <button
                       key={z.zone}
-                      className="absolute flex items-center gap-1.5 pointer-events-none"
-                      style={{
-                        left: `${z.x}%`,
-                        top: `${z.y}%`,
-                        transform: isLeft ? "translate(-100%, -50%)" : "translate(0%, -50%)",
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        setActiveZoneIdx(isActive ? null : i);
                       }}
+                      className="absolute z-10 group"
+                      style={{ left: `${z.x}%`, top: `${z.y}%`, transform: "translate(-50%, -50%)" }}
                     >
-                      {isLeft ? (
-                        <>
-                          <span className="rounded-lg bg-[#1d1d1f]/80 px-2 py-1 text-[10px] font-semibold leading-tight text-white backdrop-blur-sm md:text-xs">
-                            {label}
-                          </span>
-                          <div className="h-2.5 w-2.5 rounded-full border-2 border-white bg-[#1d1d1f] shadow-sm" />
-                        </>
-                      ) : (
-                        <>
-                          <div className="h-2.5 w-2.5 rounded-full border-2 border-white bg-[#1d1d1f] shadow-sm" />
-                          <span className="rounded-lg bg-[#1d1d1f]/80 px-2 py-1 text-[10px] font-semibold leading-tight text-white backdrop-blur-sm md:text-xs">
-                            {label}
-                          </span>
-                        </>
+                      <span className="relative flex h-4 w-4">
+                        <span
+                          className="absolute inline-flex h-full w-full animate-ping rounded-full opacity-40"
+                          style={{ backgroundColor: confColor }}
+                        />
+                        <span
+                          className="relative inline-flex h-4 w-4 rounded-full border-2 border-white shadow-md"
+                          style={{ backgroundColor: confColor }}
+                        />
+                      </span>
+
+                      {isActive && (
+                        <div className="absolute left-1/2 top-6 z-20 -translate-x-1/2 w-56 rounded-xl bg-white/95 backdrop-blur-sm border border-[#e6e6e6] p-3 shadow-xl animate-fade-in">
+                          <p className="text-xs font-semibold text-[#1d1d1f] mb-1">{z.label}</p>
+                          {z.description && (
+                            <p className="text-[11px] leading-relaxed text-[#515151]">{z.description}</p>
+                          )}
+                          <div className="mt-2 flex items-center gap-1.5">
+                            <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: confColor }} />
+                            <span className="text-[10px] text-[#766a62]">
+                              {condLabels(z.condition) || z.condition} — {z.confidence}
+                            </span>
+                          </div>
+                        </div>
                       )}
-                    </div>
+                    </button>
                   );
                 })}
               </div>
@@ -731,11 +751,17 @@ function SkinTab({ score, scoreLabel, summary, skinAge, fitzpatrick, metrics, sk
               <div className="mt-3 space-y-1.5 md:hidden">
                 {gptZones.map((z) => {
                   const label = condLabels(z.condition) || z.label;
+                  const confColor = z.confidence === "high" ? "#108474" : z.confidence === "medium" ? "#e8a020" : "#766a62";
                   return (
-                    <div key={z.zone} className="flex items-center gap-2 rounded-xl bg-[#f5f5f7] px-3 py-2">
-                      <div className="h-2 w-2 shrink-0 rounded-full bg-[#1d1d1f]" />
-                      <span className="text-[11px] font-semibold text-[#1d1d1f]">{label}</span>
-                      <span className="text-[11px] text-[#766a62]">{z.label}</span>
+                    <div key={z.zone} className="rounded-xl bg-[#f5f5f7] px-3 py-2">
+                      <div className="flex items-center gap-2">
+                        <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: confColor }} />
+                        <span className="text-[11px] font-semibold text-[#1d1d1f]">{label}</span>
+                        <span className="text-[11px] text-[#766a62]">{z.label}</span>
+                      </div>
+                      {z.description && (
+                        <p className="mt-1 pl-4 text-[11px] leading-relaxed text-[#515151]">{z.description}</p>
+                      )}
                     </div>
                   );
                 })}

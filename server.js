@@ -1689,27 +1689,46 @@ Immunologiska och hormonella kopplingar mellan tarmflora och hud. Stress/dysbios
 == ANALYSTYP ==
 Kunden har besvarat en quiz om hudtyp, besvär, rutin och livsstil. Om skanningsdata finns inkluderat, integrera det i analysen (zoner med detekterade hudtillstånd och konfidensgrader).
 
-== VISUELL BEDÖMNING (DIN VIKTIGASTE UPPGIFT NÄR BILD FINNS) ==
-Om en ansiktsbild bifogas: DU SKA ANVÄNDA DIN EGEN VISUELLA BEDÖMNING SOM PRIMÄRKÄLLA. Titta noggrant på bilden och bedöm huden själv. Din visuella analys väger MYCKET tyngre än skanningsdata.
+== VISUELL BEDÖMNING + ONNX-MODELL (DUBBEL ANALYS) ==
+Analysen har TVÅ AI-lager som samverkar:
 
-KRITISKT: Det lokala ONNX-modellen har INGEN "normal/frisk hud"-klass och MÅSTE alltid klassificera som en hudåkomma (akne, dermatit etc.) även om huden är helt frisk. Detta betyder att skanningsdata SYSTEMATISKT överrapporterar problem. ONNX-data ska i princip IGNORERAS som diagnostisk källa.
+1. LOKAL ONNX-MODELL (MobileNetV3, tränad på 88 000+ dermatologiska bilder):
+   - Klassificerar 9 tillstånd: akne, dermatit, torrhet, eksem, hyperpigmentering, NORMAL/FRISK HUD, psoriasis, rosacea, solskada
+   - Graderar allvarlighet: ingen, mild, måttlig, svår
+   - Analyserar per ansiktszon (panna, kinder, näsa, haka, ögonparti)
+   - Beräknar 15 hudmetriker (hydrering, elasticitet, porer, textur, jämnhet, känslighet m.fl.)
 
-Prioriteringsordning (viktigast först):
-1. DIN VISUELLA BEDÖMNING av bilden (om bild bifogas) – 60% vikt
-2. Kundens egna quiz-svar (hudtyp, besvär) – 25% vikt
-3. Livsstilsfaktorer – 10% vikt
-4. Skanningsdata från ONNX-modellen – max 5% vikt, och ENBART om konfidens >70% OCH din visuella bedömning bekräftar samma sak
+2. DIN VISUELLA BEDÖMNING (GPT-5.4 Vision):
+   - Du ser bilden själv och gör en oberoende bedömning
+   - Du bekräftar, fördjupar eller korrigerar ONNX-modellens resultat
 
-VIKTIGT OM NORMAL HUD: De flesta människor som gör en hudanalys har i grunden FRISK HUD med kanske milda, normala variationer. Det är INTE ett problem att ha lätt torrhet på vintern, enstaka porer eller minimal rodnad. Behandla detta som normal variation, inte som en diagnos.
+Prioriteringsordning:
+1. DIN VISUELLA BEDÖMNING av bilden (om bild bifogas) – 40% vikt
+2. ONNX-modellens per-zon-analys och metriker – 25% vikt (modellen har "normal"-klass och kan korrekt identifiera frisk hud)
+3. Kundens egna quiz-svar (hudtyp, besvär) – 20% vikt
+4. Livsstilsfaktorer – 15% vikt
 
-VIKTIGT OM SKANNINGSDATA: AI-skanningen använder en begränsad bildklassificeringsmodell (~80% accuracy) som SAKNAR "normal"-klass:
-- Modellen TVINGAS välja en åkomma även för helt frisk hud – detta är en känd brist
-- Konfidensgrader under 60% bör IGNORERAS helt
-- "normal" i skanningsdata betyder att vår filtrering bedömt att ingen åkomma detekterades tillförlitligt – behandla det som frisk hud
-- Om din visuella bedömning av bilden visar frisk hud men skanningen säger "akne" eller "dermatit" – LITA PÅ DIN BEDÖMNING
-- Om flera zoner visar samma tillstånd med låg konfidens är det sannolikt en felklassificering
-- Psoriasis, fungal och sun_damage har högst felprocent – var EXTREMT försiktig med dessa
-- Nämn ALDRIG skanningsresultat som fakta – om du nämner dem, var tydlig med att det är en indikation med låg tillförlitlighet
+SAMSPEL MELLAN MODELLERNA:
+- Om ONNX och din visuella bedömning ÖVERENSSTÄMMER: hög konfidens, presentera som säker bedömning
+- Om de AVVIKER: lita mer på din visuella bedömning men nämn att AI-skanningen visade annorlunda
+- Om ONNX säger "normal" med hög konfidens: detta är trovärdigt, modellen har tränats på frisk hud
+- Konfidensgrader under 50% från ONNX bör behandlas försiktigt
+- Severity-graderingen (mild/måttlig/svår) från ONNX är användbar för att anpassa rekommendationsintensitet
+
+VIKTIGT OM NORMAL HUD: Många har i grunden FRISK HUD. Om ONNX-modellen klassificerar som "normal" med hög konfidens OCH din visuella bedömning bekräftar det – ge en positiv bedömning och fokusera på förebyggande vård istället för att hitta problem.
+
+HUDMETRIKER: ONNX-modellen beräknar 15 metriker (0-100, högre = friskare). Dessa ska INTEGRERAS i din analys och presenteras i resultatets "score"-sektion. Justera dem om din visuella bedömning avviker markant.
+
+== BIOLOGISK HUDÅLDER ==
+Om kundens kronologiska ålder anges: uppskatta den BIOLOGISKA HUDÅLDERN baserat på:
+- Din visuella bedömning av bilden (rynkor, linjer, elasticitet, pigmentering, hudtextur)
+- ONNX-metriker (hydration, elasticity, wrinkles, sunDamage) om tillgängliga
+- Livsstilsfaktorer (sömn, stress, kost, solvanor, träning)
+- Hudtillstånd och allvarlighetsgrad
+
+Biologisk hudålder kan vara LÄGRE (yngre) eller HÖGRE (äldre) än kronologisk ålder.
+Presentera som "skinAge" i JSON-svaret (heltal). Om ingen bild finns, gör en uppskattning baserat på livsstil och hudtyp.
+Var ärlig men uppmuntrande: om huden är yngre än åldern, lyft det som en styrka. Om äldre, ge hopp genom att förklara att det går att vända.
 
 == SCORE ==
 Beräkna score (0-100) INDIVIDUELLT baserat på ALLA faktorer:
@@ -1817,20 +1836,21 @@ Svara ENBART med ett JSON-block (inget annat). JSON-blocket ska vara markerat me
       "x": 50,
       "y": 18,
       "condition": "dermatitis",
-      "confidence": "medium"
+      "confidence": "medium",
+      "description": "Tydlig rodnad och vidgade blodkärl synliga på vänster kind, karaktäristiskt för rosacea."
     }
   ]
 }
 \`\`\`
 
 == ANSIKTSZONER (faceZones) ==
-Om en ansiktsbild bifogas: TITTA NOGGRANT på bilden och gör din EGEN visuella bedömning av varje zon.
-Returnera faceZones-arrayen med en post per synlig zon (panna, näsa, vänster kind, höger kind, haka, t-zon).
-- "zone": ett av forehead, nose, left_cheek, right_cheek, chin, t_zone
-- "label": zonens svenska namn
-- "x" och "y": zonens VISUELLA centrum i bilden, angivet som procenttal (0-100) av bildens bredd och höjd. 0,0 = övre vänstra hörnet, 100,100 = nedre högra hörnet.
-- "condition": det hudtillstånd du SJÄLV bedömer finns i zonen baserat på bilden. Använd "normal" om zonen ser frisk ut. IGNORERA skannermodellens resultat helt – lita på vad DU ser.
-- "confidence": din egen bedömning av säkerheten: "low", "medium" eller "high"
+FACE ZONES: Baserat på din FULLSTÄNDIGA analys (inte bara ONNX), placera 3-8 markers på ansiktet där du identifierar specifika tillstånd eller observationer. Varje marker ska ha:
+- zone: tekniskt id (forehead, left_cheek, right_cheek, nose, chin, left_eye, right_eye)
+- label: lokaliserat namn på zonen
+- x, y: position i procent (0-100) från övre vänstra hörnet
+- condition: detekterat tillstånd
+- confidence: "low", "medium" eller "high"
+- description: 1-2 meningar som beskriver vad du ser i just den zonen (synlig observation, inte generell)
 VIKTIGT: De flesta människor har mestadels frisk hud. Det är HELT NORMALT att de flesta zoner bedöms som "normal". Rapportera ett problem ENBART om du tydligt kan se det i bilden.
 Returnera BARA zoner som syns i bilden. Om ingen bild bifogades, returnera en tom array [].
 
@@ -1920,23 +1940,35 @@ function buildAnalysisPrompt(questions, imageScan) {
     }
     if (questions.goals?.length) parts.push(`Mål: ${questions.goals.join(", ")}`);
     if (questions.goalFreeText) parts.push(`Övrigt: ${questions.goalFreeText}`);
+    if (questions.age) parts.push(`Ålder: ${questions.age}`);
+    if (questions.gender) parts.push(`Kön: ${questions.gender}`);
+    if (questions.sunProtection) parts.push(`Solskydd: ${questions.sunProtection}`);
+    if (questions.hormonal) parts.push(`Hormonell påverkan: ${questions.hormonal}`);
   }
 
   if (imageScan) {
-    parts.push("\n== SKANNINGSDATA (AI-hudskanning, lokal analys i webbläsaren) ==");
+    parts.push("\n== ONNX SKANNINGSDATA (MobileNetV3, tränad på 88k+ bilder, 9 klasser inkl. normal) ==");
     if (imageScan.overall?.length) {
-      parts.push("Helhetsbild:");
+      parts.push("Helhetsbild (topp-3 klassificeringar):");
       imageScan.overall.forEach(o => {
         parts.push(`  - ${o.conditionSv || o.condition}: ${o.confidence}% konfidens`);
       });
     }
+    if (imageScan.overallSeverity) {
+      parts.push(`Övergripande allvarlighetsgrad: ${imageScan.overallSeverity.level} (${imageScan.overallSeverity.confidence}% konfidens)`);
+    }
     if (imageScan.zones?.length) {
-      parts.push("Zon-analys:");
+      parts.push("Per-zon-analys:");
       imageScan.zones.forEach(z => {
-        parts.push(`  - ${z.zone}: ${z.conditionSv || z.condition} (${z.confidence}%)`);
+        const sevStr = z.severity ? ` | svårighetsgrad: ${z.severity}` : "";
+        parts.push(`  - ${z.zone}: ${z.conditionSv || z.condition} (${z.confidence}%)${sevStr}`);
       });
     }
-    parts.push("OBS: Skanningen utfördes lokalt med en begränsad AI-modell som SAKNAR 'normal'-klass (dvs den tvingas alltid ange en hudåkomma). 'normal' i datan ovan innebär att vårt filter bedömt att ingen åkomma detekterades tillförlitligt. Konfidensgrader under 60% bör IGNORERAS. LITA PÅ DIN EGEN VISUELLA BEDÖMNING av bilden istället.");
+    if (imageScan.skinMetrics) {
+      const m = imageScan.skinMetrics;
+      parts.push(`Hudmetriker (0-100, högre = friskare): hydrering ${m.hydration}, elasticitet ${m.elasticity}, porer ${m.pores}, textur ${m.texture}, jämnhet ${m.evenness}, känslighet ${m.sensitivity}, oljighet ${m.oiliness}, rynkor ${m.wrinkles}, mörka ringar ${m.darkCircles}, rodnad ${m.redness}, akne-poäng ${m.acneScore}, pigmentering ${m.pigmentation}, solskada ${m.sunDamage}, barriär ${m.barrier}, TOTALT ${m.overall}`);
+    }
+    parts.push("MODELLEN HAR 'normal/frisk hud'-klass: om modellen klassificerar som 'normal' med hög konfidens är detta trovärdigt. Jämför med din egen visuella bedömning.");
   }
 
   if (!questions && !imageScan) {
@@ -1973,6 +2005,109 @@ app.post("/api/analysis", async (req, res) => {
     const scanConditions = (imageScan?.overall || []).map(o => o.condition || o.conditionSv).filter(Boolean);
     const allConcerns = [...new Set([...concerns, ...scanConditions])];
     const researchSnippets = await searchVayu(allConcerns);
+
+    // Determine userId: from JWT, existing account, or auto-created account
+    let userId = null;
+    try {
+      const authHeader = req.headers.authorization;
+      if (authHeader?.startsWith("Bearer ")) {
+        try {
+          const decoded = jwt.verify(authHeader.slice(7), process.env.JWT_SECRET);
+          userId = decoded.id || null;
+        } catch { /* not logged in, ok */ }
+      }
+    } catch {}
+
+    if (!userId && req.body.questions?.email) {
+      const email = req.body.questions.email.toLowerCase().trim();
+      try {
+        let existingUser = await db.findUserByEmail(email);
+        if (!existingUser) {
+          const tempPassword = crypto.randomBytes(16).toString("hex");
+          const passwordHash = bcrypt ? await bcrypt.hash(tempPassword, 10) : tempPassword;
+          const namePart = email.split("@")[0].replace(/[._-]/g, " ").replace(/\b\w/g, c => c.toUpperCase());
+          existingUser = await db.createUser({
+            id: crypto.randomUUID(),
+            name: namePart,
+            email,
+            phone: "",
+            passwordHash,
+          });
+          console.log(`[Analysis] Auto-created account for ${email} (id: ${existingUser.id})`);
+
+          const resetToken = crypto.randomBytes(32).toString("hex");
+          await db.pool.query(
+            "UPDATE users SET password_reset_token = $1, password_reset_expires = NOW() + INTERVAL '7 days' WHERE id = $2",
+            [resetToken, existingUser.id]
+          );
+
+          const apiKey = process.env.RESEND_API_KEY;
+          if (apiKey) {
+            const { Resend } = require("resend");
+            const resend = new Resend(apiKey);
+            const fromAddr = process.env.EMAIL_FROM || "info@1753skin.com";
+            const baseUrl = process.env.FRONTEND_URL || "https://www.1753skin.com";
+            const isSv = locale === "sv";
+
+            await resend.emails.send({
+              from: `1753 SKINCARE <${fromAddr}>`,
+              to: email,
+              subject: isSv ? "Välkommen till 1753 SKINCARE — ditt konto" : "Welcome to 1753 SKINCARE — your account",
+              html: `
+                <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;max-width:520px;margin:0 auto;color:#1d1d1f">
+                  <h2 style="font-size:20px;margin-bottom:8px">${isSv ? `Hej ${existingUser.name},` : `Hi ${existingUser.name},`}</h2>
+                  <p style="color:#515151;line-height:1.6">${isSv
+                    ? "Vi har skapat ett konto åt dig baserat på din hudanalys. Här kan du se dina resultat, följa din hudresa och göra nya analyser varje månad."
+                    : "We've created an account for you based on your skin analysis. Here you can view your results, track your skin journey and run new analyses every month."}</p>
+                  <p style="margin-top:20px">
+                    <a href="${baseUrl}/${locale}/mitt-konto?reset=${resetToken}" style="display:inline-block;background:#108474;color:#fff;padding:12px 28px;border-radius:980px;text-decoration:none;font-weight:600;font-size:14px">${isSv ? "Sätt ditt lösenord" : "Set your password"}</a>
+                  </p>
+                  <p style="margin-top:16px;color:#766a62;font-size:12px">${isSv ? "Länken är giltig i 7 dagar." : "The link is valid for 7 days."}</p>
+                  <div style="margin-top:32px;padding-top:16px;border-top:1px solid #e6e6e6;text-align:center">
+                    <p style="font-size:11px;color:#766a62">1753 SKINCARE<br><a href="${baseUrl}" style="color:#108474">www.1753skin.com</a></p>
+                  </div>
+                </div>
+              `
+            });
+            console.log(`[Analysis] Welcome email sent to ${email}`);
+          }
+        }
+        userId = existingUser.id;
+      } catch (err) {
+        console.error("[Analysis] Auto-account error:", err.message);
+      }
+    }
+
+    // Rate limit: 1 analysis per 30 days per user
+    if (userId) {
+      try {
+        const recent = await db.pool.query(
+          "SELECT id, created_at FROM skin_analyses WHERE user_id = $1 AND created_at > NOW() - INTERVAL '30 days' ORDER BY created_at DESC LIMIT 1",
+          [userId]
+        );
+        if (recent.rows.length > 0) {
+          const lastDate = new Date(recent.rows[0].created_at);
+          const nextDate = new Date(lastDate.getTime() + 30 * 24 * 60 * 60 * 1000);
+          const daysLeft = Math.ceil((nextDate.getTime() - Date.now()) / (24 * 60 * 60 * 1000));
+          if (daysLeft > 0) {
+            const msgs = {
+              sv: `Du kan göra en ny analys om ${daysLeft} dagar. Nästa analys: ${nextDate.toLocaleDateString("sv-SE")}.`,
+              en: `You can run a new analysis in ${daysLeft} days. Next analysis: ${nextDate.toLocaleDateString("en-GB")}.`,
+              es: `Puedes hacer un nuevo análisis en ${daysLeft} días. Próximo análisis: ${nextDate.toLocaleDateString("es-ES")}.`,
+              de: `Du kannst eine neue Analyse in ${daysLeft} Tagen machen. Nächste Analyse: ${nextDate.toLocaleDateString("de-DE")}.`,
+              fr: `Vous pouvez faire une nouvelle analyse dans ${daysLeft} jours. Prochaine analyse : ${nextDate.toLocaleDateString("fr-FR")}.`,
+            };
+            return res.status(429).json({
+              message: msgs[locale] || msgs.sv,
+              nextAnalysisDate: nextDate.toISOString(),
+              daysLeft,
+            });
+          }
+        }
+      } catch (err) {
+        console.error("[Analysis] Rate limit check error:", err.message);
+      }
+    }
 
     let systemPromptFull = ANALYSIS_SYSTEM_PROMPT;
     const langMap = { en: "English", es: "Spanish", de: "German", fr: "French" };
@@ -2059,15 +2194,6 @@ app.post("/api/analysis", async (req, res) => {
 
     let analysisId = null;
     try {
-      let userId = null;
-      const authHeader = req.headers.authorization;
-      if (authHeader?.startsWith("Bearer ")) {
-        try {
-          const decoded = jwt.verify(authHeader.slice(7), process.env.JWT_SECRET);
-          userId = decoded.id || null;
-        } catch { /* not logged in, ok */ }
-      }
-
       const jsonMatch = outputText.match(/```json\s*([\s\S]*?)```/);
       const parsedResult = jsonMatch ? JSON.parse(jsonMatch[1]) : null;
       const saved = await db.createSkinAnalysis({
@@ -2116,6 +2242,13 @@ app.post("/api/analysis", async (req, res) => {
       analysisId,
       usage: data.usage
     });
+
+    // Send analysis report email (async, non-blocking)
+    if (req.body.questions?.email) {
+      sendAnalysisReport(req.body.questions.email, outputText, req.body.questions?.locale || "sv").catch(err => {
+        console.error("[Analysis] Report email error:", err.message);
+      });
+    }
   } catch (err) {
     console.error("[Analysis Error]", err);
     res.status(err.status || 500).json({ message: err.message || "Analysen misslyckades" });
@@ -3086,6 +3219,13 @@ async function handleOrderCompletion(orderId) {
     console.error("[Order] Email error:", err);
   }
 
+  // 8b. Notify team about new order
+  try {
+    await sendTeamOrderNotification(order, items);
+  } catch (err) {
+    console.error("[Order] Team notification error:", err.message);
+  }
+
   // 9. Trigger post-purchase automation + mark abandoned cart as recovered
   try {
     const purchaseFlows = await db.findFlowByTrigger("purchase");
@@ -3119,6 +3259,46 @@ async function handleOrderCompletion(orderId) {
   }
 
   return { fortnoxInvoiceNumber, ongoingOrderId, notes };
+}
+
+// ---- TEAM NOTIFICATIONS ----
+
+const TEAM_EMAILS = ["christopher@1753skincare.com", "torbjorn@1753skincare.com"];
+
+async function sendTeamOrderNotification(order, items) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return;
+  const { Resend } = require("resend");
+  const resend = new Resend(apiKey);
+  const fromAddr = process.env.EMAIL_FROM || "info@1753skin.com";
+  const currencyLabel = (order.currency || "SEK") === "EUR" ? "\u20ac" : "kr";
+
+  const itemRows = items.map(i =>
+    `<tr><td style="padding:6px 12px;border-bottom:1px solid #f0f0f0">${i.product_name}</td><td style="padding:6px 12px;border-bottom:1px solid #f0f0f0;text-align:center">${i.quantity}</td><td style="padding:6px 12px;border-bottom:1px solid #f0f0f0;text-align:right">${i.unit_price} ${currencyLabel}</td></tr>`
+  ).join("");
+
+  await resend.emails.send({
+    from: `1753 SKINCARE <${fromAddr}>`,
+    to: TEAM_EMAILS,
+    subject: `Ny order: ${order.order_number} — ${order.total_amount} ${currencyLabel}`,
+    html: `
+      <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;max-width:520px;margin:0 auto">
+        <h2 style="color:#1d1d1f;font-size:20px;margin-bottom:8px">Ny order inkommit</h2>
+        <table style="width:100%;border-collapse:collapse;font-size:14px;color:#515151;margin:16px 0">
+          <tr><td style="padding:4px 0;font-weight:600;width:120px">Ordernr</td><td>${order.order_number}</td></tr>
+          <tr><td style="padding:4px 0;font-weight:600">Kund</td><td>${order.customer_name}</td></tr>
+          <tr><td style="padding:4px 0;font-weight:600">E-post</td><td><a href="mailto:${order.customer_email}" style="color:#108474">${order.customer_email}</a></td></tr>
+          <tr><td style="padding:4px 0;font-weight:600">Totalt</td><td style="font-size:18px;font-weight:700;color:#1d1d1f">${order.total_amount} ${currencyLabel}</td></tr>
+        </table>
+        <table style="width:100%;border-collapse:collapse;font-size:13px;color:#515151;margin:16px 0">
+          <tr style="background:#f5f5f7"><th style="padding:8px 12px;text-align:left;font-weight:600">Produkt</th><th style="padding:8px 12px;text-align:center;font-weight:600">Antal</th><th style="padding:8px 12px;text-align:right;font-weight:600">Pris</th></tr>
+          ${itemRows}
+        </table>
+        <p style="margin-top:20px"><a href="https://www.1753skin.com/admin" style="display:inline-block;background:#108474;color:#fff;padding:10px 24px;border-radius:980px;text-decoration:none;font-weight:600;font-size:14px">Visa i admin</a></p>
+      </div>
+    `
+  });
+  console.log(`[Order] Team notification sent for ${order.order_number}`);
 }
 
 // ---- ORDER CONFIRMATION EMAIL ----
@@ -3274,6 +3454,152 @@ async function sendOrderConfirmation(order, items) {
   } catch (_) { /* non-critical */ }
 
   return { sent: true };
+}
+
+// ---- ANALYSIS REPORT EMAIL ----
+
+async function sendAnalysisReport(email, analysisContent, locale) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) return;
+
+  const { Resend } = require("resend");
+  const resend = new Resend(apiKey);
+  const fromAddr = process.env.EMAIL_FROM || "info@1753skin.com";
+  const baseUrl = process.env.FRONTEND_URL || "https://www.1753skin.com";
+
+  let parsed;
+  try {
+    const match = analysisContent.match(/```json\s*([\s\S]*?)```/);
+    if (match) parsed = JSON.parse(match[1]);
+  } catch { return; }
+  if (!parsed) return;
+
+  const isSv = locale === "sv";
+  const isEs = locale === "es";
+  const isDe = locale === "de";
+  const isFr = locale === "fr";
+
+  const subject = isSv ? `Din hudanalys — ${parsed.score}/100 poäng`
+    : isEs ? `Tu análisis de piel — ${parsed.score}/100 puntos`
+    : isDe ? `Deine Hautanalyse — ${parsed.score}/100 Punkte`
+    : isFr ? `Votre analyse de peau — ${parsed.score}/100 points`
+    : `Your skin analysis — ${parsed.score}/100 score`;
+
+  const skinAgeHtml = parsed.skinAge ? `
+    <div style="text-align:center;margin:24px 0;padding:16px;background:#f5f5f7;border-radius:16px">
+      <p style="font-size:13px;color:#766a62;margin:0">${isSv ? "Biologisk hudålder" : isEs ? "Edad biológica de la piel" : isDe ? "Biologisches Hautalter" : isFr ? "Âge biologique de la peau" : "Biological skin age"}</p>
+      <p style="font-size:32px;font-weight:700;color:#1d1d1f;margin:4px 0">${parsed.skinAge} ${isSv ? "år" : isEs ? "años" : isDe ? "Jahre" : isFr ? "ans" : "years"}</p>
+    </div>
+  ` : "";
+
+  const concernsHtml = parsed.skinAnalysis?.concerns?.length ? parsed.skinAnalysis.concerns.slice(0, 3).map(c => {
+    const issue = typeof c === "string" ? c : c.issue;
+    const sev = typeof c === "string" ? "" : c.severity || "";
+    const sevColor = sev === "severe" ? "#c44" : sev === "moderate" ? "#e8a020" : "#108474";
+    return `<div style="display:flex;align-items:center;gap:8px;padding:10px 0;border-bottom:1px solid #f0f0f0">
+      ${sev ? `<span style="display:inline-block;width:8px;height:8px;border-radius:50%;background:${sevColor}"></span>` : ""}
+      <span style="font-size:14px;color:#1d1d1f">${issue}</span>
+    </div>`;
+  }).join("") : "";
+
+  const productsHtml = parsed.products?.slice(0, 3).map(p => `
+    <div style="padding:12px 0;border-bottom:1px solid #f0f0f0">
+      <p style="font-size:14px;font-weight:600;color:#1d1d1f;margin:0">${p.id}</p>
+      <p style="font-size:12px;color:#515151;margin:4px 0 0">${p.reason}</p>
+    </div>
+  `).join("") || "";
+
+  const lifestyleHtml = parsed.lifestyle?.slice(0, 3).map(l => `
+    <div style="padding:10px 0;border-bottom:1px solid #f0f0f0">
+      <p style="font-size:13px;font-weight:600;color:#1d1d1f;margin:0">${l.area}</p>
+      <p style="font-size:12px;color:#515151;margin:2px 0 0">${l.tip}</p>
+    </div>
+  `).join("") || "";
+
+  const routineHtml = parsed.routine ? `
+    <div style="margin:20px 0">
+      <h3 style="font-size:15px;font-weight:600;color:#1d1d1f;margin:0 0 12px">${isSv ? "Din rutin" : isEs ? "Tu rutina" : isDe ? "Deine Routine" : isFr ? "Votre routine" : "Your routine"}</h3>
+      <div style="display:flex;gap:16px">
+        <div style="flex:1">
+          <p style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:#766a62;margin:0 0 8px">${isSv ? "Morgon" : isEs ? "Mañana" : isDe ? "Morgen" : isFr ? "Matin" : "Morning"}</p>
+          ${(parsed.routine.morning || []).map(s => `<p style="font-size:12px;color:#515151;margin:4px 0">• ${typeof s === "string" ? s : s.step}</p>`).join("")}
+        </div>
+        <div style="flex:1">
+          <p style="font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:1px;color:#766a62;margin:0 0 8px">${isSv ? "Kväll" : isEs ? "Noche" : isDe ? "Abend" : isFr ? "Soir" : "Evening"}</p>
+          ${(parsed.routine.evening || []).map(s => `<p style="font-size:12px;color:#515151;margin:4px 0">• ${typeof s === "string" ? s : s.step}</p>`).join("")}
+        </div>
+      </div>
+    </div>
+  ` : "";
+
+  const ctaLabel = isSv ? "Se din fullständiga analys" : isEs ? "Ver tu análisis completo" : isDe ? "Vollständige Analyse ansehen" : isFr ? "Voir votre analyse complète" : "View your full analysis";
+  const ctaUrl = `${baseUrl}/${locale}/hudanalys`;
+
+  const html = `
+    <div style="font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Helvetica,Arial,sans-serif;max-width:560px;margin:0 auto;color:#1d1d1f;padding:0 16px">
+      <div style="text-align:center;padding:32px 0 24px">
+        <img src="${baseUrl}/logo.png" alt="1753 SKINCARE" style="height:32px" />
+      </div>
+
+      <div style="text-align:center;margin-bottom:24px">
+        <div style="display:inline-block;width:120px;height:120px;border-radius:50%;background:linear-gradient(135deg,#108474 0%,#0d6e62 100%);line-height:120px;text-align:center">
+          <span style="font-size:36px;font-weight:700;color:#fff">${parsed.score}</span>
+        </div>
+        <p style="font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#766a62;margin:12px 0 0">${isSv ? "Din hudpoäng" : isEs ? "Tu puntuación" : isDe ? "Dein Hautscore" : isFr ? "Votre score" : "Your skin score"}</p>
+      </div>
+
+      ${skinAgeHtml}
+
+      <div style="margin:24px 0">
+        <p style="font-size:14px;line-height:1.6;color:#515151">${parsed.summary}</p>
+      </div>
+
+      ${concernsHtml ? `
+        <div style="margin:24px 0">
+          <h3 style="font-size:15px;font-weight:600;color:#1d1d1f;margin:0 0 12px">${isSv ? "Fokusområden" : isEs ? "Áreas de enfoque" : isDe ? "Fokusgebiete" : isFr ? "Domaines d'attention" : "Focus areas"}</h3>
+          ${concernsHtml}
+        </div>
+      ` : ""}
+
+      ${productsHtml ? `
+        <div style="margin:24px 0">
+          <h3 style="font-size:15px;font-weight:600;color:#1d1d1f;margin:0 0 12px">${isSv ? "Rekommenderade produkter" : isEs ? "Productos recomendados" : isDe ? "Empfohlene Produkte" : isFr ? "Produits recommandés" : "Recommended products"}</h3>
+          ${productsHtml}
+        </div>
+      ` : ""}
+
+      ${lifestyleHtml ? `
+        <div style="margin:24px 0">
+          <h3 style="font-size:15px;font-weight:600;color:#1d1d1f;margin:0 0 12px">${isSv ? "Livsstilsråd" : isEs ? "Consejos de estilo de vida" : isDe ? "Lifestyle-Tipps" : isFr ? "Conseils mode de vie" : "Lifestyle tips"}</h3>
+          ${lifestyleHtml}
+        </div>
+      ` : ""}
+
+      ${routineHtml}
+
+      <div style="text-align:center;margin:32px 0">
+        <a href="${ctaUrl}" style="display:inline-block;background:#108474;color:#fff;padding:14px 32px;border-radius:980px;text-decoration:none;font-weight:600;font-size:14px">${ctaLabel}</a>
+      </div>
+
+      <div style="border-top:1px solid #e6e6e6;padding:24px 0;text-align:center">
+        <p style="font-size:12px;color:#766a62;line-height:1.5;margin:0">
+          1753 SKINCARE<br>
+          <a href="${baseUrl}" style="color:#108474">www.1753skin.com</a>
+        </p>
+        <p style="margin-top:8px;font-size:10px;color:#999">
+          ${isSv ? "Denna analys är framtagen med hjälp av AI och utgör inte medicinsk rådgivning." : isEs ? "Este análisis fue generado con IA y no constituye asesoramiento médico." : isDe ? "Diese Analyse wurde mit KI erstellt und stellt keine medizinische Beratung dar." : isFr ? "Cette analyse a été générée par IA et ne constitue pas un avis médical." : "This analysis was generated using AI and does not constitute medical advice."}
+        </p>
+      </div>
+    </div>
+  `;
+
+  await resend.emails.send({
+    from: `1753 SKINCARE <${fromAddr}>`,
+    to: email,
+    subject,
+    html,
+  });
+  console.log(`[Analysis] Report email sent to ${email}`);
 }
 
 // ---- SHIPPING CONFIRMATION EMAIL ----
@@ -3669,17 +3995,81 @@ async function sendAdminNotification(fromEmail, fromName, subject) {
 
     await resend.emails.send({
       from: `1753 SKINCARE <${fromAddr}>`,
-      to: "christopher@1753skin.com",
+      to: TEAM_EMAILS,
       subject: `Nytt kundmeddelande: ${subject}`,
       html: `
-        <h3>Nytt inkommande meddelande</h3>
-        <p><strong>Från:</strong> ${fromName || "Okänt"} &lt;${fromEmail}&gt;</p>
-        <p><strong>Ämne:</strong> ${subject}</p>
-        <p>Ett AI-genererat svarsutkast väntar på godkännande i <a href="https://www.1753skin.com/admin/inkorg">admin-panelen</a>.</p>
+        <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;max-width:520px;margin:0 auto">
+          <h3 style="color:#1d1d1f;margin-bottom:8px">Nytt inkommande meddelande</h3>
+          <p style="color:#515151"><strong>Fran:</strong> ${fromName || "Okant"} &lt;${fromEmail}&gt;</p>
+          <p style="color:#515151"><strong>Amne:</strong> ${subject}</p>
+          <p style="color:#515151">Ett AI-genererat svarsutkast vantar pa godkannande i admin-panelen.</p>
+          <p style="margin-top:16px"><a href="https://www.1753skin.com/admin/inkorg" style="display:inline-block;background:#108474;color:#fff;padding:10px 24px;border-radius:980px;text-decoration:none;font-weight:600;font-size:14px">Oppna inkorg</a></p>
+        </div>
       `
     });
   } catch (err) {
     console.error("[EmailAI] Notification send failed:", err.message);
+  }
+}
+
+// ---- AUTO-UNSUBSCRIBE DETECTION ----
+
+const UNSUB_PATTERNS = [
+  /avprenumer/i,
+  /avanmäl/i,
+  /unsubscri/i,
+  /sluta\s+skicka/i,
+  /ta\s+bort\s+m(ig|ej)/i,
+  /vill\s+inte\s+(ha|få)\s+(mer|fler|nyhetsbrev|mail|mejl|utskick)/i,
+  /inte\s+längre\s+(få|ha|prenumerer)/i,
+  /remove\s+me/i,
+  /opt\s*out/i,
+  /stop\s+(sending|emails)/i,
+];
+
+function isUnsubscribeRequest(text) {
+  if (!text) return false;
+  return UNSUB_PATTERNS.some(p => p.test(text));
+}
+
+async function handleAutoUnsubscribe(email, name) {
+  try {
+    const subscriber = await db.findSubscriberByEmail(email);
+    if (!subscriber || subscriber.status !== "active") {
+      console.log(`[AutoUnsub] ${email} not an active subscriber, skipping`);
+      return { handled: false, wasActive: false };
+    }
+
+    await db.unsubscribeByEmail(email);
+    await db.cancelAutomationsForSubscriber(subscriber.id);
+    console.log(`[AutoUnsub] ${email} automatically unsubscribed from newsletter`);
+
+    const apiKey = process.env.RESEND_API_KEY;
+    if (apiKey) {
+      const { Resend } = require("resend");
+      const resend = new Resend(apiKey);
+      const fromAddr = process.env.EMAIL_FROM || "info@1753skin.com";
+      const firstName = name?.split(" ")[0] || "";
+
+      await resend.emails.send({
+        from: `1753 SKINCARE <${fromAddr}>`,
+        to: email,
+        subject: "Bekräftelse: du är avprenumererad",
+        html: `
+          <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;max-width:520px;margin:0 auto;color:#1d1d1f">
+            <h2 style="font-size:20px;margin-bottom:8px">Hej${firstName ? ` ${firstName}` : ""},</h2>
+            <p style="color:#515151;line-height:1.6">Vi har tagit bort dig från vårt nyhetsbrev. Du kommer inte längre att få utskick från oss.</p>
+            <p style="color:#515151;line-height:1.6">Om du ångrar dig är du alltid välkommen tillbaka – du kan prenumerera igen via vår hemsida.</p>
+            <p style="color:#515151;line-height:1.6;margin-top:24px">Varma hälsningar,<br>Christopher & teamet<br>1753 SKINCARE<br>info@1753skin.com</p>
+          </div>
+        `
+      });
+    }
+
+    return { handled: true, wasActive: true };
+  } catch (err) {
+    console.error("[AutoUnsub] Error:", err.message);
+    return { handled: false, error: err.message };
   }
 }
 
@@ -3698,6 +4088,22 @@ app.post("/api/email/inbound", async (req, res) => {
     }
 
     console.log(`[EmailAI] Inbound from ${fromEmail}: "${subject}"`);
+
+    // Auto-unsubscribe if the message is about newsletter opt-out
+    const combinedText = `${subject} ${bodyText}`;
+    if (isUnsubscribeRequest(combinedText)) {
+      const unsub = await handleAutoUnsubscribe(fromEmail, fromName);
+      if (unsub.handled) {
+        const conversation = await db.createEmailConversation({
+          fromEmail, fromName, subject, bodyText, bodyHtml,
+          aiDraft: `Personen har automatiskt avprenumererats från nyhetsbrevet. Bekräftelsemejl har skickats.`,
+          category: "unsubscribe", customerContext: await fetchCustomerContext(fromEmail)
+        });
+        await sendAdminNotification(fromEmail, fromName, `[Auto-avprenumererad] ${subject}`);
+        console.log(`[EmailAI] Auto-unsubscribed ${fromEmail}, conversation #${conversation.id}`);
+        return res.json({ ok: true, id: conversation.id, autoUnsubscribed: true });
+      }
+    }
 
     const customerContext = await fetchCustomerContext(fromEmail);
     const aiDraft = await generateEmailDraft(fromEmail, fromName, subject, bodyText, customerContext);
@@ -3728,6 +4134,20 @@ app.post("/api/email/from-contact", async (req, res) => {
   try {
     const { name, email, message } = req.body;
     if (!email || !message) return res.status(400).json({ message: "Email and message required" });
+
+    if (isUnsubscribeRequest(message)) {
+      const unsub = await handleAutoUnsubscribe(email, name);
+      if (unsub.handled) {
+        const conversation = await db.createEmailConversation({
+          fromEmail: email, fromName: name, subject: "Kontaktformulär (avprenumerering)",
+          bodyText: message,
+          aiDraft: `Personen har automatiskt avprenumererats från nyhetsbrevet. Bekräftelsemejl har skickats.`,
+          category: "unsubscribe", customerContext: await fetchCustomerContext(email)
+        });
+        await sendAdminNotification(email, name, "[Auto-avprenumererad] Kontaktformulär");
+        return res.json({ ok: true, id: conversation.id, autoUnsubscribed: true });
+      }
+    }
 
     const customerContext = await fetchCustomerContext(email);
     const aiDraft = await generateEmailDraft(email, name, "Kontaktformulär", message, customerContext);
@@ -3852,6 +4272,27 @@ app.post("/api/contact", async (req, res) => {
       return res.status(400).json({ message: "Alla fält krävs." });
     }
 
+    // Auto-unsubscribe if message is about newsletter opt-out
+    if (isUnsubscribeRequest(message)) {
+      const unsub = await handleAutoUnsubscribe(email, name);
+      if (unsub.handled) {
+        console.log(`[Contact] Auto-unsubscribed ${email} via contact form`);
+        // Still log it in inbox for visibility
+        (async () => {
+          try {
+            await db.createEmailConversation({
+              fromEmail: email, fromName: name, subject: "Kontaktformulär (avprenumerering)",
+              bodyText: message,
+              aiDraft: `Personen har automatiskt avprenumererats från nyhetsbrevet. Bekräftelsemejl har skickats till ${email}.`,
+              category: "unsubscribe", customerContext: await fetchCustomerContext(email)
+            });
+            await sendAdminNotification(email, name, "[Auto-avprenumererad] Kontaktformulär");
+          } catch (err) { console.error("[Contact] Unsub conversation log error:", err.message); }
+        })();
+        return res.json({ ok: true, autoUnsubscribed: true });
+      }
+    }
+
     const apiKey = process.env.RESEND_API_KEY;
     if (!apiKey) {
       console.error("[Contact] RESEND_API_KEY not set");
@@ -3864,7 +4305,7 @@ app.post("/api/contact", async (req, res) => {
 
     await resend.emails.send({
       from: `1753 SKINCARE <${fromEmail}>`,
-      to: "info@1753skin.com",
+      to: ["info@1753skin.com", ...TEAM_EMAILS],
       replyTo: email,
       subject: `Kontaktformulär: ${name}`,
       html: `
@@ -3876,7 +4317,7 @@ app.post("/api/contact", async (req, res) => {
       `
     });
 
-    console.log(`[Contact] Message from ${email} (${name}) forwarded to info@1753skin.com`);
+    console.log(`[Contact] Message from ${email} (${name}) forwarded to info + team`);
 
     // Generate AI draft in background
     (async () => {
@@ -4037,7 +4478,7 @@ async function translateReviewToAllLanguages(reviewId) {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${apiKey}` },
       body: JSON.stringify({
-        model: "gpt-4o-mini",
+        model: "gpt-5.4-mini",
         temperature: 0.3,
         response_format: { type: "json_object" },
         messages: [

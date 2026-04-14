@@ -137,9 +137,9 @@ export function Header() {
   const localeLabels: Record<string, string> = {
     sv: "Svenska",
     en: "English",
-    es: "Espanol",
+    es: "Español",
     de: "Deutsch",
-    fr: "Francais",
+    fr: "Français",
   };
 
   const flags: Record<string, React.ReactNode> = {

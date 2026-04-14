@@ -1,5 +1,5 @@
 {
-  "image_size": 260,
+  "image_size": 224,
   "labels": [
     "acne",
     "dermatitis",
@@ -30,7 +30,51 @@
     "rosacea": "Rosacea",
     "sun_damage": "Solskada"
   },
+  "label_names_en": {
+    "acne": "Acne",
+    "dermatitis": "Dermatitis",
+    "dryness": "Dry skin",
+    "eczema": "Eczema",
+    "hyperpigmentation": "Hyperpigmentation",
+    "normal": "Normal/healthy skin",
+    "psoriasis": "Psoriasis",
+    "rosacea": "Rosacea",
+    "sun_damage": "Sun damage"
+  },
+  "label_names_es": {
+    "acne": "Acné",
+    "dermatitis": "Dermatitis",
+    "dryness": "Piel seca",
+    "eczema": "Eczema",
+    "hyperpigmentation": "Hiperpigmentación",
+    "normal": "Piel normal/sana",
+    "psoriasis": "Psoriasis",
+    "rosacea": "Rosácea",
+    "sun_damage": "Daño solar"
+  },
+  "label_names_de": {
+    "acne": "Akne",
+    "dermatitis": "Dermatitis",
+    "dryness": "Trockene Haut",
+    "eczema": "Ekzem",
+    "hyperpigmentation": "Hyperpigmentierung",
+    "normal": "Normale/gesunde Haut",
+    "psoriasis": "Psoriasis",
+    "rosacea": "Rosazea",
+    "sun_damage": "Sonnenschäden"
+  },
+  "label_names_fr": {
+    "acne": "Acné",
+    "dermatitis": "Dermatite",
+    "dryness": "Peau sèche",
+    "eczema": "Eczéma",
+    "hyperpigmentation": "Hyperpigmentation",
+    "normal": "Peau normale/saine",
+    "psoriasis": "Psoriasis",
+    "rosacea": "Rosacée",
+    "sun_damage": "Dommages solaires"
+  },
   "mean": [0.485, 0.456, 0.406],
   "std": [0.229, 0.224, 0.225],
-  "source_model": "efficientnet_b3_multitask"
+  "source_model": "mobilenet_v3_multitask"
 }

@@ -33,7 +33,7 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
     "@type": "Person",
     "@id": "https://www.1753skin.com/#founder",
     name: "Christopher Genberg",
-    jobTitle: tx(l, "Grundare", "Founder", "Fundador", "Gründer"),
+    jobTitle: tx(l, "Grundare", "Founder", "Fundador", "Gründer", "Fondateur"),
     worksFor: {
       "@type": "Organization",
       "@id": "https://www.1753skin.com/#organization",

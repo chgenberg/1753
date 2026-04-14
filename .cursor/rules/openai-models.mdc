@@ -1,0 +1,37 @@
+# OpenAI-modeller – Krav
+
+## Regel
+
+Hela 1753 SKINCARE-projektet ska **alltid** anvanda GPT-5.4-familjen eller nyare. Aldrig GPT-4o, GPT-4o-mini eller aldre modeller.
+
+## Modellval
+
+| Anvandning | Modell | Motivering |
+|---|---|---|
+| Hudanalys (vision + text) | `gpt-5.4` | Frontier-modell, bast kvalitet |
+| E-post AI-svar | `gpt-5.4` | Kravs for tonsakerhet |
+| Chatbot / kundsupport | `gpt-5.4` | Frontier for kundupplevelse |
+| Oversattning (recensioner, innehall) | `gpt-5.4-mini` | Kostnadseffektivt, hog kvalitet |
+| Bildfiltrering (GPT Vision) | `gpt-5.4-mini` | Kostnadseffektivt, tillracklig kvalitet |
+| Severity-annotering | `gpt-5.4-mini` | Kostnadseffektivt, tillracklig kvalitet |
+| Nyhetsbrev-generering | `gpt-5.4` | Varumarkestext kravs hog kvalitet |
+
+## Konstanter i server.js
+
+```js
+const OPENAI_MODEL = process.env.OPENAI_MODEL || "gpt-5.4";       // Primar modell
+const EMAIL_AI_MODEL = "gpt-5.4";                                  // E-post AI
+// For kostnadseffektiva uppgifter: "gpt-5.4-mini"
+```
+
+## Forbjudet
+
+- `gpt-4o`
+- `gpt-4o-mini`
+- `gpt-4-turbo`
+- `gpt-3.5-turbo`
+- Alla modeller aldre an GPT-5.4-familjen
+
+## Vid uppgradering
+
+Nar nyare modeller slipps (t.ex. GPT-5.5, GPT-6): uppgradera, testa, och uppdatera denna regel.

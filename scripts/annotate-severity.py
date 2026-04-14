@@ -35,7 +35,7 @@ if not OPENAI_API_KEY:
     OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
 
 API_URL = "https://api.openai.com/v1/chat/completions"
-MODEL = "gpt-4o-mini"
+MODEL = "gpt-5.4-mini"
 MAX_RETRIES = 3
 RATE_LIMIT_SLEEP = 2
 
