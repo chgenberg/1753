@@ -337,7 +337,7 @@ export const es: Messages = {
     badge: "Con IA",
     title: "Análisis de piel gratuito",
     intro:
-      "Responde cinco preguntas cortas sobre tu piel y estilo de vida. Nuestra IA te ofrece un análisis más profundo y holístico con recomendaciones personalizadas, totalmente gratis.",
+      "Responde unas breves preguntas sobre tu piel y estilo de vida. Nuestra IA te ofrece un análisis más profundo y holístico con recomendaciones personalizadas, totalmente gratis.",
     startQuiz: "Iniciar análisis de piel",
     stepOf: "Paso {current} de {total}",
     next: "Siguiente",

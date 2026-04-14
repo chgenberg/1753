@@ -693,7 +693,7 @@ export function MethodologyModal({
           </div>
           <button
             onClick={onClose}
-            className="flex h-9 w-9 items-center justify-center rounded-full bg-[#f5f5f7] text-[#766a62] transition-colors hover:bg-[#e6e6e6] hover:text-[#1d1d1f] active:scale-90"
+            className="flex h-11 w-11 items-center justify-center rounded-full bg-[#f5f5f7] text-[#766a62] transition-colors hover:bg-[#e6e6e6] hover:text-[#1d1d1f] active:scale-90"
             aria-label={tx(locale, "Stäng", "Close", "Cerrar", "Schließen", "Fermer")}
           >
             <X className="h-4 w-4" />

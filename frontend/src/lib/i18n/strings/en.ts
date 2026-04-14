@@ -337,7 +337,7 @@ export const en: Messages = {
     badge: "AI-powered",
     title: "Free skin analysis",
     intro:
-      "Answer five short questions about your skin and lifestyle. Our AI gives you a deeper, more holistic analysis with personal recommendations, completely free.",
+      "Answer a few short questions about your skin and lifestyle. Our AI gives you a deeper, more holistic analysis with personal recommendations, completely free.",
     startQuiz: "Start skin analysis",
     stepOf: "Step {current} of {total}",
     next: "Next",

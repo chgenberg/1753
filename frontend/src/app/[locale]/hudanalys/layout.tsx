@@ -7,9 +7,9 @@ const BASE_URL = "https://www.1753skin.com";
 const ANALYSIS_PATHS: Record<string, string> = {
   sv: "/sv/hudanalys",
   en: "/en/skin-analysis",
-  es: "/es/analisis-de-piel",
+  es: "/es/analisis-piel",
   de: "/de/hautanalyse",
-  fr: "/fr/analyse-de-peau",
+  fr: "/fr/analyse-peau",
 };
 
 export async function generateMetadata({

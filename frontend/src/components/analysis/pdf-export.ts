@@ -24,11 +24,11 @@ function scoreColor(score: number): readonly [number, number, number] {
 
 function gradeText(grade: number, locale: string): string {
   const labels: Record<number, Record<string, string>> = {
-    5: { sv: "Utmärkt", en: "Excellent", es: "Excelente", de: "Ausgezeichnet", fr: "Excellent" },
-    4: { sv: "Bra", en: "Good", es: "Bueno", de: "Gut", fr: "Bon" },
+    1: { sv: "Utmärkt", en: "Excellent", es: "Excelente", de: "Ausgezeichnet", fr: "Excellent" },
+    2: { sv: "Bra", en: "Good", es: "Bueno", de: "Gut", fr: "Bon" },
     3: { sv: "Medel", en: "Average", es: "Promedio", de: "Durchschnitt", fr: "Moyen" },
-    2: { sv: "Under medel", en: "Below avg", es: "Bajo prom.", de: "Unter Durchschn.", fr: "Sous la moy." },
-    1: { sv: "Låg", en: "Low", es: "Bajo", de: "Niedrig", fr: "Faible" },
+    4: { sv: "Under medel", en: "Below avg", es: "Bajo prom.", de: "Unter Durchschn.", fr: "Sous la moy." },
+    5: { sv: "Behöver åtgärd", en: "Needs attention", es: "Necesita atención", de: "Braucht Aufm.", fr: "Nécessite att." },
   };
   const entry = labels[grade];
   if (!entry) return "";
@@ -263,7 +263,8 @@ export async function generateAnalysisPDF(
       const clampH = Math.min(imgH, 50);
 
       drawRoundedRect(doc, margin, y, imgW + 2, clampH + 2, 4, WHITE, [230, 230, 230]);
-      doc.addImage(img, "JPEG", margin + 1, y + 1, imgW, clampH, undefined, "FAST");
+      const imgFormat = props.scanImageSrc!.startsWith("data:image/png") ? "PNG" : "JPEG";
+      doc.addImage(img, imgFormat, margin + 1, y + 1, imgW, clampH, undefined, "FAST");
 
       const scoreX = margin + imgW + 14;
       drawScoreArc(doc, scoreX + 18, y + 18, 16, props.score, sc);
@@ -295,15 +296,17 @@ export async function generateAnalysisPDF(
         doc.text(String(props.skinAge), infoX + 14, infoY + 11.5, { align: "center" });
       }
       if (props.fitzpatrick) {
+        const fpW = 34;
         const fpX = props.skinAge ? infoX + 32 : infoX;
-        drawRoundedRect(doc, fpX, infoY, 28, 14, 3, BG);
-        doc.setFontSize(5.5);
+        drawRoundedRect(doc, fpX, infoY, fpW, 14, 3, BG);
+        doc.setFontSize(4.5);
         doc.setTextColor(...BROWN);
-        doc.text("FITZPATRICK", fpX + 14, infoY + 4, { align: "center" });
+        const fpLabel = tx(locale, "SOLKÄNSLIGHET", "SUN SENSITIVITY", "SENSIBILIDAD SOLAR", "SONNENEMPF.", "SENSIBILITÉ SOL.");
+        doc.text(fpLabel, fpX + fpW / 2, infoY + 4, { align: "center" });
         doc.setFontSize(14);
         doc.setFont("helvetica", "bold");
         doc.setTextColor(...DARK);
-        doc.text(props.fitzpatrick, fpX + 14, infoY + 11.5, { align: "center" });
+        doc.text(props.fitzpatrick, fpX + fpW / 2, infoY + 11.5, { align: "center" });
       }
 
       y += Math.max(clampH + 6, 42);

@@ -6,7 +6,7 @@ import {
   ArrowRight,
   Camera,
   Check,
-  ChevronDown,
+  Download,
   Droplets,
   Flame,
   Heart,
@@ -16,8 +16,11 @@ import {
   Mail,
   Moon,
   ScanFace,
+  Share2,
+  Shield,
   ShieldAlert,
   Sparkles,
+  X,
   Sun,
   Target,
   User,
@@ -226,7 +229,7 @@ function ChipSelect({
   onToggle: (key: string) => void;
 }) {
   return (
-    <div className="flex flex-wrap justify-center gap-3">
+    <div className="grid grid-cols-2 gap-3">
       {options.map((opt) => {
         const active = selected.includes(opt.key);
         const Icon = opt.icon;
@@ -236,7 +239,7 @@ function ChipSelect({
             type="button"
             onClick={() => onToggle(opt.key)}
             className={cn(
-              "inline-flex items-center gap-2 rounded-full border-2 px-5 py-2.5 text-sm font-medium transition-all duration-300",
+              "inline-flex items-center justify-center gap-2 rounded-full border-2 px-5 py-2.5 text-sm font-medium transition-all duration-300",
               active
                 ? "border-[#108474] bg-[#108474]/5 text-[#108474]"
                 : "border-brand-100 bg-white text-brand-700 hover:border-brand-200"
@@ -409,11 +412,29 @@ function AnalyzingProgress({ locale }: { locale: string }) {
   );
 }
 
+const GRADE_MAP: Record<string, number> = { excellent: 1, good: 2, fair: 3, poor: 4, "very poor": 5 };
+
 function parseAnalysisJSON(content: string): AnalysisJSON | null {
   const match = content.match(/```json\s*([\s\S]*?)```/);
   if (!match) return null;
   try {
-    return JSON.parse(match[1]);
+    const raw = JSON.parse(match[1]);
+    if (raw.metrics) {
+      for (const key of Object.keys(raw.metrics)) {
+        const m = raw.metrics[key];
+        if (m && typeof m.grade === "string") {
+          m.grade = GRADE_MAP[m.grade.toLowerCase()] ?? 3;
+        }
+      }
+    }
+    if (raw.skinAnalysis) {
+      raw.skinAnalysis.strengths = raw.skinAnalysis.strengths ?? [];
+      raw.skinAnalysis.concerns = raw.skinAnalysis.concerns ?? [];
+    }
+    raw.lifestyle = raw.lifestyle ?? [];
+    raw.avoid = raw.avoid ?? [];
+    raw.products = raw.products ?? [];
+    return raw;
   } catch {
     return null;
   }
@@ -450,7 +471,7 @@ export default function AnalysisPage() {
     sunProtection: "",
     hormonal: "",
   });
-  const [gdprExpanded, setGdprExpanded] = useState(false);
+  const [termsOpen, setTermsOpen] = useState(false);
   const [scanSummary, setScanSummary] = useState<ScanSummary | null>(null);
   const [result, setResult] = useState<AnalysisResponse | null>(null);
   const [parsed, setParsed] = useState<AnalysisJSON | null>(null);
@@ -538,7 +559,7 @@ export default function AnalysisPage() {
       case "email":
         return !!userEmail.trim() && userEmail.includes("@") && emailConsent;
       case "demographics":
-        return answers.age > 0 && !!answers.gender;
+        return answers.age >= 13 && answers.age <= 120 && !!answers.gender;
       case 1:
         return !!answers.skinType;
       case 2:
@@ -552,16 +573,18 @@ export default function AnalysisPage() {
       case 6:
         return !!answers.sunProtection;
       case 7:
-        return true;
+        return !!answers.hormonal;
       default:
         return true;
     }
   }, [step, answers, userEmail, emailConsent]);
 
+  const trainingUploadedRef = useRef(false);
   const uploadTrainingData = useCallback(async (
     scan: ScanSummary,
     quiz?: QuizAnswers
   ) => {
+    if (trainingUploadedRef.current) return;
     if (!scan.consentGiven || !scan.imageBase64) return;
     try {
       const res = await apiFetch<{ id: number; totalContributions: number }>(
@@ -588,6 +611,7 @@ export default function AnalysisPage() {
           }),
         }
       );
+      trainingUploadedRef.current = true;
       setTrainingUploaded(true);
       setTrainingCount(res.totalContributions);
     } catch {
@@ -620,6 +644,7 @@ export default function AnalysisPage() {
     analyzingRef.current = true;
     setStep("analyzing");
     setError("");
+    scrollTop();
     try {
       const headers: Record<string, string> = {};
       if (token) headers["Authorization"] = `Bearer ${token}`;
@@ -651,46 +676,50 @@ export default function AnalysisPage() {
 
       const faceImage = scanSummary?.imageBase64 || null;
 
-      const data = await apiFetch<AnalysisResponse>("/analysis", {
-        method: "POST",
-        headers,
-        body: JSON.stringify({
-          questions: {
-            age: answers.age,
-            gender: answers.gender,
-            skinType: answers.skinType,
-            concerns: answers.concerns,
-            routine: answers.routine.join(", "),
-            lifestyle: {
-              sleep: answers.sleep,
-              stress: answers.stress,
-              diet: answers.diet,
-              water: answers.water,
-              activity: answers.exercise,
-            },
-            goals: answers.goals,
-            goalFreeText: answers.sensitivities
-              ? tx(locale, `Känsligheter/allergier: ${answers.sensitivities}`, `Sensitivities/allergies: ${answers.sensitivities}`, `Sensibilidades/alergias: ${answers.sensitivities}`, `Empfindlichkeiten/Allergien: ${answers.sensitivities}`, `Sensibilités/allergies : ${answers.sensitivities}`)
-              : undefined,
-            sunProtection: answers.sunProtection,
-            hormonal: answers.hormonal,
-            email: userEmail,
-            locale,
+      const requestBody = JSON.stringify({
+        questions: {
+          age: answers.age,
+          gender: answers.gender,
+          skinType: answers.skinType,
+          concerns: answers.concerns,
+          routine: answers.routine.join(", "),
+          lifestyle: {
+            sleep: answers.sleep,
+            stress: answers.stress,
+            diet: answers.diet,
+            water: answers.water,
+            activity: answers.exercise,
           },
-          ...scanContext,
-          ...(faceImage ? { fullImage: faceImage } : {}),
-          ...(scanSummary?.zoneCrops?.length
-            ? {
-                regions: scanSummary.zoneCrops
-                  .filter((zc) => zc.dataUrl)
-                  .map((zc) => ({
-                    label: zc.labelEn || zc.id,
-                    imageBase64: zc.dataUrl,
-                  })),
-              }
-            : {}),
-        }),
+          goals: answers.goals,
+          goalFreeText: answers.sensitivities
+            ? tx(locale, `Känsligheter/allergier: ${answers.sensitivities}`, `Sensitivities/allergies: ${answers.sensitivities}`, `Sensibilidades/alergias: ${answers.sensitivities}`, `Empfindlichkeiten/Allergien: ${answers.sensitivities}`, `Sensibilités/allergies : ${answers.sensitivities}`)
+            : undefined,
+          sunProtection: answers.sunProtection,
+          hormonal: answers.hormonal,
+          email: userEmail,
+          locale,
+        },
+        ...scanContext,
+        ...(faceImage ? { fullImage: faceImage } : {}),
+        ...(scanSummary?.zoneCrops?.length
+          ? {
+              regions: scanSummary.zoneCrops
+                .filter((zc) => zc.dataUrl)
+                .map((zc) => ({
+                  label: zc.labelEn || zc.id,
+                  imageBase64: zc.dataUrl,
+                })),
+            }
+          : {}),
       });
+
+      let data: AnalysisResponse;
+      try {
+        data = await apiFetch<AnalysisResponse>("/analysis", { method: "POST", headers, body: requestBody });
+      } catch (firstErr) {
+        await new Promise((r) => setTimeout(r, 1000));
+        data = await apiFetch<AnalysisResponse>("/analysis", { method: "POST", headers, body: requestBody });
+      }
       setResult(data);
       const json = parseAnalysisJSON(data.content);
       setParsed(json);
@@ -701,7 +730,7 @@ export default function AnalysisPage() {
           result: data,
           parsed: json,
           answers,
-          scanSummary: scanSummary ? { overallTop: scanSummary.overallTop, zones: scanSummary.zones, consentGiven: scanSummary.consentGiven } : null,
+          scanSummary: scanSummary ? { overallTop: scanSummary.overallTop, zones: scanSummary.zones, consentGiven: scanSummary.consentGiven, imageBase64: scanSummary.imageBase64 } : null,
         }));
         sessionStorage.removeItem("1753_analysis_progress");
       } catch { /* quota exceeded */ }
@@ -736,6 +765,23 @@ export default function AnalysisPage() {
     }
   }, [answers, a, locale, token, scanSummary, uploadTrainingData, userEmail, nlSubscribed]);
 
+  useEffect(() => {
+    if (!termsOpen) return;
+    const scrollY = window.scrollY;
+    document.body.style.position = "fixed";
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.width = "100%";
+    const onKey = (e: KeyboardEvent) => { if (e.key === "Escape") setTermsOpen(false); };
+    document.addEventListener("keydown", onKey);
+    return () => {
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.width = "";
+      window.scrollTo(0, scrollY);
+      document.removeEventListener("keydown", onKey);
+    };
+  }, [termsOpen]);
+
   const scrollTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
 
   const goNext = () => {
@@ -756,6 +802,7 @@ export default function AnalysisPage() {
       setStep((step + 1) as Step);
     } else if (typeof step === "number" && step === TOTAL_STEPS) {
       analyze();
+      return;
     }
     scrollTop();
   };
@@ -932,86 +979,102 @@ export default function AnalysisPage() {
                     <div className="mt-0.5 h-5 w-5 flex-shrink-0 rounded border-2 border-[#766a62]/30" />
                   )}
                   <span className="text-xs leading-relaxed text-[#515151]">
-                    {locale === "sv" ? (
-                      <>
-                        Jag godkänner att ett konto skapas med min e-postadress för att spara mina analysresultat.
-                        Jag godkänner också att få personliga hudvårdstips via e-post och att mina svar och bilder får användas{" "}
-                        <span className="font-semibold text-[#1d1d1f]">anonymt</span> för att förbättra AI-analysen.
-                        Jag kan avregistrera mig och radera mitt konto när som helst.
-                      </>
-                    ) : locale === "es" ? (
-                      <>
-                        Acepto que se cree una cuenta con mi email para guardar mis resultados de análisis.
-                        También acepto recibir consejos personalizados por email y que mis respuestas e imágenes se utilicen{" "}
-                        <span className="font-semibold text-[#1d1d1f]">de forma anónima</span> para mejorar el análisis de IA.
-                        Puedo cancelar la suscripción y eliminar mi cuenta en cualquier momento.
-                      </>
-                    ) : locale === "de" ? (
-                      <>
-                        Ich stimme zu, dass mit meiner E-Mail-Adresse ein Konto erstellt wird, um meine Analyseergebnisse zu speichern.
-                        Ich stimme auch zu, personalisierte Hautpflegetipps per E-Mail zu erhalten und dass meine Antworten und Bilder{" "}
-                        <span className="font-semibold text-[#1d1d1f]">anonym</span> zur Verbesserung der KI-Analyse verwendet werden dürfen.
-                        Ich kann mich jederzeit abmelden und mein Konto löschen.
-                      </>
-                    ) : locale === "fr" ? (
-                      <>
-                        J&apos;accepte qu&apos;un compte soit créé avec mon e-mail pour sauvegarder mes résultats d&apos;analyse.
-                        J&apos;accepte également de recevoir des conseils personnalisés par e-mail et que mes réponses et images soient utilisées{" "}
-                        <span className="font-semibold text-[#1d1d1f]">de manière anonyme</span> pour améliorer l&apos;analyse IA.
-                        Je peux me désinscrire et supprimer mon compte à tout moment.
-                      </>
-                    ) : (
-                      <>
-                        I agree that an account is created with my email to save my analysis results.
-                        I also agree to receive personalised skincare tips by email and that my answers and images may be used{" "}
-                        <span className="font-semibold text-[#1d1d1f]">anonymously</span> to improve the AI analysis.
-                        I can unsubscribe and delete my account at any time.
-                      </>
-                    )}
+                    {tx(locale,
+                      "Jag godkänner villkoren för konto, e-post och anonym dataanvändning.",
+                      "I accept the terms for account, email and anonymous data usage.",
+                      "Acepto los términos de cuenta, email y uso anónimo de datos.",
+                      "Ich akzeptiere die Bedingungen für Konto, E-Mail und anonyme Datennutzung.",
+                      "J'accepte les conditions de compte, e-mail et utilisation anonyme des données."
+                    )}{" "}
+                    <span
+                      role="button"
+                      tabIndex={0}
+                      onClick={(e) => { e.stopPropagation(); setTermsOpen(true); }}
+                      onKeyDown={(e) => { if (e.key === "Enter") { e.stopPropagation(); setTermsOpen(true); } }}
+                      className="font-semibold text-[#108474] underline underline-offset-2"
+                    >
+                      {tx(locale, "Läs villkoren", "Read terms", "Leer términos", "Bedingungen lesen", "Lire les conditions")}
+                    </span>
                   </span>
                 </button>
 
-                <button
-                  type="button"
-                  onClick={() => setGdprExpanded((v) => !v)}
-                  className="inline-flex items-center gap-1.5 text-xs font-medium text-[#766a62] transition-colors hover:text-[#108474]"
-                >
-                  <ChevronDown className={cn("h-3.5 w-3.5 transition-transform", gdprExpanded && "rotate-180")} />
-                  {tx(locale, "Läs mer om datahantering", "Read more about data handling", "Leer más sobre el manejo de datos", "Mehr zur Datenverarbeitung", "En savoir plus sur le traitement des données")}
-                </button>
+                {termsOpen && (
+                  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setTermsOpen(false)}>
+                    <div
+                      role="dialog"
+                      aria-modal="true"
+                      className="relative mx-4 max-h-[85vh] w-full max-w-md overflow-y-auto rounded-3xl bg-white p-6 shadow-2xl md:p-8"
+                      onClick={(e) => e.stopPropagation()}
+                    >
+                      <button
+                        onClick={() => setTermsOpen(false)}
+                        className="absolute right-3 top-3 flex h-11 w-11 items-center justify-center rounded-full text-[#766a62] transition-colors hover:bg-[#f5f5f7]"
+                      >
+                        <X className="h-5 w-5" />
+                      </button>
 
-                {gdprExpanded && (
-                  <div className="rounded-2xl border border-[#e6e6e6] bg-[#f5f5f7] p-4 text-xs leading-relaxed text-[#515151] space-y-3 animate-fade-in">
-                    <p className="font-semibold text-[#1d1d1f]">{tx(locale,
-                      "Så hanterar vi dina uppgifter",
-                      "How we handle your data",
-                      "Cómo manejamos tus datos",
-                      "So gehen wir mit deinen Daten um",
-                      "Comment nous gérons vos données")}</p>
-                    <p>{tx(locale,
-                      "Din ansiktsbild analyseras först lokalt på din enhet med vår ONNX-modell — bilden lämnar aldrig din telefon i detta steg. Därefter skickas bilden krypterat (TLS 1.3) till GPT-5.4 för en fördjupad analys. OpenAI lagrar inte bilden efter analysen.",
-                      "Your face image is first analysed locally on your device using our ONNX model — the image never leaves your phone in this step. It is then sent encrypted (TLS 1.3) to GPT-5.4 for a deeper analysis. OpenAI does not store the image after analysis.",
-                      "Tu imagen facial se analiza primero localmente en tu dispositivo con nuestro modelo ONNX — la imagen nunca sale de tu teléfono en este paso. Luego se envía cifrada (TLS 1.3) a GPT-5.4 para un análisis más profundo. OpenAI no almacena la imagen después del análisis.",
-                      "Dein Gesichtsbild wird zunächst lokal auf deinem Gerät mit unserem ONNX-Modell analysiert — das Bild verlässt dein Telefon in diesem Schritt nie. Anschließend wird es verschlüsselt (TLS 1.3) an GPT-5.4 für eine tiefere Analyse gesendet. OpenAI speichert das Bild nicht nach der Analyse.",
-                      "Votre image faciale est d'abord analysée localement sur votre appareil avec notre modèle ONNX — l'image ne quitte jamais votre téléphone à cette étape. Elle est ensuite envoyée chiffrée (TLS 1.3) à GPT-5.4 pour une analyse approfondie. OpenAI ne stocke pas l'image après l'analyse.")}</p>
-                    <p>{tx(locale,
-                      "Om du godkänner kan din bild användas anonymt för att träna och förbättra vår AI-modell. Bilderna lagras krypterade (AES-256) på våra servrar i EU och är helt avidentifierade — de kopplas aldrig till ditt namn, e-post eller konto. Ingen bild delas med tredje part.",
-                      "If you consent, your image may be used anonymously to train and improve our AI model. Images are stored encrypted (AES-256) on our EU servers and are fully de-identified — they are never linked to your name, email or account. No image is shared with third parties.",
-                      "Si das tu consentimiento, tu imagen puede usarse anónimamente para entrenar y mejorar nuestro modelo de IA. Las imágenes se almacenan cifradas (AES-256) en nuestros servidores en la UE y están completamente desidentificadas — nunca se vinculan a tu nombre, email o cuenta. Ninguna imagen se comparte con terceros.",
-                      "Wenn du zustimmst, kann dein Bild anonym verwendet werden, um unser KI-Modell zu trainieren und zu verbessern. Die Bilder werden verschlüsselt (AES-256) auf unseren EU-Servern gespeichert und sind vollständig de-identifiziert — sie werden nie mit deinem Namen, deiner E-Mail oder deinem Konto verknüpft. Kein Bild wird mit Dritten geteilt.",
-                      "Si vous consentez, votre image peut être utilisée anonymement pour entraîner et améliorer notre modèle IA. Les images sont stockées chiffrées (AES-256) sur nos serveurs dans l'UE et sont entièrement désidentifiées — elles ne sont jamais liées à votre nom, email ou compte. Aucune image n'est partagée avec des tiers.")}</p>
-                    <p>{tx(locale,
-                      "Ett konto skapas automatiskt med din e-postadress så att dina analysresultat sparas. Du kan logga in när som helst för att se din hudresa, jämföra resultat över tid och göra nya analyser (en gång per månad). Ditt lösenord kan du sätta via länken i välkomstmejlet.",
-                      "An account is automatically created with your email so your analysis results are saved. You can log in anytime to view your skin journey, compare results over time, and run new analyses (once per month). You can set your password via the link in the welcome email.",
-                      "Se crea automáticamente una cuenta con tu email para guardar tus resultados. Puedes iniciar sesión en cualquier momento para ver tu viaje de piel, comparar resultados y hacer nuevos análisis (una vez al mes). Puedes establecer tu contraseña a través del enlace en el email de bienvenida.",
-                      "Mit deiner E-Mail-Adresse wird automatisch ein Konto erstellt, damit deine Analyseergebnisse gespeichert werden. Du kannst dich jederzeit einloggen, um deine Hautreise zu sehen, Ergebnisse zu vergleichen und neue Analysen durchzuführen (einmal pro Monat). Dein Passwort kannst du über den Link in der Willkommens-E-Mail festlegen.",
-                      "Un compte est créé automatiquement avec votre email pour sauvegarder vos résultats. Vous pouvez vous connecter à tout moment pour voir votre parcours peau, comparer les résultats et faire de nouvelles analyses (une fois par mois). Vous pouvez définir votre mot de passe via le lien dans l'email de bienvenue.")}</p>
-                    <p>{tx(locale,
-                      "Du kan få personliga hudvårdstips via e-post baserat på din analys. Du kan avregistrera dig när som helst. All data hanteras enligt GDPR. Kontakta oss på info@1753skin.com för frågor eller radering av data.",
-                      "You may receive personalised skincare tips by email based on your analysis. You can unsubscribe anytime. All data is handled per GDPR. Contact us at info@1753skin.com for questions or data deletion.",
-                      "Puedes recibir consejos personalizados por email basados en tu análisis. Puedes cancelar la suscripción en cualquier momento. Todos los datos se manejan según el RGPD. Contáctanos en info@1753skin.com para preguntas o eliminación de datos.",
-                      "Du kannst personalisierte Hautpflegetipps per E-Mail basierend auf deiner Analyse erhalten. Du kannst dich jederzeit abmelden. Alle Daten werden gemäß DSGVO behandelt. Kontaktiere uns unter info@1753skin.com für Fragen oder Datenlöschung.",
-                      "Vous pouvez recevoir des conseils personnalisés par email basés sur votre analyse. Vous pouvez vous désabonner à tout moment. Toutes les données sont traitées conformément au RGPD. Contactez-nous à info@1753skin.com pour toute question ou suppression de données.")}</p>
+                      <div className="mb-5 flex items-center gap-3">
+                        <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-[#108474]/10">
+                          <Shield className="h-5 w-5 text-[#108474]" />
+                        </div>
+                        <h3 className="text-lg font-bold tracking-tight text-[#1d1d1f]">
+                          {tx(locale, "Villkor och datahantering", "Terms and data handling", "Términos y manejo de datos", "Bedingungen und Datenverarbeitung", "Conditions et traitement des données")}
+                        </h3>
+                      </div>
+
+                      <div className="space-y-4 text-[13px] leading-relaxed text-[#515151]">
+                        <p>{tx(locale,
+                          "Ett konto skapas med din e-postadress så att dina analysresultat sparas. Du kan logga in för att se din hudresa, jämföra resultat och göra nya analyser (en gång per månad).",
+                          "An account is created with your email so your analysis results are saved. You can log in to view your skin journey, compare results, and run new analyses (once per month).",
+                          "Se crea una cuenta con tu email para guardar tus resultados. Puedes iniciar sesión para ver tu viaje de piel, comparar resultados y hacer nuevos análisis (una vez al mes).",
+                          "Mit deiner E-Mail wird ein Konto erstellt, damit deine Analyseergebnisse gespeichert werden. Du kannst dich einloggen, um deine Hautreise zu sehen und neue Analysen durchzuführen (einmal pro Monat).",
+                          "Un compte est créé avec votre email pour sauvegarder vos résultats. Vous pouvez vous connecter pour voir votre parcours peau et faire de nouvelles analyses (une fois par mois)."
+                        )}</p>
+
+                        <p>{tx(locale,
+                          "Din ansiktsbild analyseras först lokalt på din enhet — bilden lämnar aldrig din telefon i detta steg. Därefter skickas den krypterat (TLS 1.3) till vår AI för fördjupad analys.",
+                          "Your face image is first analysed locally on your device — the image never leaves your phone in this step. It is then sent encrypted (TLS 1.3) to our AI for deeper analysis.",
+                          "Tu imagen facial se analiza primero localmente en tu dispositivo. Luego se envía cifrada (TLS 1.3) a nuestra IA para un análisis más profundo.",
+                          "Dein Gesichtsbild wird zunächst lokal auf deinem Gerät analysiert. Anschließend wird es verschlüsselt (TLS 1.3) an unsere KI gesendet.",
+                          "Votre image faciale est d'abord analysée localement sur votre appareil. Elle est ensuite envoyée chiffrée (TLS 1.3) à notre IA."
+                        )}</p>
+
+                        <p>{tx(locale,
+                          "Om du godkänner kan din bild användas anonymt för att förbättra vår AI-modell. Bilderna lagras krypterade (AES-256) i EU och kopplas aldrig till ditt konto. Ingen bild delas med tredje part.",
+                          "If you consent, your image may be used anonymously to improve our AI model. Images are stored encrypted (AES-256) in the EU and never linked to your account. No image is shared with third parties.",
+                          "Si das tu consentimiento, tu imagen puede usarse anónimamente para mejorar nuestro modelo de IA. Las imágenes se almacenan cifradas (AES-256) en la UE.",
+                          "Wenn du zustimmst, kann dein Bild anonym zur Verbesserung unserer KI verwendet werden. Bilder werden verschlüsselt (AES-256) in der EU gespeichert.",
+                          "Si vous consentez, votre image peut être utilisée anonymement pour améliorer notre modèle IA. Les images sont chiffrées (AES-256) dans l'UE."
+                        )}</p>
+
+                        <p>{tx(locale,
+                          "Du kan få personliga hudvårdstips via e-post. Du kan avregistrera dig och radera ditt konto när som helst. All data hanteras enligt GDPR.",
+                          "You may receive personalised skincare tips by email. You can unsubscribe and delete your account anytime. All data is handled per GDPR.",
+                          "Puedes recibir consejos personalizados por email. Puedes cancelar y eliminar tu cuenta en cualquier momento. Datos según RGPD.",
+                          "Du kannst personalisierte Tipps per E-Mail erhalten. Du kannst dich jederzeit abmelden und dein Konto löschen. DSGVO-konform.",
+                          "Vous pouvez recevoir des conseils par email. Vous pouvez vous désinscrire et supprimer votre compte à tout moment. Conforme au RGPD."
+                        )}</p>
+
+                        <div className="rounded-xl bg-[#f5f5f7] px-4 py-3">
+                          <p className="text-[11px] text-[#766a62]">
+                            {tx(locale,
+                              "Kontakta info@1753skin.com för frågor eller radering av data.",
+                              "Contact info@1753skin.com for questions or data deletion.",
+                              "Contacta info@1753skin.com para preguntas o eliminación de datos.",
+                              "Kontaktiere info@1753skin.com für Fragen oder Datenlöschung.",
+                              "Contactez info@1753skin.com pour toute question ou suppression de données."
+                            )}
+                          </p>
+                        </div>
+                      </div>
+
+                      <button
+                        onClick={() => setTermsOpen(false)}
+                        className="mt-6 w-full rounded-full bg-[#108474] py-3 text-sm font-semibold text-white transition-all hover:bg-[#0d6e62]"
+                      >
+                        {tx(locale, "Jag förstår", "Got it", "Entendido", "Verstanden", "Compris")}
+                      </button>
+                    </div>
                   </div>
                 )}
 
@@ -1052,19 +1115,24 @@ export default function AnalysisPage() {
               </div>
 
               <div className="mx-auto mt-8 max-w-sm space-y-6">
-                <SelectField
-                  label={tx(locale, "Åldersgrupp", "Age range", "Rango de edad", "Altersgruppe", "Tranche d'âge")}
-                  value={answers.age > 0 ? String(answers.age) : ""}
-                  onChange={(v) => setAnswers((p) => ({ ...p, age: Number(v) }))}
-                  options={[
-                    { value: "21", label: "18–25" },
-                    { value: "30", label: "26–35" },
-                    { value: "40", label: "36–45" },
-                    { value: "50", label: "46–55" },
-                    { value: "60", label: "56–65" },
-                    { value: "70", label: "66+" },
-                  ]}
-                />
+                <div>
+                  <label className="mb-2 block text-sm font-medium text-brand-900">
+                    {tx(locale, "Ålder", "Age", "Edad", "Alter", "Âge")}
+                  </label>
+                  <input
+                    type="number"
+                    inputMode="numeric"
+                    min={13}
+                    max={120}
+                    value={answers.age > 0 ? answers.age : ""}
+                    onChange={(e) => {
+                      const v = e.target.value;
+                      setAnswers((p) => ({ ...p, age: v === "" ? 0 : Math.min(120, Math.max(0, parseInt(v, 10) || 0)) }));
+                    }}
+                    placeholder={tx(locale, "Ange din ålder", "Enter your age", "Introduce tu edad", "Gib dein Alter ein", "Entrez votre âge")}
+                    className="w-full rounded-xl border border-[#e6e6e6] bg-white px-4 py-3 text-base shadow-sm placeholder:text-[#766a62]/50 focus:border-[#108474] focus:outline-none focus:ring-2 focus:ring-[#108474]/20 md:text-sm"
+                  />
+                </div>
 
                 <div>
                   <p className="mb-3 text-sm font-medium text-brand-900">
@@ -1380,7 +1448,7 @@ export default function AnalysisPage() {
                       {tx(locale, "Hur ofta använder du solskydd?", "How often do you use sun protection?", "¿Con qué frecuencia usas protección solar?", "Wie oft verwendest du Sonnenschutz?", "À quelle fréquence utilisez-vous une protection solaire ?")}
                     </p>
                   </div>
-                  <div className="grid grid-cols-3 gap-3">
+                  <div className="grid grid-cols-1 gap-3">
                     {[
                       { key: "never", label: tx(locale, "Aldrig", "Never", "Nunca", "Nie", "Jamais"), icon: Sun },
                       { key: "sometimes", label: tx(locale, "Ibland", "Sometimes", "A veces", "Manchmal", "Parfois"), icon: Sun },
@@ -1421,7 +1489,6 @@ export default function AnalysisPage() {
                         selected={answers.hormonal === opt.key}
                         onClick={() => setAnswers((p) => ({ ...p, hormonal: opt.key }))}
                         title={opt.label}
-                        className="min-h-[80px]"
                       />
                     ))}
                   </div>
@@ -1512,7 +1579,77 @@ export default function AnalysisPage() {
               )}
 
               {/* Share result */}
-              {parsed && (
+              {parsed && (() => {
+                const shareText = tx(locale,
+                  `Min hud fick ${parsed.score}/100 poäng${parsed.skinAge ? ` och en biologisk hudålder på ${parsed.skinAge} år` : ""}! Testa din hud gratis:`,
+                  `My skin scored ${parsed.score}/100${parsed.skinAge ? ` with a biological skin age of ${parsed.skinAge}` : ""}! Test yours free:`,
+                  `Mi piel obtuvo ${parsed.score}/100${parsed.skinAge ? ` con una edad biológica de ${parsed.skinAge} años` : ""}! Prueba gratis:`,
+                  `Meine Haut hat ${parsed.score}/100 Punkte${parsed.skinAge ? ` mit einem biologischen Hautalter von ${parsed.skinAge} Jahren` : ""}! Teste kostenlos:`,
+                  `Ma peau a obtenu ${parsed.score}/100${parsed.skinAge ? ` avec un âge biologique de ${parsed.skinAge} ans` : ""}! Testez gratuitement :`);
+                const shareUrl = `https://www.1753skin.com${path("skinAnalysis")}`;
+
+                const generateShareImage = () => {
+                  const canvas = document.createElement("canvas");
+                  const w = 1080; const h = 1080;
+                  canvas.width = w; canvas.height = h;
+                  const ctx = canvas.getContext("2d");
+                  if (!ctx) return;
+
+                  const gradient = ctx.createLinearGradient(0, 0, w, h);
+                  gradient.addColorStop(0, "#f5f5f7");
+                  gradient.addColorStop(1, "#ffffff");
+                  ctx.fillStyle = gradient;
+                  ctx.fillRect(0, 0, w, h);
+
+                  ctx.fillStyle = "#766a62";
+                  ctx.font = "600 28px -apple-system, BlinkMacSystemFont, 'SF Pro Display', Inter, sans-serif";
+                  ctx.textAlign = "center";
+                  ctx.letterSpacing = "6px";
+                  ctx.fillText("1753 SKINCARE", w / 2, 200);
+                  ctx.letterSpacing = "0px";
+
+                  ctx.fillStyle = "#108474";
+                  ctx.font = "bold 180px -apple-system, BlinkMacSystemFont, 'SF Pro Display', Inter, sans-serif";
+                  ctx.fillText(`${parsed.score}`, w / 2, 460);
+
+                  ctx.fillStyle = "#766a62";
+                  ctx.font = "500 32px -apple-system, BlinkMacSystemFont, 'SF Pro Display', Inter, sans-serif";
+                  ctx.fillText(tx(locale, "Hudpoäng av 100", "Skin score out of 100", "Puntuación de 100", "Hautscore von 100", "Score sur 100"), w / 2, 520);
+
+                  if (parsed.skinAge) {
+                    ctx.fillStyle = "#e6e6e6";
+                    ctx.fillRect(w / 2 - 60, 580, 120, 1);
+
+                    ctx.fillStyle = "#1d1d1f";
+                    ctx.font = "bold 100px -apple-system, BlinkMacSystemFont, 'SF Pro Display', Inter, sans-serif";
+                    ctx.fillText(`${parsed.skinAge}`, w / 2, 710);
+
+                    ctx.fillStyle = "#766a62";
+                    ctx.font = "500 32px -apple-system, BlinkMacSystemFont, 'SF Pro Display', Inter, sans-serif";
+                    ctx.fillText(tx(locale, "Biologisk hudålder", "Biological skin age", "Edad biológica", "Biologisches Hautalter", "Âge biologique"), w / 2, 770);
+                  }
+
+                  ctx.fillStyle = "#766a62";
+                  ctx.font = "400 26px -apple-system, BlinkMacSystemFont, 'SF Pro Display', Inter, sans-serif";
+                  ctx.fillText(tx(locale,
+                    "Testa din hud gratis på 1753skin.com",
+                    "Test your skin free at 1753skin.com",
+                    "Analiza tu piel gratis en 1753skin.com",
+                    "Teste deine Haut auf 1753skin.com",
+                    "Testez votre peau sur 1753skin.com"), w / 2, 950);
+
+                  ctx.fillStyle = "#108474";
+                  ctx.beginPath();
+                  ctx.roundRect(w / 2 - 100, 980, 200, 4, 2);
+                  ctx.fill();
+
+                  const link = document.createElement("a");
+                  link.download = "1753-hudscore.png";
+                  link.href = canvas.toDataURL("image/png");
+                  link.click();
+                };
+
+                return (
                 <div className="mx-auto max-w-md rounded-2xl border border-[#e6e6e6] bg-white p-6 text-center">
                   <Sparkles className="mx-auto mb-3 h-6 w-6 text-[#108474]" />
                   <h3 className="text-lg font-bold tracking-tight text-[#1d1d1f]">
@@ -1547,25 +1684,27 @@ export default function AnalysisPage() {
                     </div>
                     <p className="mt-3 text-[10px] text-[#766a62]">
                       {tx(locale,
-                        "Testa din hud gratis på 1753skin.com/hudanalys",
-                        "Test your skin free at 1753skin.com/skin-analysis",
-                        "Analiza tu piel gratis en 1753skin.com/analisis",
-                        "Teste deine Haut kostenlos auf 1753skin.com/hautanalyse",
-                        "Testez votre peau gratuitement sur 1753skin.com/analyse")}
+                        "Testa din hud gratis på 1753skin.com",
+                        "Test your skin free at 1753skin.com",
+                        "Analiza tu piel gratis en 1753skin.com",
+                        "Teste deine Haut auf 1753skin.com",
+                        "Testez votre peau sur 1753skin.com")}
                     </p>
                   </div>
 
+                  {/* Download share image */}
+                  <button
+                    onClick={generateShareImage}
+                    className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#108474] px-6 py-3 text-sm font-semibold text-white transition-all hover:bg-[#0d6e62]"
+                  >
+                    <Download className="h-4 w-4" />
+                    {tx(locale, "Ladda ner bild", "Download image", "Descargar imagen", "Bild herunterladen", "Télécharger l'image")}
+                  </button>
+
                   {/* Share buttons */}
-                  <div className="mt-4 flex items-center justify-center gap-3">
+                  <div className="mt-3 grid grid-cols-2 gap-2">
                     <button
                       onClick={() => {
-                        const shareText = tx(locale,
-                          `Min hud fick ${parsed.score}/100 poäng${parsed.skinAge ? ` och en biologisk hudålder på ${parsed.skinAge} år` : ""}! Testa din hud gratis:`,
-                          `My skin scored ${parsed.score}/100${parsed.skinAge ? ` with a biological skin age of ${parsed.skinAge}` : ""}! Test yours free:`,
-                          `Mi piel obtuvo ${parsed.score}/100${parsed.skinAge ? ` con una edad biológica de ${parsed.skinAge} años` : ""}! Prueba gratis:`,
-                          `Meine Haut hat ${parsed.score}/100 Punkte${parsed.skinAge ? ` mit einem biologischen Hautalter von ${parsed.skinAge} Jahren` : ""}! Teste kostenlos:`,
-                          `Ma peau a obtenu ${parsed.score}/100${parsed.skinAge ? ` avec un âge biologique de ${parsed.skinAge} ans` : ""}! Testez gratuitement :`);
-                        const shareUrl = `https://www.1753skin.com${path("skinAnalysis")}`;
                         if (navigator.share) {
                           navigator.share({ title: "1753 SKINCARE", text: shareText, url: shareUrl }).catch(() => {});
                         } else {
@@ -1575,24 +1714,56 @@ export default function AnalysisPage() {
                           }).catch(() => {});
                         }
                       }}
-                      className="inline-flex items-center gap-2 rounded-full bg-[#108474] px-6 py-2.5 text-xs font-semibold text-white transition-all hover:bg-[#0d6e62]"
+                      className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-[#e6e6e6] px-4 py-2.5 text-xs font-semibold text-[#515151] transition-all hover:border-[#108474] hover:text-[#108474]"
                     >
-                      <ArrowRight className="h-3.5 w-3.5" />
+                      <Share2 className="h-3.5 w-3.5" />
                       {shareCopied
                         ? tx(locale, "Kopierat!", "Copied!", "¡Copiado!", "Kopiert!", "Copié !")
                         : tx(locale, "Dela", "Share", "Compartir", "Teilen", "Partager")}
                     </button>
                     <a
-                      href={`https://www.instagram.com/`}
+                      href={`https://wa.me/?text=${encodeURIComponent(`${shareText} ${shareUrl}`)}`}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="inline-flex items-center gap-2 rounded-full border-2 border-[#e6e6e6] px-5 py-2 text-xs font-medium text-[#515151] transition-all hover:border-[#108474] hover:text-[#108474]"
+                      className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-[#e6e6e6] px-4 py-2.5 text-xs font-semibold text-[#515151] transition-all hover:border-[#25D366] hover:text-[#25D366]"
                     >
-                      Instagram
+                      WhatsApp
+                    </a>
+                    <a
+                      href={`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(shareUrl)}&quote=${encodeURIComponent(shareText)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-[#e6e6e6] px-4 py-2.5 text-xs font-semibold text-[#515151] transition-all hover:border-[#1877F2] hover:text-[#1877F2]"
+                    >
+                      Facebook
+                    </a>
+                    <a
+                      href={`https://twitter.com/intent/tweet?text=${encodeURIComponent(shareText)}&url=${encodeURIComponent(shareUrl)}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="inline-flex items-center justify-center gap-2 rounded-full border-2 border-[#e6e6e6] px-4 py-2.5 text-xs font-semibold text-[#515151] transition-all hover:border-[#1d1d1f] hover:text-[#1d1d1f]"
+                    >
+                      X
                     </a>
                   </div>
+
+                  {/* Instagram note */}
+                  <a
+                    href="https://www.instagram.com/1753.skincare"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="mt-3 inline-flex items-center gap-2 text-xs text-[#766a62] transition-colors hover:text-[#108474]"
+                  >
+                    {tx(locale,
+                      "Dela bilden på Instagram och tagga @1753.skincare",
+                      "Share the image on Instagram and tag @1753.skincare",
+                      "Comparte la imagen en Instagram y etiqueta @1753.skincare",
+                      "Teile das Bild auf Instagram und tagge @1753.skincare",
+                      "Partagez l'image sur Instagram et identifiez @1753.skincare")}
+                  </a>
                 </div>
-              )}
+                );
+              })()}
 
               {/* Training data contribution */}
               {trainingUploaded && (
@@ -1691,11 +1862,12 @@ export default function AnalysisPage() {
                     setParsed(null);
                     setScanSummary(null);
                     setTrainingUploaded(false);
+                    trainingUploadedRef.current = false;
                     setTrainingCount(null);
                     setSnapshotSaved(false);
                     setSnapshotSaving(false);
                     setNlSubscribed(false);
-                    setUserEmail("");
+                    setUserEmail(user?.email ?? "");
                     setEmailConsent(false);
                     setEmailError("");
                     setAnswers({

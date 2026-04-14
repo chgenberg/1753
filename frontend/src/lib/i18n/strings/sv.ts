@@ -335,7 +335,7 @@ const bundle = {
     badge: "AI-driven",
     title: "Gratis hudanalys",
     intro:
-      "Svara på fem korta frågor om din hud och livsstil. Vår AI ger dig en djup, holistisk analys med personliga rekommendationer -- helt gratis.",
+      "Svara på några korta frågor om din hud och livsstil. Vår AI ger dig en djup, holistisk analys med personliga rekommendationer -- helt gratis.",
     startQuiz: "Starta hudanalys",
     stepOf: "Steg {current} av {total}",
     next: "Nästa",

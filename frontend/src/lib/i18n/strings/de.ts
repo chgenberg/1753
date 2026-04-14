@@ -337,7 +337,7 @@ export const de: Messages = {
     badge: "KI-gestützt",
     title: "Kostenlose Hautanalyse",
     intro:
-      "Beantworte fünf kurze Fragen zu deiner Haut und deinem Lebensstil. Unsere KI gibt dir eine tiefgehende, ganzheitliche Analyse mit persönlichen Empfehlungen – völlig kostenlos.",
+      "Beantworte einige kurze Fragen zu deiner Haut und deinem Lebensstil. Unsere KI gibt dir eine tiefgehende, ganzheitliche Analyse mit persönlichen Empfehlungen – völlig kostenlos.",
     startQuiz: "Hautanalyse starten",
     stepOf: "Schritt {current} von {total}",
     next: "Weiter",

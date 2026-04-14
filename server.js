@@ -1734,9 +1734,19 @@ Om kundens kronologiska ålder anges: uppskatta den BIOLOGISKA HUDÅLDERN basera
 - Livsstilsfaktorer (sömn, stress, kost, solvanor, träning)
 - Hudtillstånd och allvarlighetsgrad
 
-Biologisk hudålder kan vara LÄGRE (yngre) eller HÖGRE (äldre) än kronologisk ålder.
-Presentera som "skinAge" i JSON-svaret (heltal). Om ingen bild finns, gör en uppskattning baserat på livsstil och hudtyp.
+Biologisk hudålder ska reflektera hur gammal HUDEN SER UT, INTE vara samma som kundens kronologiska ålder.
+VIKTIGT: skinAge får ALDRIG avvika mer än ±5 år från kundens kronologiska ålder. Exempel: om kunden är 32 år ska skinAge vara mellan 27 och 37.
+Presentera som "skinAge" i JSON-svaret (heltal, OBLIGATORISKT). Om ingen bild finns, gör en uppskattning baserat på livsstil och hudtyp.
 Var ärlig men uppmuntrande: om huden är yngre än åldern, lyft det som en styrka. Om äldre, ge hopp genom att förklara att det går att vända.
+OBS: Kundens ålder anges nu som exakt siffra (t.ex. 32), inte ett spann.
+
+== SOLKÄNSLIGHET (Fitzpatrick) ==
+Uppskatta kundens solkänslighet baserat på Fitzpatrick-skalan (I-VI) utifrån bilden och eventuella quiz-svar. Presentera som "fitzpatrick" i JSON-svaret (sträng: "I", "II", "III", "IV", "V" eller "VI"). Typ I = mycket solkänslig/bränns alltid, Typ VI = mycket soltålig/bränns aldrig. Om du inte kan bedöma, gör din bästa uppskattning.
+
+== HUDMETRIKER (metrics) ==
+Returnera ALLTID ett "metrics"-objekt i JSON med 10 metriker. Varje metrik har score (0-100, högre = friskare), grade (heltal 1-5 där 1 = utmärkt, 2 = bra, 3 = medel, 4 = under medel, 5 = behöver åtgärd) och detail (1 mening som förklarar bedömningen):
+- hydration, texture, pores, elasticity, radiance, barrier_health, sensitivity, acne, sun_damage, skin_tone
+Om ONNX-metriker finns tillgängliga, använd dem som utgångspunkt men justera baserat på din visuella bedömning. Om ingen bild finns, uppskatta baserat på quiz-svar och livsstil.
 
 == SCORE ==
 Beräkna score (0-100) INDIVIDUELLT baserat på ALLA faktorer:
@@ -1745,7 +1755,7 @@ Beräkna score (0-100) INDIVIDUELLT baserat på ALLA faktorer:
 - Hudtyp och angivna besvär (20%)
 - Nuvarande rutin och dess lämplighet (15%)
 Skanningsresultat påverkar INTE poängen direkt – de kan bekräfta din visuella bedömning men aldrig sänka poängen på egen hand.
-Varje kund ska få ett UNIKT score. Kopiera aldrig exempelvärden.
+Varje kund ska få ett UNIKT score. Kopiera aldrig exempelvärden. score ska vara ett HELTAL (number), inte en sträng.
 
 KRITISKT OM SCORE-FÖRDELNING:
 - 85-100: Frisk hud + bra livsstil. DE FLESTA kunder med normal hud och hyfsad livsstil hamnar här.
@@ -1759,9 +1769,23 @@ Svara ENBART med ett JSON-block (inget annat). JSON-blocket ska vara markerat me
 
 \`\`\`json
 {
-  "score": "<BERÄKNA 0-100 baserat på kundens svar: hudtyp, besvär, rutin, livsstil. 90+ = utmärkt hud+vanor, 70-89 = bra grund, 50-69 = utrymme för förbättring, <50 = behöver uppmärksamhet. Kopiera ALDRIG exempelvärden.>",
-  "scoreLabel": "<Kort etikett som sammanfattar poängen, t.ex. 'Bra grund att bygga vidare på' eller 'Stark hudbarriär, livsstil kan förbättras'>",
+  "score": 78,
+  "scoreLabel": "Bra grund att bygga vidare på",
+  "skinAge": 34,
+  "fitzpatrick": "III",
   "summary": "4-6 meningar som sammanfattar hudens tillstånd, styrkor, problemområden och vad som bör prioriteras. Var specifik och personlig – referera till kundens svar och vad du ser i bilden.",
+  "metrics": {
+    "hydration": { "score": 72, "grade": 2, "detail": "Kort förklaring av hydreringsnivån" },
+    "texture": { "score": 68, "grade": 3, "detail": "Kort förklaring av hudtexturen" },
+    "pores": { "score": 75, "grade": 2, "detail": "Kort förklaring av porernas tillstånd" },
+    "elasticity": { "score": 80, "grade": 2, "detail": "Kort förklaring av elasticiteten" },
+    "radiance": { "score": 65, "grade": 3, "detail": "Kort förklaring av lyster" },
+    "barrier_health": { "score": 70, "grade": 2, "detail": "Kort förklaring av barriärens tillstånd" },
+    "sensitivity": { "score": 60, "grade": 3, "detail": "Kort förklaring av känslighetsnivå" },
+    "acne": { "score": 85, "grade": 1, "detail": "Kort förklaring av aknetillstånd" },
+    "sun_damage": { "score": 78, "grade": 2, "detail": "Kort förklaring av solskador" },
+    "skin_tone": { "score": 74, "grade": 2, "detail": "Kort förklaring av hudton/jämnhet" }
+  },
   "skinAnalysis": {
     "overview": "Utförlig beskrivning (400-600 ord) av kundens hudtillstånd. Beskriv vad du ser/förstår baserat på quiz-svar och eventuell skanningsdata. Förklara hur hudtyp, besvär och livsstil hänger ihop. Koppla till mikrobiom och ECS. Var specifik – referera till kundens egna svar. Skriv som löptext med stycken (använd \\n\\n för styckebrytning). Ge utförliga förklaringar, inte bara konstateranden.",
     "strengths": ["Specifik styrka med kort förklaring (1-2 meningar)", "Ytterligare styrka"],
@@ -1792,7 +1816,7 @@ Svara ENBART med ett JSON-block (inget annat). JSON-blocket ska vara markerat me
     {
       "area": "Sömn",
       "tip": "Konkret, personligt tips kopplat till kundens svar (2-3 meningar)",
-      "why": "Vetenskaplig motivering: varför detta påverkar huden (1-2 meningar)",
+      "why": "Vetenskaplig motivering: varför detta påverkar huden (2-3 meningar)",
       "impact": "hög",
       "source": "Kort referens till forskning eller bokkunskap"
     },
@@ -1816,26 +1840,33 @@ Svara ENBART med ett JSON-block (inget annat). JSON-blocket ska vara markerat me
       "why": "...",
       "impact": "medel",
       "source": "..."
+    },
+    {
+      "area": "Tarmhälsa",
+      "tip": "...",
+      "why": "...",
+      "impact": "medel",
+      "source": "..."
     }
   ],
   "routine": {
     "morning": [
-      { "step": "Skölj ansiktet med ljummet vatten", "why": "Bevarar mikrobiomets balans – undvik tvål som stör pH" },
-      { "step": "3-4 droppar The ONE Facial Oil", "why": "CBD skyddar barriären och reglerar sebum via ECS" },
-      { "step": "1-2 pump TA-DA Serum", "why": "CBG låser in fukt och ger antioxidantskydd" }
+      { "step": "Skölj ansiktet med ljummet vatten", "why": "Bevarar mikrobiomets balans – undvik tvål som stör pH. Varmt vatten löser tillräckligt med talg utan att skada lipidbarriären." },
+      { "step": "3-4 droppar The ONE Facial Oil", "why": "CBD skyddar barriären och reglerar sebum via ECS. Facial oil på fuktig hud skapar en skyddande film som håller kvar fukten hela dagen." },
+      { "step": "1-2 pump TA-DA Serum", "why": "CBG låser in fukt och ger antioxidantskydd. Serumets jojobaolja-bas absorberas snabbt och lämnar en matt, smidig finish." }
     ],
     "evening": [
-      { "step": "Rengör med Au Naturel Makeup Remover", "why": "MCT löser smuts utan att störa mikrobiomets mångfald" },
-      { "step": "3-4 droppar I LOVE Facial Oil", "why": "5% CBG stödjer nattlig reparation via ECS" },
-      { "step": "1-2 pump TA-DA Serum", "why": "Förstärker oljans absorption och regenerering" }
+      { "step": "Rengör med Au Naturel Makeup Remover", "why": "MCT löser smuts, SPF och oxiderad talg utan att störa mikrobiomets mångfald. Oljebaserad rengöring är det skonsammaste sättet att ta bort dagens föroreningar." },
+      { "step": "3-4 droppar I LOVE Facial Oil", "why": "5% CBG stödjer nattlig reparation via ECS. Under sömnen accelererar cellförnyelsen och CBG hjälper huden att optimera denna process." },
+      { "step": "1-2 pump TA-DA Serum", "why": "Förstärker oljans absorption och regenerering. Serumet skapar ett fuktlager som förhindrar transepidermal vattenförlust under natten." }
     ]
   },
   "primaryCondition": {
     "condition": "normal | acne | dermatitis | dryness | eczema | fungal | hyperpigmentation | psoriasis | rosacea | sun_damage",
     "confidence": "low | medium | high",
-    "reasoning": "1-2 meningar som motiverar valet. Om huden ar frisk, skriv det tydligt."
+    "reasoning": "1-2 meningar som motiverar valet. Om huden är frisk, skriv det tydligt."
   },
-  "avoid": ["Specifik sak att undvika med kort förklaring"],
+  "avoid": ["Specifik sak att undvika med kort förklaring varför (1-2 meningar)"],
   "nextAnalysis": "4 veckor",
   "faceZones": [
     {
@@ -1845,7 +1876,7 @@ Svara ENBART med ett JSON-block (inget annat). JSON-blocket ska vara markerat me
       "y": 18,
       "condition": "dermatitis",
       "confidence": "medium",
-      "description": "Tydlig rodnad och vidgade blodkärl synliga på vänster kind, karaktäristiskt för rosacea."
+      "description": "Tydlig rodnad och vidgade blodkärl synliga, karaktäristiskt för lätt barriärstörning."
     }
   ]
 }
@@ -1887,15 +1918,18 @@ Valfritt tillägg om relevant:
 - "the-one-i-love-ta-da" (1 795 kr) – komplett 3-produkt
 
 == LIVSSTILSRÅD ==
-Basera på kundens specifika svar om sömn, stress, kost, vatten och träning. Ge MINST 5 konkreta, personliga tips. Varje tip ska ha:
-- "area": kort kategori (t.ex. "Sömn", "Kost", "Stress", "Träning", "Tarmhälsa")
+Basera på kundens specifika svar om sömn, stress, kost, vatten och träning. Ge EXAKT 5 konkreta, personliga tips – ett för varje kategori: "Sömn", "Stress", "Kost", "Rörelse", "Tarmhälsa". Varje tip ska ha:
+- "area": kategorinamn (exakt en av: "Sömn", "Stress", "Kost", "Rörelse", "Tarmhälsa")
 - "tip": det konkreta rådet (2-3 meningar)
 - "why": vetenskaplig motivering med koppling till hud (2-3 meningar, referera till tarm-hud-axeln, ECS, mikrobiom, kortisol etc.)
-- "impact": förväntad effekt ("Hög"/"Medel"/"Låg")
+- "impact": förväntad effekt – använd GEMENER: "hög", "medel" eller "låg"
+- "source": kort referens till forskning, bok eller vetenskapligt koncept
 Skriv aldrig generiska råd som "drick mer vatten". Var specifik utifrån kundens svar.
 
 == RUTINFÖRSLAG ==
-Anpassa morgon- och kvällsrutin till kundens hudtyp och besvär. Ge MINST 3 steg per rutin (morgon och kväll). Varje steg ska ha en utförlig förklaring av VARFÖR det stöder hudens egna system (2-3 meningar per steg).
+Anpassa morgon- och kvällsrutin till kundens hudtyp och besvär. Ge MINST 3 steg per rutin (morgon och kväll). Varje steg ska ha:
+- "step": vad kunden ska göra (1 mening)
+- "why": utförlig förklaring (2-3 meningar) av VARFÖR det stöder hudens egna system, kopplat till ECS/mikrobiom och kundens specifika behov
 
 == PRIMARYCONDITION (KRITISKT FOR KORREKT TAGGNING) ==
 Fältet "primaryCondition" avgör hur kunden taggas i vårt system. Felaktig taggning gör att kunden får irrelevanta nyhetsbrev. VAR EXTREMT KONSERVATIV:
@@ -1962,7 +1996,7 @@ function buildAnalysisPrompt(questions, imageScan) {
     }
     if (questions.goals?.length) parts.push(`Mål: ${questions.goals.join(", ")}`);
     if (questions.goalFreeText) parts.push(`Övrigt: ${questions.goalFreeText}`);
-    if (questions.age) parts.push(`Ålder: ${questions.age}`);
+    if (questions.age) parts.push(`Ålder: ${questions.age} år (exakt kronologisk ålder)`);
     if (questions.gender) parts.push(`Kön: ${questions.gender}`);
     if (questions.sunProtection) parts.push(`Solskydd: ${questions.sunProtection}`);
     if (questions.hormonal) parts.push(`Hormonell påverkan: ${questions.hormonal}`);
@@ -2003,13 +2037,16 @@ function buildAnalysisPrompt(questions, imageScan) {
 
 app.post("/api/analysis", async (req, res) => {
   try {
-    const clientIp = req.ip || req.connection.remoteAddress;
-    if (!checkRateLimit(clientIp, "analysis", 10)) {
-      return res.status(429).json({ message: "Du har nått gränsen. Försök igen om en stund." });
-    }
-
     const { imageBase64, regions, fullImage, questions, imageScan } = req.body;
     const locale = req.body.questions?.locale || "sv";
+
+    const rateLimitMsg = { sv: "Du har nått gränsen. Försök igen om en stund.", en: "You've reached the limit. Please try again later.", es: "Has alcanzado el límite. Inténtalo de nuevo más tarde.", de: "Du hast das Limit erreicht. Bitte versuche es später erneut.", fr: "Vous avez atteint la limite. Veuillez réessayer plus tard." };
+    const validationMsg = { sv: "Besvara frågorna eller bifoga ett foto.", en: "Please answer the questions or attach a photo.", es: "Responde las preguntas o adjunta una foto.", de: "Bitte beantworte die Fragen oder füge ein Foto hinzu.", fr: "Répondez aux questions ou joignez une photo." };
+
+    const clientIp = req.ip || req.connection.remoteAddress;
+    if (!checkRateLimit(clientIp, "analysis", 10)) {
+      return res.status(429).json({ message: rateLimitMsg[locale] || rateLimitMsg.en });
+    }
 
     const mainImage = fullImage || imageBase64;
     const hasImage = mainImage && mainImage.startsWith("data:image/");
@@ -2017,7 +2054,7 @@ app.post("/api/analysis", async (req, res) => {
     const hasScan = imageScan && (imageScan.overall?.length || imageScan.zones?.length);
 
     if (!hasImage && !hasQuestions && !hasScan) {
-      return res.status(400).json({ message: "Besvara frågorna eller bifoga ett foto." });
+      return res.status(400).json({ message: validationMsg[locale] || validationMsg.en });
     }
 
     const promptText = buildAnalysisPrompt(questions, imageScan);
@@ -3557,7 +3594,8 @@ async function sendAnalysisReport(email, analysisContent, locale, accountPasswor
   ` : "";
 
   const ctaLabel = isSv ? "Se din fullständiga analys" : isEs ? "Ver tu análisis completo" : isDe ? "Vollständige Analyse ansehen" : isFr ? "Voir votre analyse complète" : "View your full analysis";
-  const ctaUrl = `${baseUrl}/${locale}/hudanalys`;
+  const analysisSlug = { sv: "hudanalys", en: "skin-analysis", es: "analisis-piel", de: "hautanalyse", fr: "analyse-peau" };
+  const ctaUrl = `${baseUrl}/${locale}/${analysisSlug[locale] || analysisSlug.en}`;
 
   const accountBlockHtml = accountPassword ? `
     <div style="background:#f5f5f7;border-radius:16px;padding:20px 24px;margin-bottom:28px;border:1px solid #e6e6e6">

@@ -345,7 +345,7 @@ function ScoreRing({ score, label, skinAge, fitzpatrick, locale }: {
           {fitzpatrick && (
             <div className="flex flex-col items-center rounded-2xl bg-[#f5f5f7] px-5 py-3 sm:items-start">
               <span className="text-[10px] font-medium uppercase tracking-widest text-[#766a62]">
-                Fitzpatrick
+                {tx(locale, "Solkänslighet", "Sun sensitivity", "Sensibilidad solar", "Sonnenempfindlichkeit", "Sensibilité solaire")}
               </span>
               <span className="text-2xl font-bold tracking-tight text-[#1d1d1f]">{fitzpatrick}</span>
             </div>
@@ -419,7 +419,7 @@ function InlineProductCTA({ products, locale }: { products: ProductRec[]; locale
             </div>
             <div className="min-w-0 flex-1">
               <p className="truncate text-xs font-semibold text-[#1d1d1f]">{productDisplayName(p, locale)}</p>
-              <p className="truncate text-[11px] text-[#766a62]">{p.reason}</p>
+              <p className="truncate text-xs text-[#766a62]">{p.reason}</p>
             </div>
             <span className="shrink-0 text-xs font-bold text-[#1d1d1f]">
               {formatPrice(productPrice(p, locale), locale)}
@@ -503,6 +503,7 @@ function MetricCard({ metricKey, metric, locale }: { metricKey: string; metric: 
 
   return (
     <button
+      type="button"
       onClick={() => setOpen(!open)}
       className="group flex h-full w-full flex-col rounded-2xl border border-[#e6e6e6]/80 bg-white p-4 text-left transition-all duration-300 hover:shadow-lg hover:shadow-black/[0.04] active:scale-[0.98]"
     >
@@ -533,7 +534,7 @@ function MetricCard({ metricKey, metric, locale }: { metricKey: string; metric: 
         )}
       >
         {metric.detail && (
-          <p className="text-[11px] leading-relaxed text-[#515151]">{metric.detail}</p>
+          <p className="text-sm leading-relaxed text-[#515151]">{metric.detail}</p>
         )}
       </div>
 
@@ -596,7 +597,7 @@ function FocusAreas({ entries, locale }: { entries: [string, MetricScore][]; loc
   if (entries.length === 0) return null;
   return (
     <div className="space-y-4">
-      <h4 className="text-center text-[11px] font-bold uppercase tracking-widest text-[#766a62]">
+      <h4 className="text-center text-xs font-bold uppercase tracking-widest text-[#766a62]">
         {tx(locale, "Fokusområden", "Focus areas", "Áreas de enfoque", "Fokusgebiete", "Zones prioritaires")}
       </h4>
       <div className="grid gap-3 sm:grid-cols-3">
@@ -626,7 +627,7 @@ function FocusAreas({ entries, locale }: { entries: [string, MetricScore][]; loc
                 <div className="h-full rounded-full transition-all duration-700 ease-out" style={{ width: `${pct}%`, backgroundColor: color }} />
               </div>
               {m.detail && (
-                <p className="text-[11px] leading-relaxed text-[#515151]">{m.detail}</p>
+                <p className="text-sm leading-relaxed text-[#515151]">{m.detail}</p>
               )}
             </div>
           );
@@ -688,7 +689,7 @@ function SkinTab({ score, scoreLabel, summary, skinAge, fitzpatrick, metrics, sk
       {/* Face scan image – shown early so user sees their photo first */}
       {hasScan && scanImageSrc && (
         <div className="space-y-4">
-          <div className="flex items-center justify-center gap-2 text-[11px] font-bold uppercase tracking-widest text-[#108474]">
+          <div className="flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-widest text-[#108474]">
             <ScanFace className="h-3.5 w-3.5" />
             {tx(locale, "Din ansiktsskanning", "Your face scan", "Tu escaneo facial", "Dein Gesichtsscan", "Votre scan facial")}
           </div>
@@ -737,12 +738,12 @@ function SkinTab({ score, scoreLabel, summary, skinAge, fitzpatrick, metrics, sk
                         <div className="absolute left-1/2 top-6 z-20 -translate-x-1/2 w-56 rounded-xl bg-white/95 backdrop-blur-sm border border-[#e6e6e6] p-3 shadow-xl animate-fade-in">
                           <p className="text-xs font-semibold text-[#1d1d1f] mb-1">{z.label}</p>
                           {z.description && (
-                            <p className="text-[11px] leading-relaxed text-[#515151]">{z.description}</p>
+                            <p className="text-sm leading-relaxed text-[#515151]">{z.description}</p>
                           )}
                           <div className="mt-2 flex items-center gap-1.5">
                             <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: confColor }} />
                             <span className="text-[10px] text-[#766a62]">
-                              {condLabels(z.condition) || z.condition} — {z.confidence}
+                              {condLabels(z.condition) || z.condition} — {z.confidence === "high" ? tx(locale, "Hög", "High", "Alta", "Hoch", "Élevée") : z.confidence === "medium" ? tx(locale, "Medel", "Medium", "Media", "Mittel", "Moyenne") : tx(locale, "Låg", "Low", "Baja", "Niedrig", "Faible")}
                             </span>
                           </div>
                         </div>
@@ -760,11 +761,11 @@ function SkinTab({ score, scoreLabel, summary, skinAge, fitzpatrick, metrics, sk
                     <div key={z.zone} className="rounded-xl bg-[#f5f5f7] px-3 py-2">
                       <div className="flex items-center gap-2">
                         <span className="h-2 w-2 shrink-0 rounded-full" style={{ backgroundColor: confColor }} />
-                        <span className="text-[11px] font-semibold text-[#1d1d1f]">{label}</span>
-                        <span className="text-[11px] text-[#766a62]">{z.label}</span>
+                        <span className="text-xs font-semibold text-[#1d1d1f]">{label}</span>
+                        <span className="text-xs text-[#766a62]">{z.label}</span>
                       </div>
                       {z.description && (
-                        <p className="mt-1 pl-4 text-[11px] leading-relaxed text-[#515151]">{z.description}</p>
+                        <p className="mt-1 pl-4 text-sm leading-relaxed text-[#515151]">{z.description}</p>
                       )}
                     </div>
                   );
@@ -800,7 +801,7 @@ function SkinTab({ score, scoreLabel, summary, skinAge, fitzpatrick, metrics, sk
       {/* All metric cards – uniform grid */}
       {metricEntries.length > 0 && (
         <div className="space-y-4">
-          <h4 className="text-[11px] font-bold uppercase tracking-widest text-[#766a62]">
+          <h4 className="text-xs font-bold uppercase tracking-widest text-[#766a62]">
             {tx(locale, "Alla metriker", "All metrics", "Todas las métricas", "Alle Metriken", "Toutes les métriques")}
           </h4>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-3">
@@ -859,19 +860,19 @@ function SkinTab({ score, scoreLabel, summary, skinAge, fitzpatrick, metrics, sk
               badge={`${skinAnalysis.concerns.length}`}
               defaultOpen
             >
-              <div className="flex flex-wrap gap-2">
+              <div className="space-y-3">
                 {skinAnalysis.concerns.map((c, i) => {
                   const label = typeof c === "string" ? c : c.issue;
                   const severity = typeof c === "string" ? undefined : c.severity;
                   const borderColor = severity === "severe" ? "#e55050" : severity === "moderate" ? "#fcb237" : "#e6e6e6";
                   return (
-                    <span key={i} className="rounded-full bg-white px-4 py-2 text-xs font-medium text-[#515151]" style={{ border: `1.5px solid ${borderColor}` }}>
+                    <div key={i} className="rounded-2xl bg-white px-4 py-3 text-sm leading-relaxed text-[#515151]" style={{ border: `1.5px solid ${borderColor}` }}>
                       {label}{severity && severity !== "mild" ? ` (${
                       severity === "severe"
                         ? tx(locale, "allvarlig", "severe", "severo", "schwer", "sévère")
                         : tx(locale, "måttlig", "moderate", "moderado", "mäßig", "modéré")
                     })` : ""}
-                    </span>
+                    </div>
                   );
                 })}
               </div>
@@ -944,7 +945,7 @@ function ProductsTab({ products, onNextTab }: { products: ProductRec[]; onNextTa
     <div className="space-y-8">
       {/* Discount hero card */}
       <div className="overflow-hidden rounded-3xl bg-[#1d1d1f] p-6 text-center text-white sm:p-8">
-        <p className="text-[11px] font-medium uppercase tracking-widest text-white/60">
+        <p className="text-xs font-medium uppercase tracking-widest text-white/60">
           {tx(locale, "Tack för din analys", "Thank you for your analysis", "Gracias por tu análisis", "Danke für deine Analyse", "Merci pour votre analyse")}
         </p>
         <h3 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">
@@ -957,7 +958,7 @@ function ProductsTab({ products, onNextTab }: { products: ProductRec[]; onNextTa
         <div className="mx-auto mt-5 inline-flex items-center gap-3 rounded-full bg-white/10 px-5 py-2.5 backdrop-blur-sm">
           <span className="text-sm text-white/50 line-through">{formatPrice(totalBefore, locale)}</span>
           <span className="text-xl font-bold text-white">{formatPrice(totalAfter, locale)}</span>
-          <span className="rounded-full bg-[#108474] px-3 py-1 text-[11px] font-bold text-white">
+          <span className="rounded-full bg-[#108474] px-3 py-1 text-xs font-bold text-white">
             -{formatPrice(discount, locale)}
           </span>
         </div>
@@ -987,7 +988,7 @@ function ProductsTab({ products, onNextTab }: { products: ProductRec[]; onNextTa
           </button>
         </div>
         {!added && (
-          <p className="mt-3 text-[11px] text-white/40">
+          <p className="mt-3 text-xs text-white/40">
             HUDANALYS15
           </p>
         )}
@@ -995,7 +996,7 @@ function ProductsTab({ products, onNextTab }: { products: ProductRec[]; onNextTa
 
       {/* Products grid */}
       <div className="space-y-3">
-        <p className="text-[11px] font-bold uppercase tracking-widest text-[#766a62]">
+        <p className="text-xs font-bold uppercase tracking-widest text-[#766a62]">
           {tx(locale, "Utvalda för din hud", "Chosen for your skin", "Elegidos para tu piel", "Ausgewählt für deine Haut", "Choisis pour votre peau")}
         </p>
 
@@ -1010,9 +1011,9 @@ function ProductsTab({ products, onNextTab }: { products: ProductRec[]; onNextTa
                     <p className="text-xs font-semibold text-[#1d1d1f]">
                       {tx(locale, "Varför just denna", "Why this product", "Por qué este producto", "Warum dieses Produkt", "Pourquoi ce produit")}
                     </p>
-                    <p className="mt-1 text-[11px] leading-relaxed text-[#515151]">{p.reason}</p>
+                    <p className="mt-1 text-sm leading-relaxed text-[#515151]">{p.reason}</p>
                     {p.usage && (
-                      <p className="mt-2 border-t border-[#f5f5f7] pt-2 text-[11px] leading-relaxed text-[#766a62]">
+                      <p className="mt-2 border-t border-[#f5f5f7] pt-2 text-sm leading-relaxed text-[#766a62]">
                         {p.usage}
                       </p>
                     )}
@@ -1043,7 +1044,7 @@ const AREA_ICONS: Record<string, LucideIcon> = {
   "Sömn": Moon, "Somn": Moon, "Sleep": Moon,
   "Stress": Sparkles,
   "Kost": Leaf, "Diet": Leaf,
-  "Rörelse": Moon, "Rorelse": Sun, "Movement": Sun, "Exercise": Sun,
+  "Rörelse": Sun, "Rorelse": Sun, "Movement": Sun, "Exercise": Sun,
   "Tarmhälsa": Leaf, "Gut health": Leaf,
   "Vatten": Droplets, "Water": Droplets,
 };
@@ -1055,7 +1056,7 @@ function getAreaLabel(area: string, locale: string) {
   if (n === "rorelse" || n === "rörelse" || n === "movement" || n === "exercise") return tx(locale, "Rörelse", "Exercise", "Ejercicio", "Bewegung", "Exercice");
   if (n === "tarmhälsa" || n === "gut health" || n === "gut") return tx(locale, "Tarmhälsa", "Gut health", "Salud intestinal", "Darmgesundheit", "Santé intestinale");
   if (n === "vatten" || n === "water") return tx(locale, "Vatten", "Water", "Agua", "Wasser", "Eau");
-  if (n === "stress") return "Stress";
+  if (n === "stress") return tx(locale, "Stress", "Stress", "Estrés", "Stress", "Stress");
   return area;
 }
 
@@ -1063,7 +1064,7 @@ function getImpactBadge(impact: string, locale: string) {
   const n = impact.toLowerCase();
   if (n === "hog" || n === "hög" || n === "high") return { label: tx(locale, "Hög prioritet", "High priority", "Prioridad alta", "Hohe Priorität", "Priorité haute"), color: "#108474" };
   if (n === "medel" || n === "medium") return { label: tx(locale, "Medel", "Medium", "Medio", "Mittel", "Moyen"), color: "#fcb237" };
-  return { label: tx(locale, "Bonus", "Lower", "Menor", "Niedriger", "Moins important"), color: "#766a62" };
+  return { label: tx(locale, "Bonus", "Bonus", "Bonus", "Bonus", "Bonus"), color: "#766a62" };
 }
 
 function LifestyleTab({ lifestyle, avoid, products, onNextTab }: { lifestyle: LifestyleItem[]; avoid: string[]; products: ProductRec[]; onNextTab?: () => void }) {
@@ -1085,10 +1086,10 @@ function LifestyleTab({ lifestyle, avoid, products, onNextTab }: { lifestyle: Li
             <div className="space-y-3">
               <p className="text-sm leading-relaxed text-[#1d1d1f]">{item.tip}</p>
               {item.why && (
-                <p className="text-xs leading-relaxed text-[#766a62]">{item.why}</p>
+                <p className="text-sm leading-relaxed text-[#766a62]">{item.why}</p>
               )}
               {item.source && (
-                <p className="text-[11px] italic text-[#766a62]/60">{item.source}</p>
+                <p className="text-xs italic text-[#766a62]/60">{item.source}</p>
               )}
             </div>
           </ExpandableBox>
@@ -1100,11 +1101,11 @@ function LifestyleTab({ lifestyle, avoid, products, onNextTab }: { lifestyle: Li
           title={tx(locale, "Undvik", "Avoid", "Evitar", "Vermeiden", "Éviter")}
           defaultOpen
         >
-          <div className="flex flex-wrap gap-2">
+          <div className="space-y-3">
             {avoid.map((item, i) => (
-              <span key={i} className="rounded-full border border-[#e55050]/20 bg-[#e55050]/5 px-4 py-2 text-xs font-medium text-[#1d1d1f]">
+              <div key={i} className="rounded-2xl border border-[#e55050]/20 bg-[#e55050]/5 px-4 py-3 text-sm leading-relaxed text-[#1d1d1f]">
                 {item}
-              </span>
+              </div>
             ))}
           </div>
         </ExpandableBox>
@@ -1162,7 +1163,7 @@ function RoutineTab({ routine, routineLegacy, products }: {
                 <div className="min-w-0">
                   <p className="text-sm font-semibold text-[#1d1d1f]">{s.step}</p>
                   {s.why && (
-                    <p className="mt-1 text-xs leading-relaxed text-[#766a62]">{s.why}</p>
+                    <p className="mt-1 text-sm leading-relaxed text-[#766a62]">{s.why}</p>
                   )}
                 </div>
               </div>
@@ -1190,7 +1191,7 @@ function RoutineTab({ routine, routineLegacy, products }: {
                 <div className="min-w-0">
                   <p className="text-sm font-semibold text-[#1d1d1f]">{s.step}</p>
                   {s.why && (
-                    <p className="mt-1 text-xs leading-relaxed text-[#766a62]">{s.why}</p>
+                    <p className="mt-1 text-sm leading-relaxed text-[#766a62]">{s.why}</p>
                   )}
                 </div>
               </div>
@@ -1235,7 +1236,19 @@ export function AnalysisTabs({
   const [pdfLoading, setPdfLoading] = useState(false);
   const [methodOpen, setMethodOpen] = useState(false);
   const tabBarRef = useRef<HTMLDivElement>(null);
-  const tabOrder: TabId[] = ["skin", "products", "lifestyle", "routine"];
+
+  const hasProducts = products.some((rec) => PRODUCTS.find((p) => p.id === rec.id));
+  const hasRoutine = !!(
+    (routine?.morning?.length ?? 0) > 0 ||
+    (routine?.evening?.length ?? 0) > 0 ||
+    (routineLegacy?.morning?.length ?? 0) > 0 ||
+    (routineLegacy?.evening?.length ?? 0) > 0
+  );
+  const tabOrder: TabId[] = (["skin", "products", "lifestyle", "routine"] as TabId[]).filter((id) => {
+    if (id === "products") return hasProducts;
+    if (id === "routine") return hasRoutine;
+    return true;
+  });
 
   const handleDownloadPDF = async () => {
     setPdfLoading(true);
@@ -1254,12 +1267,13 @@ export function AnalysisTabs({
     }
   };
 
-  const tabs: { id: TabId; label: string; icon: LucideIcon }[] = [
+  const allTabs: { id: TabId; label: string; icon: LucideIcon }[] = [
     { id: "skin", label: tx(locale, "Din hy", "Your skin", "Tu piel", "Deine Haut", "Votre peau"), icon: Sparkles },
     { id: "products", label: tx(locale, "Produkter", "Products", "Productos", "Produkte", "Produits"), icon: Package },
     { id: "lifestyle", label: tx(locale, "Livsstil", "Lifestyle", "Estilo de vida", "Lebensstil", "Mode de vie"), icon: Leaf },
     { id: "routine", label: tx(locale, "Rutin", "Routine", "Rutina", "Routine", "Routine"), icon: Moon },
   ];
+  const tabs = allTabs.filter((t) => tabOrder.includes(t.id));
 
   const goToNextTab = () => {
     const idx = tabOrder.indexOf(activeTab);
@@ -1297,7 +1311,7 @@ export function AnalysisTabs({
                     });
                   }}
                   className={cn(
-                    "relative flex flex-1 items-center justify-center gap-1.5 rounded-xl px-2 py-3 text-[11px] font-semibold transition-all duration-300 md:text-xs",
+                    "relative flex flex-1 items-center justify-center gap-1.5 rounded-xl px-2 py-3 text-xs font-semibold transition-all duration-300",
                     active
                       ? "bg-white text-[#1d1d1f] shadow-sm"
                       : "text-[#766a62] hover:text-[#1d1d1f]"
@@ -1311,7 +1325,7 @@ export function AnalysisTabs({
           </div>
           <button
             onClick={() => setMethodOpen(true)}
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#e6e6e6]/80 bg-[#f5f5f7]/80 text-[#766a62] backdrop-blur-sm transition-all duration-300 hover:border-[#108474]/30 hover:bg-[#108474]/10 hover:text-[#108474] active:scale-90"
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-full border border-[#e6e6e6]/80 bg-[#f5f5f7]/80 text-[#766a62] backdrop-blur-sm transition-all duration-300 hover:border-[#108474]/30 hover:bg-[#108474]/10 hover:text-[#108474] active:scale-90"
             aria-label={tx(locale, "Så fungerar analysen", "How the analysis works", "Cómo funciona el análisis", "So funktioniert die Analyse", "Comment fonctionne l'analyse")}
             title={tx(locale, "Så fungerar analysen", "How the analysis works", "Cómo funciona el análisis", "So funktioniert die Analyse", "Comment fonctionne l'analyse")}
           >
@@ -1399,7 +1413,7 @@ export function AnalysisTabs({
       {/* Next analysis hint */}
       {nextAnalysis && (
         <div className="rounded-2xl border border-[#e6e6e6]/80 bg-[#f5f5f7] p-5 text-center">
-          <p className="text-[11px] font-bold uppercase tracking-widest text-[#766a62]">
+          <p className="text-xs font-bold uppercase tracking-widest text-[#766a62]">
             {tx(locale, "Rekommenderad uppföljning", "Recommended follow-up", "Seguimiento recomendado", "Empfohlene Nachuntersuchung", "Suivi recommandé")}
           </p>
           <p className="mt-1 text-sm text-[#515151]">{nextAnalysis}</p>
