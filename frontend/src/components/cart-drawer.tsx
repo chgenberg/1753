@@ -192,7 +192,7 @@ export function CartDrawer() {
               <p className="mb-3 text-center text-xs font-medium text-brand-700">
                 {freeShipping
                   ? t("cartDrawer.freeShippingLine")
-                  : t("product.freeShippingHint")}
+                  : t("productDetail.freeShippingHint")}
               </p>
               <div className="mb-1 flex items-center justify-between text-sm text-muted-foreground">
                 <span>{t("cartDrawer.subtotal")}</span>

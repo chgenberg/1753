@@ -680,13 +680,7 @@ function SkinTab({ score, scoreLabel, summary, skinAge, fitzpatrick, metrics, sk
       {/* Hero score */}
       <ScoreRing score={score} label={scoreLabel} skinAge={skinAge} fitzpatrick={fitzpatrick} locale={locale} />
 
-      {/* Summary */}
-      <Paragraphs
-        text={summary}
-        className="mx-auto max-w-lg text-center text-sm leading-relaxed text-[#515151]"
-      />
-
-      {/* Face scan image – shown early so user sees their photo first */}
+      {/* Face scan image – between score and summary so user sees their photo first */}
       {hasScan && scanImageSrc && (
         <div className="space-y-4">
           <div className="flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-widest text-[#108474]">
@@ -791,6 +785,12 @@ function SkinTab({ score, scoreLabel, summary, skinAge, fitzpatrick, metrics, sk
           {tx(locale, "Inkluderar data från din ansiktsskanning", "Includes data from your face scan", "Incluye datos de tu escaneo facial", "Enthält Daten aus deinem Gesichtsscan", "Inclut les données de votre scan facial")}
         </div>
       )}
+
+      {/* Summary */}
+      <Paragraphs
+        text={summary}
+        className="mx-auto max-w-lg text-center text-sm leading-relaxed text-[#515151]"
+      />
 
       {/* Radar chart */}
       {hasMetrics && <SkinRadarChart metrics={metrics} locale={locale} />}
@@ -1041,12 +1041,12 @@ function ProductsTab({ products, onNextTab }: { products: ProductRec[]; onNextTa
 /* ------------------------------------------------------------------ */
 
 const AREA_ICONS: Record<string, LucideIcon> = {
-  "Sömn": Moon, "Somn": Moon, "Sleep": Moon,
-  "Stress": Sparkles,
-  "Kost": Leaf, "Diet": Leaf,
-  "Rörelse": Sun, "Rorelse": Sun, "Movement": Sun, "Exercise": Sun,
-  "Tarmhälsa": Leaf, "Gut health": Leaf,
-  "Vatten": Droplets, "Water": Droplets,
+  "Sömn": Moon, "Somn": Moon, "Sleep": Moon, "Sueño": Moon, "Schlaf": Moon, "Sommeil": Moon,
+  "Stress": Sparkles, "Estrés": Sparkles,
+  "Kost": Leaf, "Diet": Leaf, "Dieta": Leaf, "Ernährung": Leaf, "Alimentation": Leaf,
+  "Rörelse": Sun, "Rorelse": Sun, "Movement": Sun, "Exercise": Sun, "Ejercicio": Sun, "Bewegung": Sun, "Exercice": Sun,
+  "Tarmhälsa": Leaf, "Gut health": Leaf, "Salud intestinal": Leaf, "Darmgesundheit": Leaf, "Santé intestinale": Leaf,
+  "Vatten": Droplets, "Water": Droplets, "Agua": Droplets, "Wasser": Droplets, "Eau": Droplets,
 };
 
 function getAreaLabel(area: string, locale: string) {

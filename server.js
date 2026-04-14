@@ -1694,6 +1694,23 @@ Immunologiska och hormonella kopplingar mellan tarmflora och hud. Stress/dysbios
 - Rebellisk mot hudvårdsindustrin men aldrig nedlåtande mot kunden
 - Varm, personlig ton – som en kunnig vän
 
+== SOLSKYDD – EVOLUTIONÄR BALANS ==
+Solen är INTE en fiende – den är livsviktig. Människans hud har formats under miljontals år i samspel med UV-strålning. Vår position om solskydd:
+
+1. EVOLUTIONÄR ANPASSNING: Hudtyp (Fitzpatrick) speglar en evolutionär anpassning till UV-nivåer. Ljus hud (typ I-II) utvecklades i solfattiga områden för att maximera D-vitaminproduktion; mörk hud (typ V-VI) utvecklades nära ekvatorn som skydd mot intensiv UV. Det finns ingen "universell" solskyddsrekommendation.
+
+2. NÄR SOLSKYDD BEHÖVS: Rekommendera solskydd ENBART när UV-miljön överstiger vad personens hud evolutionärt är anpassad för. Exempel: ljushyad person i tropikerna – ja. Mörkhyad person i Norden – oftast nej, de riskerar snarare D-vitaminbrist. Anpassa alltid rådet efter kundens Fitzpatrick-typ, bostadsort/latitud och solvanor.
+
+3. D-VITAMIN ÄR LIVSVIKTIGT: Överdriven solrädsla och generella "använd SPF varje dag"-råd kan orsaka kronisk D-vitaminbrist. Särskilt allvarligt för mörkhyade i solfattiga länder och för barn. D-vitamin stödjer skelett, immunförsvar och en rad kroppsprocesser.
+
+4. OM SOLSKYDD REKOMMENDERAS:
+   - Mineraliskt solskydd (zinkoxid/titandioxid) framför kemiskt – skonsammare mot hud och mikrobiom
+   - Kläder, hatt och skugga i stark sol framför kemiska produkter
+   - Undvik ALDRIG det generiska rådet "använd alltid SPF 50" – individanpassa
+   - CBD/CBG ger antioxidantskydd men ersätter INTE solskydd vid stark UV-exponering
+
+5. I RUTINFÖRSLAG: Skriv ALDRIG "använd solskydd dagligen" som ett standardsteg. Formulera istället: "Använd mineraliskt solskydd om du vistas i starkare UV-miljö än din hud är anpassad för" – och förklara varför baserat på kundens Fitzpatrick-typ.
+
 == ANALYSTYP ==
 Kunden har besvarat en quiz om hudtyp, besvär, rutin och livsstil. Om skanningsdata finns inkluderat, integrera det i analysen (zoner med detekterade hudtillstånd och konfidensgrader).
 
@@ -1930,6 +1947,7 @@ Skriv aldrig generiska råd som "drick mer vatten". Var specifik utifrån kunden
 Anpassa morgon- och kvällsrutin till kundens hudtyp och besvär. Ge MINST 3 steg per rutin (morgon och kväll). Varje steg ska ha:
 - "step": vad kunden ska göra (1 mening)
 - "why": utförlig förklaring (2-3 meningar) av VARFÖR det stöder hudens egna system, kopplat till ECS/mikrobiom och kundens specifika behov
+OBS SOLSKYDD I RUTIN: Inkludera ALDRIG "använd solskydd" som standardsteg. Om kundens Fitzpatrick-typ och livssituation motiverar solskydd, formulera det som "Mineraliskt solskydd vid stark UV-exponering" med en why som förklarar den evolutionära logiken (se == SOLSKYDD – EVOLUTIONÄR BALANS ==).
 
 == PRIMARYCONDITION (KRITISKT FOR KORREKT TAGGNING) ==
 Fältet "primaryCondition" avgör hur kunden taggas i vårt system. Felaktig taggning gör att kunden får irrelevanta nyhetsbrev. VAR EXTREMT KONSERVATIV:
@@ -2661,21 +2679,25 @@ app.post("/api/account/check-email", async (req, res) => {
 app.post("/api/orders/create", async (req, res) => {
   try {
     const clientIp = req.ip || req.connection.remoteAddress;
-    if (!checkRateLimit(clientIp, "orders-create", 20)) {
-      return res.status(429).json({ message: "För många beställningar. Försök igen om en stund." });
-    }
     const { customer, deliveryAddress, items, discountCode, currency: reqCurrency, createAccount, locale: reqLocale } = req.body;
     const currency = reqCurrency === "EUR" ? "EUR" : "SEK";
-    const locale = reqLocale === "en" ? "en" : "sv";
+    const supportedLocales = ["sv", "en", "es", "de", "fr"];
+    const locale = supportedLocales.includes(reqLocale) ? reqLocale : "sv";
+
+    const orderMsg = (sv, en, es, de, fr) => ({ sv, en, es, de, fr }[locale] || en);
+
+    if (!checkRateLimit(clientIp, "orders-create", 20)) {
+      return res.status(429).json({ message: orderMsg("För många beställningar. Försök igen om en stund.", "Too many orders. Please try again later.", "Demasiados pedidos. Inténtalo más tarde.", "Zu viele Bestellungen. Bitte versuche es später erneut.", "Trop de commandes. Veuillez réessayer plus tard.") });
+    }
 
     if (!customer?.name || !customer?.email) {
-      return res.status(400).json({ message: "Namn och e-post krävs" });
+      return res.status(400).json({ message: orderMsg("Namn och e-post krävs", "Name and email are required", "Se requiere nombre y correo electrónico", "Name und E-Mail sind erforderlich", "Nom et e-mail requis") });
     }
     if (!deliveryAddress?.address || !deliveryAddress?.zip || !deliveryAddress?.city) {
-      return res.status(400).json({ message: "Leveransadress krävs" });
+      return res.status(400).json({ message: orderMsg("Leveransadress krävs", "Delivery address is required", "Se requiere dirección de entrega", "Lieferadresse erforderlich", "Adresse de livraison requise") });
     }
     if (!items || items.length === 0) {
-      return res.status(400).json({ message: "Varukorgen är tom" });
+      return res.status(400).json({ message: orderMsg("Varukorgen är tom", "Your cart is empty", "El carrito está vacío", "Dein Warenkorb ist leer", "Votre panier est vide") });
     }
 
     const hasSubscription = items.some(
@@ -5178,19 +5200,21 @@ app.get("/api/recommendations", authMiddleware, async (req, res) => {
 
 app.post("/api/newsletter/subscribe", async (req, res) => {
   try {
-    const { email, firstName, skinCondition, source } = req.body;
+    const { email, firstName, skinCondition, source, locale: reqLocale } = req.body;
+    const nlLocales = ["sv", "en", "es", "de", "fr"];
+    const locale = nlLocales.includes(reqLocale) ? reqLocale : "sv";
     if (!email || !email.includes("@")) {
-      return res.status(400).json({ message: "Ange en giltig e-postadress" });
+      return res.status(400).json({ message: locale === "sv" ? "Ange en giltig e-postadress" : "Please enter a valid email address" });
     }
 
     const clientIp = req.ip || req.connection.remoteAddress;
     if (!checkRateLimit(clientIp, "newsletter", 10)) {
-      return res.status(429).json({ message: "For manga forsok. Vanta en stund." });
+      return res.status(429).json({ message: locale === "sv" ? "För många försök. Vänta en stund." : "Too many attempts. Please wait a moment." });
     }
 
     const token = crypto.randomBytes(32).toString("hex");
     const subscriber = await db.createSubscriber({
-      email, firstName: firstName || "", source: source || "footer", unsubscribeToken: token
+      email, firstName: firstName || "", source: source || "footer", unsubscribeToken: token, locale
     });
 
     if (skinCondition) {

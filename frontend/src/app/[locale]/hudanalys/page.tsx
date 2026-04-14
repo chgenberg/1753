@@ -33,8 +33,7 @@ import { useAuth } from "@/providers/auth-provider";
 import { cn } from "@/lib/utils";
 import { SkinScanner, type ScanSummary } from "@/components/skin-scanner/skin-scanner";
 import {
-  CONDITION_LABELS_EN,
-  CONDITION_LABELS_SV,
+  conditionLabel,
 } from "@/components/skin-scanner/zones";
 
 type Step = "intro" | "email" | "demographics" | "scan" | 1 | 2 | 3 | 4 | 5 | 6 | 7 | "analyzing" | "result";
@@ -449,7 +448,7 @@ export default function AnalysisPage() {
   const { token, user } = useAuth();
   const a = (key: string, vars?: Record<string, string | number>) =>
     t(`analysisPage.${key}`, vars);
-  const conditionLabels = locale === "sv" ? CONDITION_LABELS_SV : CONDITION_LABELS_EN;
+  const condLabel = (key: string) => conditionLabel(key, locale);
 
   const [step, setStep] = useState<Step>("intro");
   const [userEmail, setUserEmail] = useState("");
@@ -655,7 +654,7 @@ export default function AnalysisPage() {
             imageScan: {
               overall: scanSummary.overallTop.map((p) => ({
                 condition: p.label,
-                conditionSv: conditionLabels[p.label] || p.label,
+                conditionSv: condLabel(p.label),
                 confidence: Math.round(p.probability * 100),
               })),
               overallSeverity: scanSummary.overallSeverity
@@ -666,7 +665,7 @@ export default function AnalysisPage() {
                 .map((z) => ({
                   zone: locale === "sv" ? z.zone.labelSv : z.zone.labelEn,
                   condition: z.topCondition,
-                  conditionSv: conditionLabels[z.topCondition] || z.topCondition,
+                  conditionSv: condLabel(z.topCondition),
                   confidence: Math.round(z.confidence * 100),
                   severity: z.severity ? z.severity.level : undefined,
                 })),
@@ -751,6 +750,7 @@ export default function AnalysisPage() {
             email: userEmail,
             skinCondition: gptCondition,
             source: "analysis",
+            locale,
           }),
         }).then(() => setNlSubscribed(true)).catch(() => {});
       }

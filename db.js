@@ -188,6 +188,7 @@ async function initSchema() {
 
     ALTER TABLE subscribers ADD COLUMN IF NOT EXISTS skin_condition VARCHAR(50) DEFAULT NULL;
     ALTER TABLE subscribers ADD COLUMN IF NOT EXISTS last_emailed_at TIMESTAMPTZ DEFAULT NULL;
+    ALTER TABLE subscribers ADD COLUMN IF NOT EXISTS locale VARCHAR(5) DEFAULT 'sv';
 
     CREATE INDEX IF NOT EXISTS idx_subscribers_email ON subscribers (email);
     CREATE INDEX IF NOT EXISTS idx_subscribers_status ON subscribers (status);
@@ -639,16 +640,17 @@ async function createSubscriptionCharge({ subscriptionId, orderId, vivaTxId, amo
 
 // ---- SUBSCRIBER helpers ----
 
-async function createSubscriber({ email, firstName, source, unsubscribeToken }) {
+async function createSubscriber({ email, firstName, source, unsubscribeToken, locale }) {
   const { rows } = await pool.query(
-    `INSERT INTO subscribers (email, first_name, source, unsubscribe_token)
-     VALUES ($1, $2, $3, $4)
+    `INSERT INTO subscribers (email, first_name, source, unsubscribe_token, locale)
+     VALUES ($1, $2, $3, $4, $5)
      ON CONFLICT (email) DO UPDATE SET
        status = CASE WHEN subscribers.status = 'unsubscribed' THEN 'active' ELSE subscribers.status END,
        first_name = COALESCE(NULLIF($2, ''), subscribers.first_name),
+       locale = COALESCE(NULLIF($5, ''), subscribers.locale),
        unsubscribed_at = CASE WHEN subscribers.status = 'unsubscribed' THEN NULL ELSE subscribers.unsubscribed_at END
      RETURNING *`,
-    [email.toLowerCase(), firstName || "", source || "footer", unsubscribeToken]
+    [email.toLowerCase(), firstName || "", source || "footer", unsubscribeToken, locale || "sv"]
   );
   return rows[0];
 }

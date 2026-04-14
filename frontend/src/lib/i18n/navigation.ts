@@ -161,3 +161,58 @@ export function localizePath(
 export function localizeHomeHash(locale: Locale, hash: string): string {
   return `/${locale}${hash}`;
 }
+
+/**
+ * Convert current pathname to the equivalent path in a different locale.
+ * Reverse-looks up the first segment to find the matching AppRoute,
+ * then builds the path for the target locale.
+ * Falls back to swapping just the locale prefix if no match is found.
+ */
+export function switchLocalePath(
+  pathname: string,
+  toLocale: Locale
+): string {
+  const parts = pathname.split("/").filter(Boolean);
+  if (parts.length === 0) return `/${toLocale}`;
+
+  const fromLocale = parts[0];
+  const rest = parts.slice(1);
+
+  if (rest.length === 0) return `/${toLocale}`;
+
+  const firstSeg = rest[0];
+  const sourceSegments = LOCALE_SEGMENTS[fromLocale] || SV_SEGMENT;
+  const targetSegments = LOCALE_SEGMENTS[toLocale] || SV_SEGMENT;
+
+  let matchedRoute: AppRoute | null = null;
+  for (const [route, seg] of Object.entries(sourceSegments)) {
+    if (seg && seg === firstSeg) {
+      matchedRoute = route as AppRoute;
+      break;
+    }
+  }
+
+  // Middleware rewrites pretty URLs to Swedish filesystem paths,
+  // so usePathname() returns e.g. "/en/hudanalys" not "/en/skin-analysis".
+  // Fall back to checking SV_SEGMENT for the internal/rewritten path.
+  if (!matchedRoute && fromLocale !== "sv") {
+    for (const [route, seg] of Object.entries(SV_SEGMENT)) {
+      if (seg && seg === firstSeg) {
+        matchedRoute = route as AppRoute;
+        break;
+      }
+    }
+  }
+
+  if (!matchedRoute) {
+    return `/${toLocale}/${rest.join("/")}`;
+  }
+
+  const targetSeg = targetSegments[matchedRoute];
+  const remaining = rest.slice(1);
+
+  if (!targetSeg) return `/${toLocale}`;
+
+  const base = `/${toLocale}/${targetSeg}`;
+  return remaining.length > 0 ? `${base}/${remaining.join("/")}` : base;
+}

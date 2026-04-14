@@ -297,7 +297,7 @@ export const de: Messages = {
       { title: "Ehrlichkeit", desc: "Kein Marketing-Nebel. Was wir sagen, können wir belegen." },
       { title: "Ganzheitlicher Blick", desc: "Die Haut spiegelt den ganzen Körper. Wir schauen hinter die Symptome und fragen, warum sie da sind." },
       { title: "Qualität", desc: "Weniger, aber bessere Inhaltsstoffe. Kein 50-Schritte-Ritual, nur das, was deine Haut wirklich braucht." },
-      { title: "Community", desc: "Wir bauen das gemeinsam mit unseren Kunden auf. Ihr Feedback bestimmt, was als Nächstes kommt." },
+      { title: "Gemeinschaft", desc: "Wir bauen das gemeinsam mit unseren Kunden auf. Ihr Feedback bestimmt, was als Nächstes kommt." },
     ],
     timeline: [
       { year: "2017", title: "Die Idee", desc: "Christopher Genberg, geplagt von Hautproblemen, erkennt, dass konventionelle Hautpflege mehr Probleme schafft, als sie löst." },

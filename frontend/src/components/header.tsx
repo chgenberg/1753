@@ -9,6 +9,8 @@ import { useCart } from "@/providers/cart-provider";
 import { useAuth } from "@/providers/auth-provider";
 import { cn } from "@/lib/utils";
 import { useLocale } from "@/providers/locale-provider";
+import { switchLocalePath } from "@/lib/i18n/navigation";
+import type { Locale } from "@/lib/i18n/types";
 
 function usePrefersReducedMotion() {
   const [reduced, setReduced] = useState(false);
@@ -252,7 +254,7 @@ export function Header() {
                 {otherLocales.map(l => (
                   <Link
                     key={l}
-                    href={`/${l}`}
+                    href={switchLocalePath(pathname, l as Locale)}
                     onClick={() => setLangOpen(false)}
                     className="group/flag flex flex-col items-center gap-1 rounded-xl px-2 py-1.5 transition-colors hover:bg-brand-50"
                     title={localeLabels[l]}
@@ -339,7 +341,7 @@ export function Header() {
               {otherLocales.map(l => (
                 <Link
                   key={l}
-                  href={`/${l}`}
+                  href={switchLocalePath(pathname, l as Locale)}
                   onClick={() => setMobileOpen(false)}
                   className="flex flex-col items-center gap-1.5 rounded-xl px-3 py-2 transition-colors hover:bg-brand-50"
                 >

@@ -187,6 +187,25 @@ function drawProgressBar(
   }
 }
 
+function pdfGetAreaLabel(area: string, locale: string): string {
+  const n = area.toLowerCase();
+  if (["sömn", "somn", "sleep", "sueño", "schlaf", "sommeil"].includes(n)) return tx(locale, "Sömn", "Sleep", "Sueño", "Schlaf", "Sommeil");
+  if (["kost", "diet", "dieta", "ernährung", "alimentation"].includes(n)) return tx(locale, "Kost", "Diet", "Dieta", "Ernährung", "Alimentation");
+  if (["rörelse", "rorelse", "movement", "exercise", "ejercicio", "bewegung", "exercice"].includes(n)) return tx(locale, "Rörelse", "Exercise", "Ejercicio", "Bewegung", "Exercice");
+  if (["tarmhälsa", "gut health", "gut", "salud intestinal", "darmgesundheit", "santé intestinale"].includes(n)) return tx(locale, "Tarmhälsa", "Gut health", "Salud intestinal", "Darmgesundheit", "Santé intestinale");
+  if (["vatten", "water", "agua", "wasser", "eau"].includes(n)) return tx(locale, "Vatten", "Water", "Agua", "Wasser", "Eau");
+  if (["stress", "estrés"].includes(n)) return tx(locale, "Stress", "Stress", "Estrés", "Stress", "Stress");
+  return area;
+}
+
+function pdfSeverityLabel(severity: string, locale: string): string {
+  const n = severity.toLowerCase();
+  if (["mild"].includes(n)) return tx(locale, "Mild", "Mild", "Leve", "Leicht", "Léger");
+  if (["moderate", "moderat"].includes(n)) return tx(locale, "Moderat", "Moderate", "Moderado", "Moderat", "Modéré");
+  if (["severe", "svår"].includes(n)) return tx(locale, "Svår", "Severe", "Grave", "Schwer", "Sévère");
+  return severity;
+}
+
 function tx(locale: string, sv: string, en: string, es?: string, de?: string, fr?: string): string {
   if (locale === "sv") return sv;
   if (locale === "es") return es || en;
@@ -495,7 +514,7 @@ export async function generateAnalysisPDF(
           const sevY = y + cLines.length * lh(7);
           doc.setFontSize(5);
           doc.setTextColor(...BROWN);
-          doc.text(`(${severity})`, margin + 6, sevY);
+          doc.text(`(${pdfSeverityLabel(severity, locale)})`, margin + 6, sevY);
         }
         y += cLines.length * lh(7) + (severity ? 3.5 : 1.5);
       });
@@ -560,22 +579,24 @@ export async function generateAnalysisPDF(
       doc.setFontSize(6);
       doc.setFont("helvetica", "bold");
       doc.setTextColor(...GREEN);
-      const icon = item.area.substring(0, 2).toUpperCase();
+      const areaLocalized = pdfGetAreaLabel(item.area, locale);
+      const icon = areaLocalized.substring(0, 2).toUpperCase();
       doc.text(icon, margin + 6, y + 6.5, { align: "center" });
 
       doc.setFontSize(7);
       doc.setFont("helvetica", "bold");
       doc.setTextColor(...DARK);
-      const areaText = doc.splitTextToSize(item.area, cw - 30);
+      const areaText = doc.splitTextToSize(areaLocalized, cw - 30);
       doc.text(areaText.slice(0, 1), margin + 12, y + 5.5);
 
       const impactN = item.impact.toLowerCase();
       const isHigh = ["hög", "hog", "high", "alta", "hoch", "haute", "élevée", "elevee"].includes(impactN);
       const isMedium = ["medel", "medium", "media", "mittel", "moyenne", "moyen"].includes(impactN);
       const impactColor: [number, number, number] = isHigh ? [...GREEN] : isMedium ? [...GOLD] : [...BROWN];
+      const impactLabel = isHigh ? tx(locale, "Hög prioritet", "High priority", "Prioridad alta", "Hohe Priorität", "Priorité haute") : isMedium ? tx(locale, "Medel", "Medium", "Medio", "Mittel", "Moyen") : tx(locale, "Bonus", "Bonus", "Bonus", "Bonus", "Bonus");
       doc.setFontSize(5);
       doc.setTextColor(impactColor[0], impactColor[1], impactColor[2]);
-      doc.text(item.impact, margin + cw - 4, y + 5.5, { align: "right" });
+      doc.text(impactLabel, margin + cw - 4, y + 5.5, { align: "right" });
 
       doc.setFontSize(6.5);
       doc.setFont("helvetica", "normal");

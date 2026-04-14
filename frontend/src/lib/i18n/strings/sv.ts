@@ -295,7 +295,7 @@ const bundle = {
       { title: "Ärlighet", desc: "Vi gömmer oss inte bakom marknadsföringsspråk. Varje påstående vi gör kan vi backa upp." },
       { title: "Holistisk syn", desc: "Huden är en spegling av hela kroppen. Vi behandlar orsaker, inte symptom." },
       { title: "Kvalitet", desc: "Färre men bättre ingredienser. Ingen produktlinje med 50 steg – bara det din hud faktiskt behöver." },
-      { title: "Community", desc: "Vi bygger något tillsammans. Varje kundberättelse inspirerar vår nästa produkt." },
+      { title: "Gemenskap", desc: "Vi bygger något tillsammans. Varje kundberättelse inspirerar vår nästa produkt." },
     ],
     timeline: [
       { year: "2017", title: "Idén föds", desc: "Christopher Genberg, plågad av hudproblem, upptäcker att konventionell hudvård skapar fler problem än den löser." },

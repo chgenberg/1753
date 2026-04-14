@@ -20,7 +20,7 @@ export function Footer() {
     try {
       await apiFetch("/newsletter/subscribe", {
         method: "POST",
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email, locale }),
       });
       setStatus("success");
       setMsg(t("footer.thanks"));
@@ -34,9 +34,9 @@ export function Footer() {
   const guidePathMap: Record<string, string> = {
     sv: "/sv/guide/cbd-hudvard",
     en: "/en/guide/cbd-skincare",
-    es: "/es/guide/cbd-skincare",
-    de: "/de/guide/cbd-skincare",
-    fr: "/fr/guide/cbd-skincare",
+    es: "/es/guide/cuidado-piel-cbd",
+    de: "/de/guide/cbd-hautpflege",
+    fr: "/fr/guide/soin-peau-cbd",
   };
   const guidePath = guidePathMap[locale] || guidePathMap.en;
   const navLinks = [

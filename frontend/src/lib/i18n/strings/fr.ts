@@ -406,7 +406,7 @@ export const fr: Messages = {
     dietBalanced: "Équilibrée / variée",
     dietVegan: "Végane / végétarienne",
     dietProcessed: "Principalement industrielle / fast-food",
-    dietLowCarb: "Low carb / keto",
+    dietLowCarb: "Faible en glucides / céto",
     dietOther: "Autre",
     waterLabel: "Consommation d'eau par jour",
     waterLow: "Moins d'1 litre",

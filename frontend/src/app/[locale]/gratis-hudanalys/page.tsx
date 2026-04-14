@@ -520,7 +520,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const canonicalMap: Record<string, string> = {
     sv: "/sv/gratis-hudanalys",
     en: "/en/free-skin-analysis",
-    es: "/es/analisis-de-piel-gratis",
+    es: "/es/analisis-piel-gratis",
     de: "/de/kostenlose-hautanalyse",
     fr: "/fr/analyse-de-peau-gratuite",
   };
@@ -589,12 +589,20 @@ export default async function FreeAnalysisLanding({ params }: Props) {
     areaServed: { "@type": "Country", name: tx(l, "Sverige", "Sweden", "Suecia", "Schweden", "Suède") },
   };
 
+  const freeAnalysisPaths: Record<string, string> = {
+    sv: "/sv/gratis-hudanalys",
+    en: "/en/free-skin-analysis",
+    es: "/es/analisis-piel-gratis",
+    de: "/de/kostenlose-hautanalyse",
+    fr: "/fr/analyse-de-peau-gratuite",
+  };
+
   const breadcrumbSchema = {
     "@context": "https://schema.org",
     "@type": "BreadcrumbList",
     itemListElement: [
       { "@type": "ListItem", position: 1, name: tx(l, "Hem", "Home", "Inicio", "Startseite", "Accueil"), item: `${BASE_URL}/${l}` },
-      { "@type": "ListItem", position: 2, name: tx(l, "Gratis hudanalys", "Free skin analysis", "Análisis de piel gratis", "Kostenlose Hautanalyse", "Analyse de peau gratuite"), item: `${BASE_URL}/${l}/gratis-hudanalys` },
+      { "@type": "ListItem", position: 2, name: tx(l, "Gratis hudanalys", "Free skin analysis", "Análisis de piel gratis", "Kostenlose Hautanalyse", "Analyse de peau gratuite"), item: `${BASE_URL}${freeAnalysisPaths[l] || freeAnalysisPaths.sv}` },
     ],
   };
 
