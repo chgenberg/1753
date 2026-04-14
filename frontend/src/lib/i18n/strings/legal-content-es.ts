@@ -23,7 +23,7 @@ export const LEGAL_TERMS_ES: LegalDoc = {
     },
     {
       h: "4. Entrega",
-      html: `<p>Enviamos todos los pedidos con PostNord Varubrev. El plazo de entrega habitual es de 2–5 días laborables en Suecia y de 5–10 días laborables para envíos en la UE. Envío gratuito en pedidos superiores a 700 SEK / \u20AC60; en caso contrario se aplica un gasto de envío de 55 SEK / \u20AC6.</p>`,
+      html: `<p>Enviamos todos los pedidos con PostNord Varubrev. El plazo de entrega habitual es de 2–5 días laborables en Suecia y de 5–10 días laborables para envíos en la UE. Envío gratuito en pedidos superiores a 600 SEK / \u20AC60; en caso contrario se aplica un gasto de envío de 55 SEK / \u20AC6.</p>`,
     },
     {
       h: "5. Derecho de desistimiento",

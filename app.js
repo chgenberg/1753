@@ -193,7 +193,7 @@ function getCartCount() {
   return getCart().reduce((sum, item) => sum + item.qty, 0);
 }
 
-const FREE_SHIPPING_THRESHOLD = 700;
+const FREE_SHIPPING_THRESHOLD = 600;
 
 /** Samma bas-URL som i index.html OG/canonical – ändra vid annan produktionsdomän. */
 const SITE_ORIGIN = "https://1753skincare.com";

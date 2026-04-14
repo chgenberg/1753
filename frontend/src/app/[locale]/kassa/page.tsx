@@ -82,7 +82,7 @@ export default function CheckoutPage() {
     : 0;
 
   const discountedSubtotal = subtotal - discountAmount;
-  const FREE_SHIPPING_THRESHOLD = currency === "EUR" ? 60 : 700;
+  const FREE_SHIPPING_THRESHOLD = currency === "EUR" ? 60 : 600;
   const freeShipping = discountedSubtotal >= FREE_SHIPPING_THRESHOLD;
   const shipping = freeShipping ? 0 : getShippingCost(locale);
   const total = discountedSubtotal + shipping;

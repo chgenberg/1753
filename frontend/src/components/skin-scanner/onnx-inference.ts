@@ -8,6 +8,7 @@
 import type { InferenceSession, Tensor } from "onnxruntime-web";
 
 const MODEL_URL = "/models/skin_classifier_q8.onnx";
+const MODEL_DATA_URL = "/models/skin_classifier_q8.onnx.data";
 const META_URL = "/models/model_meta.json";
 
 interface ModelMeta {
@@ -37,49 +38,86 @@ export async function loadMeta(): Promise<ModelMeta> {
   return meta!;
 }
 
+async function fetchWithProgress(
+  url: string,
+  onLoaded: (bytes: number) => void
+): Promise<ArrayBuffer> {
+  const resp = await fetch(url);
+  const reader = resp.body?.getReader();
+  const total = Number(resp.headers.get("content-length") || 0);
+
+  if (!reader || !total) {
+    const buf = await resp.arrayBuffer();
+    onLoaded(buf.byteLength);
+    return buf;
+  }
+
+  const chunks: Uint8Array[] = [];
+  let loaded = 0;
+  while (true) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    chunks.push(value);
+    loaded += value.length;
+    onLoaded(loaded);
+  }
+
+  const buf = new Uint8Array(loaded);
+  let offset = 0;
+  for (const chunk of chunks) {
+    buf.set(chunk, offset);
+    offset += chunk.length;
+  }
+  return buf.buffer;
+}
+
 export async function loadModel(
   onProgress?: (pct: number) => void
 ): Promise<InferenceSession> {
   if (sessionPromise) return sessionPromise;
 
   sessionPromise = (async () => {
-    const ort = await getOrt();
-    await loadMeta();
+    try {
+      const ort = await getOrt();
+      await loadMeta();
 
-    const resp = await fetch(MODEL_URL);
-    const total = Number(resp.headers.get("content-length") || 0);
-    const reader = resp.body?.getReader();
+      let modelLoaded = 0;
+      let dataLoaded = 0;
+      let totalEstimate = 0;
 
-    if (!reader || !total) {
-      const buf = await (await fetch(MODEL_URL)).arrayBuffer();
+      const headModel = await fetch(MODEL_URL, { method: "HEAD" });
+      const headData = await fetch(MODEL_DATA_URL, { method: "HEAD" });
+      const modelSize = Number(headModel.headers.get("content-length") || 400_000);
+      const dataSize = Number(headData.headers.get("content-length") || 12_000_000);
+      totalEstimate = modelSize + dataSize;
+
+      const report = () => {
+        if (totalEstimate > 0) {
+          onProgress?.(Math.min(99, Math.round(((modelLoaded + dataLoaded) / totalEstimate) * 100)));
+        }
+      };
+
+      const [modelBuf, dataBuf] = await Promise.all([
+        fetchWithProgress(MODEL_URL, (b) => { modelLoaded = b; report(); }),
+        fetchWithProgress(MODEL_DATA_URL, (b) => { dataLoaded = b; report(); }),
+      ]);
+
       onProgress?.(100);
-      return ort.InferenceSession.create(buf, {
+
+      return ort.InferenceSession.create(modelBuf, {
         executionProviders: ["wasm"],
         graphOptimizationLevel: "all",
+        externalData: [
+          {
+            path: "skin_classifier_q8.onnx.data",
+            data: new Uint8Array(dataBuf),
+          },
+        ],
       });
+    } catch (err) {
+      sessionPromise = null;
+      throw err;
     }
-
-    const chunks: Uint8Array[] = [];
-    let loaded = 0;
-    while (true) {
-      const { done, value } = await reader.read();
-      if (done) break;
-      chunks.push(value);
-      loaded += value.length;
-      onProgress?.(Math.round((loaded / total) * 100));
-    }
-
-    const buf = new Uint8Array(loaded);
-    let offset = 0;
-    for (const chunk of chunks) {
-      buf.set(chunk, offset);
-      offset += chunk.length;
-    }
-
-    return ort.InferenceSession.create(buf.buffer, {
-      executionProviders: ["wasm"],
-      graphOptimizationLevel: "all",
-    });
   })();
 
   return sessionPromise;

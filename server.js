@@ -272,7 +272,7 @@ const PRODUCTS_MAP = {
   "fungtastic-mushroom-extract":{ name: "Fungtastic Mushroom Extract", price: 399, priceEur: 32, articleNumber: "4001", vatRate: 0.06 }
 };
 
-const FREE_SHIPPING_THRESHOLD = { SEK: 700, EUR: 60 };
+const FREE_SHIPPING_THRESHOLD = { SEK: 600, EUR: 60 };
 const SHIPPING_COST = { SEK: 55, EUR: 6 };
 const VIVA_CURRENCY_CODE = { SEK: 752, EUR: 978 };
 
@@ -5677,7 +5677,7 @@ async function seedAutomationFlows() {
           </p>
           ${greenButton("Slutför din beställning", siteUrl + "/kassa")}
           <p style="font-size:13px;color:#766a62;text-align:center">
-            Fri frakt på ordrar över 700 kr.
+            Fri frakt på ordrar över 600 kr.
           </p>
         `
       },
@@ -5860,7 +5860,7 @@ OM 1753 SKINCARE:
 - Adress: Södra Skjutbanevägen 10, 439 55 Åsa
 - Telefon: 0732-30 55 21
 - E-post: info@1753skin.com
-- Fri frakt över 700 kr
+- Fri frakt över 600 kr
 - Personlig rådgivning före och efter köp
 
 ABSOLUT FÖRBJUDET:

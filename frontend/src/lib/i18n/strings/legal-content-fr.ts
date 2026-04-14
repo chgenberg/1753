@@ -23,7 +23,7 @@ export const LEGAL_TERMS_FR: LegalDoc = {
     },
     {
       h: "4. Livraison",
-      html: `<p>Nous expédions toutes les commandes avec PostNord Varubrev. Le délai de livraison habituel est de 2 à 5 jours ouvrables en Suède et de 5 à 10 jours ouvrables pour les livraisons dans l'UE. Frais de port offerts pour les commandes supérieures à 700 SEK / \u20ac60 ; sinon des frais de livraison de 55 SEK / \u20ac6 s'appliquent.</p>`,
+      html: `<p>Nous expédions toutes les commandes avec PostNord Varubrev. Le délai de livraison habituel est de 2 à 5 jours ouvrables en Suède et de 5 à 10 jours ouvrables pour les livraisons dans l'UE. Frais de port offerts pour les commandes supérieures à 600 SEK / \u20ac60 ; sinon des frais de livraison de 55 SEK / \u20ac6 s'appliquent.</p>`,
     },
     {
       h: "5. Droit de rétractation (14 jours)",

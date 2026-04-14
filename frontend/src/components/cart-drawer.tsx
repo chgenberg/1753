@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Minus, Plus, RefreshCcw, ShoppingBag, Trash2, X } from "lucide-react";
 import { useCart, type CartItem } from "@/providers/cart-provider";
 import { PRODUCTS, productDisplayName, productPrice } from "@/lib/products";
-import { formatPrice } from "@/lib/currency";
+import { formatPrice, getCurrency, getShippingCost } from "@/lib/currency";
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useLocale } from "@/providers/locale-provider";
@@ -41,6 +41,10 @@ export function CartDrawer() {
     return s + unitPrice * p.qty;
   }, 0);
   const hasSubscription = cartProducts.some((p) => p.subscription);
+  const currency = getCurrency(locale);
+  const FREE_SHIPPING_THRESHOLD = currency === "EUR" ? 60 : 600;
+  const freeShipping = subtotal >= FREE_SHIPPING_THRESHOLD;
+  const shipping = freeShipping ? 0 : getShippingCost(locale);
 
   function subscriptionLabel(days: number) {
     if (locale === "sv") return `Var ${days}:e dag`;
@@ -186,12 +190,22 @@ export function CartDrawer() {
 
             <div className="border-t border-border px-6 py-5">
               <p className="mb-3 text-center text-xs font-medium text-brand-700">
-                {t("cartDrawer.freeShippingLine")}
+                {freeShipping
+                  ? t("cartDrawer.freeShippingLine")
+                  : t("product.freeShippingHint")}
               </p>
+              <div className="mb-1 flex items-center justify-between text-sm text-muted-foreground">
+                <span>{t("cartDrawer.subtotal")}</span>
+                <span>{formatPrice(subtotal, locale)}</span>
+              </div>
+              <div className="mb-2 flex items-center justify-between text-sm text-muted-foreground">
+                <span>{t("cartDrawer.shipping")}</span>
+                <span>{freeShipping ? t("checkout.freeShipping") : formatPrice(shipping, locale)}</span>
+              </div>
               <div className="mb-4 flex items-center justify-between">
                 <span className="text-sm font-medium">{t("cartDrawer.total")}</span>
                 <span className="text-lg font-bold">
-                  {formatPrice(subtotal, locale)}
+                  {formatPrice(subtotal + shipping, locale)}
                 </span>
               </div>
               <Link href={path("checkout")} onClick={closeCart}>

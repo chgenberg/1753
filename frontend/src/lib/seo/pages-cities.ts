@@ -11,10 +11,10 @@ export const CITY_PAGES: LandingPage[] = [
     productIds: ["duo-kit", "ta-da-serum", "au-naturel-makeup-remover"],
     sv: {
       metaTitle: "Hudvård Stockholm – CBD-baserad hudvård | 1753 SKINCARE",
-      metaDescription: "Naturlig CBD-hudvård för dig i Stockholm. Beställ online med fri frakt över 700 kr. Skydda din hud mot storstadens stress och Stockholmsvintrarna.",
+      metaDescription: "Naturlig CBD-hudvård för dig i Stockholm. Beställ online med fri frakt över 600 kr. Skydda din hud mot storstadens stress och Stockholmsvintrarna.",
       kicker: "Hudvård i Stockholm",
       h1: "Naturlig hudvård för dig i Stockholm",
-      lead: "Stockholms hud har det tufft. Avgaser längs Sveavägen, iskall torr vinterluft från Mälaren och uppvärmd kontorsluft nio månader om året. Din hud förtjänar bättre än aggressiva produkter som gör problemet värre. Beställ online – fri frakt över 700 kr, direkt till din dörr i Stockholm.",
+      lead: "Stockholms hud har det tufft. Avgaser längs Sveavägen, iskall torr vinterluft från Mälaren och uppvärmd kontorsluft nio månader om året. Din hud förtjänar bättre än aggressiva produkter som gör problemet värre. Beställ online – fri frakt över 600 kr, direkt till din dörr i Stockholm.",
       problemTitle: "Stockholmshudens utmaningar",
       problemBody: "<p>Att bo i Stockholm innebär att din hud utsätts för en unik kombination av påfrestningar. Storstadens luftföroreningar – avgaser från trafiken, partiklar från tunnelbanan, uppvärmd inomhusluft – belastar hudbarriären dag efter dag. Stockholms tunnelbana har bland Europas högsta halter av järnpartiklar i luften, och dessa oxiderar på huden och driver inflammatoriska processer.</p><p>Vintrarna är långa och torra. Temperaturen kan pendla från minus femton ute till tjugofem grader inomhus, och den snabba växlingen mellan kyla och värme stressar huden enormt. Stockholms kranvatten har dessutom medelhög hårdhet – kalkhalter som på sikt kan torka ut och irritera känslig hud.</p><p>Lägg till den typiska stockholmsstressen – pendlingen, deadlines, den ständiga uppkopplingen – och du har en perfekt storm för hudproblem. Stress höjer kortisolnivåerna, som i sin tur driver talgproduktion och inflammation. Din hud berättar vad din livsstil inte gör.</p>",
       tipsTitle: "Hudvårdstips för stockholmare",
@@ -26,15 +26,15 @@ export const CITY_PAGES: LandingPage[] = [
         { title: "Skydda ansiktet på cykeln", body: "Stockholm är en cykelstad, men vind och kyla torkar ut huden snabbt. Applicera en skyddande olja innan du sätter dig på cykeln – särskilt från oktober till april." }
       ],
       solutionTitle: "CBD-hudvård levererad till din dörr i Stockholm",
-      solutionBody: "<p>Du behöver inte springa runt på Biblioteksgatan och jaga hudvårdsprodukter. 1753 SKINCARE levereras direkt till dig i Stockholm – från vårt lager i Åsa utanför Göteborg, med fri frakt på beställningar över 700 kr.</p><p>Vår DUO-kit med The ONE och I LOVE ger din stockholmshud den balans den desperat behöver. CBD och CBG arbetar med hudens eget endocannabinoidsystem för att lugna inflammation, stärka barriären och motverka den oxidativa stressen från stadslivet. TA-DA Serum med koncentrerad CBG är perfekt för de extra torra vintermånaderna. Och Au Naturel Makeup Remover rengör bort dagens smuts och partiklar utan att stressa huden ytterligare.</p><p>Naturlig, ärlig hudvård som fungerar – oavsett om du bor på Söder, i Vasastan eller ute i Nacka.</p>",
+      solutionBody: "<p>Du behöver inte springa runt på Biblioteksgatan och jaga hudvårdsprodukter. 1753 SKINCARE levereras direkt till dig i Stockholm – från vårt lager i Åsa utanför Göteborg, med fri frakt på beställningar över 600 kr.</p><p>Vår DUO-kit med The ONE och I LOVE ger din stockholmshud den balans den desperat behöver. CBD och CBG arbetar med hudens eget endocannabinoidsystem för att lugna inflammation, stärka barriären och motverka den oxidativa stressen från stadslivet. TA-DA Serum med koncentrerad CBG är perfekt för de extra torra vintermånaderna. Och Au Naturel Makeup Remover rengör bort dagens smuts och partiklar utan att stressa huden ytterligare.</p><p>Naturlig, ärlig hudvård som fungerar – oavsett om du bor på Söder, i Vasastan eller ute i Nacka.</p>",
       faq: [
-        { q: "Levererar ni till Stockholm?", a: "Absolut. Vi skickar från Åsa utanför Göteborg och de flesta beställningar når Stockholm inom 1–2 arbetsdagar. Fri frakt på beställningar över 700 kr." },
+        { q: "Levererar ni till Stockholm?", a: "Absolut. Vi skickar från Åsa utanför Göteborg och de flesta beställningar når Stockholm inom 1–2 arbetsdagar. Fri frakt på beställningar över 600 kr." },
         { q: "Var kan jag köpa CBD-hudvård i Stockholm?", a: "Du kan beställa hela vårt sortiment på 1753skin.com. Vi säljer direkt till dig online – inga mellanhänder, inga butikspålägg. Smidigt levererat hem till dörren." },
         { q: "Fungerar CBD-hudvård mot föroreningsskador?", a: "Ja, CBD har dokumenterade antioxidativa egenskaper som hjälper huden att hantera oxidativ stress från föroreningar. Det ersätter inte solskydd eller rengöring, men stärker hudens egen motståndskraft." },
         { q: "Vilken produkt passar bäst för Stockholms torra vintrar?", a: "DUO-kit ger en bra bas med två oljor som stärker barriären. Komplettera med TA-DA Serum under de kallaste månaderna för extra skydd mot torr inomhusluft och kyla." }
       ],
       ctaTitle: "Ge din stockholmshud det den förtjänar",
-      ctaSub: "Naturlig CBD-hudvård direkt till din dörr. Fri frakt över 700 kr."
+      ctaSub: "Naturlig CBD-hudvård direkt till din dörr. Fri frakt över 600 kr."
     },
     en: {
       metaTitle: "Skincare Stockholm – CBD-based skincare | 1753 SKINCARE",
@@ -155,10 +155,10 @@ export const CITY_PAGES: LandingPage[] = [
     productIds: ["duo-kit", "ta-da-serum", "fungtastic-mushroom-extract"],
     sv: {
       metaTitle: "Hudvård Göteborg – CBD-baserad hudvård | 1753 SKINCARE",
-      metaDescription: "Naturlig CBD-hudvård från Åsa, strax utanför Göteborg. Fri frakt över 700 kr. Skydda din hud mot det göteborgska regnet och havsluften.",
+      metaDescription: "Naturlig CBD-hudvård från Åsa, strax utanför Göteborg. Fri frakt över 600 kr. Skydda din hud mot det göteborgska regnet och havsluften.",
       kicker: "Hudvård i Göteborg",
       h1: "Naturlig hudvård för dig i Göteborg",
-      lead: "Vi vet hur det är – vi bor precis utanför stan själva. Regnet, havsvinden, de grå novemberdagarna. Göteborgs klimat testar din hud på sätt som stockholmare aldrig förstår. Beställ online – fri frakt över 700 kr, och vi ligger bara en liten leverans bort i Åsa.",
+      lead: "Vi vet hur det är – vi bor precis utanför stan själva. Regnet, havsvinden, de grå novemberdagarna. Göteborgs klimat testar din hud på sätt som stockholmare aldrig förstår. Beställ online – fri frakt över 600 kr, och vi ligger bara en liten leverans bort i Åsa.",
       problemTitle: "Göteborgshudens utmaningar",
       problemBody: "<p>Göteborgs oceaniska klimat är unikt i Sverige. Den fuktiga havsluften från Skagerrak bär med sig salt som lägger sig på huden och kan störa dess naturliga pH-balans. Regnet – ja, det berömda regnet – betyder att huden sällan får riktig solexponering för D-vitaminproduktion, samtidigt som den konstant utsätts för fukt och vind.</p><p>Men paradoxalt nog leder den fuktiga ytterluften till att många underskattar torr hud. Inomhus är situationen en annan: uppvärmda lägenheter i Majorna och Linnéstaden har lika torr luft som överallt annars i Sverige vintertid. Huden ställs inför en konstant fukt-torr-fukt-cykel som försvagar barriären.</p><p>Göteborg är dessutom en hamnstad med industri, och luftkvaliteten varierar. Partiklar från Göta älv-området och hamnverksamheten belastar huden, särskilt om du bor eller jobbar centralt. Lägg till den västkustska livsstilen – ute i alla väder, ofta med blåst i ansiktet – och du förstår varför göteborgshud behöver extra omsorg.</p>",
       tipsTitle: "Hudvårdstips för göteborgare",
@@ -170,15 +170,15 @@ export const CITY_PAGES: LandingPage[] = [
         { title: "Ta bastubad regelbundet", body: "Göteborgare älskar bastun, och det är bra för huden – svettningen öppnar porer och renar. Men komplettera alltid med återfuktning efteråt, annars förlorar du mer fukt än du vinner." }
       ],
       solutionTitle: "CBD-hudvård från dina grannar i Åsa",
-      solutionBody: "<p>Vi på 1753 SKINCARE bor och verkar i Åsa, strax söder om Göteborg. Vi vet exakt vad göteborgsklimatet gör med huden – vi lever i det varje dag. Våra produkter är utvecklade med just den här verkligheten i åtanke.</p><p>DUO-kit med The ONE och I LOVE ger din hud den balans som det göteborgska klimatet konstant rubblar. CBD och CBG stärker hudbarriären mot vind, salt och fuktväxlingar. Fungtastic Mushroom Extract med adaptogena svampar stärker immunförsvaret inifrån – extra viktigt i en stad där solen gömmer sig halva året.</p><p>Beställ på 1753skin.com – vi skickar från Åsa och de flesta göteborgsleveranser är framme redan nästa dag. Fri frakt på beställningar över 700 kr. Lokalt skapat, direkt till dig.</p>",
+      solutionBody: "<p>Vi på 1753 SKINCARE bor och verkar i Åsa, strax söder om Göteborg. Vi vet exakt vad göteborgsklimatet gör med huden – vi lever i det varje dag. Våra produkter är utvecklade med just den här verkligheten i åtanke.</p><p>DUO-kit med The ONE och I LOVE ger din hud den balans som det göteborgska klimatet konstant rubblar. CBD och CBG stärker hudbarriären mot vind, salt och fuktväxlingar. Fungtastic Mushroom Extract med adaptogena svampar stärker immunförsvaret inifrån – extra viktigt i en stad där solen gömmer sig halva året.</p><p>Beställ på 1753skin.com – vi skickar från Åsa och de flesta göteborgsleveranser är framme redan nästa dag. Fri frakt på beställningar över 600 kr. Lokalt skapat, direkt till dig.</p>",
       faq: [
-        { q: "Levererar ni till Göteborg?", a: "Vi sitter i Åsa, strax utanför Göteborg – så ja, definitivt. De flesta beställningar når dig inom 1 arbetsdag. Fri frakt över 700 kr." },
+        { q: "Levererar ni till Göteborg?", a: "Vi sitter i Åsa, strax utanför Göteborg – så ja, definitivt. De flesta beställningar når dig inom 1 arbetsdag. Fri frakt över 600 kr." },
         { q: "Var kan jag köpa CBD-hudvård i Göteborg?", a: "Enklast och bäst via 1753skin.com. Vi säljer direkt från Åsa utan mellanhänder, och du får våra produkter snabbare än från någon fysisk butik." },
         { q: "Hjälper CBD-hudvård mot väder och vind?", a: "Ja, CBD stärker hudbarriären och hjälper huden att hantera yttre påfrestningar som vind, salt och temperaturväxlingar. Det skyddar inte som en fysisk barriär, men gör huden mer motståndskraftig." },
         { q: "Tillverkar ni era produkter i Göteborg?", a: "Vi är baserade i Åsa, strax söder om Göteborg. Produkterna utvecklas och distribueras härifrån – det är västkustsk hudvård för västkustens förhållanden." }
       ],
       ctaTitle: "Göteborgs klimat kräver göteborgsk hudvård",
-      ctaSub: "Från Åsa till din dörr – naturlig CBD-hudvård som förstår ditt klimat. Fri frakt över 700 kr."
+      ctaSub: "Från Åsa till din dörr – naturlig CBD-hudvård som förstår ditt klimat. Fri frakt över 600 kr."
     },
     en: {
       metaTitle: "Skincare Gothenburg – CBD-based skincare | 1753 SKINCARE",
@@ -299,10 +299,10 @@ export const CITY_PAGES: LandingPage[] = [
     productIds: ["duo-kit", "au-naturel-makeup-remover", "ta-da-serum"],
     sv: {
       metaTitle: "Hudvård Malmö – CBD-baserad hudvård | 1753 SKINCARE",
-      metaDescription: "Naturlig CBD-hudvård för dig i Malmö. Beställ online med fri frakt över 700 kr. Skydda din hud mot Öresundsvindarna och kalkhaltigt vatten.",
+      metaDescription: "Naturlig CBD-hudvård för dig i Malmö. Beställ online med fri frakt över 600 kr. Skydda din hud mot Öresundsvindarna och kalkhaltigt vatten.",
       kicker: "Hudvård i Malmö",
       h1: "Naturlig hudvård för dig i Malmö",
-      lead: "Malmö ger din hud en speciell utmaning: Öresundsvindarna som aldrig riktigt slutar, Sveriges kalkhaltigaste kranvatten och en urban miljö i snabb förändring. Din hud behöver stöd som förstår dina förhållanden. Beställ online – fri frakt över 700 kr.",
+      lead: "Malmö ger din hud en speciell utmaning: Öresundsvindarna som aldrig riktigt slutar, Sveriges kalkhaltigaste kranvatten och en urban miljö i snabb förändring. Din hud behöver stöd som förstår dina förhållanden. Beställ online – fri frakt över 600 kr.",
       problemTitle: "Malmöhudens utmaningar",
       problemBody: "<p>Malmö har Sveriges hårdaste kranvatten. Kalken i vattnet är inte farlig att dricka, men den torkar ut huden vid tvätt, lämnar en film som täpper till porerna och försvagar hudbarriären över tid. Om du har känslig hud i Malmö kan kranvattnet vara en av de största bovarna utan att du ens vet om det.</p><p>Stadens läge vid Öresund innebär konstant vind. Inte den romantiska sortens havsbris, utan en ihållande, uttorkande vind som suger fukten ur huden – särskilt vintertid. Malmö har fler blåsiga dagar per år än de flesta svenska städer, och det märks på huden.</p><p>Som Sveriges tredje stad har Malmö också sin beskärda del av urban stress: trafikföroreningar, högt tempo och den mångkulturella matscenen som erbjuder fantastisk mat men också potentiella triggers för inflammerad hud. Balansen mellan att njuta av livet och ta hand om huden är en konst som malmöiter behöver bemästra.</p>",
       tipsTitle: "Hudvårdstips för malmöiter",
@@ -313,15 +313,15 @@ export const CITY_PAGES: LandingPage[] = [
         { title: "Ät Malmös regnbåge av mat klokt", body: "Malmös matmångfald är fantastisk – men kryddstark mat, mejeriprodukter och socker kan trigga inflammation i huden. Njut medvetet och komplettera med antiinflammatorisk kost." }
       ],
       solutionTitle: "CBD-hudvård levererad till din dörr i Malmö",
-      solutionBody: "<p>Från Åsa utanför Göteborg till din dörr i Malmö – 1753 SKINCARE levererar naturlig CBD-hudvård som faktiskt fungerar mot Malmös unika hudutmaningar. Fri frakt på beställningar över 700 kr.</p><p>Vår DUO-kit med The ONE och I LOVE stärker hudbarriären som Malmös hårda vatten och vind konstant bryter ner. CBD och CBG arbetar med hudens eget system för att balansera fukt och inflammation. Au Naturel Makeup Remover med MCT-olja rengör djupt utan att förvärra den uttorkning som kalkvatten redan orsakar. TA-DA Serum med koncentrerad CBG ger extra lindring under de mest vindpinade perioderna.</p><p>Skönheten med att beställa online är att du slipper springa runt – produkterna kommer till dig, oavsett om du bor i Möllevången, Limhamn eller Rosengård.</p>",
+      solutionBody: "<p>Från Åsa utanför Göteborg till din dörr i Malmö – 1753 SKINCARE levererar naturlig CBD-hudvård som faktiskt fungerar mot Malmös unika hudutmaningar. Fri frakt på beställningar över 600 kr.</p><p>Vår DUO-kit med The ONE och I LOVE stärker hudbarriären som Malmös hårda vatten och vind konstant bryter ner. CBD och CBG arbetar med hudens eget system för att balansera fukt och inflammation. Au Naturel Makeup Remover med MCT-olja rengör djupt utan att förvärra den uttorkning som kalkvatten redan orsakar. TA-DA Serum med koncentrerad CBG ger extra lindring under de mest vindpinade perioderna.</p><p>Skönheten med att beställa online är att du slipper springa runt – produkterna kommer till dig, oavsett om du bor i Möllevången, Limhamn eller Rosengård.</p>",
       faq: [
-        { q: "Levererar ni till Malmö?", a: "Ja, vi skickar från Åsa utanför Göteborg. De flesta beställningar når Malmö inom 1–2 arbetsdagar. Fri frakt på beställningar över 700 kr." },
+        { q: "Levererar ni till Malmö?", a: "Ja, vi skickar från Åsa utanför Göteborg. De flesta beställningar når Malmö inom 1–2 arbetsdagar. Fri frakt på beställningar över 600 kr." },
         { q: "Var kan jag köpa CBD-hudvård i Malmö?", a: "Beställ direkt på 1753skin.com – vi säljer utan mellanhänder och levererar till din dörr i Malmö. Smidigare och billigare än fysiska butiker." },
         { q: "Hjälper CBD-hudvård mot hårt vatten?", a: "CBD stärker hudbarriären som hårt vatten försvagar. Det neutraliserar inte kalken, men hjälper huden att hantera påfrestningen bättre och behålla sin fuktbalans." },
         { q: "Kan jag använda era produkter om jag har känslig hud?", a: "Absolut. Våra produkter är fria från parfym, parabener och andra vanliga irritanter. CBD har dessutom lugnande egenskaper som gör det extra lämpat för känslig och reaktiv hud." }
       ],
       ctaTitle: "Malmöhud förtjänar malmöanpassad hudvård",
-      ctaSub: "Naturlig CBD-hudvård som stärker din hud mot vind och kalkvatten. Fri frakt över 700 kr."
+      ctaSub: "Naturlig CBD-hudvård som stärker din hud mot vind och kalkvatten. Fri frakt över 600 kr."
     },
     en: {
       metaTitle: "Skincare Malmö – CBD-based skincare | 1753 SKINCARE",
@@ -438,10 +438,10 @@ export const CITY_PAGES: LandingPage[] = [
     productIds: ["duo-kit", "fungtastic-mushroom-extract", "ta-da-serum"],
     sv: {
       metaTitle: "Hudvård Uppsala – CBD-baserad hudvård | 1753 SKINCARE",
-      metaDescription: "Naturlig CBD-hudvård för dig i Uppsala. Beställ online med fri frakt över 700 kr. Vetenskapligt förankrad hudvård för den medvetna uppsalbon.",
+      metaDescription: "Naturlig CBD-hudvård för dig i Uppsala. Beställ online med fri frakt över 600 kr. Vetenskapligt förankrad hudvård för den medvetna uppsalbon.",
       kicker: "Hudvård i Uppsala",
       h1: "Naturlig hudvård för dig i Uppsala",
-      lead: "Uppsala är en stad som tänker – och din hud förtjänar samma eftertanke. Fyrisåns fukt, kalla inlandsvintrar och hektiska tentaperioder sätter sina spår. Beställ online – fri frakt över 700 kr, levererat direkt till Flogsta eller villakvarteret.",
+      lead: "Uppsala är en stad som tänker – och din hud förtjänar samma eftertanke. Fyrisåns fukt, kalla inlandsvintrar och hektiska tentaperioder sätter sina spår. Beställ online – fri frakt över 600 kr, levererat direkt till Flogsta eller villakvarteret.",
       problemTitle: "Uppsalahudens utmaningar",
       problemBody: "<p>Uppsala har ett typiskt inlandsklimat med kalla, torra vintrar och relativt varma somrar. Temperaturskillnaderna mellan säsongerna är stora – från minus tjugo i januari till plus trettio i juli. Huden ska hantera båda extremerna, och det sliter på barriären. Den torra vinterluften i kombination med uppvärmda föreläsningssalar och bibliotek gör huden uttorkad och slapp.</p><p>Uppsalas kranvatten har medelhög till hög hårdhet, vilket bidrar till torrhet och irritation vid daglig tvätt. Fyrisån och de omgivande lerslätterna skapar dessutom en speciell mikroklimateffekt – fuktig luft som gör att kyla biter extra hårt.</p><p>För Uppsalas stora studentbefolkning tillkommer specifika hudutmaningar: sömnbrist under tentaperioder, stressrelaterade utbrott, tight budget som leder till billiga och aggressiva produkter, och en livsstil som inte alltid prioriterar hudvård. Stress är hudens värsta fiende, och tentastress är en kategori för sig.</p>",
       tipsTitle: "Hudvårdstips för uppsalabor",
@@ -452,15 +452,15 @@ export const CITY_PAGES: LandingPage[] = [
         { title: "Ät som en medveten uppsalabo", body: "Uppsalas matscen med lokala producenter och saluhallen ger dig tillgång till omega-3-rik fisk, ekologiska grönsaker och fermenterade livsmedel. Investera i din tallrik." }
       ],
       solutionTitle: "CBD-hudvård levererad till din dörr i Uppsala",
-      solutionBody: "<p>Vi vet att uppsalabor är kritiska och kräsna – ni vill ha produkter som håller vad de lovar. 1753 SKINCARE bygger på vetenskap, inte marknadsföringsfluff. CBD och CBG interagerar med hudens endocannabinoidsystem, och forskningsunderlaget växer för varje år.</p><p>DUO-kit ger dig den bas som Uppsalas inlandsklimat kräver – två oljor som stärker barriären och balanserar fukt. Fungtastic Mushroom Extract med adaptogena svampar hjälper kroppen hantera stress inifrån, perfekt för dig som lever i tentastressens epicentrum. TA-DA Serum med CBG ger extra stöd under vinterns torraste perioder.</p><p>Beställ på 1753skin.com – vi skickar från Åsa utanför Göteborg, och leveransen når Uppsala inom 1–2 arbetsdagar. Fri frakt över 700 kr.</p>",
+      solutionBody: "<p>Vi vet att uppsalabor är kritiska och kräsna – ni vill ha produkter som håller vad de lovar. 1753 SKINCARE bygger på vetenskap, inte marknadsföringsfluff. CBD och CBG interagerar med hudens endocannabinoidsystem, och forskningsunderlaget växer för varje år.</p><p>DUO-kit ger dig den bas som Uppsalas inlandsklimat kräver – två oljor som stärker barriären och balanserar fukt. Fungtastic Mushroom Extract med adaptogena svampar hjälper kroppen hantera stress inifrån, perfekt för dig som lever i tentastressens epicentrum. TA-DA Serum med CBG ger extra stöd under vinterns torraste perioder.</p><p>Beställ på 1753skin.com – vi skickar från Åsa utanför Göteborg, och leveransen når Uppsala inom 1–2 arbetsdagar. Fri frakt över 600 kr.</p>",
       faq: [
-        { q: "Levererar ni till Uppsala?", a: "Ja, vi skickar från Åsa utanför Göteborg och de flesta beställningar når Uppsala inom 1–2 arbetsdagar. Fri frakt på beställningar över 700 kr." },
+        { q: "Levererar ni till Uppsala?", a: "Ja, vi skickar från Åsa utanför Göteborg och de flesta beställningar når Uppsala inom 1–2 arbetsdagar. Fri frakt på beställningar över 600 kr." },
         { q: "Var kan jag köpa CBD-hudvård i Uppsala?", a: "Beställ direkt på 1753skin.com. Vi säljer online utan mellanhänder – det ger dig bästa pris och snabb leverans direkt till dörren." },
         { q: "Finns det forskning bakom CBD-hudvård?", a: "Ja, och den växer. Studier visar att CBD har antiinflammatoriska, antioxidativa och sebostatiska egenskaper. Hudens endocannabinoidsystem är ett aktivt forskningsområde – passande nog för en universitetsstad som Uppsala." },
         { q: "Passar era produkter studenter med tight budget?", a: "DUO-kit ger dig två produkter som täcker det mesta. Det kostar mer per köp men räcker i månader och ersätter flera billigare produkter som ofta gör mer skada än nytta." }
       ],
       ctaTitle: "Smart hudvård för en smart stad",
-      ctaSub: "Vetenskapligt grundad CBD-hudvård direkt till din dörr i Uppsala. Fri frakt över 700 kr."
+      ctaSub: "Vetenskapligt grundad CBD-hudvård direkt till din dörr i Uppsala. Fri frakt över 600 kr."
     },
     en: {
       metaTitle: "Skincare Uppsala – CBD-based skincare | 1753 SKINCARE",
@@ -577,10 +577,10 @@ export const CITY_PAGES: LandingPage[] = [
     productIds: ["duo-kit", "ta-da-serum"],
     sv: {
       metaTitle: "Hudvård Linköping – CBD-baserad hudvård | 1753 SKINCARE",
-      metaDescription: "Naturlig CBD-hudvård för dig i Linköping. Beställ online med fri frakt över 700 kr. Skydda din hud mot östgötska inlandsvintrar.",
+      metaDescription: "Naturlig CBD-hudvård för dig i Linköping. Beställ online med fri frakt över 600 kr. Skydda din hud mot östgötska inlandsvintrar.",
       kicker: "Hudvård i Linköping",
       h1: "Naturlig hudvård för dig i Linköping",
-      lead: "Linköping är en teknikstad med framtiden i blick – men din hud lever i nuet, med kalla östgötska vintrar, torr kontorsluft och stressiga innovationsprojekt. Ge den stöd som matchar din ambitionsnivå. Fri frakt över 700 kr.",
+      lead: "Linköping är en teknikstad med framtiden i blick – men din hud lever i nuet, med kalla östgötska vintrar, torr kontorsluft och stressiga innovationsprojekt. Ge den stöd som matchar din ambitionsnivå. Fri frakt över 600 kr.",
       problemTitle: "Linköpingshudens utmaningar",
       problemBody: "<p>Östergötlands inlandsklimat ger Linköping kalla, torra vintrar och varma somrar med stor temperaturamplitud. Vintrarna kan vara bitande kalla med temperaturer under minus femton, och den torra luften suger fukten ur huden. Sommartid kan temperaturen stiga över trettio grader, och den snabba övergången mellan årstiderna ger huden lite tid att anpassa sig.</p><p>Linköping är en utpräglad kunskaps- och teknikstad med Saab, FOI och universitetet som stora arbetsgivare. Det innebär att många tillbringar långa dagar inomhus framför skärmar, i klimatiserade kontorsmiljöer med torr luft och blått ljus. Skärmtiden påverkar sömnen, som i sin tur påverkar hudens återhämtning.</p><p>Stångån och de omgivande östgötska slätterna skapar ett mikroklimat med fuktig luft som gör att kylan känns råare än temperaturen antyder. Den här kombinationen av rå kyla ute och torr värme inne är särskilt tuff för hudbarriären.</p>",
       tipsTitle: "Hudvårdstips för linköpingsbor",
@@ -591,14 +591,14 @@ export const CITY_PAGES: LandingPage[] = [
         { title: "Prioritera vinterhudvård", body: "Linköpings vintrar kräver extra omsorg. Byt till rikare produkter från oktober till mars och skydda huden med olja innan du går ut i kylan." }
       ],
       solutionTitle: "CBD-hudvård levererad till Linköping",
-      solutionBody: "<p>Teknikstaden förtjänar teknikens senaste inom hudvård. CBD-baserad hudvård representerar nästa generation – produkter som arbetar med hudens eget endocannabinoidsystem istället för att forcera resultat med aggressiva kemikalier.</p><p>DUO-kit med The ONE och I LOVE ger din hud den balans som Linköpings torra kontorsluft och kalla vintrar kräver. TA-DA Serum med koncentrerad CBG fungerar som ett booster-lager under de mest krävande perioderna.</p><p>Beställ på 1753skin.com – vi skickar från Åsa utanför Göteborg med fri frakt på beställningar över 700 kr. De flesta leveranser når Linköping inom 1–2 arbetsdagar.</p>",
+      solutionBody: "<p>Teknikstaden förtjänar teknikens senaste inom hudvård. CBD-baserad hudvård representerar nästa generation – produkter som arbetar med hudens eget endocannabinoidsystem istället för att forcera resultat med aggressiva kemikalier.</p><p>DUO-kit med The ONE och I LOVE ger din hud den balans som Linköpings torra kontorsluft och kalla vintrar kräver. TA-DA Serum med koncentrerad CBG fungerar som ett booster-lager under de mest krävande perioderna.</p><p>Beställ på 1753skin.com – vi skickar från Åsa utanför Göteborg med fri frakt på beställningar över 600 kr. De flesta leveranser når Linköping inom 1–2 arbetsdagar.</p>",
       faq: [
-        { q: "Levererar ni till Linköping?", a: "Ja, vi skickar från Åsa utanför Göteborg och de flesta beställningar når Linköping inom 1–2 arbetsdagar. Fri frakt över 700 kr." },
+        { q: "Levererar ni till Linköping?", a: "Ja, vi skickar från Åsa utanför Göteborg och de flesta beställningar når Linköping inom 1–2 arbetsdagar. Fri frakt över 600 kr." },
         { q: "Var kan jag köpa CBD-hudvård i Linköping?", a: "Beställ direkt på 1753skin.com – vi levererar till din dörr i Linköping utan mellanhänder." },
         { q: "Passar CBD-hudvård för torr hud?", a: "Ja, CBD stärker hudbarriären och hjälper huden att behålla fukt. Våra oljor ger dessutom direkt näring till hud som torkas ut av inlandsklimat och kontorsluft." }
       ],
       ctaTitle: "Framtidens hudvård för framtidens stad",
-      ctaSub: "CBD-hudvård som arbetar med din hud, inte mot den. Fri frakt över 700 kr till Linköping."
+      ctaSub: "CBD-hudvård som arbetar med din hud, inte mot den. Fri frakt över 600 kr till Linköping."
     },
     en: {
       metaTitle: "Skincare Linköping – CBD-based skincare | 1753 SKINCARE",
@@ -711,10 +711,10 @@ export const CITY_PAGES: LandingPage[] = [
     productIds: ["duo-kit", "au-naturel-makeup-remover"],
     sv: {
       metaTitle: "Hudvård Västerås – CBD-baserad hudvård | 1753 SKINCARE",
-      metaDescription: "Naturlig CBD-hudvård för dig i Västerås. Beställ online med fri frakt över 700 kr. Skydda din hud mot Mälarklimatet och torra vintrar.",
+      metaDescription: "Naturlig CBD-hudvård för dig i Västerås. Beställ online med fri frakt över 600 kr. Skydda din hud mot Mälarklimatet och torra vintrar.",
       kicker: "Hudvård i Västerås",
       h1: "Naturlig hudvård för dig i Västerås",
-      lead: "Västerås vid Mälaren – sommarparadis och vinterutmaning. Fuktiga höstar, iskalla vintrar och den ständiga pendlingen till Stockholm sätter din hud på prov. Beställ naturlig CBD-hudvård online – fri frakt över 700 kr.",
+      lead: "Västerås vid Mälaren – sommarparadis och vinterutmaning. Fuktiga höstar, iskalla vintrar och den ständiga pendlingen till Stockholm sätter din hud på prov. Beställ naturlig CBD-hudvård online – fri frakt över 600 kr.",
       problemTitle: "Västeråshudens utmaningar",
       problemBody: "<p>Västerås mälarklimat skapar en speciell hudmiljö. Mälaren reglerar temperaturen något men bidrar samtidigt med fukt som gör höstar och vintrar råa och genomträngande. Den kombinationen av fukt och kyla är särskilt påfrestande för hudbarriären – fukten gör att kylan biter djupare än vad termometern visar.</p><p>Många västeråsare pendlar till Stockholm, vilket innebär daglig exponering för torr tågluft, temperaturväxlingar mellan stationer och kontor, och den extra stressen som pendlingen medför. Huden utsätts för en konstant cykel av olika miljöer som den aldrig riktigt hinner anpassa sig till.</p><p>Västerås industritradition med ABB och andra stora företag innebär att en betydande del av befolkningen arbetar i kontorsmiljöer med klimatanläggningar som torkar ut luften. Lunchpromenaden längs Svartån ger visserligen frisk luft, men vintertid går de flesta direkt från kontoret till bilen – och huden får aldrig den paus den behöver.</p>",
       tipsTitle: "Hudvårdstips för västeråsare",
@@ -725,14 +725,14 @@ export const CITY_PAGES: LandingPage[] = [
         { title: "Anpassa efter Mälarklimatet", body: "Höstens fukt och vinterns kyla kräver rikare produkter. Byt till mer barriärstärkande hudvård från september och håll kvar den till april." }
       ],
       solutionTitle: "CBD-hudvård levererad till Västerås",
-      solutionBody: "<p>Från Åsa utanför Göteborg till din dörr i Västerås – 1753 SKINCARE levererar naturlig CBD-hudvård som stärker din hud mot Mälarklimatets påfrestningar. Fri frakt på beställningar över 700 kr.</p><p>DUO-kit med The ONE och I LOVE ger din hud det skydd och den balans som det råa Mälarklimatet kräver. CBD och CBG stärker hudbarriären och motverkar den inflammation som temperaturväxlingar och torr inomhusluft orsakar. Au Naturel Makeup Remover rengör milt efter en lång pendlingsdag utan att stressa huden ytterligare.</p><p>Beställ på 1753skin.com – leverans till Västerås inom 1–2 arbetsdagar.</p>",
+      solutionBody: "<p>Från Åsa utanför Göteborg till din dörr i Västerås – 1753 SKINCARE levererar naturlig CBD-hudvård som stärker din hud mot Mälarklimatets påfrestningar. Fri frakt på beställningar över 600 kr.</p><p>DUO-kit med The ONE och I LOVE ger din hud det skydd och den balans som det råa Mälarklimatet kräver. CBD och CBG stärker hudbarriären och motverkar den inflammation som temperaturväxlingar och torr inomhusluft orsakar. Au Naturel Makeup Remover rengör milt efter en lång pendlingsdag utan att stressa huden ytterligare.</p><p>Beställ på 1753skin.com – leverans till Västerås inom 1–2 arbetsdagar.</p>",
       faq: [
-        { q: "Levererar ni till Västerås?", a: "Ja, vi skickar från Åsa utanför Göteborg. De flesta beställningar når Västerås inom 1–2 arbetsdagar. Fri frakt över 700 kr." },
+        { q: "Levererar ni till Västerås?", a: "Ja, vi skickar från Åsa utanför Göteborg. De flesta beställningar når Västerås inom 1–2 arbetsdagar. Fri frakt över 600 kr." },
         { q: "Var kan jag köpa CBD-hudvård i Västerås?", a: "Beställ direkt på 1753skin.com – vi levererar till din dörr utan mellanhänder eller butikspålägg." },
         { q: "Hjälper CBD-hudvård mot rå kyla?", a: "CBD stärker hudbarriären och hjälper huden att behålla fukt även vid extrema temperaturväxlingar. Det fungerar som ett inre skydd som kompletterar yttre skyddslager." }
       ],
       ctaTitle: "Västeråshud förtjänar bättre",
-      ctaSub: "Naturlig CBD-hudvård som stärker din hud mot Mälarklimatet. Fri frakt över 700 kr."
+      ctaSub: "Naturlig CBD-hudvård som stärker din hud mot Mälarklimatet. Fri frakt över 600 kr."
     },
     en: {
       metaTitle: "Skincare Västerås – CBD-based skincare | 1753 SKINCARE",
@@ -845,10 +845,10 @@ export const CITY_PAGES: LandingPage[] = [
     productIds: ["duo-kit", "fungtastic-mushroom-extract", "au-naturel-makeup-remover"],
     sv: {
       metaTitle: "Hudvård Örebro – CBD-baserad hudvård | 1753 SKINCARE",
-      metaDescription: "Naturlig CBD-hudvård för dig i Örebro. Beställ online med fri frakt över 700 kr. Stärk din hud mot Närkeslätten kyla och torra vintrar.",
+      metaDescription: "Naturlig CBD-hudvård för dig i Örebro. Beställ online med fri frakt över 600 kr. Stärk din hud mot Närkeslätten kyla och torra vintrar.",
       kicker: "Hudvård i Örebro",
       h1: "Naturlig hudvård för dig i Örebro",
-      lead: "Mitt i Sverige, mitt i Närke – Örebro har ett inlandsklimat som testar huden ordentligt. Kalla vintrar, varma somrar och den typiska slättluften. Din hud behöver stöd som förstår förhållandena. Fri frakt över 700 kr.",
+      lead: "Mitt i Sverige, mitt i Närke – Örebro har ett inlandsklimat som testar huden ordentligt. Kalla vintrar, varma somrar och den typiska slättluften. Din hud behöver stöd som förstår förhållandena. Fri frakt över 600 kr.",
       problemTitle: "Örebrohudens utmaningar",
       problemBody: "<p>Örebro ligger i hjärtat av Närkeslätten, och det märks på klimatet. Inlandsluften är torrare än vid kusten, och temperaturskillnaderna mellan sommar och vinter är stora. Vintrar med temperaturer under minus tjugo är inte ovanliga, och den kalla, torra luften tränger in i varje pore och suger ut fukten.</p><p>Svartån som rinner genom staden skapar visserligen ett vackert stadslandskap, men bidrar också till fuktig dimma under höst och vår – en rå, kall fukt som gör att kylan känns i benen och i huden. Hjälmaren söder om staden förstärker denna effekt.</p><p>Som en mellanstor svensk stad har Örebro en blandning av stadsliv och närhet till natur. Många pendlar med bil, vilket innebär uppvärmd billuft som torkar ut huden, kombinerat med den snabba övergången mellan varm bil och kall utomhusluft. Stressen från arbetslivet syns ofta i huden – utbrott, torrhet, ojämn hudton – men kopplingen görs sällan.</p>",
       tipsTitle: "Hudvårdstips för örebrobor",
@@ -859,14 +859,14 @@ export const CITY_PAGES: LandingPage[] = [
         { title: "Stöd kroppens stresshantering", body: "Adaptogena tillskott som medicinsk svamp kan hjälpa kroppen hantera vardagsstress bättre, vilket direkt påverkar hudens hälsa och utstrålning." }
       ],
       solutionTitle: "CBD-hudvård levererad till Örebro",
-      solutionBody: "<p>1753 SKINCARE levererar naturlig CBD-hudvård direkt till din dörr i Örebro. Från Åsa utanför Göteborg till Närkeslätten – fri frakt på beställningar över 700 kr.</p><p>DUO-kit med The ONE och I LOVE ger din hud den näring och det skydd som Örebros inlandsklimat kräver. CBD och CBG stärker barriären och balanserar hudens fuktighet inifrån. Fungtastic Mushroom Extract med adaptogena svampar hjälper kroppen hantera stress – den osynliga fienden som syns i huden. Au Naturel Makeup Remover avslutar dagen med mild rengöring som inte förvärrar torrheten.</p><p>Beställ på 1753skin.com – de flesta leveranser når Örebro inom 1–2 arbetsdagar.</p>",
+      solutionBody: "<p>1753 SKINCARE levererar naturlig CBD-hudvård direkt till din dörr i Örebro. Från Åsa utanför Göteborg till Närkeslätten – fri frakt på beställningar över 600 kr.</p><p>DUO-kit med The ONE och I LOVE ger din hud den näring och det skydd som Örebros inlandsklimat kräver. CBD och CBG stärker barriären och balanserar hudens fuktighet inifrån. Fungtastic Mushroom Extract med adaptogena svampar hjälper kroppen hantera stress – den osynliga fienden som syns i huden. Au Naturel Makeup Remover avslutar dagen med mild rengöring som inte förvärrar torrheten.</p><p>Beställ på 1753skin.com – de flesta leveranser når Örebro inom 1–2 arbetsdagar.</p>",
       faq: [
-        { q: "Levererar ni till Örebro?", a: "Ja, vi skickar från Åsa utanför Göteborg och de flesta beställningar når Örebro inom 1–2 arbetsdagar. Fri frakt över 700 kr." },
+        { q: "Levererar ni till Örebro?", a: "Ja, vi skickar från Åsa utanför Göteborg och de flesta beställningar når Örebro inom 1–2 arbetsdagar. Fri frakt över 600 kr." },
         { q: "Var kan jag köpa CBD-hudvård i Örebro?", a: "Beställ på 1753skin.com – vi säljer direkt online och levererar hem till dig utan mellanhänder." },
         { q: "Vad gör adaptogena svampar för huden?", a: "Adaptogener som reishi och lion's mane hjälper kroppen hantera stress mer effektivt. Eftersom stress är en av de största drivkrafterna bakom hudproblem, syns effekten ofta i huden – lugnare, jämnare, mer motståndskraftig." }
       ],
       ctaTitle: "Ge din hud Örebroanpassat stöd",
-      ctaSub: "Naturlig CBD-hudvård som stärker din hud mot inlandsklimatets utmaningar. Fri frakt över 700 kr."
+      ctaSub: "Naturlig CBD-hudvård som stärker din hud mot inlandsklimatets utmaningar. Fri frakt över 600 kr."
     },
     en: {
       metaTitle: "Skincare Örebro – CBD-based skincare | 1753 SKINCARE",
@@ -979,10 +979,10 @@ export const CITY_PAGES: LandingPage[] = [
     productIds: ["duo-kit", "ta-da-serum", "au-naturel-makeup-remover"],
     sv: {
       metaTitle: "Hudvård Norrköping – CBD-baserad hudvård | 1753 SKINCARE",
-      metaDescription: "Naturlig CBD-hudvård för dig i Norrköping. Beställ online med fri frakt över 700 kr. Skydda din hud mot östgötskt klimat och industrihistorisk stolthet.",
+      metaDescription: "Naturlig CBD-hudvård för dig i Norrköping. Beställ online med fri frakt över 600 kr. Skydda din hud mot östgötskt klimat och industrihistorisk stolthet.",
       kicker: "Hudvård i Norrköping",
       h1: "Naturlig hudvård för dig i Norrköping",
-      lead: "Norrköping är en stad i förnyelse – och kanske är det dags att förnya din hudvårdsrutin också. Bråvikens fukt, östgötska vintrar och en livsstil i förändring sätter spår. Fri frakt över 700 kr, direkt till din dörr.",
+      lead: "Norrköping är en stad i förnyelse – och kanske är det dags att förnya din hudvårdsrutin också. Bråvikens fukt, östgötska vintrar och en livsstil i förändring sätter spår. Fri frakt över 600 kr, direkt till din dörr.",
       problemTitle: "Norrköpingshudens utmaningar",
       problemBody: "<p>Norrköping vid Bråvikens innersta del har ett klimat som präglas av både kustens fukt och inlandets kyla. Bråviken tillför fukt och dimma, särskilt under höst och vinter, som gör kylan genomträngande. Motalaström som rinner genom industri­landskapet skapar ett mikroklimat med fuktiga, svala förhållanden som kan överraska den som förväntar sig typiskt inlandsklimat.</p><p>Norrköpings industriella arv lever kvar i luftkvaliteten, även om staden gjort enorma framsteg. Hamnen och kvarvarande industri bidrar med partiklar som belastar huden, särskilt i centrala delar och Industrilandskapet. Vinden från Bråviken bär med sig salt och fukt som kan störa hudens pH-balans.</p><p>Många norrköpingsbor pendlar – till Linköping, Stockholm eller inom kommunen – och den dagliga rutten mellan uppvärmd bil, torr kontorsluft och kall utomhusluft är en barriärbrytare. Huden hinner aldrig acklimatisera sig ordentligt, och resultatet syns: torrhet, rodnad, ojämn hudton.</p>",
       tipsTitle: "Hudvårdstips för norrköpingsbor",
@@ -993,14 +993,14 @@ export const CITY_PAGES: LandingPage[] = [
         { title: "Investera i kvällsrutinen", body: "Huden reparerar sig på natten. En enkel kvällsrutin med mild rengöring och skyddande olja gör mer för din hud än dyra behandlingar." }
       ],
       solutionTitle: "CBD-hudvård levererad till Norrköping",
-      solutionBody: "<p>1753 SKINCARE levererar naturlig CBD-hudvård direkt till din dörr i Norrköping. Fri frakt på beställningar över 700 kr – vi skickar från Åsa utanför Göteborg.</p><p>DUO-kit med The ONE och I LOVE ger din hud den barriärstärkning som Bråvikens fukt och kyla kräver. CBD och CBG arbetar med hudens eget system för att balansera fukt, minska inflammation och stärka motståndskraften. TA-DA Serum med CBG ger extra boost under de tuffaste vinterperioderna. Au Naturel Makeup Remover rengör bort dagens partiklar och smuts med MCT-olja, utan att kompromissa med barriären.</p><p>Beställ på 1753skin.com – de flesta leveranser når Norrköping inom 1–2 arbetsdagar.</p>",
+      solutionBody: "<p>1753 SKINCARE levererar naturlig CBD-hudvård direkt till din dörr i Norrköping. Fri frakt på beställningar över 600 kr – vi skickar från Åsa utanför Göteborg.</p><p>DUO-kit med The ONE och I LOVE ger din hud den barriärstärkning som Bråvikens fukt och kyla kräver. CBD och CBG arbetar med hudens eget system för att balansera fukt, minska inflammation och stärka motståndskraften. TA-DA Serum med CBG ger extra boost under de tuffaste vinterperioderna. Au Naturel Makeup Remover rengör bort dagens partiklar och smuts med MCT-olja, utan att kompromissa med barriären.</p><p>Beställ på 1753skin.com – de flesta leveranser når Norrköping inom 1–2 arbetsdagar.</p>",
       faq: [
-        { q: "Levererar ni till Norrköping?", a: "Ja, vi skickar från Åsa utanför Göteborg och de flesta beställningar når Norrköping inom 1–2 arbetsdagar. Fri frakt över 700 kr." },
+        { q: "Levererar ni till Norrköping?", a: "Ja, vi skickar från Åsa utanför Göteborg och de flesta beställningar når Norrköping inom 1–2 arbetsdagar. Fri frakt över 600 kr." },
         { q: "Var kan jag köpa CBD-hudvård i Norrköping?", a: "Beställ direkt på 1753skin.com – vi levererar till dig i Norrköping utan mellanhänder. Smidigt och snabbt." },
         { q: "Fungerar CBD mot rodnad och irritation?", a: "Ja, CBD har dokumenterade antiinflammatoriska egenskaper som lugnar rodnad och irritation. Det är inte en quickfix, men över tid upplever de flesta en markant lugnare och jämnare hud." }
       ],
       ctaTitle: "Ge din hud en ny start i Norrköping",
-      ctaSub: "CBD-hudvård som arbetar med din hud. Fri frakt över 700 kr till Norrköping."
+      ctaSub: "CBD-hudvård som arbetar med din hud. Fri frakt över 600 kr till Norrköping."
     },
     en: {
       metaTitle: "Skincare Norrköping – CBD-based skincare | 1753 SKINCARE",
@@ -1113,10 +1113,10 @@ export const CITY_PAGES: LandingPage[] = [
     productIds: ["duo-kit", "ta-da-serum", "fungtastic-mushroom-extract"],
     sv: {
       metaTitle: "Hudvård Helsingborg – CBD-baserad hudvård | 1753 SKINCARE",
-      metaDescription: "Naturlig CBD-hudvård för dig i Helsingborg. Beställ online med fri frakt över 700 kr. Skydda din hud mot Öresundsvinden och skånskt klimat.",
+      metaDescription: "Naturlig CBD-hudvård för dig i Helsingborg. Beställ online med fri frakt över 600 kr. Skydda din hud mot Öresundsvinden och skånskt klimat.",
       kicker: "Hudvård i Helsingborg",
       h1: "Naturlig hudvård för dig i Helsingborg",
-      lead: "Helsingborg vid Öresunds smalaste punkt – här möter havsvindens salt huden med full kraft. Skånes milda men vindpinade klimat ställer unika krav på hudvården. Beställ online – fri frakt över 700 kr.",
+      lead: "Helsingborg vid Öresunds smalaste punkt – här möter havsvindens salt huden med full kraft. Skånes milda men vindpinade klimat ställer unika krav på hudvården. Beställ online – fri frakt över 600 kr.",
       problemTitle: "Helsingborgshudens utmaningar",
       problemBody: "<p>Helsingborg har ett av Sveriges mest vindexponerade lägen. Öresund är bara fyra kilometer brett här, och vinden tunnlar genom sundet med en intensitet som få andra svenska städer upplever. Havsvindens salt lägger sig på huden, torkar ut den och kan störa den naturliga pH-balansen. Ansiktet är särskilt utsatt – kind, panna och näsa tar stryk varje dag.</p><p>Skånes klimat är mildare än resten av Sverige, med kortare och mindre kalla vintrar. Men det kompenseras av konstant blåst och hög luftfuktighet som skapar en fuktig kyla som kryper in under kläderna och in i huden. Helsingborg har dessutom relativt hårt kranvatten – inte lika extremt som Malmö, men tillräckligt för att påverka känslig hud negativt.</p><p>Staden har en aktiv utomhuskultur – promenader längs Tropical Beach, träning på Ättekulla, löprundor vid Pålsjö. Allt i havsluft och vind. Det är underbart för själen men kräver att huden får rätt stöd efteråt.</p>",
       tipsTitle: "Hudvårdstips för helsingborgare",
@@ -1128,15 +1128,15 @@ export const CITY_PAGES: LandingPage[] = [
         { title: "Stöd immunförsvaret under mörka månader", body: "Helsingborgs höst och vinter ger begränsad solexponering. D-vitamin och adaptogena tillskott stödjer både immunförsvar och hud inifrån." }
       ],
       solutionTitle: "CBD-hudvård levererad till Helsingborg",
-      solutionBody: "<p>Från Åsa utanför Göteborg till din dörr i Helsingborg – vi förstår kustklimat. 1753 SKINCARE levererar naturlig CBD-hudvård som stärker din hud mot Öresundsvindens påfrestningar. Fri frakt på beställningar över 700 kr.</p><p>DUO-kit med The ONE och I LOVE ger din hud den barriärstärkning som det vindutsatta Helsingborg kräver. CBD och CBG balanserar och skyddar. TA-DA Serum med koncentrerad CBG fungerar som intensivvård under de mest vindpinade perioderna. Fungtastic Mushroom Extract stödjer immunförsvaret under de mörka skånska vintermånaderna.</p><p>Beställ på 1753skin.com – de flesta leveranser når Helsingborg inom 1–2 arbetsdagar.</p>",
+      solutionBody: "<p>Från Åsa utanför Göteborg till din dörr i Helsingborg – vi förstår kustklimat. 1753 SKINCARE levererar naturlig CBD-hudvård som stärker din hud mot Öresundsvindens påfrestningar. Fri frakt på beställningar över 600 kr.</p><p>DUO-kit med The ONE och I LOVE ger din hud den barriärstärkning som det vindutsatta Helsingborg kräver. CBD och CBG balanserar och skyddar. TA-DA Serum med koncentrerad CBG fungerar som intensivvård under de mest vindpinade perioderna. Fungtastic Mushroom Extract stödjer immunförsvaret under de mörka skånska vintermånaderna.</p><p>Beställ på 1753skin.com – de flesta leveranser når Helsingborg inom 1–2 arbetsdagar.</p>",
       faq: [
-        { q: "Levererar ni till Helsingborg?", a: "Ja, vi skickar från Åsa utanför Göteborg. De flesta beställningar når Helsingborg inom 1–2 arbetsdagar. Fri frakt över 700 kr." },
+        { q: "Levererar ni till Helsingborg?", a: "Ja, vi skickar från Åsa utanför Göteborg. De flesta beställningar når Helsingborg inom 1–2 arbetsdagar. Fri frakt över 600 kr." },
         { q: "Var kan jag köpa CBD-hudvård i Helsingborg?", a: "Beställ direkt på 1753skin.com – smidigt levererat till din dörr i Helsingborg utan mellanhänder." },
         { q: "Hjälper CBD mot vindtorkad hud?", a: "Ja, CBD stärker hudbarriären och hjälper huden att behålla sin fukt trots vindexponering. Det reparerar inte skadan direkt, men gör huden mer motståndskraftig mot framtida påfrestningar." },
         { q: "Kan jag beställa från Danmark också?", a: "Just nu levererar vi inom Sverige. Men med Helsingborg-Helsingör bara ett färjepass bort hoppas vi kunna erbjuda dansk leverans framöver." }
       ],
       ctaTitle: "Skydda din hud mot Öresundsvinden",
-      ctaSub: "Naturlig CBD-hudvård som stärker din barriär. Fri frakt över 700 kr till Helsingborg."
+      ctaSub: "Naturlig CBD-hudvård som stärker din barriär. Fri frakt över 600 kr till Helsingborg."
     },
     en: {
       metaTitle: "Skincare Helsingborg – CBD-based skincare | 1753 SKINCARE",
@@ -1257,10 +1257,10 @@ export const CITY_PAGES: LandingPage[] = [
     productIds: ["duo-kit", "au-naturel-makeup-remover", "fungtastic-mushroom-extract"],
     sv: {
       metaTitle: "Hudvård Jönköping – CBD-baserad hudvård | 1753 SKINCARE",
-      metaDescription: "Naturlig CBD-hudvård för dig i Jönköping. Beställ online med fri frakt över 700 kr. Skydda din hud mot småländska vintrar och Vätternklimatet.",
+      metaDescription: "Naturlig CBD-hudvård för dig i Jönköping. Beställ online med fri frakt över 600 kr. Skydda din hud mot småländska vintrar och Vätternklimatet.",
       kicker: "Hudvård i Jönköping",
       h1: "Naturlig hudvård för dig i Jönköping",
-      lead: "Jönköping vid Vätterns södra spets – en stad där småländsk envishet möter naturens krafter. Vätternvindar, kalla inlandsvintrar och den höga höjden ger din hud unika utmaningar. Fri frakt över 700 kr.",
+      lead: "Jönköping vid Vätterns södra spets – en stad där småländsk envishet möter naturens krafter. Vätternvindar, kalla inlandsvintrar och den höga höjden ger din hud unika utmaningar. Fri frakt över 600 kr.",
       problemTitle: "Jönköpingshudens utmaningar",
       problemBody: "<p>Jönköpings läge vid Vätterns södra ände skapar ett mikroklimat som skiljer sig från omgivande Småland. Vättern, en av Europas största och djupaste sjöar, kyler ner luften och skapar lokala vindförhållanden som kan vara överraskande starka. Sjöns enorma vattenvolym gör att den sällan fryser, och den konstanta avdunstningen tillför fukt till luften – en kall, rå fukt som skiljer sig från vanlig inlandstorrhet.</p><p>Jönköping ligger dessutom på den småländska högläntan, cirka 300 meter över havet. Den högre altituden innebär starkare UV-strålning och torrare luft, trots närheten till Vättern. Vintrarna är genuint kalla med stabila minusgrader, och övergången mellan årstiderna kan vara abrupt.</p><p>Smålands företagaranda innebär att många jobbar hårt och länge, ofta i tillverknings- och kontorsmiljöer. Stressnivåerna är höga i Skandinaviens mest entreprenöriella region, och det syns i huden – torrhet, utbrott och en trötthet som ingen concealer i världen kan dölja.</p>",
       tipsTitle: "Hudvårdstips för jönköpingsbor",
@@ -1271,15 +1271,15 @@ export const CITY_PAGES: LandingPage[] = [
         { title: "Investera i kvällsrutinen", body: "Efter en lång dag i småländsk entreprenörsanda behöver huden återhämtning. En enkel kvällsrutin med mild rengöring och närande olja gör underverk." }
       ],
       solutionTitle: "CBD-hudvård levererad till Jönköping",
-      solutionBody: "<p>1753 SKINCARE levererar naturlig CBD-hudvård direkt till din dörr i Jönköping. Från Åsa utanför Göteborg – fri frakt på beställningar över 700 kr.</p><p>DUO-kit med The ONE och I LOVE ger din hud den näring som Vätternklimatet och den småländska vinterkylans kräver. CBD och CBG stärker hudbarriären och balanserar inflammationsprocesser. Au Naturel Makeup Remover med MCT-olja rengör milt efter en dag i Jönköpings blandade klimat. Fungtastic Mushroom Extract stödjer kroppen inifrån – för dig som driver hårt och behöver hjälpa kroppen hänga med.</p><p>Beställ på 1753skin.com – de flesta leveranser når Jönköping inom 1–2 arbetsdagar.</p>",
+      solutionBody: "<p>1753 SKINCARE levererar naturlig CBD-hudvård direkt till din dörr i Jönköping. Från Åsa utanför Göteborg – fri frakt på beställningar över 600 kr.</p><p>DUO-kit med The ONE och I LOVE ger din hud den näring som Vätternklimatet och den småländska vinterkylans kräver. CBD och CBG stärker hudbarriären och balanserar inflammationsprocesser. Au Naturel Makeup Remover med MCT-olja rengör milt efter en dag i Jönköpings blandade klimat. Fungtastic Mushroom Extract stödjer kroppen inifrån – för dig som driver hårt och behöver hjälpa kroppen hänga med.</p><p>Beställ på 1753skin.com – de flesta leveranser når Jönköping inom 1–2 arbetsdagar.</p>",
       faq: [
-        { q: "Levererar ni till Jönköping?", a: "Ja, vi skickar från Åsa utanför Göteborg och de flesta beställningar når Jönköping inom 1–2 arbetsdagar. Fri frakt över 700 kr." },
+        { q: "Levererar ni till Jönköping?", a: "Ja, vi skickar från Åsa utanför Göteborg och de flesta beställningar når Jönköping inom 1–2 arbetsdagar. Fri frakt över 600 kr." },
         { q: "Var kan jag köpa CBD-hudvård i Jönköping?", a: "Enklast via 1753skin.com – vi levererar direkt till din dörr utan mellanhänder eller butikspålägg." },
         { q: "Vad gör CBD för hud som utsätts för kyla?", a: "CBD stärker hudbarriären och hjälper huden att behålla fukt och elasticitet trots kyla. Det minskar inflammation och reparerar den skada som temperaturväxlingar orsakar." },
         { q: "Kan jag använda era produkter året runt?", a: "Absolut. Våra produkter är formulerade för att fungera i alla årstider. Justera mängden efter säsong – lite mer under vintern, lite mindre på sommaren." }
       ],
       ctaTitle: "Småländsk envishet förtjänar småländsk hudvård",
-      ctaSub: "Naturlig CBD-hudvård som håller lika länge som din arbetsdag. Fri frakt över 700 kr."
+      ctaSub: "Naturlig CBD-hudvård som håller lika länge som din arbetsdag. Fri frakt över 600 kr."
     },
     en: {
       metaTitle: "Skincare Jönköping – CBD-based skincare | 1753 SKINCARE",
@@ -1396,10 +1396,10 @@ export const CITY_PAGES: LandingPage[] = [
     productIds: ["duo-ta-da", "duo-kit", "fungtastic-mushroom-extract"],
     sv: {
       metaTitle: "Hudvård Umeå – CBD-baserad hudvård | 1753 SKINCARE",
-      metaDescription: "Naturlig CBD-hudvård för dig i Umeå. Beställ online med fri frakt över 700 kr. Skydda din hud mot norrländsk extrem kyla och polarnatt.",
+      metaDescription: "Naturlig CBD-hudvård för dig i Umeå. Beställ online med fri frakt över 600 kr. Skydda din hud mot norrländsk extrem kyla och polarnatt.",
       kicker: "Hudvård i Umeå",
       h1: "Naturlig hudvård för dig i Umeå",
-      lead: "Umeå – Europas kulturhuvudstad som råkar ligga i ett av Sveriges tuffaste klimat för huden. Minus trettio på vintern, midnattssol på sommaren, och allt däremellan. Din hud behöver extremvårdare, inte standardlösningar. Fri frakt över 700 kr.",
+      lead: "Umeå – Europas kulturhuvudstad som råkar ligga i ett av Sveriges tuffaste klimat för huden. Minus trettio på vintern, midnattssol på sommaren, och allt däremellan. Din hud behöver extremvårdare, inte standardlösningar. Fri frakt över 600 kr.",
       problemTitle: "Umeåhudens utmaningar",
       problemBody: "<p>Umeå har ett subarktiskt klimat som ställer extrema krav på huden. Vintrarna är långa – från november till mars lever huden med temperaturer som regelbundet kryper under minus tjugo, ibland under minus trettio. Den kalla luften håller nästan ingen fukt alls, och den torra vinterluften suger bokstavligen fukten ur huden. Hudens barriärfunktion sätts på sin yttersta gräns.</p><p>Polarnatten innebär veckor med minimal solexponering, vilket leder till D-vitaminbrist som påverkar hudens immunförsvar och förnyelsecykel. Huden blir blek, tunn och sårbar. Samtidigt innebär midnattssolen på sommaren extrem UV-exponering dygnet runt för hud som inte är van vid det.</p><p>Inomhusklimatet i Umeå är också extremt. Uppvärmda lägenheter och universitetslokaler har luftfuktighet som kan sjunka under 10 procent vintertid – det är torrare än Saharaöknen. Huden torkar, spricker och kliar. Och för Umeås stora studentbefolkning läggs tentastress, sömnbrist och tight budget ovanpå det hela.</p>",
       tipsTitle: "Hudvårdstips för umeåbor",
@@ -1411,15 +1411,15 @@ export const CITY_PAGES: LandingPage[] = [
         { title: "Skydda huden mot blåsten vid älven", body: "Vindtunneleffekten längs Ume älv kan göra kyla till extrem kyla. Skydda ansiktet med halsduk och applicera extra olja innan promenader längs vattnet." }
       ],
       solutionTitle: "CBD-hudvård som klarar Umeås klimat",
-      solutionBody: "<p>Vi på 1753 SKINCARE förstår att Umeås hud lever under extrema förhållanden. Våra produkter är formulerade för att stärka hudbarriären – inte bara plåstra om den. CBD och CBG arbetar med hudens eget endocannabinoidsystem för att reparera, skydda och balansera, oavsett vad termometern visar.</p><p>DUO-kit + TA-DA Serum-kombination är vår rekommendation för Umeå. Du får tre produkter som tillsammans ger maximal barriärstärkning: The ONE och I LOVE som daglig bas, och TA-DA Serum med koncentrerad CBG för extra intensivvård under de värsta köldknäpparna. Fungtastic Mushroom Extract stödjer immunförsvaret under de mörka månaderna.</p><p>Vi skickar från Åsa utanför Göteborg med fri frakt på beställningar över 700 kr. De flesta leveranser når Umeå inom 2–3 arbetsdagar.</p>",
+      solutionBody: "<p>Vi på 1753 SKINCARE förstår att Umeås hud lever under extrema förhållanden. Våra produkter är formulerade för att stärka hudbarriären – inte bara plåstra om den. CBD och CBG arbetar med hudens eget endocannabinoidsystem för att reparera, skydda och balansera, oavsett vad termometern visar.</p><p>DUO-kit + TA-DA Serum-kombination är vår rekommendation för Umeå. Du får tre produkter som tillsammans ger maximal barriärstärkning: The ONE och I LOVE som daglig bas, och TA-DA Serum med koncentrerad CBG för extra intensivvård under de värsta köldknäpparna. Fungtastic Mushroom Extract stödjer immunförsvaret under de mörka månaderna.</p><p>Vi skickar från Åsa utanför Göteborg med fri frakt på beställningar över 600 kr. De flesta leveranser når Umeå inom 2–3 arbetsdagar.</p>",
       faq: [
-        { q: "Levererar ni till Umeå?", a: "Ja, vi levererar till hela Sverige. Från Åsa utanför Göteborg når de flesta beställningar Umeå inom 2–3 arbetsdagar. Fri frakt på beställningar över 700 kr." },
+        { q: "Levererar ni till Umeå?", a: "Ja, vi levererar till hela Sverige. Från Åsa utanför Göteborg når de flesta beställningar Umeå inom 2–3 arbetsdagar. Fri frakt på beställningar över 600 kr." },
         { q: "Var kan jag köpa CBD-hudvård i Umeå?", a: "Beställ direkt på 1753skin.com. Vi levererar till din dörr – smidigast och snabbast i en stad utan fysiska CBD-hudvårdsbutiker." },
         { q: "Klarar era oljor extrem kyla?", a: "Ja, våra oljor är stabila ner till långt under noll grader. Förvara dem i rumstemperatur hemma, och applicera generöst innan du går ut i kylan – de skapar en skyddande barriär." },
         { q: "Borde jag använda mer produkt på vintern?", a: "Ja. I Umeås extrema vinterklimat behöver huden mer skydd. Applicera ett extra lager av The ONE eller I LOVE under de kallaste perioderna, och lägg till TA-DA Serum för intensivvård." }
       ],
       ctaTitle: "Extrem kyla kräver extrem hudvård",
-      ctaSub: "CBD-hudvård som stärker din barriär mot Umeås klimat. Fri frakt över 700 kr."
+      ctaSub: "CBD-hudvård som stärker din barriär mot Umeås klimat. Fri frakt över 600 kr."
     },
     en: {
       metaTitle: "Skincare Umeå – CBD-based skincare | 1753 SKINCARE",
@@ -1540,10 +1540,10 @@ export const CITY_PAGES: LandingPage[] = [
     productIds: ["duo-kit", "ta-da-serum"],
     sv: {
       metaTitle: "Hudvård Lund – CBD-baserad hudvård | 1753 SKINCARE",
-      metaDescription: "Naturlig CBD-hudvård för dig i Lund. Beställ online med fri frakt över 700 kr. Vetenskapligt grundad hudvård för Sveriges mest forskningsintensiva stad.",
+      metaDescription: "Naturlig CBD-hudvård för dig i Lund. Beställ online med fri frakt över 600 kr. Vetenskapligt grundad hudvård för Sveriges mest forskningsintensiva stad.",
       kicker: "Hudvård i Lund",
       h1: "Naturlig hudvård för dig i Lund",
-      lead: "Lund – kunskapsstaden som forskar fram framtiden. Din hud förtjänar samma vetenskapliga eftertanke. Skånes blåsiga klimat, hårt vatten och studentlivets påfrestningar kräver mer än standard. Fri frakt över 700 kr.",
+      lead: "Lund – kunskapsstaden som forskar fram framtiden. Din hud förtjänar samma vetenskapliga eftertanke. Skånes blåsiga klimat, hårt vatten och studentlivets påfrestningar kräver mer än standard. Fri frakt över 600 kr.",
       problemTitle: "Lundahudens utmaningar",
       problemBody: "<p>Lund delar mycket av Skånes klimatutmaningar – blåst, relativt milt men fuktigt klimat, och hårt kranvatten. Men som universitetsstad har Lund sina egna unika hudutmaningar. Stadens 50 000 studenter lever ofta i en cocktail av stress, sömnbrist, tight budget och snabb mat som sätter spår i huden.</p><p>Det skånska vattnet i Lund har hög kalkhalt, vilket långsamt bryter ner hudbarriären vid daglig tvätt. Effekten märks inte direkt, men efter veckor och månader upplever många torr, irriterad och reaktiv hud utan att kunna peka på orsaken. Kalkavlagringar på huden kan dessutom täppa till porer och förvärra akne.</p><p>Lunds kompakta stadskärna gör att de flesta cyklar – bra för kondition men utsätter ansiktet för vind, partiklar och temperaturväxlingar dagligen. Den skånska höstvinden blåser rakt in från sydväst och tar med sig fukt från Öresund som gör kylan genomträngande.</p>",
       tipsTitle: "Hudvårdstips för lundabor",
@@ -1554,15 +1554,15 @@ export const CITY_PAGES: LandingPage[] = [
         { title: "Utforska Skåneleden", body: "Skånes vandringsleder runt Lund ger dig frisk luft och stresslindring. Natur är den bästa medicinen mot den kortisoldrivna stresshud som drabbar så många studenter." }
       ],
       solutionTitle: "CBD-hudvård levererad till Lund",
-      solutionBody: "<p>I en stad som lever av forskning och kunskap borde hudvården bygga på samma grund. CBD-hudvård är inte fluff – det är produkter som arbetar med hudens endocannabinoidsystem, ett system som forskningen lyfter fram allt mer som centralt för hudhälsa.</p><p>DUO-kit med The ONE och I LOVE ger din lundalägenhetshud den barriärstärkning som det skånska vattnet och klimatet kräver. TA-DA Serum med koncentrerad CBG fungerar som intensivvård under stressiga perioder – tentaveckor, deadlines, de mörka vintermånaderna.</p><p>Beställ på 1753skin.com – vi skickar från Åsa utanför Göteborg. Fri frakt på beställningar över 700 kr, leverans till Lund inom 1–2 arbetsdagar.</p>",
+      solutionBody: "<p>I en stad som lever av forskning och kunskap borde hudvården bygga på samma grund. CBD-hudvård är inte fluff – det är produkter som arbetar med hudens endocannabinoidsystem, ett system som forskningen lyfter fram allt mer som centralt för hudhälsa.</p><p>DUO-kit med The ONE och I LOVE ger din lundalägenhetshud den barriärstärkning som det skånska vattnet och klimatet kräver. TA-DA Serum med koncentrerad CBG fungerar som intensivvård under stressiga perioder – tentaveckor, deadlines, de mörka vintermånaderna.</p><p>Beställ på 1753skin.com – vi skickar från Åsa utanför Göteborg. Fri frakt på beställningar över 600 kr, leverans till Lund inom 1–2 arbetsdagar.</p>",
       faq: [
-        { q: "Levererar ni till Lund?", a: "Ja, vi skickar från Åsa utanför Göteborg och de flesta beställningar når Lund inom 1–2 arbetsdagar. Fri frakt över 700 kr." },
+        { q: "Levererar ni till Lund?", a: "Ja, vi skickar från Åsa utanför Göteborg och de flesta beställningar når Lund inom 1–2 arbetsdagar. Fri frakt över 600 kr." },
         { q: "Var kan jag köpa CBD-hudvård i Lund?", a: "Beställ direkt på 1753skin.com. Vi säljer online utan mellanhänder – smidigt levererat till din studentkorridor eller villa." },
         { q: "Finns vetenskapligt stöd för CBD i hudvård?", a: "Ja, forskningen växer. Studier visar antiinflammatoriska, antioxidativa och sebostatiska egenskaper. Lunds universitet ligger i framkant av cannabinoidforskning – fråga din närmaste forskare." },
         { q: "Passar era produkter studentbudget?", a: "DUO-kit kostar 1 099 kr och räcker i flera månader. Per dag är det billigare än en kaffe på Lundagård – och gör mer för din hud." }
       ],
       ctaTitle: "Forskningen talar – CBD fungerar",
-      ctaSub: "Vetenskapligt grundad hudvård till din dörr i Lund. Fri frakt över 700 kr."
+      ctaSub: "Vetenskapligt grundad hudvård till din dörr i Lund. Fri frakt över 600 kr."
     },
     en: {
       metaTitle: "Skincare Lund – CBD-based skincare | 1753 SKINCARE",
@@ -1679,10 +1679,10 @@ export const CITY_PAGES: LandingPage[] = [
     productIds: ["duo-kit", "au-naturel-makeup-remover", "ta-da-serum"],
     sv: {
       metaTitle: "Hudvård Borås – CBD-baserad hudvård | 1753 SKINCARE",
-      metaDescription: "Naturlig CBD-hudvård för dig i Borås. Beställ online med fri frakt över 700 kr. Skydda din hud mot Borås berömda regn och Sjuhäradsbygdens klimat.",
+      metaDescription: "Naturlig CBD-hudvård för dig i Borås. Beställ online med fri frakt över 600 kr. Skydda din hud mot Borås berömda regn och Sjuhäradsbygdens klimat.",
       kicker: "Hudvård i Borås",
       h1: "Naturlig hudvård för dig i Borås",
-      lead: "Borås – Sveriges regnhuvudstad. Om du bor här vet du redan att din hud har det tufft. Men det behöver inte vara så. Naturlig CBD-hudvård som förstår dina förhållanden – levererad från dina grannar i Åsa. Fri frakt över 700 kr.",
+      lead: "Borås – Sveriges regnhuvudstad. Om du bor här vet du redan att din hud har det tufft. Men det behöver inte vara så. Naturlig CBD-hudvård som förstår dina förhållanden – levererad från dina grannar i Åsa. Fri frakt över 600 kr.",
       problemTitle: "Boråshudens utmaningar",
       problemBody: "<p>Borås är inte Sveriges regnigaste stad bara på skämt – det är fakta. Stadens läge i Sjuhäradsbygden, inkilad mellan kullar och sjöar, skapar ett mikroklimat som fångar fukten. Årsnederbörden är bland de högsta i Sverige, och det innebär att din hud lever i en konstant fuktig miljö utomhus – men paradoxalt nog extremt torr inomhus under uppvärmningsperioden.</p><p>Den ständiga fukten kan lura dig att tro att din hud är hydrerad. Men yttre fukt är inte samma sak som hudbarriärens egna fuktretention. Många i Borås har dehydrerad hud utan att veta om det – ytan känns fuktig men barriären är försvagad och läcker fukt inifrån.</p><p>Borås textiltradition lever vidare genom Textilhögskolan och en aktiv modeindustri, och många tänker mer på vad de har PÅ huden (kläder) än hur huden under mår. Kombinationen av regnpendling, ständiga temperaturväxlingar mellan ute och inne, och den stress som ett aktivt yrkesliv innebär, gör att boråsarhud behöver mer medveten omsorg än den ofta får.</p>",
       tipsTitle: "Hudvårdstips för boråsare",
@@ -1693,15 +1693,15 @@ export const CITY_PAGES: LandingPage[] = [
         { title: "Investera i barriärstärkning", body: "I Borås fuktklimat handlar hudvård mer om att stärka barriären än att tillföra fukt. Oljor som låser in och skyddar är viktigare än vattenbasprodukter som dunstar bort." }
       ],
       solutionTitle: "CBD-hudvård från dina grannar",
-      solutionBody: "<p>Vi bor i Åsa, bara en kort bilresa från Borås. Vi vet hur Sjuhäradsbygdens klimat fungerar – regnet, fukten, den snabba växlingen mellan ute och inne. 1753 SKINCARE är skapat med just den här verkligheten i åtanke.</p><p>DUO-kit med The ONE och I LOVE ger din hud den barriärstärkning som regnet och fukten kräver. CBD och CBG arbetar med hudens eget system för att låsa in fukt och stärka skyddsfunktionen inifrån. Au Naturel Makeup Remover rengör milt efter en regnig dag utan att förvärra barriärförsvagningen. TA-DA Serum med CBG ger extra stöd under de gråaste perioderna.</p><p>Beställ på 1753skin.com – fri frakt på beställningar över 700 kr, och leveransen från Åsa når Borås redan nästa dag.</p>",
+      solutionBody: "<p>Vi bor i Åsa, bara en kort bilresa från Borås. Vi vet hur Sjuhäradsbygdens klimat fungerar – regnet, fukten, den snabba växlingen mellan ute och inne. 1753 SKINCARE är skapat med just den här verkligheten i åtanke.</p><p>DUO-kit med The ONE och I LOVE ger din hud den barriärstärkning som regnet och fukten kräver. CBD och CBG arbetar med hudens eget system för att låsa in fukt och stärka skyddsfunktionen inifrån. Au Naturel Makeup Remover rengör milt efter en regnig dag utan att förvärra barriärförsvagningen. TA-DA Serum med CBG ger extra stöd under de gråaste perioderna.</p><p>Beställ på 1753skin.com – fri frakt på beställningar över 600 kr, och leveransen från Åsa når Borås redan nästa dag.</p>",
       faq: [
-        { q: "Levererar ni till Borås?", a: "Vi sitter i Åsa, strax söder om Göteborg och nära Borås. De flesta beställningar når dig redan nästa arbetsdag. Fri frakt över 700 kr." },
+        { q: "Levererar ni till Borås?", a: "Vi sitter i Åsa, strax söder om Göteborg och nära Borås. De flesta beställningar når dig redan nästa arbetsdag. Fri frakt över 600 kr." },
         { q: "Var kan jag köpa CBD-hudvård i Borås?", a: "Beställ på 1753skin.com – snabbast och smidigast, direkt från oss i Åsa utan mellanhänder." },
         { q: "Behöver min hud fukt när det redan är fuktigt ute?", a: "Ja. Yttre luftfuktighet och hudens egen fuktretention är helt olika saker. Huden behöver sina egna fettsyror och barriärskydd – det levererar inte regn." },
         { q: "Vilken produkt passar bäst i fuktigt klimat?", a: "DUO-kit ger den barriärstärkning som fuktigt klimat kräver. Oljorna låser in hudens fukt utan att lägga till vattenbaserad fukt som dunstar." }
       ],
       ctaTitle: "Borås regn kräver Borås hudvård",
-      ctaSub: "Barriärstärkande CBD-hudvård från dina grannar i Åsa. Fri frakt över 700 kr."
+      ctaSub: "Barriärstärkande CBD-hudvård från dina grannar i Åsa. Fri frakt över 600 kr."
     },
     en: {
       metaTitle: "Skincare Borås – CBD-based skincare | 1753 SKINCARE",
@@ -1818,10 +1818,10 @@ export const CITY_PAGES: LandingPage[] = [
     productIds: ["duo-ta-da", "duo-kit", "fungtastic-mushroom-extract"],
     sv: {
       metaTitle: "Hudvård Sundsvall – CBD-baserad hudvård | 1753 SKINCARE",
-      metaDescription: "Naturlig CBD-hudvård för dig i Sundsvall. Beställ online med fri frakt över 700 kr. Stärk din hud mot norrlandsvintrar och torr inomhusluft.",
+      metaDescription: "Naturlig CBD-hudvård för dig i Sundsvall. Beställ online med fri frakt över 600 kr. Stärk din hud mot norrlandsvintrar och torr inomhusluft.",
       kicker: "Hudvård i Sundsvall",
       h1: "Naturlig hudvård för dig i Sundsvall",
-      lead: "Sundsvall – stenstaden vid havet, mitt i Norrland. Långa vintrar, kort men intensiv sommar och en hud som får kämpa halvåret runt. Du förtjänar produkter som klarar dina förhållanden. Fri frakt över 700 kr.",
+      lead: "Sundsvall – stenstaden vid havet, mitt i Norrland. Långa vintrar, kort men intensiv sommar och en hud som får kämpa halvåret runt. Du förtjänar produkter som klarar dina förhållanden. Fri frakt över 600 kr.",
       problemTitle: "Sundsvallshudens utmaningar",
       problemBody: "<p>Sundsvall har ett unikt läge vid Bottenhavet, inramat av berget Norra och Södra Stadsberget. Det skapar ett mikroklimat som kan överraska – inversionsskikt vintertid fångar kall luft i dalgången och gör att temperaturen kan sjunka drastiskt. Sundsvall har haft några av Sveriges lägsta uppmätta temperaturer i kustläge.</p><p>Vintrarna är långa och kalla, med temperaturer som regelbundet når minus tjugo och ibland minus trettio. Den torra vinterluften innehåller minimalt med fukt, och huden torkar ut snabbt. Samtidigt ger uppvärmda hem och kontor extremt torr inomhusluft – en dubbel uttorkningseffekt som sliter på hudbarriären.</p><p>Sommaren i Sundsvall är kort men kan vara intensiv, med långa ljusa dagar och överraskande stark sol. Huden som tillbringat sex månader i torr, kall luft utsätts plötsligt för UV-strålning den inte är förberedd på. Övergången är brutal, och många upplever hudproblem precis vid årstidsväxlingarna.</p>",
       tipsTitle: "Hudvårdstips för sundsvallsbor",
@@ -1833,15 +1833,15 @@ export const CITY_PAGES: LandingPage[] = [
         { title: "Skydda ansiktet vid havet", body: "Bottenhavetsvinden längs Sundsvalls kust är kall och rå. En skyddande olja som barriär innan utevistelse vid havet låser in fukten och stänger ute kylan." }
       ],
       solutionTitle: "CBD-hudvård levererad till Sundsvall",
-      solutionBody: "<p>1753 SKINCARE levererar naturlig CBD-hudvård som klarar Sundsvalls tuffa förhållanden. Från Åsa utanför Göteborg till din dörr – fri frakt på beställningar över 700 kr.</p><p>Vår starkaste rekommendation för Sundsvall är DUO-kit + TA-DA Serum-kombination. Du får tre produkter som tillsammans ger maximal barriärstärkning för norrlandsvintrar: The ONE och I LOVE som daglig bas, och TA-DA Serum med CBG för intensivvård under köldknäppar. Fungtastic Mushroom Extract stärker immunförsvaret under de mörka månaderna.</p><p>Beställ på 1753skin.com – de flesta leveranser når Sundsvall inom 2 arbetsdagar.</p>",
+      solutionBody: "<p>1753 SKINCARE levererar naturlig CBD-hudvård som klarar Sundsvalls tuffa förhållanden. Från Åsa utanför Göteborg till din dörr – fri frakt på beställningar över 600 kr.</p><p>Vår starkaste rekommendation för Sundsvall är DUO-kit + TA-DA Serum-kombination. Du får tre produkter som tillsammans ger maximal barriärstärkning för norrlandsvintrar: The ONE och I LOVE som daglig bas, och TA-DA Serum med CBG för intensivvård under köldknäppar. Fungtastic Mushroom Extract stärker immunförsvaret under de mörka månaderna.</p><p>Beställ på 1753skin.com – de flesta leveranser når Sundsvall inom 2 arbetsdagar.</p>",
       faq: [
-        { q: "Levererar ni till Sundsvall?", a: "Ja, vi levererar till hela Sverige. De flesta beställningar från Åsa når Sundsvall inom 2 arbetsdagar. Fri frakt på beställningar över 700 kr." },
+        { q: "Levererar ni till Sundsvall?", a: "Ja, vi levererar till hela Sverige. De flesta beställningar från Åsa når Sundsvall inom 2 arbetsdagar. Fri frakt på beställningar över 600 kr." },
         { q: "Var kan jag köpa CBD-hudvård i Sundsvall?", a: "Beställ direkt på 1753skin.com – vi levererar till din dörr i Sundsvall utan mellanhänder." },
         { q: "Behöver jag olika produkter för sommar och vinter?", a: "Våra produkter fungerar året runt, men justera mängden. Vintertid i Sundsvall: generöst med olja, gärna dubbla lager. Sommartid: tunnare applicering räcker." },
         { q: "Klarar era produkter att fraktas i kyla?", a: "Ja, våra oljor tål kyla utan att förlora kvalitet. Om paketet är kallt när det anländer, låt det nå rumstemperatur innan användning." }
       ],
       ctaTitle: "Norrlandshud kräver norrlandsstark hudvård",
-      ctaSub: "CBD-hudvård som stärker din barriär mot Sundsvalls klimat. Fri frakt över 700 kr."
+      ctaSub: "CBD-hudvård som stärker din barriär mot Sundsvalls klimat. Fri frakt över 600 kr."
     },
     en: {
       metaTitle: "Skincare Sundsvall – CBD-based skincare | 1753 SKINCARE",
@@ -1962,10 +1962,10 @@ export const CITY_PAGES: LandingPage[] = [
     productIds: ["duo-kit", "ta-da-serum", "fungtastic-mushroom-extract"],
     sv: {
       metaTitle: "Hudvård Gävle – CBD-baserad hudvård | 1753 SKINCARE",
-      metaDescription: "Naturlig CBD-hudvård för dig i Gävle. Beställ online med fri frakt över 700 kr. Stärk din hud mot Norrlandsporten klimat.",
+      metaDescription: "Naturlig CBD-hudvård för dig i Gävle. Beställ online med fri frakt över 600 kr. Stärk din hud mot Norrlandsporten klimat.",
       kicker: "Hudvård i Gävle",
       h1: "Naturlig hudvård för dig i Gävle",
-      lead: "Gävle – porten till Norrland, där Mellansverige möter den riktiga vintern. Gavleåns fukt, Bottenhavets vind och vintrar som testar din hud på riktigt. Ge den det stöd den förtjänar. Fri frakt över 700 kr.",
+      lead: "Gävle – porten till Norrland, där Mellansverige möter den riktiga vintern. Gavleåns fukt, Bottenhavets vind och vintrar som testar din hud på riktigt. Ge den det stöd den förtjänar. Fri frakt över 600 kr.",
       problemTitle: "Gävlehudens utmaningar",
       problemBody: "<p>Gävle ligger vid gränsen mellan Mellansverige och Norrland, och klimatet reflekterar den positionen – kallt nog att vara utmanande, men inte så extremt att alla automatiskt anpassar sig. Vintrarna är långa med temperaturer som regelbundet når minus femton till minus tjugo, och Gavleån som rinner genom staden tillför rå fukt som gör kylan genomträngande.</p><p>Bottenhavets närhet ger Gävle en vind som bär salt och fukt. Längs kusten, vid Bönan och Engeltofta, kan havsvinden vara kraftig och uttorkande. Men mitt i stan, skyddad av bebyggelsen, märker man det knappt – tills man undrar varför huden är så torr trots att man knappt varit utomhus.</p><p>Gävle har en blandning av gammal industritradition och modern tjänstesektor. Många pendlar, antingen lokalt eller ner mot Stockholm, och den dagliga rutten genom olika klimatzoner – hem, bil, tåg, kontor – ger huden en karusell av temperatur och luftfuktighet som den aldrig riktigt vänjer sig vid. Kaffekulturen är stark i Gävle (Gevalia, som bekant), men koffein avvattnar – och det syns i huden.</p>",
       tipsTitle: "Hudvårdstips för gävlebor",
@@ -1976,15 +1976,15 @@ export const CITY_PAGES: LandingPage[] = [
         { title: "Stöd immunförsvaret under mörka månader", body: "Gävles vinterhalvår ger begränsad solexponering. D-vitamin och adaptogena tillskott stödjer immunförsvar och hudhälsa under de mörkaste månaderna." }
       ],
       solutionTitle: "CBD-hudvård levererad till Gävle",
-      solutionBody: "<p>1753 SKINCARE levererar naturlig CBD-hudvård direkt till din dörr i Gävle. Fri frakt på beställningar över 700 kr – vi skickar från Åsa utanför Göteborg.</p><p>DUO-kit med The ONE och I LOVE ger din hud den bas den behöver för att klara Gävles klimat. CBD och CBG stärker barriären och balanserar fukt och inflammation. TA-DA Serum med koncentrerad CBG fungerar som booster under de kallaste månaderna. Fungtastic Mushroom Extract stödjer immunförsvaret under vinterns mörka perioder – för Gävlebor som vill ta hand om huden inifrån och ut.</p><p>Beställ på 1753skin.com – de flesta leveranser når Gävle inom 1–2 arbetsdagar.</p>",
+      solutionBody: "<p>1753 SKINCARE levererar naturlig CBD-hudvård direkt till din dörr i Gävle. Fri frakt på beställningar över 600 kr – vi skickar från Åsa utanför Göteborg.</p><p>DUO-kit med The ONE och I LOVE ger din hud den bas den behöver för att klara Gävles klimat. CBD och CBG stärker barriären och balanserar fukt och inflammation. TA-DA Serum med koncentrerad CBG fungerar som booster under de kallaste månaderna. Fungtastic Mushroom Extract stödjer immunförsvaret under vinterns mörka perioder – för Gävlebor som vill ta hand om huden inifrån och ut.</p><p>Beställ på 1753skin.com – de flesta leveranser når Gävle inom 1–2 arbetsdagar.</p>",
       faq: [
-        { q: "Levererar ni till Gävle?", a: "Ja, vi skickar från Åsa utanför Göteborg och de flesta beställningar når Gävle inom 1–2 arbetsdagar. Fri frakt över 700 kr." },
+        { q: "Levererar ni till Gävle?", a: "Ja, vi skickar från Åsa utanför Göteborg och de flesta beställningar når Gävle inom 1–2 arbetsdagar. Fri frakt över 600 kr." },
         { q: "Var kan jag köpa CBD-hudvård i Gävle?", a: "Beställ direkt på 1753skin.com – vi levererar till din dörr i Gävle. Ingen butik behövs." },
         { q: "Hjälper CBD mot vintertorr hud?", a: "Ja, CBD stärker hudbarriären och hjälper huden att behålla sin fukt trots kall, torr luft. Våra oljor ger dessutom ett skyddande lager som minskar fuktförlusten." },
         { q: "Kan jag beställa som present?", a: "Absolut. Alla beställningar skickas i diskret, snygg förpackning som fungerar utmärkt som present. Perfekt julklapp för en gävlebo med torr vinterhud." }
       ],
       ctaTitle: "Norrlandsportens hud förtjänar riktig hudvård",
-      ctaSub: "CBD-hudvård som stärker din barriär mot Gävles klimat. Fri frakt över 700 kr."
+      ctaSub: "CBD-hudvård som stärker din barriär mot Gävles klimat. Fri frakt över 600 kr."
     },
     en: {
       metaTitle: "Skincare Gävle – CBD-based skincare | 1753 SKINCARE",
