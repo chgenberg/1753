@@ -1,0 +1,43 @@
+---
+description: Regressionsskydd – krav som agenten ALLTID ska följa vid kodändringar och push.
+alwaysApply: true
+---
+
+# Regressionsskydd
+
+## Före varje push
+
+Agenten MÅSTE utföra dessa steg innan `git push`:
+
+1. **TypeScript-kompilering:** Kör `cd frontend && npx tsc --noEmit` – NOLL fel tillåtna.
+2. **Linter-kontroll:** Kör `ReadLints` på ALLA ändrade filer.
+3. **Backend-syntax:** Kör `node -c server.js` för att verifiera att backend parsar korrekt.
+4. **Sammanfattning:** Innan push, beskriv kort vilka av de kritiska flödena (se nedan) som berörs av ändringarna och bekräfta att de verifierats.
+
+## Kritiska flöden som ALDRIG får gå sönder
+
+| Flöde | Steg |
+|-------|------|
+| Hudanalys | intro → email → demografi → scan → quiz (7 frågor) → analysering → resultat → PDF → delning |
+| Kassa | varukorg → checkout-formulär → Viva Wallet-betalning → bekräftelsesida |
+| Autentisering | registrering → login → dashboard (8 vyer) → lösenordsåterställning |
+| i18n | Alla 5 språk (sv/en/es/de/fr) ska fungera i samtliga flöden, inklusive URL-routing, metadata, PDF, API-felmeddelanden |
+| Newsletter | prenumeration med locale → bekräftelse → avprenumeration |
+| Produkter | produktlista → produktsida → lägg i varukorg |
+
+## Regler vid kodändringar
+
+- **Ta aldrig bort befintlig funktionalitet** utan explicit begäran från användaren.
+- **Ändra aldrig dessa utan manuell bekräftelse:** `PRODUCTS`-arrayen (app.js), färgschemat (CSS-variabler), navigationsstrukturen (4 menypunkter + Mitt konto), API-nycklar/secrets, `ANALYSIS_SYSTEM_PROMPT` grundfilosofi.
+- **Kontrollera importer:** Säkerställ att alla borttagna/omdöpta exporter fortfarande importeras korrekt i alla filer som använder dem.
+- **i18n-konsistens:** Om en sträng läggs till i ett språk, kontrollera att motsvarande nyckel finns i alla 5 språkfiler (`sv.ts`, `en.ts`, `es.ts`, `de.ts`, `fr.ts`).
+- **Middleware-routing:** Vid ändringar i `navigation.ts`, `middleware.ts` eller `LOCALE_SEGMENTS`, verifiera att URL-omskrivningar fortfarande matchar och att `switchLocalePath` fungerar korrekt.
+
+## Filer med hög risk (extra försiktighet)
+
+- `server.js` – Backend, auth, AI-prompt, betalning, e-post
+- `frontend/src/middleware.ts` – URL-routing för alla språk
+- `frontend/src/app/[locale]/hudanalys/page.tsx` – Hudanalysflödet
+- `frontend/src/lib/i18n/navigation.ts` – Lokaliserad routing
+- `frontend/src/providers/auth-provider.tsx` – Autentiseringskontext
+- `db.js` – Databasschema och queries

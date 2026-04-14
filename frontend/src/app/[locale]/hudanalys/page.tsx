@@ -183,7 +183,7 @@ function OptionCard({
       type="button"
       onClick={onClick}
       className={cn(
-        "group relative flex h-full min-h-[120px] flex-col items-center justify-center gap-2 rounded-2xl border-2 px-4 py-5 text-center transition-all duration-300",
+        "group relative flex h-full min-h-[140px] flex-col items-center justify-center gap-2.5 rounded-2xl border-2 px-4 py-6 text-center transition-all duration-300",
         selected
           ? "border-[#108474] bg-[#108474]/5 shadow-md shadow-[#108474]/10"
           : "border-brand-100 bg-white hover:border-brand-200 hover:shadow-sm",
@@ -200,7 +200,7 @@ function OptionCard({
       )}
       <span
         className={cn(
-          "text-sm font-semibold transition-colors",
+          "text-sm font-semibold leading-snug transition-colors",
           selected ? "text-[#108474]" : "text-brand-900"
         )}
       >
@@ -238,7 +238,7 @@ function ChipSelect({
             type="button"
             onClick={() => onToggle(opt.key)}
             className={cn(
-              "inline-flex h-[52px] items-center justify-center gap-2 rounded-full border-2 px-5 text-sm font-medium transition-all duration-300",
+              "inline-flex min-h-[52px] items-center justify-center gap-2 rounded-full border-2 px-5 py-3 text-sm font-medium transition-all duration-300",
               active
                 ? "border-[#108474] bg-[#108474]/5 text-[#108474]"
                 : "border-brand-100 bg-white text-brand-700 hover:border-brand-200"
@@ -525,6 +525,7 @@ export default function AnalysisPage() {
         overallSeverity: scanSummary.overallSeverity,
         skinMetrics: scanSummary.skinMetrics,
         imageBase64: scanSummary.imageBase64,
+        zoneAnchors: scanSummary.zoneAnchors,
       } : undefined;
       sessionStorage.setItem("1753_analysis_progress", JSON.stringify({
         step,
@@ -730,7 +731,7 @@ export default function AnalysisPage() {
           result: data,
           parsed: json,
           answers,
-          scanSummary: scanSummary ? { overallTop: scanSummary.overallTop, zones: scanSummary.zones, consentGiven: scanSummary.consentGiven, imageBase64: scanSummary.imageBase64 } : null,
+          scanSummary: scanSummary ? { overallTop: scanSummary.overallTop, zones: scanSummary.zones, consentGiven: scanSummary.consentGiven, imageBase64: scanSummary.imageBase64, zoneAnchors: scanSummary.zoneAnchors } : null,
         }));
         sessionStorage.removeItem("1753_analysis_progress");
       } catch { /* quota exceeded */ }
@@ -933,7 +934,7 @@ export default function AnalysisPage() {
           {step === "email" && (
             <div className="animate-fade-in">
               <button
-                onClick={() => setStep("intro")}
+                onClick={() => { setStep("intro"); scrollTop(); }}
                 className="mb-6 inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium text-[#515151] transition-colors hover:bg-[#f5f5f7]"
               >
                 <ArrowLeft className="h-4 w-4" />
@@ -1025,11 +1026,11 @@ export default function AnalysisPage() {
 
                       <div className="space-y-4 text-[13px] leading-relaxed text-[#515151]">
                         <p>{tx(locale,
-                          "Ett konto skapas med din e-postadress så att dina analysresultat sparas. Du kan logga in för att se din hudresa, jämföra resultat och göra nya analyser (en gång per månad).",
-                          "An account is created with your email so your analysis results are saved. You can log in to view your skin journey, compare results, and run new analyses (once per month).",
-                          "Se crea una cuenta con tu email para guardar tus resultados. Puedes iniciar sesión para ver tu viaje de piel, comparar resultados y hacer nuevos análisis (una vez al mes).",
-                          "Mit deiner E-Mail wird ein Konto erstellt, damit deine Analyseergebnisse gespeichert werden. Du kannst dich einloggen, um deine Hautreise zu sehen und neue Analysen durchzuführen (einmal pro Monat).",
-                          "Un compte est créé avec votre email pour sauvegarder vos résultats. Vous pouvez vous connecter pour voir votre parcours peau et faire de nouvelles analyses (une fois par mois)."
+                          "Ett konto skapas med din e-postadress så att dina analysresultat sparas. Du kan logga in för att se din hudresa, jämföra resultat och göra nya analyser (varannan vecka).",
+                          "An account is created with your email so your analysis results are saved. You can log in to view your skin journey, compare results, and run new analyses (every two weeks).",
+                          "Se crea una cuenta con tu email para guardar tus resultados. Puedes iniciar sesión para ver tu viaje de piel, comparar resultados y hacer nuevos análisis (cada dos semanas).",
+                          "Mit deiner E-Mail wird ein Konto erstellt, damit deine Analyseergebnisse gespeichert werden. Du kannst dich einloggen, um deine Hautreise zu sehen und neue Analysen durchzuführen (alle zwei Wochen).",
+                          "Un compte est créé avec votre email pour sauvegarder vos résultats. Vous pouvez vous connecter pour voir votre parcours peau et faire de nouvelles analyses (toutes les deux semaines)."
                         )}</p>
 
                         <p>{tx(locale,
@@ -1152,7 +1153,6 @@ export default function AnalysisPage() {
                         onClick={() => setAnswers((p) => ({ ...p, gender: g.key }))}
                         title={g.label}
                         icon={User}
-                        className="min-h-[80px]"
                       />
                     ))}
                   </div>
@@ -1169,7 +1169,7 @@ export default function AnalysisPage() {
 
                 {canProceed() && (
                   <button
-                    onClick={() => setStep(1)}
+                    onClick={() => { setStep(1); scrollTop(); }}
                     className="block mx-auto text-xs font-medium text-[#766a62] underline underline-offset-2 transition-colors hover:text-[#108474]"
                   >
                     {tx(locale, "Hoppa över skanning, svara bara på frågor", "Skip face scan, answer questions only", "Saltar escaneo, solo responder preguntas", "Scan überspringen, nur Fragen beantworten", "Passer le scan, répondre uniquement aux questions")}
@@ -1183,7 +1183,7 @@ export default function AnalysisPage() {
           {step === "scan" && (
             <div className="animate-fade-in">
               <button
-                onClick={() => setStep("demographics")}
+                onClick={() => { setStep("demographics"); scrollTop(); }}
                 className="mb-6 inline-flex items-center gap-2 rounded-xl px-4 py-2 text-sm font-medium text-[#515151] transition-colors hover:bg-[#f5f5f7]"
               >
                 <ArrowLeft className="h-4 w-4" />
@@ -1203,6 +1203,7 @@ export default function AnalysisPage() {
                     uploadTrainingData(summary);
                   }
                   setStep(1);
+                  scrollTop();
                 }}
               />
 
@@ -1561,6 +1562,7 @@ export default function AnalysisPage() {
                   scanImageSrc={scanSummary?.imageBase64 || undefined}
                   scanZoneResults={scanSummary?.zones || undefined}
                   faceZonesGPT={parsed.faceZones || undefined}
+                  zoneAnchors={scanSummary?.zoneAnchors || undefined}
                 />
               ) : (
                 <div className="rounded-2xl border border-border bg-white p-6 md:p-8">
@@ -1871,6 +1873,7 @@ export default function AnalysisPage() {
                     setUserEmail(user?.email ?? "");
                     setEmailConsent(false);
                     setEmailError("");
+                    scrollTop();
                     setAnswers({
                       age: 0,
                       gender: "",

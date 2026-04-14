@@ -1305,6 +1305,14 @@ async function getSkinAnalyses(userId) {
   return rows;
 }
 
+async function deleteSkinAnalysis(userId, analysisId) {
+  const { rowCount } = await pool.query(
+    "DELETE FROM skin_analyses WHERE id = $1 AND user_id = $2",
+    [analysisId, userId]
+  );
+  return rowCount > 0;
+}
+
 async function getSkinMetricsHistory(userId, limit = 20) {
   const { rows } = await pool.query(
     `SELECT id, score, result->'metrics' as metrics, result->'skinAge' as skin_age,
@@ -1807,6 +1815,7 @@ module.exports = {
   saveSkinAnalysis,
   createSkinAnalysis,
   getSkinAnalyses,
+  deleteSkinAnalysis,
   getSkinMetricsHistory,
   createTrainingUpload,
   countTrainingUploads,

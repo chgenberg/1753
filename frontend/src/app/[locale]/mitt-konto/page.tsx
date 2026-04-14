@@ -462,6 +462,22 @@ function SkinJourneyView({ token }: { token: string }) {
     }).finally(() => setLoading(false));
   }, [token]);
 
+  const [deletingId, setDeletingId] = useState<number | null>(null);
+
+  const deleteAnalysis = async (id: number) => {
+    if (!confirm(tx(locale, "Radera denna analys? Detta kan inte ångras.", "Delete this analysis? This cannot be undone.", "¿Eliminar este análisis? No se puede deshacer.", "Diese Analyse löschen? Dies kann nicht rückgängig gemacht werden.", "Supprimer cette analyse ? Cette action est irréversible."))) return;
+    setDeletingId(id);
+    try {
+      await authFetch(`/analysis/${id}`, token, { method: "DELETE" });
+      setAnalyses((prev) => prev.filter((a) => a.id !== id));
+      showToast(tx(locale, "Analys raderad", "Analysis deleted", "Análisis eliminado", "Analyse gelöscht", "Analyse supprimée"));
+    } catch {
+      showToast(tx(locale, "Kunde inte radera analys", "Could not delete analysis", "No se pudo eliminar el análisis", "Analyse konnte nicht gelöscht werden", "Impossible de supprimer l'analyse"));
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   const deleteAllSnapshots = async () => {
     if (!confirm(tx(locale, "Radera alla sparade foton? Detta kan inte ångras.", "Delete all saved photos? This cannot be undone.", "¿Eliminar todas las fotos guardadas? No se puede deshacer.", "Alle gespeicherten Fotos löschen? Dies kann nicht rückgängig gemacht werden.", "Supprimer toutes les photos enregistrées ? Cette action est irréversible."))) return;
     setDeletingAll(true);
@@ -550,7 +566,7 @@ function SkinJourneyView({ token }: { token: string }) {
       {(() => {
         const latestDate = analyses[0]?.created_at ? new Date(analyses[0].created_at) : null;
         if (!latestDate) return null;
-        const nextDate = new Date(latestDate.getTime() + 30 * 24 * 60 * 60 * 1000);
+        const nextDate = new Date(latestDate.getTime() + 14 * 24 * 60 * 60 * 1000);
         const daysLeft = Math.max(0, Math.ceil((nextDate.getTime() - Date.now()) / (24 * 60 * 60 * 1000)));
         const canAnalyze = daysLeft <= 0;
         return (
@@ -675,7 +691,7 @@ function SkinJourneyView({ token }: { token: string }) {
               </div>
               <div className="flex-1 rounded-xl border border-border bg-white p-4 transition-all hover:shadow-sm">
                 <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-3">
+                <div className="flex items-center gap-3">
                     {a.score !== null && (
                       <span className="text-sm font-bold text-[#108474]">
                         {a.score} {t("accountDash.scorePoints")}
@@ -687,15 +703,25 @@ function SkinJourneyView({ token }: { token: string }) {
                       </span>
                     )}
                   </div>
-                  <div className="text-right">
-                    <p className="text-xs font-medium text-brand-900">
-                      {new Date(a.created_at).toLocaleDateString(loc, {
-                        year: "numeric",
-                        month: "short",
-                        day: "numeric",
-                      })}
-                    </p>
-                    <span className="text-[11px] text-muted-foreground">{relativeDate(a.created_at, locale, t)}</span>
+                  <div className="flex items-center gap-3">
+                    <div className="text-right">
+                      <p className="text-xs font-medium text-brand-900">
+                        {new Date(a.created_at).toLocaleDateString(loc, {
+                          year: "numeric",
+                          month: "short",
+                          day: "numeric",
+                        })}
+                      </p>
+                      <span className="text-[11px] text-muted-foreground">{relativeDate(a.created_at, locale, t)}</span>
+                    </div>
+                    <button
+                      onClick={() => deleteAnalysis(a.id)}
+                      disabled={deletingId === a.id}
+                      className="rounded-full p-1.5 text-brand-300 transition-colors hover:bg-red-50 hover:text-red-500"
+                      title={tx(locale, "Radera analys", "Delete analysis", "Eliminar análisis", "Analyse löschen", "Supprimer l'analyse")}
+                    >
+                      <Trash2 className="h-3.5 w-3.5" />
+                    </button>
                   </div>
                 </div>
                 {summary && (

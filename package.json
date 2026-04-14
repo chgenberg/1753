@@ -5,7 +5,11 @@
   "main": "server.js",
   "scripts": {
     "start": "node server.js",
-    "dev": "node server.js"
+    "dev": "node server.js",
+    "check": "cd frontend && npm run typecheck && npm run lint",
+    "check:backend": "node -c server.js && node -c db.js",
+    "prepare": "husky",
+    "prepare": "husky"
   },
   "dependencies": {
     "@fal-ai/client": "^1.9.5",
@@ -23,5 +27,8 @@
     "resend": "^6.10.0",
     "valyu-js": "^2.7.9",
     "xlsx": "^0.18.5"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7"
   }
 }

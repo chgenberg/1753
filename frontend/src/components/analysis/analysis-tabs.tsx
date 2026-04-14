@@ -138,6 +138,7 @@ export interface AnalysisTabsProps {
   scanImageSrc?: string;
   scanZoneResults?: ZoneResult[];
   faceZonesGPT?: FaceZoneGPT[];
+  zoneAnchors?: Record<string, { x: number; y: number }>;
 }
 
 /* ------------------------------------------------------------------ */
@@ -638,10 +639,57 @@ function FocusAreas({ entries, locale }: { entries: [string, MetricScore][]; loc
 }
 
 /* ------------------------------------------------------------------ */
+/*  Zone anchor defaults (used when MediaPipe data is unavailable)     */
+/* ------------------------------------------------------------------ */
+
+const ZONE_ANCHOR_DEFAULTS: Record<string, { x: number; y: number }> = {
+  forehead: { x: 50, y: 18 },
+  nose: { x: 50, y: 42 },
+  left_cheek: { x: 28, y: 45 },
+  right_cheek: { x: 72, y: 45 },
+  chin: { x: 50, y: 72 },
+  t_zone: { x: 50, y: 30 },
+  left_eye_area: { x: 35, y: 30 },
+  right_eye_area: { x: 65, y: 30 },
+  mouth_area: { x: 50, y: 60 },
+  jawline: { x: 50, y: 78 },
+};
+
+const ZONE_NAME_MAP: Record<string, string> = {
+  panna: "forehead", forehead: "forehead", frente: "forehead", stirn: "forehead", front: "forehead",
+  "näsa": "nose", nasa: "nose", nose: "nose", nariz: "nose", nase: "nose", nez: "nose",
+  "vänster kind": "left_cheek", "vanster kind": "left_cheek", left_cheek: "left_cheek", "left cheek": "left_cheek",
+  "höger kind": "right_cheek", "hoger kind": "right_cheek", right_cheek: "right_cheek", "right cheek": "right_cheek",
+  haka: "chin", chin: "chin", "mentón": "chin", kinn: "chin", menton: "chin",
+  "t-zon": "t_zone", t_zone: "t_zone", "t-zone": "t_zone", "zona t": "t_zone",
+  "vänster ögonområde": "left_eye_area", "left eye area": "left_eye_area", left_eye_area: "left_eye_area",
+  "höger ögonområde": "right_eye_area", "right eye area": "right_eye_area", right_eye_area: "right_eye_area",
+  "munområde": "mouth_area", "mouth area": "mouth_area", mouth_area: "mouth_area",
+  "käklinje": "jawline", jawline: "jawline",
+};
+
+function resolveZoneAnchor(
+  zone: string,
+  anchors?: Record<string, { x: number; y: number }>,
+  gptX?: number,
+  gptY?: number
+): { x: number; y: number } {
+  const normalized = ZONE_NAME_MAP[zone.toLowerCase()] ?? zone.toLowerCase().replace(/\s+/g, "_");
+
+  if (anchors?.[normalized]) return anchors[normalized];
+
+  if (ZONE_ANCHOR_DEFAULTS[normalized]) return ZONE_ANCHOR_DEFAULTS[normalized];
+
+  if (typeof gptX === "number" && typeof gptY === "number") return { x: gptX, y: gptY };
+
+  return { x: 50, y: 50 };
+}
+
+/* ------------------------------------------------------------------ */
 /*  Tab 1 – Din hy                                                     */
 /* ------------------------------------------------------------------ */
 
-function SkinTab({ score, scoreLabel, summary, skinAge, fitzpatrick, metrics, skinAnalysis, hasScan, scanImageSrc, faceZonesGPT, products, onNextTab }: {
+function SkinTab({ score, scoreLabel, summary, skinAge, fitzpatrick, metrics, skinAnalysis, hasScan, scanImageSrc, faceZonesGPT, zoneAnchors, products, onNextTab }: {
   score: number;
   scoreLabel?: string;
   summary: string;
@@ -652,6 +700,7 @@ function SkinTab({ score, scoreLabel, summary, skinAge, fitzpatrick, metrics, sk
   hasScan?: boolean;
   scanImageSrc?: string;
   faceZonesGPT?: FaceZoneGPT[];
+  zoneAnchors?: Record<string, { x: number; y: number }>;
   products: ProductRec[];
   onNextTab?: () => void;
 }) {
@@ -707,6 +756,7 @@ function SkinTab({ score, scoreLabel, summary, skinAge, fitzpatrick, metrics, sk
                 {gptZones.map((z, i) => {
                   const isActive = activeZoneIdx === i;
                   const confColor = z.confidence === "high" ? "#108474" : z.confidence === "medium" ? "#e8a020" : "#766a62";
+                  const anchor = resolveZoneAnchor(z.zone, zoneAnchors, z.x, z.y);
                   return (
                     <button
                       key={z.zone}
@@ -715,7 +765,7 @@ function SkinTab({ score, scoreLabel, summary, skinAge, fitzpatrick, metrics, sk
                         setActiveZoneIdx(isActive ? null : i);
                       }}
                       className="absolute z-10 group"
-                      style={{ left: `${z.x}%`, top: `${z.y}%`, transform: "translate(-50%, -50%)" }}
+                      style={{ left: `${anchor.x}%`, top: `${anchor.y}%`, transform: "translate(-50%, -50%)" }}
                     >
                       <span className="relative flex h-4 w-4">
                         <span
@@ -1230,6 +1280,7 @@ export function AnalysisTabs({
   scanImageSrc,
   scanZoneResults,
   faceZonesGPT,
+  zoneAnchors,
 }: AnalysisTabsProps) {
   const { locale } = useLocale();
   const [activeTab, setActiveTab] = useState<TabId>("skin");
@@ -1388,6 +1439,7 @@ export function AnalysisTabs({
               hasScan={hasScan}
               scanImageSrc={scanImageSrc}
               faceZonesGPT={faceZonesGPT}
+              zoneAnchors={zoneAnchors}
               products={products}
               onNextTab={goToNextTab}
             />

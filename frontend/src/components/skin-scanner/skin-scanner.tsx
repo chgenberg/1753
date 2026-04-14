@@ -41,6 +41,7 @@ export interface ScanSummary {
   zoneCrops?: { id: string; dataUrl: string; labelEn?: string }[];
   overallSeverity?: SeverityResult;
   skinMetrics?: SkinMetrics;
+  zoneAnchors?: Record<string, { x: number; y: number }>;
 }
 
 type ScannerStep = "idle" | "loading-model" | "camera" | "captured" | "analyzing" | "results";
@@ -295,6 +296,15 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
         console.warn("MediaPipe face detection failed, falling back to grid zones:", e);
       }
 
+      // --- Build zone anchors from MediaPipe landmarks (percentage coordinates) ---
+      const zoneAnchors: Record<string, { x: number; y: number }> = {};
+      for (const mz of mediapipeZones) {
+        zoneAnchors[mz.id] = {
+          x: Math.round(mz.centerX * 1000) / 10,
+          y: Math.round(mz.centerY * 1000) / 10,
+        };
+      }
+
       // --- ONNX per-zone classification (use MediaPipe zones if available, fallback to grid) ---
       const zoneResults: ZoneResult[] = [];
 
@@ -369,6 +379,7 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
         zoneCrops: zoneCrops.length > 0 ? zoneCrops : undefined,
         overallSeverity,
         skinMetrics,
+        zoneAnchors: Object.keys(zoneAnchors).length > 0 ? zoneAnchors : undefined,
       });
     } catch (err) {
       console.error("Analysis error:", err);

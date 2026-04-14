@@ -1,0 +1,22 @@
+#!/bin/sh
+
+echo "Pre-push: Verifierar kod..."
+
+# TypeScript-kompilering
+echo "  TypeScript..."
+cd frontend && npx tsc --noEmit
+if [ $? -ne 0 ]; then
+  echo "TypeScript-fel hittade. Push avbruten."
+  exit 1
+fi
+cd ..
+
+# Backend-syntax
+echo "  Backend-syntax..."
+node -c server.js && node -c db.js
+if [ $? -ne 0 ]; then
+  echo "Backend-syntaxfel hittade. Push avbruten."
+  exit 1
+fi
+
+echo "Verifiering klar. Push fortsatter."

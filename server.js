@@ -2120,16 +2120,16 @@ app.post("/api/analysis", async (req, res) => {
       }
     }
 
-    // Rate limit: 1 analysis per 30 days per user
+    // Rate limit: 1 analysis per 14 days per user
     if (userId) {
       try {
         const recent = await db.pool.query(
-          "SELECT id, created_at FROM skin_analyses WHERE user_id = $1 AND created_at > NOW() - INTERVAL '30 days' ORDER BY created_at DESC LIMIT 1",
+          "SELECT id, created_at FROM skin_analyses WHERE user_id = $1 AND created_at > NOW() - INTERVAL '14 days' ORDER BY created_at DESC LIMIT 1",
           [userId]
         );
         if (recent.rows.length > 0) {
           const lastDate = new Date(recent.rows[0].created_at);
-          const nextDate = new Date(lastDate.getTime() + 30 * 24 * 60 * 60 * 1000);
+          const nextDate = new Date(lastDate.getTime() + 14 * 24 * 60 * 60 * 1000);
           const daysLeft = Math.ceil((nextDate.getTime() - Date.now()) / (24 * 60 * 60 * 1000));
           if (daysLeft > 0) {
             const msgs = {
@@ -2415,6 +2415,19 @@ app.get("/api/analysis/history", authMiddleware, async (req, res) => {
   } catch (err) {
     console.error("[Analysis History]", err);
     res.status(500).json({ message: "Kunde inte hämta analyshistorik" });
+  }
+});
+
+app.delete("/api/analysis/:id", authMiddleware, async (req, res) => {
+  try {
+    const analysisId = parseInt(req.params.id, 10);
+    if (isNaN(analysisId)) return res.status(400).json({ message: "Ogiltigt id" });
+    const deleted = await db.deleteSkinAnalysis(req.user.id, analysisId);
+    if (!deleted) return res.status(404).json({ message: "Analys ej hittad" });
+    res.json({ ok: true });
+  } catch (err) {
+    console.error("[Analysis Delete]", err);
+    res.status(500).json({ message: "Kunde inte radera analys" });
   }
 });
 
@@ -3615,9 +3628,9 @@ async function sendAnalysisReport(email, analysisContent, locale, accountPasswor
     </div>
   ` : "";
 
-  const ctaLabel = isSv ? "Se din fullständiga analys" : isEs ? "Ver tu análisis completo" : isDe ? "Vollständige Analyse ansehen" : isFr ? "Voir votre analyse complète" : "View your full analysis";
-  const analysisSlug = { sv: "hudanalys", en: "skin-analysis", es: "analisis-piel", de: "hautanalyse", fr: "analyse-peau" };
-  const ctaUrl = `${baseUrl}/${locale}/${analysisSlug[locale] || analysisSlug.en}`;
+  const ctaLabel = isSv ? "Logga in och se din analys" : isEs ? "Inicia sesión y ve tu análisis" : isDe ? "Einloggen und Analyse ansehen" : isFr ? "Connectez-vous pour voir votre analyse" : "Log in to view your analysis";
+  const loginSlug = { sv: "logga-in", en: "login", es: "iniciar-sesion", de: "anmelden", fr: "connexion" };
+  const ctaUrl = `${baseUrl}/${locale}/${loginSlug[locale] || loginSlug.en}`;
 
   const accountBlockHtml = accountPassword ? `
     <div style="background:#f5f5f7;border-radius:16px;padding:20px 24px;margin-bottom:28px;border:1px solid #e6e6e6">
@@ -3650,15 +3663,26 @@ async function sendAnalysisReport(email, analysisContent, locale, accountPasswor
   const html = `
     <div style="font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Helvetica,Arial,sans-serif;max-width:560px;margin:0 auto;color:#1d1d1f;padding:0 16px">
       <div style="text-align:center;padding:32px 0 24px">
-        <img src="https://www.1753skin.com/1753.png" alt="1753 SKINCARE" width="48" height="48" style="border-radius:12px" />
+        <img src="https://www.1753skin.com/1753.png" alt="1753 SKINCARE" width="80" height="80" style="border-radius:16px;display:inline-block" />
       </div>
 
       ${accountBlockHtml}
 
       <div style="text-align:center;margin-bottom:24px">
-        <div style="display:inline-block;width:120px;height:120px;border-radius:50%;background:linear-gradient(135deg,#108474 0%,#0d6e62 100%);line-height:120px;text-align:center">
-          <span style="font-size:36px;font-weight:700;color:#fff">${parsed.score}</span>
-        </div>
+        <!--[if mso]>
+        <v:roundrect xmlns:v="urn:schemas-microsoft-com:vml" style="height:120px;width:120px;v-text-anchor:middle;" arcsize="50%" fillcolor="#108474" stroke="f">
+          <v:textbox inset="0,0,0,0"><center style="font-size:36px;font-weight:700;color:#ffffff;font-family:Arial,sans-serif;">${parsed.score}</center></v:textbox>
+        </v:roundrect>
+        <![endif]-->
+        <!--[if !mso]><!-->
+        <table role="presentation" cellpadding="0" cellspacing="0" border="0" align="center" style="margin:0 auto">
+          <tr>
+            <td align="center" valign="middle" width="120" height="120" style="width:120px;height:120px;border-radius:60px;background-color:#108474;text-align:center;vertical-align:middle;">
+              <span style="font-size:36px;font-weight:700;color:#ffffff;font-family:Arial,sans-serif;line-height:120px">${parsed.score}</span>
+            </td>
+          </tr>
+        </table>
+        <!--<![endif]-->
         <p style="font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#766a62;margin:12px 0 0">${isSv ? "Din hudpoäng" : isEs ? "Tu puntuación" : isDe ? "Dein Hautscore" : isFr ? "Votre score" : "Your skin score"}</p>
       </div>
 
