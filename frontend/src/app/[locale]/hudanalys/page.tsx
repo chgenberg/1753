@@ -680,6 +680,7 @@ export default function AnalysisPage() {
           body: JSON.stringify({
             email: userEmail,
             skinCondition: gptCondition,
+            source: "analysis",
           }),
         }).then(() => setNlSubscribed(true)).catch(() => {});
       }

@@ -1233,7 +1233,7 @@ app.post("/api/admin/orders/:id/cancel", adminAuthMiddleware, async (req, res) =
             : `Order #${order.order_number} has been cancelled`,
           html: emailWrapper(`
             <div style="text-align:center;padding:32px 0 8px">
-              <img src="https://www.1753skin.com/1753.webp" alt="1753 SKINCARE" width="48" height="48" style="border-radius:12px"/>
+              <img src="https://www.1753skin.com/1753.png" alt="1753 SKINCARE" width="48" height="48" style="border-radius:12px"/>
             </div>
             <h1 style="font-size:24px;font-weight:600;color:#1d1d1f;letter-spacing:-0.02em;margin:16px 0;">
               ${isSv ? "Din order har makulerats" : "Your order has been cancelled"}
@@ -2062,29 +2062,65 @@ app.post("/api/analysis", async (req, res) => {
             const resend = new Resend(apiKey);
             const fromAddr = process.env.EMAIL_FROM || "info@1753skin.com";
             const baseUrl = process.env.FRONTEND_URL || "https://www.1753skin.com";
-            const isSv = locale === "sv";
+
+            const setPasswordSegments = {
+              sv: "valj-losenord", en: "set-password", es: "establecer-contrasena",
+              de: "passwort-setzen", fr: "choisir-mot-de-passe"
+            };
+            const setPasswordPath = setPasswordSegments[locale] || setPasswordSegments.en;
+            const setPasswordUrl = `${baseUrl}/${locale}/${setPasswordPath}?token=${resetToken}`;
+
+            const subjects = {
+              sv: "Välkommen till 1753 SKINCARE — ditt konto",
+              en: "Welcome to 1753 SKINCARE — your account",
+              es: "Bienvenido a 1753 SKINCARE — tu cuenta",
+              de: "Willkommen bei 1753 SKINCARE — dein Konto",
+              fr: "Bienvenue chez 1753 SKINCARE — votre compte"
+            };
+            const greetings = {
+              sv: `Hej ${existingUser.name},`, en: `Hi ${existingUser.name},`,
+              es: `Hola ${existingUser.name},`, de: `Hallo ${existingUser.name},`,
+              fr: `Bonjour ${existingUser.name},`
+            };
+            const bodyTexts = {
+              sv: "Vi har skapat ett konto åt dig baserat på din hudanalys. Här kan du se dina resultat, följa din hudresa och göra nya analyser varje månad.",
+              en: "We've created an account for you based on your skin analysis. Here you can view your results, track your skin journey and run new analyses every month.",
+              es: "Hemos creado una cuenta para ti basada en tu análisis de piel. Aquí puedes ver tus resultados, seguir tu viaje cutáneo y hacer nuevos análisis cada mes.",
+              de: "Wir haben ein Konto für dich basierend auf deiner Hautanalyse erstellt. Hier kannst du deine Ergebnisse einsehen, deine Hautreise verfolgen und jeden Monat neue Analysen durchführen.",
+              fr: "Nous avons créé un compte pour vous basé sur votre analyse cutanée. Ici, vous pouvez consulter vos résultats, suivre votre parcours cutané et effectuer de nouvelles analyses chaque mois."
+            };
+            const btnTexts = {
+              sv: "Sätt ditt lösenord", en: "Set your password",
+              es: "Establece tu contraseña", de: "Passwort festlegen",
+              fr: "Définir votre mot de passe"
+            };
+            const expiryTexts = {
+              sv: "Länken är giltig i 7 dagar.", en: "The link is valid for 7 days.",
+              es: "El enlace es válido durante 7 días.", de: "Der Link ist 7 Tage gültig.",
+              fr: "Le lien est valide pendant 7 jours."
+            };
+
+            const l = locale || "sv";
 
             await resend.emails.send({
               from: `1753 SKINCARE <${fromAddr}>`,
               to: email,
-              subject: isSv ? "Välkommen till 1753 SKINCARE — ditt konto" : "Welcome to 1753 SKINCARE — your account",
+              subject: subjects[l] || subjects.en,
               html: `
                 <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;max-width:520px;margin:0 auto;color:#1d1d1f">
-                  <h2 style="font-size:20px;margin-bottom:8px">${isSv ? `Hej ${existingUser.name},` : `Hi ${existingUser.name},`}</h2>
-                  <p style="color:#515151;line-height:1.6">${isSv
-                    ? "Vi har skapat ett konto åt dig baserat på din hudanalys. Här kan du se dina resultat, följa din hudresa och göra nya analyser varje månad."
-                    : "We've created an account for you based on your skin analysis. Here you can view your results, track your skin journey and run new analyses every month."}</p>
+                  <h2 style="font-size:20px;margin-bottom:8px">${greetings[l] || greetings.en}</h2>
+                  <p style="color:#515151;line-height:1.6">${bodyTexts[l] || bodyTexts.en}</p>
                   <p style="margin-top:20px">
-                    <a href="${baseUrl}/${locale}/mitt-konto?reset=${resetToken}" style="display:inline-block;background:#108474;color:#fff;padding:12px 28px;border-radius:980px;text-decoration:none;font-weight:600;font-size:14px">${isSv ? "Sätt ditt lösenord" : "Set your password"}</a>
+                    <a href="${setPasswordUrl}" style="display:inline-block;background:#108474;color:#fff;padding:12px 28px;border-radius:980px;text-decoration:none;font-weight:600;font-size:14px">${btnTexts[l] || btnTexts.en}</a>
                   </p>
-                  <p style="margin-top:16px;color:#766a62;font-size:12px">${isSv ? "Länken är giltig i 7 dagar." : "The link is valid for 7 days."}</p>
+                  <p style="margin-top:16px;color:#766a62;font-size:12px">${expiryTexts[l] || expiryTexts.en}</p>
                   <div style="margin-top:32px;padding-top:16px;border-top:1px solid #e6e6e6;text-align:center">
                     <p style="font-size:11px;color:#766a62">1753 SKINCARE<br><a href="${baseUrl}" style="color:#108474">www.1753skin.com</a></p>
                   </div>
                 </div>
               `
             });
-            console.log(`[Analysis] Welcome email sent to ${email}`);
+            console.log(`[Analysis] Welcome email sent to ${email} (locale: ${l}, url: ${setPasswordUrl})`);
           }
         }
         userId = existingUser.id;
@@ -2757,7 +2793,7 @@ app.post("/api/orders/create", async (req, res) => {
         checkoutUserId = newUser.id;
         console.log(`[Checkout] Account created for ${customer.email}, reset token generated`);
 
-        sendPasswordSetupEmail(customer.email, customer.name, resetToken).catch(err => {
+        sendPasswordSetupEmail(customer.email, customer.name, resetToken, locale).catch(err => {
           console.error("[Checkout] Password email error:", err.message);
         });
       } catch (err) {
@@ -3422,7 +3458,7 @@ async function sendOrderConfirmation(order, items) {
     html: `
       <div style="font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Helvetica,Arial,sans-serif;max-width:560px;margin:0 auto;color:#1d1d1f;padding:0 16px">
         <div style="text-align:center;padding:32px 0 8px">
-          <img src="https://www.1753skin.com/1753.webp" alt="1753 SKINCARE" width="48" height="48" style="border-radius:12px"/>
+          <img src="https://www.1753skin.com/1753.png" alt="1753 SKINCARE" width="48" height="48" style="border-radius:12px"/>
         </div>
         <div style="text-align:center;padding:16px 0 24px">
           <h1 style="font-size:24px;font-weight:700;margin:0;letter-spacing:-0.02em">${en ? "Thank you for your order!" : "Tack för din beställning!"}</h1>
@@ -3570,7 +3606,7 @@ async function sendAnalysisReport(email, analysisContent, locale) {
   const html = `
     <div style="font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Helvetica,Arial,sans-serif;max-width:560px;margin:0 auto;color:#1d1d1f;padding:0 16px">
       <div style="text-align:center;padding:32px 0 24px">
-        <img src="${baseUrl}/logo.png" alt="1753 SKINCARE" style="height:32px" />
+        <img src="https://www.1753skin.com/1753.png" alt="1753 SKINCARE" width="48" height="48" style="border-radius:12px" />
       </div>
 
       <div style="text-align:center;margin-bottom:24px">
@@ -3685,7 +3721,7 @@ async function sendShippingConfirmation(order, items, trackingNumber, trackingUr
     html: `
       <div style="font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Helvetica,Arial,sans-serif;max-width:560px;margin:0 auto;color:#1d1d1f;padding:0 16px">
         <div style="text-align:center;padding:32px 0 8px">
-          <img src="https://www.1753skin.com/1753.webp" alt="1753 SKINCARE" width="48" height="48" style="border-radius:12px"/>
+          <img src="https://www.1753skin.com/1753.png" alt="1753 SKINCARE" width="48" height="48" style="border-radius:12px"/>
         </div>
         <div style="text-align:center;padding:16px 0 24px">
           <h1 style="font-size:24px;font-weight:700;margin:0;letter-spacing:-0.02em">${en ? "Your order is on its way!" : "Din order är på väg!"}</h1>
@@ -3811,7 +3847,7 @@ async function sendSubscriptionChangeEmail(sub, action, details) {
     html: `
       <div style="font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Helvetica,Arial,sans-serif;max-width:560px;margin:0 auto;color:#1d1d1f;padding:0 16px">
         <div style="text-align:center;padding:32px 0 8px">
-          <img src="https://www.1753skin.com/1753.webp" alt="1753 SKINCARE" width="48" height="48" style="border-radius:12px"/>
+          <img src="https://www.1753skin.com/1753.png" alt="1753 SKINCARE" width="48" height="48" style="border-radius:12px"/>
         </div>
         <div style="text-align:center;padding:16px 0 24px">
           <h1 style="font-size:24px;font-weight:700;margin:0;letter-spacing:-0.02em">${t.heading}</h1>
@@ -3852,7 +3888,7 @@ async function sendSubscriptionChangeEmail(sub, action, details) {
 
 // ---- PASSWORD SETUP EMAIL ----
 
-async function sendPasswordSetupEmail(email, name, resetToken) {
+async function sendPasswordSetupEmail(email, name, resetToken, locale) {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) {
     console.warn("[Email] RESEND_API_KEY not set – password setup email NOT sent");
@@ -3863,41 +3899,78 @@ async function sendPasswordSetupEmail(email, name, resetToken) {
   const resend = new Resend(apiKey);
   const fromEmail = process.env.EMAIL_FROM || "noreply@1753skin.com";
   const baseUrl = process.env.FRONTEND_URL || "https://www.1753skin.com";
-  const resetUrl = `${baseUrl}/sv/valj-losenord?token=${resetToken}`;
-  const firstName = (name || "").split(" ")[0] || "du";
+  const l = locale || "sv";
+
+  const setPasswordSegments = {
+    sv: "valj-losenord", en: "set-password", es: "establecer-contrasena",
+    de: "passwort-setzen", fr: "choisir-mot-de-passe"
+  };
+  const resetUrl = `${baseUrl}/${l}/${setPasswordSegments[l] || setPasswordSegments.en}?token=${resetToken}`;
+  const firstName = (name || "").split(" ")[0] || (l === "sv" ? "du" : "there");
+
+  const subjects = {
+    sv: "Välkommen till 1753 SKINCARE – Välj ditt lösenord",
+    en: "Welcome to 1753 SKINCARE – Set your password",
+    es: "Bienvenido a 1753 SKINCARE – Establece tu contraseña",
+    de: "Willkommen bei 1753 SKINCARE – Passwort festlegen",
+    fr: "Bienvenue chez 1753 SKINCARE – Définir votre mot de passe"
+  };
+  const greetings = {
+    sv: `Välkommen, ${firstName}!`, en: `Welcome, ${firstName}!`,
+    es: `Bienvenido/a, ${firstName}!`, de: `Willkommen, ${firstName}!`,
+    fr: `Bienvenue, ${firstName} !`
+  };
+  const bodyTexts = {
+    sv: "Vi har skapat ett konto åt dig i vårt lojalitetsprogram. Du tjänar poäng på varje köp och får tillgång till exklusiva förmåner och rabatter.",
+    en: "We've created an account for you in our loyalty programme. You earn points on every purchase and get access to exclusive perks and discounts.",
+    es: "Hemos creado una cuenta para ti en nuestro programa de fidelización. Ganas puntos en cada compra y accedes a ventajas y descuentos exclusivos.",
+    de: "Wir haben ein Konto für dich in unserem Treueprogramm erstellt. Du sammelst Punkte bei jedem Einkauf und erhältst Zugang zu exklusiven Vorteilen und Rabatten.",
+    fr: "Nous avons créé un compte pour vous dans notre programme de fidélité. Vous gagnez des points à chaque achat et accédez à des avantages et réductions exclusifs."
+  };
+  const ctaTexts = {
+    sv: "Klicka på knappen nedan för att välja ditt lösenord och aktivera ditt konto:",
+    en: "Click the button below to set your password and activate your account:",
+    es: "Haz clic en el botón de abajo para establecer tu contraseña y activar tu cuenta:",
+    de: "Klicke auf den Button unten, um dein Passwort festzulegen und dein Konto zu aktivieren:",
+    fr: "Cliquez sur le bouton ci-dessous pour définir votre mot de passe et activer votre compte :"
+  };
+  const btnTexts = {
+    sv: "Välj lösenord", en: "Set password",
+    es: "Establecer contraseña", de: "Passwort festlegen",
+    fr: "Définir le mot de passe"
+  };
+  const expiryTexts = {
+    sv: "Länken är giltig i 72 timmar. Om den har gått ut kan du alltid begära en ny via inloggningssidan.",
+    en: "The link is valid for 72 hours. If it has expired, you can request a new one from the login page.",
+    es: "El enlace es válido durante 72 horas. Si ha expirado, puedes solicitar uno nuevo desde la página de inicio de sesión.",
+    de: "Der Link ist 72 Stunden gültig. Falls er abgelaufen ist, kannst du über die Anmeldeseite einen neuen anfordern.",
+    fr: "Le lien est valide pendant 72 heures. S'il a expiré, vous pouvez en demander un nouveau depuis la page de connexion."
+  };
 
   await resend.emails.send({
     from: fromEmail,
     to: email,
-    subject: "Välkommen till 1753 SKINCARE – Välj ditt lösenord",
+    subject: subjects[l] || subjects.en,
     html: `
       <div style="font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Helvetica,Arial,sans-serif;max-width:560px;margin:0 auto;color:#1d1d1f;padding:0 16px">
         <div style="text-align:center;padding:32px 0 8px">
-          <img src="https://www.1753skin.com/1753.webp" alt="1753 SKINCARE" width="48" height="48" style="border-radius:12px"/>
+          <img src="https://www.1753skin.com/1753.png" alt="1753 SKINCARE" width="48" height="48" style="border-radius:12px"/>
         </div>
         <div style="text-align:center;padding:16px 0 24px">
-          <h1 style="font-size:24px;font-weight:700;margin:0;letter-spacing:-0.02em">Välkommen, ${firstName}!</h1>
+          <h1 style="font-size:24px;font-weight:700;margin:0;letter-spacing:-0.02em">${greetings[l] || greetings.en}</h1>
         </div>
-        <p style="font-size:15px;line-height:1.7;color:#515151">
-          Vi har skapat ett konto åt dig i vårt lojalitetsprogram. Du tjänar poäng på varje köp
-          och får tillgång till exklusiva förmåner och rabatter.
-        </p>
-        <p style="font-size:15px;line-height:1.7;color:#515151">
-          Klicka på knappen nedan för att välja ditt lösenord och aktivera ditt konto:
-        </p>
+        <p style="font-size:15px;line-height:1.7;color:#515151">${bodyTexts[l] || bodyTexts.en}</p>
+        <p style="font-size:15px;line-height:1.7;color:#515151">${ctaTexts[l] || ctaTexts.en}</p>
         <div style="text-align:center;margin:28px 0">
           <a href="${resetUrl}"
              style="display:inline-block;padding:14px 32px;background:#108474;color:#fff;font-size:15px;font-weight:600;border-radius:980px;text-decoration:none">
-            Välj lösenord
+            ${btnTexts[l] || btnTexts.en}
           </a>
         </div>
-        <p style="font-size:13px;color:#766a62;line-height:1.7">
-          Länken är giltig i 72 timmar. Om den har gått ut kan du alltid begära en ny
-          via inloggningssidan.
-        </p>
+        <p style="font-size:13px;color:#766a62;line-height:1.7">${expiryTexts[l] || expiryTexts.en}</p>
         <div style="margin-top:40px;padding-top:24px;border-top:1px solid #e6e6e6;text-align:center">
           <p style="font-size:12px;color:#766a62;line-height:1.6;margin:0">
-            1753 SKINCARE – Holistisk hudvård med CBD och CBG<br>
+            1753 SKINCARE<br>
             <a href="https://www.1753skin.com" style="color:#108474">www.1753skin.com</a>
           </p>
         </div>
@@ -3905,7 +3978,7 @@ async function sendPasswordSetupEmail(email, name, resetToken) {
     `
   });
 
-  console.log(`[Email] Password setup email sent to ${email}`);
+  console.log(`[Email] Password setup email sent to ${email} (locale: ${l})`);
   return { sent: true };
 }
 
@@ -4409,13 +4482,112 @@ app.post("/api/auth/set-password", async (req, res) => {
   }
 });
 
+app.post("/api/auth/forgot-password", async (req, res) => {
+  try {
+    const { email, locale } = req.body;
+    if (!email || !email.includes("@")) {
+      return res.status(400).json({ message: "Ange en giltig e-postadress" });
+    }
+
+    const clientIp = req.ip || req.connection.remoteAddress;
+    if (!checkRateLimit(clientIp, "forgot-pw", 5)) {
+      return res.status(429).json({ message: "För många försök. Vänta en stund." });
+    }
+
+    const user = await db.findUserByEmail(email.toLowerCase().trim());
+    if (!user) {
+      // Don't reveal whether the account exists
+      return res.json({ ok: true });
+    }
+
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    await db.pool.query(
+      "UPDATE users SET password_reset_token = $1, password_reset_expires = NOW() + INTERVAL '1 hour' WHERE id = $2",
+      [resetToken, user.id]
+    );
+
+    const apiKey = process.env.RESEND_API_KEY;
+    if (apiKey) {
+      const { Resend } = require("resend");
+      const resend = new Resend(apiKey);
+      const fromAddr = process.env.EMAIL_FROM || "info@1753skin.com";
+      const baseUrl = process.env.FRONTEND_URL || "https://www.1753skin.com";
+      const l = locale || "sv";
+
+      const setPasswordSegments = {
+        sv: "valj-losenord", en: "set-password", es: "establecer-contrasena",
+        de: "passwort-setzen", fr: "choisir-mot-de-passe"
+      };
+      const resetUrl = `${baseUrl}/${l}/${setPasswordSegments[l] || setPasswordSegments.en}?token=${resetToken}`;
+
+      const subjects = {
+        sv: "Återställ ditt lösenord — 1753 SKINCARE",
+        en: "Reset your password — 1753 SKINCARE",
+        es: "Restablece tu contraseña — 1753 SKINCARE",
+        de: "Passwort zurücksetzen — 1753 SKINCARE",
+        fr: "Réinitialisez votre mot de passe — 1753 SKINCARE"
+      };
+      const greetings = {
+        sv: `Hej ${user.name || ""},`, en: `Hi ${user.name || ""},`,
+        es: `Hola ${user.name || ""},`, de: `Hallo ${user.name || ""},`,
+        fr: `Bonjour ${user.name || ""},`
+      };
+      const bodyTexts = {
+        sv: "Vi fick en begäran om att återställa ditt lösenord. Klicka på knappen nedan för att välja ett nytt lösenord. Om du inte begärde detta kan du ignorera detta meddelande.",
+        en: "We received a request to reset your password. Click the button below to choose a new password. If you didn't request this, you can safely ignore this message.",
+        es: "Recibimos una solicitud para restablecer tu contraseña. Haz clic en el botón de abajo para elegir una nueva contraseña. Si no solicitaste esto, puedes ignorar este mensaje.",
+        de: "Wir haben eine Anfrage zum Zurücksetzen deines Passworts erhalten. Klicke auf den Button unten, um ein neues Passwort zu wählen. Wenn du dies nicht angefordert hast, kannst du diese Nachricht ignorieren.",
+        fr: "Nous avons reçu une demande de réinitialisation de votre mot de passe. Cliquez sur le bouton ci-dessous pour choisir un nouveau mot de passe. Si vous n'avez pas fait cette demande, ignorez ce message."
+      };
+      const btnTexts = {
+        sv: "Välj nytt lösenord", en: "Choose new password",
+        es: "Elegir nueva contraseña", de: "Neues Passwort wählen",
+        fr: "Choisir un nouveau mot de passe"
+      };
+      const expiryTexts = {
+        sv: "Länken är giltig i 1 timme.", en: "The link is valid for 1 hour.",
+        es: "El enlace es válido durante 1 hora.", de: "Der Link ist 1 Stunde gültig.",
+        fr: "Le lien est valide pendant 1 heure."
+      };
+
+      await resend.emails.send({
+        from: `1753 SKINCARE <${fromAddr}>`,
+        to: user.email,
+        subject: subjects[l] || subjects.en,
+        html: `
+          <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;max-width:520px;margin:0 auto;color:#1d1d1f">
+            <div style="text-align:center;padding:32px 0 8px">
+              <img src="https://www.1753skin.com/1753.png" alt="1753 SKINCARE" width="48" height="48" style="border-radius:12px"/>
+            </div>
+            <h2 style="font-size:20px;margin-bottom:8px">${greetings[l] || greetings.en}</h2>
+            <p style="color:#515151;line-height:1.6">${bodyTexts[l] || bodyTexts.en}</p>
+            <p style="margin-top:20px;text-align:center">
+              <a href="${resetUrl}" style="display:inline-block;background:#108474;color:#fff;padding:14px 32px;border-radius:980px;text-decoration:none;font-weight:600;font-size:14px">${btnTexts[l] || btnTexts.en}</a>
+            </p>
+            <p style="margin-top:16px;color:#766a62;font-size:12px;text-align:center">${expiryTexts[l] || expiryTexts.en}</p>
+            <div style="margin-top:32px;padding-top:16px;border-top:1px solid #e6e6e6;text-align:center">
+              <p style="font-size:11px;color:#766a62">1753 SKINCARE<br><a href="${baseUrl}" style="color:#108474">www.1753skin.com</a></p>
+            </div>
+          </div>
+        `
+      });
+      console.log(`[Auth] Password reset email sent to ${user.email} (locale: ${l})`);
+    }
+
+    res.json({ ok: true });
+  } catch (err) {
+    console.error("[Auth] Forgot password error:", err);
+    res.status(500).json({ message: "Något gick fel. Försök igen." });
+  }
+});
+
 // ---- EMAIL TEMPLATES (shared style) ----
 
 function emailWrapper(content, unsubscribeUrl) {
   return `
   <div style="font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Helvetica,Arial,sans-serif;max-width:560px;margin:0 auto;color:#1d1d1f;padding:0 16px">
     <div style="text-align:center;padding:32px 0 8px">
-      <img src="https://www.1753skin.com/1753.webp" alt="1753 SKINCARE" width="48" height="48" style="border-radius:12px"/>
+      <img src="https://www.1753skin.com/1753.png" alt="1753 SKINCARE" width="48" height="48" style="border-radius:12px"/>
     </div>
     ${content}
     <div style="margin-top:40px;padding-top:24px;border-top:1px solid #e6e6e6;text-align:center">
@@ -4931,7 +5103,7 @@ app.get("/api/recommendations", authMiddleware, async (req, res) => {
 
 app.post("/api/newsletter/subscribe", async (req, res) => {
   try {
-    const { email, firstName, skinCondition } = req.body;
+    const { email, firstName, skinCondition, source } = req.body;
     if (!email || !email.includes("@")) {
       return res.status(400).json({ message: "Ange en giltig e-postadress" });
     }
@@ -4943,7 +5115,7 @@ app.post("/api/newsletter/subscribe", async (req, res) => {
 
     const token = crypto.randomBytes(32).toString("hex");
     const subscriber = await db.createSubscriber({
-      email, firstName: firstName || "", source: "footer", unsubscribeToken: token
+      email, firstName: firstName || "", source: source || "footer", unsubscribeToken: token
     });
 
     if (skinCondition) {
