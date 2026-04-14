@@ -117,9 +117,39 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
   }, [stopCamera]);
 
   const handleFileUpload = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement>) => {
+    async (e: React.ChangeEvent<HTMLInputElement>) => {
       const file = e.target.files?.[0];
       if (!file) return;
+
+      const isHeic =
+        file.type === "image/heic" ||
+        file.type === "image/heif" ||
+        /\.hei[cf]$/i.test(file.name);
+
+      let blob: Blob = file;
+      if (isHeic) {
+        try {
+          const heic2any = (await import("heic2any")).default;
+          const converted = await heic2any({
+            blob: file,
+            toType: "image/jpeg",
+            quality: 0.92,
+          });
+          blob = Array.isArray(converted) ? converted[0] : converted;
+        } catch {
+          setError(
+            tx(
+              locale,
+              "Kunde inte konvertera HEIC-bilden. Prova att ta ett nytt foto direkt i appen.",
+              "Could not convert HEIC image. Try taking a new photo directly in the app.",
+              "No se pudo convertir la imagen HEIC. Intenta tomar una nueva foto directamente.",
+              "HEIC-Bild konnte nicht konvertiert werden. Versuche ein neues Foto direkt aufzunehmen.",
+              "Impossible de convertir l'image HEIC. Essayez de prendre une nouvelle photo."
+            )
+          );
+          return;
+        }
+      }
 
       const reader = new FileReader();
       reader.onload = () => {
@@ -127,18 +157,42 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
         img.onload = () => {
           const canvas = canvasRef.current;
           if (!canvas) return;
-          canvas.width = img.naturalWidth;
-          canvas.height = img.naturalHeight;
+
+          const MAX_DIM = 2048;
+          let w = img.naturalWidth;
+          let h = img.naturalHeight;
+          if (w > MAX_DIM || h > MAX_DIM) {
+            const scale = MAX_DIM / Math.max(w, h);
+            w = Math.round(w * scale);
+            h = Math.round(h * scale);
+          }
+
+          canvas.width = w;
+          canvas.height = h;
           const ctx = canvas.getContext("2d")!;
-          ctx.drawImage(img, 0, 0);
-          setImageSrc(reader.result as string);
+          ctx.drawImage(img, 0, 0, w, h);
+
+          const jpegDataUrl = canvas.toDataURL("image/jpeg", 0.92);
+          setImageSrc(jpegDataUrl);
           setStep("captured");
+        };
+        img.onerror = () => {
+          setError(
+            tx(
+              locale,
+              "Bilden kunde inte laddas. Prova ett annat format (JPEG eller PNG).",
+              "Image could not be loaded. Try another format (JPEG or PNG).",
+              "La imagen no se pudo cargar. Prueba otro formato (JPEG o PNG).",
+              "Das Bild konnte nicht geladen werden. Versuche ein anderes Format (JPEG oder PNG).",
+              "L'image n'a pas pu être chargée. Essayez un autre format (JPEG ou PNG)."
+            )
+          );
         };
         img.src = reader.result as string;
       };
-      reader.readAsDataURL(file);
+      reader.readAsDataURL(blob);
     },
-    []
+    [locale]
   );
 
   const runAnalysis = useCallback(async () => {
@@ -324,8 +378,7 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
       <input
         ref={fileRef}
         type="file"
-        accept="image/*"
-        capture="user"
+        accept="image/*,.heic,.heif"
         className="hidden"
         onChange={handleFileUpload}
       />
