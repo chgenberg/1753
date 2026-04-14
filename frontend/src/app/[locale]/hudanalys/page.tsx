@@ -243,7 +243,7 @@ function ChipSelect({
           >
             {Icon && <Icon className="h-4 w-4" />}
             {opt.label}
-            {active && <Check className="h-3.5 w-3.5" />}
+            <Check className={cn("h-3.5 w-3.5 transition-opacity duration-200", active ? "opacity-100" : "opacity-0")} />
           </button>
         );
       })}
@@ -331,7 +331,7 @@ function AnalyzingProgress({ locale }: { locale: string }) {
   const steps = ANALYSIS_STEPS_MAP[locale] || ANALYSIS_STEPS_EN;
 
   useEffect(() => {
-    const totalDuration = 47000;
+    const totalDuration = 92000;
     const interval = 50;
     let elapsed = 0;
 

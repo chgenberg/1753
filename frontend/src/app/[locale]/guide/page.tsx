@@ -172,7 +172,7 @@ export default async function GuidePage({ params }: Props) {
             </h2>
             <p className="mt-1 text-sm text-[#515151]">
               {tx(
-                "Var gratis AI-hudanalys ger dig 15 hudmetriker, estimerad hudalder och en personlig rutin pa 60 sekunder.",
+                "Vår gratis AI-hudanalys ger dig 15 hudmetriker, estimerad hudålder och en personlig rutin på 60 sekunder.",
                 "Our free AI skin analysis gives you 15 skin metrics, estimated skin age and a personal routine in 60 seconds.",
                 "Nuestro analisis de piel gratuito te da 15 metricas, edad estimada de la piel y una rutina personalizada en 60 segundos.",
                 "Unsere kostenlose KI-Hautanalyse liefert 15 Hautmetriken, geschatztes Hautalter und eine personliche Routine in 60 Sekunden.",

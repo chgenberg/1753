@@ -74,9 +74,9 @@ const bundle = {
     whySub: "Vi tror på färre produkter, bättre ingredienser och ärlig hudvård.",
     readMore: "Läs mer",
     closeModalAria: "Stäng",
-    ctaAnalysisTitle: "Osaker pa vad din hud behover?",
+    ctaAnalysisTitle: "Osäker på vad din hud behöver?",
     ctaAnalysisSub:
-      "Fa 15 vetenskapliga hudmetriker, estimerad hudalder och en personlig rutin – pa under 60 sekunder. Gratis och anonymt.",
+      "Få 15 vetenskapliga hudmetriker, estimerad hudålder och en personlig rutin – på under 60 sekunder. Gratis och anonymt.",
     ctaAnalysisButton: "Starta hudanalys",
     features: [
       {
@@ -597,10 +597,10 @@ const bundle = {
     tooShort: "L\u00f6senordet m\u00e5ste vara minst 6 tecken.",
   },
   analysisLayoutSeo: {
-    title: "Hudanalys – 15 Metriker och Hudalder",
-    description: "Gratis AI-hudanalys med 15 hudmetriker, estimerad hudalder, radardiagram och personlig rutin. MediaPipe-precision i 12 ansiktszoner.",
-    ogTitle: "AI Hudanalys – 15 Metriker, Hudalder, Radardiagram | 1753 SKINCARE",
-    ogDescription: "Fa 15 vetenskapliga hudmetriker, estimerad hudalder och personliga rekommendationer pa under 60 sekunder. Helt gratis.",
+    title: "Hudanalys – 15 Metriker och Hudålder",
+    description: "Gratis AI-hudanalys med 15 hudmetriker, estimerad hudålder, radardiagram och personlig rutin. MediaPipe-precision i 12 ansiktszoner.",
+    ogTitle: "AI Hudanalys – 15 Metriker, Hudålder, Radardiagram | 1753 SKINCARE",
+    ogDescription: "Få 15 vetenskapliga hudmetriker, estimerad hudålder och personliga rekommendationer på under 60 sekunder. Helt gratis.",
   },
   accountDash: {
     relativeToday: "Idag",

@@ -1754,15 +1754,15 @@ Svara ENBART med ett JSON-block (inget annat). JSON-blocket ska vara markerat me
 {
   "score": "<BERÄKNA 0-100 baserat på kundens svar: hudtyp, besvär, rutin, livsstil. 90+ = utmärkt hud+vanor, 70-89 = bra grund, 50-69 = utrymme för förbättring, <50 = behöver uppmärksamhet. Kopiera ALDRIG exempelvärden.>",
   "scoreLabel": "<Kort etikett som sammanfattar poängen, t.ex. 'Bra grund att bygga vidare på' eller 'Stark hudbarriär, livsstil kan förbättras'>",
-  "summary": "2-3 meningars personlig sammanfattning av hudens tillstånd",
+  "summary": "4-6 meningar som sammanfattar hudens tillstånd, styrkor, problemområden och vad som bör prioriteras. Var specifik och personlig – referera till kundens svar och vad du ser i bilden.",
   "skinAnalysis": {
-    "overview": "Utförlig beskrivning (250-400 ord) av kundens hudtillstånd. Beskriv vad du ser/förstår baserat på quiz-svar och eventuell skanningsdata. Förklara hur hudtyp, besvär och livsstil hänger ihop. Koppla till mikrobiom och ECS. Var specifik – referera till kundens egna svar. Skriv som löptext med stycken (använd \\n\\n för styckebrytning).",
-    "strengths": ["Specifik styrka 1", "Specifik styrka 2"],
+    "overview": "Utförlig beskrivning (400-600 ord) av kundens hudtillstånd. Beskriv vad du ser/förstår baserat på quiz-svar och eventuell skanningsdata. Förklara hur hudtyp, besvär och livsstil hänger ihop. Koppla till mikrobiom och ECS. Var specifik – referera till kundens egna svar. Skriv som löptext med stycken (använd \\n\\n för styckebrytning). Ge utförliga förklaringar, inte bara konstateranden.",
+    "strengths": ["Specifik styrka med kort förklaring (1-2 meningar)", "Ytterligare styrka"],
     "concerns": [
-      { "issue": "Specifikt problem med kort förklaring", "severity": "mild | moderate | severe" }
+      { "issue": "Specifikt problem med utförlig förklaring (2-3 meningar) om orsak och hur det påverkar huden", "severity": "mild | moderate | severe" }
     ],
-    "microbiome": "Kort analys (2-3 meningar) av hur kundens livsstil och rutin påverkar mikrobiomets balans",
-    "ecs": "Kort analys (2-3 meningar) av hur ECS-aktivitet relaterar till kundens hudtillstånd"
+    "microbiome": "Analys (4-5 meningar) av hur kundens livsstil och rutin påverkar mikrobiomets balans. Koppla specifikt till kundens svar om kost, rengöring och produktanvändning.",
+    "ecs": "Analys (4-5 meningar) av hur ECS-aktivitet relaterar till kundens hudtillstånd. Förklara hur CBD/CBG kan stödja hudens system baserat på just denna persons besvär."
   },
   "products": [
     {
@@ -1848,10 +1848,19 @@ Svara ENBART med ett JSON-block (inget annat). JSON-blocket ska vara markerat me
 FACE ZONES: Baserat på din FULLSTÄNDIGA analys (inte bara ONNX), placera 3-8 markers på ansiktet där du identifierar specifika tillstånd eller observationer. Varje marker ska ha:
 - zone: tekniskt id (forehead, left_cheek, right_cheek, nose, chin, left_eye, right_eye)
 - label: lokaliserat namn på zonen
-- x, y: position i procent (0-100) från övre vänstra hörnet
+- x, y: position i procent (0-100) RELATIVT HELA BILDEN (övre vänstra hörnet = 0,0; nedre högra = 100,100)
 - condition: detekterat tillstånd
 - confidence: "low", "medium" eller "high"
 - description: 1-2 meningar som beskriver vad du ser i just den zonen (synlig observation, inte generell)
+
+KRITISKT FÖR x,y-POSITIONERING:
+- x och y ska peka på EXAKT den pixel i BILDEN där problemet finns.
+- Titta noga på var ansiktet FAKTISKT befinner sig i bilden. Ansiktet är INTE alltid centrerat eller fyller hela bilden.
+- Om ansiktet bara tar upp 60% av bildens höjd och börjar vid 20% uppifrån, ska pannans y-värde vara ca 25-30, INTE 15-18.
+- Om ansiktet är förskjutet till vänster, ska x-värdena vara lägre (20-40), inte centrerade (50).
+- Kontrollera: om du ritar en prick vid (x%, y%) på originalbilden – hamnar den PÅ rätt hudområde? Justera tills den gör det.
+- Vanliga misstag: att anta att ansiktet alltid börjar vid y=10 och slutar vid y=90. Titta på bilden!
+
 VIKTIGT: De flesta människor har mestadels frisk hud. Det är HELT NORMALT att de flesta zoner bedöms som "normal". Rapportera ett problem ENBART om du tydligt kan se det i bilden.
 Returnera BARA zoner som syns i bilden. Om ingen bild bifogades, returnera en tom array [].
 
@@ -1871,10 +1880,15 @@ Valfritt tillägg om relevant:
 - "the-one-i-love-ta-da" (1 795 kr) – komplett 3-produkt
 
 == LIVSSTILSRÅD ==
-Basera på kundens specifika svar om sömn, stress, kost, vatten och träning. Ge konkreta, personliga tips. Motivera vetenskapligt (kortfattat). Referera gärna till kopplingar mellan tarm-hud-axeln, ECS, mikrobiom, stress-kortisol-hud etc.
+Basera på kundens specifika svar om sömn, stress, kost, vatten och träning. Ge MINST 5 konkreta, personliga tips. Varje tip ska ha:
+- "area": kort kategori (t.ex. "Sömn", "Kost", "Stress", "Träning", "Tarmhälsa")
+- "tip": det konkreta rådet (2-3 meningar)
+- "why": vetenskaplig motivering med koppling till hud (2-3 meningar, referera till tarm-hud-axeln, ECS, mikrobiom, kortisol etc.)
+- "impact": förväntad effekt ("Hög"/"Medel"/"Låg")
+Skriv aldrig generiska råd som "drick mer vatten". Var specifik utifrån kundens svar.
 
 == RUTINFÖRSLAG ==
-Anpassa morgon- och kvällsrutin till kundens hudtyp och besvär. Varje steg ska ha en kort förklaring av VARFÖR det stöder hudens egna system.
+Anpassa morgon- och kvällsrutin till kundens hudtyp och besvär. Ge MINST 3 steg per rutin (morgon och kväll). Varje steg ska ha en utförlig förklaring av VARFÖR det stöder hudens egna system (2-3 meningar per steg).
 
 == PRIMARYCONDITION (KRITISKT FOR KORREKT TAGGNING) ==
 Fältet "primaryCondition" avgör hur kunden taggas i vårt system. Felaktig taggning gör att kunden får irrelevanta nyhetsbrev. VAR EXTREMT KONSERVATIV:
@@ -2171,6 +2185,7 @@ app.post("/api/analysis", async (req, res) => {
         input: [
           { role: "user", content: contentParts }
         ],
+        max_output_tokens: 16384,
         store: true
       })
     });

@@ -186,16 +186,31 @@ function ExpandableBox({
 }) {
   const [open, setOpen] = useState(defaultOpen);
   return (
-    <div className="overflow-hidden rounded-2xl border border-[#e6e6e6]/80 bg-white transition-all duration-300 hover:shadow-md hover:shadow-black/[0.03]">
+    <div className={cn(
+      "overflow-hidden rounded-2xl border bg-white transition-all duration-300",
+      open
+        ? "border-[#108474]/20 shadow-lg shadow-[#108474]/[0.04]"
+        : "border-[#e6e6e6]/80 hover:border-[#e6e6e6] hover:shadow-md hover:shadow-black/[0.03]"
+    )}>
       <button
         onClick={() => setOpen((o) => !o)}
-        className="flex w-full items-center justify-between px-5 py-4 text-left"
+        className="flex w-full items-center justify-between px-5 py-4 text-left transition-colors duration-200"
       >
-        <div className="flex items-center gap-2.5">
-          {Icon && <Icon className="h-4 w-4 text-[#108474]" />}
+        <div className="flex items-center gap-3">
+          {Icon && (
+            <div className={cn(
+              "flex h-9 w-9 items-center justify-center rounded-xl transition-colors duration-300",
+              open ? "bg-[#108474]/10" : "bg-[#f5f5f7]"
+            )}>
+              <Icon className={cn(
+                "h-4.5 w-4.5 transition-colors duration-300",
+                open ? "text-[#108474]" : "text-[#766a62]"
+              )} />
+            </div>
+          )}
           <span className="text-sm font-semibold text-[#1d1d1f]">{title}</span>
           {badge && (
-            <span className="rounded-full bg-[#108474]/10 px-2 py-0.5 text-[10px] font-bold text-[#108474]">
+            <span className="rounded-full bg-[#108474]/10 px-2.5 py-0.5 text-[10px] font-bold text-[#108474]">
               {badge}
             </span>
           )}
@@ -316,7 +331,7 @@ function ScoreRing({ score, label, skinAge, fitzpatrick, locale }: {
           {skinAge && (
             <div className="flex flex-col items-center rounded-2xl bg-[#f5f5f7] px-5 py-3 sm:items-start">
               <span className="text-[10px] font-medium uppercase tracking-widest text-[#766a62]">
-                {tx(locale, "Hudalder", "Skin age", "Edad de la piel", "Hautalter", "Âge de la peau")}
+                {tx(locale, "Hudålder", "Skin age", "Edad de la piel", "Hautalter", "Âge de la peau")}
               </span>
               <span className="text-2xl font-bold tracking-tight text-[#1d1d1f]">
                 <AnimatedNumber value={skinAge} />
@@ -389,7 +404,7 @@ function InlineProductCTA({ products, locale }: { products: ProductRec[]; locale
     <div className="rounded-2xl border border-[#108474]/15 bg-gradient-to-br from-[#108474]/[0.03] to-transparent p-5">
       <div className="flex items-center gap-2 text-xs font-bold uppercase tracking-widest text-[#108474]">
         <ShoppingBag className="h-3.5 w-3.5" />
-        {tx(locale, "Rekommenderat for dig", "Recommended for you", "Recomendado para ti", "Empfohlen für dich", "Recommandé pour vous")}
+        {tx(locale, "Rekommenderat för dig", "Recommended for you", "Recomendado para ti", "Empfohlen für dich", "Recommandé pour vous")}
       </div>
       <div className="mt-3 space-y-2.5">
         {matched.map((p) => (
@@ -429,16 +444,16 @@ const METRIC_LABELS: Record<string, { sv: string; en: string; es: string; de: st
   pigmentation: { sv: "Pigmentering", en: "Pigmentation", es: "Pigmentación", de: "Pigmentierung", fr: "Pigmentation", icon: Sun },
   redness: { sv: "Rodnad", en: "Redness", es: "Enrojecimiento", de: "Rötung", fr: "Rougeur", icon: ShieldCheck },
   texture: { sv: "Textur", en: "Texture", es: "Textura", de: "Textur", fr: "Texture", icon: Sparkles },
-  dark_circles: { sv: "Morka ringar", en: "Dark circles", es: "Ojeras", de: "Augenringe", fr: "Cernes", icon: Eye },
+  dark_circles: { sv: "Mörka ringar", en: "Dark circles", es: "Ojeras", de: "Augenringe", fr: "Cernes", icon: Eye },
   firmness: { sv: "Fasthet", en: "Firmness", es: "Firmeza", de: "Festigkeit", fr: "Fermeté", icon: TrendingUp },
   hydration: { sv: "Fukt", en: "Hydration", es: "Hidratación", de: "Hydratation", fr: "Hydratation", icon: Droplets },
   skin_tone: { sv: "Hudton", en: "Skin tone", es: "Tono de piel", de: "Hautton", fr: "Teint", icon: Sparkles },
   acne: { sv: "Akne", en: "Acne", es: "Acné", de: "Akne", fr: "Acné", icon: ShieldCheck },
-  sensitivity: { sv: "Kanslighet", en: "Sensitivity", es: "Sensibilidad", de: "Empfindlichkeit", fr: "Sensibilité", icon: ShieldCheck },
+  sensitivity: { sv: "Känslighet", en: "Sensitivity", es: "Sensibilidad", de: "Empfindlichkeit", fr: "Sensibilité", icon: ShieldCheck },
   sun_damage: { sv: "Solskador", en: "Sun damage", es: "Daño solar", de: "Sonnenschäden", fr: "Dommages solaires", icon: Sun },
   elasticity: { sv: "Elasticitet", en: "Elasticity", es: "Elasticidad", de: "Elastizität", fr: "Élasticité", icon: Zap },
   radiance: { sv: "Lyster", en: "Radiance", es: "Luminosidad", de: "Ausstrahlung", fr: "Éclat", icon: Sparkles },
-  barrier_health: { sv: "Barriar", en: "Barrier", es: "Barrera", de: "Barriere", fr: "Barrière", icon: ShieldCheck },
+  barrier_health: { sv: "Barriär", en: "Barrier", es: "Barrera", de: "Barriere", fr: "Barrière", icon: ShieldCheck },
 };
 
 const RADAR_KEYS = [
@@ -576,25 +591,39 @@ function SkinRadarChart({ metrics, locale }: { metrics: SkinMetrics; locale: str
 function FocusAreas({ entries, locale }: { entries: [string, MetricScore][]; locale: string }) {
   if (entries.length === 0) return null;
   return (
-    <div className="space-y-3">
+    <div className="space-y-4">
       <h4 className="text-center text-[11px] font-bold uppercase tracking-widest text-[#766a62]">
-        {tx(locale, "Fokusomraden", "Focus areas", "Áreas de enfoque", "Fokusgebiete", "Zones prioritaires")}
+        {tx(locale, "Fokusområden", "Focus areas", "Áreas de enfoque", "Fokusgebiete", "Zones prioritaires")}
       </h4>
-      <div className="flex flex-wrap justify-center gap-2">
+      <div className="grid gap-3 sm:grid-cols-3">
         {entries.map(([key, m]) => {
           const info = METRIC_LABELS[key];
           const label = (info as unknown as Record<string, string> | undefined)?.[locale] ?? info?.en ?? key;
           const color = metricScoreColor(m.score);
+          const pct = Math.min(100, Math.max(0, m.score));
           const Icon = info?.icon;
           return (
             <div
               key={key}
-              className="inline-flex items-center gap-2 rounded-full px-4 py-2.5 transition-transform duration-300 hover:scale-105"
-              style={{ backgroundColor: `${color}08`, border: `1.5px solid ${color}20` }}
+              className="group flex flex-col gap-2 rounded-2xl border border-[#e6e6e6]/80 bg-white p-4 transition-all duration-300 hover:shadow-lg hover:shadow-black/[0.04]"
             >
-              {Icon && <Icon className="h-3.5 w-3.5" style={{ color }} />}
-              <span className="text-xs font-semibold" style={{ color }}>{label}</span>
-              <span className="text-xs font-bold tabular-nums" style={{ color }}>{m.score}</span>
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-2">
+                  {Icon && (
+                    <div className="flex h-8 w-8 items-center justify-center rounded-xl" style={{ backgroundColor: `${color}10` }}>
+                      <Icon className="h-4 w-4" style={{ color }} />
+                    </div>
+                  )}
+                  <span className="text-xs font-semibold text-[#1d1d1f]">{label}</span>
+                </div>
+                <span className="text-xl font-bold tabular-nums" style={{ color }}>{m.score}</span>
+              </div>
+              <div className="h-1.5 w-full overflow-hidden rounded-full bg-[#f5f5f7]">
+                <div className="h-full rounded-full transition-all duration-700 ease-out" style={{ width: `${pct}%`, backgroundColor: color }} />
+              </div>
+              {m.detail && (
+                <p className="text-[11px] leading-relaxed text-[#515151]">{m.detail}</p>
+              )}
             </div>
           );
         })}
@@ -783,7 +812,7 @@ function SkinTab({ score, scoreLabel, summary, skinAge, fitzpatrick, metrics, sk
       {hasScan && !scanImageSrc && (
         <div className="flex items-center justify-center gap-2 rounded-2xl bg-[#f5f5f7] px-4 py-3 text-xs font-medium text-[#108474]">
           <ScanFace className="h-3.5 w-3.5" />
-          {tx(locale, "Inkluderar data fran din ansiktsskanning", "Includes data from your face scan", "Incluye datos de tu escaneo facial", "Enthält Daten aus deinem Gesichtsscan", "Inclut les données de votre scan facial")}
+          {tx(locale, "Inkluderar data från din ansiktsskanning", "Includes data from your face scan", "Incluye datos de tu escaneo facial", "Enthält Daten aus deinem Gesichtsscan", "Inclut les données de votre scan facial")}
         </div>
       )}
 
@@ -912,13 +941,13 @@ function ProductsTab({ products, onNextTab }: { products: ProductRec[]; onNextTa
       {/* Discount hero card */}
       <div className="overflow-hidden rounded-3xl bg-[#1d1d1f] p-6 text-center text-white sm:p-8">
         <p className="text-[11px] font-medium uppercase tracking-widest text-white/60">
-          {tx(locale, "Tack for din analys", "Thank you for your analysis", "Gracias por tu análisis", "Danke für deine Analyse", "Merci pour votre analyse")}
+          {tx(locale, "Tack för din analys", "Thank you for your analysis", "Gracias por tu análisis", "Danke für deine Analyse", "Merci pour votre analyse")}
         </p>
         <h3 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">
           {tx(locale, "15% rabatt", "15% off", "15% descuento", "15% Rabatt", "15% de réduction")}
         </h3>
         <p className="mt-1 text-sm text-white/70">
-          {tx(locale, "Pa dina rekommenderade produkter", "On your recommended products", "En tus productos recomendados", "Auf deine empfohlenen Produkte", "Sur vos produits recommandés")}
+          {tx(locale, "På dina rekommenderade produkter", "On your recommended products", "En tus productos recomendados", "Auf deine empfohlenen Produkte", "Sur vos produits recommandés")}
         </p>
 
         <div className="mx-auto mt-5 inline-flex items-center gap-3 rounded-full bg-white/10 px-5 py-2.5 backdrop-blur-sm">
@@ -948,7 +977,7 @@ function ProductsTab({ products, onNextTab }: { products: ProductRec[]; onNextTa
             ) : (
               <>
                 <Gift className="h-4 w-4" />
-                {tx(locale, `Lagg alla i varukorgen — ${formatPrice(totalAfter, locale)}`, `Add all — ${formatPrice(totalAfter, locale)}`, `Añadir todo — ${formatPrice(totalAfter, locale)}`, `Alle hinzufügen — ${formatPrice(totalAfter, locale)}`, `Tout ajouter — ${formatPrice(totalAfter, locale)}`)}
+                {tx(locale, `Lägg alla i varukorgen — ${formatPrice(totalAfter, locale)}`, `Add all — ${formatPrice(totalAfter, locale)}`, `Añadir todo — ${formatPrice(totalAfter, locale)}`, `Alle hinzufügen — ${formatPrice(totalAfter, locale)}`, `Tout ajouter — ${formatPrice(totalAfter, locale)}`)}
               </>
             )}
           </button>
@@ -963,7 +992,7 @@ function ProductsTab({ products, onNextTab }: { products: ProductRec[]; onNextTa
       {/* Products grid */}
       <div className="space-y-3">
         <p className="text-[11px] font-bold uppercase tracking-widest text-[#766a62]">
-          {tx(locale, "Utvalda for din hud", "Chosen for your skin", "Elegidos para tu piel", "Ausgewählt für deine Haut", "Choisis pour votre peau")}
+          {tx(locale, "Utvalda för din hud", "Chosen for your skin", "Elegidos para tu piel", "Ausgewählt für deine Haut", "Choisis pour votre peau")}
         </p>
 
         <div className="grid gap-5 sm:grid-cols-2">
@@ -975,7 +1004,7 @@ function ProductsTab({ products, onNextTab }: { products: ProductRec[]; onNextTa
                   <ChevronRight className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#108474]" />
                   <div>
                     <p className="text-xs font-semibold text-[#1d1d1f]">
-                      {tx(locale, "Varfor just denna", "Why this product", "Por qué este producto", "Warum dieses Produkt", "Pourquoi ce produit")}
+                      {tx(locale, "Varför just denna", "Why this product", "Por qué este producto", "Warum dieses Produkt", "Pourquoi ce produit")}
                     </p>
                     <p className="mt-1 text-[11px] leading-relaxed text-[#515151]">{p.reason}</p>
                     {p.usage && (
@@ -993,8 +1022,8 @@ function ProductsTab({ products, onNextTab }: { products: ProductRec[]; onNextTa
 
       {onNextTab && (
         <NextStepButton
-          label={tx(locale, "Dina livsstilsrad", "Your lifestyle tips", "Tus consejos de estilo de vida", "Deine Lifestyle-Tipps", "Vos conseils de vie")}
-          subtext={tx(locale, "Personliga vanor for battre hud", "Personalised habits for better skin", "Hábitos personalizados para mejor piel", "Persönliche Gewohnheiten für bessere Haut", "Habitudes personnalisées pour une meilleure peau")}
+          label={tx(locale, "Dina livsstilsråd", "Your lifestyle tips", "Tus consejos de estilo de vida", "Deine Lifestyle-Tipps", "Vos conseils de vie")}
+          subtext={tx(locale, "Personliga vanor för bättre hud", "Personalised habits for better skin", "Hábitos personalizados para mejor piel", "Persönliche Gewohnheiten für bessere Haut", "Habitudes personnalisées pour une meilleure peau")}
           onClick={onNextTab}
         />
       )}
@@ -1007,24 +1036,28 @@ function ProductsTab({ products, onNextTab }: { products: ProductRec[]; onNextTa
 /* ------------------------------------------------------------------ */
 
 const AREA_ICONS: Record<string, LucideIcon> = {
-  "Somn": Moon, "Sleep": Moon,
+  "Sömn": Moon, "Somn": Moon, "Sleep": Moon,
   "Stress": Sparkles,
   "Kost": Leaf, "Diet": Leaf,
-  "Rorelse": Sun, "Movement": Sun, "Exercise": Sun,
+  "Rörelse": Moon, "Rorelse": Sun, "Movement": Sun, "Exercise": Sun,
+  "Tarmhälsa": Leaf, "Gut health": Leaf,
+  "Vatten": Droplets, "Water": Droplets,
 };
 
 function getAreaLabel(area: string, locale: string) {
   const n = area.toLowerCase();
-  if (n === "somn" || n === "sömn" || n === "sleep") return tx(locale, "Somn", "Sleep", "Sueño", "Schlaf", "Sommeil");
+  if (n === "somn" || n === "sömn" || n === "sleep") return tx(locale, "Sömn", "Sleep", "Sueño", "Schlaf", "Sommeil");
   if (n === "kost" || n === "diet") return tx(locale, "Kost", "Diet", "Dieta", "Ernährung", "Alimentation");
-  if (n === "rorelse" || n === "rörelse" || n === "movement" || n === "exercise") return tx(locale, "Rorelse", "Exercise", "Ejercicio", "Bewegung", "Exercice");
+  if (n === "rorelse" || n === "rörelse" || n === "movement" || n === "exercise") return tx(locale, "Rörelse", "Exercise", "Ejercicio", "Bewegung", "Exercice");
+  if (n === "tarmhälsa" || n === "gut health" || n === "gut") return tx(locale, "Tarmhälsa", "Gut health", "Salud intestinal", "Darmgesundheit", "Santé intestinale");
+  if (n === "vatten" || n === "water") return tx(locale, "Vatten", "Water", "Agua", "Wasser", "Eau");
   if (n === "stress") return "Stress";
   return area;
 }
 
 function getImpactBadge(impact: string, locale: string) {
   const n = impact.toLowerCase();
-  if (n === "hog" || n === "hög" || n === "high") return { label: tx(locale, "Hog prioritet", "High priority", "Prioridad alta", "Hohe Priorität", "Priorité haute"), color: "#108474" };
+  if (n === "hog" || n === "hög" || n === "high") return { label: tx(locale, "Hög prioritet", "High priority", "Prioridad alta", "Hohe Priorität", "Priorité haute"), color: "#108474" };
   if (n === "medel" || n === "medium") return { label: tx(locale, "Medel", "Medium", "Medio", "Mittel", "Moyen"), color: "#fcb237" };
   return { label: tx(locale, "Bonus", "Lower", "Menor", "Niedriger", "Moins important"), color: "#766a62" };
 }
@@ -1081,7 +1114,7 @@ function LifestyleTab({ lifestyle, avoid, products, onNextTab }: { lifestyle: Li
       {onNextTab && (
         <NextStepButton
           label={tx(locale, "Se din rutin", "See your routine", "Ver tu rutina", "Deine Routine ansehen", "Voir votre routine")}
-          subtext={tx(locale, "Morgon- och kvallsrutin", "Morning & evening steps", "Pasos de mañana y noche", "Morgen- und Abendroutine", "Routine matin et soir")}
+          subtext={tx(locale, "Morgon- och kvällsrutin", "Morning & evening steps", "Pasos de mañana y noche", "Morgen- und Abendroutine", "Routine matin et soir")}
           onClick={onNextTab}
         />
       )}
@@ -1141,7 +1174,7 @@ function RoutineTab({ routine, routineLegacy, products }: {
               <Moon className="h-4 w-4 text-[#766a62]" />
             </div>
             <h3 className="text-lg font-bold tracking-tight text-[#1d1d1f]">
-              {tx(locale, "Kvallsrutin", "Evening routine", "Rutina nocturna", "Abendroutine", "Routine du soir")}
+              {tx(locale, "Kvällsrutin", "Evening routine", "Rutina nocturna", "Abendroutine", "Routine du soir")}
             </h3>
           </div>
           <div className="space-y-2.5">
