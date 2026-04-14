@@ -424,7 +424,7 @@ function stripJSON(content: string): string {
 }
 
 export default function AnalysisPage() {
-  const { locale, t } = useLocale();
+  const { locale, t, path } = useLocale();
   const { token, user } = useAuth();
   const a = (key: string, vars?: Record<string, string | number>) =>
     t(`analysisPage.${key}`, vars);
@@ -1558,7 +1558,7 @@ export default function AnalysisPage() {
                           `Mi piel obtuvo ${parsed.score}/100${parsed.skinAge ? ` con una edad biológica de ${parsed.skinAge} años` : ""}! Prueba gratis:`,
                           `Meine Haut hat ${parsed.score}/100 Punkte${parsed.skinAge ? ` mit einem biologischen Hautalter von ${parsed.skinAge} Jahren` : ""}! Teste kostenlos:`,
                           `Ma peau a obtenu ${parsed.score}/100${parsed.skinAge ? ` avec un âge biologique de ${parsed.skinAge} ans` : ""}! Testez gratuitement :`);
-                        const shareUrl = `https://www.1753skin.com/${locale}/hudanalys`;
+                        const shareUrl = `https://www.1753skin.com${path("skinAnalysis")}`;
                         if (navigator.share) {
                           navigator.share({ title: "1753 SKINCARE", text: shareText, url: shareUrl }).catch(() => {});
                         } else {

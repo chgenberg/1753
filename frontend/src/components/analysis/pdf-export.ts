@@ -22,18 +22,42 @@ function scoreColor(score: number): readonly [number, number, number] {
   return RED;
 }
 
-function gradeText(grade: number): string {
-  const labels: Record<number, string> = { 5: "Utmärkt", 4: "Bra", 3: "Medel", 2: "Under medel", 1: "Låg" };
-  return labels[grade] || "";
+function gradeText(grade: number, locale: string): string {
+  const labels: Record<number, Record<string, string>> = {
+    5: { sv: "Utmärkt", en: "Excellent", es: "Excelente", de: "Ausgezeichnet", fr: "Excellent" },
+    4: { sv: "Bra", en: "Good", es: "Bueno", de: "Gut", fr: "Bon" },
+    3: { sv: "Medel", en: "Average", es: "Promedio", de: "Durchschnitt", fr: "Moyen" },
+    2: { sv: "Under medel", en: "Below avg", es: "Bajo prom.", de: "Unter Durchschn.", fr: "Sous la moy." },
+    1: { sv: "Låg", en: "Low", es: "Bajo", de: "Niedrig", fr: "Faible" },
+  };
+  const entry = labels[grade];
+  if (!entry) return "";
+  return entry[locale] || entry.en || "";
 }
 
-const METRIC_NAMES: Record<string, string> = {
-  wrinkles: "Rynkor", pores: "Porer", pigmentation: "Pigmentering",
-  redness: "Rodnad", texture: "Textur", dark_circles: "Mörka ringar",
-  firmness: "Fasthet", hydration: "Fukt", skin_tone: "Hudton",
-  acne: "Akne", sensitivity: "Känslighet", sun_damage: "Solskador",
-  elasticity: "Elasticitet", radiance: "Lyster", barrier_health: "Barriär",
+const METRIC_NAMES_I18N: Record<string, Record<string, string>> = {
+  wrinkles: { sv: "Rynkor", en: "Wrinkles", es: "Arrugas", de: "Falten", fr: "Rides" },
+  pores: { sv: "Porer", en: "Pores", es: "Poros", de: "Poren", fr: "Pores" },
+  pigmentation: { sv: "Pigmentering", en: "Pigmentation", es: "Pigmentación", de: "Pigmentierung", fr: "Pigmentation" },
+  redness: { sv: "Rodnad", en: "Redness", es: "Enrojecimiento", de: "Rötung", fr: "Rougeur" },
+  texture: { sv: "Textur", en: "Texture", es: "Textura", de: "Textur", fr: "Texture" },
+  dark_circles: { sv: "Mörka ringar", en: "Dark circles", es: "Ojeras", de: "Augenringe", fr: "Cernes" },
+  firmness: { sv: "Fasthet", en: "Firmness", es: "Firmeza", de: "Festigkeit", fr: "Fermeté" },
+  hydration: { sv: "Fukt", en: "Hydration", es: "Hidratación", de: "Hydratation", fr: "Hydratation" },
+  skin_tone: { sv: "Hudton", en: "Skin tone", es: "Tono de piel", de: "Hautton", fr: "Teint" },
+  acne: { sv: "Akne", en: "Acne", es: "Acné", de: "Akne", fr: "Acné" },
+  sensitivity: { sv: "Känslighet", en: "Sensitivity", es: "Sensibilidad", de: "Empfindlichkeit", fr: "Sensibilité" },
+  sun_damage: { sv: "Solskador", en: "Sun damage", es: "Daño solar", de: "Sonnenschäden", fr: "Dommages solaires" },
+  elasticity: { sv: "Elasticitet", en: "Elasticity", es: "Elasticidad", de: "Elastizität", fr: "Élasticité" },
+  radiance: { sv: "Lyster", en: "Radiance", es: "Luminosidad", de: "Ausstrahlung", fr: "Éclat" },
+  barrier_health: { sv: "Barriär", en: "Barrier", es: "Barrera", de: "Barriere", fr: "Barrière" },
 };
+
+function metricName(key: string, locale: string): string {
+  const entry = METRIC_NAMES_I18N[key];
+  if (!entry) return key;
+  return entry[locale] || entry.en || key;
+}
 
 function drawRoundedRect(
   doc: jsPDF,
@@ -85,7 +109,8 @@ function drawScoreArc(
 function drawRadar(
   doc: jsPDF,
   cx: number, cy: number, radius: number,
-  metrics: SkinMetrics
+  metrics: SkinMetrics,
+  locale: string
 ) {
   const entries = Object.entries(metrics).filter(
     ([, v]) => v && typeof (v as MetricScore).score === "number"
@@ -145,7 +170,7 @@ function drawRadar(
     const labelR = radius + 6;
     const lx = cx + Math.cos(a) * labelR;
     const ly = cy + Math.sin(a) * labelR;
-    const name = METRIC_NAMES[key] || key;
+    const name = metricName(key, locale);
     doc.text(name, lx, ly, { align: "center", baseline: "middle" });
   });
 }
@@ -257,7 +282,7 @@ export async function generateAnalysisPDF(
         drawRoundedRect(doc, infoX, infoY, 28, 14, 3, BG);
         doc.setFontSize(5.5);
         doc.setTextColor(...BROWN);
-        doc.text("HUDÅLDER", infoX + 14, infoY + 4, { align: "center" });
+        doc.text(tx(locale, "HUDÅLDER", "SKIN AGE", "EDAD PIEL", "HAUTALTER", "ÂGE PEAU"), infoX + 14, infoY + 4, { align: "center" });
         doc.setFontSize(14);
         doc.setFont("helvetica", "bold");
         doc.setTextColor(...DARK);
@@ -325,7 +350,7 @@ export async function generateAnalysisPDF(
     y += 4;
 
     drawRoundedRect(doc, margin, y, cw, 72, 4, WHITE, [230, 230, 230]);
-    drawRadar(doc, margin + cw / 2, y + 36, 28, props.metrics);
+    drawRadar(doc, margin + cw / 2, y + 36, 28, props.metrics, locale);
     y += 76;
   }
 
@@ -365,7 +390,7 @@ export async function generateAnalysisPDF(
         doc.setFontSize(6.5);
         doc.setFont("helvetica", "bold");
         doc.setTextColor(...DARK);
-        doc.text(METRIC_NAMES[key] || key, cx + 3, cy + 5.5);
+        doc.text(metricName(key, locale), cx + 3, cy + 5.5);
 
         doc.setFontSize(12);
         doc.setFont("helvetica", "bold");
@@ -375,7 +400,7 @@ export async function generateAnalysisPDF(
         doc.setFontSize(5);
         doc.setFont("helvetica", "normal");
         doc.setTextColor(...BROWN);
-        doc.text(gradeText(m.grade), cx + cardW - 3, cy + 10, { align: "right" });
+        doc.text(gradeText(m.grade, locale), cx + cardW - 3, cy + 10, { align: "right" });
 
         drawProgressBar(doc, cx + 3, cy + 12, cardW - 6, 1.5, m.score, color);
 
@@ -530,7 +555,9 @@ export async function generateAnalysisPDF(
       doc.text(areaText.slice(0, 1), margin + 12, y + 5.5);
 
       const impactN = item.impact.toLowerCase();
-      const impactColor: [number, number, number] = impactN === "hög" || impactN === "hog" || impactN === "high" ? [...GREEN] : impactN === "medel" || impactN === "medium" ? [...GOLD] : [...BROWN];
+      const isHigh = ["hög", "hog", "high", "alta", "hoch", "haute", "élevée", "elevee"].includes(impactN);
+      const isMedium = ["medel", "medium", "media", "mittel", "moyenne", "moyen"].includes(impactN);
+      const impactColor: [number, number, number] = isHigh ? [...GREEN] : isMedium ? [...GOLD] : [...BROWN];
       doc.setFontSize(5);
       doc.setTextColor(impactColor[0], impactColor[1], impactColor[2]);
       doc.text(item.impact, margin + cw - 4, y + 5.5, { align: "right" });
