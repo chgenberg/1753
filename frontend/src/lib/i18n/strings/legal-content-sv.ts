@@ -11,7 +11,7 @@ export const LEGAL_TERMS_SV: LegalDoc = {
   sections: [
     {
       h: "1. Allmänt",
-      html: `<p>Dessa villkor gäller för köp av produkter via 1753skincare.com och drivs av Floranie International AB, org.nr 559266-5735, Södra Skjutbanevägen 10, 439 55 Åsa. Genom att genomföra ett köp godkänner du dessa villkor.</p>`,
+      html: `<p>Dessa villkor gäller för köp av produkter via 1753skin.com och drivs av Floranie International AB, org.nr 559266-5735, Södra Skjutbanevägen 10, 439 55 Åsa. Genom att genomföra ett köp godkänner du dessa villkor.</p>`,
     },
     {
       h: "2. Priser",

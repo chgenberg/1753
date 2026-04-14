@@ -11,7 +11,7 @@ export const LEGAL_TERMS_ES: LegalDoc = {
   sections: [
     {
       h: "1. General",
-      html: `<p>Estas condiciones se aplican a las compras realizadas a través de 1753skincare.com. El sitio web es operado por Floranie International AB, número de registro 559266-5735, Södra Skjutbanevägen 10, 439 55 Åsa, Suecia. Al completar una compra, aceptas estas condiciones.</p>`,
+      html: `<p>Estas condiciones se aplican a las compras realizadas a través de 1753skin.com. El sitio web es operado por Floranie International AB, número de registro 559266-5735, Södra Skjutbanevägen 10, 439 55 Åsa, Suecia. Al completar una compra, aceptas estas condiciones.</p>`,
     },
     {
       h: "2. Precios",

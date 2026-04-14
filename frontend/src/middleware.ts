@@ -192,6 +192,14 @@ function rewritePretty(
 }
 
 export function middleware(request: NextRequest) {
+  const host = request.headers.get("host") || "";
+  if (host.includes("1753skincare.com")) {
+    const dest = new URL(request.url);
+    dest.host = "www.1753skin.com";
+    dest.port = "";
+    return NextResponse.redirect(dest, 301);
+  }
+
   const { pathname } = request.nextUrl;
 
   if (

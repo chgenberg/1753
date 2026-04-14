@@ -11,7 +11,7 @@ export const LEGAL_TERMS_EN: LegalDoc = {
   sections: [
     {
       h: "1. General",
-      html: `<p>These terms apply to purchases made through 1753skincare.com. The site is operated by Floranie International AB, company registration number 559266-5735, Södra Skjutbanevägen 10, 439 55 Åsa, Sweden. By completing a purchase, you accept these terms.</p>`,
+      html: `<p>These terms apply to purchases made through 1753skin.com. The site is operated by Floranie International AB, company registration number 559266-5735, Södra Skjutbanevägen 10, 439 55 Åsa, Sweden. By completing a purchase, you accept these terms.</p>`,
     },
     {
       h: "2. Prices",

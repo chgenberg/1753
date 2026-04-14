@@ -105,6 +105,7 @@ export default async function LocaleLayout({
       },
     ],
     sameAs: [
+      "https://www.1753skincare.com",
       "https://www.instagram.com/1753.skincare",
     ],
   };
