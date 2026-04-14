@@ -378,7 +378,7 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
       <input
         ref={fileRef}
         type="file"
-        accept="image/*,.heic,.heif"
+        accept="image/jpeg,image/png,image/webp,image/heic,image/heif,.heic,.heif"
         className="hidden"
         onChange={handleFileUpload}
       />

@@ -640,28 +640,48 @@ export function MethodologyModal({
   );
 
   useEffect(() => {
-    if (open) {
-      document.addEventListener("keydown", handleKeyDown);
-      document.body.style.overflow = "hidden";
-    }
+    if (!open) return;
+    document.addEventListener("keydown", handleKeyDown);
+
+    const scrollY = window.scrollY;
+    document.body.style.position = "fixed";
+    document.body.style.top = `-${scrollY}px`;
+    document.body.style.left = "0";
+    document.body.style.right = "0";
+    document.body.style.overflow = "hidden";
+
     return () => {
       document.removeEventListener("keydown", handleKeyDown);
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.left = "";
+      document.body.style.right = "";
       document.body.style.overflow = "";
+      window.scrollTo(0, scrollY);
     };
   }, [open, handleKeyDown]);
 
   if (!open) return null;
 
   return (
-    <div className="fixed inset-0 z-[100] flex items-end justify-center sm:items-center">
+    <div
+      className="fixed inset-0 z-[100] flex items-end justify-center sm:items-center"
+      role="dialog"
+      aria-modal="true"
+    >
       <div
         className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-300"
         onClick={onClose}
         aria-hidden
       />
 
-      <div className="relative flex max-h-[92vh] w-full max-w-2xl flex-col overflow-hidden rounded-t-3xl bg-white shadow-2xl sm:max-h-[85vh] sm:rounded-3xl">
-        <div className="flex items-center justify-between border-b border-[#e6e6e6]/60 px-5 py-4 sm:px-6">
+      <div className="relative flex h-[100dvh] w-full max-w-2xl flex-col bg-white shadow-2xl sm:h-auto sm:max-h-[85vh] sm:rounded-3xl">
+        {/* Drag handle (mobile) */}
+        <div className="flex justify-center pb-0 pt-2 sm:hidden">
+          <div className="h-1 w-10 rounded-full bg-[#e6e6e6]" />
+        </div>
+
+        <div className="flex items-center justify-between border-b border-[#e6e6e6]/60 px-5 py-3 sm:py-4 sm:px-6">
           <div>
             <h3 className="text-[15px] font-bold text-[#1d1d1f]">
               {tx(locale, "Så fungerar din analys", "How your analysis works", "Cómo funciona tu análisis", "So funktioniert deine Analyse", "Comment fonctionne votre analyse")}
@@ -672,14 +692,14 @@ export function MethodologyModal({
           </div>
           <button
             onClick={onClose}
-            className="flex h-8 w-8 items-center justify-center rounded-full bg-[#f5f5f7] text-[#766a62] transition-colors hover:bg-[#e6e6e6] hover:text-[#1d1d1f]"
+            className="flex h-9 w-9 items-center justify-center rounded-full bg-[#f5f5f7] text-[#766a62] transition-colors hover:bg-[#e6e6e6] hover:text-[#1d1d1f] active:scale-90"
             aria-label={tx(locale, "Stäng", "Close", "Cerrar", "Schließen", "Fermer")}
           >
             <X className="h-4 w-4" />
           </button>
         </div>
 
-        <div className="shrink-0 overflow-x-auto border-b border-[#e6e6e6]/40 px-5 sm:px-6">
+        <div className="shrink-0 overflow-x-auto border-b border-[#e6e6e6]/40 px-5 sm:px-6 [-webkit-overflow-scrolling:touch]">
           <div className="flex gap-1 py-2">
             {tabs.map((tab) => {
               const active = activeTab === tab.id;
@@ -689,7 +709,7 @@ export function MethodologyModal({
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id)}
                   className={cn(
-                    "flex shrink-0 items-center gap-1.5 rounded-xl px-3 py-2 text-[11px] font-semibold transition-all duration-200",
+                    "flex shrink-0 items-center gap-1.5 rounded-xl px-3 py-2.5 text-[11px] font-semibold transition-all duration-200 active:scale-95",
                     active
                       ? "bg-[#108474]/10 text-[#108474]"
                       : "text-[#766a62] hover:bg-[#f5f5f7] hover:text-[#1d1d1f]"
@@ -703,7 +723,7 @@ export function MethodologyModal({
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-5 py-5 sm:px-6">
+        <div className="flex-1 overflow-y-auto overscroll-contain px-5 py-5 sm:px-6 [-webkit-overflow-scrolling:touch]">
           <TabContent tabId={activeTab} locale={locale} />
         </div>
       </div>

@@ -1277,9 +1277,9 @@ export function AnalysisTabs({
   return (
     <div className="space-y-6">
       {/* Sticky tab bar */}
-      <div ref={tabBarRef} className="sticky top-16 z-30 -mx-6 bg-white/80 px-6 pb-4 pt-2 backdrop-blur-xl md:-mx-10 md:px-10">
-        <div className="flex items-center justify-center gap-2">
-          <div className="inline-flex w-full max-w-md rounded-2xl border border-[#e6e6e6]/80 bg-[#f5f5f7]/80 p-1 backdrop-blur-sm">
+      <div ref={tabBarRef} className="sticky top-[64px] z-40 -mx-6 bg-white/90 px-6 pb-4 pt-2 shadow-[0_2px_12px_rgba(0,0,0,0.04)] backdrop-blur-xl md:-mx-10 md:px-10">
+        <div className="flex items-center gap-2">
+          <div className="inline-flex min-w-0 flex-1 rounded-2xl border border-[#e6e6e6]/80 bg-[#f5f5f7]/80 p-1 backdrop-blur-sm">
             {tabs.map((tab) => {
               const active = activeTab === tab.id;
               const Icon = tab.icon;
@@ -1302,11 +1302,11 @@ export function AnalysisTabs({
           </div>
           <button
             onClick={() => setMethodOpen(true)}
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-[#e6e6e6]/80 bg-[#f5f5f7]/80 text-[#766a62] backdrop-blur-sm transition-all duration-300 hover:border-[#108474]/30 hover:bg-[#108474]/10 hover:text-[#108474]"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[#e6e6e6]/80 bg-[#f5f5f7]/80 text-[#766a62] backdrop-blur-sm transition-all duration-300 hover:border-[#108474]/30 hover:bg-[#108474]/10 hover:text-[#108474] active:scale-90"
             aria-label={tx(locale, "Så fungerar analysen", "How the analysis works", "Cómo funciona el análisis", "So funktioniert die Analyse", "Comment fonctionne l'analyse")}
             title={tx(locale, "Så fungerar analysen", "How the analysis works", "Cómo funciona el análisis", "So funktioniert die Analyse", "Comment fonctionne l'analyse")}
           >
-            <HelpCircle className="h-4 w-4" />
+            <HelpCircle className="h-4.5 w-4.5" />
           </button>
         </div>
 
