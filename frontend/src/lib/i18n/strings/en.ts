@@ -374,6 +374,7 @@ export const en: Messages = {
     skinSensitiveSub: "Easily red, reacts to products",
     step2Title: "What would you like to improve?",
     step2Sub: "Choose up to four areas.",
+    concernNone: "No concerns / normal skin",
     concernAcne: "Acne / breakouts",
     concernDryness: "Dryness",
     concernRedness: "Redness / rosacea",

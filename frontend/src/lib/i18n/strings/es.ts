@@ -374,6 +374,7 @@ export const es: Messages = {
     skinSensitiveSub: "Se enrojece fácilmente, reacciona a productos",
     step2Title: "¿Qué te gustaría mejorar?",
     step2Sub: "Elige hasta cuatro aspectos.",
+    concernNone: "Sin problemas / piel normal",
     concernAcne: "Acné / brotes",
     concernDryness: "Sequedad",
     concernRedness: "Rojeces / rosácea",

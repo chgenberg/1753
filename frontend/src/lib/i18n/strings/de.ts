@@ -374,6 +374,7 @@ export const de: Messages = {
     skinSensitiveSub: "Rötet schnell, reagiert auf Produkte",
     step2Title: "Was möchtest du verbessern?",
     step2Sub: "Wähle bis zu vier Bereiche.",
+    concernNone: "Keine Beschwerden / normale Haut",
     concernAcne: "Akne / Unreinheiten",
     concernDryness: "Trockenheit",
     concernRedness: "Rötungen / Rosazea",

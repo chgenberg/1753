@@ -372,6 +372,7 @@ const bundle = {
     skinSensitiveSub: "Rodnar lätt, reagerar på produkter",
     step2Title: "Vad vill du förbättra?",
     step2Sub: "Välj upp till 4 områden.",
+    concernNone: "Inga besvär / normal hy",
     concernAcne: "Acne / finnar",
     concernDryness: "Torrhet",
     concernRedness: "Rodnad / rosacea",

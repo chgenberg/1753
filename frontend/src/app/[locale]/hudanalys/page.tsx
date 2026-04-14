@@ -136,6 +136,7 @@ function tx(locale: string, sv: string, en: string, es?: string, de?: string, fr
 }
 
 const CONCERN_ICONS: Record<string, typeof Flame> = {
+  none: Leaf,
   acne: Flame,
   dryness: Droplets,
   redness: ShieldAlert,
@@ -731,6 +732,7 @@ export default function AnalysisPage() {
   ];
 
   const concerns = [
+    { key: "none", label: a("concernNone"), icon: CONCERN_ICONS.none },
     { key: "acne", label: a("concernAcne"), icon: CONCERN_ICONS.acne },
     { key: "dryness", label: a("concernDryness"), icon: CONCERN_ICONS.dryness },
     { key: "redness", label: a("concernRedness"), icon: CONCERN_ICONS.redness },
@@ -1163,10 +1165,13 @@ export default function AnalysisPage() {
                     options={concerns}
                     selected={answers.concerns}
                     onToggle={(k) =>
-                      setAnswers((p) => ({
-                        ...p,
-                        concerns: toggleArray(p.concerns, k, 4),
-                      }))
+                      setAnswers((p) => {
+                        if (k === "none") {
+                          return { ...p, concerns: p.concerns.includes("none") ? [] : ["none"] };
+                        }
+                        const without = p.concerns.filter((c) => c !== "none");
+                        return { ...p, concerns: toggleArray(without, k, 4) };
+                      })
                     }
                   />
                 </div>
