@@ -5,7 +5,7 @@ import "./globals.css";
 import { CartProvider } from "@/providers/cart-provider";
 import { AuthProvider } from "@/providers/auth-provider";
 import { Toaster } from "@/components/notification";
-import { HtmlLang } from "@/components/html-lang";
+import { HtmlLang, SkipLink } from "@/components/html-lang";
 
 const GA_ID = "G-R3H0MEB7V4";
 
@@ -45,6 +45,7 @@ export default function RootLayout({
     <html lang="sv" className={`${inter.variable} h-full`} suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://www.googletagmanager.com" />
+        <link rel="preconnect" href="https://cdn.shopify.com" />
         <link rel="dns-prefetch" href="https://www.google-analytics.com" />
         <script dangerouslySetInnerHTML={{ __html: `(function(){var s=location.pathname.split("/")[1];var L={"en":1,"es":1,"de":1,"fr":1};document.documentElement.lang=L[s]?s:"sv"})()` }} />
         <Script
@@ -56,9 +57,7 @@ export default function RootLayout({
         </Script>
       </head>
       <body className="min-h-full flex flex-col font-[family-name:var(--font-inter)]">
-        <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[9999] focus:rounded-lg focus:bg-[#108474] focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-white">
-          Skip to content
-        </a>
+        <SkipLink />
         <HtmlLang />
         <AuthProvider>
           <CartProvider>

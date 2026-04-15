@@ -65,7 +65,7 @@ export function TechTabs({ tabs }: { tabs: Tab[] }) {
                   className="flex items-start gap-3 rounded-xl bg-[#f5f5f7] px-4 py-3"
                 >
                   <div className="mt-0.5 flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-[#108474]">
-                    <svg viewBox="0 0 12 12" className="h-3 w-3 text-white" fill="none" stroke="currentColor" strokeWidth="2">
+                    <svg viewBox="0 0 12 12" className="h-3 w-3 text-white" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true">
                       <path d="M2 6l3 3 5-5" />
                     </svg>
                   </div>

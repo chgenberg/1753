@@ -147,7 +147,7 @@ export function Footer() {
                 info@1753skin.com
               </a>
               <a
-                href="https://instagram.com/1753.skincare"
+                href="https://www.instagram.com/1753.skincare"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-2 text-sm text-brand-600 transition-colors hover:text-brand-900"

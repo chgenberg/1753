@@ -669,6 +669,7 @@ export function MethodologyModal({
       className="fixed inset-0 z-[100] flex items-end justify-center sm:items-center"
       role="dialog"
       aria-modal="true"
+      aria-labelledby="methodology-modal-title"
     >
       <div
         className="absolute inset-0 bg-black/40 backdrop-blur-sm transition-opacity duration-300"
@@ -684,7 +685,7 @@ export function MethodologyModal({
 
         <div className="flex items-center justify-between border-b border-[#e6e6e6]/60 px-5 py-3 sm:py-4 sm:px-6">
           <div>
-            <h3 className="text-[15px] font-bold text-[#1d1d1f]">
+            <h3 id="methodology-modal-title" className="text-[15px] font-bold text-[#1d1d1f]">
               {tx(locale, "Så fungerar din analys", "How your analysis works", "Cómo funciona tu análisis", "So funktioniert deine Analyse", "Comment fonctionne votre analyse")}
             </h3>
             <p className="mt-0.5 text-[11px] text-[#766a62]">

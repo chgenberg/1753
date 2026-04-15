@@ -310,7 +310,7 @@ function ScoreRing({ score, label, skinAge, fitzpatrick, locale }: {
   return (
     <div className="flex flex-col items-center gap-6 sm:flex-row sm:justify-center sm:gap-10">
       <div className="relative mx-auto h-44 w-44 shrink-0 sm:mx-0">
-        <svg viewBox="0 0 160 160" className="h-full w-full -rotate-90">
+        <svg viewBox="0 0 160 160" className="h-full w-full -rotate-90" aria-hidden="true">
           <circle cx="80" cy="80" r={r} fill="none" stroke="#f5f5f7" strokeWidth="10" />
           <circle
             cx="80" cy="80" r={r} fill="none" stroke={scoreColor} strokeWidth="10"

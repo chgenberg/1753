@@ -218,7 +218,7 @@ export function ReviewsSection({ productId }: { productId: string }) {
               <Stars rating={Math.round(stats.avg)} size="lg" />
             </div>
             <p className="mt-1.5 text-sm text-brand-400">
-              {t("reviewsUi.basedOn", { count: stats.count.toLocaleString(loc) })}
+              {t(stats.count === 1 ? "reviewsUi.basedOnOne" : "reviewsUi.basedOn", { count: stats.count.toLocaleString(loc) })}
             </p>
           </div>
 

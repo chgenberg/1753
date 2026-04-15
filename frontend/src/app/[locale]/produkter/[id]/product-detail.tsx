@@ -166,7 +166,7 @@ export default function ProductDetail({ id }: { id: string }) {
                 </div>
                 <span className="text-sm text-brand-500">
                   {reviewStats
-                    ? t("reviewsUi.reviewCountLabel", {
+                    ? t(reviewStats.count === 1 ? "reviewsUi.reviewCountLabelOne" : "reviewsUi.reviewCountLabel", {
                         count: reviewStats.count.toLocaleString(loc),
                       })
                     : `${product.reviews} ${t("productDetail.reviewsLabel")}`}

@@ -482,7 +482,7 @@ export function ScoreRing({
 
   return (
     <div className="flex flex-col items-center gap-2">
-      <svg width={size} height={size} className="-rotate-90">
+      <svg width={size} height={size} className="-rotate-90" aria-hidden="true">
         <circle cx={size / 2} cy={size / 2} r={r} fill="none" stroke={COLORS.bg} strokeWidth={strokeWidth} />
         <circle
           cx={size / 2}

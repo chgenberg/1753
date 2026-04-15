@@ -12,6 +12,7 @@ import {
 import { API_URL } from "@/lib/api";
 import { getProduct, productDisplayName, productPrice } from "@/lib/products";
 import { formatPrice } from "@/lib/currency";
+import DOMPurify from "dompurify";
 import { useAuth } from "@/providers/auth-provider";
 import { useCart } from "@/providers/cart-provider";
 import { useLocale } from "@/providers/locale-provider";
@@ -31,8 +32,17 @@ type ChatResponse = {
   actions?: ChatAction[];
 };
 
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
+}
+
 function formatMarkdown(text: string): string {
-  return text
+  const escaped = escapeHtml(text);
+  const html = escaped
     .replace(/\*\*(.+?)\*\*/g, "<strong>$1</strong>")
     .replace(/^- (.+)$/gm, "<li>$1</li>")
     .replace(/(<li>[\s\S]*?<\/li>)/g, (m) =>
@@ -42,6 +52,7 @@ function formatMarkdown(text: string): string {
     .replace(/\n/g, "<br>")
     .replace(/^/, "<p>")
     .replace(/$/, "</p>");
+  return DOMPurify.sanitize(html);
 }
 
 export function ChatWidget() {

@@ -43,10 +43,12 @@ export function Toaster({ children }: { children?: ReactNode }) {
   return (
     <ToastContext.Provider value={{ showToast }}>
       {children}
-      <div className="fixed bottom-6 right-6 z-[100] flex flex-col gap-2">
+      <div className="fixed bottom-6 right-6 z-[100] flex flex-col gap-2" role="status" aria-live="polite">
         {toasts.map((toast) => (
           <div
             key={toast.id}
+            role={toast.type === "error" ? "alert" : undefined}
+            aria-live={toast.type === "error" ? "assertive" : undefined}
             className={cn(
               "flex items-center gap-3 rounded-xl px-4 py-3 shadow-lg animate-fade-in",
               toast.type === "success" && "bg-green-50 text-green-900",
@@ -57,6 +59,8 @@ export function Toaster({ children }: { children?: ReactNode }) {
             <p className="text-sm font-medium">{toast.message}</p>
             <button
               onClick={() => dismiss(toast.id)}
+              type="button"
+              aria-label="Stäng"
               className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full hover:bg-black/10"
             >
               <X className="h-3 w-3" />

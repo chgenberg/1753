@@ -3,12 +3,12 @@
   "version": "1.0.0",
   "description": "1753 SKINCARE – Holistisk hudvård",
   "main": "server.js",
+  "engines": { "node": ">=20" },
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
     "check": "cd frontend && npm run typecheck && npm run lint",
     "check:backend": "node -c server.js && node -c db.js",
-    "prepare": "husky",
     "prepare": "husky"
   },
   "dependencies": {

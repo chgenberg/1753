@@ -43,6 +43,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant, size, pulse, ...props }, ref) => {
     return (
       <button
+        type={props.type ?? "button"}
         className={cn(
           buttonVariants({ variant, size, className }),
           pulse && "animate-subtle-pulse"

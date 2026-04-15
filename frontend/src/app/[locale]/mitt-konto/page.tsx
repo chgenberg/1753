@@ -2,6 +2,7 @@
 
 import { useCallback, useEffect, useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   BarChart3,
   CalendarClock,
@@ -198,7 +199,8 @@ function relativeDate(
   if (diffDays === 0) return tfn("accountDash.relativeToday");
   if (diffDays === 1) return tfn("accountDash.relativeYesterday");
   if (diffDays < 7) return tfn("accountDash.relativeDaysAgo", { n: diffDays });
-  if (diffDays < 30) return tfn("accountDash.relativeWeeksAgo", { n: Math.floor(diffDays / 7) });
+  const weeks = Math.floor(diffDays / 7);
+  if (diffDays < 30) return tfn(weeks === 1 ? "accountDash.relativeWeeksAgoOne" : "accountDash.relativeWeeksAgo", { n: weeks });
   return new Date(dateStr).toLocaleDateString(loc, { year: "numeric", month: "long", day: "numeric" });
 }
 
@@ -253,9 +255,9 @@ function OverviewView({
       {error && <ErrorBanner message={error} />}
 
       <div>
-        <h2 className="text-3xl font-bold tracking-tight">
+        <h1 className="text-3xl font-bold tracking-tight">
           {d("overviewGreeting", { name: firstName })}
-        </h2>
+        </h1>
         <p className="mt-1 text-sm text-muted-foreground">
           {t(`account.tier.${tier}`)}
           {t("account.memberSuffix")} &middot; {points.toLocaleString(loc)} {t("account.pointsWord")}
@@ -513,9 +515,9 @@ function SkinJourneyView({ token }: { token: string }) {
               {d("skinJourneyEmptyTitle")}
             </h3>
             <p className="mt-2 text-sm leading-relaxed text-brand-600">{d("skinJourneyEmptyBody")}</p>
-            <a href={path("skinAnalysis")}>
+            <Link href={path("skinAnalysis")}>
               <Button className="mt-6 h-12 rounded-xl px-8">{d("firstAnalysisCta")}</Button>
-            </a>
+            </Link>
           </div>
         </div>
       </div>
@@ -586,9 +588,9 @@ function SkinJourneyView({ token }: { token: string }) {
                 </p>
               </div>
               {canAnalyze && (
-                <a href={path("skinAnalysis")} className="ml-auto">
+                <Link href={path("skinAnalysis")} className="ml-auto">
                   <Button size="sm" className="rounded-full">{tx(locale, "Starta", "Start", "Iniciar", "Starten", "Démarrer")}</Button>
-                </a>
+                </Link>
               )}
             </div>
           </div>
@@ -596,7 +598,7 @@ function SkinJourneyView({ token }: { token: string }) {
       })()}
 
       {scoredAnalyses.length >= 2 && (
-        <ChartCard title={d("skinScoreOverTime")} subtitle={d("skinScoreChartSub", { count: scoredAnalyses.length })}>
+        <ChartCard title={d("skinScoreOverTime")} subtitle={d(scoredAnalyses.length === 1 ? "skinScoreChartSubOne" : "skinScoreChartSub", { count: scoredAnalyses.length })}>
           <ScoreLineChart scores={scoredAnalyses} locale={locale} />
         </ChartCard>
       )}
@@ -747,9 +749,9 @@ function SkinJourneyView({ token }: { token: string }) {
         })}
       </div>
 
-      <a href={path("skinAnalysis")}>
+      <Link href={path("skinAnalysis")}>
         <Button className="mt-4 rounded-xl">{d("newAnalysis")}</Button>
-      </a>
+      </Link>
     </div>
   );
 }
@@ -790,9 +792,9 @@ function OrdersView({ orders, loading, error }: { orders: Order[]; loading: bool
           <ShoppingBag className="mx-auto mb-3 h-12 w-12 text-brand-200" />
           <p className="text-base font-medium text-brand-900">{d("ordersEmptyTitle")}</p>
           <p className="mt-1 text-sm text-muted-foreground">{d("ordersEmptySub")}</p>
-          <a href={path("products")}>
+          <Link href={path("products")}>
             <Button className="mt-4 rounded-xl">{d("seeProducts")}</Button>
-          </a>
+          </Link>
         </div>
       ) : (
         <div className="space-y-4">
@@ -1208,9 +1210,9 @@ function SubscriptionsView({ token }: { token: string }) {
             <RefreshCcw className="mb-3 h-8 w-8 text-brand-700" />
             <h3 className="text-lg font-bold text-brand-900">{d("subsEmptyTitle")}</h3>
             <p className="mt-2 text-sm text-brand-600">{d("subsEmptyBody")}</p>
-            <a href={path("products")}>
+            <Link href={path("products")}>
               <Button className="mt-5 rounded-xl">{d("chooseProducts")}</Button>
-            </a>
+            </Link>
           </div>
         </div>
       ) : (
@@ -1422,9 +1424,9 @@ function WishlistView({ token }: { token: string }) {
           <Heart className="mx-auto mb-3 h-12 w-12 text-brand-200" />
           <p className="text-base font-medium text-brand-900">{d("wishlistEmpty")}</p>
           <p className="mt-1 text-sm text-muted-foreground">{d("wishlistHint")}</p>
-          <a href={path("products")}>
+          <Link href={path("products")}>
             <Button className="mt-4 rounded-xl">{d("seeProducts")}</Button>
-          </a>
+          </Link>
         </div>
       ) : (
         <div className="grid gap-4 sm:grid-cols-2">
@@ -1438,13 +1440,13 @@ function WishlistView({ token }: { token: string }) {
                 key={item.product_id}
                 className="flex items-center gap-4 rounded-xl border border-border bg-white p-4 transition-all hover:shadow-sm"
               >
-                <a href={path("product", { productId: item.product_id })} className="flex-1">
+                <Link href={path("product", { productId: item.product_id })} className="flex-1">
                   <p className="text-sm font-bold">{name}</p>
                   <p className="mt-0.5 text-xs text-muted-foreground">{short}</p>
                   <p className="mt-1 text-sm font-bold">
                     {formatPrice(productPrice(product, locale), locale)}
                   </p>
-                </a>
+                </Link>
                 <div className="flex flex-col gap-2">
                   <button
                     type="button"
@@ -1906,7 +1908,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <nav className="flex-1 overflow-y-auto px-3 py-4">
+          <nav aria-label={d("menu")} className="flex-1 overflow-y-auto px-3 py-4">
             <div className="flex flex-col gap-1">
               {SIDEBAR_ITEMS.map((item) => (
                 <button

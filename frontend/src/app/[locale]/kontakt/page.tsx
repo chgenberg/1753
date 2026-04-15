@@ -131,27 +131,30 @@ export default function ContactPage() {
                 {p("formTitle")}
               </h2>
               <div>
-                <label className="mb-1.5 block text-sm font-medium">
-                  {p("nameLabel")}
+                <label htmlFor="contact-name" className="mb-1.5 block text-sm font-medium">
+                  {p("nameLabel")} <span aria-hidden="true">*</span>
                 </label>
                 <input
+                  id="contact-name"
                   type="text"
                   required
+                  autoComplete="name"
                   value={form.name}
                   onChange={(e) =>
                     setForm((p) => ({ ...p, name: e.target.value }))
                   }
                   className="w-full rounded-xl border border-input bg-background px-4 py-3 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring focus:outline-none"
-                  placeholder={p("nameLabel")}
                 />
               </div>
               <div>
-                <label className="mb-1.5 block text-sm font-medium">
-                  {t("checkout.email")}
+                <label htmlFor="contact-email" className="mb-1.5 block text-sm font-medium">
+                  {t("checkout.email")} <span aria-hidden="true">*</span>
                 </label>
                 <input
+                  id="contact-email"
                   type="email"
                   required
+                  autoComplete="email"
                   value={form.email}
                   onChange={(e) =>
                     setForm((p) => ({ ...p, email: e.target.value }))
@@ -161,10 +164,11 @@ export default function ContactPage() {
                 />
               </div>
               <div>
-                <label className="mb-1.5 block text-sm font-medium">
-                  {p("messageLabel")}
+                <label htmlFor="contact-message" className="mb-1.5 block text-sm font-medium">
+                  {p("messageLabel")} <span aria-hidden="true">*</span>
                 </label>
                 <textarea
+                  id="contact-message"
                   required
                   rows={5}
                   value={form.message}

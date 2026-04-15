@@ -1726,7 +1726,9 @@ export default function AnalysisPage() {
                     <button
                       onClick={() => {
                         if (navigator.share) {
-                          navigator.share({ title: "1753 SKINCARE", text: shareText, url: shareUrl }).catch(() => {});
+                          navigator.share({ title: "1753 SKINCARE", text: shareText, url: shareUrl }).catch((err) => {
+                            if (err?.name !== "AbortError") console.warn("[Share]", err);
+                          });
                         } else {
                           navigator.clipboard.writeText(`${shareText} ${shareUrl}`).then(() => {
                             setShareCopied(true);

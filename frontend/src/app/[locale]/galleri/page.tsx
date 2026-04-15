@@ -62,7 +62,7 @@ export default function GalleryPage() {
   }, []);
 
   return (
-    <main className="mx-auto max-w-7xl px-5 pb-24 pt-32">
+    <section className="mx-auto max-w-7xl px-5 pb-24 pt-32">
       {/* Header */}
       <div className="mb-12 text-center">
         <div className="mb-4 inline-flex items-center gap-2 rounded-full bg-[#108474]/10 px-4 py-1.5 text-xs font-semibold tracking-wide text-[#108474]">
@@ -226,6 +226,6 @@ export default function GalleryPage() {
           animation: lightbox-in 0.25s cubic-bezier(0.25, 0.1, 0.25, 1);
         }
       `}</style>
-    </main>
+    </section>
   );
 }

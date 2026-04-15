@@ -212,7 +212,7 @@ export function Header() {
             />
           </Link>
 
-          <nav aria-label="Main navigation" className="hidden items-center gap-10 md:flex">
+          <nav aria-label={t("header.mainNavAria")} className="hidden items-center gap-10 md:flex">
             {nav.map((link) => {
               const isActive = pathname === link.href;
               return (
@@ -316,7 +316,7 @@ export function Header() {
               <X className="h-5 w-5" />
             </button>
           </div>
-          <nav aria-label="Mobile navigation" className="flex flex-1 flex-col items-center justify-center gap-6">
+          <nav aria-label={t("header.mobileNavAria")} className="flex flex-1 flex-col items-center justify-center gap-6">
             {nav.map((link, i) => {
               const isActive = pathname === link.href;
               return (

@@ -20,6 +20,8 @@ const bundle = {
     account: "Mitt konto",
     login: "Logga in",
     langSwitch: "English",
+    mainNavAria: "Huvudnavigation",
+    mobileNavAria: "Mobilnavigation",
   },
   footer: {
     newsletterTitle: "Hudvårdstips och exklusiva erbjudanden",
@@ -230,7 +232,7 @@ const bundle = {
   paymentFailed: {
     title: "Betalningen misslyckades",
     sub:
-      "Något gick fel vid betalningen. Du har inte blivit debiterad. Vänligen försök igen eller kontakta oss om problemet kvarstår.",
+      "Något gick fel vid betalningen. Du har inte blivit debiterad. Försök igen eller kontakta oss om problemet kvarstår.",
     retry: "Försök igen",
     contact: "Kontakta oss",
   },
@@ -444,8 +446,10 @@ const bundle = {
     replyFrom: "Svar från 1753 SKINCARE",
     title: "Omdömen",
     basedOn: "Baserat på {count} omdömen",
+    basedOnOne: "Baserat på {count} omdöme",
     loadMore: "Visa fler omdömen",
     reviewCountLabel: "{count} omdömen",
+    reviewCountLabelOne: "{count} omdöme",
   },
   productDetail: {
     backToProducts: "Tillbaka till produkter",
@@ -534,7 +538,7 @@ const bundle = {
     platinaTitle: "Platina",
     platinaPoints: "10 000 poäng",
     platinaPerk: "12% rabatt på alla köp",
-    platinaDesc: "Toppen. Platina-medlemmar får 12% på allt, prioriterad support och exklusiva erbjudanden.",
+    platinaDesc: "Du har nått toppen. Som Platina-medlem får du 12% på allt, prioriterad support och exklusiva erbjudanden.",
     redeemTitle: "Lös in dina poäng",
     redeemDesc: "100 poäng = 10 kr rabatt. Skapa en rabattkod direkt i Mitt konto och använd den i kassan.",
     ctaTitle: "Redo att börja?",
@@ -610,6 +614,7 @@ const bundle = {
     relativeYesterday: "Igår",
     relativeDaysAgo: "{n} dagar sedan",
     relativeWeeksAgo: "{n} veckor sedan",
+    relativeWeeksAgoOne: "{n} vecka sedan",
     scorePoints: "poäng",
     changeLabel: "Förändring",
     overviewGreeting: "Hej, {name}",
@@ -633,6 +638,7 @@ const bundle = {
     analysesDoneOne: "{count} analys genomförd",
     skinScoreOverTime: "Hudpoäng över tid",
     skinScoreChartSub: "{count} analyser",
+    skinScoreChartSubOne: "{count} analys",
     latestScore: "Senaste poäng",
     newAnalysis: "Gör en ny analys",
     ordersTitle: "Mina ordrar",
@@ -746,7 +752,7 @@ const bundle = {
     placeholder: "Ställ en fråga...",
     send: "Skicka",
     welcome:
-      "Hej! Välkomna till 1753 SKINCARE. Vad kan jag hjälpa dig med idag? Jag kan svara på frågor om våra produkter, hudvård, livsstil – eller lägga något direkt i din varukorg.",
+      "Hej! Välkommen till 1753 SKINCARE. Vad kan jag hjälpa dig med idag? Jag kan svara på frågor om våra produkter, hudvård, livsstil – eller lägga något direkt i din varukorg.",
     maxMessages:
       "Vi har pratat ett tag nu! För fler frågor, kontakta oss på info@1753skin.com eller ring 0732-30 55 21.",
     error:
