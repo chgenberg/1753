@@ -198,7 +198,7 @@ export default function CheckoutPage() {
             customer: {
               name: `${form.firstname} ${form.lastname}`.trim(),
               email: form.email,
-              phone: phoneDigits,
+              phone: phoneDigits.replace(/^0/, ""),
             },
             deliveryAddress: {
               address: form.address,

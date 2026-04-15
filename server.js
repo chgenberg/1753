@@ -2920,7 +2920,7 @@ app.post("/api/orders/create", async (req, res) => {
       customer: {
         email: customer.email,
         fullName: customer.name,
-        phone: customer.phone || ""
+        phone: (customer.phone || "").replace(/^0/, "")
       }
     };
     if (hasSubscription) {
@@ -2933,7 +2933,7 @@ app.post("/api/orders/create", async (req, res) => {
       orderNumber,
       customerName: customer.name,
       customerEmail: customer.email,
-      customerPhone: customer.phone || "",
+      customerPhone: (customer.phone || "").replace(/^0/, ""),
       address: deliveryAddress.address,
       zip: deliveryAddress.zip,
       city: deliveryAddress.city,
