@@ -333,17 +333,26 @@ function AnalyzingProgress({ locale }: { locale: string }) {
   const steps = ANALYSIS_STEPS_MAP[locale] || ANALYSIS_STEPS_EN;
 
   useEffect(() => {
-    const totalDuration = 92000;
+    const totalDuration = 120000;
     const interval = 50;
     let elapsed = 0;
 
     const timer = setInterval(() => {
       elapsed += interval;
       const t = elapsed / totalDuration;
-      const eased = t < 0.5
-        ? 4 * t * t * t
-        : 1 - Math.pow(-2 * t + 2, 3) / 2;
-      const pct = Math.min(Math.round(eased * 98), 98);
+
+      let pct: number;
+      if (t < 0.008) {
+        // Jump to 1% in the first ~1 second
+        pct = Math.round((t / 0.008) * 1);
+      } else {
+        const t2 = (t - 0.008) / (1 - 0.008);
+        const eased = t2 < 0.5
+          ? 4 * t2 * t2 * t2
+          : 1 - Math.pow(-2 * t2 + 2, 3) / 2;
+        pct = Math.round(1 + eased * 97);
+      }
+      pct = Math.min(pct, 98);
       setProgress(pct);
 
       const idx = steps.reduce((acc, s, i) => (pct >= s.pct ? i : acc), 0);
