@@ -1,0 +1,138 @@
+# 1753 SKINCARE – Complete Reference
+
+> Swedish skincare brand using CBD and CBG to strengthen skin naturally. Founded by Christopher Genberg. Ships from Sweden to the EU. All products vegan, cruelty-free, manufactured in Sweden.
+
+## Company
+
+- Legal name: Floranie International AB
+- Founded: 2020
+- Founder: Christopher Genberg
+- Country: Sweden
+- Address: Södra Skjutbanevägen 10, 439 55 Åsa, Sweden
+- Email: info@1753skin.com
+- Phone: +46 732 305 521
+- Instagram: @1753.skincare
+- Website: https://www.1753skin.com
+- Languages: Swedish, English, Spanish, German, French
+- Currency: SEK (Sweden), EUR (international)
+- Free shipping: orders over 700 SEK / €60
+- Return policy: 30 days, return by mail
+
+## Philosophy
+
+1753 SKINCARE takes a holistic approach: great skin starts with sleep, diet, stress management and movement. Products work with the body's endocannabinoid system (ECS) rather than masking symptoms. Minimal ingredient lists – no fillers, fragrances or unnecessary additives. CBD and CBG at clinically relevant concentrations, not trace amounts.
+
+## Products
+
+### DUO kit + TA-DA Serum (Best value bundle)
+- Price: 1 495 SEK / €129 (normally 2 197 SEK / €189)
+- Contents: The ONE Facial Oil (morning, 10% CBD, 0.2% CBG) + I LOVE Facial Oil (evening, 10% CBD, 5% CBG) + TA-DA Serum (3% CBG booster)
+- Key ingredients: CBD, CBG, organic jojoba oil
+- URL: https://www.1753skin.com/sv/produkter/duo-ta-da
+
+### DUO kit
+- Price: 1 099 SEK / €95 (normally 1 498 SEK / €129)
+- Contents: The ONE Facial Oil (morning) + I LOVE Facial Oil (evening)
+- Size: 2 × 10 ml glass bottles with dropper
+- Key ingredients: CBD (10%), CBG (0.2–5%), organic jojoba oil
+- URL: https://www.1753skin.com/sv/produkter/duo-kit
+
+### The ONE Facial Oil (morning)
+- Price: 749 SEK / €64
+- Size: 10 ml glass bottle with dropper
+- Key ingredients: CBD (10%), CBG (0.2%), organic jojoba oil
+- Ingredients (INCI): Simmondsia chinensis (Jojoba) Seed Oil (organic), Cannabidiol (CBD, 10%), Cannabigerol (CBG, 0.2%)
+- URL: https://www.1753skin.com/sv/produkter/the-one-facial-oil
+
+### I LOVE Facial Oil (evening)
+- Price: 749 SEK / €64
+- Size: 10 ml glass bottle with dropper
+- Key ingredients: CBD (10%), CBG (5%), organic jojoba oil
+- Ingredients (INCI): Simmondsia chinensis (Jojoba) Seed Oil (organic), Cannabidiol (CBD, 10%), Cannabigerol (CBG, 5%)
+- URL: https://www.1753skin.com/sv/produkter/i-love-facial-oil
+
+### TA-DA Serum
+- Price: 699 SEK / €59
+- Size: 30 ml
+- Key ingredients: CBG (3% / 1 500 mg), organic jojoba oil
+- Ingredients (INCI): Simmondsia chinensis (Jojoba) Seed Oil (organic), Cannabigerol (CBG, 3% / 1 500 mg)
+- URL: https://www.1753skin.com/sv/produkter/ta-da-serum
+
+### Au Naturel Makeup Remover
+- Price: 399 SEK / €34
+- Size: 100 ml
+- Key ingredients: MCT oil, CBD (0.2%)
+- Ingredients (INCI): Caprylic/Capric Triglyceride (MCT), Cannabidiol (CBD, 0.2%)
+- URL: https://www.1753skin.com/sv/produkter/au-naturel-makeup-remover
+
+### Fungtastic Mushroom Extract (supplement)
+- Price: 377 SEK / €32
+- Size: 60 capsules
+- Key ingredients: Chaga (25%), Lion's Mane (25%), Cordyceps (25%), Reishi (25%) – 400 mg per capsule (15:1 extract), beta-glucans min 20%
+- URL: https://www.1753skin.com/sv/produkter/fungtastic-mushroom-extract
+
+## Services
+
+### Free AI Skin Analysis
+- What: Upload a photo and receive a personalised skin analysis powered by AI
+- Technology: Custom-trained ONNX model (90,000+ training images), MediaPipe Face Landmarker (478 facial points, 12 zones), lifestyle questionnaire, GPT-5.4 Vision multimodal fusion
+- Output: 15 skin metrics with scores (0–100), biological skin age, Fitzpatrick skin type, interactive radar chart, zone-by-zone analysis, lifestyle recommendations, product suggestions
+- Duration: ~60 seconds (face scan 10s, 7 questions 40s, AI analysis 20s)
+- Privacy: Face scan and MediaPipe run 100% locally in browser; zone images sent encrypted to GPT-5.4; optional photo storage with AES-256-GCM encryption; GDPR compliant
+- Cost: Free
+- URL (Swedish): https://www.1753skin.com/sv/gratis-hudanalys
+- URL (English): https://www.1753skin.com/en/free-skin-analysis
+
+### Loyalty Program
+- Tiers: Silver (2 000 SEK spent, 5% discount), Gold (5 000 SEK, 8%), Platinum (10 000 SEK, 12%)
+- Points: 1 SEK = 1 point
+- Referral: Invite a friend – both get 100 SEK discount
+- URL: https://www.1753skin.com/sv/lojalitetsprogram
+
+### Subscriptions
+- Automatic delivery at chosen frequency
+- Savings displayed at checkout
+- Easy to pause or cancel
+
+## Key Differentiators
+
+- CBD and CBG at clinically relevant concentrations (not trace amounts)
+- Works with the endocannabinoid system (ECS) – the body's own balancing mechanism
+- Holistic approach: lifestyle first, products second
+- Minimal ingredient lists – no fillers, fragrances or unnecessary additives
+- Swedish-made, vegan, cruelty-free
+- AI skin analysis combining computer vision + lifestyle data + GPT-5.4 Vision
+- 15 individual skin metrics tracked over time
+
+## FAQ
+
+Q: What is CBD skincare?
+A: CBD (cannabidiol) is a non-psychoactive compound from the hemp plant. It interacts with CB2 receptors in the skin's endocannabinoid system to help regulate inflammation, sebum production and barrier function. 1753 SKINCARE uses CBD at 10% concentration – significantly higher than most brands.
+
+Q: What is CBG?
+A: CBG (cannabigerol) is the "mother cannabinoid" from which other cannabinoids are synthesised. It has strong antioxidant properties and works synergistically with CBD. The TA-DA Serum contains 3% CBG (1 500 mg per bottle).
+
+Q: Is CBD legal in Sweden/EU?
+A: Yes. All 1753 SKINCARE products contain CBD derived from industrial hemp with less than 0.2% THC, fully compliant with Swedish and EU regulations.
+
+Q: Are the products vegan and cruelty-free?
+A: Yes. All products are vegan, cruelty-free, and manufactured in Sweden. No animal testing at any stage.
+
+Q: How does the AI skin analysis work?
+A: Three steps: (1) Face scan using MediaPipe Face Landmarker identifying 478 facial points across 12 zones, running locally in browser. (2) Seven lifestyle questions about skin type, sleep, diet, stress, sun habits, hormonal influence, and skin goals. (3) Multimodal AI fusion combining the ONNX model classification, MediaPipe zone images, lifestyle data, and GPT-5.4 Vision analysis. Result: 15 skin metrics, biological skin age, Fitzpatrick type, radar chart, and personalised recommendations.
+
+Q: Is my photo stored?
+A: The face scan runs 100% locally. Zone images are sent encrypted to GPT-5.4 for analysis. Photo storage to your account is optional and uses AES-256-GCM encryption. You can delete all data at any time.
+
+## Pages
+
+- Home: https://www.1753skin.com/sv (Swedish) / https://www.1753skin.com/en (English)
+- Products: https://www.1753skin.com/sv/produkter
+- About us: https://www.1753skin.com/sv/om-oss
+- Contact: https://www.1753skin.com/sv/kontakt
+- Skin analysis: https://www.1753skin.com/sv/gratis-hudanalys
+- Skin analysis quiz: https://www.1753skin.com/sv/hudanalys
+- Guide hub: https://www.1753skin.com/sv/guide
+- Loyalty program: https://www.1753skin.com/sv/lojalitetsprogram
+- Terms: https://www.1753skin.com/sv/villkor
+- Privacy policy: https://www.1753skin.com/sv/integritetspolicy

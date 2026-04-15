@@ -163,7 +163,7 @@ export default async function LocaleLayout({
       />
       <TopBanner />
       <Header />
-      <main className="flex-1">{children}</main>
+      <main id="main-content" className="flex-1">{children}</main>
       <Footer />
       <CartDrawer />
       <ChatWidget />

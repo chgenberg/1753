@@ -24,6 +24,7 @@ export const viewport: Viewport = {
 
 export const metadata: Metadata = {
   metadataBase: new URL("https://www.1753skin.com"),
+  manifest: "/manifest.webmanifest",
   icons: {
     icon: [
       { url: "/favicon-32.png", sizes: "32x32", type: "image/png" },
@@ -53,6 +54,9 @@ export default function RootLayout({
         </Script>
       </head>
       <body className="min-h-full flex flex-col font-[family-name:var(--font-inter)]">
+        <a href="#main-content" className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[9999] focus:rounded-lg focus:bg-[#108474] focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-white">
+          Skip to content
+        </a>
         <HtmlLang />
         <AuthProvider>
           <CartProvider>

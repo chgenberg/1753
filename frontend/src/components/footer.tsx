@@ -60,7 +60,11 @@ export function Footer() {
             {t("footer.newsletterDesc")}
           </p>
           <form onSubmit={handleSubscribe} className="mt-5 flex w-full max-w-sm gap-2">
+            <label htmlFor="footer-newsletter-email" className="sr-only">
+              {t("footer.emailPlaceholder")}
+            </label>
             <input
+              id="footer-newsletter-email"
               type="email"
               required
               value={email}

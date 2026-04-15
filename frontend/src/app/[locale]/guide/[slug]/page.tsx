@@ -153,6 +153,28 @@ export default async function GuidePage({ params }: Props) {
     ],
   };
 
+  const articleSchema = {
+    "@context": "https://schema.org",
+    "@type": "Article",
+    headline: c.h1,
+    description: c.metaDescription,
+    image: `${BASE_URL}${images.hero}`,
+    datePublished: "2025-01-15",
+    dateModified: new Date().toISOString().split("T")[0],
+    author: {
+      "@type": "Person",
+      name: "Christopher Genberg",
+      url: `${BASE_URL}/${l}/om-oss`,
+    },
+    publisher: {
+      "@type": "Organization",
+      name: "1753 SKINCARE",
+      logo: { "@type": "ImageObject", url: `${BASE_URL}/1753.webp` },
+    },
+    mainEntityOfPage: `${BASE_URL}/${l}/guide/${slug}`,
+    inLanguage: l,
+  };
+
   const howToSchema = page.category === "howto" ? {
     "@context": "https://schema.org",
     "@type": "HowTo",
@@ -177,6 +199,10 @@ export default async function GuidePage({ params }: Props) {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
       />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(articleSchema) }}
+      />
       {howToSchema && (
         <script
           type="application/ld+json"
@@ -184,6 +210,7 @@ export default async function GuidePage({ params }: Props) {
         />
       )}
 
+      <article>
       {/* ── Hero ── */}
       <section className="relative overflow-hidden bg-[#f5f5f7] py-20 md:py-28">
         <div className="mx-auto grid max-w-[1280px] items-center gap-10 px-6 md:grid-cols-2 md:gap-16 md:px-10">
@@ -194,6 +221,13 @@ export default async function GuidePage({ params }: Props) {
             <h1 className="text-[2.2rem] font-bold leading-[1.15] tracking-tight text-[#1d1d1f] md:text-[2.8rem]">
               {c.h1}
             </h1>
+            <p className="mt-3 flex items-center gap-2 text-xs text-[#766a62]">
+              <span>{tx(l, "Av", "By", "Por", "Von", "Par")} Christopher Genberg</span>
+              <span className="text-[#e6e6e6]">|</span>
+              <time dateTime="2025-01-15">
+                {tx(l, "Uppdaterad 2025", "Updated 2025", "Actualizado 2025", "Aktualisiert 2025", "Mis à jour 2025")}
+              </time>
+            </p>
             <p className="mt-5 text-base leading-relaxed text-[#515151] md:text-lg">
               {c.lead}
             </p>
@@ -408,6 +442,8 @@ export default async function GuidePage({ params }: Props) {
           </section>
         );
       })()}
+
+      </article>
 
       {/* ── CTA ── */}
       <section className="py-16 md:py-24">

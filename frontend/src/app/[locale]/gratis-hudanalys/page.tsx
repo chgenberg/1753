@@ -622,6 +622,19 @@ export default async function FreeAnalysisLanding({ params }: Props) {
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "HowTo",
+        name: c.processTitle,
+        description: c.metaDescription,
+        totalTime: "PT1M",
+        step: c.steps.map((s, i) => ({
+          "@type": "HowToStep",
+          position: i + 1,
+          name: s.title,
+          text: s.body,
+        })),
+      }) }} />
 
       {/* ── Hero with image ── */}
       <section className="relative overflow-hidden bg-gradient-to-b from-[#f5f5f7] to-white py-16 md:py-24">

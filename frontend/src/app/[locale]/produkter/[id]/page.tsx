@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import { getProduct, PRODUCTS, productDisplayName, productShortDesc, productPrice } from "@/lib/products";
 import { getCurrency } from "@/lib/currency";
 import ProductDetail from "./product-detail";
@@ -136,6 +137,33 @@ export default async function ProductPage({ params }: Props) {
     return schema;
   })();
 
+  const product = getProduct(id);
+  const name = product ? productDisplayName(product, l) : id;
+  const breadcrumbSchema = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      {
+        "@type": "ListItem",
+        position: 1,
+        name: tx(l, "Hem", "Home", "Inicio", "Startseite", "Accueil"),
+        item: `${SITE_ORIGIN}/${l}`,
+      },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: tx(l, "Produkter", "Products", "Productos", "Produkte", "Produits"),
+        item: `${SITE_ORIGIN}${localizePath(l, "products")}`,
+      },
+      {
+        "@type": "ListItem",
+        position: 3,
+        name,
+        item: `${SITE_ORIGIN}${localizePath(l, "product", { productId: id })}`,
+      },
+    ],
+  };
+
   return (
     <>
       {jsonLd && (
@@ -144,6 +172,27 @@ export default async function ProductPage({ params }: Props) {
           dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
         />
       )}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }}
+      />
+      <nav aria-label="Breadcrumb" className="mx-auto max-w-[1280px] px-6 pt-4 md:px-10">
+        <ol className="flex items-center gap-1.5 text-xs text-[#766a62]">
+          <li>
+            <Link href={`/${l}`} className="hover:text-[#1d1d1f] transition-colors">
+              {tx(l, "Hem", "Home", "Inicio", "Startseite", "Accueil")}
+            </Link>
+          </li>
+          <li className="text-[#e6e6e6]">/</li>
+          <li>
+            <Link href={localizePath(l, "products")} className="hover:text-[#1d1d1f] transition-colors">
+              {tx(l, "Produkter", "Products", "Productos", "Produkte", "Produits")}
+            </Link>
+          </li>
+          <li className="text-[#e6e6e6]">/</li>
+          <li className="text-[#1d1d1f] font-medium truncate max-w-[200px]">{name}</li>
+        </ol>
+      </nav>
       <ProductDetail id={id} />
     </>
   );
