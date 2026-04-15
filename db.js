@@ -795,7 +795,7 @@ async function enqueueAutomation({ subscriberId, flowId, context, nextSendAt }) 
 async function findDueAutomations() {
   const { rows } = await pool.query(
     `SELECT aq.*, af.steps, af.slug AS flow_slug, af.name AS flow_name,
-            s.email, s.first_name, s.status AS subscriber_status, s.unsubscribe_token
+            s.email, s.first_name, s.locale, s.status AS subscriber_status, s.unsubscribe_token
      FROM automation_queue aq
      JOIN automation_flows af ON af.id = aq.flow_id
      JOIN subscribers s ON s.id = aq.subscriber_id

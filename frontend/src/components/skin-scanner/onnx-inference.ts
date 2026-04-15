@@ -294,6 +294,14 @@ export async function classifyRegionMultiTaskTTA(
   const allCondProbs: number[][] = [];
   const allSevProbs: number[][] = [];
 
+  const supportsFilter = (() => {
+    try {
+      const c = document.createElement("canvas");
+      const ctx = c.getContext("2d");
+      return ctx ? typeof ctx.filter === "string" : false;
+    } catch { return false; }
+  })();
+
   for (let p = 0; p < usePasses; p++) {
     const aug = augmentations[p];
 
@@ -304,7 +312,7 @@ export async function classifyRegionMultiTaskTTA(
       inputCanvas.height = canvas.height;
       const fCtx = inputCanvas.getContext("2d")!;
 
-      if (aug.brightnessShift !== 0) {
+      if (aug.brightnessShift !== 0 && supportsFilter) {
         fCtx.filter = `brightness(${100 + aug.brightnessShift}%)`;
       }
 
@@ -313,6 +321,18 @@ export async function classifyRegionMultiTaskTTA(
         fCtx.scale(-1, 1);
       }
       fCtx.drawImage(canvas, 0, 0);
+
+      if (aug.brightnessShift !== 0 && !supportsFilter) {
+        const imgData = fCtx.getImageData(0, 0, inputCanvas.width, inputCanvas.height);
+        const d = imgData.data;
+        const factor = (100 + aug.brightnessShift) / 100;
+        for (let i = 0; i < d.length; i += 4) {
+          d[i]     = Math.min(255, Math.max(0, d[i] * factor));
+          d[i + 1] = Math.min(255, Math.max(0, d[i + 1] * factor));
+          d[i + 2] = Math.min(255, Math.max(0, d[i + 2] * factor));
+        }
+        fCtx.putImageData(imgData, 0, 0);
+      }
     }
 
     const input = preprocessRegion(inputCanvas, aug.cx, aug.cy, aug.cw, aug.ch, m.image_size, m.mean, m.std);

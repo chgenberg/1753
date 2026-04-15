@@ -37,7 +37,7 @@ export const fr: Messages = {
     navGuide: "Guide soins",
     contactTitle: "Contact",
     addressTitle: "Adresse",
-    addressLines: "Sodra Skjutbanevagen 10\n439 55 Asa\nSuède",
+    addressLines: "Södra Skjutbanevägen 10\n439 55 Åsa\nSuède",
     copyright: "Floranie International AB. Tous droits réservés.",
     privacy: "Politique de confidentialité",
     termsShort: "CGV",
@@ -467,7 +467,7 @@ export const fr: Messages = {
     ingredientsTitle: "Ingrédients",
     relatedTitle: "Autres produits de la routine",
     wishlistLoginRequired: "Connecte-toi pour utiliser la liste d'envies",
-    lifestyleAltSuffix: " – lifestyle",
+    lifestyleAltSuffix: " – mode de vie",
   },
   reviewFormPage: {
     metaTitle: "Écrire un avis – 1753 SKINCARE",
@@ -732,7 +732,7 @@ export const fr: Messages = {
     menu: "Menu",
     logout: "Se déconnecter",
     defaultAddrLabel: "Maison",
-    subscriptionPcs: "pcs",
+    subscriptionPcs: "unités",
     subscriptionEvery: "tous les {n} jours",
   },
   chatWidget: {

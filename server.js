@@ -135,14 +135,69 @@ function verifyToken(token) {
   }
 }
 
+function reqLocale(req) {
+  const l = req.body?.locale || req.query?.locale || req.headers["accept-language"]?.slice(0, 2) || "sv";
+  return ["sv","en","es","de","fr"].includes(l) ? l : "sv";
+}
+
+const API_MSG = {
+  notLoggedIn:        { sv: "Ej inloggad", en: "Not logged in", es: "No has iniciado sesión", de: "Nicht eingeloggt", fr: "Non connecté" },
+  invalidSession:     { sv: "Ogiltig eller utgången session", en: "Invalid or expired session", es: "Sesión inválida o expirada", de: "Ungültige oder abgelaufene Sitzung", fr: "Session invalide ou expirée" },
+  userNotFound:       { sv: "Användare hittades inte", en: "User not found", es: "Usuario no encontrado", de: "Benutzer nicht gefunden", fr: "Utilisateur introuvable" },
+  unknownProduct:     { sv: "Okänd produkt", en: "Unknown product", es: "Producto desconocido", de: "Unbekanntes Produkt", fr: "Produit inconnu" },
+  subNotFound:        { sv: "Prenumeration hittades inte", en: "Subscription not found", es: "Suscripción no encontrada", de: "Abo nicht gefunden", fr: "Abonnement introuvable" },
+  subCreateFail:      { sv: "Prenumerationen kunde inte skapas", en: "Could not create subscription", es: "No se pudo crear la suscripción", de: "Abo konnte nicht erstellt werden", fr: "L'abonnement n'a pas pu être créé" },
+  subFetchFail:       { sv: "Kunde inte hämta prenumerationer", en: "Could not fetch subscriptions", es: "No se pudieron obtener las suscripciones", de: "Abos konnten nicht abgerufen werden", fr: "Impossible de récupérer les abonnements" },
+  subPauseOnly:       { sv: "Kan bara pausa aktiva prenumerationer", en: "Can only pause active subscriptions", es: "Solo se pueden pausar suscripciones activas", de: "Nur aktive Abos können pausiert werden", fr: "Seuls les abonnements actifs peuvent être mis en pause" },
+  subPauseFail:       { sv: "Kunde inte pausa prenumerationen", en: "Could not pause subscription", es: "No se pudo pausar la suscripción", de: "Abo konnte nicht pausiert werden", fr: "Impossible de mettre l'abonnement en pause" },
+  subResumeOnly:      { sv: "Kan bara återuppta pausade prenumerationer", en: "Can only resume paused subscriptions", es: "Solo se pueden reanudar suscripciones pausadas", de: "Nur pausierte Abos können fortgesetzt werden", fr: "Seuls les abonnements en pause peuvent être repris" },
+  subResumeFail:      { sv: "Kunde inte återuppta prenumerationen", en: "Could not resume subscription", es: "No se pudo reanudar la suscripción", de: "Abo konnte nicht fortgesetzt werden", fr: "Impossible de reprendre l'abonnement" },
+  subCancelledNoEdit: { sv: "Kan inte ändra avbruten prenumeration", en: "Cannot modify a cancelled subscription", es: "No se puede modificar una suscripción cancelada", de: "Gekündigtes Abo kann nicht geändert werden", fr: "Impossible de modifier un abonnement annulé" },
+  subInvalidInterval: { sv: "Ogiltigt intervall. Välj 30, 60 eller 90 dagar.", en: "Invalid interval. Choose 30, 60 or 90 days.", es: "Intervalo inválido. Elige 30, 60 o 90 días.", de: "Ungültiges Intervall. Wähle 30, 60 oder 90 Tage.", fr: "Intervalle invalide. Choisissez 30, 60 ou 90 jours." },
+  subNothingToChange: { sv: "Inget att ändra", en: "Nothing to change", es: "Nada que cambiar", de: "Nichts zu ändern", fr: "Rien à modifier" },
+  subUpdateFail:      { sv: "Kunde inte uppdatera prenumerationen", en: "Could not update subscription", es: "No se pudo actualizar la suscripción", de: "Abo konnte nicht aktualisiert werden", fr: "Impossible de mettre à jour l'abonnement" },
+  subCancelFail:      { sv: "Kunde inte avbryta prenumerationen", en: "Could not cancel subscription", es: "No se pudo cancelar la suscripción", de: "Abo konnte nicht gekündigt werden", fr: "Impossible d'annuler l'abonnement" },
+  orderNotFound:      { sv: "Order hittades inte", en: "Order not found", es: "Pedido no encontrado", de: "Bestellung nicht gefunden", fr: "Commande introuvable" },
+  ordersFetchFail:    { sv: "Kunde inte hämta ordrar", en: "Could not fetch orders", es: "No se pudieron obtener los pedidos", de: "Bestellungen konnten nicht abgerufen werden", fr: "Impossible de récupérer les commandes" },
+  statsFetchFail:     { sv: "Kunde inte hämta statistik", en: "Could not fetch statistics", es: "No se pudieron obtener las estadísticas", de: "Statistiken konnten nicht abgerufen werden", fr: "Impossible de récupérer les statistiques" },
+  discountEnter:      { sv: "Ange en rabattkod", en: "Enter a discount code", es: "Introduce un código de descuento", de: "Gib einen Rabattcode ein", fr: "Saisissez un code de réduction" },
+  discountInvalid:    { sv: "Ogiltig rabattkod", en: "Invalid discount code", es: "Código de descuento inválido", de: "Ungültiger Rabattcode", fr: "Code de réduction invalide" },
+  discountWrongProducts: { sv: "Rabattkoden gäller inte för dessa produkter", en: "Discount code does not apply to these products", es: "El código no aplica a estos productos", de: "Der Rabattcode gilt nicht für diese Produkte", fr: "Le code ne s'applique pas à ces produits" },
+  analysisNoKey:      { sv: "AI-tjänsten är inte konfigurerad.", en: "AI service is not configured.", es: "El servicio de IA no está configurado.", de: "Der KI-Dienst ist nicht konfiguriert.", fr: "Le service IA n'est pas configuré." },
+  analysisFailed:     { sv: "Analysen kunde inte genomföras just nu.", en: "The analysis could not be completed right now.", es: "El análisis no pudo completarse ahora.", de: "Die Analyse konnte gerade nicht durchgeführt werden.", fr: "L'analyse n'a pas pu être effectuée pour le moment." },
+  analysisNoResult:   { sv: "Analysen gav inget resultat. Försök igen.", en: "Analysis produced no result. Try again.", es: "El análisis no produjo resultado. Inténtalo de nuevo.", de: "Die Analyse hat kein Ergebnis geliefert. Versuche es erneut.", fr: "L'analyse n'a donné aucun résultat. Réessayez." },
+  imageTooBig:        { sv: "Bilden är för stor (max 10 MB).", en: "Image is too large (max 10 MB).", es: "La imagen es demasiado grande (máx. 10 MB).", de: "Das Bild ist zu groß (max. 10 MB).", fr: "L'image est trop grande (max. 10 Mo)." },
+  noValidPhoto:       { sv: "Inget giltigt foto bifogat.", en: "No valid photo attached.", es: "No se adjuntó una foto válida.", de: "Kein gültiges Foto angehängt.", fr: "Aucune photo valide jointe." },
+  historyFetchFail:   { sv: "Kunde inte hämta analyshistorik.", en: "Could not fetch analysis history.", es: "No se pudo obtener el historial.", de: "Analyseverlauf konnte nicht abgerufen werden.", fr: "Impossible de récupérer l'historique." },
+  tokenAndPwRequired: { sv: "Token och lösenord krävs", en: "Token and password are required", es: "Se requieren token y contraseña", de: "Token und Passwort sind erforderlich", fr: "Le jeton et le mot de passe sont requis" },
+  pwMinLength:        { sv: "Lösenordet måste vara minst 6 tecken", en: "Password must be at least 6 characters", es: "La contraseña debe tener al menos 6 caracteres", de: "Das Passwort muss mindestens 6 Zeichen lang sein", fr: "Le mot de passe doit comporter au moins 6 caractères" },
+  linkInvalid:        { sv: "Ogiltig eller utgången länk", en: "Invalid or expired link", es: "Enlace inválido o expirado", de: "Ungültiger oder abgelaufener Link", fr: "Lien invalide ou expiré" },
+  linkExpired:        { sv: "Länken har gått ut. Begär en ny via inloggningssidan.", en: "Link has expired. Request a new one from the login page.", es: "El enlace ha expirado. Solicita uno nuevo desde la página de inicio de sesión.", de: "Der Link ist abgelaufen. Fordere einen neuen über die Anmeldeseite an.", fr: "Le lien a expiré. Demandez-en un nouveau depuis la page de connexion." },
+  pwSaved:            { sv: "Lösenord sparat!", en: "Password saved!", es: "¡Contraseña guardada!", de: "Passwort gespeichert!", fr: "Mot de passe enregistré !" },
+  pwSaveFail:         { sv: "Kunde inte spara lösenordet", en: "Could not save password", es: "No se pudo guardar la contraseña", de: "Passwort konnte nicht gespeichert werden", fr: "Impossible d'enregistrer le mot de passe" },
+  rateLimited:        { sv: "Du har nått gränsen. Försök igen om en stund.", en: "Rate limit reached. Please try again later.", es: "Has alcanzado el límite. Inténtalo más tarde.", de: "Limit erreicht. Bitte versuche es später erneut.", fr: "Limite atteinte. Veuillez réessayer plus tard." },
+  allFieldsRequired:  { sv: "Alla fält krävs.", en: "All fields are required.", es: "Todos los campos son obligatorios.", de: "Alle Felder sind erforderlich.", fr: "Tous les champs sont requis." },
+  emailNotConfigured: { sv: "E-posttjänsten är inte konfigurerad.", en: "Email service is not configured.", es: "El servicio de correo no está configurado.", de: "Der E-Mail-Dienst ist nicht konfiguriert.", fr: "Le service e-mail n'est pas configuré." },
+  messageSendFail:    { sv: "Kunde inte skicka meddelandet. Försök igen.", en: "Could not send message. Please try again.", es: "No se pudo enviar el mensaje. Inténtalo de nuevo.", de: "Nachricht konnte nicht gesendet werden. Bitte versuche es erneut.", fr: "Impossible d'envoyer le message. Veuillez réessayer." },
+  notEnoughPoints:    { sv: "Inte tillräckligt med poäng", en: "Not enough points", es: "No tienes suficientes puntos", de: "Nicht genügend Punkte", fr: "Pas assez de points" },
+  pointsMin100:       { sv: "Minst 100 poäng krävs", en: "At least 100 points required", es: "Se requieren al menos 100 puntos", de: "Mindestens 100 Punkte erforderlich", fr: "Au moins 100 points requis" },
+  pointsStep100:      { sv: "Poäng måste vara i steg om 100", en: "Points must be in steps of 100", es: "Los puntos deben ser en pasos de 100", de: "Punkte müssen in 100er-Schritten sein", fr: "Les points doivent être par tranches de 100" },
+};
+
+function apiMsg(key, locale) {
+  const texts = API_MSG[key];
+  if (!texts) return key;
+  return texts[locale] || texts.en || texts.sv || key;
+}
+
 function authMiddleware(req, res, next) {
   const header = req.headers.authorization;
   if (!header || !header.startsWith("Bearer ")) {
-    return res.status(401).json({ message: "Ej inloggad" });
+    return res.status(401).json({ message: emailT(reqLocale(req), API_MSG.notLoggedIn) });
   }
   const payload = verifyToken(header.split(" ")[1]);
   if (!payload) {
-    return res.status(401).json({ message: "Ogiltig eller utgången session" });
+    return res.status(401).json({ message: emailT(reqLocale(req), API_MSG.invalidSession) });
   }
   req.userId = payload.id;
   req.userEmail = payload.email;
@@ -341,10 +396,11 @@ app.post("/api/subscriptions/create", authMiddleware, async (req, res) => {
     const { productId, quantity, intervalDays, currency: reqCurrency } = req.body;
     const currency = reqCurrency === "EUR" ? "EUR" : "SEK";
     const product = PRODUCTS_MAP[productId];
-    if (!product) return res.status(400).json({ message: "Okänd produkt" });
+    const l = reqLocale(req);
+    if (!product) return res.status(400).json({ message: apiMsg("unknownProduct", l) });
 
     const user = await db.findUserById(req.userId);
-    if (!user) return res.status(404).json({ message: "Användare hittades inte" });
+    if (!user) return res.status(404).json({ message: apiMsg("userNotFound", l) });
 
     const qty = quantity || 1;
     const allowedIntervals = [30, 60, 90];
@@ -390,7 +446,7 @@ app.post("/api/subscriptions/create", authMiddleware, async (req, res) => {
     res.json({ orderCode: vivaData.orderCode, checkoutUrl });
   } catch (err) {
     console.error("[Subscription Create Error]", err);
-    res.status(err.status || 500).json({ message: err.message || "Prenumerationen kunde inte skapas" });
+    res.status(err.status || 500).json({ message: err.message || apiMsg("subCreateFail", reqLocale(req)) });
   }
 });
 
@@ -399,15 +455,16 @@ app.get("/api/subscriptions", authMiddleware, async (req, res) => {
     const subs = await db.findSubscriptionsByUser(req.userId);
     res.json(subs);
   } catch (err) {
-    res.status(500).json({ message: err.message || "Kunde inte hämta prenumerationer" });
+    res.status(500).json({ message: err.message || apiMsg("subFetchFail", reqLocale(req)) });
   }
 });
 
 app.put("/api/subscriptions/:id/pause", authMiddleware, async (req, res) => {
   try {
     const sub = await db.findSubscriptionById(parseInt(req.params.id, 10));
-    if (!sub || sub.user_id !== req.userId) return res.status(404).json({ message: "Prenumeration hittades inte" });
-    if (sub.status !== "active") return res.status(400).json({ message: "Kan bara pausa aktiva prenumerationer" });
+    const l = reqLocale(req);
+    if (!sub || sub.user_id !== req.userId) return res.status(404).json({ message: apiMsg("subNotFound", l) });
+    if (sub.status !== "active") return res.status(400).json({ message: apiMsg("subPauseOnly", l) });
 
     const updated = await db.updateSubscription(sub.id, {
       status: "paused",
@@ -416,15 +473,16 @@ app.put("/api/subscriptions/:id/pause", authMiddleware, async (req, res) => {
     sendSubscriptionChangeEmail(sub, "paused").catch(err => console.error("[Email] Sub pause email error:", err.message));
     res.json(updated);
   } catch (err) {
-    res.status(500).json({ message: err.message || "Kunde inte pausa prenumerationen" });
+    res.status(500).json({ message: err.message || apiMsg("subPauseFail", reqLocale(req)) });
   }
 });
 
 app.put("/api/subscriptions/:id/resume", authMiddleware, async (req, res) => {
   try {
     const sub = await db.findSubscriptionById(parseInt(req.params.id, 10));
-    if (!sub || sub.user_id !== req.userId) return res.status(404).json({ message: "Prenumeration hittades inte" });
-    if (sub.status !== "paused") return res.status(400).json({ message: "Kan bara återuppta pausade prenumerationer" });
+    const l = reqLocale(req);
+    if (!sub || sub.user_id !== req.userId) return res.status(404).json({ message: apiMsg("subNotFound", l) });
+    if (sub.status !== "paused") return res.status(400).json({ message: apiMsg("subResumeOnly", l) });
 
     const nextCharge = new Date();
     nextCharge.setDate(nextCharge.getDate() + sub.interval_days);
@@ -437,15 +495,16 @@ app.put("/api/subscriptions/:id/resume", authMiddleware, async (req, res) => {
     sendSubscriptionChangeEmail(sub, "resumed", { nextCharge: nextCharge.toISOString().split("T")[0] }).catch(err => console.error("[Email] Sub resume email error:", err.message));
     res.json(updated);
   } catch (err) {
-    res.status(500).json({ message: err.message || "Kunde inte återuppta prenumerationen" });
+    res.status(500).json({ message: err.message || apiMsg("subResumeFail", reqLocale(req)) });
   }
 });
 
 app.put("/api/subscriptions/:id", authMiddleware, async (req, res) => {
   try {
     const sub = await db.findSubscriptionById(parseInt(req.params.id, 10));
-    if (!sub || sub.user_id !== req.userId) return res.status(404).json({ message: "Prenumeration hittades inte" });
-    if (sub.status === "cancelled") return res.status(400).json({ message: "Kan inte ändra avbruten prenumeration" });
+    const l = reqLocale(req);
+    if (!sub || sub.user_id !== req.userId) return res.status(404).json({ message: apiMsg("subNotFound", l) });
+    if (sub.status === "cancelled") return res.status(400).json({ message: apiMsg("subCancelledNoEdit", l) });
 
     const { quantity, intervalDays } = req.body;
     const fields = {};
@@ -464,7 +523,7 @@ app.put("/api/subscriptions/:id", authMiddleware, async (req, res) => {
     if (intervalDays !== undefined) {
       const allowedIntervals = [30, 60, 90];
       if (!allowedIntervals.includes(intervalDays)) {
-        return res.status(400).json({ message: "Ogiltigt intervall. Välj 30, 60 eller 90 dagar." });
+        return res.status(400).json({ message: apiMsg("subInvalidInterval", l) });
       }
       fields.interval_days = intervalDays;
       if (sub.status === "active" && sub.next_charge_date) {
@@ -476,7 +535,7 @@ app.put("/api/subscriptions/:id", authMiddleware, async (req, res) => {
     }
 
     if (Object.keys(fields).length === 0) {
-      return res.status(400).json({ message: "Inget att ändra" });
+      return res.status(400).json({ message: apiMsg("subNothingToChange", l) });
     }
 
     const updated = await db.updateSubscription(sub.id, fields);
@@ -486,14 +545,14 @@ app.put("/api/subscriptions/:id", authMiddleware, async (req, res) => {
     }).catch(err => console.error("[Email] Sub update email error:", err.message));
     res.json(updated);
   } catch (err) {
-    res.status(500).json({ message: err.message || "Kunde inte uppdatera prenumerationen" });
+    res.status(500).json({ message: err.message || apiMsg("subUpdateFail", reqLocale(req)) });
   }
 });
 
 app.delete("/api/subscriptions/:id", authMiddleware, async (req, res) => {
   try {
     const sub = await db.findSubscriptionById(parseInt(req.params.id, 10));
-    if (!sub || sub.user_id !== req.userId) return res.status(404).json({ message: "Prenumeration hittades inte" });
+    if (!sub || sub.user_id !== req.userId) return res.status(404).json({ message: apiMsg("subNotFound", reqLocale(req)) });
 
     const updated = await db.updateSubscription(sub.id, {
       status: "cancelled",
@@ -502,7 +561,7 @@ app.delete("/api/subscriptions/:id", authMiddleware, async (req, res) => {
     sendSubscriptionChangeEmail(sub, "cancelled").catch(err => console.error("[Email] Sub cancel email error:", err.message));
     res.json(updated);
   } catch (err) {
-    res.status(500).json({ message: err.message || "Kunde inte avbryta prenumerationen" });
+    res.status(500).json({ message: err.message || apiMsg("subCancelFail", reqLocale(req)) });
   }
 });
 
@@ -2181,7 +2240,7 @@ app.post("/api/analysis", async (req, res) => {
     if (researchSnippets) systemPromptFull += researchSnippets;
 
     if (!process.env.OPENAI_API_KEY) {
-      return res.status(500).json({ message: "OpenAI API-nyckel saknas i serverkonfigurationen." });
+      return res.status(500).json({ message: apiMsg("analysisNoKey", reqLocale(req)) });
     }
 
     const contentParts = [
@@ -2244,7 +2303,7 @@ app.post("/api/analysis", async (req, res) => {
 
     if (!response.ok) {
       console.error("[Analysis] OpenAI error:", response.status, JSON.stringify(data).slice(0, 500));
-      const msg = data.error?.message || "Analysen kunde inte genomföras just nu.";
+      const msg = data.error?.message || apiMsg("analysisFailed", reqLocale(req));
       throw { status: response.status, message: msg };
     }
 
@@ -2253,7 +2312,7 @@ app.post("/api/analysis", async (req, res) => {
     const outputText = extractOutputText(data);
     if (!outputText) {
       console.error("[Analysis] Empty output. Full response:", JSON.stringify(data).slice(0, 2000));
-      throw { status: 500, message: "Analysen gav inget resultat. Försök igen." };
+      throw { status: 500, message: apiMsg("analysisNoResult", reqLocale(req)) };
     }
 
     console.log("[Analysis] Success, output length:", outputText.length);
@@ -2332,11 +2391,11 @@ app.post("/api/training-data", async (req, res) => {
     const { imageBase64, scanResults, quizAnswers, topCondition, confidence } = req.body;
 
     if (!imageBase64 || !imageBase64.startsWith("data:image/")) {
-      return res.status(400).json({ message: "Ingen giltig bild bifogad." });
+      return res.status(400).json({ message: apiMsg("noValidPhoto", reqLocale(req)) });
     }
 
     if (imageBase64.length > 15 * 1024 * 1024) {
-      return res.status(413).json({ message: "Bilden ar for stor (max 10 MB)." });
+      return res.status(413).json({ message: apiMsg("imageTooBig", reqLocale(req)) });
     }
 
     const saved = await db.createTrainingUpload({
@@ -2435,7 +2494,7 @@ app.get("/api/analysis/history", authMiddleware, async (req, res) => {
     res.json(analyses);
   } catch (err) {
     console.error("[Analysis History]", err);
-    res.status(500).json({ message: "Kunde inte hämta analyshistorik" });
+    res.status(500).json({ message: apiMsg("historyFetchFail", reqLocale(req)) });
   }
 });
 
@@ -2607,7 +2666,7 @@ app.post("/api/analysis/chat", async (req, res) => {
   try {
     const clientIp = req.ip || req.connection.remoteAddress;
     if (!checkRateLimit(clientIp, "analysis-chat", 50)) {
-      return res.status(429).json({ message: "Du har nått gränsen. Försök igen om en stund." });
+      return res.status(429).json({ message: apiMsg("rateLimited", reqLocale(req)) });
     }
 
     const { message, previousResponseId } = req.body;
@@ -2656,7 +2715,7 @@ app.post("/api/analysis/chat", async (req, res) => {
 
 app.post("/api/discount/validate", async (req, res) => {
   const { code, items } = req.body;
-  if (!code) return res.status(400).json({ message: "Ange en rabattkod" });
+  if (!code) return res.status(400).json({ message: apiMsg("discountEnter", reqLocale(req)) });
 
   const key = code.toLowerCase().trim();
   let discount = DISCOUNT_CODES[key];
@@ -2679,11 +2738,11 @@ app.post("/api/discount/validate", async (req, res) => {
     }
   }
 
-  if (!discount) return res.status(404).json({ message: "Ogiltig rabattkod" });
+  if (!discount) return res.status(404).json({ message: apiMsg("discountInvalid", reqLocale(req)) });
 
   const applicableItems = (items || []).filter(i => !discount.productIds || discount.productIds.includes(i.id));
   if (applicableItems.length === 0) {
-    return res.status(400).json({ message: "Rabattkoden gäller inte för dessa produkter" });
+    return res.status(400).json({ message: apiMsg("discountWrongProducts", reqLocale(req)) });
   }
 
   res.json({
@@ -4516,7 +4575,7 @@ app.post("/api/contact", async (req, res) => {
     }
     const { name, email, message } = req.body;
     if (!name || !email || !message) {
-      return res.status(400).json({ message: "Alla fält krävs." });
+      return res.status(400).json({ message: apiMsg("allFieldsRequired", reqLocale(req)) });
     }
 
     // Auto-unsubscribe if message is about newsletter opt-out
@@ -4543,7 +4602,7 @@ app.post("/api/contact", async (req, res) => {
     const apiKey = process.env.RESEND_API_KEY;
     if (!apiKey) {
       console.error("[Contact] RESEND_API_KEY not set");
-      return res.status(500).json({ message: "E-posttjänsten är inte konfigurerad." });
+      return res.status(500).json({ message: apiMsg("emailNotConfigured", reqLocale(req)) });
     }
 
     const { Resend } = require("resend");
@@ -4582,7 +4641,7 @@ app.post("/api/contact", async (req, res) => {
     res.json({ ok: true });
   } catch (err) {
     console.error("[Contact] Error:", err);
-    res.status(500).json({ message: "Kunde inte skicka meddelandet. Försök igen." });
+    res.status(500).json({ message: apiMsg("messageSendFail", reqLocale(req)) });
   }
 });
 
@@ -4592,10 +4651,10 @@ app.post("/api/auth/set-password", async (req, res) => {
   try {
     const { token, password } = req.body;
     if (!token || !password) {
-      return res.status(400).json({ message: "Token och lösenord krävs" });
+      return res.status(400).json({ message: apiMsg("tokenAndPwRequired", reqLocale(req)) });
     }
     if (password.length < 6) {
-      return res.status(400).json({ message: "Lösenordet måste vara minst 6 tecken" });
+      return res.status(400).json({ message: apiMsg("pwMinLength", reqLocale(req)) });
     }
 
     const { rows } = await db.pool.query(
@@ -4604,10 +4663,10 @@ app.post("/api/auth/set-password", async (req, res) => {
     );
     const user = rows[0];
     if (!user) {
-      return res.status(400).json({ message: "Ogiltig eller utgången länk" });
+      return res.status(400).json({ message: apiMsg("linkInvalid", reqLocale(req)) });
     }
     if (user.password_reset_expires && new Date(user.password_reset_expires) < new Date()) {
-      return res.status(400).json({ message: "Länken har gått ut. Begär en ny via inloggningssidan." });
+      return res.status(400).json({ message: apiMsg("linkExpired", reqLocale(req)) });
     }
 
     const passwordHash = bcrypt ? await bcrypt.hash(password, 10) : password;
@@ -4618,9 +4677,9 @@ app.post("/api/auth/set-password", async (req, res) => {
     });
 
     const authToken = generateToken(user);
-    res.json({ token: authToken, message: "Lösenord sparat!" });
+    res.json({ token: authToken, message: apiMsg("pwSaved", reqLocale(req)) });
   } catch (err) {
-    res.status(500).json({ message: err.message || "Kunde inte spara lösenordet" });
+    res.status(500).json({ message: err.message || apiMsg("pwSaveFail", reqLocale(req)) });
   }
 });
 
@@ -5189,12 +5248,12 @@ app.post("/api/loyalty/redeem", authMiddleware, async (req, res) => {
   try {
     const { points } = req.body;
     const amount = parseInt(points);
-    if (!amount || amount < 100) return res.status(400).json({ message: "Minst 100 poäng krävs" });
-    if (amount % 100 !== 0) return res.status(400).json({ message: "Poäng måste vara i steg om 100" });
+    if (!amount || amount < 100) return res.status(400).json({ message: apiMsg("pointsMin100", reqLocale(req)) });
+    if (amount % 100 !== 0) return res.status(400).json({ message: apiMsg("pointsStep100", reqLocale(req)) });
 
     const user = await db.findUserByEmail(req.user.email);
     if (!user || (user.loyalty_points || 0) < amount) {
-      return res.status(400).json({ message: "Inte tillräckligt med poäng" });
+      return res.status(400).json({ message: apiMsg("notEnoughPoints", reqLocale(req)) });
     }
 
     const remaining = await db.deductLoyaltyPoints(user.id, amount);
@@ -6224,7 +6283,7 @@ app.post("/api/chat", async (req, res) => {
   try {
     const clientIp = req.ip || req.connection.remoteAddress;
     if (!checkRateLimit(clientIp, "chat-widget", 60)) {
-      return res.status(429).json({ message: "Du har nått gränsen. Försök igen om en stund." });
+      return res.status(429).json({ message: apiMsg("rateLimited", reqLocale(req)) });
     }
 
     const { message, previousResponseId, locale } = req.body;

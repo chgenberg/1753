@@ -46,13 +46,10 @@ const GUIDE_PATHS: Record<string, string> = {
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
-  const svMeta = locale === "sv";
   const canonicalPath = GUIDE_PATHS[locale] ?? GUIDE_PATHS.en;
   return {
-    title: svMeta ? "Hudvardsguide -- artiklar och tips" : "Skincare Guide -- articles and tips",
-    description: svMeta
-      ? "Utforska vara guider om hudvard, CBD, CBG, livsstil och hudtillstand. Vetenskapsbaserade artiklar fran 1753 SKINCARE."
-      : "Explore our guides on skincare, CBD, CBG, lifestyle, and skin conditions. Science-based articles from 1753 SKINCARE.",
+    title: { sv: "Hudvårdsguide – artiklar och tips", en: "Skincare Guide – articles and tips", es: "Guía de cuidado – artículos y consejos", de: "Hautpflege-Ratgeber – Artikel und Tipps", fr: "Guide de soins – articles et conseils" }[locale] || "Skincare Guide – articles and tips",
+    description: { sv: "Utforska våra guider om hudvård, CBD, CBG, livsstil och hudtillstånd. Vetenskapsbaserade artiklar från 1753 SKINCARE.", en: "Explore our guides on skincare, CBD, CBG, lifestyle, and skin conditions. Science-based articles from 1753 SKINCARE.", es: "Explora nuestras guías sobre cuidado de la piel, CBD, CBG, estilo de vida y afecciones cutáneas. Artículos basados en ciencia de 1753 SKINCARE.", de: "Entdecke unsere Ratgeber zu Hautpflege, CBD, CBG, Lifestyle und Hautzuständen. Wissenschaftsbasierte Artikel von 1753 SKINCARE.", fr: "Explorez nos guides sur les soins, le CBD, le CBG, le mode de vie et les affections cutanées. Articles scientifiques de 1753 SKINCARE." }[locale] || "Explore our guides on skincare, CBD, CBG, lifestyle, and skin conditions. Science-based articles from 1753 SKINCARE.",
     alternates: {
       canonical: `${BASE_URL}${canonicalPath}`,
       languages: {
@@ -95,9 +92,7 @@ export default async function GuidePage({ params }: Props) {
     "@context": "https://schema.org",
     "@type": "CollectionPage",
     name: tx("Hudvardsguide", "Skincare Guide", "Guia de cuidado de la piel", "Hautpflege-Guide", "Guide de soins de la peau"),
-    description: l === "sv"
-      ? "Samling av vetenskapsbaserade artiklar om hudvard, CBD, CBG och livsstil"
-      : "Collection of science-based articles on skincare, CBD, CBG, and lifestyle",
+    description: tx("Samling av vetenskapsbaserade artiklar om hudvård, CBD, CBG och livsstil", "Collection of science-based articles on skincare, CBD, CBG, and lifestyle", "Colección de artículos científicos sobre cuidado de la piel, CBD, CBG y estilo de vida", "Sammlung wissenschaftsbasierter Artikel über Hautpflege, CBD, CBG und Lifestyle", "Collection d'articles scientifiques sur les soins, le CBD, le CBG et le mode de vie"),
     url: `${BASE_URL}/${l}/guide`,
     publisher: { "@id": "https://www.1753skin.com/#organization" },
     mainEntity: {

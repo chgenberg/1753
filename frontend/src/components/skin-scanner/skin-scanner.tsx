@@ -121,7 +121,9 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
     (source: HTMLImageElement | ImageBitmap) => {
       const canvas = canvasRef.current;
       if (!canvas) return;
-      const MAX_DIM = 2048;
+      const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+        (navigator.maxTouchPoints > 0 && window.innerWidth < 1024);
+      const MAX_DIM = isMobile ? 1024 : 2048;
       let w = "naturalWidth" in source ? source.naturalWidth : source.width;
       let h = "naturalHeight" in source ? source.naturalHeight : source.height;
       if (w > MAX_DIM || h > MAX_DIM) {
@@ -229,6 +231,10 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
     setError(null);
     setAnalyzingZone("");
 
+    const isMobile = /Mobi|Android|iPhone|iPad|iPod/i.test(navigator.userAgent) ||
+      (navigator.maxTouchPoints > 0 && window.innerWidth < 1024);
+    const ttaPasses = isMobile ? 3 : 5;
+
     try {
       const [{ loadModel, classifyRegionMultiTaskTTA, computeSkinMetrics, ensembleZones, loadMeta }, { loadFaceLandmarker, detectFaceZones, cropZoneImages, ZONE_IDS_FOR_GPT }] =
         await Promise.all([
@@ -269,7 +275,7 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
       }
 
       setAnalyzingZone(tx(locale, "Helhetsbild", "Full face", "Rostro completo", "Gesamtes Gesicht", "Visage complet"));
-      const rawOverallResult = await classifyRegionMultiTaskTTA(session, canvas, 0, 0, canvas.width, canvas.height, 5);
+      const rawOverallResult = await classifyRegionMultiTaskTTA(session, canvas, 0, 0, canvas.width, canvas.height, ttaPasses);
       const overallPreds = applyNormalFilter(rawOverallResult.conditions);
       const overallSeverity = rawOverallResult.severity;
 
@@ -320,7 +326,7 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
 
           setAnalyzingZone(getZoneLabel(matchingFaceZone, locale));
 
-          const rawResult = await classifyRegionMultiTaskTTA(session, canvas, mz.x, mz.y, mz.w, mz.h, 5);
+          const rawResult = await classifyRegionMultiTaskTTA(session, canvas, mz.x, mz.y, mz.w, mz.h, ttaPasses);
           const preds = applyNormalFilter(rawResult.conditions);
 
           zoneResults.push({
@@ -348,7 +354,7 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
 
           if (safeW < 20 || safeH < 20) continue;
 
-          const rawResult = await classifyRegionMultiTaskTTA(session, canvas, safeX, safeY, safeW, safeH, 5);
+          const rawResult = await classifyRegionMultiTaskTTA(session, canvas, safeX, safeY, safeW, safeH, ttaPasses);
           const preds = applyNormalFilter(rawResult.conditions);
 
           zoneResults.push({

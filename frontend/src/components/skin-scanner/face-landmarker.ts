@@ -23,17 +23,28 @@ export async function loadFaceLandmarker(): Promise<FaceLandmarker> {
     const vision = await FilesetResolver.forVisionTasks(
       "https://cdn.jsdelivr.net/npm/@mediapipe/tasks-vision@latest/wasm"
     );
-    const landmarker = await FaceLandmarker.createFromOptions(vision, {
-      baseOptions: {
-        modelAssetPath:
-          "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",
-        delegate: "GPU",
-      },
-      runningMode: "IMAGE",
+    const baseOpts = {
+      modelAssetPath:
+        "https://storage.googleapis.com/mediapipe-models/face_landmarker/face_landmarker/float16/1/face_landmarker.task",
+    };
+    const commonOpts = {
+      runningMode: "IMAGE" as const,
       numFaces: 1,
       outputFaceBlendshapes: false,
       outputFacialTransformationMatrixes: false,
-    });
+    };
+    let landmarker: FaceLandmarker;
+    try {
+      landmarker = await FaceLandmarker.createFromOptions(vision, {
+        baseOptions: { ...baseOpts, delegate: "GPU" },
+        ...commonOpts,
+      });
+    } catch {
+      landmarker = await FaceLandmarker.createFromOptions(vision, {
+        baseOptions: { ...baseOpts, delegate: "CPU" },
+        ...commonOpts,
+      });
+    }
     landmarkerInstance = landmarker;
     return landmarker;
   })();

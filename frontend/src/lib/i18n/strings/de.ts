@@ -515,7 +515,7 @@ export const de: Messages = {
     metaTitle: "Treueprogramm – 1753 SKINCARE",
     metaDescription: "Silber, Gold und Platin. Sammle Punkte und schalte exklusive Vorteile mit jedem Einkauf frei.",
     kicker: "1753 Rewards",
-    h1: "Treuere Haut, bessere Vorteile",
+    h1: "Treue Haut, bessere Vorteile",
     lead: "Jeder Euro, den du ausgibst, bringt Punkte. Je mehr du einkaufst, desto besser die Vorteile. Drei Stufen, null Aufwand.",
     howTitle: "So funktioniert's",
     howStep1Title: "Einkaufen",
