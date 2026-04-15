@@ -159,7 +159,7 @@ export default async function GuidePage({ params }: Props) {
     headline: c.h1,
     description: c.metaDescription,
     image: `${BASE_URL}${images.hero}`,
-    datePublished: "2025-01-15",
+    datePublished: "2026-01-15",
     dateModified: new Date().toISOString().split("T")[0],
     author: {
       "@type": "Person",
@@ -224,8 +224,8 @@ export default async function GuidePage({ params }: Props) {
             <p className="mt-3 flex items-center gap-2 text-xs text-[#766a62]">
               <span>{tx(l, "Av", "By", "Por", "Von", "Par")} Christopher Genberg</span>
               <span className="text-[#e6e6e6]">|</span>
-              <time dateTime="2025-01-15">
-                {tx(l, "Uppdaterad 2025", "Updated 2025", "Actualizado 2025", "Aktualisiert 2025", "Mis à jour 2025")}
+              <time dateTime="2026-01-15">
+                {tx(l, "Uppdaterad 2026", "Updated 2026", "Actualizado 2026", "Aktualisiert 2026", "Mis à jour 2026")}
               </time>
             </p>
             <p className="mt-5 text-base leading-relaxed text-[#515151] md:text-lg">
