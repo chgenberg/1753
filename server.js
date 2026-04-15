@@ -5357,6 +5357,24 @@ app.post("/api/newsletter/subscribe", async (req, res) => {
       });
     }
 
+    // Sync to Resend Audience (non-blocking)
+    const audienceId = process.env.RESEND_AUDIENCE_ID || "efd080df-d556-4b81-a6f4-bbece8017cb9";
+    const resendKey = process.env.RESEND_API_KEY;
+    if (resendKey) {
+      const { Resend } = require("resend");
+      const resendClient = new Resend(resendKey);
+      resendClient.contacts.create({
+        audienceId,
+        email: subscriber.email,
+        firstName: subscriber.first_name || "",
+        unsubscribed: false,
+      }).then(() => {
+        console.log(`[Newsletter] Synced ${subscriber.email} to Resend Audience`);
+      }).catch((err) => {
+        console.error(`[Newsletter] Resend Audience sync failed for ${subscriber.email}:`, err.message);
+      });
+    }
+
     console.log(`[Newsletter] ${email} subscribed (id=${subscriber.id}, skin=${skinCondition || "none"})`);
     res.json({ ok: true, message: emailT(locale, { sv: "Tack! Du är nu prenumerant.", en: "Thanks! You are now subscribed.", es: "Gracias! Ya estás suscrito/a.", de: "Danke! Du bist jetzt abonniert.", fr: "Merci ! Vous êtes maintenant abonné(e)." }) });
   } catch (err) {
