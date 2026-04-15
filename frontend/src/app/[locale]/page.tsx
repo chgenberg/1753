@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
+import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -264,10 +265,27 @@ function FeatureModal({ feature, onClose }: { feature: FeatureItem | null; onClo
   );
 }
 
+function tx(locale: string, sv: string, en: string, es?: string, de?: string, fr?: string) {
+  if (locale === "sv") return sv;
+  if (locale === "es") return es || en;
+  if (locale === "de") return de || en;
+  if (locale === "fr") return fr || en;
+  return en;
+}
+
 export default function HomePage() {
-  const { t, messages, path, homeHash } = useLocale();
+  const { t, messages, path, homeHash, locale } = useLocale();
+  const searchParams = useSearchParams();
   const [activeFeature, setActiveFeature] = useState<FeatureItem | null>(null);
   const [videoOpen, setVideoOpen] = useState(false);
+  const [showUnsub, setShowUnsub] = useState(false);
+
+  useEffect(() => {
+    if (searchParams.get("unsubscribed") === "1") {
+      setShowUnsub(true);
+      window.history.replaceState({}, "", window.location.pathname);
+    }
+  }, [searchParams]);
 
   const features: FeatureItem[] = messages.home.features.map((f, i) => ({
     ...f,
@@ -288,6 +306,27 @@ export default function HomePage() {
       <FeatureModal feature={activeFeature} onClose={closeFeature} />
       <VideoPopup open={videoOpen} onClose={closeVideo} />
       <VideoTab onClick={() => setVideoOpen(true)} />
+
+      {showUnsub && (
+        <div className="fixed inset-x-0 top-20 z-50 mx-auto max-w-md animate-fade-in px-4">
+          <div className="flex items-center gap-3 rounded-2xl border border-[#e6e6e6] bg-white px-5 py-4 shadow-xl">
+            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#108474]/10">
+              <Shield className="h-4 w-4 text-[#108474]" />
+            </div>
+            <p className="flex-1 text-sm text-[#1d1d1f]">
+              {tx(locale,
+                "Du har avprenumererats och kommer inte längre att få nyhetsbrev.",
+                "You have been unsubscribed and will no longer receive newsletters.",
+                "Te has dado de baja y ya no recibirás boletines.",
+                "Du wurdest abgemeldet und wirst keine Newsletter mehr erhalten.",
+                "Vous avez été désabonné(e) et ne recevrez plus de newsletters.")}
+            </p>
+            <button onClick={() => setShowUnsub(false)} className="shrink-0 rounded-full p-1 text-[#766a62] transition-colors hover:bg-[#f5f5f7]">
+              <X className="h-4 w-4" />
+            </button>
+          </div>
+        </div>
+      )}
 
       <section className="py-10 md:py-16 lg:py-20">
         <div className="mx-auto max-w-[1280px] px-6 md:px-10">

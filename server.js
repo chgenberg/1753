@@ -5327,13 +5327,14 @@ app.post("/api/newsletter/subscribe", async (req, res) => {
       await db.updateSubscriberSkinCondition(email, skinCondition);
     }
 
-    // Enqueue welcome flow
+    // Enqueue welcome flow (delay 2h if from analysis since analysis report email is sent immediately)
+    const welcomeDelay = source === "analysis" ? 2 * 3600000 : 0;
     const welcomeFlows = await db.findFlowByTrigger("subscribe");
     for (const flow of welcomeFlows) {
       await db.enqueueAutomation({
         subscriberId: subscriber.id, flowId: flow.id,
         context: { firstName: subscriber.first_name },
-        nextSendAt: new Date()
+        nextSendAt: new Date(Date.now() + welcomeDelay)
       });
     }
 
