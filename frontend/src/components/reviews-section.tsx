@@ -92,7 +92,7 @@ function ReviewCard({
       </div>
 
       {review.title && (
-        <h4 className="mb-1.5 text-[14px] font-semibold text-brand-900">{review.title}</h4>
+        <h3 className="mb-1.5 text-[14px] font-semibold text-brand-900">{review.title}</h3>
       )}
 
       {review.body && (

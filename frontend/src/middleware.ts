@@ -228,7 +228,7 @@ export function middleware(request: NextRequest) {
   if (frRw) return frRw;
 
   if (pathname === "/") {
-    return NextResponse.redirect(new URL("/sv", request.url));
+    return NextResponse.redirect(new URL("/sv", request.url), 301);
   }
 
   if (
@@ -238,7 +238,7 @@ export function middleware(request: NextRequest) {
     !pathname.startsWith("/de") &&
     !pathname.startsWith("/fr")
   ) {
-    return NextResponse.redirect(new URL(`/sv${pathname}`, request.url));
+    return NextResponse.redirect(new URL(`/sv${pathname}`, request.url), 301);
   }
 
   return NextResponse.next();

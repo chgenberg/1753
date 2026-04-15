@@ -447,6 +447,7 @@ export default function CheckoutPage() {
                 <Link
                   href={path("terms")}
                   target="_blank"
+                  rel="noopener noreferrer"
                   className="font-medium text-brand-900 underline underline-offset-2"
                 >
                   {t("checkout.termsLink")}
@@ -455,6 +456,7 @@ export default function CheckoutPage() {
                 <Link
                   href={path("privacy")}
                   target="_blank"
+                  rel="noopener noreferrer"
                   className="font-medium text-brand-900 underline underline-offset-2"
                 >
                   {t("checkout.privacyLink")}

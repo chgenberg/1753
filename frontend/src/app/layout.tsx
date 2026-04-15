@@ -43,6 +43,7 @@ export default function RootLayout({
   return (
     <html lang="sv" className={`${inter.variable} h-full`} suppressHydrationWarning>
       <head>
+        <script dangerouslySetInnerHTML={{ __html: `(function(){var s=location.pathname.split("/")[1];var L={"en":1,"es":1,"de":1,"fr":1};document.documentElement.lang=L[s]?s:"sv"})()` }} />
         <Script
           src={`https://www.googletagmanager.com/gtag/js?id=${GA_ID}`}
           strategy="afterInteractive"

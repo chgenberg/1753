@@ -8,7 +8,7 @@ const ABOUT_PATHS: Record<string, string> = {
   sv: "/sv/om-oss",
   en: "/en/about",
   es: "/es/sobre-nosotros",
-  de: "/de/uber-uns",
+  de: "/de/ueber-uns",
   fr: "/fr/a-propos",
 };
 

@@ -11,7 +11,7 @@ const REVIEW_PATHS: Record<string, string> = {
   en: "/en/write-review",
   es: "/es/escribir-resena",
   de: "/de/bewertung-schreiben",
-  fr: "/fr/ecrire-un-avis",
+  fr: "/fr/ecrire-avis",
 };
 
 export async function generateMetadata({

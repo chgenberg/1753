@@ -39,13 +39,15 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
       "@id": "https://www.1753skin.com/#organization",
       name: "1753 SKINCARE",
     },
-    knowsAbout: [
-      "CBD skincare",
-      "CBG skincare",
-      "Endocannabinoid system",
-      "Holistic skincare",
-      "Nordic skincare",
-    ],
+    knowsAbout: l === "sv"
+      ? ["CBD-hudvård", "CBG-hudvård", "Endocannabinoidsystemet", "Holistisk hudvård", "Nordisk hudvård"]
+      : l === "es"
+        ? ["Cuidado de la piel con CBD", "Cuidado de la piel con CBG", "Sistema endocannabinoide", "Cuidado holístico de la piel", "Cuidado nórdico de la piel"]
+        : l === "de"
+          ? ["CBD-Hautpflege", "CBG-Hautpflege", "Endocannabinoid-System", "Ganzheitliche Hautpflege", "Nordische Hautpflege"]
+          : l === "fr"
+            ? ["Soins CBD", "Soins CBG", "Système endocannabinoïde", "Soins holistiques", "Soins nordiques"]
+            : ["CBD skincare", "CBG skincare", "Endocannabinoid system", "Holistic skincare", "Nordic skincare"],
     url: "https://www.1753skin.com" + (ABOUT_PATH[l] || ABOUT_PATH.en),
   };
 

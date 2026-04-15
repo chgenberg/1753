@@ -24,7 +24,7 @@ import { HeroVideo } from "@/components/hero-video";
 const BASE_URL = "https://www.1753skin.com";
 const IMG = "/Landing_page_skinanalys";
 
-const OG_LOCALE: Record<string, string> = { sv: "sv_SE", en: "en_GB", es: "es_ES", de: "de_DE", fr: "fr_FR" };
+const OG_LOCALE: Record<string, string> = { sv: "sv_SE", en: "en_US", es: "es_ES", de: "de_DE", fr: "fr_FR" };
 
 function tx(locale: string, sv: string, en: string, es?: string, de?: string, fr?: string): string {
   if (locale === "sv") return sv;

@@ -14,7 +14,7 @@ import { getMessages } from "@/lib/i18n";
 const BASE_URL = "https://www.1753skin.com";
 const LP = "/landing-pages";
 
-const OG_LOCALE: Record<string, string> = { sv: "sv_SE", en: "en_GB", es: "es_ES", de: "de_DE", fr: "fr_FR" };
+const OG_LOCALE: Record<string, string> = { sv: "sv_SE", en: "en_US", es: "es_ES", de: "de_DE", fr: "fr_FR" };
 
 function tx(locale: string, sv: string, en: string, es?: string, de?: string, fr?: string): string {
   if (locale === "sv") return sv;
@@ -99,7 +99,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description: c.metaDescription,
       url: `${BASE_URL}/${locale}/guide/${slug}`,
       images: [{ url: `${BASE_URL}${images.hero}`, width: 1200, height: 1200 }],
-      locale: OG_LOCALE[locale] || "en_GB",
+      locale: OG_LOCALE[locale] || "en_US",
       type: "article",
     },
   };

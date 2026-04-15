@@ -3,6 +3,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, BookOpen, Sparkles } from "lucide-react";
 import { locales, type Locale } from "@/lib/i18n/types";
+import { localizePath } from "@/lib/i18n/navigation";
 import { ALL_LANDING_PAGES } from "@/lib/seo";
 import { getContent } from "@/lib/seo/types";
 import { getMessages } from "@/lib/i18n";
@@ -39,17 +40,27 @@ interface Props {
 const GUIDE_PATHS: Record<string, string> = {
   sv: "/sv/guide",
   en: "/en/guide",
-  es: "/es/guia",
-  de: "/de/ratgeber",
+  es: "/es/guide",
+  de: "/de/guide",
   fr: "/fr/guide",
 };
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale } = await params;
   const canonicalPath = GUIDE_PATHS[locale] ?? GUIDE_PATHS.en;
+  const ogLocale = ({ sv: "sv_SE", en: "en_US", es: "es_ES", de: "de_DE", fr: "fr_FR" } as Record<string, string>)[locale] || "en_US";
+  const title = ({ sv: "Hudvårdsguide – artiklar och tips", en: "Skincare Guide – articles and tips", es: "Guía de cuidado – artículos y consejos", de: "Hautpflege-Ratgeber – Artikel und Tipps", fr: "Guide de soins – articles et conseils" } as Record<string, string>)[locale] || "Skincare Guide – articles and tips";
+  const description = ({ sv: "Utforska våra guider om hudvård, CBD, CBG, livsstil och hudtillstånd. Vetenskapsbaserade artiklar från 1753 SKINCARE.", en: "Explore our guides on skincare, CBD, CBG, lifestyle, and skin conditions. Science-based articles from 1753 SKINCARE.", es: "Explora nuestras guías sobre cuidado de la piel, CBD, CBG, estilo de vida y afecciones cutáneas. Artículos basados en ciencia de 1753 SKINCARE.", de: "Entdecke unsere Ratgeber zu Hautpflege, CBD, CBG, Lifestyle und Hautzuständen. Wissenschaftsbasierte Artikel von 1753 SKINCARE.", fr: "Explorez nos guides sur les soins, le CBD, le CBG, le mode de vie et les affections cutanées. Articles scientifiques de 1753 SKINCARE." } as Record<string, string>)[locale] || "Explore our guides on skincare, CBD, CBG, lifestyle, and skin conditions. Science-based articles from 1753 SKINCARE.";
   return {
-    title: { sv: "Hudvårdsguide – artiklar och tips", en: "Skincare Guide – articles and tips", es: "Guía de cuidado – artículos y consejos", de: "Hautpflege-Ratgeber – Artikel und Tipps", fr: "Guide de soins – articles et conseils" }[locale] || "Skincare Guide – articles and tips",
-    description: { sv: "Utforska våra guider om hudvård, CBD, CBG, livsstil och hudtillstånd. Vetenskapsbaserade artiklar från 1753 SKINCARE.", en: "Explore our guides on skincare, CBD, CBG, lifestyle, and skin conditions. Science-based articles from 1753 SKINCARE.", es: "Explora nuestras guías sobre cuidado de la piel, CBD, CBG, estilo de vida y afecciones cutáneas. Artículos basados en ciencia de 1753 SKINCARE.", de: "Entdecke unsere Ratgeber zu Hautpflege, CBD, CBG, Lifestyle und Hautzuständen. Wissenschaftsbasierte Artikel von 1753 SKINCARE.", fr: "Explorez nos guides sur les soins, le CBD, le CBG, le mode de vie et les affections cutanées. Articles scientifiques de 1753 SKINCARE." }[locale] || "Explore our guides on skincare, CBD, CBG, lifestyle, and skin conditions. Science-based articles from 1753 SKINCARE.",
+    title,
+    description,
+    openGraph: {
+      title,
+      description,
+      locale: ogLocale,
+      type: "website",
+      images: [{ url: `${BASE_URL}/og-image.jpg`, width: 1200, height: 630, alt: "1753 SKINCARE" }],
+    },
     alternates: {
       canonical: `${BASE_URL}${canonicalPath}`,
       languages: {
@@ -112,7 +123,7 @@ export default async function GuidePage({ params }: Props) {
     "@type": "BreadcrumbList",
     itemListElement: [
       { "@type": "ListItem", position: 1, name: tx("Hem", "Home", "Inicio", "Startseite", "Accueil"), item: `${BASE_URL}/${l}` },
-      { "@type": "ListItem", position: 2, name: "Guide", item: `${BASE_URL}/${l}/guide` },
+      { "@type": "ListItem", position: 2, name: tx("Guide", "Guide", "Guía", "Ratgeber", "Guide"), item: `${BASE_URL}/${l}/guide` },
     ],
   };
 
@@ -176,7 +187,7 @@ export default async function GuidePage({ params }: Props) {
             </p>
           </div>
           <Link
-            href={`/${l}/hudanalys`}
+            href={localizePath(l, "skinAnalysis")}
             className="inline-flex items-center gap-2 rounded-full bg-[#108474] px-7 py-3 text-sm font-semibold text-white transition-all hover:bg-[#0d6e62]"
           >
             <Sparkles className="h-4 w-4" />
@@ -255,7 +266,7 @@ export default async function GuidePage({ params }: Props) {
           </p>
           <div className="mt-6 flex items-center justify-center gap-4">
             <Link
-              href={`/${l}/hudanalys`}
+              href={localizePath(l, "skinAnalysis")}
               className="inline-flex items-center gap-2 rounded-full bg-[#108474] px-6 py-3 text-sm font-semibold text-white transition-all hover:bg-[#0d6e62]"
             >
               {tx("Gor hudanalys", "Take skin analysis", "Analisis de piel", "Hautanalyse starten", "Faire une analyse de peau")}
