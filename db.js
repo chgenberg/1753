@@ -90,6 +90,7 @@ async function initSchema() {
     ALTER TABLE users ADD COLUMN IF NOT EXISTS role VARCHAR(20) DEFAULT 'customer';
     ALTER TABLE users ADD COLUMN IF NOT EXISTS password_reset_token VARCHAR(128);
     ALTER TABLE users ADD COLUMN IF NOT EXISTS password_reset_expires TIMESTAMPTZ;
+    ALTER TABLE users ADD COLUMN IF NOT EXISTS locale VARCHAR(5) DEFAULT 'sv';
 
     CREATE INDEX IF NOT EXISTS idx_users_email ON users (email);
 
@@ -152,6 +153,7 @@ async function initSchema() {
     ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS customer_name VARCHAR(255);
     ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS order_number VARCHAR(50);
     ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS currency VARCHAR(3) DEFAULT 'SEK';
+    ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS locale VARCHAR(5) DEFAULT 'sv';
 
     ALTER TABLE orders ADD COLUMN IF NOT EXISTS currency VARCHAR(3) DEFAULT 'SEK';
     ALTER TABLE orders ADD COLUMN IF NOT EXISTS locale VARCHAR(5) DEFAULT 'sv';
@@ -489,12 +491,12 @@ async function appendNotes(id, text) {
 
 // ---- USER helpers ----
 
-async function createUser({ id, name, email, phone, passwordHash }) {
+async function createUser({ id, name, email, phone, passwordHash, locale }) {
   const { rows } = await pool.query(
-    `INSERT INTO users (id, name, email, phone, password_hash)
-     VALUES ($1,$2,$3,$4,$5)
-     RETURNING id, name, email, phone, loyalty_points, tier, notifications, created_at`,
-    [id, name, email.toLowerCase(), phone || "", passwordHash]
+    `INSERT INTO users (id, name, email, phone, password_hash, locale)
+     VALUES ($1,$2,$3,$4,$5,$6)
+     RETURNING id, name, email, phone, loyalty_points, tier, notifications, locale, created_at`,
+    [id, name, email.toLowerCase(), phone || "", passwordHash, locale || "sv"]
   );
   return rows[0];
 }
@@ -552,18 +554,18 @@ async function countOrdersByEmail(email) {
 async function createSubscription({
   userId, productId, productName, quantity,
   intervalDays, discountPercent, originalPrice, recurringPrice,
-  vivaInitialOrderCode, customerEmail, customerName, orderNumber
+  vivaInitialOrderCode, customerEmail, customerName, orderNumber, locale
 }) {
   const { rows } = await pool.query(
     `INSERT INTO subscriptions
        (user_id, product_id, product_name, quantity,
         interval_days, discount_percent, original_price, recurring_price,
-        viva_initial_order_code, customer_email, customer_name, order_number)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+        viva_initial_order_code, customer_email, customer_name, order_number, locale)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
      RETURNING *`,
     [userId, productId, productName, quantity || 1,
      intervalDays || 60, discountPercent || 15, originalPrice, recurringPrice,
-     vivaInitialOrderCode, customerEmail || null, customerName || null, orderNumber || null]
+     vivaInitialOrderCode, customerEmail || null, customerName || null, orderNumber || null, locale || "sv"]
   );
   return rows[0];
 }

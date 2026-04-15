@@ -9,6 +9,7 @@ import {
   type ReactNode,
 } from "react";
 import { apiFetch } from "@/lib/api";
+import { useLocaleOptional } from "./locale-provider";
 
 interface User {
   id: number;
@@ -49,6 +50,8 @@ function isTokenValid(token: string): boolean {
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [user, setUser] = useState<User | null>(null);
   const [token, setToken] = useState<string | null>(null);
+  const localeCtx = useLocaleOptional();
+  const locale = localeCtx?.locale || "sv";
 
   useEffect(() => {
     const savedToken = localStorage.getItem(TOKEN_KEY);
@@ -65,14 +68,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const login = useCallback(async (email: string, password: string): Promise<User> => {
     const data = await apiFetch<{ token: string; user: User }>("/auth/login", {
       method: "POST",
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({ email, password, locale }),
     });
     setToken(data.token);
     setUser(data.user);
     localStorage.setItem(TOKEN_KEY, data.token);
     localStorage.setItem(USER_KEY, JSON.stringify(data.user));
     return data.user;
-  }, []);
+  }, [locale]);
 
   const register = useCallback(
     async (regData: {
@@ -85,7 +88,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         "/auth/register",
         {
           method: "POST",
-          body: JSON.stringify(regData),
+          body: JSON.stringify({ ...regData, locale }),
         }
       );
       setToken(data.token);
@@ -93,7 +96,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       localStorage.setItem(TOKEN_KEY, data.token);
       localStorage.setItem(USER_KEY, JSON.stringify(data.user));
     },
-    []
+    [locale]
   );
 
   const logout = useCallback(() => {

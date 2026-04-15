@@ -644,7 +644,7 @@ function SkinJourneyView({ token }: { token: string }) {
                   <p className="mt-1.5 text-[11px] text-brand-500">
                     {new Date(snapshots[snapshots.length - 1].created_at).toLocaleDateString(loc, { month: "short", day: "numeric" })}
                     {snapshots[snapshots.length - 1].score !== null && (
-                      <span className="ml-1 font-semibold text-brand-900">{snapshots[snapshots.length - 1].score}{locale === "sv" ? "p" : "pts"}</span>
+                      <span className="ml-1 font-semibold text-brand-900">{snapshots[snapshots.length - 1].score}{tx(locale, "p", "pts", "pts", "Pkt", "pts")}</span>
                     )}
                   </p>
                 </div>
@@ -653,7 +653,7 @@ function SkinJourneyView({ token }: { token: string }) {
                   <p className="mt-1.5 text-[11px] text-brand-500">
                     {new Date(snapshots[0].created_at).toLocaleDateString(loc, { month: "short", day: "numeric" })}
                     {snapshots[0].score !== null && (
-                      <span className="ml-1 font-semibold text-brand-900">{snapshots[0].score}{locale === "sv" ? "p" : "pts"}</span>
+                      <span className="ml-1 font-semibold text-brand-900">{snapshots[0].score}{tx(locale, "p", "pts", "pts", "Pkt", "pts")}</span>
                     )}
                   </p>
                 </div>

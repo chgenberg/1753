@@ -99,6 +99,20 @@ function emailT(locale, texts) {
   return texts[locale] || texts.en || texts.sv || Object.values(texts)[0] || "";
 }
 
+const EMAIL_SEGMENTS = {
+  account:      { sv: "mitt-konto", en: "my-account", es: "mi-cuenta", de: "mein-konto", fr: "mon-compte" },
+  products:     { sv: "produkter", en: "products", es: "productos", de: "produkte", fr: "produits" },
+  about:        { sv: "om-oss", en: "about", es: "sobre-nosotros", de: "ueber-uns", fr: "a-propos" },
+  skinAnalysis: { sv: "hudanalys", en: "skin-analysis", es: "analisis-piel", de: "hautanalyse", fr: "analyse-peau" },
+  checkout:     { sv: "kassa", en: "checkout", es: "pago", de: "kasse", fr: "caisse" },
+  login:        { sv: "logga-in", en: "login", es: "iniciar-sesion", de: "anmelden", fr: "connexion" },
+};
+
+function emailPath(locale, route) {
+  const seg = EMAIL_SEGMENTS[route];
+  return `${locale}/${seg ? (seg[locale] || seg.sv) : route}`;
+}
+
 // ---- USER STORE (PostgreSQL) ----
 
 function generateToken(user) {
@@ -140,20 +154,21 @@ function authMiddleware(req, res, next) {
 
 app.post("/api/auth/register", async (req, res) => {
   try {
+    const { name, email, phone, password, locale: reqLocale } = req.body;
+    const locale = ["sv","en","es","de","fr"].includes(reqLocale) ? reqLocale : "sv";
     const clientIp = req.ip || req.connection.remoteAddress;
     if (!checkRateLimit(clientIp, "auth-register", 10)) {
-      return res.status(429).json({ message: "För många registreringsförsök. Försök igen om en stund." });
+      return res.status(429).json({ message: emailT(locale, { sv: "För många registreringsförsök. Försök igen om en stund.", en: "Too many registration attempts. Please try again later.", es: "Demasiados intentos de registro. Inténtalo más tarde.", de: "Zu viele Registrierungsversuche. Bitte versuche es später.", fr: "Trop de tentatives d'inscription. Veuillez réessayer plus tard." }) });
     }
-    const { name, email, phone, password } = req.body;
     if (!name || !email || !password) {
-      return res.status(400).json({ message: "Namn, e-post och lösenord krävs" });
+      return res.status(400).json({ message: emailT(locale, { sv: "Namn, e-post och lösenord krävs", en: "Name, email and password are required", es: "Nombre, correo y contraseña son obligatorios", de: "Name, E-Mail und Passwort sind erforderlich", fr: "Nom, e-mail et mot de passe sont requis" }) });
     }
     if (password.length < 6) {
-      return res.status(400).json({ message: "Lösenordet måste vara minst 6 tecken" });
+      return res.status(400).json({ message: emailT(locale, { sv: "Lösenordet måste vara minst 6 tecken", en: "Password must be at least 6 characters", es: "La contraseña debe tener al menos 6 caracteres", de: "Das Passwort muss mindestens 6 Zeichen lang sein", fr: "Le mot de passe doit comporter au moins 6 caractères" }) });
     }
     const existing = await db.findUserByEmail(email);
     if (existing) {
-      return res.status(409).json({ message: "E-postadressen är redan registrerad" });
+      return res.status(409).json({ message: emailT(locale, { sv: "E-postadressen är redan registrerad", en: "This email is already registered", es: "Este correo ya está registrado", de: "Diese E-Mail-Adresse ist bereits registriert", fr: "Cet e-mail est déjà enregistré" }) });
     }
 
     const passwordHash = bcrypt ? await bcrypt.hash(password, 10) : password;
@@ -162,7 +177,8 @@ app.post("/api/auth/register", async (req, res) => {
       name,
       email,
       phone: phone || "",
-      passwordHash
+      passwordHash,
+      locale
     });
 
     const token = generateToken(user);
@@ -176,28 +192,33 @@ app.post("/api/auth/login", async (req, res) => {
   try {
     const clientIp = req.ip || req.connection.remoteAddress;
     if (!checkRateLimit(clientIp, "auth-login", 20)) {
-      return res.status(429).json({ message: "För många inloggningsförsök. Försök igen om en stund." });
+      return res.status(429).json({ message: "Too many login attempts. Please wait a moment." });
     }
-    const { email, password } = req.body;
+    const { email, password, locale: reqLocale } = req.body;
+    const locale = ["sv","en","es","de","fr"].includes(reqLocale) ? reqLocale : "sv";
     if (!email || !password) {
-      return res.status(400).json({ message: "E-post och lösenord krävs" });
+      return res.status(400).json({ message: emailT(locale, { sv: "E-post och lösenord krävs", en: "Email and password are required", es: "Correo y contraseña son obligatorios", de: "E-Mail und Passwort sind erforderlich", fr: "E-mail et mot de passe sont requis" }) });
     }
 
     const user = await db.findUserByEmail(email);
     if (!user) {
-      return res.status(401).json({ message: "Fel e-post eller lösenord" });
+      return res.status(401).json({ message: emailT(locale, { sv: "Fel e-post eller lösenord", en: "Wrong email or password", es: "Correo o contraseña incorrectos", de: "Falsche E-Mail oder falsches Passwort", fr: "E-mail ou mot de passe incorrect" }) });
     }
 
     const valid = bcrypt ? await bcrypt.compare(password, user.password_hash) : password === user.password_hash;
     if (!valid) {
-      return res.status(401).json({ message: "Fel e-post eller lösenord" });
+      return res.status(401).json({ message: emailT(locale, { sv: "Fel e-post eller lösenord", en: "Wrong email or password", es: "Correo o contraseña incorrectos", de: "Falsche E-Mail oder falsches Passwort", fr: "E-mail ou mot de passe incorrect" }) });
+    }
+
+    if (locale && locale !== (user.locale || "sv")) {
+      try { await db.pool.query("UPDATE users SET locale = $1 WHERE id = $2", [locale, user.id]); } catch {}
     }
 
     const token = generateToken(user);
     const { password_hash: _, ...safeUser } = user;
-    res.json({ token, user: safeUser });
+    res.json({ token, user: { ...safeUser, locale: locale || safeUser.locale || "sv" } });
   } catch (err) {
-    res.status(500).json({ message: err.message || "Inloggningen misslyckades" });
+    res.status(500).json({ message: err.message || "Login failed" });
   }
 });
 
@@ -1251,7 +1272,7 @@ app.post("/api/admin/orders/:id/cancel", adminAuthMiddleware, async (req, res) =
               ${emailT(cl, { sv: "Din order har makulerats", en: "Your order has been cancelled", es: "Tu pedido ha sido cancelado", de: "Deine Bestellung wurde storniert", fr: "Votre commande a été annulée" })}
             </h1>
             <p style="color:#515151;font-size:15px;line-height:1.6;margin:0 0 24px;">
-              ${hi} ${firstName}${firstName ? ", " : ""}${emailT(cl, { sv: "order", en: "order", es: "pedido", de: "Bestellung", fr: "commande" })} <strong>#${order.order_number}</strong> ${emailT(cl, { sv: "har makulerats.", en: "has been cancelled.", es: "ha sido cancelado.", de: "wurde storniert.", fr: "a été annulée." })}${refundNote}
+              ${hi} ${firstName}${firstName ? ", " : ""}${emailT(cl, { sv: "din beställning", en: "your order", es: "tu pedido", de: "deine Bestellung", fr: "votre commande" })} <strong>#${order.order_number}</strong> ${emailT(cl, { sv: "har makulerats.", en: "has been cancelled.", es: "ha sido cancelado.", de: "wurde storniert.", fr: "a été annulée." })}${refundNote}
             </p>
             <div style="background:#f5f5f7;border-radius:12px;padding:16px 20px;margin:20px 0">
               <table style="width:100%;border-collapse:collapse;">
@@ -1265,7 +1286,7 @@ app.post("/api/admin/orders/:id/cancel", adminAuthMiddleware, async (req, res) =
                   <td style="padding:8px 0;text-align:right;font-weight:600;color:#108474;font-size:14px;">${totalKr} ${currencyLabel}</td>
                 </tr>` : ""}
                 <tr>
-                  <td style="padding:8px 0;color:#766a62;font-size:14px;">Status</td>
+                  <td style="padding:8px 0;color:#766a62;font-size:14px;">${emailT(cl, { sv: "Status", en: "Status", es: "Estado", de: "Status", fr: "Statut" })}</td>
                   <td style="padding:8px 0;text-align:right;font-weight:600;color:#1d1d1f;font-size:14px;">${order.viva_transaction_id ? emailT(cl, { sv: "Återbetalning påbörjad", en: "Refund initiated", es: "Reembolso iniciado", de: "Rückerstattung eingeleitet", fr: "Remboursement initié" }) : emailT(cl, { sv: "Makulerad", en: "Cancelled", es: "Cancelado", de: "Storniert", fr: "Annulée" })}</td>
                 </tr>
               </table>
@@ -3267,6 +3288,7 @@ async function handleOrderCompletion(orderId) {
               originalPrice,
               recurringPrice,
               vivaInitialOrderCode: order.viva_order_code || null,
+              locale: order.locale || "sv",
             });
             notes.push(`Prenumeration skapad: ${item.name || item.articleNumber} (var ${intervalDays}:e dag)`);
             console.log(`[Subscription] Created for ${order.customer_email}: ${item.articleNumber || item.id} every ${intervalDays} days`);
@@ -3441,7 +3463,7 @@ async function sendOrderConfirmation(order, items) {
           fr: "Votre prochaine livraison sera envoyée automatiquement à l'intervalle choisi avec 15% de réduction. Vous pouvez suspendre, modifier ou annuler à tout moment depuis Mon Compte."
         })}
       </p>
-      <a href="${baseUrl}/${localePath}/mitt-konto" style="display:inline-block;margin-top:14px;background:#fff;color:#108474;padding:10px 24px;border-radius:980px;font-size:13px;font-weight:600;text-decoration:none">
+      <a href="${baseUrl}/${emailPath(l, "account")}" style="display:inline-block;margin-top:14px;background:#fff;color:#108474;padding:10px 24px;border-radius:980px;font-size:13px;font-weight:600;text-decoration:none">
         ${emailT(l, { sv: "Hantera prenumeration", en: "Manage subscription", es: "Gestionar suscripción", de: "Abo verwalten", fr: "Gérer l'abonnement" })} →
       </a>
     </div>
@@ -3459,7 +3481,7 @@ async function sendOrderConfirmation(order, items) {
           fr: "Connectez-vous à Mon Compte pour suivre votre commande, voir le statut de livraison et gérer vos paramètres."
         })}
       </p>
-      <a href="${baseUrl}/${localePath}/mitt-konto" style="display:inline-block;margin-top:12px;background:#1d1d1f;color:#fff;padding:10px 28px;border-radius:980px;font-size:13px;font-weight:600;text-decoration:none">
+      <a href="${baseUrl}/${emailPath(l, "account")}" style="display:inline-block;margin-top:12px;background:#1d1d1f;color:#fff;padding:10px 28px;border-radius:980px;font-size:13px;font-weight:600;text-decoration:none">
         ${emailT(l, { sv: "Mitt konto", en: "My Account", es: "Mi Cuenta", de: "Mein Konto", fr: "Mon Compte" })}
       </a>
     </div>
@@ -3643,7 +3665,7 @@ async function sendAnalysisReport(email, analysisContent, locale, accountPasswor
       <table style="width:100%;border-collapse:collapse">
         <tr>
           <td style="padding:8px 12px;background:#fff;border-radius:8px 8px 0 0;border-bottom:1px solid #eee">
-            <span style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#766a62">${isSv ? "E-post" : "Email"}</span><br>
+            <span style="font-size:11px;text-transform:uppercase;letter-spacing:1px;color:#766a62">${isSv ? "E-post" : isEs ? "Correo" : isDe ? "E-Mail" : isFr ? "E-mail" : "Email"}</span><br>
             <span style="font-size:14px;font-weight:500;color:#1d1d1f">${email}</span>
           </td>
         </tr>
@@ -3839,7 +3861,7 @@ async function sendShippingConfirmation(order, items, trackingNumber, trackingUr
         </div>
         ${order.user_id ? `
         <div style="text-align:center;margin:20px 0">
-          <a href="${baseUrl}/${localePath}/mitt-konto" style="display:inline-block;background:#1d1d1f;color:#fff;padding:12px 32px;border-radius:980px;font-size:14px;font-weight:600;text-decoration:none">
+          <a href="${baseUrl}/${emailPath(l, "account")}" style="display:inline-block;background:#1d1d1f;color:#fff;padding:12px 32px;border-radius:980px;font-size:14px;font-weight:600;text-decoration:none">
             ${emailT(l, { sv: "Mitt konto", en: "My Account", es: "Mi Cuenta", de: "Mein Konto", fr: "Mon Compte" })}
           </a>
         </div>` : ""}
@@ -3887,7 +3909,7 @@ async function sendSubscriptionChangeEmail(sub, action, details) {
   if (!email) return { sent: false, skipReason: "no_email" };
 
   const user = sub.user_id ? await db.findUserById(sub.user_id) : null;
-  const l = user?.locale || "sv";
+  const l = sub.locale || user?.locale || "sv";
   const localePath = l;
   const firstNameFallback = { sv: "du", en: "there", es: "amigo/a", de: "du", fr: "vous" };
   const firstName = (user?.name || sub.customer_name || "").split(" ")[0] || (firstNameFallback[l] || "du");
@@ -3963,7 +3985,7 @@ async function sendSubscriptionChangeEmail(sub, action, details) {
           <p style="margin:4px 0 0;font-size:15px;font-weight:600">${pn}</p>
         </div>
         <div style="text-align:center;margin:28px 0">
-          <a href="${baseUrl}/${localePath}/mitt-konto"
+          <a href="${baseUrl}/${emailPath(l, "account")}"
              style="display:inline-block;padding:14px 32px;background:#1d1d1f;color:#fff;font-size:15px;font-weight:600;border-radius:980px;text-decoration:none">
             ${emailT(l, { sv: "Mitt konto", en: "My Account", es: "Mi Cuenta", de: "Mein Konto", fr: "Mon Compte" })}
           </a>
@@ -4605,13 +4627,14 @@ app.post("/api/auth/set-password", async (req, res) => {
 app.post("/api/auth/forgot-password", async (req, res) => {
   try {
     const { email, locale } = req.body;
+    const fpl = ["sv","en","es","de","fr"].includes(locale) ? locale : "sv";
     if (!email || !email.includes("@")) {
-      return res.status(400).json({ message: "Ange en giltig e-postadress" });
+      return res.status(400).json({ message: emailT(fpl, { sv: "Ange en giltig e-postadress", en: "Please enter a valid email address", es: "Introduce un correo electrónico válido", de: "Bitte gib eine gültige E-Mail-Adresse ein", fr: "Veuillez saisir une adresse e-mail valide" }) });
     }
 
     const clientIp = req.ip || req.connection.remoteAddress;
     if (!checkRateLimit(clientIp, "forgot-pw", 5)) {
-      return res.status(429).json({ message: "För många försök. Vänta en stund." });
+      return res.status(429).json({ message: emailT(fpl, { sv: "För många försök. Vänta en stund.", en: "Too many attempts. Please wait.", es: "Demasiados intentos. Espera un momento.", de: "Zu viele Versuche. Bitte warte.", fr: "Trop de tentatives. Veuillez patienter." }) });
     }
 
     const user = await db.findUserByEmail(email.toLowerCase().trim());
@@ -4697,7 +4720,7 @@ app.post("/api/auth/forgot-password", async (req, res) => {
     res.json({ ok: true });
   } catch (err) {
     console.error("[Auth] Forgot password error:", err);
-    res.status(500).json({ message: "Något gick fel. Försök igen." });
+    res.status(500).json({ message: "Something went wrong. Please try again." });
   }
 });
 
@@ -5228,12 +5251,12 @@ app.post("/api/newsletter/subscribe", async (req, res) => {
     const nlLocales = ["sv", "en", "es", "de", "fr"];
     const locale = nlLocales.includes(reqLocale) ? reqLocale : "sv";
     if (!email || !email.includes("@")) {
-      return res.status(400).json({ message: locale === "sv" ? "Ange en giltig e-postadress" : "Please enter a valid email address" });
+      return res.status(400).json({ message: emailT(locale, { sv: "Ange en giltig e-postadress", en: "Please enter a valid email address", es: "Introduce un correo electrónico válido", de: "Bitte gib eine gültige E-Mail-Adresse ein", fr: "Veuillez saisir une adresse e-mail valide" }) });
     }
 
     const clientIp = req.ip || req.connection.remoteAddress;
     if (!checkRateLimit(clientIp, "newsletter", 10)) {
-      return res.status(429).json({ message: locale === "sv" ? "För många försök. Vänta en stund." : "Too many attempts. Please wait a moment." });
+      return res.status(429).json({ message: emailT(locale, { sv: "För många försök. Vänta en stund.", en: "Too many attempts. Please wait a moment.", es: "Demasiados intentos. Espera un momento.", de: "Zu viele Versuche. Bitte warte einen Moment.", fr: "Trop de tentatives. Veuillez patienter." }) });
     }
 
     const token = crypto.randomBytes(32).toString("hex");
@@ -5256,10 +5279,10 @@ app.post("/api/newsletter/subscribe", async (req, res) => {
     }
 
     console.log(`[Newsletter] ${email} subscribed (id=${subscriber.id}, skin=${skinCondition || "none"})`);
-    res.json({ ok: true, message: "Tack! Du ar nu prenumerant." });
+    res.json({ ok: true, message: emailT(locale, { sv: "Tack! Du är nu prenumerant.", en: "Thanks! You are now subscribed.", es: "Gracias! Ya estás suscrito/a.", de: "Danke! Du bist jetzt abonniert.", fr: "Merci ! Vous êtes maintenant abonné(e)." }) });
   } catch (err) {
     console.error("[Newsletter] Subscribe error:", err);
-    res.status(500).json({ message: "Nagonting gick fel. Forsok igen." });
+    res.status(500).json({ message: emailT(reqLocale || "sv", { sv: "Något gick fel. Försök igen.", en: "Something went wrong. Please try again.", es: "Algo salió mal. Inténtalo de nuevo.", de: "Etwas ist schiefgelaufen. Bitte versuche es erneut.", fr: "Une erreur s'est produite. Veuillez réessayer." }) });
   }
 });
 
@@ -5410,8 +5433,10 @@ async function processAutomationQueue() {
         const ctx = typeof item.context === "string" ? JSON.parse(item.context) : (item.context || {});
         const subLocale = item.locale || "sv";
         const firstNameFallback = { sv: "du", en: "there", es: "amigo/a", de: "du", fr: "vous" };
+        const resolvedSubject = typeof step.subject === "object" ? emailT(subLocale, step.subject) : step.subject;
+        const resolvedHtml = typeof step.html === "object" ? emailT(subLocale, step.html) : step.html;
         const html = emailWrapper(
-          step.html
+          resolvedHtml
             .replace(/\{\{firstName\}\}/g, item.first_name || (firstNameFallback[subLocale] || "du"))
             .replace(/\{\{email\}\}/g, item.email)
             .replace(/\{\{reviewToken\}\}/g, ctx.reviewToken || "")
@@ -5424,14 +5449,14 @@ async function processAutomationQueue() {
         if (!canSend) {
           const retryAt = new Date(Date.now() + 24 * 3600000);
           await db.advanceAutomation(item.id, { nextStep: item.current_step, nextSendAt: retryAt });
-          console.log(`[Automation] Deferred "${step.subject}" to ${item.email} – emailed too recently, retry ${retryAt.toISOString()}`);
+          console.log(`[Automation] Deferred "${resolvedSubject}" to ${item.email} – emailed too recently, retry ${retryAt.toISOString()}`);
           continue;
         }
 
         await resend.emails.send({
           from: fromEmail,
           to: item.email,
-          subject: step.subject.replace(/\{\{firstName\}\}/g, item.first_name || "du"),
+          subject: resolvedSubject.replace(/\{\{firstName\}\}/g, item.first_name || (firstNameFallback[subLocale] || "du")),
           html
         });
 
@@ -5447,7 +5472,7 @@ async function processAutomationQueue() {
         }
 
         await db.advanceAutomation(item.id, { nextStep: nextStepIdx, nextSendAt });
-        console.log(`[Automation] Sent "${step.subject}" to ${item.email} (flow: ${item.flow_slug}, step ${item.current_step})`);
+        console.log(`[Automation] Sent "${resolvedSubject}" to ${item.email} (flow: ${item.flow_slug}, step ${item.current_step})`);
       } catch (err) {
         console.error(`[Automation] Error sending to ${item.email}:`, err.message);
       }
@@ -5785,8 +5810,16 @@ app.post("/api/newsletter/broadcast-segmented", async (req, res) => {
 
 async function seedAutomationFlows() {
   const siteUrl = "https://www.1753skin.com";
+  const p = (l, route) => `${siteUrl}/${emailPath(l, route)}`;
+  const btn = (texts, route) => {
+    const o = {};
+    for (const l of ["sv","en","es","de","fr"]) o[l] = greenButton(texts[l], p(l, route));
+    return o;
+  };
+  const h2 = (t) => `<h2 style="font-size:22px;font-weight:700;margin:24px 0 12px">${t}</h2>`;
+  const pp = (t) => `<p style="font-size:15px;line-height:1.7;color:#515151">${t}</p>`;
+  const quote = (text, attr) => `<div style="background:#f5f5f7;border-radius:12px;padding:20px;margin:20px 0"><p style="font-size:15px;line-height:1.7;color:#515151;font-style:italic;margin:0">${text}</p><p style="font-size:13px;color:#766a62;margin:8px 0 0">${attr}</p></div>`;
 
-  // Welcome flow (5 emails over 14 days)
   await db.upsertFlow({
     slug: "welcome",
     name: "Välkomstserie",
@@ -5794,113 +5827,62 @@ async function seedAutomationFlows() {
     steps: [
       {
         delay_hours: 0,
-        subject: "Välkommen till 1753 SKINCARE, {{firstName}}!",
-        html: `
-          <h2 style="font-size:22px;font-weight:700;margin:24px 0 12px">Välkommen till familjen!</h2>
-          <p style="font-size:15px;line-height:1.7;color:#515151">
-            Vi är så glada att du är här. 1753 SKINCARE är mer än hudvård – det är en filosofi.
-            Vi tror på att jobba med kroppen, inte mot den. Våra produkter bygger på CBD, CBG
-            och noga utvalda naturliga ingredienser.
-          </p>
-          <p style="font-size:15px;line-height:1.7;color:#515151">
-            Utforska vårt sortiment och hitta din favorit. Vi finns här om du har frågor.
-          </p>
-          ${greenButton("Utforska produkterna", siteUrl + "/produkter")}
-        `
+        subject: { sv: "Välkommen till 1753 SKINCARE, {{firstName}}!", en: "Welcome to 1753 SKINCARE, {{firstName}}!", es: "Bienvenido/a a 1753 SKINCARE, {{firstName}}!", de: "Willkommen bei 1753 SKINCARE, {{firstName}}!", fr: "Bienvenue chez 1753 SKINCARE, {{firstName}} !" },
+        html: {
+          sv: `${h2("Välkommen till familjen!")}${pp("Vi är så glada att du är här. 1753 SKINCARE är mer än hudvård – det är en filosofi. Vi tror på att jobba med kroppen, inte mot den. Våra produkter bygger på CBD, CBG och noga utvalda naturliga ingredienser.")}${pp("Utforska vårt sortiment och hitta din favorit. Vi finns här om du har frågor.")}${greenButton("Utforska produkterna", p("sv","products"))}`,
+          en: `${h2("Welcome to the family!")}${pp("We're so happy you're here. 1753 SKINCARE is more than skincare – it's a philosophy. We believe in working with the body, not against it. Our products are built on CBD, CBG and carefully selected natural ingredients.")}${pp("Explore our range and find your favourite. We're here if you have questions.")}${greenButton("Explore products", p("en","products"))}`,
+          es: `${h2("Bienvenido/a a la familia!")}${pp("Estamos muy contentos de que estés aquí. 1753 SKINCARE es más que cuidado de la piel – es una filosofía. Creemos en trabajar con el cuerpo, no en su contra. Nuestros productos están basados en CBD, CBG e ingredientes naturales cuidadosamente seleccionados.")}${pp("Explora nuestra gama y encuentra tu favorito. Estamos aquí si tienes preguntas.")}${greenButton("Explorar productos", p("es","products"))}`,
+          de: `${h2("Willkommen in der Familie!")}${pp("Wir freuen uns, dass du hier bist. 1753 SKINCARE ist mehr als Hautpflege – es ist eine Philosophie. Wir glauben daran, mit dem Körper zu arbeiten, nicht gegen ihn. Unsere Produkte basieren auf CBD, CBG und sorgfältig ausgewählten natürlichen Inhaltsstoffen.")}${pp("Entdecke unser Sortiment und finde deinen Favoriten. Wir sind für dich da.")}${greenButton("Produkte entdecken", p("de","products"))}`,
+          fr: `${h2("Bienvenue dans la famille !")}${pp("Nous sommes ravis que vous soyez là. 1753 SKINCARE est plus que du soin – c'est une philosophie. Nous croyons qu'il faut travailler avec le corps, pas contre lui. Nos produits sont à base de CBD, CBG et d'ingrédients naturels soigneusement sélectionnés.")}${pp("Explorez notre gamme et trouvez votre favori. Nous sommes là pour vous.")}${greenButton("Explorer les produits", p("fr","products"))}`
+        }
       },
       {
         delay_hours: 48,
-        subject: "Vår filosofi – hudvård som faktiskt fungerar",
-        html: `
-          <h2 style="font-size:22px;font-weight:700;margin:24px 0 12px">Holistisk hudvård</h2>
-          <p style="font-size:15px;line-height:1.7;color:#515151">
-            De flesta hudvårdsprodukter löser symtom. Vi vill lösa orsaken.
-          </p>
-          <p style="font-size:15px;line-height:1.7;color:#515151">
-            Våra CBD- och CBG-baserade oljor jobbar med hudens egna endocannabinoidsystem
-            för att återställa balans. Ingen onaturlig kemi, inga tomma löften.
-          </p>
-          <p style="font-size:15px;line-height:1.7;color:#515151">
-            Men produkter är bara en del. Sömn, kost, stresshantering och rörelse – allt spelar
-            roll för din hud. Det är därför vi tar ett holistiskt grepp.
-          </p>
-          ${greenButton("Läs mer om oss", siteUrl + "/om-oss")}
-        `
+        subject: { sv: "Vår filosofi – hudvård som faktiskt fungerar", en: "Our philosophy – skincare that actually works", es: "Nuestra filosofía – cuidado que realmente funciona", de: "Unsere Philosophie – Hautpflege die wirklich wirkt", fr: "Notre philosophie – des soins qui fonctionnent vraiment" },
+        html: {
+          sv: `${h2("Holistisk hudvård")}${pp("De flesta hudvårdsprodukter löser symtom. Vi vill lösa orsaken.")}${pp("Våra CBD- och CBG-baserade oljor jobbar med hudens egna endocannabinoidsystem för att återställa balans. Ingen onaturlig kemi, inga tomma löften.")}${pp("Men produkter är bara en del. Sömn, kost, stresshantering och rörelse – allt spelar roll för din hud. Det är därför vi tar ett holistiskt grepp.")}${greenButton("Läs mer om oss", p("sv","about"))}`,
+          en: `${h2("Holistic skincare")}${pp("Most skincare products treat symptoms. We want to address the cause.")}${pp("Our CBD- and CBG-based oils work with your skin's own endocannabinoid system to restore balance. No unnatural chemistry, no empty promises.")}${pp("But products are only part of it. Sleep, diet, stress management and movement – everything matters for your skin. That's why we take a holistic approach.")}${greenButton("Read more about us", p("en","about"))}`,
+          es: `${h2("Cuidado holístico")}${pp("La mayoría de los productos para la piel tratan los síntomas. Nosotros queremos abordar la causa.")}${pp("Nuestros aceites a base de CBD y CBG trabajan con el sistema endocannabinoide de tu piel para restaurar el equilibrio. Sin química artificial, sin promesas vacías.")}${pp("Pero los productos son solo una parte. Sueño, alimentación, manejo del estrés y movimiento – todo importa para tu piel.")}${greenButton("Más sobre nosotros", p("es","about"))}`,
+          de: `${h2("Ganzheitliche Hautpflege")}${pp("Die meisten Hautpflegeprodukte behandeln Symptome. Wir wollen die Ursache angehen.")}${pp("Unsere CBD- und CBG-basierten Öle arbeiten mit dem körpereigenen Endocannabinoid-System deiner Haut, um das Gleichgewicht wiederherzustellen. Keine künstliche Chemie, keine leeren Versprechen.")}${pp("Aber Produkte sind nur ein Teil. Schlaf, Ernährung, Stressbewältigung und Bewegung – alles spielt eine Rolle für deine Haut.")}${greenButton("Mehr über uns", p("de","about"))}`,
+          fr: `${h2("Soins holistiques")}${pp("La plupart des produits de soin traitent les symptômes. Nous voulons traiter la cause.")}${pp("Nos huiles à base de CBD et CBG travaillent avec le système endocannabinoïde de votre peau pour restaurer l'équilibre. Pas de chimie artificielle, pas de promesses vides.")}${pp("Mais les produits ne sont qu'une partie. Sommeil, alimentation, gestion du stress et mouvement – tout compte pour votre peau.")}${greenButton("En savoir plus", p("fr","about"))}`
+        }
       },
       {
         delay_hours: 72,
-        subject: "Vilken produkt passar dig?",
-        html: `
-          <h2 style="font-size:22px;font-weight:700;margin:24px 0 12px">Hitta din match</h2>
-          <p style="font-size:15px;line-height:1.7;color:#515151">
-            <strong>The ONE Facial Oil</strong> – Vår allround-olja. Perfekt om du vill börja enkelt
-            med en produkt som balanserar, återfuktar och ger lyster. Funkar för alla hudtyper.
-          </p>
-          <p style="font-size:15px;line-height:1.7;color:#515151">
-            <strong>I LOVE Facial Oil</strong> – Extra näringsrik med CBG. Bäst för torr eller mogen hud
-            som behöver djupgående återfuktning.
-          </p>
-          <p style="font-size:15px;line-height:1.7;color:#515151">
-            <strong>DUO-kit</strong> – Båda oljorna i ett kit. The ONE på morgonen, I LOVE på kvällen.
-            Vår mest populära produkt.
-          </p>
-          <p style="font-size:15px;line-height:1.7;color:#515151">
-            Osäker? Prova vår <strong>AI-hudanalys</strong> – ladda upp ett foto och få personliga rekommendationer.
-          </p>
-          ${greenButton("Gör hudanalys", siteUrl + "/hudanalys")}
-        `
+        subject: { sv: "Vilken produkt passar dig?", en: "Which product is right for you?", es: "¿Qué producto es ideal para ti?", de: "Welches Produkt passt zu dir?", fr: "Quel produit vous convient ?" },
+        html: {
+          sv: `${h2("Hitta din match")}${pp("<strong>The ONE Facial Oil</strong> – Vår allround-olja. Perfekt om du vill börja enkelt med en produkt som balanserar, återfuktar och ger lyster. Funkar för alla hudtyper.")}${pp("<strong>I LOVE Facial Oil</strong> – Extra näringsrik med CBG. Bäst för torr eller mogen hud som behöver djupgående återfuktning.")}${pp("<strong>DUO-kit</strong> – Båda oljorna i ett kit. The ONE på morgonen, I LOVE på kvällen. Vår mest populära produkt.")}${pp("Osäker? Prova vår <strong>AI-hudanalys</strong> – ladda upp ett foto och få personliga rekommendationer.")}${greenButton("Gör hudanalys", p("sv","skinAnalysis"))}`,
+          en: `${h2("Find your match")}${pp("<strong>The ONE Facial Oil</strong> – Our all-round oil. Perfect if you want to start simple with a product that balances, moisturises and adds radiance. Works for all skin types.")}${pp("<strong>I LOVE Facial Oil</strong> – Extra nourishing with CBG. Best for dry or mature skin that needs deep hydration.")}${pp("<strong>DUO kit</strong> – Both oils in one kit. The ONE in the morning, I LOVE in the evening. Our most popular product.")}${pp("Not sure? Try our <strong>AI skin analysis</strong> – upload a photo and get personalised recommendations.")}${greenButton("Try skin analysis", p("en","skinAnalysis"))}`,
+          es: `${h2("Encuentra tu producto ideal")}${pp("<strong>The ONE Facial Oil</strong> – Nuestro aceite todo en uno. Perfecto para empezar con un producto que equilibra, hidrata y da luminosidad. Funciona para todos los tipos de piel.")}${pp("<strong>I LOVE Facial Oil</strong> – Extra nutritivo con CBG. Ideal para piel seca o madura que necesita hidratación profunda.")}${pp("<strong>DUO kit</strong> – Ambos aceites en un kit. The ONE por la mañana, I LOVE por la noche.")}${pp("¿No estás seguro/a? Prueba nuestro <strong>análisis de piel con IA</strong>.")}${greenButton("Análisis de piel", p("es","skinAnalysis"))}`,
+          de: `${h2("Finde dein Match")}${pp("<strong>The ONE Facial Oil</strong> – Unser Allround-Öl. Perfekt, wenn du einfach anfangen willst mit einem Produkt, das ausgleicht, pflegt und Strahlkraft verleiht. Für alle Hauttypen.")}${pp("<strong>I LOVE Facial Oil</strong> – Extra nährend mit CBG. Am besten für trockene oder reife Haut, die tiefe Feuchtigkeit braucht.")}${pp("<strong>DUO-Kit</strong> – Beide Öle in einem Kit. The ONE am Morgen, I LOVE am Abend.")}${pp("Unsicher? Probiere unsere <strong>KI-Hautanalyse</strong> – lade ein Foto hoch und erhalte persönliche Empfehlungen.")}${greenButton("Hautanalyse starten", p("de","skinAnalysis"))}`,
+          fr: `${h2("Trouvez votre match")}${pp("<strong>The ONE Facial Oil</strong> – Notre huile polyvalente. Parfaite pour commencer simplement avec un produit qui équilibre, hydrate et donne de l'éclat. Convient à tous les types de peau.")}${pp("<strong>I LOVE Facial Oil</strong> – Extra nourrissante au CBG. Idéale pour les peaux sèches ou matures qui ont besoin d'une hydratation profonde.")}${pp("<strong>DUO kit</strong> – Les deux huiles dans un kit. The ONE le matin, I LOVE le soir.")}${pp("Pas sûr(e) ? Essayez notre <strong>analyse de peau IA</strong>.")}${greenButton("Analyse de peau", p("fr","skinAnalysis"))}`
+        }
       },
       {
         delay_hours: 96,
-        subject: "\"Min hud har aldrig varit bättre\"",
-        html: `
-          <h2 style="font-size:22px;font-weight:700;margin:24px 0 12px">Riktig feedback från riktiga människor</h2>
-          <p style="font-size:15px;line-height:1.7;color:#515151">
-            Vi behöver inte hitta på berättelser. Våra kunder talar för sig själva.
-          </p>
-          <div style="background:#f5f5f7;border-radius:12px;padding:20px;margin:20px 0">
-            <p style="font-size:15px;line-height:1.7;color:#515151;font-style:italic;margin:0">
-              "Jag har provat allt – dyr hudvård, billig hudvård, ingenting. The ONE är den
-              enda produkten som verkligen gjort skillnad. Lugnar, balanserar, ger lyster."
-            </p>
-            <p style="font-size:13px;color:#766a62;margin:8px 0 0">– Sandra, 34 år</p>
-          </div>
-          <div style="background:#f5f5f7;border-radius:12px;padding:20px;margin:20px 0">
-            <p style="font-size:15px;line-height:1.7;color:#515151;font-style:italic;margin:0">
-              "DUO-kitet har blivit min morgon- och kvällsrutin. Så enkelt, så bra. Huden
-              är mjukare och jämnare än någonsin."
-            </p>
-            <p style="font-size:13px;color:#766a62;margin:8px 0 0">– Mikael, 41 år</p>
-          </div>
-          ${greenButton("Se alla produkter", siteUrl + "/produkter")}
-        `
+        subject: { sv: "\"Min hud har aldrig varit bättre\"", en: "\"My skin has never been better\"", es: "\"Mi piel nunca ha estado mejor\"", de: "\"Meine Haut war noch nie so gut\"", fr: "\"Ma peau n'a jamais été aussi belle\"" },
+        html: {
+          sv: `${h2("Riktig feedback från riktiga människor")}${pp("Vi behöver inte hitta på berättelser. Våra kunder talar för sig själva.")}${quote("\"Jag har provat allt – dyr hudvård, billig hudvård, ingenting. The ONE är den enda produkten som verkligen gjort skillnad. Lugnar, balanserar, ger lyster.\"", "– Sandra, 34 år")}${quote("\"DUO-kitet har blivit min morgon- och kvällsrutin. Så enkelt, så bra. Huden är mjukare och jämnare än någonsin.\"", "– Mikael, 41 år")}${greenButton("Se alla produkter", p("sv","products"))}`,
+          en: `${h2("Real feedback from real people")}${pp("We don't need to make up stories. Our customers speak for themselves.")}${quote("\"I've tried everything – expensive skincare, cheap skincare, nothing at all. The ONE is the only product that truly made a difference. Calms, balances, gives radiance.\"", "– Sandra, 34")}${quote("\"The DUO kit has become my morning and evening routine. So simple, so good. My skin is softer and smoother than ever.\"", "– Mikael, 41")}${greenButton("See all products", p("en","products"))}`,
+          es: `${h2("Opiniones reales de personas reales")}${pp("No necesitamos inventar historias. Nuestros clientes hablan por sí mismos.")}${quote("\"He probado de todo. The ONE es el único producto que realmente marcó la diferencia. Calma, equilibra, da luminosidad.\"", "– Sandra, 34")}${quote("\"El DUO kit se ha convertido en mi rutina de mañana y noche. Tan simple, tan bueno.\"", "– Mikael, 41")}${greenButton("Ver todos los productos", p("es","products"))}`,
+          de: `${h2("Echtes Feedback von echten Menschen")}${pp("Wir müssen keine Geschichten erfinden. Unsere Kunden sprechen für sich.")}${quote("\"Ich habe alles ausprobiert. The ONE ist das einzige Produkt, das wirklich einen Unterschied gemacht hat. Beruhigt, gleicht aus, gibt Strahlkraft.\"", "– Sandra, 34")}${quote("\"Das DUO-Kit ist meine Morgen- und Abendroutine geworden. So einfach, so gut.\"", "– Mikael, 41")}${greenButton("Alle Produkte ansehen", p("de","products"))}`,
+          fr: `${h2("De vrais avis de vraies personnes")}${pp("Nous n'avons pas besoin d'inventer des histoires. Nos clients parlent d'eux-mêmes.")}${quote("\"J'ai tout essayé. The ONE est le seul produit qui a vraiment fait la différence. Apaise, équilibre, donne de l'éclat.\"", "– Sandra, 34")}${quote("\"Le DUO kit est devenu ma routine matin et soir. Si simple, si efficace.\"", "– Mikael, 41")}${greenButton("Voir tous les produits", p("fr","products"))}`
+        }
       },
       {
         delay_hours: 120,
-        subject: "Ditt exklusiva erbjudande väntar, {{firstName}}",
-        html: `
-          <h2 style="font-size:22px;font-weight:700;margin:24px 0 12px">Bara för dig</h2>
-          <p style="font-size:15px;line-height:1.7;color:#515151">
-            Du har följt med oss i två veckor nu – tack för det! Vi hoppas att du lärt dig
-            något nytt om holistisk hudvård.
-          </p>
-          <p style="font-size:15px;line-height:1.7;color:#515151">
-            Som tack vill vi ge dig ett exklusivt erbjudande:
-            <strong>fri frakt + 15% rabatt</strong> på hela sortimentet.
-          </p>
-          <p style="font-size:17px;font-weight:700;color:#108474;text-align:center;margin:20px 0">
-            Kod: INSIDER15
-          </p>
-          <p style="font-size:13px;color:#766a62;text-align:center">
-            Giltig i 7 dagar. Kan inte kombineras med andra erbjudanden.
-          </p>
-          ${greenButton("Handla nu", siteUrl + "/produkter")}
-        `
+        subject: { sv: "Ditt exklusiva erbjudande väntar, {{firstName}}", en: "Your exclusive offer awaits, {{firstName}}", es: "Tu oferta exclusiva te espera, {{firstName}}", de: "Dein exklusives Angebot wartet, {{firstName}}", fr: "Votre offre exclusive vous attend, {{firstName}}" },
+        html: {
+          sv: `${h2("Bara för dig")}${pp("Du har följt med oss i två veckor nu – tack för det! Vi hoppas att du lärt dig något nytt om holistisk hudvård.")}${pp("Som tack vill vi ge dig ett exklusivt erbjudande: <strong>fri frakt + 15% rabatt</strong> på hela sortimentet.")}<p style="font-size:17px;font-weight:700;color:#108474;text-align:center;margin:20px 0">Kod: INSIDER15</p><p style="font-size:13px;color:#766a62;text-align:center">Giltig i 7 dagar. Kan inte kombineras med andra erbjudanden.</p>${greenButton("Handla nu", p("sv","products"))}`,
+          en: `${h2("Just for you")}${pp("You've been with us for two weeks now – thank you! We hope you've learned something new about holistic skincare.")}${pp("As a thank you, we'd like to offer you: <strong>free shipping + 15% off</strong> the entire range.")}<p style="font-size:17px;font-weight:700;color:#108474;text-align:center;margin:20px 0">Code: INSIDER15</p><p style="font-size:13px;color:#766a62;text-align:center">Valid for 7 days. Cannot be combined with other offers.</p>${greenButton("Shop now", p("en","products"))}`,
+          es: `${h2("Solo para ti")}${pp("Llevas dos semanas con nosotros – ¡gracias! Esperamos que hayas aprendido algo nuevo sobre el cuidado holístico.")}${pp("Como agradecimiento, te ofrecemos: <strong>envío gratis + 15% de descuento</strong> en toda la gama.")}<p style="font-size:17px;font-weight:700;color:#108474;text-align:center;margin:20px 0">Código: INSIDER15</p><p style="font-size:13px;color:#766a62;text-align:center">Válido por 7 días. No combinable con otras ofertas.</p>${greenButton("Comprar ahora", p("es","products"))}`,
+          de: `${h2("Nur für dich")}${pp("Du bist jetzt seit zwei Wochen bei uns – danke dafür! Wir hoffen, du hast etwas Neues über ganzheitliche Hautpflege gelernt.")}${pp("Als Dankeschön möchten wir dir ein exklusives Angebot machen: <strong>kostenloser Versand + 15% Rabatt</strong> auf das gesamte Sortiment.")}<p style="font-size:17px;font-weight:700;color:#108474;text-align:center;margin:20px 0">Code: INSIDER15</p><p style="font-size:13px;color:#766a62;text-align:center">Gültig für 7 Tage. Nicht mit anderen Angeboten kombinierbar.</p>${greenButton("Jetzt shoppen", p("de","products"))}`,
+          fr: `${h2("Rien que pour vous")}${pp("Cela fait deux semaines que vous êtes avec nous – merci ! Nous espérons que vous avez appris de nouvelles choses sur les soins holistiques.")}${pp("Pour vous remercier, nous vous offrons : <strong>livraison gratuite + 15% de réduction</strong> sur toute la gamme.")}<p style="font-size:17px;font-weight:700;color:#108474;text-align:center;margin:20px 0">Code : INSIDER15</p><p style="font-size:13px;color:#766a62;text-align:center">Valable 7 jours. Non cumulable avec d'autres offres.</p>${greenButton("Acheter maintenant", p("fr","products"))}`
+        }
       }
     ]
   });
 
-  // Post-purchase flow (4 emails)
   await db.upsertFlow({
     slug: "post-purchase",
     name: "Efter köp",
@@ -5908,86 +5890,51 @@ async function seedAutomationFlows() {
     steps: [
       {
         delay_hours: 24,
-        subject: "Tack för ditt köp, {{firstName}} – här är dina tips!",
-        html: `
-          <h2 style="font-size:22px;font-weight:700;margin:24px 0 12px">Så får du bäst resultat</h2>
-          <p style="font-size:15px;line-height:1.7;color:#515151">
-            Grattis till ditt köp! Här är några tips för att få ut maximalt av dina produkter:
-          </p>
-          <ul style="font-size:15px;line-height:2;color:#515151;padding-left:20px">
-            <li>Applicera på ren, fuktad hud för bäst absorption</li>
-            <li>2–3 droppar räcker – värm oljan mellan handflatorna först</li>
-            <li>Ge huden tid – CBD och CBG bygger effekt över tid (2–4 veckor)</li>
-            <li>Kombinera med bra sömn och vatten för synergieffekt</li>
-          </ul>
-          ${greenButton("Läs mer om våra ingredienser", siteUrl + "/om-oss")}
-        `
+        subject: { sv: "Tack för ditt köp, {{firstName}} – här är dina tips!", en: "Thanks for your purchase, {{firstName}} – here are your tips!", es: "Gracias por tu compra, {{firstName}} – aquí van tus consejos!", de: "Danke für deinen Kauf, {{firstName}} – hier sind deine Tipps!", fr: "Merci pour votre achat, {{firstName}} – voici vos conseils !" },
+        html: {
+          sv: `${h2("Så får du bäst resultat")}${pp("Grattis till ditt köp! Här är några tips för att få ut maximalt av dina produkter:")}<ul style="font-size:15px;line-height:2;color:#515151;padding-left:20px"><li>Applicera på ren, fuktad hud för bäst absorption</li><li>2–3 droppar räcker – värm oljan mellan handflatorna först</li><li>Ge huden tid – CBD och CBG bygger effekt över tid (2–4 veckor)</li><li>Kombinera med bra sömn och vatten för synergieffekt</li></ul>${greenButton("Läs mer om våra ingredienser", p("sv","about"))}`,
+          en: `${h2("How to get the best results")}${pp("Congratulations on your purchase! Here are some tips to get the most out of your products:")}<ul style="font-size:15px;line-height:2;color:#515151;padding-left:20px"><li>Apply to clean, damp skin for best absorption</li><li>2–3 drops is enough – warm the oil between your palms first</li><li>Give your skin time – CBD and CBG build effect over time (2–4 weeks)</li><li>Combine with good sleep and water for synergy</li></ul>${greenButton("Read more about our ingredients", p("en","about"))}`,
+          es: `${h2("Cómo obtener los mejores resultados")}${pp("¡Felicidades por tu compra! Aquí tienes algunos consejos para aprovechar al máximo tus productos:")}<ul style="font-size:15px;line-height:2;color:#515151;padding-left:20px"><li>Aplica sobre piel limpia y húmeda para mejor absorción</li><li>2–3 gotas son suficientes – calienta el aceite entre las palmas primero</li><li>Dale tiempo a tu piel – CBD y CBG construyen efecto con el tiempo (2–4 semanas)</li><li>Combina con buen sueño y agua para sinergia</li></ul>${greenButton("Más sobre nuestros ingredientes", p("es","about"))}`,
+          de: `${h2("So erzielst du die besten Ergebnisse")}${pp("Herzlichen Glückwunsch zu deinem Kauf! Hier sind einige Tipps, um das Beste aus deinen Produkten herauszuholen:")}<ul style="font-size:15px;line-height:2;color:#515151;padding-left:20px"><li>Auf saubere, feuchte Haut auftragen für beste Aufnahme</li><li>2–3 Tropfen genügen – erwärme das Öl zuerst zwischen den Handflächen</li><li>Gib deiner Haut Zeit – CBD und CBG bauen Wirkung über Zeit auf (2–4 Wochen)</li><li>Kombiniere mit gutem Schlaf und Wasser für Synergieeffekte</li></ul>${greenButton("Mehr über unsere Inhaltsstoffe", p("de","about"))}`,
+          fr: `${h2("Comment obtenir les meilleurs résultats")}${pp("Félicitations pour votre achat ! Voici quelques conseils pour tirer le meilleur parti de vos produits :")}<ul style="font-size:15px;line-height:2;color:#515151;padding-left:20px"><li>Appliquez sur peau propre et humide pour une meilleure absorption</li><li>2–3 gouttes suffisent – réchauffez l'huile entre vos paumes d'abord</li><li>Donnez du temps à votre peau – CBD et CBG construisent leur effet avec le temps (2–4 semaines)</li><li>Combinez avec un bon sommeil et de l'eau pour un effet de synergie</li></ul>${greenButton("En savoir plus sur nos ingrédients", p("fr","about"))}`
+        }
       },
       {
         delay_hours: 168,
-        subject: "Din hudvårdsrutin – enklare än du tror",
-        html: `
-          <h2 style="font-size:22px;font-weight:700;margin:24px 0 12px">Morgon och kväll</h2>
-          <p style="font-size:15px;line-height:1.7;color:#515151">
-            En bra rutin behöver inte vara komplicerad. Här är vårt förslag:
-          </p>
-          <div style="background:#f5f5f7;border-radius:12px;padding:20px;margin:16px 0">
-            <p style="font-size:13px;font-weight:700;color:#108474;margin:0">MORGON</p>
-            <p style="font-size:14px;line-height:1.7;color:#515151;margin:8px 0 0">
-              1. Skölj ansiktet med ljummet vatten<br>
-              2. The ONE Facial Oil – 2–3 droppar<br>
-              3. SPF (om du går ut)
-            </p>
-          </div>
-          <div style="background:#f5f5f7;border-radius:12px;padding:20px;margin:16px 0">
-            <p style="font-size:13px;font-weight:700;color:#108474;margin:0">KVÄLL</p>
-            <p style="font-size:14px;line-height:1.7;color:#515151;margin:8px 0 0">
-              1. Au Naturel Makeup Remover<br>
-              2. I LOVE Facial Oil – 3–4 droppar<br>
-              3. Sov gott!
-            </p>
-          </div>
-          ${greenButton("Se alla produkter", siteUrl + "/produkter")}
-        `
+        subject: { sv: "Din hudvårdsrutin – enklare än du tror", en: "Your skincare routine – simpler than you think", es: "Tu rutina de cuidado – más simple de lo que crees", de: "Deine Hautpflegeroutine – einfacher als du denkst", fr: "Votre routine de soin – plus simple que vous ne le pensez" },
+        html: {
+          sv: `${h2("Morgon och kväll")}${pp("En bra rutin behöver inte vara komplicerad. Här är vårt förslag:")}<div style="background:#f5f5f7;border-radius:12px;padding:20px;margin:16px 0"><p style="font-size:13px;font-weight:700;color:#108474;margin:0">MORGON</p><p style="font-size:14px;line-height:1.7;color:#515151;margin:8px 0 0">1. Skölj ansiktet med ljummet vatten<br>2. The ONE Facial Oil – 2–3 droppar<br>3. SPF (om du går ut)</p></div><div style="background:#f5f5f7;border-radius:12px;padding:20px;margin:16px 0"><p style="font-size:13px;font-weight:700;color:#108474;margin:0">KVÄLL</p><p style="font-size:14px;line-height:1.7;color:#515151;margin:8px 0 0">1. Au Naturel Makeup Remover<br>2. I LOVE Facial Oil – 3–4 droppar<br>3. Sov gott!</p></div>${greenButton("Se alla produkter", p("sv","products"))}`,
+          en: `${h2("Morning and evening")}${pp("A good routine doesn't have to be complicated. Here's our suggestion:")}<div style="background:#f5f5f7;border-radius:12px;padding:20px;margin:16px 0"><p style="font-size:13px;font-weight:700;color:#108474;margin:0">MORNING</p><p style="font-size:14px;line-height:1.7;color:#515151;margin:8px 0 0">1. Rinse face with lukewarm water<br>2. The ONE Facial Oil – 2–3 drops<br>3. SPF (if going out)</p></div><div style="background:#f5f5f7;border-radius:12px;padding:20px;margin:16px 0"><p style="font-size:13px;font-weight:700;color:#108474;margin:0">EVENING</p><p style="font-size:14px;line-height:1.7;color:#515151;margin:8px 0 0">1. Au Naturel Makeup Remover<br>2. I LOVE Facial Oil – 3–4 drops<br>3. Sleep well!</p></div>${greenButton("See all products", p("en","products"))}`,
+          es: `${h2("Mañana y noche")}${pp("Una buena rutina no tiene que ser complicada. Aquí va nuestra sugerencia:")}<div style="background:#f5f5f7;border-radius:12px;padding:20px;margin:16px 0"><p style="font-size:13px;font-weight:700;color:#108474;margin:0">MAÑANA</p><p style="font-size:14px;line-height:1.7;color:#515151;margin:8px 0 0">1. Enjuaga el rostro con agua tibia<br>2. The ONE Facial Oil – 2–3 gotas<br>3. SPF (si sales)</p></div><div style="background:#f5f5f7;border-radius:12px;padding:20px;margin:16px 0"><p style="font-size:13px;font-weight:700;color:#108474;margin:0">NOCHE</p><p style="font-size:14px;line-height:1.7;color:#515151;margin:8px 0 0">1. Au Naturel Makeup Remover<br>2. I LOVE Facial Oil – 3–4 gotas<br>3. ¡Buenas noches!</p></div>${greenButton("Ver todos los productos", p("es","products"))}`,
+          de: `${h2("Morgen und Abend")}${pp("Eine gute Routine muss nicht kompliziert sein. Hier ist unser Vorschlag:")}<div style="background:#f5f5f7;border-radius:12px;padding:20px;margin:16px 0"><p style="font-size:13px;font-weight:700;color:#108474;margin:0">MORGEN</p><p style="font-size:14px;line-height:1.7;color:#515151;margin:8px 0 0">1. Gesicht mit lauwarmem Wasser abspülen<br>2. The ONE Facial Oil – 2–3 Tropfen<br>3. SPF (wenn du rausgehst)</p></div><div style="background:#f5f5f7;border-radius:12px;padding:20px;margin:16px 0"><p style="font-size:13px;font-weight:700;color:#108474;margin:0">ABEND</p><p style="font-size:14px;line-height:1.7;color:#515151;margin:8px 0 0">1. Au Naturel Makeup Remover<br>2. I LOVE Facial Oil – 3–4 Tropfen<br>3. Schlaf gut!</p></div>${greenButton("Alle Produkte ansehen", p("de","products"))}`,
+          fr: `${h2("Matin et soir")}${pp("Une bonne routine n'a pas besoin d'être compliquée. Voici notre suggestion :")}<div style="background:#f5f5f7;border-radius:12px;padding:20px;margin:16px 0"><p style="font-size:13px;font-weight:700;color:#108474;margin:0">MATIN</p><p style="font-size:14px;line-height:1.7;color:#515151;margin:8px 0 0">1. Rincez le visage à l'eau tiède<br>2. The ONE Facial Oil – 2–3 gouttes<br>3. SPF (si vous sortez)</p></div><div style="background:#f5f5f7;border-radius:12px;padding:20px;margin:16px 0"><p style="font-size:13px;font-weight:700;color:#108474;margin:0">SOIR</p><p style="font-size:14px;line-height:1.7;color:#515151;margin:8px 0 0">1. Au Naturel Makeup Remover<br>2. I LOVE Facial Oil – 3–4 gouttes<br>3. Bonne nuit !</p></div>${greenButton("Voir tous les produits", p("fr","products"))}`
+        }
       },
       {
         delay_hours: 504,
-        subject: "Hur mår din hud, {{firstName}}?",
-        html: `
-          <h2 style="font-size:22px;font-weight:700;margin:24px 0 12px">Vi vill höra från dig</h2>
-          <p style="font-size:15px;line-height:1.7;color:#515151">
-            Det har nu gått tre veckor sedan ditt köp. Förhoppningsvis börjar du se
-            skillnad – CBD och CBG bygger effekt över tid.
-          </p>
-          <p style="font-size:15px;line-height:1.7;color:#515151">
-            Vill du se hur din hud utvecklas? Vår AI-hudanalys ger dig en objektiv
-            bedömning och personliga råd.
-          </p>
-          ${greenButton("Gör en gratis hudanalys", siteUrl + "/hudanalys")}
-          <p style="font-size:14px;line-height:1.7;color:#515151;margin-top:16px">
-            Har du frågor? Svara på detta mejl så återkommer vi inom 24 timmar.
-          </p>
-        `
+        subject: { sv: "Hur mår din hud, {{firstName}}?", en: "How's your skin doing, {{firstName}}?", es: "¿Cómo va tu piel, {{firstName}}?", de: "Wie geht es deiner Haut, {{firstName}}?", fr: "Comment va votre peau, {{firstName}} ?" },
+        html: {
+          sv: `${h2("Vi vill höra från dig")}${pp("Det har nu gått tre veckor sedan ditt köp. Förhoppningsvis börjar du se skillnad – CBD och CBG bygger effekt över tid.")}${pp("Vill du se hur din hud utvecklas? Vår AI-hudanalys ger dig en objektiv bedömning och personliga råd.")}${greenButton("Gör en gratis hudanalys", p("sv","skinAnalysis"))}${pp("Har du frågor? Svara på detta mejl så återkommer vi inom 24 timmar.")}`,
+          en: `${h2("We'd love to hear from you")}${pp("It's been three weeks since your purchase. Hopefully you're starting to see a difference – CBD and CBG build effect over time.")}${pp("Want to see how your skin is progressing? Our AI skin analysis gives you an objective assessment and personalised advice.")}${greenButton("Try free skin analysis", p("en","skinAnalysis"))}${pp("Questions? Reply to this email and we'll get back to you within 24 hours.")}`,
+          es: `${h2("Queremos saber de ti")}${pp("Han pasado tres semanas desde tu compra. Esperamos que empieces a notar la diferencia – CBD y CBG construyen su efecto con el tiempo.")}${pp("¿Quieres ver cómo progresa tu piel? Nuestro análisis de piel con IA te da una evaluación objetiva y consejos personalizados.")}${greenButton("Análisis de piel gratis", p("es","skinAnalysis"))}${pp("¿Preguntas? Responde a este email y te responderemos en 24 horas.")}`,
+          de: `${h2("Wir möchten von dir hören")}${pp("Es sind jetzt drei Wochen seit deinem Kauf vergangen. Hoffentlich siehst du langsam einen Unterschied – CBD und CBG bauen ihre Wirkung über Zeit auf.")}${pp("Möchtest du sehen, wie sich deine Haut entwickelt? Unsere KI-Hautanalyse gibt dir eine objektive Bewertung und persönliche Tipps.")}${greenButton("Kostenlose Hautanalyse", p("de","skinAnalysis"))}${pp("Fragen? Antworte auf diese E-Mail und wir melden uns innerhalb von 24 Stunden.")}`,
+          fr: `${h2("Nous aimerions avoir de vos nouvelles")}${pp("Cela fait trois semaines depuis votre achat. Nous espérons que vous commencez à voir une différence – CBD et CBG construisent leur effet avec le temps.")}${pp("Envie de voir comment votre peau progresse ? Notre analyse de peau IA vous donne une évaluation objective et des conseils personnalisés.")}${greenButton("Analyse de peau gratuite", p("fr","skinAnalysis"))}${pp("Des questions ? Répondez à cet email et nous vous répondrons sous 24 heures.")}`
+        }
       },
       {
         delay_hours: 1080,
-        subject: "Dags att fylla på? Spara med prenumeration",
-        html: `
-          <h2 style="font-size:22px;font-weight:700;margin:24px 0 12px">Slipp att ta slut</h2>
-          <p style="font-size:15px;line-height:1.7;color:#515151">
-            Beroende på hur mycket du använder borde det snart vara dags för påfyllning.
-          </p>
-          <p style="font-size:15px;line-height:1.7;color:#515151">
-            Med våra prenumerationer får du <strong>15% rabatt</strong> på varje leverans,
-            och du väljer själv intervall (30, 60 eller 90 dagar). Avbryt när du vill.
-          </p>
-          ${greenButton("Beställ igen", siteUrl + "/produkter")}
-        `
+        subject: { sv: "Dags att fylla på? Spara med prenumeration", en: "Time to restock? Save with a subscription", es: "¿Hora de reponer? Ahorra con una suscripción", de: "Zeit zum Nachfüllen? Spare mit einem Abo", fr: "Il est temps de réapprovisionner ? Économisez avec un abonnement" },
+        html: {
+          sv: `${h2("Slipp att ta slut")}${pp("Beroende på hur mycket du använder borde det snart vara dags för påfyllning.")}${pp("Med våra prenumerationer får du <strong>15% rabatt</strong> på varje leverans, och du väljer själv intervall (30, 60 eller 90 dagar). Avbryt när du vill.")}${greenButton("Beställ igen", p("sv","products"))}`,
+          en: `${h2("Never run out")}${pp("Depending on how much you use, it might be time to restock soon.")}${pp("With our subscriptions, you get <strong>15% off</strong> every delivery, and you choose your own interval (30, 60 or 90 days). Cancel anytime.")}${greenButton("Order again", p("en","products"))}`,
+          es: `${h2("Que no se te acabe")}${pp("Dependiendo de cuánto uses, pronto podría ser hora de reponer.")}${pp("Con nuestras suscripciones, obtienes un <strong>15% de descuento</strong> en cada entrega, y eliges tu propio intervalo (30, 60 o 90 días). Cancela cuando quieras.")}${greenButton("Pedir de nuevo", p("es","products"))}`,
+          de: `${h2("Nie wieder leer")}${pp("Je nachdem wie viel du verwendest, könnte es bald Zeit zum Nachfüllen sein.")}${pp("Mit unseren Abos bekommst du <strong>15% Rabatt</strong> auf jede Lieferung, und du wählst dein eigenes Intervall (30, 60 oder 90 Tage). Jederzeit kündbar.")}${greenButton("Nachbestellen", p("de","products"))}`,
+          fr: `${h2("Ne soyez jamais à court")}${pp("Selon votre utilisation, il est peut-être bientôt temps de réapprovisionner.")}${pp("Avec nos abonnements, vous bénéficiez de <strong>15% de réduction</strong> sur chaque livraison, et vous choisissez votre intervalle (30, 60 ou 90 jours). Annulable à tout moment.")}${greenButton("Commander à nouveau", p("fr","products"))}`
+        }
       }
     ]
   });
 
-  // Cart abandonment flow (3 emails)
   await db.upsertFlow({
     slug: "cart-abandoned",
     name: "Övergiven varukorg",
@@ -5995,48 +5942,36 @@ async function seedAutomationFlows() {
     steps: [
       {
         delay_hours: 1,
-        subject: "Du glömde något i varukorgen",
-        html: `
-          <h2 style="font-size:22px;font-weight:700;margin:24px 0 12px">Din varukorg väntar</h2>
-          <p style="font-size:15px;line-height:1.7;color:#515151">
-            Vi såg att du var nära att slutföra din beställning. Dina produkter
-            väntar fortfarande på dig!
-          </p>
-          ${greenButton("Slutför din beställning", siteUrl + "/kassa")}
-          <p style="font-size:13px;color:#766a62;text-align:center">
-            Fri frakt på ordrar över 600 kr.
-          </p>
-        `
+        subject: { sv: "Du glömde något i varukorgen", en: "You left something in your cart", es: "Olvidaste algo en tu carrito", de: "Du hast etwas im Warenkorb vergessen", fr: "Vous avez oublié quelque chose dans votre panier" },
+        html: {
+          sv: `${h2("Din varukorg väntar")}${pp("Vi såg att du var nära att slutföra din beställning. Dina produkter väntar fortfarande på dig!")}${greenButton("Slutför din beställning", p("sv","checkout"))}<p style="font-size:13px;color:#766a62;text-align:center">Fri frakt på ordrar över 600 kr.</p>`,
+          en: `${h2("Your cart is waiting")}${pp("We noticed you were close to completing your order. Your products are still waiting for you!")}${greenButton("Complete your order", p("en","checkout"))}<p style="font-size:13px;color:#766a62;text-align:center">Free shipping on orders over 600 SEK.</p>`,
+          es: `${h2("Tu carrito te espera")}${pp("Notamos que estuviste a punto de completar tu pedido. ¡Tus productos todavía te están esperando!")}${greenButton("Completar tu pedido", p("es","checkout"))}<p style="font-size:13px;color:#766a62;text-align:center">Envío gratis en pedidos superiores a 600 SEK.</p>`,
+          de: `${h2("Dein Warenkorb wartet")}${pp("Wir haben gesehen, dass du kurz davor warst, deine Bestellung abzuschließen. Deine Produkte warten noch auf dich!")}${greenButton("Bestellung abschließen", p("de","checkout"))}<p style="font-size:13px;color:#766a62;text-align:center">Kostenloser Versand bei Bestellungen über 600 SEK.</p>`,
+          fr: `${h2("Votre panier vous attend")}${pp("Nous avons remarqué que vous étiez sur le point de finaliser votre commande. Vos produits vous attendent toujours !")}${greenButton("Finaliser votre commande", p("fr","checkout"))}<p style="font-size:13px;color:#766a62;text-align:center">Livraison gratuite à partir de 600 SEK.</p>`
+        }
       },
       {
         delay_hours: 24,
-        subject: "Fortfarande intresserad? Fri frakt på oss",
-        html: `
-          <h2 style="font-size:22px;font-weight:700;margin:24px 0 12px">Vi bjuder på frakten</h2>
-          <p style="font-size:15px;line-height:1.7;color:#515151">
-            Vi vill göra det enkelt för dig. Slutför din beställning idag
-            så står vi för fraktkostnaden – oavsett ordervärde.
-          </p>
-          ${greenButton("Handla med fri frakt", siteUrl + "/kassa")}
-        `
+        subject: { sv: "Fortfarande intresserad? Fri frakt på oss", en: "Still interested? Free shipping on us", es: "¿Sigues interesado/a? Envío gratis por nuestra cuenta", de: "Noch interessiert? Versandkostenfrei auf uns", fr: "Toujours intéressé(e) ? Livraison offerte" },
+        html: {
+          sv: `${h2("Vi bjuder på frakten")}${pp("Vi vill göra det enkelt för dig. Slutför din beställning idag så står vi för fraktkostnaden – oavsett ordervärde.")}${greenButton("Handla med fri frakt", p("sv","checkout"))}`,
+          en: `${h2("Shipping's on us")}${pp("We want to make it easy for you. Complete your order today and we'll cover the shipping cost – regardless of order value.")}${greenButton("Shop with free shipping", p("en","checkout"))}`,
+          es: `${h2("El envío corre por nuestra cuenta")}${pp("Queremos hacértelo fácil. Completa tu pedido hoy y cubrimos el costo de envío – sin importar el valor del pedido.")}${greenButton("Comprar con envío gratis", p("es","checkout"))}`,
+          de: `${h2("Versand geht auf uns")}${pp("Wir möchten es dir einfach machen. Schließe deine Bestellung heute ab und wir übernehmen die Versandkosten – unabhängig vom Bestellwert.")}${greenButton("Mit kostenlosem Versand bestellen", p("de","checkout"))}`,
+          fr: `${h2("La livraison est pour nous")}${pp("Nous voulons vous faciliter la tâche. Finalisez votre commande aujourd'hui et nous prenons en charge les frais de livraison – quel que soit le montant.")}${greenButton("Acheter avec livraison gratuite", p("fr","checkout"))}`
+        }
       },
       {
         delay_hours: 72,
-        subject: "Sista chansen – 5% extra rabatt",
-        html: `
-          <h2 style="font-size:22px;font-weight:700;margin:24px 0 12px">Sista knuffen</h2>
-          <p style="font-size:15px;line-height:1.7;color:#515151">
-            Vi ger inte upp så lätt! Här är <strong>5% extra rabatt</strong>
-            på hela din varukorg. Använd koden:
-          </p>
-          <p style="font-size:17px;font-weight:700;color:#108474;text-align:center;margin:20px 0">
-            KOMTILLBAKA5
-          </p>
-          ${greenButton("Slutför ditt köp", siteUrl + "/kassa")}
-          <p style="font-size:13px;color:#766a62;text-align:center">
-            Erbjudandet är giltigt i 48 timmar.
-          </p>
-        `
+        subject: { sv: "Sista chansen – 5% extra rabatt", en: "Last chance – 5% extra off", es: "Última oportunidad – 5% de descuento extra", de: "Letzte Chance – 5% Extra-Rabatt", fr: "Dernière chance – 5% de réduction supplémentaire" },
+        html: {
+          sv: `${h2("Sista knuffen")}${pp("Vi ger inte upp så lätt! Här är <strong>5% extra rabatt</strong> på hela din varukorg. Använd koden:")}<p style="font-size:17px;font-weight:700;color:#108474;text-align:center;margin:20px 0">KOMTILLBAKA5</p>${greenButton("Slutför ditt köp", p("sv","checkout"))}<p style="font-size:13px;color:#766a62;text-align:center">Erbjudandet är giltigt i 48 timmar.</p>`,
+          en: `${h2("One last nudge")}${pp("We don't give up easily! Here's <strong>5% extra off</strong> your entire cart. Use the code:")}<p style="font-size:17px;font-weight:700;color:#108474;text-align:center;margin:20px 0">COMEBACK5</p>${greenButton("Complete your purchase", p("en","checkout"))}<p style="font-size:13px;color:#766a62;text-align:center">Offer valid for 48 hours.</p>`,
+          es: `${h2("Último empujón")}${pp("¡No nos rendimos fácilmente! Aquí tienes un <strong>5% de descuento extra</strong> en todo tu carrito. Usa el código:")}<p style="font-size:17px;font-weight:700;color:#108474;text-align:center;margin:20px 0">VUELVE5</p>${greenButton("Completar tu compra", p("es","checkout"))}<p style="font-size:13px;color:#766a62;text-align:center">Oferta válida por 48 horas.</p>`,
+          de: `${h2("Ein letzter Anstoß")}${pp("Wir geben nicht so leicht auf! Hier sind <strong>5% Extra-Rabatt</strong> auf deinen gesamten Warenkorb. Nutze den Code:")}<p style="font-size:17px;font-weight:700;color:#108474;text-align:center;margin:20px 0">COMEBACK5</p>${greenButton("Kauf abschließen", p("de","checkout"))}<p style="font-size:13px;color:#766a62;text-align:center">Angebot gültig für 48 Stunden.</p>`,
+          fr: `${h2("Un dernier coup de pouce")}${pp("Nous n'abandonnons pas facilement ! Voici <strong>5% de réduction supplémentaire</strong> sur tout votre panier. Utilisez le code :")}<p style="font-size:17px;font-weight:700;color:#108474;text-align:center;margin:20px 0">RETOUR5</p>${greenButton("Finaliser votre achat", p("fr","checkout"))}<p style="font-size:13px;color:#766a62;text-align:center">Offre valable 48 heures.</p>`
+        }
       }
     ]
   });
