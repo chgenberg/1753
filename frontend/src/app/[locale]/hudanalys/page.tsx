@@ -183,7 +183,8 @@ function OptionCard({
       type="button"
       onClick={onClick}
       className={cn(
-        "group relative flex h-full min-h-[140px] flex-col items-center justify-center gap-2.5 rounded-2xl border-2 px-4 py-6 text-center transition-all duration-300",
+        "group relative flex flex-col items-center justify-center gap-2.5 rounded-2xl border-2 px-4 py-4 text-center transition-all duration-300",
+        subtitle ? "h-[140px]" : "h-[100px]",
         selected
           ? "border-[#108474] bg-[#108474]/5 shadow-md shadow-[#108474]/10"
           : "border-brand-100 bg-white hover:border-brand-200 hover:shadow-sm",
@@ -238,7 +239,7 @@ function ChipSelect({
             type="button"
             onClick={() => onToggle(opt.key)}
             className={cn(
-              "inline-flex min-h-[52px] items-center justify-center gap-2 rounded-full border-2 px-5 py-3 text-sm font-medium transition-all duration-300",
+              "inline-flex h-[60px] items-center justify-center gap-2 rounded-full border-2 px-5 text-center text-sm font-medium leading-tight transition-all duration-300",
               active
                 ? "border-[#108474] bg-[#108474]/5 text-[#108474]"
                 : "border-brand-100 bg-white text-brand-700 hover:border-brand-200"
@@ -784,7 +785,10 @@ export default function AnalysisPage() {
     };
   }, [termsOpen]);
 
-  const scrollTop = () => window.scrollTo({ top: 0, behavior: "smooth" });
+  const scrollTop = () => {
+    window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
+    requestAnimationFrame(() => window.scrollTo({ top: 0 }));
+  };
 
   const goNext = () => {
     if (step === "email") {
