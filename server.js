@@ -163,6 +163,7 @@ const API_MSG = {
   discountEnter:      { sv: "Ange en rabattkod", en: "Enter a discount code", es: "Introduce un código de descuento", de: "Gib einen Rabattcode ein", fr: "Saisissez un code de réduction" },
   discountInvalid:    { sv: "Ogiltig rabattkod", en: "Invalid discount code", es: "Código de descuento inválido", de: "Ungültiger Rabattcode", fr: "Code de réduction invalide" },
   discountWrongProducts: { sv: "Rabattkoden gäller inte för dessa produkter", en: "Discount code does not apply to these products", es: "El código no aplica a estos productos", de: "Der Rabattcode gilt nicht für diese Produkte", fr: "Le code ne s'applique pas à ces produits" },
+  discountMinOrder:   { sv: "Ordervärdet är för lågt för denna rabattkod", en: "Order value is too low for this discount code", es: "El valor del pedido es demasiado bajo para este código", de: "Der Bestellwert ist zu niedrig für diesen Rabattcode", fr: "Le montant de la commande est trop bas pour ce code" },
   analysisNoKey:      { sv: "AI-tjänsten är inte konfigurerad.", en: "AI service is not configured.", es: "El servicio de IA no está configurado.", de: "Der KI-Dienst ist nicht konfiguriert.", fr: "Le service IA n'est pas configuré." },
   analysisFailed:     { sv: "Analysen kunde inte genomföras just nu.", en: "The analysis could not be completed right now.", es: "El análisis no pudo completarse ahora.", de: "Die Analyse konnte gerade nicht durchgeführt werden.", fr: "L'analyse n'a pas pu être effectuée pour le moment." },
   analysisNoResult:   { sv: "Analysen gav inget resultat. Försök igen.", en: "Analysis produced no result. Try again.", es: "El análisis no produjo resultado. Inténtalo de nuevo.", de: "Die Analyse hat kein Ergebnis geliefert. Versuche es erneut.", fr: "L'analyse n'a donné aucun résultat. Réessayez." },
@@ -2731,6 +2732,7 @@ app.post("/api/discount/validate", async (req, res) => {
         discount = {
           percent: dbCode.percent || 0,
           fixedAmount: dbCode.fixed_amount || 0,
+          minOrderAmount: dbCode.min_order_amount || 0,
           productIds: dbCode.product_ids,
           description: dbCode.description
         };
@@ -2745,10 +2747,16 @@ app.post("/api/discount/validate", async (req, res) => {
     return res.status(400).json({ message: apiMsg("discountWrongProducts", reqLocale(req)) });
   }
 
+  const itemsTotal = applicableItems.reduce((sum, i) => sum + (i.price || 0) * (i.qty || 1), 0);
+  if (discount.minOrderAmount && itemsTotal < discount.minOrderAmount) {
+    return res.status(400).json({ message: apiMsg("discountMinOrder", reqLocale(req)), minOrderAmount: discount.minOrderAmount });
+  }
+
   res.json({
     code: key,
     percent: discount.percent || 0,
     fixedAmount: discount.fixedAmount || 0,
+    minOrderAmount: discount.minOrderAmount || 0,
     description: discount.description,
     applicableProductIds: discount.productIds || null,
   });
@@ -2813,11 +2821,22 @@ app.post("/api/orders/create", async (req, res) => {
           discount = {
             percent: dbCode.percent || 0,
             fixedAmount: dbCode.fixed_amount || 0,
+            minOrderAmount: dbCode.min_order_amount || 0,
             productIds: dbCode.product_ids,
             description: dbCode.description
           };
           await db.incrementDiscountUsage(discountCode);
         }
+      }
+    }
+
+    if (discount && discount.minOrderAmount) {
+      const cartTotal = items.reduce((sum, i) => {
+        const p = PRODUCTS_MAP[i.id];
+        return sum + (p ? (currency === "EUR" ? (p.priceEur || p.price) : p.price) * (i.qty || 1) : 0);
+      }, 0);
+      if (cartTotal < discount.minOrderAmount) {
+        discount = null;
       }
     }
 

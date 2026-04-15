@@ -19,6 +19,7 @@ import { locales, type Locale } from "@/lib/i18n/types";
 import { localizePath } from "@/lib/i18n/navigation";
 import { getMessages } from "@/lib/i18n";
 import { TechTabs } from "./tech-tabs";
+import { HeroVideo } from "@/components/hero-video";
 
 const BASE_URL = "https://www.1753skin.com";
 const IMG = "/Landing_page_skinanalys";
@@ -159,6 +160,8 @@ const content = {
     ctaSub: "15 metriker. Hudålder. Radardiagram. Gratis. Under 60 sekunder.",
     ctaButton: "Starta gratis hudanalys",
     ctaSecondary: "Läs mer om vår hudvård",
+    videoLabel: "Se hur det fungerar",
+    videoPosterAlt: "Resultat från AI-hudanalysen med poängring och metriker",
   },
   en: {
     metaTitle: "Free AI Skin Analysis – 15 Skin Metrics, Skin Age and Personal Routine | 1753 SKINCARE",
@@ -245,6 +248,8 @@ const content = {
     ctaSub: "15 metrics. Skin age. Radar chart. Free. Under 60 seconds.",
     ctaButton: "Start free skin analysis",
     ctaSecondary: "Learn more about our skincare",
+    videoLabel: "See how it works",
+    videoPosterAlt: "AI skin analysis results showing score ring and metrics",
   },
   es: {
     metaTitle: "Análisis de Piel con IA Gratis – 15 Métricas, Edad de la Piel y Rutina Personalizada | 1753 SKINCARE",
@@ -331,6 +336,8 @@ const content = {
     ctaSub: "15 métricas. Edad de la piel. Gráfico radar. Gratis. En menos de 60 segundos.",
     ctaButton: "Iniciar análisis de piel gratis",
     ctaSecondary: "Descubre nuestro cuidado de la piel",
+    videoLabel: "Mira cómo funciona",
+    videoPosterAlt: "Resultados del análisis de piel con IA mostrando puntuación y métricas",
   },
   de: {
     metaTitle: "Kostenlose KI-Hautanalyse – 15 Hautmetriken, Hautalter und Persönliche Routine | 1753 SKINCARE",
@@ -417,6 +424,8 @@ const content = {
     ctaSub: "15 Metriken. Hautalter. Radardiagramm. Kostenlos. In unter 60 Sekunden.",
     ctaButton: "Kostenlose Hautanalyse starten",
     ctaSecondary: "Mehr über unsere Hautpflege erfahren",
+    videoLabel: "So funktioniert es",
+    videoPosterAlt: "Ergebnisse der KI-Hautanalyse mit Bewertungsring und Metriken",
   },
   fr: {
     metaTitle: "Analyse de Peau IA Gratuite – 15 Métriques, Âge de la Peau et Routine Personnalisée | 1753 SKINCARE",
@@ -503,6 +512,8 @@ const content = {
     ctaSub: "15 métriques. Âge de la peau. Graphique radar. Gratuit. En moins de 60 secondes.",
     ctaButton: "Lancer l'analyse de peau gratuite",
     ctaSecondary: "En savoir plus sur nos soins",
+    videoLabel: "Découvrez comment ça marche",
+    videoPosterAlt: "Résultats de l'analyse de peau IA avec anneau de score et métriques",
   },
 };
 
@@ -636,16 +647,7 @@ export default async function FreeAnalysisLanding({ params }: Props) {
               </Link>
             </div>
           </div>
-          <div className="relative aspect-[4/5] overflow-hidden rounded-3xl shadow-2xl shadow-black/10 md:aspect-square">
-            <Image
-              src={`${IMG}/1.webp`}
-              alt={tx(l, "Kvinna som analyserar sin hud", "Woman analysing her skin", "Mujer analizando su piel", "Frau analysiert ihre Haut", "Femme analysant sa peau")}
-              fill
-              className="object-cover"
-              sizes="(max-width: 768px) 100vw, 50vw"
-              priority
-            />
-          </div>
+          <HeroVideo label={c.videoLabel} posterAlt={c.videoPosterAlt} locale={l} />
         </div>
 
         {/* Stats */}
