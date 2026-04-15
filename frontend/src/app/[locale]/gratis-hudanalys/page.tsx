@@ -635,6 +635,18 @@ export default async function FreeAnalysisLanding({ params }: Props) {
           text: s.body,
         })),
       }) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
+        "@context": "https://schema.org",
+        "@type": "VideoObject",
+        name: tx(l, "AI Hudanalys – så fungerar det", "AI Skin Analysis – how it works", "Análisis de Piel con IA – cómo funciona", "KI-Hautanalyse – so funktioniert es", "Analyse de Peau IA – comment ça marche"),
+        description: c.metaDescription,
+        thumbnailUrl: `${BASE_URL}/Landing_page_skinanalys/video-poster-${l}.jpg`,
+        uploadDate: "2026-03-01",
+        contentUrl: `${BASE_URL}/Landing_page_skinanalys/hudanalys-demo-${l}.mp4`,
+        embedUrl: `${BASE_URL}${freeAnalysisPaths[l] || freeAnalysisPaths.sv}`,
+        duration: "PT45S",
+        inLanguage: l,
+      }) }} />
 
       {/* ── Hero with image ── */}
       <section className="relative overflow-hidden bg-gradient-to-b from-[#f5f5f7] to-white py-16 md:py-24">

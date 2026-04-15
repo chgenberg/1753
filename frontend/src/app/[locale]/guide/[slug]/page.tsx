@@ -153,6 +153,42 @@ export default async function GuidePage({ params }: Props) {
     ],
   };
 
+  const CATEGORY_ENTITIES: Record<string, { name: string; sameAs: string }[]> = {
+    cbd: [
+      { name: "Cannabidiol", sameAs: "https://www.wikidata.org/wiki/Q422197" },
+      { name: "Endocannabinoid system", sameAs: "https://www.wikidata.org/wiki/Q901330" },
+    ],
+    cbg: [
+      { name: "Cannabigerol", sameAs: "https://www.wikidata.org/wiki/Q5033195" },
+      { name: "Endocannabinoid system", sameAs: "https://www.wikidata.org/wiki/Q901330" },
+    ],
+    condition: [
+      { name: "Dermatology", sameAs: "https://www.wikidata.org/wiki/Q171171" },
+      { name: "Skin", sameAs: "https://www.wikidata.org/wiki/Q1074" },
+    ],
+    lifestyle: [
+      { name: "Skin care", sameAs: "https://www.wikidata.org/wiki/Q2383867" },
+    ],
+    general: [
+      { name: "Skin care", sameAs: "https://www.wikidata.org/wiki/Q2383867" },
+    ],
+    howto: [
+      { name: "Skin care", sameAs: "https://www.wikidata.org/wiki/Q2383867" },
+    ],
+    audience: [
+      { name: "Skin care", sameAs: "https://www.wikidata.org/wiki/Q2383867" },
+    ],
+    stad: [
+      { name: "Skin care", sameAs: "https://www.wikidata.org/wiki/Q2383867" },
+    ],
+  };
+
+  const aboutEntities = (CATEGORY_ENTITIES[page.category] || CATEGORY_ENTITIES.general).map((e) => ({
+    "@type": "Thing",
+    name: e.name,
+    sameAs: e.sameAs,
+  }));
+
   const articleSchema = {
     "@context": "https://schema.org",
     "@type": "Article",
@@ -173,6 +209,11 @@ export default async function GuidePage({ params }: Props) {
     },
     mainEntityOfPage: `${BASE_URL}/${l}/guide/${slug}`,
     inLanguage: l,
+    about: aboutEntities,
+    speakable: {
+      "@type": "SpeakableSpecification",
+      cssSelector: ["h1", ".article-lead"],
+    },
   };
 
   const howToSchema = page.category === "howto" ? {
@@ -228,7 +269,7 @@ export default async function GuidePage({ params }: Props) {
                 {tx(l, "Uppdaterad 2026", "Updated 2026", "Actualizado 2026", "Aktualisiert 2026", "Mis à jour 2026")}
               </time>
             </p>
-            <p className="mt-5 text-base leading-relaxed text-[#515151] md:text-lg">
+            <p className="article-lead mt-5 text-base leading-relaxed text-[#515151] md:text-lg">
               {c.lead}
             </p>
             <div className="mt-8 flex flex-wrap gap-4">

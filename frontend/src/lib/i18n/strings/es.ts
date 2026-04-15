@@ -35,6 +35,7 @@ export const es: Messages = {
     navTitle: "Navegación",
     navAnalysis: "Análisis de piel",
     navGuide: "Guía de cosmética",
+    navGallery: "Galería",
     contactTitle: "Contacto",
     addressTitle: "Dirección",
     addressLines: "Södra Skjutbanevägen 10\n439 55 Åsa\nSuecia",

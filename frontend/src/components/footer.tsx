@@ -31,14 +31,6 @@ export function Footer() {
     }
   };
 
-  const guidePathMap: Record<string, string> = {
-    sv: "/sv/guide/cbd-hudvard",
-    en: "/en/guide/cbd-skincare",
-    es: "/es/guide/cuidado-piel-cbd",
-    de: "/de/guide/cbd-hautpflege",
-    fr: "/fr/guide/soin-peau-cbd",
-  };
-  const guidePath = guidePathMap[locale] || guidePathMap.en;
   const navLinks = [
     { href: path("home"), label: t("header.navHome") },
     { href: path("products"), label: t("header.navProducts") },
@@ -46,7 +38,8 @@ export function Footer() {
     { href: path("contact"), label: t("header.navContact") },
     { href: path("skinAnalysis"), label: t("footer.navAnalysis") },
     { href: path("loyalty"), label: t("loyaltyPage.navLabel") },
-    { href: guidePath, label: t("footer.navGuide") },
+    { href: `/${locale}/guide`, label: t("footer.navGuide") },
+    { href: `/${locale}/galleri`, label: t("footer.navGallery") },
   ];
 
   return (

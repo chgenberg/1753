@@ -147,6 +147,23 @@ export default async function LocaleLayout({
     })),
   };
 
+  const navSchema = {
+    "@context": "https://schema.org",
+    "@type": "SiteNavigationElement",
+    name: [
+      messages.header.navHome,
+      messages.header.navProducts,
+      messages.header.navAbout,
+      messages.header.navContact,
+    ],
+    url: [
+      `https://www.1753skin.com${localizePath(l, "home")}`,
+      `https://www.1753skin.com${localizePath(l, "products")}`,
+      `https://www.1753skin.com${localizePath(l, "about")}`,
+      `https://www.1753skin.com${localizePath(l, "contact")}`,
+    ],
+  };
+
   return (
     <LocaleProvider locale={locale as Locale} messages={messages}>
       <script
@@ -160,6 +177,10 @@ export default async function LocaleLayout({
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(navSchema) }}
       />
       <TopBanner />
       <Header />

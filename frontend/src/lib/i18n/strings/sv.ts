@@ -34,6 +34,7 @@ const bundle = {
     navTitle: "Navigera",
     navAnalysis: "Hudanalys",
     navGuide: "Hudvårdsguide",
+    navGallery: "Galleri",
     contactTitle: "Kontakt",
     addressTitle: "Adress",
     addressLines: "Södra Skjutbanevägen 10\n439 55 Åsa\nSverige",

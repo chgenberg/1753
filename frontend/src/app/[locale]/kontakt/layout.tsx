@@ -41,6 +41,51 @@ export async function generateMetadata({
   };
 }
 
-export default function KontaktLayout({ children }: { children: React.ReactNode }) {
-  return children;
+function tx(locale: string, sv: string, en: string, es?: string, de?: string, fr?: string): string {
+  if (locale === "sv") return sv;
+  if (locale === "es") return es || en;
+  if (locale === "de") return de || en;
+  if (locale === "fr") return fr || en;
+  return en;
+}
+
+export default async function KontaktLayout({
+  children,
+  params,
+}: {
+  children: React.ReactNode;
+  params: Promise<{ locale: string }>;
+}) {
+  const { locale } = await params;
+
+  const contactPageSchema = {
+    "@context": "https://schema.org",
+    "@type": "ContactPage",
+    name: tx(locale, "Kontakt", "Contact", "Contacto", "Kontakt", "Contact"),
+    url: `${BASE_URL}${CONTACT_PATHS[locale] || CONTACT_PATHS.en}`,
+    mainEntity: {
+      "@type": "Organization",
+      "@id": "https://www.1753skin.com/#organization",
+      name: "1753 SKINCARE",
+      telephone: "+46732305521",
+      email: "info@1753skin.com",
+      address: {
+        "@type": "PostalAddress",
+        streetAddress: "Sodra Skjutbanevagen 10",
+        addressLocality: "Asa",
+        postalCode: "439 55",
+        addressCountry: "SE",
+      },
+    },
+  };
+
+  return (
+    <>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(contactPageSchema) }}
+      />
+      {children}
+    </>
+  );
 }
