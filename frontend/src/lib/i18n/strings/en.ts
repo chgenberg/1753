@@ -3,9 +3,9 @@ import { LEGAL_PRIVACY_EN, LEGAL_TERMS_EN } from "./legal-content-en";
 
 export const en: Messages = {
   meta: {
-    defaultTitle: "1753 SKINCARE – CBD skincare for Nordic skin",
+    defaultTitle: "1753 SKINCARE – World-class CBD & CBG skincare",
     defaultDescription:
-      "Swedish skincare powered by CBD and CBG. Honest formulas made for Nordic skin.",
+      "Swedish skincare powered by CBD and CBG. Honest, world-class formulas for every skin.",
   },
   header: {
     navHome: "Home",
@@ -31,7 +31,7 @@ export const en: Messages = {
     thanks: "Thanks! Check your inbox.",
     subscribeError: "Could not subscribe. Please try again.",
     skincare: "Skincare",
-    tagline: "Swedish skincare with CBD and CBG. Developed for Nordic skin.",
+    tagline: "Swedish skincare with CBD and CBG. World-class skincare.",
     navTitle: "Navigate",
     navAnalysis: "Skin analysis",
     navGuide: "Skincare guide",

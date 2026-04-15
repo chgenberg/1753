@@ -3,9 +3,9 @@ import { LEGAL_PRIVACY_ES, LEGAL_TERMS_ES } from "./legal-content-es";
 
 export const es: Messages = {
   meta: {
-    defaultTitle: "1753 SKINCARE – Cosmética CBD para piel nórdica",
+    defaultTitle: "1753 SKINCARE – Cosmética CBD y CBG de clase mundial",
     defaultDescription:
-      "Cosmética sueca con CBD y CBG. Fórmulas honestas diseñadas para piel nórdica.",
+      "Cosmética sueca con CBD y CBG. Fórmulas honestas de clase mundial para todo tipo de piel.",
   },
   header: {
     navHome: "Inicio",
@@ -31,7 +31,7 @@ export const es: Messages = {
     thanks: "¡Gracias! Revisa tu bandeja de entrada.",
     subscribeError: "No se pudo suscribir. Inténtalo de nuevo.",
     skincare: "Skincare",
-    tagline: "Cosmética sueca con CBD y CBG. Desarrollada para piel nórdica.",
+    tagline: "Cosmética sueca con CBD y CBG. Cuidado de la piel de clase mundial.",
     navTitle: "Navegación",
     navAnalysis: "Análisis de piel",
     navGuide: "Guía de cosmética",

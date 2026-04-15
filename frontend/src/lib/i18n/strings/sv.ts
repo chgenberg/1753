@@ -2,9 +2,9 @@ import { LEGAL_PRIVACY_SV, LEGAL_TERMS_SV } from "./legal-content-sv";
 
 const bundle = {
   meta: {
-    defaultTitle: "1753 SKINCARE – CBD-hudvård för nordisk hud",
+    defaultTitle: "1753 SKINCARE – CBD & CBG hudvård i världsklass",
     defaultDescription:
-      "Svenskt hudvårdsmärke med CBD/CBG-baserade produkter. Ärlig, varm och effektiv hudvård utvecklad för nordisk hud.",
+      "Svenskt hudvårdsmärke med CBD- och CBG-baserade produkter. Ärlig, varm och effektiv hudvård i världsklass.",
   },
   header: {
     navHome: "Hem",
@@ -30,7 +30,7 @@ const bundle = {
     thanks: "Tack! Kolla din inkorg.",
     subscribeError: "Kunde inte prenumerera. Försök igen.",
     skincare: "Skincare",
-    tagline: "Svensk hudvård med CBD och CBG. Utvecklad för nordisk hud.",
+    tagline: "Svensk hudvård med CBD och CBG. Hudvård i världsklass.",
     navTitle: "Navigera",
     navAnalysis: "Hudanalys",
     navGuide: "Hudvårdsguide",
@@ -507,7 +507,7 @@ const bundle = {
     description:
       "Utforska 1753 SKINCAREs sortiment av CBD- och CBG-baserad hudvård. Ansiktsoljor, serum, rengöring och kosttillskott.",
     ogTitle: "Produkter – 1753 SKINCARE",
-    ogDescription: "CBD- och CBG-baserad hudvård för nordisk hud. Ansiktsoljor, serum och mer.",
+    ogDescription: "CBD- och CBG-baserad hudvård i världsklass. Ansiktsoljor, serum och mer.",
   },
   loyaltyPage: {
     metaTitle: "Lojalitetsprogram – 1753 SKINCARE",

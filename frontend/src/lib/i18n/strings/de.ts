@@ -3,9 +3,9 @@ import { LEGAL_PRIVACY_DE, LEGAL_TERMS_DE } from "./legal-content-de";
 
 export const de: Messages = {
   meta: {
-    defaultTitle: "1753 SKINCARE – CBD-Hautpflege für nordische Haut",
+    defaultTitle: "1753 SKINCARE – CBD- & CBG-Hautpflege auf Weltniveau",
     defaultDescription:
-      "Schwedische Hautpflege mit CBD und CBG. Ehrliche Formeln, entwickelt für nordische Haut.",
+      "Schwedische Hautpflege mit CBD und CBG. Ehrliche Formeln auf Weltniveau für jeden Hauttyp.",
   },
   header: {
     navHome: "Startseite",
@@ -31,7 +31,7 @@ export const de: Messages = {
     thanks: "Danke! Schau in dein Postfach.",
     subscribeError: "Abonnieren fehlgeschlagen. Bitte versuche es erneut.",
     skincare: "Skincare",
-    tagline: "Schwedische Hautpflege mit CBD und CBG. Entwickelt für nordische Haut.",
+    tagline: "Schwedische Hautpflege mit CBD und CBG. Hautpflege auf Weltniveau.",
     navTitle: "Navigation",
     navAnalysis: "Hautanalyse",
     navGuide: "Hautpflege-Guide",

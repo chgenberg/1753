@@ -3,9 +3,9 @@ import { LEGAL_PRIVACY_FR, LEGAL_TERMS_FR } from "./legal-content-fr";
 
 export const fr: Messages = {
   meta: {
-    defaultTitle: "1753 SKINCARE – Soins CBD pour peaux nordiques",
+    defaultTitle: "1753 SKINCARE – Soins CBD & CBG de classe mondiale",
     defaultDescription:
-      "Marque suédoise de soins à base de CBD et CBG. Des formules honnêtes, conçues pour les peaux nordiques.",
+      "Marque suédoise de soins à base de CBD et CBG. Des formules honnêtes de classe mondiale pour tous les types de peau.",
   },
   header: {
     navHome: "Accueil",
@@ -31,7 +31,7 @@ export const fr: Messages = {
     thanks: "Merci ! Vérifie ta boîte de réception.",
     subscribeError: "Impossible de s'abonner. Réessaie.",
     skincare: "Skincare",
-    tagline: "Soins suédois au CBD et CBG. Développés pour les peaux nordiques.",
+    tagline: "Soins suédois au CBD et CBG. Des soins de classe mondiale.",
     navTitle: "Navigation",
     navAnalysis: "Analyse de peau",
     navGuide: "Guide soins",
