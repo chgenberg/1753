@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, useRef, useEffect, useCallback } from "react";
-import { useSearchParams } from "next/navigation";
 import Image from "next/image";
 import Link from "next/link";
 import {
@@ -275,17 +274,17 @@ function tx(locale: string, sv: string, en: string, es?: string, de?: string, fr
 
 export default function HomePage() {
   const { t, messages, path, homeHash, locale } = useLocale();
-  const searchParams = useSearchParams();
   const [activeFeature, setActiveFeature] = useState<FeatureItem | null>(null);
   const [videoOpen, setVideoOpen] = useState(false);
   const [showUnsub, setShowUnsub] = useState(false);
 
   useEffect(() => {
-    if (searchParams.get("unsubscribed") === "1") {
+    const params = new URLSearchParams(window.location.search);
+    if (params.get("unsubscribed") === "1") {
       setShowUnsub(true);
       window.history.replaceState({}, "", window.location.pathname);
     }
-  }, [searchParams]);
+  }, []);
 
   const features: FeatureItem[] = messages.home.features.map((f, i) => ({
     ...f,
