@@ -26,8 +26,9 @@ export function generateStaticParams() {
   return locales.map((locale) => ({ locale }));
 }
 
-export function GET(_req: NextRequest, { params }: { params: { locale: string } }) {
-  const locale = (locales.includes(params.locale as Locale) ? params.locale : "en") as Locale;
+export async function GET(_req: NextRequest, { params }: { params: Promise<{ locale: string }> }) {
+  const { locale: rawLocale } = await params;
+  const locale = (locales.includes(rawLocale as Locale) ? rawLocale : "en") as Locale;
   const now = new Date().toUTCString();
 
   const items = ALL_LANDING_PAGES
