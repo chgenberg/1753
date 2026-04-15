@@ -440,7 +440,7 @@ app.post("/api/subscriptions/create", authMiddleware, async (req, res) => {
     });
 
     const env = process.env.VIVA_ENVIRONMENT === "production" ? "www" : "demo";
-    const checkoutUrl = `https://${env}.vivapayments.com/web/checkout?ref=${vivaData.orderCode}`;
+    const checkoutUrl = `https://${env}.vivapayments.com/web/checkout?ref=${vivaData.orderCode}&color=108474`;
 
     console.log(`[Subscription] Created for ${user.email}, product=${productId}, vivaOrderCode=${vivaData.orderCode}`);
     res.json({ orderCode: vivaData.orderCode, checkoutUrl });
@@ -2931,7 +2931,7 @@ app.post("/api/orders/create", async (req, res) => {
     console.log(`[Order] Created ${orderNumber} (${currency}), vivaOrderCode=${vivaData.orderCode}${checkoutUserId ? `, userId=${checkoutUserId}` : ""}`);
 
     const env = process.env.VIVA_ENVIRONMENT === "production" ? "www" : "demo";
-    const checkoutUrl = `https://${env}.vivapayments.com/web/checkout?ref=${vivaData.orderCode}`;
+    const checkoutUrl = `https://${env}.vivapayments.com/web/checkout?ref=${vivaData.orderCode}&color=108474`;
 
     res.json({ orderCode: vivaData.orderCode, orderNumber, checkoutUrl });
   } catch (err) {

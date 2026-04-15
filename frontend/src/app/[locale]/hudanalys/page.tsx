@@ -4,7 +4,6 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ArrowLeft,
   ArrowRight,
-  Camera,
   Check,
   Download,
   Droplets,
@@ -12,7 +11,6 @@ import {
   Heart,
   Leaf,
   Loader2,
-  Lock,
   Mail,
   Moon,
   ScanFace,
@@ -640,6 +638,12 @@ export default function AnalysisPage() {
       setSnapshotSaving(false);
     }
   }, [token, scanSummary, result, snapshotSaving, snapshotSaved]);
+
+  useEffect(() => {
+    if (step === "result" && token && scanSummary?.imageBase64 && !snapshotSaved && !snapshotSaving) {
+      saveSnapshot();
+    }
+  }, [step, token, scanSummary, snapshotSaved, snapshotSaving, saveSnapshot]);
 
   const analyze = useCallback(async () => {
     if (analyzingRef.current) return;
@@ -1790,46 +1794,16 @@ export default function AnalysisPage() {
                 </div>
               )}
 
-              {/* Save face snapshot opt-in */}
-              {token && scanSummary?.imageBase64 && !snapshotSaved && (
-                <div className="mx-auto max-w-md rounded-2xl border border-brand-200 bg-white p-5 text-center">
-                  <Camera className="mx-auto mb-2 h-5 w-5 text-brand-500" />
-                  <p className="text-sm font-semibold text-brand-900">
-                    {tx(locale,
-                      "Spara ditt foto för att följa förändringar över tid?",
-                      "Save your photo to track changes over time?",
-                      "¿Guardar tu foto para seguir los cambios con el tiempo?",
-                      "Dein Foto speichern, um Veränderungen zu verfolgen?",
-                      "Enregistrer votre photo pour suivre les changements au fil du temps ?")}
-                  </p>
-                  <p className="mt-1.5 text-xs leading-relaxed text-brand-500">
-                    {tx(locale,
-                      "Din bild krypteras och lagras säkert. Bara du kan se den. Du kan radera den när som helst från ditt konto.",
-                      "Your image is encrypted and stored securely. Only you can see it. You can delete it anytime from your account.",
-                      "Tu imagen se cifra y almacena de forma segura. Solo tú puedes verla. Puedes eliminarla en cualquier momento desde tu cuenta.",
-                      "Dein Bild wird verschlüsselt und sicher gespeichert. Nur du kannst es sehen. Du kannst es jederzeit in deinem Konto löschen.",
-                      "Votre image est chiffrée et stockée en toute sécurité. Vous seul pouvez la voir. Vous pouvez la supprimer à tout moment depuis votre compte.")}
-                  </p>
-                  <div className="mt-4 flex items-center justify-center gap-3">
-                    <button
-                      onClick={saveSnapshot}
-                      disabled={snapshotSaving}
-                      className="inline-flex items-center gap-2 rounded-full bg-[#108474] px-6 py-2.5 text-xs font-semibold text-white transition-all hover:bg-[#0d6e62] disabled:opacity-50"
-                    >
-                      {snapshotSaving ? (
-                        <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                      ) : (
-                        <Lock className="h-3.5 w-3.5" />
-                      )}
-                      {tx(locale, "Spara krypterat", "Save encrypted", "Guardar cifrado", "Verschlüsselt speichern", "Enregistrer chiffré")}
-                    </button>
-                    <button
-                      onClick={() => setSnapshotSaved(true)}
-                      className="rounded-full px-5 py-2.5 text-xs font-medium text-brand-500 transition-colors hover:bg-brand-50"
-                    >
-                      {tx(locale, "Nej tack", "No thanks", "No, gracias", "Nein, danke", "Non merci")}
-                    </button>
-                  </div>
+              {/* Auto-saved snapshot indicator (saving in progress) */}
+              {snapshotSaving && (
+                <div className="flex items-center justify-center gap-2 rounded-xl bg-brand-50 px-4 py-3 text-xs font-medium text-brand-500">
+                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                  {tx(locale,
+                    "Sparar ditt foto krypterat...",
+                    "Saving your photo encrypted...",
+                    "Guardando tu foto cifrado...",
+                    "Speichere dein Foto verschlüsselt...",
+                    "Enregistrement chiffré de votre photo...")}
                 </div>
               )}
 
