@@ -99,6 +99,22 @@ function emailT(locale, texts) {
   return texts[locale] || texts.en || texts.sv || Object.values(texts)[0] || "";
 }
 
+/** Avsändare för nyhetsbrev, kontakt, interna notifieringar m.m. (aldrig orders@) */
+function emailFromInfo() {
+  if (process.env.EMAIL_FROM_INFO) return process.env.EMAIL_FROM_INFO;
+  const legacy = process.env.EMAIL_FROM;
+  if (legacy && !/^orders?@1753skin\.com$/i.test(String(legacy).trim())) return legacy;
+  return "info@1753skin.com";
+}
+
+/** Avsändare för orderrelaterade transaktionsmejl till kund (bekräftelse, leverans, makulering, prenumeration på order) */
+function emailFromOrders() {
+  if (process.env.EMAIL_FROM_ORDERS) return process.env.EMAIL_FROM_ORDERS;
+  const legacy = process.env.EMAIL_FROM;
+  if (legacy && /^orders?@1753skin\.com$/i.test(String(legacy).trim())) return legacy;
+  return "orders@1753skin.com";
+}
+
 const EMAIL_SEGMENTS = {
   account:      { sv: "mitt-konto", en: "my-account", es: "mi-cuenta", de: "mein-konto", fr: "mon-compte" },
   products:     { sv: "produkter", en: "products", es: "productos", de: "produkte", fr: "produits" },
@@ -1305,7 +1321,7 @@ app.post("/api/admin/orders/:id/cancel", adminAuthMiddleware, async (req, res) =
       const currencyLabel = (order.currency || "SEK") === "EUR" ? "\u20ac" : "kr";
 
       const apiKey = process.env.RESEND_API_KEY;
-      const fromEmail = process.env.EMAIL_FROM || "info@1753skin.com";
+      const fromEmail = emailFromOrders();
       if (apiKey) {
         const { Resend } = require("resend");
         const resend = new Resend(apiKey);
@@ -3449,7 +3465,7 @@ async function sendTeamOrderNotification(order, items) {
   if (!apiKey) return;
   const { Resend } = require("resend");
   const resend = new Resend(apiKey);
-  const fromAddr = process.env.EMAIL_FROM || "info@1753skin.com";
+  const fromAddr = emailFromInfo();
   const currencyLabel = (order.currency || "SEK") === "EUR" ? "\u20ac" : "kr";
 
   const itemRows = items.map(i =>
@@ -3492,7 +3508,7 @@ async function sendOrderConfirmation(order, items) {
 
   const { Resend } = require("resend");
   const resend = new Resend(apiKey);
-  const fromEmail = process.env.EMAIL_FROM || "order@1753skin.com";
+  const fromEmail = emailFromOrders();
   const baseUrl = process.env.FRONTEND_URL || "https://www.1753skin.com";
   const currency = order.currency || "SEK";
   const isSEK = currency === "SEK";
@@ -3651,7 +3667,7 @@ async function sendAnalysisReport(email, analysisContent, locale, accountPasswor
 
   const { Resend } = require("resend");
   const resend = new Resend(apiKey);
-  const fromAddr = process.env.EMAIL_FROM || "info@1753skin.com";
+  const fromAddr = emailFromInfo();
   const baseUrl = process.env.FRONTEND_URL || "https://www.1753skin.com";
 
   let parsed;
@@ -3862,7 +3878,7 @@ async function sendShippingConfirmation(order, items, trackingNumber, trackingUr
 
   const { Resend } = require("resend");
   const resend = new Resend(apiKey);
-  const fromEmail = process.env.EMAIL_FROM || "order@1753skin.com";
+  const fromEmail = emailFromOrders();
   const baseUrl = process.env.FRONTEND_URL || "https://www.1753skin.com";
   const l = order.locale || "sv";
   const localePath = l;
@@ -3980,7 +3996,7 @@ async function sendSubscriptionChangeEmail(sub, action, details) {
 
   const { Resend } = require("resend");
   const resend = new Resend(apiKey);
-  const fromEmail = process.env.EMAIL_FROM || "order@1753skin.com";
+  const fromEmail = emailFromOrders();
   const baseUrl = process.env.FRONTEND_URL || "https://www.1753skin.com";
 
   const email = sub.customer_email;
@@ -4102,7 +4118,7 @@ async function sendPasswordSetupEmail(email, name, resetToken, locale) {
 
   const { Resend } = require("resend");
   const resend = new Resend(apiKey);
-  const fromEmail = process.env.EMAIL_FROM || "noreply@1753skin.com";
+  const fromEmail = emailFromInfo();
   const baseUrl = process.env.FRONTEND_URL || "https://www.1753skin.com";
   const l = locale || "sv";
 
@@ -4302,7 +4318,7 @@ async function sendAdminNotification(fromEmail, fromName, subject) {
     if (!apiKey) return;
     const { Resend } = require("resend");
     const resend = new Resend(apiKey);
-    const fromAddr = process.env.EMAIL_FROM || "info@1753skin.com";
+    const fromAddr = emailFromInfo();
 
     await resend.emails.send({
       from: `1753 SKINCARE <${fromAddr}>`,
@@ -4359,7 +4375,7 @@ async function handleAutoUnsubscribe(email, name) {
     if (apiKey) {
       const { Resend } = require("resend");
       const resend = new Resend(apiKey);
-      const fromAddr = process.env.EMAIL_FROM || "info@1753skin.com";
+      const fromAddr = emailFromInfo();
       const firstName = name?.split(" ")[0] || "";
 
       const subLocale = subscriber.locale || "sv";
@@ -4550,7 +4566,7 @@ app.post("/api/admin/inbox/:id/send", adminAuthMiddleware, async (req, res) => {
 
     const { Resend } = require("resend");
     const resend = new Resend(apiKey);
-    const fromAddr = process.env.EMAIL_FROM || "info@1753skin.com";
+    const fromAddr = emailFromInfo();
 
     await resend.emails.send({
       from: `1753 SKINCARE <${fromAddr}>`,
@@ -4626,7 +4642,7 @@ app.post("/api/contact", async (req, res) => {
 
     const { Resend } = require("resend");
     const resend = new Resend(apiKey);
-    const fromEmail = process.env.EMAIL_FROM || "info@1753skin.com";
+    const fromEmail = emailFromInfo();
 
     await resend.emails.send({
       from: `1753 SKINCARE <${fromEmail}>`,
@@ -4731,7 +4747,7 @@ app.post("/api/auth/forgot-password", async (req, res) => {
     if (apiKey) {
       const { Resend } = require("resend");
       const resend = new Resend(apiKey);
-      const fromAddr = process.env.EMAIL_FROM || "info@1753skin.com";
+      const fromAddr = emailFromInfo();
       const baseUrl = process.env.FRONTEND_URL || "https://www.1753skin.com";
       const l = locale || "sv";
 
@@ -4969,7 +4985,7 @@ async function processReviewReply(review, productName, reviewerName) {
       if (apiKey) {
         const { Resend } = require("resend");
         const resend = new Resend(apiKey);
-        const fromAddr = process.env.EMAIL_FROM || "info@1753skin.com";
+        const fromAddr = emailFromInfo();
         await resend.emails.send({
           from: `1753 SKINCARE <${fromAddr}>`,
           to: "christopher@1753skin.com",
@@ -5507,7 +5523,7 @@ async function processAutomationQueue() {
 
     const { Resend } = require("resend");
     const resend = new Resend(apiKey);
-    const fromEmail = process.env.EMAIL_FROM || "info@1753skin.com";
+    const fromEmail = emailFromInfo();
 
     for (const item of due) {
       try {
@@ -5790,7 +5806,7 @@ app.post("/api/newsletter/broadcast", async (req, res) => {
 
     const { Resend } = require("resend");
     const resend = new Resend(apiKey);
-    const fromEmail = process.env.EMAIL_FROM || "info@1753skin.com";
+    const fromEmail = emailFromInfo();
 
     const subscribers = await db.findActiveSubscribers();
     const baseUrl = process.env.BASE_URL || "https://api.1753skin.com";
@@ -5843,7 +5859,7 @@ app.post("/api/newsletter/broadcast-segmented", async (req, res) => {
 
     const { Resend } = require("resend");
     const resend = new Resend(apiKey);
-    const fromEmail = process.env.EMAIL_FROM || "info@1753skin.com";
+    const fromEmail = emailFromInfo();
     const baseUrl = process.env.BASE_URL || "https://api.1753skin.com";
 
     const results = [];
