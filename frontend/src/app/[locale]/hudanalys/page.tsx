@@ -740,6 +740,10 @@ export default function AnalysisPage() {
       setParsed(json);
       setStep("result");
 
+      if (typeof window !== "undefined" && typeof (window as any).fbq === "function") {
+        (window as any).fbq("track", "CompleteRegistration", { content_name: "skin_analysis_complete" });
+      }
+
       try {
         sessionStorage.setItem("1753_analysis_result", JSON.stringify({
           result: data,
@@ -928,7 +932,12 @@ export default function AnalysisPage() {
                 )}
 
                 <button
-                  onClick={() => { setStep(isReturningUser ? "demographics" : "email"); scrollTop(); }}
+                  onClick={() => {
+                    if (typeof window !== "undefined" && typeof (window as any).fbq === "function") {
+                      (window as any).fbq("track", "InitiateCheckout", { content_name: "skin_analysis_start" });
+                    }
+                    setStep(isReturningUser ? "demographics" : "email"); scrollTop();
+                  }}
                   className="inline-flex h-14 w-full items-center justify-center gap-3 rounded-full bg-[#108474] px-10 text-sm font-semibold text-white shadow-lg shadow-[#108474]/20 transition-all hover:bg-[#0d6e62] hover:shadow-xl active:scale-[0.97]"
                 >
                   <ScanFace className="h-5 w-5" />
