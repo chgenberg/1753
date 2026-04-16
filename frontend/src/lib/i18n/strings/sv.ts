@@ -38,6 +38,7 @@ const bundle = {
     navGuide: "Hudvårdsguide",
     navGallery: "Galleri",
     contactTitle: "Kontakt",
+    guidesTitle: "Populära guider",
     addressTitle: "Adress",
     addressLines: "Södra Skjutbanevägen 10\n439 55 Åsa\nSverige",
     copyright: "Floranie International AB. Alla rättigheter förbehållna.",

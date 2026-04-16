@@ -7,6 +7,59 @@ import { ArrowRight, AtSign, Check, Loader2, Mail, Phone } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 import { useLocale } from "@/providers/locale-provider";
 
+const FEATURED_GUIDES: Record<string, { slug: string; label: string }[]> = {
+  sv: [
+    { slug: "cbd-hudvard", label: "CBD-hudvård" },
+    { slug: "basta-hudvardsrutin", label: "Bästa hudvårdsrutinen" },
+    { slug: "cbd-mot-akne", label: "CBD mot akne" },
+    { slug: "naturlig-hudvard", label: "Naturlig hudvård" },
+    { slug: "cbd-mot-rosacea", label: "CBD mot rosacea" },
+    { slug: "torr-hud-behandling", label: "Torr hud" },
+    { slug: "cbd-vs-cbg", label: "CBD vs CBG" },
+    { slug: "kost-och-huden", label: "Kost och huden" },
+  ],
+  en: [
+    { slug: "cbd-skincare", label: "CBD skincare" },
+    { slug: "best-skincare-routine", label: "Best skincare routine" },
+    { slug: "cbd-for-acne", label: "CBD for acne" },
+    { slug: "natural-skincare", label: "Natural skincare" },
+    { slug: "cbd-for-rosacea", label: "CBD for rosacea" },
+    { slug: "dry-skin-treatment", label: "Dry skin treatment" },
+    { slug: "cbd-vs-cbg", label: "CBD vs CBG" },
+    { slug: "diet-and-skin", label: "Diet and skin" },
+  ],
+  es: [
+    { slug: "cbd-skincare", label: "Cuidado con CBD" },
+    { slug: "best-skincare-routine", label: "Mejor rutina facial" },
+    { slug: "cbd-for-acne", label: "CBD para el acné" },
+    { slug: "natural-skincare", label: "Cosmética natural" },
+    { slug: "cbd-for-rosacea", label: "CBD para rosácea" },
+    { slug: "dry-skin-treatment", label: "Piel seca" },
+    { slug: "cbd-vs-cbg", label: "CBD vs CBG" },
+    { slug: "diet-and-skin", label: "Dieta y piel" },
+  ],
+  de: [
+    { slug: "cbd-skincare", label: "CBD-Hautpflege" },
+    { slug: "best-skincare-routine", label: "Beste Hautpflege-Routine" },
+    { slug: "cbd-for-acne", label: "CBD gegen Akne" },
+    { slug: "natural-skincare", label: "Natürliche Hautpflege" },
+    { slug: "cbd-for-rosacea", label: "CBD gegen Rosazea" },
+    { slug: "dry-skin-treatment", label: "Trockene Haut" },
+    { slug: "cbd-vs-cbg", label: "CBD vs CBG" },
+    { slug: "diet-and-skin", label: "Ernährung und Haut" },
+  ],
+  fr: [
+    { slug: "cbd-skincare", label: "Soins au CBD" },
+    { slug: "best-skincare-routine", label: "Meilleure routine soin" },
+    { slug: "cbd-for-acne", label: "CBD contre l'acné" },
+    { slug: "natural-skincare", label: "Soins naturels" },
+    { slug: "cbd-for-rosacea", label: "CBD contre la rosacée" },
+    { slug: "dry-skin-treatment", label: "Peau sèche" },
+    { slug: "cbd-vs-cbg", label: "CBD vs CBG" },
+    { slug: "diet-and-skin", label: "Alimentation et peau" },
+  ],
+};
+
 export function Footer() {
   const { t, path, locale } = useLocale();
   const [email, setEmail] = useState("");
@@ -92,7 +145,7 @@ export function Footer() {
           )}
         </div>
 
-        <div className="grid gap-12 md:grid-cols-4">
+        <div className="grid gap-12 md:grid-cols-5">
           <div className="md:col-span-1">
             <div className="flex items-center gap-2.5">
               <Image
@@ -122,6 +175,23 @@ export function Footer() {
                   className="text-sm text-brand-600 transition-colors hover:text-brand-900"
                 >
                   {link.label}
+                </Link>
+              ))}
+            </div>
+          </div>
+
+          <div>
+            <h4 className="mb-4 text-[11px] font-bold uppercase tracking-[0.15em] text-brand-500">
+              {t("footer.guidesTitle")}
+            </h4>
+            <div className="flex flex-col gap-2.5">
+              {(FEATURED_GUIDES[locale] || FEATURED_GUIDES.en).map((g) => (
+                <Link
+                  key={g.slug}
+                  href={`/${locale}/guide/${g.slug}`}
+                  className="text-sm text-brand-600 transition-colors hover:text-brand-900"
+                >
+                  {g.label}
                 </Link>
               ))}
             </div>

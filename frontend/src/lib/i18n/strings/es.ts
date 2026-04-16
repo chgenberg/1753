@@ -39,6 +39,7 @@ export const es: Messages = {
     navGuide: "Guía de cosmética",
     navGallery: "Galería",
     contactTitle: "Contacto",
+    guidesTitle: "Guías populares",
     addressTitle: "Dirección",
     addressLines: "Södra Skjutbanevägen 10\n439 55 Åsa\nSuecia",
     copyright: "Floranie International AB. Todos los derechos reservados.",
