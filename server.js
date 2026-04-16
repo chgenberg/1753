@@ -43,6 +43,10 @@ app.use(express.json({
 /** Publik butiks-URL (Next.js). Viva-källkod kan fortfarande peka på *.railway.app – vi skickar vidare hit. */
 const PUBLIC_STORE_URL = (process.env.FRONTEND_URL || "https://www.1753skin.com").replace(/\/$/, "");
 
+app.get("/robots.txt", (_req, res) => {
+  res.type("text/plain").send("User-agent: *\nDisallow: /\n");
+});
+
 app.get("/payment-fail.html", (req, res) => {
   const qs = req.url.includes("?") ? req.url.slice(req.url.indexOf("?")) : "";
   res.redirect(302, `${PUBLIC_STORE_URL}/betalning/misslyckad${qs}`);
