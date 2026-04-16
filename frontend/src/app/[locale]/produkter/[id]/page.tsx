@@ -110,10 +110,11 @@ export default async function ProductPage({ params }: Props) {
         },
         hasMerchantReturnPolicy: {
           "@type": "MerchantReturnPolicy",
-          applicableCountry: "SE",
+          applicableCountry: COUNTRY_CODE[l] || "SE",
           returnPolicyCategory: "https://schema.org/MerchantReturnFiniteReturnWindow",
           merchantReturnDays: 30,
           returnMethod: "https://schema.org/ReturnByMail",
+          returnFees: "https://schema.org/FreeReturn",
         },
       },
       aggregateRating: {
