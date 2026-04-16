@@ -31,7 +31,7 @@ export async function generateMetadata({
 
   const alternatesLang: Record<string, string> = {};
   for (const loc of locales) alternatesLang[loc] = `${BASE}${localizePath(loc, "loyalty")}`;
-  alternatesLang["x-default"] = alternatesLang.en;
+  alternatesLang["x-default"] = alternatesLang.sv;
 
   return {
     title: TITLES[l] || TITLES.en,

@@ -33,7 +33,7 @@ export async function generateMetadata({
         es: `${BASE_URL}${TERMS_PATHS.es}`,
         de: `${BASE_URL}${TERMS_PATHS.de}`,
         fr: `${BASE_URL}${TERMS_PATHS.fr}`,
-        "x-default": `${BASE_URL}${TERMS_PATHS.en}`,
+        "x-default": `${BASE_URL}${TERMS_PATHS.sv}`,
       },
     },
   };

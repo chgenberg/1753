@@ -55,7 +55,7 @@ export async function generateMetadata({
         es: "https://www.1753skin.com/es",
         de: "https://www.1753skin.com/de",
         fr: "https://www.1753skin.com/fr",
-        "x-default": "https://www.1753skin.com/en",
+        "x-default": "https://www.1753skin.com/sv",
       },
     },
   };

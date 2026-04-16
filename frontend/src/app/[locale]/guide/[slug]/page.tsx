@@ -86,7 +86,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
   if (page.esSlug) langs.es = `${BASE_URL}/es/guide/${page.esSlug}`;
   if (page.deSlug) langs.de = `${BASE_URL}/de/guide/${page.deSlug}`;
   if (page.frSlug) langs.fr = `${BASE_URL}/fr/guide/${page.frSlug}`;
-  langs["x-default"] = `${BASE_URL}${enPath}`;
+  langs["x-default"] = `${BASE_URL}${svPath}`;
   return {
     title: c.metaTitle,
     description: c.metaDescription,

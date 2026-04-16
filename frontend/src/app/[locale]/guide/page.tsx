@@ -69,7 +69,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         es: `${BASE_URL}${GUIDE_PATHS.es}`,
         de: `${BASE_URL}${GUIDE_PATHS.de}`,
         fr: `${BASE_URL}${GUIDE_PATHS.fr}`,
-        "x-default": `${BASE_URL}${GUIDE_PATHS.en}`,
+        "x-default": `${BASE_URL}${GUIDE_PATHS.sv}`,
       },
     },
   };

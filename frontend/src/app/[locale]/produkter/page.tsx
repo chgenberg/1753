@@ -36,7 +36,7 @@ export async function generateMetadata({
         es: `${BASE_URL}${PRODUCTS_PATHS.es}`,
         de: `${BASE_URL}${PRODUCTS_PATHS.de}`,
         fr: `${BASE_URL}${PRODUCTS_PATHS.fr}`,
-        "x-default": `${BASE_URL}${PRODUCTS_PATHS.en}`,
+        "x-default": `${BASE_URL}${PRODUCTS_PATHS.sv}`,
       },
     },
   };

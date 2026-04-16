@@ -33,7 +33,7 @@ export async function generateMetadata({
         es: `${BASE_URL}${PRIVACY_PATHS.es}`,
         de: `${BASE_URL}${PRIVACY_PATHS.de}`,
         fr: `${BASE_URL}${PRIVACY_PATHS.fr}`,
-        "x-default": `${BASE_URL}${PRIVACY_PATHS.en}`,
+        "x-default": `${BASE_URL}${PRIVACY_PATHS.sv}`,
       },
     },
   };

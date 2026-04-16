@@ -547,7 +547,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         es: `${BASE_URL}${canonicalMap.es}`,
         de: `${BASE_URL}${canonicalMap.de}`,
         fr: `${BASE_URL}${canonicalMap.fr}`,
-        "x-default": `${BASE_URL}${canonicalMap.en}`,
+        "x-default": `${BASE_URL}${canonicalMap.sv}`,
       },
     },
     openGraph: {

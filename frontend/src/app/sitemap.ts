@@ -34,7 +34,7 @@ function hreflang(pathsByLocale: Record<string, string>) {
   for (const [l, p] of Object.entries(pathsByLocale)) {
     languages[l] = `${BASE}${p}`;
   }
-  languages["x-default"] = languages.en || languages.sv;
+  languages["x-default"] = languages.sv || languages.en;
   return { languages };
 }
 

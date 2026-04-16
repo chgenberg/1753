@@ -47,7 +47,7 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
         es: productLangUrls.es,
         de: productLangUrls.de,
         fr: productLangUrls.fr,
-        "x-default": productLangUrls.en,
+        "x-default": productLangUrls.sv,
       },
     },
   };
