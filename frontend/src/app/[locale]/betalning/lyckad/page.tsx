@@ -26,7 +26,7 @@ function PaymentSuccessContent() {
 
     const transactionId = params.get("t") || params.get("s");
     if (transactionId) {
-      apiFetch<{ orderNumber?: string }>("/orders/verify", {
+      apiFetch<{ orderNumber?: string; totalAmount?: number; currency?: string; firstPurchase?: boolean }>("/orders/verify", {
         method: "POST",
         body: JSON.stringify({
           transactionId,
@@ -35,6 +35,17 @@ function PaymentSuccessContent() {
       })
         .then((data) => {
           if (data.orderNumber) setOrderNumber(data.orderNumber);
+          const pixelKey = `1753_pixel_purchase_${data.orderNumber || storedOrder || transactionId}`;
+          const alreadyFired = localStorage.getItem(pixelKey);
+          if (!alreadyFired && typeof window !== "undefined" && typeof (window as any).fbq === "function") {
+            (window as any).fbq("track", "Purchase", {
+              value: Number(data.totalAmount) || 0,
+              currency: data.currency || "SEK",
+              content_ids: data.orderNumber ? [data.orderNumber] : undefined,
+              content_type: "product",
+            });
+            localStorage.setItem(pixelKey, String(Date.now()));
+          }
         })
         .catch(() => {});
     }

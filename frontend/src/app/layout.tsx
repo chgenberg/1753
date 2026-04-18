@@ -8,7 +8,7 @@ import { Toaster } from "@/components/notification";
 import { HtmlLang, SkipLink } from "@/components/html-lang";
 
 const GA_ID = "G-R3H0MEB7V4";
-const META_PIXEL_ID = "418955840391360";
+const META_PIXEL_ID = "236081386522723";
 
 const inter = Inter({
   variable: "--font-inter",

@@ -6121,6 +6121,8 @@ app.post("/api/orders/verify", async (req, res) => {
         success: true,
         orderNumber: order.order_number,
         status: order.status,
+        totalAmount: (Number(order.total_amount || 0) + Number(order.shipping_cost || 0)) / 100,
+        currency: order.currency || "SEK",
         message: "Ordern är redan behandlad"
       });
     }
@@ -6140,6 +6142,9 @@ app.post("/api/orders/verify", async (req, res) => {
             success: true,
             orderNumber: order.order_number,
             status: "fulfilled",
+            totalAmount: (Number(order.total_amount || 0) + Number(order.shipping_cost || 0)) / 100,
+            currency: order.currency || "SEK",
+            firstPurchase: true,
             message: "Beställningen har behandlats"
           });
         }
@@ -6153,11 +6158,15 @@ app.post("/api/orders/verify", async (req, res) => {
     }
 
     const updated = await db.findOrderByNumber(order.order_number);
+    const wasJustProcessed = !order.processed_at && updated.processed_at;
     res.json({
       success: true,
       orderNumber: updated.order_number,
       status: updated.status,
       paymentStatus: updated.payment_status,
+      totalAmount: (Number(updated.total_amount || 0) + Number(updated.shipping_cost || 0)) / 100,
+      currency: updated.currency || "SEK",
+      firstPurchase: wasJustProcessed,
       message: updated.processed_at ? "Beställningen har behandlats" : "Beställningen väntar på behandling"
     });
   } catch (err) {
