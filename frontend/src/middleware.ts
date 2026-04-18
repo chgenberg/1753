@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 const STATIC_EXT =
-  /\.(ico|png|jpg|jpeg|webp|svg|gif|txt|xml|json|webmanifest|woff2?|onnx|onnx\.data|bin|pb|data)$/i;
+  /\.(ico|png|jpg|jpeg|webp|avif|svg|gif|txt|xml|json|webmanifest|woff2?|onnx|onnx\.data|bin|pb|data|mp4|webm|mov|m4v|ogv|ogg|mp3|wav|pdf|map|css|js)$/i;
 
 /* ── Shopify legacy redirects ── */
 const SHOPIFY_PRODUCT_SLUGS: Record<string, string> = {
