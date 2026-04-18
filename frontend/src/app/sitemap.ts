@@ -9,6 +9,8 @@ const BASE = "https://www.1753skin.com";
 
 const SITE_PUBLISHED = new Date("2026-03-24");
 const CONTENT_UPDATED = new Date("2026-04-16");
+const GUIDES_UPDATED = new Date("2026-04-16");
+const PRODUCTS_UPDATED = new Date("2026-04-16");
 
 const PUBLIC_ROUTES: AppRoute[] = [
   "home",
@@ -62,6 +64,12 @@ export async function generateSitemaps() {
   ];
 }
 
+const HERO_IMAGES = [
+  `${BASE}/1753desktop.webp`,
+  `${BASE}/1753mobile.webp`,
+  `${BASE}/1753.webp`,
+];
+
 function buildCoreEntries(): MetadataRoute.Sitemap {
   const out: MetadataRoute.Sitemap = [];
 
@@ -70,13 +78,22 @@ function buildCoreEntries(): MetadataRoute.Sitemap {
       const path = localizePath(locale as Locale, route);
       const pathsByLocale: Record<string, string> = {};
       for (const l of locales) pathsByLocale[l] = localizePath(l as Locale, route);
-      out.push({
+
+      const entry: MetadataRoute.Sitemap[number] = {
         url: `${BASE}${path}`,
         lastModified: CONTENT_UPDATED,
         changeFrequency: route === "home" || route === "products" ? "weekly" : "monthly",
         priority: route === "home" ? 1 : route === "products" ? 0.9 : 0.7,
         alternates: hreflang(pathsByLocale),
-      });
+      };
+
+      if (route === "home") {
+        entry.images = HERO_IMAGES;
+      } else if (route === "products") {
+        entry.images = PRODUCTS.map((p) => `${BASE}${p.image}`);
+      }
+
+      out.push(entry);
     }
 
     const analysisAlternates: Record<string, string> = {};
@@ -87,6 +104,11 @@ function buildCoreEntries(): MetadataRoute.Sitemap {
       changeFrequency: "weekly",
       priority: 0.9,
       alternates: hreflang(analysisAlternates),
+      images: [
+        `${BASE}/Landing_page_skinanalys/1.webp`,
+        `${BASE}/Landing_page_skinanalys/2.webp`,
+        `${BASE}/1753.webp`,
+      ],
     });
 
     const guideAlternates: Record<string, string> = {};
@@ -108,6 +130,16 @@ function buildCoreEntries(): MetadataRoute.Sitemap {
       priority: 0.5,
       alternates: hreflang(galleryAlternates),
     });
+
+    const knowledgeAlternates: Record<string, string> = {};
+    for (const l of locales) knowledgeAlternates[l] = `/${l}/kunskapsbank`;
+    out.push({
+      url: `${BASE}/${locale}/kunskapsbank`,
+      lastModified: CONTENT_UPDATED,
+      changeFrequency: "monthly",
+      priority: 0.7,
+      alternates: hreflang(knowledgeAlternates),
+    });
   }
 
   return out;
@@ -122,10 +154,11 @@ function buildProductEntries(): MetadataRoute.Sitemap {
       for (const l of locales) pathsByLocale[l] = localizePath(l as Locale, "product", { productId: p.id });
       out.push({
         url: `${BASE}${localizePath(locale as Locale, "product", { productId: p.id })}`,
-        lastModified: CONTENT_UPDATED,
+        lastModified: PRODUCTS_UPDATED,
         changeFrequency: "weekly",
         priority: 0.8,
         alternates: hreflang(pathsByLocale),
+        images: [`${BASE}${p.image}`],
       });
     }
   }
@@ -150,7 +183,7 @@ function buildGuideEntries(locale: Locale): MetadataRoute.Sitemap {
 
     out.push({
       url: `${BASE}/${locale}/guide/${slug}`,
-      lastModified: SITE_PUBLISHED,
+      lastModified: GUIDES_UPDATED,
       changeFrequency: "monthly",
       priority: 0.6,
       alternates: hreflang(alternatesByLocale),

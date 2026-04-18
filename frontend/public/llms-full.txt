@@ -2,6 +2,12 @@
 
 > Swedish skincare brand using CBD and CBG to strengthen skin naturally. Founded by Christopher Genberg. Ships from Sweden to the EU. All products vegan, cruelty-free, manufactured in Sweden.
 
+## Companion files (deeper reference)
+
+- Product catalogue: https://www.1753skin.com/llms-products.txt
+- AI skin analysis methodology: https://www.1753skin.com/llms-methodology.txt
+- Scientific references and peer-reviewed sources: https://www.1753skin.com/llms-science.txt
+
 ## Company
 
 - Legal name: Floranie International AB

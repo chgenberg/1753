@@ -96,6 +96,8 @@ export default async function ProductPage({ params }: Props) {
         price,
         priceCurrency: currency,
         availability: "https://schema.org/InStock",
+        itemCondition: "https://schema.org/NewCondition",
+        priceValidUntil: new Date(Date.now() + 90 * 86_400_000).toISOString().slice(0, 10),
         url: `${SITE_ORIGIN}${path}`,
         seller: { "@type": "Organization", "@id": "https://www.1753skin.com/#organization" },
         shippingDetails: {

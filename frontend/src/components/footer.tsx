@@ -84,6 +84,17 @@ export function Footer() {
     }
   };
 
+  const knowledgeLabel =
+    locale === "sv"
+      ? "Kunskapsbank"
+      : locale === "es"
+        ? "Base de conocimiento"
+        : locale === "de"
+          ? "Wissensdatenbank"
+          : locale === "fr"
+            ? "Base de connaissances"
+            : "Knowledge hub";
+
   const navLinks = [
     { href: path("home"), label: t("header.navHome") },
     { href: path("products"), label: t("header.navProducts") },
@@ -92,6 +103,7 @@ export function Footer() {
     { href: path("skinAnalysis"), label: t("footer.navAnalysis") },
     { href: path("loyalty"), label: t("loyaltyPage.navLabel") },
     { href: `/${locale}/guide`, label: t("footer.navGuide") },
+    { href: `/${locale}/kunskapsbank`, label: knowledgeLabel },
     { href: `/${locale}/galleri`, label: t("footer.navGallery") },
   ];
 

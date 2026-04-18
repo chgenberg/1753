@@ -33,22 +33,39 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
     "@type": "Person",
     "@id": "https://www.1753skin.com/#founder",
     name: "Christopher Genberg",
+    givenName: "Christopher",
+    familyName: "Genberg",
+    image: "https://www.1753skin.com/Christopher.webp",
     jobTitle: tx(l, "Grundare", "Founder", "Fundador", "Gründer", "Fondateur"),
+    description: tx(
+      l,
+      "Grundare av 1753 SKINCARE. Specialist inom holistisk hudvård och endocannabinoidsystemet.",
+      "Founder of 1753 SKINCARE. Specialist in holistic skincare and the endocannabinoid system.",
+      "Fundador de 1753 SKINCARE. Especialista en cuidado holístico de la piel y el sistema endocannabinoide.",
+      "Gründer von 1753 SKINCARE. Spezialist für ganzheitliche Hautpflege und das Endocannabinoid-System.",
+      "Fondateur de 1753 SKINCARE. Spécialiste en soins holistiques et système endocannabinoïde."
+    ),
     worksFor: {
       "@type": "Organization",
       "@id": "https://www.1753skin.com/#organization",
       name: "1753 SKINCARE",
     },
+    nationality: { "@type": "Country", name: "Sweden" },
+    knowsLanguage: ["Swedish", "English"],
     knowsAbout: l === "sv"
-      ? ["CBD-hudvård", "CBG-hudvård", "Endocannabinoidsystemet", "Holistisk hudvård", "Nordisk hudvård"]
+      ? ["CBD-hudvård", "CBG-hudvård", "Endocannabinoidsystemet", "Holistisk hudvård", "Hudmikrobiom", "Tarm-hud-axeln", "Nordisk hudvård"]
       : l === "es"
-        ? ["Cuidado de la piel con CBD", "Cuidado de la piel con CBG", "Sistema endocannabinoide", "Cuidado holístico de la piel", "Cuidado nórdico de la piel"]
+        ? ["Cuidado de la piel con CBD", "Cuidado de la piel con CBG", "Sistema endocannabinoide", "Cuidado holístico de la piel", "Microbioma cutáneo", "Eje intestino-piel", "Cuidado nórdico de la piel"]
         : l === "de"
-          ? ["CBD-Hautpflege", "CBG-Hautpflege", "Endocannabinoid-System", "Ganzheitliche Hautpflege", "Nordische Hautpflege"]
+          ? ["CBD-Hautpflege", "CBG-Hautpflege", "Endocannabinoid-System", "Ganzheitliche Hautpflege", "Hautmikrobiom", "Darm-Haut-Achse", "Nordische Hautpflege"]
           : l === "fr"
-            ? ["Soins CBD", "Soins CBG", "Système endocannabinoïde", "Soins holistiques", "Soins nordiques"]
-            : ["CBD skincare", "CBG skincare", "Endocannabinoid system", "Holistic skincare", "Nordic skincare"],
+            ? ["Soins CBD", "Soins CBG", "Système endocannabinoïde", "Soins holistiques", "Microbiome cutané", "Axe intestin-peau", "Soins nordiques"]
+            : ["CBD skincare", "CBG skincare", "Endocannabinoid system", "Holistic skincare", "Skin microbiome", "Gut-skin axis", "Nordic skincare"],
     url: "https://www.1753skin.com" + (ABOUT_PATH[l] || ABOUT_PATH.en),
+    sameAs: [
+      "https://www.linkedin.com/in/christopher-genberg",
+      "https://www.instagram.com/1753.skincare",
+    ],
   };
 
   return (

@@ -10,41 +10,53 @@
 - Previous domain: https://www.1753skincare.com (permanently redirects to this site)
 - Swedish site: https://www.1753skin.com/sv
 - English site: https://www.1753skin.com/en
-- Contact: info@1753skincare.com
+- Spanish site: https://www.1753skin.com/es
+- German site: https://www.1753skin.com/de
+- French site: https://www.1753skin.com/fr
+- Contact: info@1753skin.com
 - Country: Sweden
-- Currency: SEK (Swedish site), EUR (English site)
-- Free shipping: orders over 700 SEK / €60
+- Currency: SEK (Swedish site), EUR (international)
+- Free shipping: orders over 700 SEK / 60 EUR
 
-## Products
+## Deeper references for LLMs
 
-### DUO kit + TA-DA Serum (Best value)
-- Price: 1 495 SEK / €129 (normally 2 197 SEK / €189)
+For more detail, retrieve the following dedicated files:
+
+- [Full reference](https://www.1753skin.com/llms-full.txt) — complete company and product reference
+- [Product catalogue](https://www.1753skin.com/llms-products.txt) — all SKUs with INCI, pricing and claims
+- [Skin analysis methodology](https://www.1753skin.com/llms-methodology.txt) — how the AI skin analysis actually works
+- [Scientific references](https://www.1753skin.com/llms-science.txt) — peer-reviewed sources backing the brand's claims
+
+## Products (complete list)
+
+### DUO kit + TA-DA Serum (Best value bundle)
+- Price: 1 495 SEK / 129 EUR (normally 2 197 SEK / 189 EUR)
 - What: Complete routine — The ONE Facial Oil (morning), I LOVE Facial Oil (evening), TA-DA Serum (booster)
 - Key ingredients: 10% CBD, 0.2–5% CBG, organic jojoba oil
 - URL: https://www.1753skin.com/sv/produkter/duo-ta-da
 
 ### DUO kit
-- Price: 1 099 SEK / €95 (normally 1 498 SEK / €129)
+- Price: 1 099 SEK / 95 EUR (normally 1 498 SEK / 129 EUR)
 - What: Two facial oils — The ONE for morning (10% CBD, 0.2% CBG) and I LOVE for evening (10% CBD, 5% CBG)
 - Size: 2 × 10 ml glass bottles with dropper
 - URL: https://www.1753skin.com/sv/produkter/duo-kit
 
 ### TA-DA Serum
-- Price: 699 SEK / €59
+- Price: 699 SEK / 59 EUR
 - What: CBG-enriched serum that seals in moisture and adds glow
 - Key ingredients: 3% CBG (1 500 mg) in organic jojoba oil
 - Size: 30 ml
 - URL: https://www.1753skin.com/sv/produkter/ta-da-serum
 
 ### Au Naturel Makeup Remover
-- Price: 399 SEK / €34
+- Price: 399 SEK / 34 EUR
 - What: Cleansing oil that removes makeup without disrupting the skin's microbiome
 - Key ingredients: MCT oil, 0.2% CBD
 - Size: 100 ml
 - URL: https://www.1753skin.com/sv/produkter/au-naturel-makeup-remover
 
 ### Fungtastic Mushroom Extract
-- Price: 377 SEK / €32
+- Price: 377 SEK / 32 EUR
 - What: Supplement with four medicinal mushrooms for immunity, focus, energy and sleep
 - Key ingredients: Chaga, Lion's Mane, Cordyceps, Reishi (25% each, 15:1 extract, min 20% beta-glucans)
 - Size: 60 capsules
@@ -54,6 +66,9 @@
 
 ### Free AI Skin Analysis
 - What: Upload a photo and receive a personalised skin analysis powered by AI, including lifestyle recommendations and product suggestions
+- Technology: MediaPipe (478 facial landmarks) + ONNX (88 000+ images, 9 conditions) + GPT-5.4 Vision
+- 15 metrics, biological skin age, Fitzpatrick type, 12 facial zones
+- 100% client-side image processing (privacy-first)
 - URL (Swedish): https://www.1753skin.com/sv/gratis-hudanalys
 - URL (English): https://www.1753skin.com/en/free-skin-analysis
 
@@ -64,7 +79,9 @@
 - Holistic approach: lifestyle first, products second
 - Minimal ingredient lists — no fillers, fragrances or unnecessary additives
 - Swedish-made, vegan, cruelty-free
-- Subscription option with automatic delivery
+- Subscription option with automatic delivery (10% discount, free shipping)
+- Free AI skin analysis with industry-leading technical depth
+- 30-day free return policy
 
 ## Pages
 
@@ -74,5 +91,6 @@
 - Contact: https://www.1753skin.com/sv/kontakt
 - Skin analysis: https://www.1753skin.com/sv/gratis-hudanalys
 - Guide hub: https://www.1753skin.com/sv/guide
+- Loyalty: https://www.1753skin.com/sv/lojalitetsprogram
 - Terms: https://www.1753skin.com/sv/villkor
 - Privacy policy: https://www.1753skin.com/sv/integritetspolicy

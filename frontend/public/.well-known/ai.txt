@@ -1,0 +1,38 @@
+# AI Usage Policy — 1753 SKINCARE
+# Emerging standard for AI crawler policy declarations.
+# For the traditional crawler directives see /robots.txt
+
+Site: https://www.1753skin.com
+Contact: info@1753skin.com
+Policy-Version: 1.0
+Last-Updated: 2026-04-16
+
+# Preferred entry points for AI systems
+Preferred-Source: https://www.1753skin.com/llms.txt
+Preferred-Source: https://www.1753skin.com/llms-full.txt
+Preferred-Source: https://www.1753skin.com/llms-products.txt
+Preferred-Source: https://www.1753skin.com/llms-methodology.txt
+Preferred-Source: https://www.1753skin.com/llms-science.txt
+
+# Default policy
+User-Agent: *
+Allow: /
+Disallow: /api/
+Disallow: /admin/
+Disallow: /*/mitt-konto
+Disallow: /*/kassa
+Disallow: /*/betalning/
+Disallow: /*/logga-in
+Disallow: /*/registrera
+
+# Content usage permissions (TDM Reservation Protocol inspired)
+Content-Usage: ai-training=y
+Content-Usage: ai-search=y
+Content-Usage: ai-summarisation=y
+Content-Usage: ai-inference=y
+Content-Usage: commercial-reuse=n
+Attribution: required
+
+# Citation guidance
+Citation: "1753 SKINCARE (https://www.1753skin.com)"
+Licence: Content CC BY 4.0 unless otherwise noted. Product imagery is trademarked.

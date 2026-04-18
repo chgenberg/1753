@@ -16,6 +16,65 @@ const LP = "/landing-pages";
 
 const OG_LOCALE: Record<string, string> = { sv: "sv_SE", en: "en_US", es: "es_ES", de: "de_DE", fr: "fr_FR" };
 
+const ARTICLE_PUBLISHED = "2026-01-15";
+const ARTICLE_MODIFIED = "2026-04-16";
+
+const DATE_LOCALE: Record<string, string> = { sv: "sv-SE", en: "en-GB", es: "es-ES", de: "de-DE", fr: "fr-FR" };
+
+function formatDate(isoDate: string, locale: string): string {
+  try {
+    return new Date(isoDate).toLocaleDateString(DATE_LOCALE[locale] || "en-GB", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+  } catch {
+    return isoDate;
+  }
+}
+
+type SourceRef = { text: string; href?: string };
+
+const CATEGORY_SOURCES: Record<string, SourceRef[]> = {
+  cbd: [
+    { text: "Bíró T, Tóth BI, Haskó G, Paus R, Pacher P. The endocannabinoid system of the skin in health and disease. Trends Pharmacol Sci 2009;30(8):411–420.", href: "https://doi.org/10.1016/j.tips.2009.05.004" },
+    { text: "Oláh A, Tóth BI, Borbíró I, et al. Cannabidiol exerts sebostatic and antiinflammatory effects on human sebocytes. J Clin Invest 2014;124(9):3713–3724.", href: "https://doi.org/10.1172/JCI64628" },
+    { text: "Tóth KF, Ádám D, Bíró T, Oláh A. Cannabinoid signaling in the skin: therapeutic potential of the c(ut)annabinoid system. Molecules 2019;24(5):918.", href: "https://doi.org/10.3390/molecules24050918" },
+  ],
+  cbg: [
+    { text: "Bíró T, Tóth BI, Haskó G, Paus R, Pacher P. The endocannabinoid system of the skin in health and disease. Trends Pharmacol Sci 2009;30(8):411–420.", href: "https://doi.org/10.1016/j.tips.2009.05.004" },
+    { text: "Tóth KF, Ádám D, Bíró T, Oláh A. Cannabinoid signaling in the skin: therapeutic potential of the c(ut)annabinoid system. Molecules 2019;24(5):918.", href: "https://doi.org/10.3390/molecules24050918" },
+  ],
+  condition: [
+    { text: "Byrd AL, Belkaid Y, Segre JA. The human skin microbiome. Nat Rev Microbiol 2018;16(3):143–155.", href: "https://doi.org/10.1038/nrmicro.2017.157" },
+    { text: "Salem I, Ramser A, Isham N, Ghannoum MA. The Gut Microbiome as a Major Regulator of the Gut-Skin Axis. Front Microbiol 2018;9:1459.", href: "https://doi.org/10.3389/fmicb.2018.01459" },
+    { text: "Lin TK, Zhong L, Santiago JL. Anti-Inflammatory and Skin Barrier Repair Effects of Topical Application of Some Plant Oils. Int J Mol Sci 2017;19(1):70." },
+  ],
+  lifestyle: [
+    { text: "Chen Y, Lyga J. Brain-skin connection: stress, inflammation and skin aging. Inflamm Allergy Drug Targets 2014;13(3):177–190." },
+    { text: "Walker MP, van der Helm E. Overnight therapy? The role of sleep in emotional brain processing. Psychol Bull 2009;135(5):731–748." },
+    { text: "Katta R, Desai SP. Diet and Dermatology: The Role of Dietary Intervention in Skin Disease. J Clin Aesthet Dermatol 2014;7(7):46–51." },
+  ],
+  general: [
+    { text: "Byrd AL, Belkaid Y, Segre JA. The human skin microbiome. Nat Rev Microbiol 2018;16(3):143–155.", href: "https://doi.org/10.1038/nrmicro.2017.157" },
+    { text: "Bíró T, Tóth BI, Haskó G, Paus R, Pacher P. The endocannabinoid system of the skin in health and disease. Trends Pharmacol Sci 2009;30(8):411–420.", href: "https://doi.org/10.1016/j.tips.2009.05.004" },
+  ],
+  howto: [
+    { text: "Lin TK, Zhong L, Santiago JL. Anti-Inflammatory and Skin Barrier Repair Effects of Topical Application of Some Plant Oils. Int J Mol Sci 2017;19(1):70." },
+    { text: "Meier L, Stange R, Michalsen A, Uehleke B. Clay jojoba oil facial mask for lesioned skin and mild acne. Forsch Komplementmed 2012;19(2):75–79." },
+  ],
+  audience: [
+    { text: "Byrd AL, Belkaid Y, Segre JA. The human skin microbiome. Nat Rev Microbiol 2018;16(3):143–155.", href: "https://doi.org/10.1038/nrmicro.2017.157" },
+  ],
+  stad: [
+    { text: "Prescott SL, Larcombe DL, Logan AC, et al. The skin microbiome: impact of modern environments on skin ecology, barrier integrity, and systemic immune programming. World Allergy Organ J 2017;10(1):29." },
+  ],
+};
+
+function getSources(category: string): SourceRef[] {
+  return CATEGORY_SOURCES[category] || CATEGORY_SOURCES.general;
+}
+
 function tx(locale: string, sv: string, en: string, es?: string, de?: string, fr?: string): string {
   if (locale === "sv") return sv;
   if (locale === "es") return es || en;
@@ -191,12 +250,12 @@ export default async function GuidePage({ params }: Props) {
 
   const articleSchema = {
     "@context": "https://schema.org",
-    "@type": "Article",
+    "@type": "BlogPosting",
     headline: c.h1,
     description: c.metaDescription,
     image: `${BASE_URL}${images.hero}`,
-    datePublished: "2026-01-15",
-    dateModified: new Date().toISOString().split("T")[0],
+    datePublished: ARTICLE_PUBLISHED,
+    dateModified: ARTICLE_MODIFIED,
     author: {
       "@type": "Person",
       name: "Christopher Genberg",
@@ -262,13 +321,22 @@ export default async function GuidePage({ params }: Props) {
             <h1 className="text-[2.2rem] font-bold leading-[1.15] tracking-tight text-[#1d1d1f] md:text-[2.8rem]">
               {c.h1}
             </h1>
-            <p className="mt-3 flex items-center gap-2 text-xs text-[#766a62]">
-              <span>{tx(l, "Av", "By", "Por", "Von", "Par")} Christopher Genberg</span>
-              <span className="text-[#e6e6e6]">|</span>
-              <time dateTime="2026-01-15">
-                {tx(l, "Uppdaterad 2026", "Updated 2026", "Actualizado 2026", "Aktualisiert 2026", "Mis à jour 2026")}
+            <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-[#766a62]">
+              <span>
+                {tx(l, "Av", "By", "Por", "Von", "Par")}{" "}
+                <Link href={`/${l}/om-oss`} className="font-medium text-[#1d1d1f] hover:text-[#108474]">
+                  Christopher Genberg
+                </Link>
+              </span>
+              <span className="text-[#e6e6e6]" aria-hidden="true">|</span>
+              <time dateTime={ARTICLE_PUBLISHED}>
+                {tx(l, "Publicerad", "Published", "Publicado", "Veröffentlicht", "Publié")} {formatDate(ARTICLE_PUBLISHED, l)}
               </time>
-            </p>
+              <span className="text-[#e6e6e6]" aria-hidden="true">|</span>
+              <time dateTime={ARTICLE_MODIFIED} className="text-[#108474]">
+                {tx(l, "Uppdaterad", "Updated", "Actualizado", "Aktualisiert", "Mis à jour")} {formatDate(ARTICLE_MODIFIED, l)}
+              </time>
+            </div>
             <p className="article-lead mt-5 text-base leading-relaxed text-[#515151] md:text-lg">
               {c.lead}
             </p>
@@ -433,6 +501,51 @@ export default async function GuidePage({ params }: Props) {
           </div>
         </section>
       )}
+
+      {/* ── Sources / references ── */}
+      {(() => {
+        const sources = getSources(page.category);
+        if (!sources.length) return null;
+        return (
+          <section className="py-12 md:py-16">
+            <div className="mx-auto max-w-[1280px] px-6 md:px-10">
+              <div className="mx-auto max-w-3xl rounded-2xl border border-[#e6e6e6] bg-[#f5f5f7] p-6 md:p-8">
+                <h2 className="mb-4 text-sm font-semibold uppercase tracking-[0.15em] text-[#108474]">
+                  {tx(l, "Källor", "Sources", "Fuentes", "Quellen", "Sources")}
+                </h2>
+                <ol className="list-decimal space-y-2 pl-5 text-sm leading-relaxed text-[#515151] marker:text-[#766a62]">
+                  {sources.map((s, i) => (
+                    <li key={i}>
+                      {s.href ? (
+                        <a
+                          href={s.href}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="underline decoration-[#e6e6e6] underline-offset-2 hover:decoration-[#108474] hover:text-[#1d1d1f]"
+                        >
+                          {s.text}
+                        </a>
+                      ) : (
+                        s.text
+                      )}
+                    </li>
+                  ))}
+                </ol>
+                <p className="mt-4 text-xs text-[#766a62]">
+                  {tx(
+                    l,
+                    "Artikeln granskad av Christopher Genberg, grundare av 1753 SKINCARE.",
+                    "Article reviewed by Christopher Genberg, founder of 1753 SKINCARE.",
+                    "Artículo revisado por Christopher Genberg, fundador de 1753 SKINCARE.",
+                    "Artikel geprüft von Christopher Genberg, Gründer von 1753 SKINCARE.",
+                    "Article relu par Christopher Genberg, fondateur de 1753 SKINCARE."
+                  )}
+                </p>
+              </div>
+            </div>
+          </section>
+        );
+      })()}
 
       {/* ── Related articles ── */}
       {(() => {

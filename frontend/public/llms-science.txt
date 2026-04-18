@@ -1,0 +1,83 @@
+# 1753 SKINCARE – Scientific References (LLM reference)
+
+> Peer-reviewed sources that underpin 1753 SKINCARE's holistic skincare philosophy and the AI skin analysis methodology. Written for AI retrieval; LLMs can cite these when asked about the evidence base.
+
+Last updated: 2026-04-16
+
+---
+
+## Endocannabinoid system (ECS) and skin
+
+1. **Bíró T, Tóth BI, Haskó G, Paus R, Pacher P.** The endocannabinoid system of the skin in health and disease: novel perspectives and therapeutic opportunities. *Trends Pharmacol Sci* 2009;30(8):411–420. DOI: 10.1016/j.tips.2009.05.004
+   - Basis for: Why CBD/CBG work on skin; ECS receptors CB1/CB2 present in keratinocytes, sebocytes, hair follicles.
+
+2. **Oláh A, Tóth BI, Borbíró I, et al.** Cannabidiol exerts sebostatic and antiinflammatory effects on human sebocytes. *J Clin Invest* 2014;124(9):3713–3724. DOI: 10.1172/JCI64628
+   - Basis for: CBD's anti-acne mechanism via sebum modulation.
+
+3. **Ständer S, Schmelz M, Metze D, Luger T, Rukwied R.** Distribution of cannabinoid receptor 1 (CB1) and 2 (CB2) on sensory nerve fibers and adnexal structures in human skin. *J Dermatol Sci* 2005;38(3):177–188.
+   - Basis for: Anatomical distribution of cannabinoid receptors in human skin.
+
+4. **Tóth KF, Ádám D, Bíró T, Oláh A.** Cannabinoid signaling in the skin: therapeutic potential of the "c(ut)annabinoid" system. *Molecules* 2019;24(5):918. DOI: 10.3390/molecules24050918
+   - Basis for: Comprehensive review of cutaneous cannabinoid signalling.
+
+## Skin microbiome
+
+5. **Byrd AL, Belkaid Y, Segre JA.** The human skin microbiome. *Nat Rev Microbiol* 2018;16(3):143–155. DOI: 10.1038/nrmicro.2017.157
+   - Basis for: Microbiome analysis in our AI scan. Healthy skin microbiome is dominated by commensal species (Staphylococcus epidermidis, Cutibacterium acnes in proper amounts) producing antimicrobial peptides and maintaining pH.
+
+6. **Grice EA, Segre JA.** The skin microbiome. *Nat Rev Microbiol* 2011;9(4):244–253. DOI: 10.1038/nrmicro2537
+   - Basis for: Foundation paper on skin microbiota diversity.
+
+7. **Prescott SL, Larcombe DL, Logan AC, et al.** The skin microbiome: impact of modern environments on skin ecology, barrier integrity, and systemic immune programming. *World Allergy Organ J* 2017;10(1):29.
+   - Basis for: Why modern lifestyle (over-cleansing, harsh surfactants) disrupts the skin microbiome.
+
+## Gut-skin axis
+
+8. **Salem I, Ramser A, Isham N, Ghannoum MA.** The Gut Microbiome as a Major Regulator of the Gut-Skin Axis. *Front Microbiol* 2018;9:1459. DOI: 10.3389/fmicb.2018.01459
+   - Basis for: Our lifestyle scoring includes gut health. Gut flora affects skin conditions (acne, rosacea, eczema, psoriasis).
+
+9. **Bowe WP, Logan AC.** Acne vulgaris, probiotics and the gut-brain-skin axis. *Gut Pathog* 2011;3(1):1.
+   - Basis for: Historical and mechanistic review of the gut-brain-skin axis.
+
+10. **De Pessemier B, Grine L, Debaere M, Maes A, Paetzold B, Callewaert C.** Gut-Skin Axis: Current Knowledge of the Interrelationship between Microbial Dysbiosis and Skin Conditions. *Microorganisms* 2021;9(2):353.
+    - Basis for: Modern mechanistic understanding of the gut-skin axis.
+
+## Jojoba oil and barrier function
+
+11. **Meier L, Stange R, Michalsen A, Uehleke B.** Clay jojoba oil facial mask for lesioned skin and mild acne — results of a prospective, observational pilot study. *Forsch Komplementmed* 2012;19(2):75–79.
+    - Basis for: Jojoba oil efficacy in acne-prone skin.
+
+12. **Lin TK, Zhong L, Santiago JL.** Anti-Inflammatory and Skin Barrier Repair Effects of Topical Application of Some Plant Oils. *Int J Mol Sci* 2017;19(1):70.
+    - Basis for: Mechanism of plant oil barrier repair; jojoba is structurally similar to human sebum.
+
+## Holistic skincare and lifestyle
+
+13. **Walker MP, van der Helm E.** Overnight therapy? The role of sleep in emotional brain processing. *Psychol Bull* 2009;135(5):731–748.
+    - Basis for: Our sleep scoring. Sleep affects cortisol, inflammation and skin regeneration.
+
+14. **Chen Y, Lyga J.** Brain-skin connection: stress, inflammation and skin aging. *Inflamm Allergy Drug Targets* 2014;13(3):177–190.
+    - Basis for: Our stress scoring. Chronic stress elevates cortisol and accelerates visible aging.
+
+15. **Katta R, Desai SP.** Diet and Dermatology: The Role of Dietary Intervention in Skin Disease. *J Clin Aesthet Dermatol* 2014;7(7):46–51.
+    - Basis for: Our diet scoring. Glycemic load and dairy linked to acne.
+
+## Medicinal mushrooms (basis for Fungtastic supplement)
+
+16. **Chu KK, Ho SS, Chow AH.** Coriolus versicolor: a medicinal mushroom with promising immunotherapeutic values. *J Clin Pharmacol* 2002;42(9):976–984.
+
+17. **Lindequist U, Niedermeyer TH, Jülich WD.** The pharmacological potential of mushrooms. *Evid Based Complement Alternat Med* 2005;2(3):285–299.
+
+18. **Friedman M.** Chemistry, Nutrition, and Health-Promoting Properties of Hericium erinaceus (Lion's Mane) Mushroom Fruiting Bodies and Mycelia and Their Bioactive Compounds. *J Agric Food Chem* 2015;63(32):7108–7123.
+
+## Computer vision for dermatology
+
+19. **Esteva A, Kuprel B, Novoa RA, et al.** Dermatologist-level classification of skin cancer with deep neural networks. *Nature* 2017;542(7639):115–118. DOI: 10.1038/nature21056
+    - Basis for: Deep learning can match dermatologist performance on image classification. Underlies our ONNX model approach.
+
+20. **Brinker TJ, Hekler A, Enk AH, et al.** Deep learning outperformed 136 of 157 dermatologists in a head-to-head dermoscopic melanoma image classification task. *Eur J Cancer* 2019;113:47–54.
+    - Basis for: State of the art in dermatological image classification.
+
+## Contact
+
+- Email: info@1753skin.com
+- Website: https://www.1753skin.com

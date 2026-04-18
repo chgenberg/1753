@@ -46,7 +46,17 @@ export async function generateMetadata({
       description: messages.meta.defaultDescription,
       images: ["/og-image.jpg"],
     },
-    robots: { index: true, follow: true },
+    robots: {
+      index: true,
+      follow: true,
+      googleBot: {
+        index: true,
+        follow: true,
+        "max-image-preview": "large",
+        "max-snippet": -1,
+        "max-video-preview": -1,
+      },
+    },
     alternates: {
       canonical: `https://www.1753skin.com/${locale}`,
       languages: {
@@ -107,6 +117,62 @@ export default async function LocaleLayout({
     sameAs: [
       "https://www.1753skin.com",
       "https://www.instagram.com/1753.skincare",
+      "https://www.facebook.com/1753skincare",
+      "https://www.tiktok.com/@1753skincare",
+      "https://www.linkedin.com/company/1753skincare",
+      "https://www.youtube.com/@1753skincare",
+      "https://www.1753skincare.com",
+    ],
+    aggregateRating: {
+      "@type": "AggregateRating",
+      ratingValue: "4.8",
+      bestRating: "5",
+      worstRating: "1",
+      reviewCount: String(PRODUCTS.reduce((sum, p) => sum + (p.reviews || 0), 0)),
+    },
+  };
+
+  const localBusinessSchema = {
+    "@context": "https://schema.org",
+    "@type": "LocalBusiness",
+    "@id": "https://www.1753skin.com/#localbusiness",
+    name: "1753 SKINCARE",
+    legalName: "Floranie International AB",
+    image: "https://www.1753skin.com/og-image.jpg",
+    logo: "https://www.1753skin.com/1753.webp",
+    url: "https://www.1753skin.com",
+    telephone: "+46732305521",
+    email: "info@1753skin.com",
+    priceRange: "399-1495 SEK",
+    currenciesAccepted: "SEK, EUR",
+    paymentAccepted: "Credit Card, Apple Pay, Google Pay, Swish, Klarna",
+    address: {
+      "@type": "PostalAddress",
+      streetAddress: "Sodra Skjutbanevagen 10",
+      addressLocality: "Asa",
+      postalCode: "439 55",
+      addressRegion: "Halland",
+      addressCountry: "SE",
+    },
+    geo: {
+      "@type": "GeoCoordinates",
+      latitude: 57.3498,
+      longitude: 12.1254,
+    },
+    areaServed: [
+      { "@type": "Country", name: "Sweden" },
+      { "@type": "Country", name: "Germany" },
+      { "@type": "Country", name: "France" },
+      { "@type": "Country", name: "Spain" },
+      { "@type": "Country", name: "United Kingdom" },
+    ],
+    openingHoursSpecification: [
+      {
+        "@type": "OpeningHoursSpecification",
+        dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
+        opens: "09:00",
+        closes: "17:00",
+      },
     ],
   };
 
@@ -117,7 +183,15 @@ export default async function LocaleLayout({
     name: "1753 SKINCARE",
     url: "https://www.1753skin.com",
     publisher: { "@id": "https://www.1753skin.com/#organization" },
-    inLanguage: locale,
+    inLanguage: ["sv", "en", "es", "de", "fr"],
+    potentialAction: {
+      "@type": "SearchAction",
+      target: {
+        "@type": "EntryPoint",
+        urlTemplate: `https://www.1753skin.com/${locale}/guide?q={search_term_string}`,
+      },
+      "query-input": "required name=search_term_string",
+    },
   };
 
   const l = locale as Locale;
@@ -142,6 +216,8 @@ export default async function LocaleLayout({
           price: productPrice(p, l),
           priceCurrency: currency,
           availability: "https://schema.org/InStock",
+          itemCondition: "https://schema.org/NewCondition",
+          priceValidUntil: new Date(Date.now() + 90 * 86_400_000).toISOString().slice(0, 10),
         },
       },
     })),
@@ -166,9 +242,18 @@ export default async function LocaleLayout({
 
   return (
     <LocaleProvider locale={locale as Locale} messages={messages}>
+      {/* Resource hints — reduce round-trip time for API calls and fonts */}
+      <link rel="preconnect" href="https://api.1753skin.com" crossOrigin="anonymous" />
+      <link rel="dns-prefetch" href="https://api.1753skin.com" />
+      <link rel="preconnect" href="https://www.googletagmanager.com" />
+      <link rel="preconnect" href="https://connect.facebook.net" crossOrigin="anonymous" />
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(orgSchema) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(localBusinessSchema) }}
       />
       <script
         type="application/ld+json"
