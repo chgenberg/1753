@@ -38,6 +38,7 @@ export const metadata: Metadata = {
   alternates: {
     types: {
       "application/rss+xml": "https://www.1753skin.com/guide/rss.xml",
+      "application/atom+xml": "https://www.1753skin.com/guide/atom.xml",
     },
   },
 };

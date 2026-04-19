@@ -513,11 +513,46 @@ export default async function GuidePage({ params }: Props) {
     mainEntityOfPage: `${BASE_URL}/${l}/guide/${slug}`,
     inLanguage: l,
     about: aboutEntities,
+    isAccessibleForFree: true,
+    isFamilyFriendly: true,
+    license: `${BASE_URL}/${l}/villkor`,
     speakable: {
       "@type": "SpeakableSpecification",
       cssSelector: ["h1", ".article-lead"],
     },
   };
+
+  // For educational categories, also emit a LearningResource entity so
+  // Google, Bing and LLMs can recognise the page as structured learning
+  // content (helps Knowledge Panel and Discover surfacing).
+  const LEARNING_CATEGORIES = new Set([
+    "science", "myth", "comparison", "trend", "ingredient", "howto",
+  ]);
+  const learningResourceSchema = LEARNING_CATEGORIES.has(page.category)
+    ? {
+        "@context": "https://schema.org",
+        "@type": "LearningResource",
+        name: c.h1,
+        description: c.metaDescription,
+        url: `${BASE_URL}/${l}/guide/${slug}`,
+        inLanguage: l,
+        learningResourceType:
+          page.category === "howto"
+            ? "HowTo"
+            : page.category === "myth"
+              ? "FactCheck"
+              : page.category === "comparison"
+                ? "ComparisonArticle"
+                : "Article",
+        educationalLevel: "beginner to intermediate",
+        isAccessibleForFree: true,
+        about: aboutEntities,
+        audience: {
+          "@type": "Audience",
+          audienceType: "consumers, skincare enthusiasts, dermatology-curious readers",
+        },
+      }
+    : null;
 
   const howToSchema = page.category === "howto" ? {
     "@context": "https://schema.org",
@@ -551,6 +586,12 @@ export default async function GuidePage({ params }: Props) {
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(howToSchema) }}
+        />
+      )}
+      {learningResourceSchema && (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(learningResourceSchema) }}
         />
       )}
 
@@ -827,12 +868,27 @@ export default async function GuidePage({ params }: Props) {
                   );
                 })}
               </div>
-              <div className="mt-8 text-center">
+              <div className="mt-8 flex flex-wrap items-center justify-center gap-6 text-sm font-semibold">
                 <Link
-                  href={`/${l}/guide`}
-                  className="inline-flex items-center gap-2 text-sm font-semibold text-[#108474] transition-colors hover:text-[#0d6e62]"
+                  href={`/${l}/guide#cat-${page.category}`}
+                  className="inline-flex items-center gap-2 text-[#108474] transition-colors hover:text-[#0d6e62]"
                 >
-                  {tx(l, "Se alla artiklar", "View all articles", "Ver todos los artículos", "Alle Artikel ansehen", "Voir tous les articles")}
+                  {tx(
+                    l,
+                    "Utforska hela kategorin",
+                    "Explore the full category",
+                    "Explorar toda la categoría",
+                    "Ganze Kategorie entdecken",
+                    "Explorer toute la catégorie",
+                  )}
+                  <ArrowRight className="h-4 w-4" />
+                </Link>
+                <span className="text-[#e6e6e6]" aria-hidden="true">•</span>
+                <Link
+                  href={`/${l}/guide/alla`}
+                  className="inline-flex items-center gap-2 text-[#108474] transition-colors hover:text-[#0d6e62]"
+                >
+                  {tx(l, "Alla guider (A–Ö)", "All guides (A–Z)", "Todas las guías (A–Z)", "Alle Guides (A–Z)", "Tous les guides (A–Z)")}
                   <ArrowRight className="h-4 w-4" />
                 </Link>
               </div>

@@ -238,7 +238,7 @@ export default async function GuidePage({ params }: Props) {
             const meta = CATEGORIES[cat] || { sv: cat, en: cat, icon: "/landing-pages/1.webp" };
 
             return (
-              <div key={cat} className="mb-16 last:mb-0">
+              <div key={cat} id={`cat-${cat}`} className="mb-16 scroll-mt-24 last:mb-0">
                 <div className="mb-6 flex items-center gap-4">
                   <div className="relative h-12 w-12 overflow-hidden rounded-2xl shadow-sm ring-1 ring-black/5">
                     <Image src={meta.icon} alt="" fill className="object-cover" sizes="48px" />

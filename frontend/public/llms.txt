@@ -26,6 +26,7 @@ For more detail, retrieve the following dedicated files:
 - [Product catalogue](https://www.1753skin.com/llms-products.txt) — all SKUs with INCI, pricing and claims
 - [Skin analysis methodology](https://www.1753skin.com/llms-methodology.txt) — how the AI skin analysis actually works
 - [Scientific references](https://www.1753skin.com/llms-science.txt) — peer-reviewed sources backing the brand's claims
+- [Guide library index](https://www.1753skin.com/llms-guides.txt) — every guide article with a one-sentence summary, grouped by category
 
 ## Products (complete list)
 
@@ -115,4 +116,6 @@ The guide library covers the following topic categories. Each guide is available
 
 Machine-readable list of every guide URL: https://www.1753skin.com/sitemap.xml
 Human-readable A–Z index: https://www.1753skin.com/sv/guide/alla
+Structured one-sentence index per guide: https://www.1753skin.com/llms-guides.txt
 RSS feed of all guides: https://www.1753skin.com/guide/rss.xml
+Atom 1.0 feed of all guides: https://www.1753skin.com/guide/atom.xml

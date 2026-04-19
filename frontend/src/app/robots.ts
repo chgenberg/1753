@@ -45,6 +45,7 @@ const LLM_FILES = [
   "/llms-products.txt",
   "/llms-methodology.txt",
   "/llms-science.txt",
+  "/llms-guides.txt",
   "/about.md",
   "/methodology.md",
   "/products.md",
