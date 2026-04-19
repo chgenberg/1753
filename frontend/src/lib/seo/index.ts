@@ -8,8 +8,10 @@ import { CONDITION_PAGES } from "./pages-conditions";
 import { LIFESTYLE_PAGES } from "./pages-lifestyle";
 import { AUDIENCE_PAGES } from "./pages-audience";
 import { HOWTO_PAGES } from "./pages-howto";
+import { TIER1_PAGES } from "./pages-tier1";
 
 export const ALL_LANDING_PAGES: LandingPage[] = [
+  ...TIER1_PAGES,
   ...CBD_PAGES,
   ...CBG_PAGES,
   ...CITY_PAGES,
