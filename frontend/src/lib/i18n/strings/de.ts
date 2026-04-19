@@ -37,6 +37,7 @@ export const de: Messages = {
     navTitle: "Navigation",
     navAnalysis: "Hautanalyse",
     navGuide: "Hautpflege-Guide",
+    navAllGuides: "Alle Guides (A–Z)",
     navGallery: "Galerie",
     contactTitle: "Kontakt",
     guidesTitle: "Beliebte Ratgeber",

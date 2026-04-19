@@ -37,6 +37,7 @@ export const fr: Messages = {
     navTitle: "Navigation",
     navAnalysis: "Analyse de peau",
     navGuide: "Guide soins",
+    navAllGuides: "Tous les guides (A–Z)",
     navGallery: "Galerie",
     contactTitle: "Contact",
     guidesTitle: "Guides populaires",

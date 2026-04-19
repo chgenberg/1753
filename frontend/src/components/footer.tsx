@@ -103,6 +103,7 @@ export function Footer() {
     { href: path("skinAnalysis"), label: t("footer.navAnalysis") },
     { href: path("loyalty"), label: t("loyaltyPage.navLabel") },
     { href: `/${locale}/guide`, label: t("footer.navGuide") },
+    { href: `/${locale}/guide/alla`, label: t("footer.navAllGuides") },
     { href: `/${locale}/kunskapsbank`, label: knowledgeLabel },
     { href: `/${locale}/galleri`, label: t("footer.navGallery") },
   ];

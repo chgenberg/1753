@@ -36,6 +36,7 @@ const bundle = {
     navTitle: "Navigera",
     navAnalysis: "Hudanalys",
     navGuide: "Hudvårdsguide",
+    navAllGuides: "Alla guider (A–Ö)",
     navGallery: "Galleri",
     contactTitle: "Kontakt",
     guidesTitle: "Populära guider",
