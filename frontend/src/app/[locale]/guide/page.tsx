@@ -23,14 +23,26 @@ function getSlug(page: LandingPage, locale: Locale): string {
 }
 
 const CATEGORIES: Record<string, Record<string, string>> = {
-  howto:     { sv: "Guides och rutiner", en: "Guides & routines", es: "Guías y rutinas", de: "Guides & Routinen", fr: "Guides et routines", icon: "/landing-pages/1.webp" },
-  condition: { sv: "Hudtillstånd", en: "Skin conditions", es: "Afecciones cutáneas", de: "Hautzustände", fr: "Affections cutanées", icon: "/landing-pages/3.webp" },
-  cbd:       { sv: "CBD för huden", en: "CBD for skin", es: "CBD para la piel", de: "CBD für die Haut", fr: "CBD pour la peau", icon: "/landing-pages/4.webp" },
-  cbg:       { sv: "CBG för huden", en: "CBG for skin", es: "CBG para la piel", de: "CBG für die Haut", fr: "CBG pour la peau", icon: "/landing-pages/4.webp" },
-  lifestyle: { sv: "Livsstil och hud", en: "Lifestyle & skin", es: "Estilo de vida y piel", de: "Lifestyle & Haut", fr: "Mode de vie et peau", icon: "/landing-pages/2.webp" },
-  general:   { sv: "Allmänt om hudvård", en: "General skincare", es: "Cuidado general", de: "Allgemeine Hautpflege", fr: "Soins généraux", icon: "/landing-pages/6.webp" },
-  audience:  { sv: "Hudvård för dig", en: "Skincare for you", es: "Cuidado para ti", de: "Hautpflege für dich", fr: "Soins pour vous", icon: "/landing-pages/8.webp" },
-  stad:      { sv: "Hudvård i din stad", en: "Skincare in your city", es: "Cuidado en tu ciudad", de: "Hautpflege in deiner Stadt", fr: "Soins dans votre ville", icon: "/landing-pages/6.webp" },
+  howto:      { sv: "Guides och rutiner", en: "Guides & routines", es: "Guías y rutinas", de: "Guides & Routinen", fr: "Guides et routines", icon: "/landing-pages/1.webp" },
+  condition:  { sv: "Hudtillstånd", en: "Skin conditions", es: "Afecciones cutáneas", de: "Hautzustände", fr: "Affections cutanées", icon: "/landing-pages/3.webp" },
+  symptom:    { sv: "Hudsymtom", en: "Skin symptoms", es: "Síntomas cutáneos", de: "Hautsymptome", fr: "Symptômes cutanés", icon: "/landing-pages/3.webp" },
+  ingredient: { sv: "Ingredienser", en: "Ingredients", es: "Ingredientes", de: "Inhaltsstoffe", fr: "Ingrédients", icon: "/landing-pages/4.webp" },
+  cbd:        { sv: "CBD för huden", en: "CBD for skin", es: "CBD para la piel", de: "CBD für die Haut", fr: "CBD pour la peau", icon: "/landing-pages/4.webp" },
+  cbg:        { sv: "CBG för huden", en: "CBG for skin", es: "CBG para la piel", de: "CBG für die Haut", fr: "CBG pour la peau", icon: "/landing-pages/4.webp" },
+  comparison: { sv: "Jämförelser", en: "Comparisons", es: "Comparaciones", de: "Vergleiche", fr: "Comparaisons", icon: "/landing-pages/6.webp" },
+  myth:       { sv: "Myter om hudvård", en: "Skincare myths", es: "Mitos del cuidado", de: "Hautpflege-Mythen", fr: "Mythes cosmétiques", icon: "/landing-pages/6.webp" },
+  trend:      { sv: "Hudvårdstrender", en: "Skincare trends", es: "Tendencias del cuidado", de: "Hautpflege-Trends", fr: "Tendances cosmétiques", icon: "/landing-pages/1.webp" },
+  lifestyle:  { sv: "Livsstil och hud", en: "Lifestyle & skin", es: "Estilo de vida y piel", de: "Lifestyle & Haut", fr: "Mode de vie et peau", icon: "/landing-pages/2.webp" },
+  wellness:   { sv: "Hälsa och hud", en: "Wellness & skin", es: "Bienestar y piel", de: "Wellness & Haut", fr: "Bien-être et peau", icon: "/landing-pages/2.webp" },
+  seasonal:   { sv: "Säsongshud", en: "Seasonal skin", es: "Piel por estaciones", de: "Saisonale Haut", fr: "Peau au fil des saisons", icon: "/landing-pages/2.webp" },
+  lifecycle:  { sv: "Hud genom livet", en: "Skin through life", es: "Piel a lo largo de la vida", de: "Haut im Lauf des Lebens", fr: "La peau au fil de la vie", icon: "/landing-pages/8.webp" },
+  bodypart:   { sv: "Kroppsdelar", en: "Body parts", es: "Partes del cuerpo", de: "Körperpartien", fr: "Parties du corps", icon: "/landing-pages/8.webp" },
+  profession: { sv: "Hud i vardagen", en: "Skin in daily life", es: "Piel en el día a día", de: "Haut im Alltag", fr: "Peau au quotidien", icon: "/landing-pages/8.webp" },
+  audience:   { sv: "Hudvård för dig", en: "Skincare for you", es: "Cuidado para ti", de: "Hautpflege für dich", fr: "Soins pour vous", icon: "/landing-pages/8.webp" },
+  science:    { sv: "Hudvetenskap", en: "Skin science", es: "Ciencia de la piel", de: "Hautwissenschaft", fr: "Science de la peau", icon: "/landing-pages/4.webp" },
+  general:    { sv: "Allmänt om hudvård", en: "General skincare", es: "Cuidado general", de: "Allgemeine Hautpflege", fr: "Soins généraux", icon: "/landing-pages/6.webp" },
+  stad:       { sv: "Hudvård i din stad", en: "Skincare in your city", es: "Cuidado en tu ciudad", de: "Hautpflege in deiner Stadt", fr: "Soins dans votre ville", icon: "/landing-pages/6.webp" },
+  stad_v2:    { sv: "Fler städer", en: "More cities", es: "Más ciudades", de: "Weitere Städte", fr: "Autres villes", icon: "/landing-pages/6.webp" },
 };
 
 interface Props {
@@ -97,7 +109,28 @@ export default async function GuidePage({ params }: Props) {
     grouped[page.category].push(page);
   }
 
-  const categoryOrder = ["howto", "condition", "cbd", "cbg", "lifestyle", "general", "audience", "stad"];
+  const categoryOrder = [
+    "howto",
+    "condition",
+    "symptom",
+    "ingredient",
+    "cbd",
+    "cbg",
+    "comparison",
+    "myth",
+    "trend",
+    "lifestyle",
+    "wellness",
+    "seasonal",
+    "lifecycle",
+    "bodypart",
+    "profession",
+    "audience",
+    "science",
+    "general",
+    "stad",
+    "stad_v2",
+  ];
 
   const hubSchema = {
     "@context": "https://schema.org",
