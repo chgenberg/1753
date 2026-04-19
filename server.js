@@ -4373,6 +4373,7 @@ async function handleAutoUnsubscribe(email, name) {
 
     await db.unsubscribeByEmail(email);
     await db.cancelAutomationsForSubscriber(subscriber.id);
+    syncResendUnsubscribe(email).catch(() => {});
     console.log(`[AutoUnsub] ${email} automatically unsubscribed from newsletter`);
 
     const apiKey = process.env.RESEND_API_KEY;
@@ -4821,6 +4822,38 @@ app.post("/api/auth/forgot-password", async (req, res) => {
     res.status(500).json({ message: "Something went wrong. Please try again." });
   }
 });
+
+// ---- NEWSLETTER COMPLIANCE HELPERS ----
+
+// RFC 2369 + RFC 8058: required by Gmail/Yahoo/Apple for bulk senders since 2024.
+// The one-click POST endpoint is registered further down as POST /api/newsletter/unsubscribe/:token.
+function newsletterHeaders(unsubscribeUrl) {
+  if (!unsubscribeUrl) return undefined;
+  return {
+    "List-Unsubscribe": `<${unsubscribeUrl}>, <mailto:info@1753skin.com?subject=unsubscribe>`,
+    "List-Unsubscribe-Post": "List-Unsubscribe=One-Click",
+  };
+}
+
+// Reverse-sync to Resend Audience so broadcasts sent via Resend Dashboard
+// don't reach users who clicked unsubscribe on our side.
+async function syncResendUnsubscribe(email) {
+  const resendKey = process.env.RESEND_API_KEY;
+  const audienceId = process.env.RESEND_AUDIENCE_ID || "efd080df-d556-4b81-a6f4-bbece8017cb9";
+  if (!resendKey || !email) return;
+  try {
+    const { Resend } = require("resend");
+    const client = new Resend(resendKey);
+    await client.contacts.update({
+      audienceId,
+      email: email.toLowerCase(),
+      unsubscribed: true,
+    });
+    console.log(`[Newsletter] Marked ${email} unsubscribed in Resend Audience`);
+  } catch (err) {
+    console.error(`[Newsletter] Resend unsubscribe sync failed for ${email}:`, err?.message || err);
+  }
+}
 
 // ---- EMAIL TEMPLATES (shared style) ----
 
@@ -5456,12 +5489,30 @@ app.get("/api/newsletter/unsubscribe/:token", async (req, res) => {
     const locale = subscriber?.locale || "sv";
     if (subscriber) {
       await db.cancelAutomationsForSubscriber(subscriber.id);
+      syncResendUnsubscribe(subscriber.email).catch(() => {});
       console.log(`[Newsletter] ${subscriber.email} unsubscribed`);
     }
     res.redirect(`https://www.1753skin.com/${locale}?unsubscribed=1`);
   } catch (err) {
     console.error("[Newsletter] Unsubscribe error:", err);
     res.redirect("https://www.1753skin.com/");
+  }
+});
+
+// RFC 8058 one-click unsubscribe (triggered by Gmail/Apple/Yahoo mail clients).
+// Same behaviour as the GET, but must respond 200 without redirect.
+app.post("/api/newsletter/unsubscribe/:token", async (req, res) => {
+  try {
+    const subscriber = await db.unsubscribe(req.params.token);
+    if (subscriber) {
+      await db.cancelAutomationsForSubscriber(subscriber.id);
+      syncResendUnsubscribe(subscriber.email).catch(() => {});
+      console.log(`[Newsletter] ${subscriber.email} unsubscribed (one-click)`);
+    }
+    res.status(200).json({ ok: true });
+  } catch (err) {
+    console.error("[Newsletter] One-click unsubscribe error:", err);
+    res.status(200).json({ ok: true });
   }
 });
 
@@ -5574,7 +5625,8 @@ async function processAutomationQueue() {
           from: fromEmail,
           to: item.email,
           subject: resolvedSubject.replace(/\{\{firstName\}\}/g, item.first_name || (firstNameFallback[subLocale] || "du")),
-          html
+          html,
+          headers: newsletterHeaders(unsubUrl),
         });
 
         await db.touchSubscriberEmailed(item.subscriber_id);
@@ -5829,7 +5881,8 @@ app.post("/api/newsletter/broadcast", async (req, res) => {
             html.replace(/\{\{firstName\}\}/g, sub.first_name || (fnFallback[subL] || "du")),
             unsubUrl,
             subL
-          )
+          ),
+          headers: newsletterHeaders(unsubUrl),
         });
         sent++;
       } catch (err) {
@@ -5901,7 +5954,8 @@ app.post("/api/newsletter/broadcast-segmented", async (req, res) => {
               html.replace(/\{\{firstName\}\}/g, sub.first_name || (fnFallback2[subL] || "du")),
               unsubUrl,
               subL
-            )
+            ),
+            headers: newsletterHeaders(unsubUrl),
           });
           await db.touchSubscriberEmailed(sub.id);
           sent++;
