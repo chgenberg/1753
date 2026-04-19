@@ -9,9 +9,33 @@ import { LIFESTYLE_PAGES } from "./pages-lifestyle";
 import { AUDIENCE_PAGES } from "./pages-audience";
 import { HOWTO_PAGES } from "./pages-howto";
 import { TIER1_PAGES } from "./pages-tier1";
+import { INGREDIENT_PAGES } from "./pages-ingredients";
+import { MYTH_PAGES } from "./pages-myths";
+import { TREND_PAGES } from "./pages-trends";
+import { SYMPTOM_PAGES } from "./pages-symptoms";
+import { BODYPART_PAGES } from "./pages-bodyparts";
+import { LIFECYCLE_PAGES } from "./pages-lifecycle";
+import { COMPARISON_PAGES } from "./pages-comparisons";
+import { SEASONAL_PAGES } from "./pages-seasonal";
+import { WELLNESS_PAGES } from "./pages-wellness";
+import { PROFESSION_PAGES } from "./pages-profession";
+import { CITY_V2_PAGES } from "./pages-cities-v2";
+import { SCIENCE_PAGES } from "./pages-science";
 
 export const ALL_LANDING_PAGES: LandingPage[] = [
   ...TIER1_PAGES,
+  ...INGREDIENT_PAGES,
+  ...MYTH_PAGES,
+  ...TREND_PAGES,
+  ...SYMPTOM_PAGES,
+  ...BODYPART_PAGES,
+  ...LIFECYCLE_PAGES,
+  ...COMPARISON_PAGES,
+  ...SEASONAL_PAGES,
+  ...WELLNESS_PAGES,
+  ...PROFESSION_PAGES,
+  ...CITY_V2_PAGES,
+  ...SCIENCE_PAGES,
   ...CBD_PAGES,
   ...CBG_PAGES,
   ...CITY_PAGES,
