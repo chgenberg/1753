@@ -319,6 +319,29 @@ async function initSchema() {
 
     CREATE INDEX IF NOT EXISTS idx_skin_analyses_user ON skin_analyses (user_id);
 
+    CREATE TABLE IF NOT EXISTS personal_newsletters (
+      id                SERIAL PRIMARY KEY,
+      subscriber_id     INTEGER REFERENCES subscribers(id) ON DELETE CASCADE,
+      user_id           UUID REFERENCES users(id) ON DELETE SET NULL,
+      analysis_id       INTEGER REFERENCES skin_analyses(id) ON DELETE SET NULL,
+      email             TEXT NOT NULL,
+      locale            TEXT DEFAULT 'sv',
+      focus_areas       JSONB,
+      subject           TEXT,
+      html              TEXT,
+      sources           JSONB,
+      model             TEXT,
+      dry_run           BOOLEAN DEFAULT true,
+      sent_at           TIMESTAMPTZ,
+      feedback_score    INTEGER,
+      created_at        TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_personal_nl_subscriber
+      ON personal_newsletters (subscriber_id, created_at DESC);
+    CREATE INDEX IF NOT EXISTS idx_personal_nl_sent
+      ON personal_newsletters (sent_at) WHERE sent_at IS NOT NULL;
+
     CREATE TABLE IF NOT EXISTS face_snapshots (
       id              SERIAL PRIMARY KEY,
       user_id         UUID NOT NULL REFERENCES users(id) ON DELETE CASCADE,
@@ -1327,6 +1350,108 @@ async function getSkinMetricsHistory(userId, limit = 20) {
   return rows;
 }
 
+// ---- PERSONAL NEWSLETTERS (per-individual LLM-generated sends) ----
+
+// Returns active subscribers that (a) have a linked user account via email,
+// (b) have a skin analysis in the last `withinDays`, and
+// (c) have not received a personal newsletter in the last `cooldownDays`.
+// The latest analysis row is returned inline so downstream code does not
+// need to re-query per subscriber.
+async function findSubscribersForPersonalNewsletter({
+  withinDays = 180,
+  cooldownDays = 6,
+  limit = 250,
+} = {}) {
+  const { rows } = await pool.query(
+    `SELECT
+       s.id              AS subscriber_id,
+       s.email           AS email,
+       s.first_name      AS first_name,
+       s.locale          AS locale,
+       s.skin_condition  AS skin_condition,
+       s.unsubscribe_token AS unsubscribe_token,
+       u.id              AS user_id,
+       sa.id             AS analysis_id,
+       sa.result         AS analysis_result,
+       sa.answers        AS analysis_answers,
+       sa.score          AS analysis_score,
+       sa.created_at     AS analysis_created_at
+     FROM subscribers s
+     JOIN users u ON LOWER(u.email) = LOWER(s.email)
+     JOIN LATERAL (
+       SELECT id, result, answers, score, created_at
+       FROM skin_analyses
+       WHERE user_id = u.id
+       ORDER BY created_at DESC
+       LIMIT 1
+     ) sa ON TRUE
+     LEFT JOIN LATERAL (
+       SELECT created_at
+       FROM personal_newsletters
+       WHERE subscriber_id = s.id AND sent_at IS NOT NULL
+       ORDER BY sent_at DESC
+       LIMIT 1
+     ) last_nl ON TRUE
+     WHERE s.status = 'active'
+       AND sa.created_at > NOW() - MAKE_INTERVAL(days => $1::int)
+       AND (last_nl.created_at IS NULL
+            OR last_nl.created_at < NOW() - MAKE_INTERVAL(days => $2::int))
+     ORDER BY sa.created_at DESC
+     LIMIT $3`,
+    [withinDays, cooldownDays, limit]
+  );
+  return rows;
+}
+
+async function recordPersonalNewsletter({
+  subscriberId,
+  userId,
+  analysisId,
+  email,
+  locale,
+  focusAreas,
+  subject,
+  html,
+  sources,
+  model,
+  dryRun,
+  sent,
+}) {
+  const { rows } = await pool.query(
+    `INSERT INTO personal_newsletters
+       (subscriber_id, user_id, analysis_id, email, locale, focus_areas,
+        subject, html, sources, model, dry_run, sent_at)
+     VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+     RETURNING *`,
+    [
+      subscriberId || null,
+      userId || null,
+      analysisId || null,
+      email,
+      locale || "sv",
+      JSON.stringify(focusAreas || []),
+      subject || "",
+      html || "",
+      JSON.stringify(sources || []),
+      model || "",
+      dryRun === true,
+      sent ? new Date() : null,
+    ]
+  );
+  return rows[0];
+}
+
+async function getRecentPersonalNewsletters(limit = 50) {
+  const { rows } = await pool.query(
+    `SELECT id, subscriber_id, email, locale, subject, focus_areas,
+            sources, model, dry_run, sent_at, created_at
+     FROM personal_newsletters
+     ORDER BY created_at DESC LIMIT $1`,
+    [limit]
+  );
+  return rows;
+}
+
 // ---- FACE SNAPSHOTS (encrypted) ----
 
 async function saveFaceSnapshot({ userId, analysisId, imageBuffer }) {
@@ -1819,6 +1944,9 @@ module.exports = {
   getSkinAnalyses,
   deleteSkinAnalysis,
   getSkinMetricsHistory,
+  findSubscribersForPersonalNewsletter,
+  recordPersonalNewsletter,
+  getRecentPersonalNewsletters,
   createTrainingUpload,
   countTrainingUploads,
   exportTrainingUploads,

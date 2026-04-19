@@ -5746,6 +5746,70 @@ app.post("/api/content/generate-guides", async (req, res) => {
   }
 });
 
+// ---- PERSONAL NEWSLETTER GENERATE (per-individual, LLM+ebook+PubMed) ----
+// Defaults to DRY-RUN. Set body.send=true (or query ?send=1) to actually send.
+app.post("/api/newsletter/generate-personal", async (req, res) => {
+  try {
+    const adminKey = req.body.adminKey || req.headers["x-admin-key"];
+    const expectedKey = process.env.ADMIN_API_KEY || "1753-admin-key";
+    if (adminKey !== expectedKey) {
+      return res.status(403).json({ message: "Ogiltig admin-nyckel" });
+    }
+
+    const send = req.body.send === true || req.query.send === "1";
+    const limit = Number(req.body.limit) || (send ? 100 : 10);
+    const days = Number(req.body.days) || 180;
+    const cooldown = Number(req.body.cooldown) || 6;
+    const onlyEmail = typeof req.body.email === "string" ? req.body.email : null;
+
+    const { execFile } = require("child_process");
+    const scriptPath = require("path").join(__dirname, "scripts", "generate-personal-newsletters.js");
+    const args = [
+      `--limit=${limit}`,
+      `--days=${days}`,
+      `--cooldown=${cooldown}`,
+    ];
+    if (send) args.push("--send");
+    if (onlyEmail) args.push(`--email=${onlyEmail}`);
+
+    res.json({
+      ok: true,
+      message: send
+        ? "Personaliserad utskickning startad (skarpt)"
+        : "Personaliserad utskickning startad (dry-run)",
+      limit, days, cooldown, send, onlyEmail,
+    });
+
+    execFile("node", [scriptPath, ...args], { env: process.env, timeout: 900_000 }, (err, stdout, stderr) => {
+      if (err) {
+        console.error("[PersonalNewsletter] Misslyckades:", err.message);
+        if (stderr) console.error(stderr);
+      } else {
+        console.log("[PersonalNewsletter] Klar:", stdout.trim().split("\n").slice(-5).join(" | "));
+      }
+    });
+  } catch (err) {
+    console.error("[PersonalNewsletter] Error:", err);
+    res.status(500).json({ message: "Kunde inte starta personaliserad utskickning" });
+  }
+});
+
+app.get("/api/newsletter/personal/recent", async (req, res) => {
+  try {
+    const adminKey = req.query.adminKey || req.headers["x-admin-key"];
+    const expectedKey = process.env.ADMIN_API_KEY || "1753-admin-key";
+    if (adminKey !== expectedKey) {
+      return res.status(403).json({ message: "Ogiltig admin-nyckel" });
+    }
+    const limit = Math.min(Number(req.query.limit) || 50, 200);
+    const rows = await db.getRecentPersonalNewsletters(limit);
+    res.json({ ok: true, count: rows.length, newsletters: rows });
+  } catch (err) {
+    console.error("[PersonalNewsletter] list error:", err);
+    res.status(500).json({ message: "Kunde inte hamta listan" });
+  }
+});
+
 // ---- SKIN CONDITION NEWSLETTER GENERATE (cron-job.org trigger, Sundays 18:00) ----
 
 app.post("/api/newsletter/generate-skin", async (req, res) => {
