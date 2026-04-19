@@ -35,6 +35,11 @@ export const metadata: Metadata = {
     ],
     apple: "/apple-icon.png",
   },
+  alternates: {
+    types: {
+      "application/rss+xml": "https://www.1753skin.com/guide/rss.xml",
+    },
+  },
 };
 
 export default function RootLayout({

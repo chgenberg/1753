@@ -138,7 +138,33 @@ A: The face scan runs 100% locally. Zone images are sent encrypted to GPT-5.4 fo
 - Contact: https://www.1753skin.com/sv/kontakt
 - Skin analysis: https://www.1753skin.com/sv/gratis-hudanalys
 - Skin analysis quiz: https://www.1753skin.com/sv/hudanalys
-- Guide hub: https://www.1753skin.com/sv/guide
+- Guide hub (grouped by topic): https://www.1753skin.com/sv/guide
+- All guides (A–Z sitemap index, 1 000+ articles): https://www.1753skin.com/sv/guide/alla
+- RSS feed of all guides: https://www.1753skin.com/guide/rss.xml
 - Loyalty program: https://www.1753skin.com/sv/lojalitetsprogram
 - Terms: https://www.1753skin.com/sv/villkor
 - Privacy policy: https://www.1753skin.com/sv/integritetspolicy
+
+## Content library taxonomy
+
+The /guide section is split into the following categories. Each category has dozens to hundreds of pages in all 5 languages, cross-linked with JSON-LD, Wikidata entity references and peer-reviewed sources:
+
+- **Ingredients** (`/guide/[slug]` category=ingredient) – deep dives on CBD, CBG, jojoba, MCT and individual botanicals
+- **Symptoms** (category=symptom) – acne, eczema, rosacea, dryness, oiliness, sensitivity, post-inflammatory hyperpigmentation
+- **Conditions** (category=condition) – chronic skin conditions and how the endocannabinoid system relates to them
+- **Body parts** (category=bodypart) – face, jawline, neck, chest, back, scalp, hands, feet
+- **Life stages** (category=lifecycle) – teenage skin, 20s, 30s, 40s, menopausal, postpartum
+- **Audiences** (category=audience) – men, women, parents, athletes
+- **Wellness** (category=wellness) – sleep, stress, gut–skin axis, exercise, diet
+- **Lifestyle** (category=lifestyle) – habit redesign and daily routines
+- **Professions** (category=profession) – nurses, chefs, outdoor workers, office, shift workers
+- **Seasonal** (category=seasonal) – winter barrier, summer sun, dry indoor air
+- **City guides** (category=stad, stad_v2, stad_eu) – Stockholm, Gothenburg, Malmö + major EU cities
+- **Comparisons** (category=comparison) – CBD vs CBG, oil vs cream, morning vs evening
+- **Myths** (category=myth) – common skincare misconceptions, fact-checked
+- **Trends** (category=trend) – emerging ingredients and techniques, scored for evidence
+- **How-to** (category=howto) – step-by-step routines, application tips
+- **Science** (category=science) – technical background on ECS, microbiome, barrier biology
+- **Tier 1 hub pages** (category=tier1) – pillar pages targeting the highest-volume queries
+
+All pages include: structured data (BlogPosting, FAQPage, BreadcrumbList, optional HowTo), hreflang alternates for 5 languages, `about`/`sameAs` Wikidata entity links, `dateModified` derived from the source file's mtime, curated peer-reviewed citations and a brand-reviewed author attribution (Christopher Genberg).

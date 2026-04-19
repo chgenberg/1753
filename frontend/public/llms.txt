@@ -90,7 +90,29 @@ For more detail, retrieve the following dedicated files:
 - About us: https://www.1753skin.com/sv/om-oss
 - Contact: https://www.1753skin.com/sv/kontakt
 - Skin analysis: https://www.1753skin.com/sv/gratis-hudanalys
-- Guide hub: https://www.1753skin.com/sv/guide
+- Guide hub (grouped by topic): https://www.1753skin.com/sv/guide
+- All guides (A–Z sitemap): https://www.1753skin.com/sv/guide/alla
 - Loyalty: https://www.1753skin.com/sv/lojalitetsprogram
 - Terms: https://www.1753skin.com/sv/villkor
 - Privacy policy: https://www.1753skin.com/sv/integritetspolicy
+
+## Content library (1 000+ SEO guide articles in 5 languages)
+
+The guide library covers the following topic categories. Each guide is available in Swedish, English, Spanish, German and French, with hreflang alternates, JSON-LD BlogPosting + FAQPage + BreadcrumbList, Wikidata entity linking and peer-reviewed citations.
+
+- Ingredients (CBD, CBG, jojoba, MCT, botanicals) – how each works on the skin
+- Symptoms (acne, eczema, redness, dryness, sensitivity, barrier damage) – root causes and holistic fixes
+- Body parts (face, neck, chest, back, scalp, hands) – location-specific concerns
+- Life stages (teen, 20s, 30s, 40s, menopause, postpartum)
+- Lifestyle & wellness (sleep, stress, gut–skin axis, nutrition, exercise)
+- Seasonal skincare (winter barrier, summer, dry indoor air)
+- Occupations (nurses, chefs, office, outdoor work)
+- City-specific guides (Stockholm, Gothenburg, Malmö + major EU cities) – pollution + climate context
+- Comparisons (CBD vs CBG, facial oil vs cream, etc.)
+- Trends & myths (what actually holds up scientifically)
+- Science deep-dives (endocannabinoid system, skin microbiome, barrier biology)
+- How-to routines (morning, evening, oil-cleansing, travel)
+
+Machine-readable list of every guide URL: https://www.1753skin.com/sitemap.xml
+Human-readable A–Z index: https://www.1753skin.com/sv/guide/alla
+RSS feed of all guides: https://www.1753skin.com/guide/rss.xml

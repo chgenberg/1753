@@ -3,6 +3,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowRight, Sparkles, ChevronDown } from "lucide-react";
+import fs from "node:fs";
+import path from "node:path";
 import { ProductCard } from "@/components/product-card";
 import { locales, type Locale } from "@/lib/i18n/types";
 import { localizePath } from "@/lib/i18n/navigation";
@@ -17,7 +19,60 @@ const LP = "/landing-pages";
 const OG_LOCALE: Record<string, string> = { sv: "sv_SE", en: "en_US", es: "es_ES", de: "de_DE", fr: "fr_FR" };
 
 const ARTICLE_PUBLISHED = "2026-01-15";
-const ARTICLE_MODIFIED = "2026-04-16";
+const ARTICLE_MODIFIED_FALLBACK = "2026-04-16";
+
+/**
+ * Map each page category to its source data file, so we can derive a
+ * per-page `dateModified` from the file's mtime at build time. This lets
+ * search engines and LLMs see an accurate "last updated" signal whenever
+ * we regenerate or edit any category batch.
+ */
+const CATEGORY_FILE: Record<string, string> = {
+  cbd: "pages-cbd.ts",
+  cbg: "pages-cbg.ts",
+  stad: "pages-cities.ts",
+  stad_eu: "pages-cities-eu.ts",
+  stad_v2: "pages-cities-v2.ts",
+  general: "pages-general.ts",
+  condition: "pages-conditions.ts",
+  lifestyle: "pages-lifestyle.ts",
+  audience: "pages-audience.ts",
+  howto: "pages-howto.ts",
+  tier1: "pages-tier1.ts",
+  ingredient: "pages-ingredients.ts",
+  myth: "pages-myths.ts",
+  trend: "pages-trends.ts",
+  symptom: "pages-symptoms.ts",
+  bodypart: "pages-bodyparts.ts",
+  lifecycle: "pages-lifecycle.ts",
+  comparison: "pages-comparisons.ts",
+  seasonal: "pages-seasonal.ts",
+  wellness: "pages-wellness.ts",
+  profession: "pages-profession.ts",
+  science: "pages-science.ts",
+};
+
+const SEO_DIR = path.join(process.cwd(), "src", "lib", "seo");
+const MTIME_CACHE = new Map<string, string>();
+
+function getCategoryModifiedDate(category: string): string {
+  const cached = MTIME_CACHE.get(category);
+  if (cached) return cached;
+  const file = CATEGORY_FILE[category];
+  if (!file) {
+    MTIME_CACHE.set(category, ARTICLE_MODIFIED_FALLBACK);
+    return ARTICLE_MODIFIED_FALLBACK;
+  }
+  try {
+    const st = fs.statSync(path.join(SEO_DIR, file));
+    const iso = st.mtime.toISOString().slice(0, 10);
+    MTIME_CACHE.set(category, iso);
+    return iso;
+  } catch {
+    MTIME_CACHE.set(category, ARTICLE_MODIFIED_FALLBACK);
+    return ARTICLE_MODIFIED_FALLBACK;
+  }
+}
 
 const DATE_LOCALE: Record<string, string> = { sv: "sv-SE", en: "en-GB", es: "es-ES", de: "de-DE", fr: "fr-FR" };
 
@@ -69,6 +124,58 @@ const CATEGORY_SOURCES: Record<string, SourceRef[]> = {
   stad: [
     { text: "Prescott SL, Larcombe DL, Logan AC, et al. The skin microbiome: impact of modern environments on skin ecology, barrier integrity, and systemic immune programming. World Allergy Organ J 2017;10(1):29." },
   ],
+  ingredient: [
+    { text: "Oláh A, Tóth BI, Borbíró I, et al. Cannabidiol exerts sebostatic and antiinflammatory effects on human sebocytes. J Clin Invest 2014;124(9):3713–3724.", href: "https://doi.org/10.1172/JCI64628" },
+    { text: "Lin TK, Zhong L, Santiago JL. Anti-Inflammatory and Skin Barrier Repair Effects of Topical Application of Some Plant Oils. Int J Mol Sci 2017;19(1):70." },
+    { text: "Tóth KF, Ádám D, Bíró T, Oláh A. Cannabinoid signaling in the skin: therapeutic potential of the c(ut)annabinoid system. Molecules 2019;24(5):918.", href: "https://doi.org/10.3390/molecules24050918" },
+  ],
+  myth: [
+    { text: "Proksch E, Brandner JM, Jensen JM. The skin: an indispensable barrier. Exp Dermatol 2008;17(12):1063–1072.", href: "https://doi.org/10.1111/j.1600-0625.2008.00786.x" },
+    { text: "Byrd AL, Belkaid Y, Segre JA. The human skin microbiome. Nat Rev Microbiol 2018;16(3):143–155.", href: "https://doi.org/10.1038/nrmicro.2017.157" },
+  ],
+  trend: [
+    { text: "Bíró T, Tóth BI, Haskó G, Paus R, Pacher P. The endocannabinoid system of the skin in health and disease. Trends Pharmacol Sci 2009;30(8):411–420.", href: "https://doi.org/10.1016/j.tips.2009.05.004" },
+    { text: "Prescott SL, Larcombe DL, Logan AC, et al. The skin microbiome: impact of modern environments on skin ecology, barrier integrity, and systemic immune programming. World Allergy Organ J 2017;10(1):29." },
+  ],
+  symptom: [
+    { text: "Byrd AL, Belkaid Y, Segre JA. The human skin microbiome. Nat Rev Microbiol 2018;16(3):143–155.", href: "https://doi.org/10.1038/nrmicro.2017.157" },
+    { text: "Salem I, Ramser A, Isham N, Ghannoum MA. The Gut Microbiome as a Major Regulator of the Gut-Skin Axis. Front Microbiol 2018;9:1459.", href: "https://doi.org/10.3389/fmicb.2018.01459" },
+    { text: "Chen Y, Lyga J. Brain-skin connection: stress, inflammation and skin aging. Inflamm Allergy Drug Targets 2014;13(3):177–190." },
+  ],
+  bodypart: [
+    { text: "Proksch E, Brandner JM, Jensen JM. The skin: an indispensable barrier. Exp Dermatol 2008;17(12):1063–1072.", href: "https://doi.org/10.1111/j.1600-0625.2008.00786.x" },
+    { text: "Lin TK, Zhong L, Santiago JL. Anti-Inflammatory and Skin Barrier Repair Effects of Topical Application of Some Plant Oils. Int J Mol Sci 2017;19(1):70." },
+  ],
+  lifecycle: [
+    { text: "Zouboulis CC, Makrantonaki E. Hormonal therapy of intrinsic aging. Rejuvenation Res 2012;15(3):302–312." },
+    { text: "Raghunath RS, Venables ZC, Millington GWM. The menstrual cycle and the skin. Clin Exp Dermatol 2015;40(2):111–115." },
+  ],
+  comparison: [
+    { text: "Oláh A, Tóth BI, Borbíró I, et al. Cannabidiol exerts sebostatic and antiinflammatory effects on human sebocytes. J Clin Invest 2014;124(9):3713–3724.", href: "https://doi.org/10.1172/JCI64628" },
+    { text: "Tóth KF, Ádám D, Bíró T, Oláh A. Cannabinoid signaling in the skin: therapeutic potential of the c(ut)annabinoid system. Molecules 2019;24(5):918.", href: "https://doi.org/10.3390/molecules24050918" },
+  ],
+  seasonal: [
+    { text: "Engebretsen KA, Johansen JD, Kezic S, Linneberg A, Thyssen JP. The effect of environmental humidity and temperature on skin barrier function and dermatitis. J Eur Acad Dermatol Venereol 2016;30(2):223–249.", href: "https://doi.org/10.1111/jdv.13301" },
+    { text: "Lin TK, Zhong L, Santiago JL. Anti-Inflammatory and Skin Barrier Repair Effects of Topical Application of Some Plant Oils. Int J Mol Sci 2017;19(1):70." },
+  ],
+  wellness: [
+    { text: "Chen Y, Lyga J. Brain-skin connection: stress, inflammation and skin aging. Inflamm Allergy Drug Targets 2014;13(3):177–190." },
+    { text: "Walker MP, van der Helm E. Overnight therapy? The role of sleep in emotional brain processing. Psychol Bull 2009;135(5):731–748." },
+    { text: "Katta R, Desai SP. Diet and Dermatology: The Role of Dietary Intervention in Skin Disease. J Clin Aesthet Dermatol 2014;7(7):46–51." },
+  ],
+  profession: [
+    { text: "Chen Y, Lyga J. Brain-skin connection: stress, inflammation and skin aging. Inflamm Allergy Drug Targets 2014;13(3):177–190." },
+    { text: "Engebretsen KA, Johansen JD, Kezic S, Linneberg A, Thyssen JP. The effect of environmental humidity and temperature on skin barrier function and dermatitis. J Eur Acad Dermatol Venereol 2016;30(2):223–249.", href: "https://doi.org/10.1111/jdv.13301" },
+  ],
+  stad_v2: [
+    { text: "Prescott SL, Larcombe DL, Logan AC, et al. The skin microbiome: impact of modern environments on skin ecology, barrier integrity, and systemic immune programming. World Allergy Organ J 2017;10(1):29." },
+    { text: "Araviiskaia E, Berardesca E, Bieber T, et al. The impact of airborne pollution on skin. J Eur Acad Dermatol Venereol 2019;33(8):1496–1505.", href: "https://doi.org/10.1111/jdv.15583" },
+  ],
+  science: [
+    { text: "Bíró T, Tóth BI, Haskó G, Paus R, Pacher P. The endocannabinoid system of the skin in health and disease. Trends Pharmacol Sci 2009;30(8):411–420.", href: "https://doi.org/10.1016/j.tips.2009.05.004" },
+    { text: "Tóth KF, Ádám D, Bíró T, Oláh A. Cannabinoid signaling in the skin: therapeutic potential of the c(ut)annabinoid system. Molecules 2019;24(5):918.", href: "https://doi.org/10.3390/molecules24050918" },
+    { text: "Byrd AL, Belkaid Y, Segre JA. The human skin microbiome. Nat Rev Microbiol 2018;16(3):143–155.", href: "https://doi.org/10.1038/nrmicro.2017.157" },
+  ],
 };
 
 function getSources(category: string): SourceRef[] {
@@ -83,29 +190,101 @@ function tx(locale: string, sv: string, en: string, es?: string, de?: string, fr
   return en;
 }
 
-function getRelatedPages(current: ReturnType<typeof getPageBySlug>, locale: Locale, max = 6) {
-  if (!current) return [];
-  const candidates = ALL_LANDING_PAGES.filter(
-    (p) => p.svSlug !== current.svSlug,
-  );
-  const sameCategory = candidates.filter((p) => p.category === current.category);
-  const otherCategories = candidates.filter((p) => p.category !== current.category);
+/**
+ * Category affinity – which categories are "semantically adjacent"? This
+ * gives mixed suggestions (e.g. a symptom page also surfaces a related
+ * ingredient or how-to). Lowers the risk of pure-silo recommendations.
+ */
+const CATEGORY_AFFINITY: Record<string, string[]> = {
+  cbd: ["cbg", "ingredient", "comparison", "science"],
+  cbg: ["cbd", "ingredient", "comparison", "science"],
+  ingredient: ["cbd", "cbg", "comparison", "howto"],
+  comparison: ["ingredient", "cbd", "cbg", "myth"],
+  myth: ["science", "comparison", "ingredient"],
+  science: ["cbd", "cbg", "ingredient", "myth"],
+  symptom: ["condition", "howto", "ingredient", "bodypart"],
+  condition: ["symptom", "howto", "lifestyle", "ingredient"],
+  bodypart: ["symptom", "condition", "howto"],
+  lifecycle: ["audience", "symptom", "wellness"],
+  audience: ["lifecycle", "wellness", "lifestyle"],
+  wellness: ["lifestyle", "audience", "symptom"],
+  lifestyle: ["wellness", "howto", "audience"],
+  seasonal: ["howto", "symptom", "lifestyle"],
+  profession: ["lifestyle", "wellness", "symptom"],
+  howto: ["ingredient", "symptom", "lifestyle"],
+  trend: ["ingredient", "science", "myth"],
+  stad: ["stad_v2", "stad_eu", "lifestyle"],
+  stad_v2: ["stad", "stad_eu", "lifestyle"],
+  stad_eu: ["stad", "stad_v2", "lifestyle"],
+  tier1: ["cbd", "cbg", "ingredient"],
+  general: ["cbd", "ingredient", "lifestyle"],
+};
 
-  const result = [...sameCategory.slice(0, Math.min(4, sameCategory.length))];
-  const remaining = max - result.length;
-  if (remaining > 0) result.push(...otherCategories.slice(0, remaining));
-  return result.slice(0, max);
+function getRelatedPages(
+  current: ReturnType<typeof getPageBySlug>,
+  locale: Locale,
+  max = 6,
+) {
+  if (!current) return [];
+  const affinity = new Set(CATEGORY_AFFINITY[current.category] || []);
+  const productSet = new Set(current.productIds);
+
+  const scored = ALL_LANDING_PAGES
+    .filter((p) => p.svSlug !== current.svSlug)
+    .map((p) => {
+      let score = 0;
+      if (p.category === current.category) score += 10;
+      else if (affinity.has(p.category)) score += 4;
+      for (const id of p.productIds) if (productSet.has(id)) score += 3;
+      return { p, score };
+    })
+    .filter((x) => x.score > 0)
+    .sort((a, b) => b.score - a.score);
+
+  const picked: typeof ALL_LANDING_PAGES = [];
+  const seenCategories = new Set<string>();
+  for (const { p } of scored) {
+    const sameCount = picked.filter((x) => x.category === p.category).length;
+    if (sameCount >= 3) continue;
+    picked.push(p);
+    seenCategories.add(p.category);
+    if (picked.length >= max) break;
+  }
+
+  if (picked.length < max) {
+    for (const { p } of scored) {
+      if (picked.includes(p)) continue;
+      picked.push(p);
+      if (picked.length >= max) break;
+    }
+  }
+
+  return picked.slice(0, max);
 }
 
 const CATEGORY_IMAGES: Record<string, { hero: string; secondary?: string }> = {
-  general:   { hero: `${LP}/1.webp`, secondary: `${LP}/6.webp` },
-  cbd:       { hero: `${LP}/4.webp`, secondary: `${LP}/3.webp` },
-  cbg:       { hero: `${LP}/4.webp`, secondary: `${LP}/1.webp` },
-  condition: { hero: `${LP}/3.webp`, secondary: `${LP}/5.webp` },
-  lifestyle: { hero: `${LP}/2.webp`, secondary: `${LP}/7.webp` },
-  howto:     { hero: `${LP}/1.webp`, secondary: `${LP}/4.webp` },
-  audience:  { hero: `${LP}/8.webp`, secondary: `${LP}/6.webp` },
-  stad:      { hero: `${LP}/6.webp`, secondary: `${LP}/2.webp` },
+  general:    { hero: `${LP}/1.webp`, secondary: `${LP}/6.webp` },
+  cbd:        { hero: `${LP}/4.webp`, secondary: `${LP}/3.webp` },
+  cbg:        { hero: `${LP}/4.webp`, secondary: `${LP}/1.webp` },
+  condition:  { hero: `${LP}/3.webp`, secondary: `${LP}/5.webp` },
+  lifestyle:  { hero: `${LP}/2.webp`, secondary: `${LP}/7.webp` },
+  howto:      { hero: `${LP}/1.webp`, secondary: `${LP}/4.webp` },
+  audience:   { hero: `${LP}/8.webp`, secondary: `${LP}/6.webp` },
+  stad:       { hero: `${LP}/6.webp`, secondary: `${LP}/2.webp` },
+  tier1:      { hero: `${LP}/1.webp`, secondary: `${LP}/4.webp` },
+  ingredient: { hero: `${LP}/4.webp`, secondary: `${LP}/7.webp` },
+  myth:       { hero: `${LP}/5.webp`, secondary: `${LP}/3.webp` },
+  trend:      { hero: `${LP}/7.webp`, secondary: `${LP}/2.webp` },
+  symptom:    { hero: `${LP}/3.webp`, secondary: `${LP}/6.webp` },
+  bodypart:   { hero: `${LP}/2.webp`, secondary: `${LP}/5.webp` },
+  lifecycle:  { hero: `${LP}/8.webp`, secondary: `${LP}/1.webp` },
+  comparison: { hero: `${LP}/5.webp`, secondary: `${LP}/4.webp` },
+  seasonal:   { hero: `${LP}/7.webp`, secondary: `${LP}/6.webp` },
+  wellness:   { hero: `${LP}/2.webp`, secondary: `${LP}/8.webp` },
+  profession: { hero: `${LP}/6.webp`, secondary: `${LP}/3.webp` },
+  stad_v2:    { hero: `${LP}/6.webp`, secondary: `${LP}/7.webp` },
+  stad_eu:    { hero: `${LP}/6.webp`, secondary: `${LP}/2.webp` },
+  science:    { hero: `${LP}/3.webp`, secondary: `${LP}/4.webp` },
 };
 
 const FALLBACK = { hero: `${LP}/1.webp` };
@@ -173,6 +352,7 @@ export default async function GuidePage({ params }: Props) {
   const c = getContent(page, l);
   const t = getMessages(l);
   const images = getImages(page.category);
+  const articleModified = getCategoryModifiedDate(page.category);
   const products = page.productIds
     .map((id) => PRODUCTS.find((p) => p.id === id))
     .filter(Boolean);
@@ -240,6 +420,65 @@ export default async function GuidePage({ params }: Props) {
     stad: [
       { name: "Skin care", sameAs: "https://www.wikidata.org/wiki/Q2383867" },
     ],
+    tier1: [
+      { name: "Skin care", sameAs: "https://www.wikidata.org/wiki/Q2383867" },
+      { name: "Cannabidiol", sameAs: "https://www.wikidata.org/wiki/Q422197" },
+    ],
+    ingredient: [
+      { name: "Cosmetic ingredient", sameAs: "https://www.wikidata.org/wiki/Q62494251" },
+      { name: "Cannabidiol", sameAs: "https://www.wikidata.org/wiki/Q422197" },
+      { name: "Jojoba oil", sameAs: "https://www.wikidata.org/wiki/Q420825" },
+    ],
+    myth: [
+      { name: "Skin", sameAs: "https://www.wikidata.org/wiki/Q1074" },
+      { name: "Dermatology", sameAs: "https://www.wikidata.org/wiki/Q171171" },
+    ],
+    trend: [
+      { name: "Skin care", sameAs: "https://www.wikidata.org/wiki/Q2383867" },
+      { name: "Cosmetics industry", sameAs: "https://www.wikidata.org/wiki/Q11469" },
+    ],
+    symptom: [
+      { name: "Skin condition", sameAs: "https://www.wikidata.org/wiki/Q47526" },
+      { name: "Dermatology", sameAs: "https://www.wikidata.org/wiki/Q171171" },
+    ],
+    bodypart: [
+      { name: "Human skin", sameAs: "https://www.wikidata.org/wiki/Q1074" },
+      { name: "Anatomy", sameAs: "https://www.wikidata.org/wiki/Q514" },
+    ],
+    lifecycle: [
+      { name: "Human skin", sameAs: "https://www.wikidata.org/wiki/Q1074" },
+      { name: "Ageing", sameAs: "https://www.wikidata.org/wiki/Q147787" },
+    ],
+    comparison: [
+      { name: "Cannabidiol", sameAs: "https://www.wikidata.org/wiki/Q422197" },
+      { name: "Cannabigerol", sameAs: "https://www.wikidata.org/wiki/Q5033195" },
+      { name: "Cosmetic ingredient", sameAs: "https://www.wikidata.org/wiki/Q62494251" },
+    ],
+    seasonal: [
+      { name: "Skin care", sameAs: "https://www.wikidata.org/wiki/Q2383867" },
+      { name: "Climate", sameAs: "https://www.wikidata.org/wiki/Q7942" },
+    ],
+    wellness: [
+      { name: "Wellness", sameAs: "https://www.wikidata.org/wiki/Q736208" },
+      { name: "Sleep", sameAs: "https://www.wikidata.org/wiki/Q35831" },
+      { name: "Stress (biology)", sameAs: "https://www.wikidata.org/wiki/Q6540" },
+    ],
+    profession: [
+      { name: "Skin care", sameAs: "https://www.wikidata.org/wiki/Q2383867" },
+      { name: "Occupational stress", sameAs: "https://www.wikidata.org/wiki/Q1766117" },
+    ],
+    stad_v2: [
+      { name: "Air pollution", sameAs: "https://www.wikidata.org/wiki/Q131201" },
+      { name: "Skin care", sameAs: "https://www.wikidata.org/wiki/Q2383867" },
+    ],
+    stad_eu: [
+      { name: "Skin care", sameAs: "https://www.wikidata.org/wiki/Q2383867" },
+    ],
+    science: [
+      { name: "Endocannabinoid system", sameAs: "https://www.wikidata.org/wiki/Q901330" },
+      { name: "Skin microbiome", sameAs: "https://www.wikidata.org/wiki/Q19342040" },
+      { name: "Dermatology", sameAs: "https://www.wikidata.org/wiki/Q171171" },
+    ],
   };
 
   const aboutEntities = (CATEGORY_ENTITIES[page.category] || CATEGORY_ENTITIES.general).map((e) => ({
@@ -253,9 +492,14 @@ export default async function GuidePage({ params }: Props) {
     "@type": "BlogPosting",
     headline: c.h1,
     description: c.metaDescription,
-    image: `${BASE_URL}${images.hero}`,
+    image: {
+      "@type": "ImageObject",
+      url: `${BASE_URL}${images.hero}`,
+      width: 1200,
+      height: 1200,
+    },
     datePublished: ARTICLE_PUBLISHED,
-    dateModified: ARTICLE_MODIFIED,
+    dateModified: articleModified,
     author: {
       "@type": "Person",
       name: "Christopher Genberg",
@@ -333,8 +577,8 @@ export default async function GuidePage({ params }: Props) {
                 {tx(l, "Publicerad", "Published", "Publicado", "Veröffentlicht", "Publié")} {formatDate(ARTICLE_PUBLISHED, l)}
               </time>
               <span className="text-[#e6e6e6]" aria-hidden="true">|</span>
-              <time dateTime={ARTICLE_MODIFIED} className="text-[#108474]">
-                {tx(l, "Uppdaterad", "Updated", "Actualizado", "Aktualisiert", "Mis à jour")} {formatDate(ARTICLE_MODIFIED, l)}
+              <time dateTime={articleModified} className="text-[#108474]">
+                {tx(l, "Uppdaterad", "Updated", "Actualizado", "Aktualisiert", "Mis à jour")} {formatDate(articleModified, l)}
               </time>
             </div>
             <p className="article-lead mt-5 text-base leading-relaxed text-[#515151] md:text-lg">
