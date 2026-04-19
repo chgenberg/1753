@@ -257,6 +257,16 @@ app.post("/api/auth/register", async (req, res) => {
       locale
     });
 
+    // Self-heal: link any orphan skin analyses (user_id IS NULL) saved earlier
+    // under this email so "Min hudresa" shows them immediately. Soft-fails so
+    // registration is never blocked by this auxiliary step.
+    try {
+      const linked = await db.reclaimOrphanAnalyses(user.id, user.email);
+      if (linked) console.log(`[Auth] Linked ${linked} orphan analyses to ${user.email}`);
+    } catch (err) {
+      console.warn("[Auth] reclaimOrphanAnalyses (register) failed:", err.message);
+    }
+
     const token = generateToken(user);
     res.status(201).json({ token, user });
   } catch (err) {
@@ -288,6 +298,15 @@ app.post("/api/auth/login", async (req, res) => {
 
     if (locale && locale !== (user.locale || "sv")) {
       try { await db.pool.query("UPDATE users SET locale = $1 WHERE id = $2", [locale, user.id]); } catch {}
+    }
+
+    // Self-heal: claim orphan skin analyses saved under this email before the
+    // account was coupled. Soft-fails so login is never blocked.
+    try {
+      const linked = await db.reclaimOrphanAnalyses(user.id, user.email);
+      if (linked) console.log(`[Auth] Linked ${linked} orphan analyses to ${user.email}`);
+    } catch (err) {
+      console.warn("[Auth] reclaimOrphanAnalyses (login) failed:", err.message);
     }
 
     const token = generateToken(user);
@@ -2344,6 +2363,7 @@ app.post("/api/analysis", async (req, res) => {
       const parsedResult = jsonMatch ? JSON.parse(jsonMatch[1]) : null;
       const saved = await db.createSkinAnalysis({
         userId,
+        email: req.body.questions?.email,
         answers: questions || null,
         result: parsedResult,
         fullText: outputText,
@@ -2351,6 +2371,13 @@ app.post("/api/analysis", async (req, res) => {
       });
       analysisId = saved?.id || null;
       console.log(`[Analysis] Saved to DB: id=${analysisId}, userId=${userId}, score=${parsedResult?.score}`);
+      if (!userId) {
+        console.warn("[Analysis] Saved with NULL user_id", {
+          email: req.body.questions?.email || "(none)",
+          hadAuthHeader: !!req.headers.authorization,
+          analysisId,
+        });
+      }
 
       // Auto-tag subscriber using GPT's primaryCondition (not raw ONNX)
       try {
@@ -2511,7 +2538,7 @@ app.post("/api/analysis/classify", async (req, res) => {
 
 app.get("/api/analysis/history", authMiddleware, async (req, res) => {
   try {
-    const analyses = await db.getSkinAnalyses(req.user.id);
+    const analyses = await db.getSkinAnalyses(req.user.id, req.user.email);
     res.json(analyses);
   } catch (err) {
     console.error("[Analysis History]", err);
@@ -2642,7 +2669,7 @@ app.post("/api/analysis/fusion", async (req, res) => {
 
 app.get("/api/analysis/diff", authMiddleware, async (req, res) => {
   try {
-    const analyses = await db.getSkinAnalyses(req.user.id);
+    const analyses = await db.getSkinAnalyses(req.user.id, req.user.email);
     if (analyses.length < 2) {
       return res.json({ hasDiff: false, message: "Minst tva analyser behovs for jamforelse." });
     }
@@ -5211,7 +5238,7 @@ app.post("/api/skin-analyses", authMiddleware, async (req, res) => {
 
 app.get("/api/skin-analyses", authMiddleware, async (req, res) => {
   try {
-    const analyses = await db.getSkinAnalyses(req.user.id);
+    const analyses = await db.getSkinAnalyses(req.user.id, req.user.email);
     res.json(analyses);
   } catch (err) { res.status(500).json({ message: err.message }); }
 });
@@ -6419,7 +6446,7 @@ async function buildCustomerContext(userId) {
       parts.push("Ordrar: Inga tidigare ordrar.");
     }
 
-    const analyses = await db.getSkinAnalyses(userId).catch(() => []);
+    const analyses = await db.getSkinAnalyses(userId, user.email).catch(() => []);
     if (analyses && analyses.length > 0) {
       const latest = analyses[0];
       parts.push(`\nHudanalyser (${analyses.length} st):`);

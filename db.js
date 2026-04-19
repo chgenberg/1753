@@ -420,6 +420,27 @@ async function initSchema() {
     await pool.query(`ALTER TABLE social_posts ADD COLUMN IF NOT EXISTS caption_linkedin_en TEXT`);
   } catch (_) {}
 
+  // Migration (idempotent): link orphan skin_analyses rows back to users via email.
+  // Fixes the "Min hudresa" view being empty for accounts auto-created from the
+  // skin-analysis flow when user_id never got populated. Safe to re-run: all
+  // statements use IF NOT EXISTS / conditional UPDATEs.
+  try {
+    await pool.query(`ALTER TABLE skin_analyses ADD COLUMN IF NOT EXISTS email VARCHAR(255)`);
+    await pool.query(`CREATE INDEX IF NOT EXISTS skin_analyses_email_lower_idx ON skin_analyses (LOWER(email))`);
+    const backfill = await pool.query(
+      `UPDATE skin_analyses
+          SET email = LOWER(TRIM(answers->>'email'))
+        WHERE email IS NULL
+          AND answers ? 'email'
+          AND COALESCE(answers->>'email', '') <> ''`
+    );
+    if (backfill.rowCount) {
+      console.log(`[DB] Backfilled email on ${backfill.rowCount} skin_analyses rows`);
+    }
+  } catch (err) {
+    console.warn("[DB] skin_analyses email migration failed:", err.message);
+  }
+
   // Ensure shared_order_seq starts at 20000 minimum
   try {
     const seqCheck = await pool.query(
@@ -1313,16 +1334,35 @@ async function saveSkinAnalysis({ userId, score, summary, recommendations, fullR
   return rows[0];
 }
 
-async function createSkinAnalysis({ userId, answers, result, fullText, score }) {
+async function createSkinAnalysis({ userId, email, answers, result, fullText, score }) {
+  const normalizedEmail = (email || "").toLowerCase().trim() || null;
   const { rows } = await pool.query(
-    `INSERT INTO skin_analyses (user_id, score, answers, result, full_text)
-     VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-    [userId || null, score || null, JSON.stringify(answers || {}), JSON.stringify(result || {}), fullText || ""]
+    `INSERT INTO skin_analyses (user_id, email, score, answers, result, full_text)
+     VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+    [userId || null, normalizedEmail, score || null, JSON.stringify(answers || {}), JSON.stringify(result || {}), fullText || ""]
   );
   return rows[0];
 }
 
-async function getSkinAnalyses(userId) {
+/**
+ * Fetch a user's skin analyses. When `userEmail` is supplied, also include
+ * orphan rows (user_id IS NULL) whose email matches the user's email –
+ * needed because the auto-create path in POST /api/analysis can leave
+ * user_id NULL when any of the three coupling attempts (JWT, email lookup,
+ * auto-create) fail silently.
+ */
+async function getSkinAnalyses(userId, userEmail) {
+  if (userEmail) {
+    const { rows } = await pool.query(
+      `SELECT id, score, answers, result, full_text, created_at
+         FROM skin_analyses
+        WHERE user_id = $1
+           OR (user_id IS NULL AND LOWER(email) = LOWER($2))
+        ORDER BY created_at DESC`,
+      [userId, userEmail]
+    );
+    return rows;
+  }
   const { rows } = await pool.query(
     "SELECT id, score, answers, result, full_text, created_at FROM skin_analyses WHERE user_id = $1 ORDER BY created_at DESC",
     [userId]
@@ -1336,6 +1376,25 @@ async function deleteSkinAnalysis(userId, analysisId) {
     [analysisId, userId]
   );
   return rowCount > 0;
+}
+
+/**
+ * Claim any orphan skin_analyses rows (user_id IS NULL) whose stored email
+ * matches the supplied user's email. Called after successful login and
+ * registration so the "Min hudresa" view immediately reflects analyses run
+ * before the account existed. Never overwrites an already-set user_id.
+ * Returns the number of rows linked.
+ */
+async function reclaimOrphanAnalyses(userId, userEmail) {
+  if (!userId || !userEmail) return 0;
+  const { rowCount } = await pool.query(
+    `UPDATE skin_analyses
+        SET user_id = $1
+      WHERE user_id IS NULL
+        AND LOWER(email) = LOWER($2)`,
+    [userId, userEmail]
+  );
+  return rowCount;
 }
 
 async function getSkinMetricsHistory(userId, limit = 20) {
@@ -1943,6 +2002,7 @@ module.exports = {
   createSkinAnalysis,
   getSkinAnalyses,
   deleteSkinAnalysis,
+  reclaimOrphanAnalyses,
   getSkinMetricsHistory,
   findSubscribersForPersonalNewsletter,
   recordPersonalNewsletter,
