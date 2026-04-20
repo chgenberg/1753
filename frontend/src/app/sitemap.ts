@@ -41,28 +41,15 @@ function hreflang(pathsByLocale: Record<string, string>) {
 }
 
 /**
- * Sitemap segments:
- *   0 = core pages (public routes + analysis + guide hub + gallery) — all locales
- *   1 = products — all locales
- *   2 = guide articles — sv
- *   3 = guide articles — en
- *   4 = guide articles — es
- *   5 = guide articles — de
- *   6 = guide articles — fr
+ * Historical note: this file used to split the sitemap via generateSitemaps()
+ * into 7 numbered files under /sitemap/{id}.xml. Google Search Console was
+ * submitted the root index URL /sitemap.xml which Next.js did NOT emit in
+ * that setup, so GSC reported "Hämtning misslyckades" (404). Since our total
+ * URL count (~1.5k) is well below the 50k sitemap limit, we now return a
+ * single consolidated sitemap served at /sitemap.xml. All URLs (core +
+ * products + guides across all 5 locales) are preserved – Google just fetches
+ * them via one file instead of seven.
  */
-const GUIDE_LOCALE_IDS: Record<number, Locale> = { 2: "sv", 3: "en", 4: "es", 5: "de", 6: "fr" };
-
-export async function generateSitemaps() {
-  return [
-    { id: 0 },
-    { id: 1 },
-    { id: 2 },
-    { id: 3 },
-    { id: 4 },
-    { id: 5 },
-    { id: 6 },
-  ];
-}
 
 const HERO_IMAGES = [
   `${BASE}/1753desktop.webp`,
@@ -193,12 +180,14 @@ function buildGuideEntries(locale: Locale): MetadataRoute.Sitemap {
   return out;
 }
 
-export default function sitemap({ id }: { id: number }): MetadataRoute.Sitemap {
-  if (id === 0) return buildCoreEntries();
-  if (id === 1) return buildProductEntries();
-
-  const guideLocale = GUIDE_LOCALE_IDS[id];
-  if (guideLocale) return buildGuideEntries(guideLocale);
-
-  return [];
+export default function sitemap(): MetadataRoute.Sitemap {
+  return [
+    ...buildCoreEntries(),
+    ...buildProductEntries(),
+    ...buildGuideEntries("sv"),
+    ...buildGuideEntries("en"),
+    ...buildGuideEntries("es"),
+    ...buildGuideEntries("de"),
+    ...buildGuideEntries("fr"),
+  ];
 }
