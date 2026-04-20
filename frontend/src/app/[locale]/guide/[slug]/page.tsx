@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Image from "next/image";
 import Link from "next/link";
-import { notFound } from "next/navigation";
+import { notFound, permanentRedirect } from "next/navigation";
 import { ArrowRight, Sparkles, ChevronDown } from "lucide-react";
 import fs from "node:fs";
 import path from "node:path";
@@ -309,10 +309,36 @@ export async function generateStaticParams() {
   return out;
 }
 
+/**
+ * Find a landing page whose slug in ANY locale matches the requested slug.
+ * Used to 301-redirect cross-locale slug typos (e.g. /en/guide/cbd-hautpflege-prague,
+ * which is the DE slug) to the current locale's correct version of the same article.
+ * Keeps 404s for genuinely unknown slugs.
+ */
+function findPageByAnyLocaleSlug(slug: string) {
+  return ALL_LANDING_PAGES.find(
+    (p) =>
+      p.svSlug === slug ||
+      p.enSlug === slug ||
+      p.esSlug === slug ||
+      p.deSlug === slug ||
+      p.frSlug === slug,
+  );
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { locale, slug } = await params;
   const page = getPageBySlug(ALL_LANDING_PAGES, slug, locale as Locale);
-  if (!page) return {};
+  if (!page) {
+    const fallback = findPageByAnyLocaleSlug(slug);
+    if (fallback) {
+      const correctSlug = getSlug(fallback, locale as Locale);
+      if (correctSlug && correctSlug !== slug) {
+        permanentRedirect(`/${locale}/guide/${correctSlug}`);
+      }
+    }
+    return {};
+  }
   const c = getContent(page, locale as Locale);
   const images = getImages(page.category);
   const svPath = `/sv/guide/${page.svSlug}`;
@@ -347,7 +373,16 @@ export default async function GuidePage({ params }: Props) {
   const { locale, slug } = await params;
   const l = locale as Locale;
   const page = getPageBySlug(ALL_LANDING_PAGES, slug, l);
-  if (!page) notFound();
+  if (!page) {
+    const fallback = findPageByAnyLocaleSlug(slug);
+    if (fallback) {
+      const correctSlug = getSlug(fallback, l);
+      if (correctSlug && correctSlug !== slug) {
+        permanentRedirect(`/${l}/guide/${correctSlug}`);
+      }
+    }
+    notFound();
+  }
 
   const c = getContent(page, l);
   const t = getMessages(l);

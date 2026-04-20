@@ -22,6 +22,20 @@ const nextConfig: NextConfig = {
       },
     ];
   },
+  /**
+   * 301-redirect known external typos for the skin analysis landing page that
+   * Google Search Console surfaced as 404. These slugs are NOT used by our
+   * navigation, middleware rewrites, or sitemaps – only by external links /
+   * auto-translated inbound URLs. Cross-locale guide-slug typos (e.g.
+   * /en/guide/cbd-hautpflege-prague) are handled dynamically inside
+   * /[locale]/guide/[slug]/page.tsx via findPageByAnyLocaleSlug.
+   */
+  async redirects() {
+    return [
+      { source: "/es/analisis-de-piel", destination: "/es/analisis-piel", permanent: true },
+      { source: "/es/analisis-de-la-piel", destination: "/es/analisis-piel", permanent: true },
+    ];
+  },
   async headers() {
     return [
       {
