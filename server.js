@@ -16,6 +16,10 @@ const path = require("path");
 require("dotenv").config();
 
 const db = require("./db");
+const {
+  PREMIUM_ANALYSIS_SYSTEM_PROMPT,
+  buildPremiumAnalysisPrompt,
+} = require("./services/premium-analysis-prompt");
 
 let bcrypt, jwt;
 try { bcrypt = require("bcryptjs"); } catch { bcrypt = null; }
@@ -2559,6 +2563,368 @@ app.delete("/api/analysis/:id", authMiddleware, async (req, res) => {
   }
 });
 
+/* ─── Premium hudanalys (29 kr paywall) ─────────────────────────────────────
+ *
+ * Helt isolerat fr\u00e5n gratisfl\u00f6det. Egna routes, egen tabell, egen prompt,
+ * egen Viva-merchantTrns-prefix (PREMIUM-). Existerande /api/analysis,
+ * ANALYSIS_SYSTEM_PROMPT, createSkinAnalysis och webhook-grenarna f\u00f6r SUB-
+ * och vanliga ordrar r\u00f6rs ALDRIG. Aktiveras via PREMIUM_ANALYSIS_ENABLED.
+ *
+ * Fl\u00f6de:
+ *   1. POST /api/analysis-premium/checkout
+ *      Body: { email, locale, answers, imageBase64?, fullImage?, regions?, imageScan? }
+ *      \u2192 skapar token + Viva-order (29 kr SEK), sparar payload i DB,
+ *        returnerar { token, orderCode, checkoutUrl, amount }.
+ *
+ *   2. Viva betalas \u2192 webhook med MerchantTrns "PREMIUM-{token}" \u2192
+ *      markPremiumPurchasePaid + email till kund med l\u00e4nk till resultatsidan.
+ *
+ *   3. GET /api/analysis-premium/status/:token
+ *      \u2192 { status: "pending" | "paid" | "redeemed" | "failed", analysisId? }.
+ *
+ *   4. POST /api/analysis-premium/run
+ *      Body: { token }
+ *      \u2192 Om paid: k\u00f6r GPT-5.4 med PREMIUM_ANALYSIS_SYSTEM_PROMPT (32k tokens),
+ *        sparar i skin_analyses (kind='premium'), markerar redeemed, returnerar resultat.
+ *      \u2192 Om redan redeemed: returnerar tidigare analys.
+ *
+ *   5. GET /api/analysis-premium/prefill?email=...
+ *      \u2192 Senaste gratis-analysens demografi/foto (ENBART l\u00e4sning, inga edits).
+ */
+
+const PREMIUM_ANALYSIS_PRICE_SEK = 29;
+const PREMIUM_ANALYSIS_CURRENCY = "SEK";
+const PREMIUM_ANALYSIS_PRICE_CENTS = PREMIUM_ANALYSIS_PRICE_SEK * 100;
+
+function isPremiumAnalysisEnabled() {
+  const v = String(process.env.PREMIUM_ANALYSIS_ENABLED || "").toLowerCase();
+  return v === "1" || v === "true" || v === "yes" || v === "on";
+}
+
+function premiumDisabledMsg(locale) {
+  const texts = {
+    sv: "Premium-hudanalysen \u00e4r tillf\u00e4lligt otillg\u00e4nglig. F\u00f6rs\u00f6k igen senare.",
+    en: "Premium skin analysis is temporarily unavailable. Please try again later.",
+    es: "El an\u00e1lisis premium de la piel no est\u00e1 disponible temporalmente.",
+    de: "Die Premium-Hautanalyse ist vor\u00fcbergehend nicht verf\u00fcgbar.",
+    fr: "L'analyse premium de la peau est temporairement indisponible.",
+  };
+  return texts[locale] || texts.sv;
+}
+
+app.post("/api/analysis-premium/checkout", async (req, res) => {
+  const locale = reqLocale(req);
+  try {
+    if (!isPremiumAnalysisEnabled()) {
+      return res.status(503).json({ message: premiumDisabledMsg(locale) });
+    }
+
+    const clientIp = req.ip || req.connection.remoteAddress;
+    if (!checkRateLimit(clientIp, "premium-checkout", 6)) {
+      return res.status(429).json({ message: apiMsg("rateLimited", locale) });
+    }
+
+    const { email, answers, imageBase64, fullImage, regions, imageScan } = req.body || {};
+    const normalizedEmail = (email || "").toLowerCase().trim();
+    if (!normalizedEmail || !/.+@.+\..+/.test(normalizedEmail)) {
+      return res.status(400).json({
+        message: emailT(locale, {
+          sv: "Ange en giltig e-postadress.",
+          en: "Please enter a valid email address.",
+          es: "Introduce un correo v\u00e1lido.",
+          de: "Bitte gib eine g\u00fcltige E-Mail-Adresse ein.",
+          fr: "Veuillez saisir une adresse e-mail valide.",
+        }),
+      });
+    }
+    if (!answers || typeof answers !== "object") {
+      return res.status(400).json({
+        message: emailT(locale, {
+          sv: "Slutf\u00f6r premium-formul\u00e4ret innan betalning.",
+          en: "Please complete the premium questionnaire before paying.",
+          es: "Completa el cuestionario premium antes de pagar.",
+          de: "Bitte beantworte den Premium-Fragebogen vor der Zahlung.",
+          fr: "Veuillez compl\u00e9ter le questionnaire premium avant de payer.",
+        }),
+      });
+    }
+
+    const mainImage = fullImage || imageBase64;
+    const hasImage = mainImage && typeof mainImage === "string" && mainImage.startsWith("data:image/");
+
+    let userId = null;
+    try {
+      const authHeader = req.headers.authorization;
+      if (authHeader?.startsWith("Bearer ")) {
+        const decoded = jwt && jwt.verify(authHeader.slice(7), JWT_SECRET);
+        userId = decoded?.id || null;
+      }
+    } catch { /* anonymous ok */ }
+
+    if (!userId) {
+      try {
+        const existing = await db.findUserByEmail(normalizedEmail);
+        if (existing) userId = existing.id;
+      } catch (err) {
+        console.warn("[PremiumAnalysis] user lookup failed:", err.message);
+      }
+    }
+
+    const token = crypto.randomUUID().replace(/-/g, "");
+    const merchantTrns = `PREMIUM-${token}`;
+
+    const vivaOrderBody = {
+      amount: PREMIUM_ANALYSIS_PRICE_CENTS,
+      currencyCode: VIVA_CURRENCY_CODE[PREMIUM_ANALYSIS_CURRENCY],
+      customerTrns: `1753 SKINCARE Premium hudanalys`,
+      merchantTrns,
+      sourceCode: process.env.VIVA_SOURCE_CODE,
+      customer: {
+        email: normalizedEmail,
+        fullName: answers?.foundation?.name || normalizedEmail.split("@")[0],
+      },
+    };
+
+    const vivaData = await vivaFetch("/checkout/v2/orders", "POST", vivaOrderBody);
+    const orderCode = vivaData.orderCode;
+    if (!orderCode) {
+      throw new Error("Viva did not return orderCode for premium checkout");
+    }
+
+    const payload = {
+      answers,
+      imageScan: imageScan || null,
+      regions: Array.isArray(regions) ? regions.slice(0, 5) : null,
+      image: hasImage ? mainImage : null,
+    };
+
+    await db.createPremiumPurchase({
+      token,
+      email: normalizedEmail,
+      userId,
+      vivaOrderCode: orderCode,
+      merchantTrns,
+      amount: PREMIUM_ANALYSIS_PRICE_CENTS,
+      currency: PREMIUM_ANALYSIS_CURRENCY,
+      payload,
+      locale,
+    });
+
+    const env = process.env.VIVA_ENVIRONMENT === "production" ? "www" : "demo";
+    const checkoutUrl = `https://${env}.vivapayments.com/web/checkout?ref=${orderCode}&color=108474`;
+
+    console.log(`[PremiumAnalysis] Checkout created token=${token.slice(0, 8)}\u2026 orderCode=${orderCode} email=${normalizedEmail}`);
+
+    res.json({
+      token,
+      orderCode,
+      checkoutUrl,
+      amount: PREMIUM_ANALYSIS_PRICE_SEK,
+      currency: PREMIUM_ANALYSIS_CURRENCY,
+    });
+  } catch (err) {
+    console.error("[PremiumAnalysis Checkout]", err);
+    res.status(err.status || 500).json({ message: err.message || apiMsg("analysisFailed", locale) });
+  }
+});
+
+app.get("/api/analysis-premium/status/:token", async (req, res) => {
+  try {
+    const purchase = await db.findPremiumPurchaseByToken(req.params.token);
+    if (!purchase) return res.status(404).json({ message: "Token saknas" });
+    res.json({
+      status: purchase.status,
+      analysisId: purchase.analysis_id || null,
+      paidAt: purchase.paid_at,
+      redeemedAt: purchase.redeemed_at,
+      email: purchase.email,
+      locale: purchase.locale || "sv",
+    });
+  } catch (err) {
+    console.error("[PremiumAnalysis Status]", err);
+    res.status(500).json({ message: "Kunde inte h\u00e4mta status" });
+  }
+});
+
+app.post("/api/analysis-premium/run", async (req, res) => {
+  const locale = reqLocale(req);
+  try {
+    if (!isPremiumAnalysisEnabled()) {
+      return res.status(503).json({ message: premiumDisabledMsg(locale) });
+    }
+    const { token } = req.body || {};
+    if (!token) return res.status(400).json({ message: "Token saknas" });
+
+    const purchase = await db.findPremiumPurchaseByToken(token);
+    if (!purchase) return res.status(404).json({ message: "Ogiltig token" });
+
+    if (purchase.status === "pending") {
+      return res.status(402).json({ message: "Betalning ej genomf\u00f6rd \u00e4n", status: "pending" });
+    }
+
+    // Idempotens: om redan redeemed, returnera tidigare analys.
+    if (purchase.status === "redeemed" && purchase.analysis_id) {
+      const { rows } = await db.pool.query(
+        "SELECT id, score, answers, result, full_text, created_at FROM skin_analyses WHERE id = $1",
+        [purchase.analysis_id]
+      );
+      const existing = rows[0];
+      if (existing) {
+        return res.json({
+          status: "redeemed",
+          analysisId: existing.id,
+          analysis: existing,
+        });
+      }
+    }
+
+    if (purchase.status !== "paid" && purchase.status !== "redeemed") {
+      return res.status(400).json({ message: "Otillg\u00e4ngligt status: " + purchase.status });
+    }
+
+    if (!process.env.OPENAI_API_KEY) {
+      return res.status(500).json({ message: apiMsg("analysisNoKey", locale) });
+    }
+
+    const payload = typeof purchase.payload === "string"
+      ? (() => { try { return JSON.parse(purchase.payload); } catch { return {}; } })()
+      : (purchase.payload || {});
+    const answers = payload.answers || {};
+    const imageScan = payload.imageScan || null;
+    const mainImage = payload.image || null;
+    const regions = payload.regions || null;
+    const purchaseLocale = purchase.locale || locale;
+
+    const promptText = buildPremiumAnalysisPrompt(answers, imageScan);
+    let systemPromptFull = PREMIUM_ANALYSIS_SYSTEM_PROMPT;
+    const langMap = { en: "English", es: "Spanish", de: "German", fr: "French" };
+    if (purchaseLocale && langMap[purchaseLocale]) {
+      systemPromptFull += `\n\n== LANGUAGE ==\nWrite the ENTIRE JSON response in ${langMap[purchaseLocale]} (keep keys in English).`;
+    }
+
+    const contentParts = [{ type: "input_text", text: promptText }];
+    if (mainImage && mainImage.startsWith("data:image/")) {
+      contentParts.push({ type: "input_image", image_url: mainImage });
+    }
+    if (Array.isArray(regions)) {
+      for (const region of regions) {
+        if (region.imageBase64 && region.imageBase64.startsWith("data:image/")) {
+          contentParts.push({ type: "input_image", image_url: region.imageBase64 });
+        }
+      }
+    }
+
+    console.log(`[PremiumAnalysis] Running token=${token.slice(0, 8)}\u2026 model=${OPENAI_MODEL} locale=${purchaseLocale}`);
+
+    const response = await fetchWithRetry("https://api.openai.com/v1/responses", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${process.env.OPENAI_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: OPENAI_MODEL,
+        instructions: systemPromptFull,
+        input: [{ role: "user", content: contentParts }],
+        max_output_tokens: 32000,
+        store: true,
+      }),
+    });
+
+    const data = await response.json().catch(() => ({}));
+    if (!response.ok) {
+      console.error("[PremiumAnalysis] OpenAI error:", response.status, JSON.stringify(data).slice(0, 500));
+      throw { status: response.status, message: data.error?.message || apiMsg("analysisFailed", locale) };
+    }
+
+    const outputText = extractOutputText(data);
+    if (!outputText) {
+      throw { status: 500, message: apiMsg("analysisNoResult", locale) };
+    }
+
+    let parsedResult = null;
+    try {
+      const m = outputText.match(/```json\s*([\s\S]*?)```/);
+      parsedResult = m ? JSON.parse(m[1]) : null;
+    } catch (parseErr) {
+      console.warn("[PremiumAnalysis] JSON parse failed:", parseErr.message);
+    }
+
+    let resolvedUserId = purchase.user_id || null;
+    if (!resolvedUserId && purchase.email) {
+      try {
+        const u = await db.findUserByEmail(purchase.email);
+        if (u) resolvedUserId = u.id;
+      } catch { /* ignore */ }
+    }
+
+    const saved = await db.createPremiumSkinAnalysis({
+      userId: resolvedUserId,
+      email: purchase.email,
+      answers,
+      result: parsedResult,
+      fullText: outputText,
+      score: parsedResult?.scoreOverall || parsedResult?.score || null,
+    });
+    const analysisId = saved?.id || null;
+
+    await db.markPremiumPurchaseRedeemed(purchase.id, analysisId);
+    if (resolvedUserId && !purchase.user_id) {
+      await db.attachPremiumUser(purchase.id, resolvedUserId);
+    }
+
+    console.log(`[PremiumAnalysis] Saved analysis id=${analysisId} for token=${token.slice(0, 8)}\u2026`);
+
+    res.json({
+      status: "redeemed",
+      analysisId,
+      analysis: saved,
+      content: outputText,
+      result: parsedResult,
+    });
+  } catch (err) {
+    console.error("[PremiumAnalysis Run]", err);
+    res.status(err.status || 500).json({ message: err.message || apiMsg("analysisFailed", locale) });
+  }
+});
+
+app.get("/api/analysis-premium/prefill", async (req, res) => {
+  try {
+    if (!isPremiumAnalysisEnabled()) {
+      return res.status(503).json({ message: premiumDisabledMsg(reqLocale(req)) });
+    }
+    const email = (req.query.email || "").toString().toLowerCase().trim();
+    if (!email) return res.json({ found: false });
+
+    const { rows } = await db.pool.query(
+      `SELECT id, score, answers, result, created_at
+         FROM skin_analyses
+        WHERE LOWER(email) = LOWER($1)
+          AND COALESCE(kind, 'free') = 'free'
+        ORDER BY created_at DESC
+        LIMIT 1`,
+      [email]
+    );
+    const latest = rows[0];
+    if (!latest) return res.json({ found: false });
+
+    const answers = typeof latest.answers === "string"
+      ? (() => { try { return JSON.parse(latest.answers); } catch { return null; } })()
+      : latest.answers;
+
+    res.json({
+      found: true,
+      latestAnalysisId: latest.id,
+      createdAt: latest.created_at,
+      score: latest.score,
+      answers,
+    });
+  } catch (err) {
+    console.error("[PremiumAnalysis Prefill]", err);
+    res.status(500).json({ message: "Kunde inte h\u00e4mta tidigare analys" });
+  }
+});
+
 /* ─── Multimodal Fusion Scoring ─── */
 
 const QUIZ_CONCERN_MAP = {
@@ -3064,6 +3430,36 @@ app.post("/api/vivawallet/webhook", async (req, res) => {
       const transactionId = event.EventData?.TransactionId;
       const merchantTrns = event.EventData?.MerchantTrns;
       const orderCode = event.EventData?.OrderCode;
+
+      // Premium-hudanalys (29 kr) – egen gren med tidigt return.
+      // Matchar PREMIUM-{token}; pekar p\u00e5 premium_analysis_purchases-tabellen.
+      // Existerande SUB-/order-grenar nedan k\u00f6rs ALDRIG om prefix matchar h\u00e4r.
+      if (merchantTrns && merchantTrns.startsWith("PREMIUM-")) {
+        try {
+          let purchase = await db.findPremiumPurchaseByMerchantTrns(merchantTrns);
+          if (!purchase && orderCode) {
+            purchase = await db.findPremiumPurchaseByVivaCode(orderCode);
+          }
+          if (!purchase) {
+            console.warn("[Webhook] Premium-purchase saknas:", merchantTrns, orderCode);
+            return;
+          }
+          if (purchase.status === "pending") {
+            await db.markPremiumPurchasePaid(purchase.id, transactionId || null);
+            console.log(`[Webhook] Premium-hudanalys betald (token=${(purchase.token || "").slice(0, 8)}\u2026)`);
+            try {
+              await sendPremiumAnalysisReady(purchase);
+            } catch (mailErr) {
+              console.error("[Webhook] Premium-email error:", mailErr.message);
+            }
+          } else {
+            console.log(`[Webhook] Premium-purchase redan i status=${purchase.status}, hoppar markPaid`);
+          }
+        } catch (err) {
+          console.error("[Webhook] Premium-betalning fel:", err);
+        }
+        return;
+      }
 
       // Check if this is a subscription payment (merchantTrns starts with SUB-)
       if (merchantTrns && merchantTrns.startsWith("SUB-")) {
@@ -4232,6 +4628,105 @@ async function sendPasswordSetupEmail(email, name, resetToken, locale) {
   });
 
   console.log(`[Email] Password setup email sent to ${email} (locale: ${l})`);
+  return { sent: true };
+}
+
+// ---- PREMIUM ANALYSIS EMAILS ----
+
+const PREMIUM_RESULT_SEGMENTS = {
+  sv: "hudanalys-premium/resultat",
+  en: "premium-skin-analysis/result",
+  es: "analisis-piel-premium/resultado",
+  de: "hautanalyse-premium/ergebnis",
+  fr: "analyse-peau-premium/resultat",
+};
+
+async function sendPremiumAnalysisReady(purchase) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    console.warn("[Email] RESEND_API_KEY not set – premium analysis email NOT sent");
+    return { sent: false, skipReason: "no_api_key" };
+  }
+  if (!purchase || !purchase.email || !purchase.token) {
+    return { sent: false, skipReason: "missing_purchase" };
+  }
+
+  const { Resend } = require("resend");
+  const resend = new Resend(apiKey);
+  const fromEmail = emailFromInfo();
+  const baseUrl = process.env.FRONTEND_URL || "https://www.1753skin.com";
+  const l = purchase.locale || "sv";
+
+  const segment = PREMIUM_RESULT_SEGMENTS[l] || PREMIUM_RESULT_SEGMENTS.sv;
+  const resultUrl = `${baseUrl}/${l}/${segment}?token=${purchase.token}`;
+
+  const subjects = {
+    sv: "Din premium-hudanalys är klar att hämta",
+    en: "Your premium skin analysis is ready",
+    es: "Tu análisis premium de piel está listo",
+    de: "Deine Premium-Hautanalyse ist bereit",
+    fr: "Votre analyse premium de peau est prête",
+  };
+  const headings = {
+    sv: "Tack för ditt köp",
+    en: "Thank you for your purchase",
+    es: "Gracias por tu compra",
+    de: "Vielen Dank für deinen Kauf",
+    fr: "Merci pour votre achat",
+  };
+  const bodyTexts = {
+    sv: "Vi har bekräftat din betalning. Klicka på knappen nedan för att låsa upp och hämta din djupgående premium-hudanalys (35 frågor + foto).",
+    en: "We've confirmed your payment. Click the button below to unlock and retrieve your in-depth premium skin analysis (35 questions + photo).",
+    es: "Hemos confirmado tu pago. Haz clic en el botón para desbloquear tu análisis premium en profundidad (35 preguntas + foto).",
+    de: "Wir haben deine Zahlung bestätigt. Klicke auf den Button, um deine ausführliche Premium-Hautanalyse abzurufen (35 Fragen + Foto).",
+    fr: "Nous avons confirmé votre paiement. Cliquez sur le bouton pour récupérer votre analyse premium détaillée (35 questions + photo).",
+  };
+  const ctaTexts = {
+    sv: "Hämta min analys",
+    en: "Get my analysis",
+    es: "Ver mi análisis",
+    de: "Analyse ansehen",
+    fr: "Voir mon analyse",
+  };
+  const noteTexts = {
+    sv: "Länken är personlig och giltig i 30 dagar. Spara den – du kan ladda ner din rapport som PDF.",
+    en: "The link is personal and valid for 30 days. Save it – you can download your report as PDF.",
+    es: "El enlace es personal y válido por 30 días. Guárdalo: podrás descargar el informe en PDF.",
+    de: "Der Link ist persönlich und 30 Tage gültig. Bewahre ihn auf – du kannst den Bericht als PDF herunterladen.",
+    fr: "Le lien est personnel et valable 30 jours. Conservez-le : vous pouvez télécharger le rapport en PDF.",
+  };
+
+  await resend.emails.send({
+    from: fromEmail,
+    to: purchase.email,
+    subject: subjects[l] || subjects.en,
+    html: `
+      <div style="font-family:-apple-system,BlinkMacSystemFont,'SF Pro Display','Segoe UI',Helvetica,Arial,sans-serif;max-width:560px;margin:0 auto;color:#1d1d1f;padding:0 16px">
+        <div style="text-align:center;padding:32px 0 8px">
+          <img src="https://www.1753skin.com/1753.png" alt="1753 SKINCARE" width="48" height="48" style="border-radius:12px"/>
+        </div>
+        <div style="text-align:center;padding:16px 0 24px">
+          <h1 style="font-size:24px;font-weight:700;margin:0;letter-spacing:-0.02em">${headings[l] || headings.en}</h1>
+        </div>
+        <p style="font-size:15px;line-height:1.7;color:#515151">${bodyTexts[l] || bodyTexts.en}</p>
+        <div style="text-align:center;margin:28px 0">
+          <a href="${resultUrl}"
+             style="display:inline-block;padding:14px 32px;background:#108474;color:#fff;font-size:15px;font-weight:600;border-radius:980px;text-decoration:none">
+            ${ctaTexts[l] || ctaTexts.en}
+          </a>
+        </div>
+        <p style="font-size:13px;color:#766a62;line-height:1.7">${noteTexts[l] || noteTexts.en}</p>
+        <div style="margin-top:40px;padding-top:24px;border-top:1px solid #e6e6e6;text-align:center">
+          <p style="font-size:12px;color:#766a62;line-height:1.6;margin:0">
+            1753 SKINCARE<br>
+            <a href="${baseUrl}" style="color:#108474">www.1753skin.com</a>
+          </p>
+        </div>
+      </div>
+    `,
+  });
+
+  console.log(`[Email] Premium analysis ready email sent to ${purchase.email} (locale: ${l})`);
   return { sent: true };
 }
 

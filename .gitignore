@@ -4,6 +4,7 @@ node_modules/
 public/weed your glow complete 2025.pdf
 frontend/public/models/skin_classifier.onnx
 .vscode/
-services/
+services/*
+!services/premium-analysis-prompt.js
 public/Landing_page_skinanalys/
 public/Landing-pages/

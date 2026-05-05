@@ -319,6 +319,33 @@ async function initSchema() {
 
     CREATE INDEX IF NOT EXISTS idx_skin_analyses_user ON skin_analyses (user_id);
 
+    -- Premium hudanalys ($29 SEK paywall). Helt isolerat fr\u00e5n gratisfl\u00f6det.
+    -- Rader i premium_analysis_purchases motsvarar k\u00f6p; sj\u00e4lva analysen
+    -- skapas i skin_analyses med kind='premium' n\u00e4r run-endpointen k\u00f6rs.
+    CREATE TABLE IF NOT EXISTS premium_analysis_purchases (
+      id                  SERIAL PRIMARY KEY,
+      token               VARCHAR(64) UNIQUE NOT NULL,
+      email               VARCHAR(255) NOT NULL,
+      user_id             UUID REFERENCES users(id),
+      viva_order_code     BIGINT,
+      viva_transaction_id VARCHAR(100),
+      merchant_trns       VARCHAR(100),
+      amount              INTEGER NOT NULL,
+      currency            VARCHAR(3) NOT NULL DEFAULT 'SEK',
+      status              VARCHAR(20) DEFAULT 'pending',
+      payload             JSONB,
+      analysis_id         INTEGER REFERENCES skin_analyses(id),
+      locale              VARCHAR(5) DEFAULT 'sv',
+      created_at          TIMESTAMPTZ DEFAULT NOW(),
+      paid_at             TIMESTAMPTZ,
+      redeemed_at         TIMESTAMPTZ
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_premium_purchases_token ON premium_analysis_purchases (token);
+    CREATE INDEX IF NOT EXISTS idx_premium_purchases_email ON premium_analysis_purchases (LOWER(email));
+    CREATE INDEX IF NOT EXISTS idx_premium_purchases_merchant_trns ON premium_analysis_purchases (merchant_trns);
+    CREATE INDEX IF NOT EXISTS idx_premium_purchases_viva_code ON premium_analysis_purchases (viva_order_code);
+
     CREATE TABLE IF NOT EXISTS personal_newsletters (
       id                SERIAL PRIMARY KEY,
       subscriber_id     INTEGER REFERENCES subscribers(id) ON DELETE CASCADE,
@@ -426,6 +453,9 @@ async function initSchema() {
   // statements use IF NOT EXISTS / conditional UPDATEs.
   try {
     await pool.query(`ALTER TABLE skin_analyses ADD COLUMN IF NOT EXISTS email VARCHAR(255)`);
+    // Premium-flagga: alla befintliga rader f\u00e5r 'free' via DEFAULT, gratis-flow
+    // forts\u00e4tter att INSERTa utan att skicka kind (default kvarst\u00e5r).
+    await pool.query(`ALTER TABLE skin_analyses ADD COLUMN IF NOT EXISTS kind VARCHAR(16) DEFAULT 'free'`);
     await pool.query(`CREATE INDEX IF NOT EXISTS skin_analyses_email_lower_idx ON skin_analyses (LOWER(email))`);
     const backfill = await pool.query(
       `UPDATE skin_analyses
@@ -1397,6 +1427,138 @@ async function reclaimOrphanAnalyses(userId, userEmail) {
   return rowCount;
 }
 
+// ---- PREMIUM ANALYSIS PURCHASES ----
+//
+// Helpers f\u00f6r 29 kr-paywallen. Helt separerade fr\u00e5n gratisfl\u00f6det:
+// gratis sparas via createSkinAnalysis utan att skicka `kind` (default 'free'),
+// premium-bilden sparas via createPremiumSkinAnalysis med kind='premium' f\u00f6rst
+// EFTER att en token markerats som paid och redeemed.
+
+async function createPremiumPurchase({
+  token, email, userId, vivaOrderCode, merchantTrns,
+  amount, currency, payload, locale,
+}) {
+  const { rows } = await pool.query(
+    `INSERT INTO premium_analysis_purchases
+       (token, email, user_id, viva_order_code, merchant_trns,
+        amount, currency, payload, locale)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+     RETURNING *`,
+    [
+      token,
+      (email || "").toLowerCase().trim(),
+      userId || null,
+      vivaOrderCode || null,
+      merchantTrns || null,
+      amount,
+      currency || "SEK",
+      payload ? JSON.stringify(payload) : null,
+      locale || "sv",
+    ]
+  );
+  return rows[0];
+}
+
+async function findPremiumPurchaseByToken(token) {
+  if (!token) return null;
+  const { rows } = await pool.query(
+    "SELECT * FROM premium_analysis_purchases WHERE token = $1 LIMIT 1",
+    [token]
+  );
+  return rows[0] || null;
+}
+
+async function findPremiumPurchaseByMerchantTrns(merchantTrns) {
+  if (!merchantTrns) return null;
+  const { rows } = await pool.query(
+    "SELECT * FROM premium_analysis_purchases WHERE merchant_trns = $1 LIMIT 1",
+    [merchantTrns]
+  );
+  return rows[0] || null;
+}
+
+async function findPremiumPurchaseByVivaCode(vivaOrderCode) {
+  if (!vivaOrderCode) return null;
+  const { rows } = await pool.query(
+    "SELECT * FROM premium_analysis_purchases WHERE viva_order_code = $1 LIMIT 1",
+    [vivaOrderCode]
+  );
+  return rows[0] || null;
+}
+
+async function markPremiumPurchasePaid(id, vivaTransactionId) {
+  const { rows } = await pool.query(
+    `UPDATE premium_analysis_purchases
+        SET status = 'paid',
+            paid_at = COALESCE(paid_at, NOW()),
+            viva_transaction_id = COALESCE($2, viva_transaction_id)
+      WHERE id = $1
+      RETURNING *`,
+    [id, vivaTransactionId || null]
+  );
+  return rows[0] || null;
+}
+
+async function markPremiumPurchaseRedeemed(id, analysisId) {
+  const { rows } = await pool.query(
+    `UPDATE premium_analysis_purchases
+        SET status = 'redeemed',
+            analysis_id = $2,
+            redeemed_at = COALESCE(redeemed_at, NOW())
+      WHERE id = $1
+      RETURNING *`,
+    [id, analysisId || null]
+  );
+  return rows[0] || null;
+}
+
+async function attachPremiumUser(id, userId) {
+  if (!userId) return null;
+  const { rows } = await pool.query(
+    `UPDATE premium_analysis_purchases
+        SET user_id = COALESCE(user_id, $2)
+      WHERE id = $1
+      RETURNING *`,
+    [id, userId]
+  );
+  return rows[0] || null;
+}
+
+// Skapar en premium-rad i skin_analyses (kind='premium'). Helt s\u00e4r-skild
+// fr\u00e5n createSkinAnalysis – gratisfl\u00f6dets helper r\u00f6rs inte. Returnerar
+// skapad rad med id som kan kopplas till purchase.analysis_id.
+async function createPremiumSkinAnalysis({ userId, email, answers, result, fullText, score }) {
+  const normalizedEmail = (email || "").toLowerCase().trim() || null;
+  const { rows } = await pool.query(
+    `INSERT INTO skin_analyses (user_id, email, score, answers, result, full_text, kind)
+     VALUES ($1, $2, $3, $4, $5, $6, 'premium')
+     RETURNING *`,
+    [
+      userId || null,
+      normalizedEmail,
+      score || null,
+      JSON.stringify(answers || {}),
+      JSON.stringify(result || {}),
+      fullText || "",
+    ]
+  );
+  return rows[0];
+}
+
+async function listPremiumPurchasesByEmail(email, { limit = 50 } = {}) {
+  if (!email) return [];
+  const { rows } = await pool.query(
+    `SELECT id, token, status, amount, currency, locale, viva_order_code,
+            analysis_id, created_at, paid_at, redeemed_at
+       FROM premium_analysis_purchases
+      WHERE LOWER(email) = LOWER($1)
+      ORDER BY created_at DESC
+      LIMIT $2`,
+    [email, limit]
+  );
+  return rows;
+}
+
 async function getSkinMetricsHistory(userId, limit = 20) {
   const { rows } = await pool.query(
     `SELECT id, score, result->'metrics' as metrics, result->'skinAge' as skin_age,
@@ -2004,6 +2166,15 @@ module.exports = {
   deleteSkinAnalysis,
   reclaimOrphanAnalyses,
   getSkinMetricsHistory,
+  createPremiumPurchase,
+  findPremiumPurchaseByToken,
+  findPremiumPurchaseByMerchantTrns,
+  findPremiumPurchaseByVivaCode,
+  markPremiumPurchasePaid,
+  markPremiumPurchaseRedeemed,
+  attachPremiumUser,
+  createPremiumSkinAnalysis,
+  listPremiumPurchasesByEmail,
   findSubscribersForPersonalNewsletter,
   recordPersonalNewsletter,
   getRecentPersonalNewsletters,

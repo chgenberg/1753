@@ -25,6 +25,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { MethodologyModal } from "./methodology-modal";
+import { PremiumUpsell } from "@/components/analysis-premium/premium-upsell";
 import { cn } from "@/lib/utils";
 import type { Locale } from "@/lib/i18n/types";
 import { PRODUCTS, type Product, productDisplayName, productPrice } from "@/lib/products";
@@ -1471,6 +1472,8 @@ export function AnalysisTabs({
           <p className="mt-1 text-sm text-[#515151]">{nextAnalysis}</p>
         </div>
       )}
+
+      <PremiumUpsell />
 
       <MethodologyModal open={methodOpen} onClose={() => setMethodOpen(false)} />
     </div>
