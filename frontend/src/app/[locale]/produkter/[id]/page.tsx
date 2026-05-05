@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import { permanentRedirect } from "next/navigation";
 import { getProduct, PRODUCTS, productDisplayName, productShortDesc, productPrice } from "@/lib/products";
 import { getCurrency } from "@/lib/currency";
 import ProductDetail from "./product-detail";
@@ -9,10 +10,43 @@ import { locales, type Locale } from "@/lib/i18n/types";
 
 type Props = { params: Promise<{ locale: string; id: string }> };
 
+// Shopify-legacy → nuvarande sellable produkt (samma mapping som i middleware,
+// men där triggas bara av /products/* – här fångar vi /[locale]/produkter/*).
+// Förhindrar 404 för historiska URL:er som "i-love-facial-oil", "the-one-facial-oil",
+// "akne-paketet" m.fl. som upptäcks av Google. 308 permanent redirect bevarar
+// link equity till nuvarande produkt.
+const LEGACY_PRODUCT_REDIRECTS: Record<string, string> = {
+  "duo-kit-the-one-i-love": "duo-kit",
+  "the-one-facial-oil": "duo-ta-da",
+  "i-love-facial-oil": "duo-ta-da",
+  "ta-da-moisturizing-serum": "ta-da-serum",
+  "makeup-remover-au-naturel": "au-naturel-makeup-remover",
+  "au-naturel": "au-naturel-makeup-remover",
+  "fungtastic-extract": "fungtastic-mushroom-extract",
+  fungtastic: "fungtastic-mushroom-extract",
+  "akne-paketet": "duo-ta-da",
+  "balans-paketet": "duo-ta-da",
+  "eksem-paketet": "duo-ta-da",
+  "fina-linjer-paketet": "duo-ta-da",
+  "kanslig-paketet": "duo-ta-da",
+  "rosacea-paketet": "duo-ta-da",
+};
+
+function maybeRedirectLegacyProduct(locale: string, id: string): void {
+  const target = LEGACY_PRODUCT_REDIRECTS[id];
+  if (target && target !== id) {
+    permanentRedirect(`/${locale}/produkter/${target}`);
+  }
+}
+
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
   const { id, locale } = await params;
   const l = locale as Locale;
   const m = getMessages(l);
+
+  // Redirecta i metadata-fasen för att undvika 404 i HEAD-requests
+  if (!getProduct(id)) maybeRedirectLegacyProduct(l, id);
+
   const product = getProduct(id);
   if (!product) {
     return { title: m.productsSeo.notFoundTitle };
@@ -72,6 +106,10 @@ function tx(locale: string, sv: string, en: string, es?: string, de?: string, fr
 export default async function ProductPage({ params }: Props) {
   const { id, locale } = await params;
   const l = locale as Locale;
+
+  // Om id inte längre finns i PRODUCTS men är en känd legacy-slug,
+  // skicka 308 till nuvarande sellable produkt istället för att rendera 404.
+  if (!getProduct(id)) maybeRedirectLegacyProduct(l, id);
 
   const jsonLd = (() => {
     const product = getProduct(id);
