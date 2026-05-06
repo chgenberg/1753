@@ -74,6 +74,75 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(personSchema) }}
       />
+
+      <section className="pt-16 pb-12 md:pt-24 md:pb-16">
+        <div className="mx-auto max-w-[1280px] px-6 md:px-10">
+          <div className="mx-auto max-w-3xl text-center animate-fade-in">
+            <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.18em] text-brand-500">
+              {p.teamKicker}
+            </p>
+            <h1 className="text-3xl font-bold tracking-tight md:text-5xl lg:text-6xl">
+              {p.teamTitle}
+            </h1>
+            <p className="mx-auto mt-5 max-w-2xl text-base leading-relaxed text-brand-500 md:text-lg">
+              {p.teamLead}
+            </p>
+          </div>
+
+          <div className="mx-auto mt-14 grid max-w-5xl gap-12 md:mt-16 md:grid-cols-2 md:gap-10 lg:gap-16">
+            <article className="group flex flex-col">
+              <div className="relative aspect-[3/4] overflow-hidden rounded-[28px] bg-brand-50 shadow-xl shadow-brand-900/5 ring-1 ring-inset ring-black/5 transition-all duration-500 ease-out group-hover:-translate-y-1 group-hover:shadow-2xl group-hover:shadow-brand-900/10">
+                <Image
+                  src="/CG.png"
+                  alt={p.teamChristopherImgAlt}
+                  fill
+                  priority
+                  className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+                  sizes="(max-width: 768px) 100vw, 40vw"
+                />
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/15 to-transparent" />
+              </div>
+              <div className="mt-6 px-1">
+                <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-brand-700">
+                  {p.teamChristopherRole}
+                </p>
+                <h2 className="mt-1.5 text-2xl font-bold tracking-tight text-brand-900">
+                  {p.teamChristopherName}
+                </h2>
+                <p className="mt-3 text-[15px] leading-relaxed text-brand-500">
+                  {p.teamChristopherBio}
+                </p>
+              </div>
+            </article>
+
+            <article className="group flex flex-col">
+              <div className="relative aspect-[3/4] overflow-hidden rounded-[28px] bg-brand-50 shadow-xl shadow-brand-900/5 ring-1 ring-inset ring-black/5 transition-all duration-500 ease-out group-hover:-translate-y-1 group-hover:shadow-2xl group-hover:shadow-brand-900/10">
+                <Image
+                  src="/Ebba.png"
+                  alt={p.teamEbbaImgAlt}
+                  fill
+                  priority
+                  className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
+                  sizes="(max-width: 768px) 100vw, 40vw"
+                />
+                <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/15 to-transparent" />
+              </div>
+              <div className="mt-6 px-1">
+                <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-brand-700">
+                  {p.teamEbbaRole}
+                </p>
+                <h2 className="mt-1.5 text-2xl font-bold tracking-tight text-brand-900">
+                  {p.teamEbbaName}
+                </h2>
+                <p className="mt-3 text-[15px] leading-relaxed text-brand-500">
+                  {p.teamEbbaBio}
+                </p>
+              </div>
+            </article>
+          </div>
+        </div>
+      </section>
+
       <section className="py-16 md:py-20">
         <div className="mx-auto max-w-[1280px] px-6 md:px-10">
           <div className="grid items-center gap-10 md:grid-cols-2 lg:gap-16">
@@ -81,9 +150,9 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
               <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.15em] text-brand-500">
                 {p.kicker}
               </p>
-              <h1 className="text-3xl font-bold tracking-tight md:text-4xl lg:text-5xl">
+              <h2 className="text-3xl font-bold tracking-tight md:text-4xl lg:text-5xl">
                 {p.h1}
-              </h1>
+              </h2>
               <p className="mt-4 max-w-lg text-base leading-relaxed text-brand-500">{p.lead1}</p>
               <p className="mt-3 max-w-lg text-base leading-relaxed text-brand-500">{p.lead2}</p>
             </div>
@@ -179,67 +248,6 @@ export default async function AboutPage({ params }: { params: Promise<{ locale: 
         </div>
       </SectionWrapper>
 
-      <SectionWrapper>
-        <div className="mx-auto max-w-3xl text-center">
-          <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.18em] text-brand-500">
-            {p.teamKicker}
-          </p>
-          <h2 className="text-3xl font-bold tracking-tight md:text-4xl">{p.teamTitle}</h2>
-          <p className="mx-auto mt-4 max-w-2xl text-base leading-relaxed text-brand-500">
-            {p.teamLead}
-          </p>
-        </div>
-
-        <div className="mx-auto mt-14 grid max-w-5xl gap-12 md:grid-cols-2 md:gap-10 lg:gap-16">
-          <article className="group flex flex-col">
-            <div className="relative aspect-[3/4] overflow-hidden rounded-[28px] bg-brand-50 shadow-xl shadow-brand-900/5 ring-1 ring-inset ring-black/5 transition-all duration-500 ease-out group-hover:-translate-y-1 group-hover:shadow-2xl group-hover:shadow-brand-900/10">
-              <Image
-                src="/CG.png"
-                alt={p.teamChristopherImgAlt}
-                fill
-                className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
-                sizes="(max-width: 768px) 100vw, 40vw"
-              />
-              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/15 to-transparent" />
-            </div>
-            <div className="mt-6 px-1">
-              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-brand-700">
-                {p.teamChristopherRole}
-              </p>
-              <h3 className="mt-1.5 text-2xl font-bold tracking-tight text-brand-900">
-                {p.teamChristopherName}
-              </h3>
-              <p className="mt-3 text-[15px] leading-relaxed text-brand-500">
-                {p.teamChristopherBio}
-              </p>
-            </div>
-          </article>
-
-          <article className="group flex flex-col">
-            <div className="relative aspect-[3/4] overflow-hidden rounded-[28px] bg-brand-50 shadow-xl shadow-brand-900/5 ring-1 ring-inset ring-black/5 transition-all duration-500 ease-out group-hover:-translate-y-1 group-hover:shadow-2xl group-hover:shadow-brand-900/10">
-              <Image
-                src="/Ebba.png"
-                alt={p.teamEbbaImgAlt}
-                fill
-                className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.03]"
-                sizes="(max-width: 768px) 100vw, 40vw"
-              />
-              <div className="pointer-events-none absolute inset-x-0 bottom-0 h-24 bg-gradient-to-t from-black/15 to-transparent" />
-            </div>
-            <div className="mt-6 px-1">
-              <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-brand-700">
-                {p.teamEbbaRole}
-              </p>
-              <h3 className="mt-1.5 text-2xl font-bold tracking-tight text-brand-900">
-                {p.teamEbbaName}
-              </h3>
-              <p className="mt-3 text-[15px] leading-relaxed text-brand-500">
-                {p.teamEbbaBio}
-              </p>
-            </div>
-          </article>
-        </div>
-      </SectionWrapper>
     </>
   );
 }
