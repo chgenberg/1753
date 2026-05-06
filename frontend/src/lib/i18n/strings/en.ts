@@ -298,6 +298,19 @@ export const en: Messages = {
     dualImgAlt1: "Skincare close-up",
     dualImgAlt2: "Natural ingredients",
     timelineTitle: "Our timeline",
+    teamKicker: "The people behind",
+    teamTitle: "We are Christopher and Ebba",
+    teamLead: "Two people sharing one conviction: skin already knows what it needs. We just listen.",
+    teamChristopherName: "Christopher Genberg",
+    teamChristopherRole: "Founder",
+    teamChristopherBio:
+      "Over a decade of research into the skin's own systems. The discovery of the endocannabinoid system changed everything – and laid the foundation for 1753 SKINCARE.",
+    teamChristopherImgAlt: "Portrait of Christopher Genberg, founder of 1753 SKINCARE",
+    teamEbbaName: "Ebba Genberg",
+    teamEbbaRole: "Creative lead",
+    teamEbbaBio:
+      "A social worker by training, a creative at heart. Ebba gives 1753 its voice, its eye and its warmth. Every image and every word comes from a genuine place.",
+    teamEbbaImgAlt: "Portrait of Ebba Genberg, creative lead at 1753 SKINCARE",
     values: [
       { title: "Honesty", desc: "No marketing fog. If we say something, we should be able to stand behind it." },
       { title: "Holistic view", desc: "Skin reflects the whole body. We look beyond symptoms and ask why they are there." },

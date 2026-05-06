@@ -296,6 +296,19 @@ const bundle = {
     dualImgAlt1: "Hudvård – närbild",
     dualImgAlt2: "Naturliga ingredienser",
     timelineTitle: "Vår tidslinje",
+    teamKicker: "Människorna bakom",
+    teamTitle: "Vi är Christopher och Ebba",
+    teamLead: "Två personer med en gemensam övertygelse: huden vet vad den behöver. Vi lyssnar bara.",
+    teamChristopherName: "Christopher Genberg",
+    teamChristopherRole: "Grundare",
+    teamChristopherBio:
+      "Över tio år av forskning kring hudens egna system. Det var upptäckten av endocannabinoidsystemet som förändrade allt – och som lade grunden till 1753 SKINCARE.",
+    teamChristopherImgAlt: "Porträtt av Christopher Genberg, grundare av 1753 SKINCARE",
+    teamEbbaName: "Ebba Genberg",
+    teamEbbaRole: "Kreativ kraft",
+    teamEbbaBio:
+      "Socionom i grunden, kreativ i hjärtat. Ebba ger 1753 sin röst, sitt öga och sin värme. Varje bild, varje ord – allt kommer från en äkta plats.",
+    teamEbbaImgAlt: "Porträtt av Ebba Genberg, kreativ kraft bakom 1753 SKINCARE",
     values: [
       { title: "Ärlighet", desc: "Vi gömmer oss inte bakom marknadsföringsspråk. Varje påstående vi gör kan vi backa upp." },
       { title: "Holistisk syn", desc: "Huden är en spegling av hela kroppen. Vi behandlar orsaker, inte symptom." },

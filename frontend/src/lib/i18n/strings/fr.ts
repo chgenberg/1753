@@ -298,6 +298,19 @@ export const fr: Messages = {
     dualImgAlt1: "Soins de peau en gros plan",
     dualImgAlt2: "Ingrédients naturels",
     timelineTitle: "Notre chronologie",
+    teamKicker: "Les personnes derrière",
+    teamTitle: "Nous sommes Christopher et Ebba",
+    teamLead: "Deux personnes, une même conviction : la peau sait déjà ce dont elle a besoin. Nous l'écoutons, simplement.",
+    teamChristopherName: "Christopher Genberg",
+    teamChristopherRole: "Fondateur",
+    teamChristopherBio:
+      "Plus de dix années de recherche sur les systèmes propres de la peau. La découverte du système endocannabinoïde a tout changé – et a posé les bases de 1753 SKINCARE.",
+    teamChristopherImgAlt: "Portrait de Christopher Genberg, fondateur de 1753 SKINCARE",
+    teamEbbaName: "Ebba Genberg",
+    teamEbbaRole: "Direction créative",
+    teamEbbaBio:
+      "Travailleuse sociale de formation, créative dans l'âme. Ebba donne à 1753 sa voix, son regard et sa chaleur. Chaque image et chaque mot viennent d'un endroit sincère.",
+    teamEbbaImgAlt: "Portrait d'Ebba Genberg, direction créative de 1753 SKINCARE",
     values: [
       { title: "Honnêteté", desc: "Pas de brouillard marketing. Si on affirme quelque chose, on doit pouvoir le prouver." },
       { title: "Vision holistique", desc: "La peau reflète le corps entier. On regarde au-delà des symptômes pour comprendre leur origine." },
