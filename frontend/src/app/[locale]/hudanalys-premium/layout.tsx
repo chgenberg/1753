@@ -22,8 +22,11 @@ const FREE_PATHS: Record<string, string> = {
 };
 
 function isPremiumEnabled() {
-  const v = String(process.env.PREMIUM_ANALYSIS_ENABLED || "").toLowerCase();
-  return v === "1" || v === "true" || v === "yes" || v === "on";
+  // Premium-hudanalysen är manuellt inaktiverad. För att aktivera igen,
+  // byt ut return false mot env-läsningen nedan.
+  // const v = String(process.env.PREMIUM_ANALYSIS_ENABLED || "").toLowerCase();
+  // return v === "1" || v === "true" || v === "yes" || v === "on";
+  return false;
 }
 
 export async function generateMetadata({

@@ -2597,8 +2597,11 @@ const PREMIUM_ANALYSIS_CURRENCY = "SEK";
 const PREMIUM_ANALYSIS_PRICE_CENTS = PREMIUM_ANALYSIS_PRICE_SEK * 100;
 
 function isPremiumAnalysisEnabled() {
-  const v = String(process.env.PREMIUM_ANALYSIS_ENABLED || "").toLowerCase();
-  return v === "1" || v === "true" || v === "yes" || v === "on";
+  // Premium-hudanalysen ar manuellt inaktiverad. For att aktivera igen, byt
+  // ut return false mot env-laesningen nedan.
+  // const v = String(process.env.PREMIUM_ANALYSIS_ENABLED || "").toLowerCase();
+  // return v === "1" || v === "true" || v === "yes" || v === "on";
+  return false;
 }
 
 function premiumDisabledMsg(locale) {
