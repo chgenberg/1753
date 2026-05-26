@@ -1575,6 +1575,118 @@ app.delete("/api/admin/discounts/:code", adminAuthMiddleware, async (req, res) =
   }
 });
 
+// ---- ADMIN: SUBSCRIPTION HEALTH CHECK ----
+//
+// Helt passiv check mot Viva som svarar pa fragan: "skulle nasta recurring-
+// charge fungera?". Vi anropar GET /api/transactions/{txId} pa Vivas API.
+// Detta DRAR INGENTING fran kortet och kunden mark ingenting. Returvardet
+// "ok=true" betyder att Viva kanner igen tx:en som ett aktivt recurring-
+// token. "ok=false" + reason berattar varfor en framtida dragning skulle
+// misslyckas innan vi proverar pa riktigt.
+
+async function checkVivaRecurringToken(vivaInitialTxId) {
+  if (!vivaInitialTxId) return { ok: false, reason: "no_initial_tx_id" };
+  const merchantId = process.env.VIVA_MERCHANT_ID;
+  const apiKey = process.env.VIVA_API_KEY;
+  if (!merchantId || !apiKey) return { ok: false, reason: "viva_credentials_missing" };
+
+  const fetch = (await import("node-fetch")).default;
+  const env = process.env.VIVA_ENVIRONMENT === "production" ? "" : "demo-";
+  const basicAuth = Buffer.from(`${merchantId}:${apiKey}`).toString("base64");
+  const url = `https://${env}api.vivapayments.com/api/transactions/${vivaInitialTxId}`;
+
+  try {
+    const r = await fetch(url, {
+      method: "GET",
+      headers: { "Authorization": `Basic ${basicAuth}` }
+    });
+    const data = await r.json().catch(() => null);
+
+    if (!r.ok) {
+      return {
+        ok: false,
+        httpStatus: r.status,
+        reason: r.status === 404 ? "transaction_not_found" : "viva_error",
+        vivaResponse: data
+      };
+    }
+
+    const tx = Array.isArray(data) ? data[0] : data;
+    const statusId = tx?.StatusId || tx?.statusId;
+    const statusCode = typeof statusId === "string" ? statusId.toUpperCase() : statusId;
+    const isFinalised = statusCode === "F" || statusCode === "f";
+    const cardCountry = tx?.CardCountryCode || tx?.cardCountryCode;
+    const insertDate = tx?.InsertDate || tx?.insertDate;
+    const cardNumber = tx?.CardNumber || tx?.cardNumber;
+    const cardType = tx?.CardTypeId || tx?.cardTypeId;
+
+    return {
+      ok: isFinalised,
+      reason: isFinalised ? "ok" : `tx_status_${statusCode}`,
+      details: {
+        statusCode,
+        cardLast4: cardNumber ? String(cardNumber).slice(-4) : null,
+        cardType,
+        cardCountry,
+        insertDate
+      }
+    };
+  } catch (err) {
+    return { ok: false, reason: "network_error", error: err.message };
+  }
+}
+
+app.get("/api/admin/subscriptions/:id/viva-check", adminAuthMiddleware, async (req, res) => {
+  try {
+    const sub = await db.findSubscriptionById(parseInt(req.params.id, 10));
+    if (!sub) return res.status(404).json({ message: "Prenumeration hittades inte" });
+    const result = await checkVivaRecurringToken(sub.viva_initial_tx_id);
+    res.json({
+      subscriptionId: sub.id,
+      productName: sub.product_name,
+      customerEmail: sub.customer_email,
+      status: sub.status,
+      vivaInitialTxId: sub.viva_initial_tx_id || null,
+      check: result
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+app.get("/api/admin/subscriptions/viva-check-all", adminAuthMiddleware, async (req, res) => {
+  try {
+    const { rows } = await db.pool.query(
+      `SELECT id, product_name, customer_email, status, viva_initial_tx_id
+       FROM subscriptions
+       WHERE status IN ('active', 'payment_failed')
+         AND cancelled_at IS NULL
+       ORDER BY id`
+    );
+    const results = [];
+    for (const sub of rows) {
+      const check = await checkVivaRecurringToken(sub.viva_initial_tx_id);
+      results.push({
+        id: sub.id,
+        productName: sub.product_name,
+        customerEmail: sub.customer_email,
+        status: sub.status,
+        vivaInitialTxId: sub.viva_initial_tx_id || null,
+        check
+      });
+    }
+    const okCount = results.filter(r => r.check.ok).length;
+    res.json({
+      total: results.length,
+      ok: okCount,
+      failing: results.length - okCount,
+      results
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // ---- ADMIN: PRODUCTS ----
 
 app.get("/api/admin/products", adminAuthMiddleware, async (req, res) => {
