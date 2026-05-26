@@ -125,7 +125,11 @@ const VIVA_REASON_LABELS: Record<string, string> = {
   ok: "Kortet ok",
   no_initial_tx_id: "Ingen tx-ref sparad",
   transaction_not_found: "Hittas inte hos Viva",
+  no_recurring_support: "Ej recurring-token",
   viva_credentials_missing: "Server-config saknas",
+  viva_auth_failed: "Viva-auth misslyckades",
+  viva_forbidden: "Viva nekade åtkomst",
+  viva_error: "Viva-fel",
   network_error: "Nätverksfel",
 };
 

@@ -1578,53 +1578,60 @@ app.delete("/api/admin/discounts/:code", adminAuthMiddleware, async (req, res) =
 // ---- ADMIN: SUBSCRIPTION HEALTH CHECK ----
 //
 // Helt passiv check mot Viva som svarar pa fragan: "skulle nasta recurring-
-// charge fungera?". Vi anropar GET /api/transactions/{txId} pa Vivas API.
-// Detta DRAR INGENTING fran kortet och kunden mark ingenting. Returvardet
-// "ok=true" betyder att Viva kanner igen tx:en som ett aktivt recurring-
-// token. "ok=false" + reason berattar varfor en framtida dragning skulle
-// misslyckas innan vi proverar pa riktigt.
+// charge fungera?". Vi anropar GET /checkout/v2/transactions/{txId} pa Vivas
+// Smart-Checkout-API med OAuth2 Bearer. Detta DRAR INGENTING fran kortet och
+// kunden mark ingenting. Returvardet "ok=true" betyder att Viva ser tx:en
+// som "F" (finalised) och recurringSupport=true, dvs nasta recurring-charge
+// borde gå igenom.
 
 async function checkVivaRecurringToken(vivaInitialTxId) {
   if (!vivaInitialTxId) return { ok: false, reason: "no_initial_tx_id" };
-  const merchantId = process.env.VIVA_MERCHANT_ID;
-  const apiKey = process.env.VIVA_API_KEY;
-  if (!merchantId || !apiKey) return { ok: false, reason: "viva_credentials_missing" };
+  if (!process.env.VIVA_CLIENT_ID || !process.env.VIVA_CLIENT_SECRET) {
+    return { ok: false, reason: "viva_credentials_missing" };
+  }
 
   const fetch = (await import("node-fetch")).default;
   const env = process.env.VIVA_ENVIRONMENT === "production" ? "" : "demo-";
-  const basicAuth = Buffer.from(`${merchantId}:${apiKey}`).toString("base64");
-  const url = `https://${env}api.vivapayments.com/api/transactions/${vivaInitialTxId}`;
+  const url = `https://${env}api.vivapayments.com/checkout/v2/transactions/${vivaInitialTxId}`;
 
   try {
+    const token = await vivaGetToken();
     const r = await fetch(url, {
       method: "GET",
-      headers: { "Authorization": `Basic ${basicAuth}` }
+      headers: { "Authorization": `Bearer ${token}` }
     });
     const data = await r.json().catch(() => null);
 
     if (!r.ok) {
-      return {
-        ok: false,
-        httpStatus: r.status,
-        reason: r.status === 404 ? "transaction_not_found" : "viva_error",
-        vivaResponse: data
-      };
+      const reason =
+        r.status === 404 ? "transaction_not_found" :
+        r.status === 401 ? "viva_auth_failed" :
+        r.status === 403 ? "viva_forbidden" :
+        "viva_error";
+      return { ok: false, httpStatus: r.status, reason, vivaResponse: data };
     }
 
     const tx = Array.isArray(data) ? data[0] : data;
-    const statusId = tx?.StatusId || tx?.statusId;
+    const statusId = tx?.statusId || tx?.StatusId;
     const statusCode = typeof statusId === "string" ? statusId.toUpperCase() : statusId;
-    const isFinalised = statusCode === "F" || statusCode === "f";
-    const cardCountry = tx?.CardCountryCode || tx?.cardCountryCode;
-    const insertDate = tx?.InsertDate || tx?.insertDate;
-    const cardNumber = tx?.CardNumber || tx?.cardNumber;
-    const cardType = tx?.CardTypeId || tx?.cardTypeId;
+    const isFinalised = statusCode === "F";
+    const recurringSupport = tx?.recurringSupport === true || tx?.RecurringSupport === true;
+
+    const cardNumber = tx?.cardNumber || tx?.CardNumber;
+    const cardType = tx?.cardTypeId || tx?.CardTypeId;
+    const cardCountry = tx?.cardCountryCode || tx?.CardCountryCode;
+    const insertDate = tx?.insDate || tx?.InsDate || tx?.insertDate;
+
+    let reason = "ok";
+    if (!isFinalised) reason = `tx_status_${statusCode}`;
+    else if (!recurringSupport) reason = "no_recurring_support";
 
     return {
-      ok: isFinalised,
-      reason: isFinalised ? "ok" : `tx_status_${statusCode}`,
+      ok: isFinalised && recurringSupport,
+      reason,
       details: {
         statusCode,
+        recurringSupport,
         cardLast4: cardNumber ? String(cardNumber).slice(-4) : null,
         cardType,
         cardCountry,
