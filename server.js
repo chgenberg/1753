@@ -3802,7 +3802,7 @@ async function handleOrderCompletion(orderId) {
           );
 
           if (!alreadyExists) {
-            await db.createSubscription({
+            const newSub = await db.createSubscription({
               userId: subUser.id,
               productId: item.articleNumber || item.id,
               productName: item.name || (product ? product.name : "Produkt"),
@@ -3812,10 +3812,27 @@ async function handleOrderCompletion(orderId) {
               originalPrice,
               recurringPrice,
               vivaInitialOrderCode: order.viva_order_code || null,
+              customerEmail: order.customer_email,
+              customerName: order.customer_name,
+              orderNumber: order.order_number,
               locale: order.locale || "sv",
             });
-            notes.push(`Prenumeration skapad: ${item.name || item.articleNumber} (var ${intervalDays}:e dag)`);
-            console.log(`[Subscription] Created for ${order.customer_email}: ${item.articleNumber || item.id} every ${intervalDays} days`);
+
+            // Initial-betalningen ar redan bekraftad nar handleOrderCompletion
+            // korts (webhook har satt order till paid). Aktivera prenumerationen
+            // direkt och schemalagg nasta charge intervalDays efter orderdatum.
+            const orderDate = order.created_at ? new Date(order.created_at) : new Date();
+            const nextCharge = new Date(orderDate);
+            nextCharge.setDate(nextCharge.getDate() + intervalDays);
+            await db.updateSubscription(newSub.id, {
+              status: "active",
+              viva_initial_tx_id: order.viva_transaction_id || null,
+              last_charge_date: orderDate.toISOString().split("T")[0],
+              next_charge_date: nextCharge.toISOString().split("T")[0],
+            });
+
+            notes.push(`Prenumeration aktiverad: ${item.name || item.articleNumber} (var ${intervalDays}:e dag, nasta ${nextCharge.toISOString().split("T")[0]})`);
+            console.log(`[Subscription] Activated for ${order.customer_email}: ${item.articleNumber || item.id} every ${intervalDays} days, next charge ${nextCharge.toISOString().split("T")[0]}`);
           }
         }
       } else {
