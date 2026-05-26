@@ -1667,7 +1667,7 @@ app.get("/api/admin/subscriptions/viva-check-all", adminAuthMiddleware, async (r
     for (const sub of rows) {
       const check = await checkVivaRecurringToken(sub.viva_initial_tx_id);
       results.push({
-        id: sub.id,
+        subscriptionId: sub.id,
         productName: sub.product_name,
         customerEmail: sub.customer_email,
         status: sub.status,

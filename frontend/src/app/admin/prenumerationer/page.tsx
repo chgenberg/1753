@@ -10,10 +10,13 @@ import {
   Pause,
   Play,
   Repeat,
+  ShieldCheck,
+  ShieldAlert,
+  ShieldQuestion,
   XCircle,
 } from "lucide-react";
 
-type SubStatus = "active" | "paused" | "cancelled" | "pending";
+type SubStatus = "active" | "paused" | "cancelled" | "pending" | "payment_failed";
 
 interface Subscription {
   id: number;
@@ -35,12 +38,44 @@ interface SubscriptionListResponse {
   perPage: number;
 }
 
+interface VivaCheckResult {
+  ok: boolean;
+  reason: string;
+  details?: {
+    statusCode?: string | number | null;
+    cardLast4?: string | null;
+    cardType?: string | number | null;
+    cardCountry?: string | null;
+    insertDate?: string | null;
+  };
+  vivaResponse?: unknown;
+  httpStatus?: number;
+  error?: string;
+}
+
+interface VivaCheckResponse {
+  subscriptionId: number;
+  productName: string;
+  customerEmail: string | null;
+  status: string;
+  vivaInitialTxId: string | null;
+  check: VivaCheckResult;
+}
+
+interface VivaCheckAllResponse {
+  total: number;
+  ok: number;
+  failing: number;
+  results: VivaCheckResponse[];
+}
+
 const STATUS_FILTERS: { value: string; label: string }[] = [
   { value: "all", label: "Alla" },
   { value: "active", label: "Aktiva" },
   { value: "paused", label: "Pausade" },
   { value: "cancelled", label: "Avbrutna" },
   { value: "pending", label: "Väntande" },
+  { value: "payment_failed", label: "Misslyckade" },
 ];
 
 function formatSEK(amount: number): string {
@@ -75,6 +110,7 @@ const BADGE_STYLES: Record<SubStatus, string> = {
   paused: "bg-amber-50 text-amber-700",
   cancelled: "bg-red-50 text-red-700",
   pending: "bg-gray-100 text-gray-600",
+  payment_failed: "bg-red-50 text-red-700",
 };
 
 const STATUS_LABELS: Record<SubStatus, string> = {
@@ -82,7 +118,25 @@ const STATUS_LABELS: Record<SubStatus, string> = {
   paused: "Pausad",
   cancelled: "Avbruten",
   pending: "Väntande",
+  payment_failed: "Betalning misslyckades",
 };
+
+const VIVA_REASON_LABELS: Record<string, string> = {
+  ok: "Kortet ok",
+  no_initial_tx_id: "Ingen tx-ref sparad",
+  transaction_not_found: "Hittas inte hos Viva",
+  viva_credentials_missing: "Server-config saknas",
+  network_error: "Nätverksfel",
+};
+
+function vivaReasonLabel(reason: string): string {
+  if (VIVA_REASON_LABELS[reason]) return VIVA_REASON_LABELS[reason];
+  if (reason.startsWith("tx_status_")) {
+    const code = reason.slice("tx_status_".length);
+    return `Tx-status ${code || "okänd"}`;
+  }
+  return reason;
+}
 
 export default function AdminSubscriptionsPage() {
   const { token } = useAuth();
@@ -95,6 +149,9 @@ export default function AdminSubscriptionsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [actionLoading, setActionLoading] = useState<number | null>(null);
+  const [vivaResults, setVivaResults] = useState<Record<number, VivaCheckResult>>({});
+  const [vivaLoading, setVivaLoading] = useState<number | "all" | null>(null);
+  const [vivaSummary, setVivaSummary] = useState<{ ok: number; failing: number } | null>(null);
 
   const totalPages = Math.max(1, Math.ceil(total / perPage));
 
@@ -124,6 +181,43 @@ export default function AdminSubscriptionsPage() {
   useEffect(() => {
     fetchSubscriptions();
   }, [fetchSubscriptions]);
+
+  const handleVivaCheck = async (id: number) => {
+    if (!token) return;
+    setVivaLoading(id);
+    try {
+      const data = await authFetch<VivaCheckResponse>(
+        `/admin/subscriptions/${id}/viva-check`,
+        token
+      );
+      setVivaResults((prev) => ({ ...prev, [id]: data.check }));
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Viva-kontroll misslyckades");
+    } finally {
+      setVivaLoading(null);
+    }
+  };
+
+  const handleVivaCheckAll = async () => {
+    if (!token) return;
+    setVivaLoading("all");
+    try {
+      const data = await authFetch<VivaCheckAllResponse>(
+        "/admin/subscriptions/viva-check-all",
+        token
+      );
+      const map: Record<number, VivaCheckResult> = {};
+      for (const r of data.results) {
+        map[r.subscriptionId] = r.check;
+      }
+      setVivaResults(map);
+      setVivaSummary({ ok: data.ok, failing: data.failing });
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Bulk-Viva-kontroll misslyckades");
+    } finally {
+      setVivaLoading(null);
+    }
+  };
 
   const handleAction = async (
     id: number,
@@ -165,25 +259,60 @@ export default function AdminSubscriptionsPage() {
           </p>
         </div>
 
-        <div className="flex gap-1.5 rounded-xl bg-[#f5f5f7] p-1">
-          {STATUS_FILTERS.map((f) => (
-            <button
-              key={f.value}
-              onClick={() => {
-                setPage(1);
-                setStatusFilter(f.value);
-              }}
-              className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
-                statusFilter === f.value
-                  ? "bg-white text-[#1d1d1f] shadow-sm"
-                  : "text-[#515151] hover:text-[#1d1d1f]"
-              }`}
-            >
-              {f.label}
-            </button>
-          ))}
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-center">
+          <div className="flex gap-1.5 rounded-xl bg-[#f5f5f7] p-1">
+            {STATUS_FILTERS.map((f) => (
+              <button
+                key={f.value}
+                onClick={() => {
+                  setPage(1);
+                  setStatusFilter(f.value);
+                }}
+                className={`rounded-lg px-3 py-1.5 text-xs font-medium transition-all ${
+                  statusFilter === f.value
+                    ? "bg-white text-[#1d1d1f] shadow-sm"
+                    : "text-[#515151] hover:text-[#1d1d1f]"
+                }`}
+              >
+                {f.label}
+              </button>
+            ))}
+          </div>
+
+          <button
+            onClick={handleVivaCheckAll}
+            disabled={vivaLoading === "all"}
+            className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#1d1d1f] px-4 py-2 text-xs font-medium text-white transition-colors hover:bg-[#108474] disabled:opacity-50"
+            title="Frågar Viva om alla sparade kort/recurring-tokens fortfarande är giltiga. Inga pengar dras."
+          >
+            {vivaLoading === "all" ? (
+              <Loader2 className="h-4 w-4 animate-spin" />
+            ) : (
+              <ShieldCheck className="h-4 w-4" />
+            )}
+            Kontrollera alla betalkort
+          </button>
         </div>
       </div>
+
+      {vivaSummary && (
+        <div className="rounded-2xl bg-white px-5 py-4 text-sm shadow-sm ring-1 ring-[#e6e6e6]">
+          <p className="text-[#1d1d1f]">
+            Senaste Viva-kontroll:{" "}
+            <span className="font-medium text-emerald-700">
+              {vivaSummary.ok} ok
+            </span>
+            {" · "}
+            <span className="font-medium text-red-700">
+              {vivaSummary.failing} med problem
+            </span>
+          </p>
+          <p className="mt-1 text-xs text-[#766a62]">
+            Inga betalningar har dragits – detta är bara en passiv kontroll mot
+            Viva.
+          </p>
+        </div>
+      )}
 
       {error && (
         <div className="rounded-2xl bg-red-50 px-5 py-4 text-sm text-red-700">
@@ -221,6 +350,9 @@ export default function AdminSubscriptionsPage() {
                     </th>
                     <th className="px-5 py-3.5 font-medium text-[#766a62]">
                       Status
+                    </th>
+                    <th className="hidden px-5 py-3.5 font-medium text-[#766a62] xl:table-cell">
+                      Betalkort
                     </th>
                     <th className="hidden px-5 py-3.5 font-medium text-[#766a62] lg:table-cell">
                       Nästa debitering
@@ -260,10 +392,63 @@ export default function AdminSubscriptionsPage() {
                       </td>
                       <td className="px-5 py-3.5">
                         <span
-                          className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${BADGE_STYLES[sub.status]}`}
+                          className={`inline-block rounded-full px-2.5 py-0.5 text-xs font-medium ${BADGE_STYLES[sub.status] ?? "bg-gray-100 text-gray-600"}`}
                         >
-                          {STATUS_LABELS[sub.status]}
+                          {STATUS_LABELS[sub.status] ?? sub.status}
                         </span>
+                      </td>
+                      <td className="hidden px-5 py-3.5 xl:table-cell">
+                        {(() => {
+                          const result = vivaResults[sub.id];
+                          if (vivaLoading === sub.id) {
+                            return (
+                              <Loader2 className="h-4 w-4 animate-spin text-[#108474]" />
+                            );
+                          }
+                          if (!result) {
+                            return (
+                              <button
+                                onClick={() => handleVivaCheck(sub.id)}
+                                title="Kontrollera detta kort/recurring-token mot Viva"
+                                className="inline-flex items-center gap-1.5 rounded-lg bg-[#f5f5f7] px-2.5 py-1 text-xs font-medium text-[#515151] transition-colors hover:bg-[#e6e6e6]"
+                              >
+                                <ShieldQuestion className="h-3.5 w-3.5" />
+                                Kontrollera
+                              </button>
+                            );
+                          }
+                          if (result.ok) {
+                            const last4 = result.details?.cardLast4;
+                            return (
+                              <div className="flex flex-col gap-0.5">
+                                <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-medium text-emerald-700">
+                                  <ShieldCheck className="h-3.5 w-3.5" />
+                                  Aktiv
+                                </span>
+                                {last4 && (
+                                  <span className="text-[11px] text-[#766a62]">
+                                    •••• {last4}
+                                  </span>
+                                )}
+                              </div>
+                            );
+                          }
+                          return (
+                            <div className="flex flex-col gap-0.5">
+                              <button
+                                onClick={() => handleVivaCheck(sub.id)}
+                                className="inline-flex w-fit items-center gap-1.5 rounded-full bg-red-50 px-2.5 py-0.5 text-xs font-medium text-red-700 hover:bg-red-100"
+                                title="Klicka för att kontrollera igen"
+                              >
+                                <ShieldAlert className="h-3.5 w-3.5" />
+                                Problem
+                              </button>
+                              <span className="text-[11px] text-[#766a62]">
+                                {vivaReasonLabel(result.reason)}
+                              </span>
+                            </div>
+                          );
+                        })()}
                       </td>
                       <td className="hidden px-5 py-3.5 text-[#515151] lg:table-cell">
                         {formatDate(sub.next_charge_date)}
@@ -274,6 +459,18 @@ export default function AdminSubscriptionsPage() {
                             <Loader2 className="h-4 w-4 animate-spin text-[#108474]" />
                           ) : (
                             <>
+                              <button
+                                onClick={() => handleVivaCheck(sub.id)}
+                                title="Kontrollera betalkort mot Viva (xl-skärmar visar resultat i kolumn)"
+                                className="rounded-lg p-1.5 text-[#108474] transition-colors hover:bg-emerald-50 xl:hidden"
+                                disabled={vivaLoading === sub.id}
+                              >
+                                {vivaLoading === sub.id ? (
+                                  <Loader2 className="h-4 w-4 animate-spin" />
+                                ) : (
+                                  <ShieldCheck className="h-4 w-4" />
+                                )}
+                              </button>
                               {sub.status === "active" && (
                                 <button
                                   onClick={() =>
