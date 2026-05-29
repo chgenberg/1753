@@ -2326,15 +2326,18 @@ app.post("/api/analysis", async (req, res) => {
     const allConcerns = [...new Set([...concerns, ...scanConditions])];
     const researchSnippets = await searchVayu(allConcerns);
 
-    // Determine userId: from JWT, existing account, or auto-created account
+    // Determine userId: from JWT, existing account, or auto-created account.
+    // Använder verifyToken() (rad ~149) så vi delar JWT_SECRET-fallback med
+    // resten av servern. Tidigare användes process.env.JWT_SECRET direkt vilket
+    // gjorde att inloggade användare tappade sin koppling när env-varianten
+    // skiljde sig från konstanten i rad 82 – analysen sparades då anonymt och
+    // dök aldrig upp i "Min hudresa".
     let userId = null;
     try {
       const authHeader = req.headers.authorization;
       if (authHeader?.startsWith("Bearer ")) {
-        try {
-          const decoded = jwt.verify(authHeader.slice(7), process.env.JWT_SECRET);
-          userId = decoded.id || null;
-        } catch { /* not logged in, ok */ }
+        const decoded = verifyToken(authHeader.slice(7));
+        userId = decoded?.id || null;
       }
     } catch {}
 
@@ -2481,6 +2484,7 @@ app.post("/api/analysis", async (req, res) => {
     console.log("[Analysis] Success, output length:", outputText.length);
 
     let analysisId = null;
+    let savedToHistory = false;
     try {
       const jsonMatch = outputText.match(/```json\s*([\s\S]*?)```/);
       const parsedResult = jsonMatch ? JSON.parse(jsonMatch[1]) : null;
@@ -2493,6 +2497,7 @@ app.post("/api/analysis", async (req, res) => {
         score: parsedResult?.score || null,
       });
       analysisId = saved?.id || null;
+      savedToHistory = !!analysisId;
       console.log(`[Analysis] Saved to DB: id=${analysisId}, userId=${userId}, score=${parsedResult?.score}`);
       if (!userId) {
         console.warn("[Analysis] Saved with NULL user_id", {
@@ -2529,13 +2534,26 @@ app.post("/api/analysis", async (req, res) => {
         console.error("[Analysis] Auto-tag failed (non-fatal):", tagErr.message);
       }
     } catch (saveErr) {
-      console.error("[Analysis] DB save failed (non-fatal):", saveErr.message);
+      // Tidigare loggades enbart .message vilket dolde grundorsaken (t.ex.
+      // schema-mismatch i skin_analyses). Vi loggar nu hela stacken plus
+      // den kontextuella infon som behövs för att felsöka i prod, och
+      // skickar med savedToHistory=false i responsen så frontend kan visa
+      // att analysen inte sparades i Min hudresa även om resultatet renderas.
+      console.error("[Analysis] DB save FAILED (non-fatal)", {
+        userId,
+        email: req.body.questions?.email || "(none)",
+        message: saveErr?.message,
+        code: saveErr?.code,
+        detail: saveErr?.detail,
+        stack: saveErr?.stack,
+      });
     }
 
     res.json({
       content: outputText,
       responseId: data.id || null,
       analysisId,
+      savedToHistory,
       usage: data.usage
     });
 

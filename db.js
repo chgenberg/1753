@@ -471,6 +471,108 @@ async function initSchema() {
     console.warn("[DB] skin_analyses email migration failed:", err.message);
   }
 
+  // Migration (idempotent): repair skin_analyses schema drift.
+  //
+  // Bakgrund: en äldre schema-version av skin_analyses (med user_id INTEGER NOT NULL
+  // och kolumnerna summary / recommendations / full_response) ligger kvar i prod
+  // eftersom CREATE TABLE IF NOT EXISTS aldrig modifierar en befintlig tabell.
+  // Konsekvens: createSkinAnalysis-INSERT:en kraschar tyst på varje analys, så
+  // tabellen är permanent tom och "Min hudresa" är alltid blank.
+  //
+  // Den här migrationen:
+  //   1) Tar reda på faktisk kolumntyp och nullability per kolumn.
+  //   2) Lägger till saknade kolumner (answers / result / full_text) idempotent.
+  //   3) Tar bort NOT NULL från user_id så anonyma analyser kan sparas.
+  //   4) Om user_id är INTEGER och tabellen är tom: byter typ till UUID + FK
+  //      mot users(id). Skippar typkonvertering om tabellen innehåller rader.
+  //   5) Säkerställer FK skin_analyses.user_id → users.id.
+  //
+  // Om någon delsats misslyckas så avbryts inte serverstart – vi loggar tydligt
+  // och låter de delar som lyckats kvarstå (idempotent vid nästa start).
+  try {
+    const cols = await pool.query(
+      `SELECT column_name, data_type, is_nullable
+         FROM information_schema.columns
+        WHERE table_schema = 'public' AND table_name = 'skin_analyses'`
+    );
+    const byName = {};
+    for (const r of cols.rows) byName[r.column_name] = r;
+
+    if (!byName.answers) {
+      await pool.query(`ALTER TABLE skin_analyses ADD COLUMN answers JSONB`);
+      console.log("[DB] skin_analyses: added column answers JSONB");
+    }
+    if (!byName.result) {
+      await pool.query(`ALTER TABLE skin_analyses ADD COLUMN result JSONB`);
+      console.log("[DB] skin_analyses: added column result JSONB");
+    }
+    if (!byName.full_text) {
+      await pool.query(`ALTER TABLE skin_analyses ADD COLUMN full_text TEXT DEFAULT ''`);
+      console.log("[DB] skin_analyses: added column full_text TEXT");
+    }
+
+    if (byName.user_id && byName.user_id.is_nullable === "NO") {
+      try {
+        await pool.query(`ALTER TABLE skin_analyses ALTER COLUMN user_id DROP NOT NULL`);
+        console.log("[DB] skin_analyses: dropped NOT NULL on user_id");
+      } catch (e) {
+        console.warn("[DB] skin_analyses: could not drop NOT NULL on user_id:", e.message);
+      }
+    }
+
+    if (byName.user_id && byName.user_id.data_type === "integer") {
+      const { rows: countRows } = await pool.query(`SELECT COUNT(*)::int AS n FROM skin_analyses`);
+      const rowCount = countRows[0]?.n ?? 0;
+      if (rowCount === 0) {
+        try {
+          await pool.query(`ALTER TABLE skin_analyses DROP COLUMN user_id`);
+          await pool.query(`ALTER TABLE skin_analyses ADD COLUMN user_id UUID REFERENCES users(id)`);
+          await pool.query(`CREATE INDEX IF NOT EXISTS idx_skin_analyses_user ON skin_analyses (user_id)`);
+          console.log("[DB] skin_analyses: converted user_id INTEGER → UUID (tabell var tom)");
+        } catch (e) {
+          console.warn("[DB] skin_analyses: user_id type-conversion failed:", e.message);
+        }
+      } else {
+        console.warn(
+          `[DB] skin_analyses.user_id är INTEGER men tabellen har ${rowCount} rader. ` +
+          `Manuell migration krävs.`
+        );
+      }
+    }
+
+    const { rows: fkRows } = await pool.query(
+      `SELECT 1
+         FROM information_schema.table_constraints tc
+         JOIN information_schema.key_column_usage kcu
+           ON kcu.constraint_name = tc.constraint_name
+          AND kcu.table_name = tc.table_name
+        WHERE tc.table_schema = 'public'
+          AND tc.table_name = 'skin_analyses'
+          AND tc.constraint_type = 'FOREIGN KEY'
+          AND kcu.column_name = 'user_id'`
+    );
+    if (fkRows.length === 0) {
+      const colsAfter = await pool.query(
+        `SELECT data_type FROM information_schema.columns
+          WHERE table_schema='public' AND table_name='skin_analyses' AND column_name='user_id'`
+      );
+      if (colsAfter.rows[0]?.data_type === "uuid") {
+        try {
+          await pool.query(
+            `ALTER TABLE skin_analyses
+                 ADD CONSTRAINT skin_analyses_user_id_fkey
+                 FOREIGN KEY (user_id) REFERENCES users(id)`
+          );
+          console.log("[DB] skin_analyses: re-added FK user_id → users(id)");
+        } catch (e) {
+          console.warn("[DB] skin_analyses: could not re-add FK on user_id:", e.message);
+        }
+      }
+    }
+  } catch (err) {
+    console.warn("[DB] skin_analyses schema-repair migration failed:", err.message);
+  }
+
   // Ensure shared_order_seq starts at 20000 minimum
   try {
     const seqCheck = await pool.query(
