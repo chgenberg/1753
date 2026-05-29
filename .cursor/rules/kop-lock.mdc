@@ -1,0 +1,133 @@
+---
+description: Köpprocessen (kassa → Viva Wallet → Fortnox → Ongoing) – kontraktslås. Förändringar kräver explicit ok.
+globs:
+  - frontend/src/app/[locale]/kassa/**/*
+  - frontend/src/app/[locale]/betalning/**/*
+  - frontend/src/providers/cart-provider.tsx
+  - frontend/src/lib/currency.ts
+  - frontend/src/lib/products.ts
+  - server.js
+  - integrations/fortnox.js
+  - integrations/vivawallet.js
+  - integrations/ongoing.js
+  - db.js
+alwaysApply: false
+---
+
+# Köpprocessen – kontraktslås
+
+Hela kedjan **varukorg → kassa → Viva Wallet → webhook → Fortnox (kund + order + faktura + bokföring + betalning) → Ongoing → bekräftelsemail** fungerar idag.
+**Förbättra gärna UI, prestanda och småinteraktioner – men rör inte listorna nedan utan att användaren explicit godkänner det.**
+
+## Låsta API-kontrakt
+
+### `POST /api/orders/create`
+Request body (frontend skickar exakt detta):
+```ts
+{
+  customer: { name: string; email: string; phone: string };
+  deliveryAddress: { address: string; zip: string; city: string };
+  items: { id: string; qty: number; subscription?: { intervalDays: number } }[];
+  discountCode?: string;
+  currency: "SEK" | "EUR";
+  locale: "sv" | "en" | "es" | "de" | "fr";
+  createAccount?: boolean;
+}
+```
+Response: `{ orderCode, orderNumber, checkoutUrl }`. Behåll alla tre fält.
+
+### `POST /api/discount/validate`
+Body: `{ code, items: [{ id, qty }] }`. Response: `{ code, percent, fixedAmount, minOrderAmount, description, applicableProductIds }`. Frontend läser **alla** dessa fält.
+
+### Övriga låsta endpoints
+- `POST /api/account/check-email` (autoifyll vid känd e-post)
+- `POST /api/orders/verify` (succé-sidan)
+- `GET  /api/vivawallet/verify/:transactionId`
+- `GET  /api/vivawallet/webhook` (URL-verifiering)
+- `POST /api/vivawallet/webhook` (transaktioner)
+
+## Låst datastruktur i `orders.items` (JSONB)
+
+`/api/orders/create` skriver dessa fält per rad i `orderItems`:
+
+```ts
+{
+  articleNumber: string;     // Fortnox + Ongoing-nyckel
+  productId: string;         // intern produkt-id
+  name: string;
+  quantity: number;
+  price: number;             // post-subscription, post-percent (inte fixedAmount-justerad)
+  originalPrice: number;     // fullt retailpris
+  vatRate: number;           // 0.25
+  paidUnitPrice?: number;    // sätts ENBART när fixedAmount-rabatt fördelats
+  subscription?: true;
+  intervalDays?: number;
+}
+```
+
+**`paidUnitPrice` är inte valfritt fluff – det fixar SPARRE-buggen där Fortnox-fakturan blev för hög.** Fortnox-orderbygget (`handleOrderCompletion`) läser:
+
+```js
+const paidPrice = typeof i.paidUnitPrice === "number" ? i.paidUnitPrice : i.price;
+```
+
+Tar du bort fältet eller ändrar fallback-logiken så återintroducerar du buggen.
+
+## Låsta konstanter (server.js, ca rad 400)
+
+```js
+const FREE_SHIPPING_THRESHOLD = { SEK: 600, EUR: 60 };
+const SHIPPING_COST          = { SEK: 55,  EUR: 6  };
+const VIVA_CURRENCY_CODE     = { SEK: 752, EUR: 978 };
+```
+
+Och affärsregler:
+- **Subscription-rabatt = 15 %** (`Math.round(price * 0.85)`).
+- **Frakt-raden mot Fortnox** = `Description: "Frakt", Price: 44, VAT: 25` (ex VAT) när `shipping_cost > 0`.
+- **`fixedAmount`-rabatten** fördelas proportionellt över items (sista raden tar resten av öresavrundningen). Cap:as till `min(fixedAmount, subtotal)`.
+
+## Låst orchestrering i `handleOrderCompletion`
+
+Ordningen är **idempotent och atomisk** (lås via `processed_at`):
+
+1. Fortnox: hitta/skapa kund
+2. Fortnox: skapa order (med `paidPrice` ex-VAT per rad + ev. fraktrad)
+3. Fortnox: `PUT /orders/{n}/createinvoice`
+4. Fortnox: `PUT /invoices/{n}/bookkeep`
+5. Fortnox: `POST /invoicepayments` med `order.total_amount + order.shipping_cost`
+6. Ongoing: `PUT /orders` (B2C, transporter PBREV/PUA)
+7. DB: `updateOrder` + status (`fulfilled` / `partial` / `confirmed`)
+8. Ev. lojalitetspoäng + subscription-rader
+9. Bekräftelse-mail till kund + team
+
+Skippa **inget** av stegen utan att resonera kring följderna (kund får alltid både faktura **och** lager-leverans).
+
+## Fortnox-token
+
+- Token persisteras i DB via `db.saveFortnoxTokensToDB`. Skriv aldrig om så att tokens tappas vid deploy.
+- Proaktiv refresh var 45 min, lazy-refresh före API-anrop. Behåll `_fortnoxRefreshLock` så vi inte dubbel-refreshar.
+- 401 → en (1) automatisk refresh + retry. Inte mer.
+
+## Tillåtna förbättringar (utan att fråga)
+
+- UI/UX i `kassa/page.tsx` och `betalning/lyckad/page.tsx` (animationer, kopia, layout).
+- Nya fält **läggs till** i `orderItems` så länge befintliga fält behålls.
+- Loggning, observability, retry-resilience kring nätverksfel.
+- Frontend-validering av telefon/zip/e-post.
+
+## Kräver explicit ok från användaren
+
+- Ändring av `FREE_SHIPPING_THRESHOLD`, `SHIPPING_COST`, `VIVA_CURRENCY_CODE`, fraktradens 44 kr.
+- Ändring av subscription-rabatt (15 %) eller fixedAmount-fördelningen.
+- Ny eller ändrad `currency`/`locale`.
+- Borttagning eller omkastning av Fortnox-stegen 1–5 ovan.
+- Ändring av `orderItems`-fältnamn (`price`, `paidUnitPrice`, `originalPrice`, `articleNumber`, `productId`, `vatRate`, `subscription`, `intervalDays`).
+- Migrering bort från Viva Wallet, Fortnox eller Ongoing.
+- Direkta SQL-ändringar i `discount_codes`, `orders`, `subscriptions` via agent (be användaren köra det).
+
+## Verifiera innan push
+
+- `cd frontend && npx tsc --noEmit` – noll fel.
+- `node -c server.js`.
+- Manuellt smoke-test: lägg i varukorg → kassa → applicera rabattkod → klicka betala → verifiera att `checkoutUrl` öppnas.
+- Vid ändring i `handleOrderCompletion`: simulera webhook med en testorder och kontrollera att Fortnox-fakturan får **rätt totalbelopp** och att betalningen registreras så saldot blir 0.

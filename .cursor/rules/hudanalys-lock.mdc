@@ -1,0 +1,83 @@
+---
+description: Hudanalys-flödet (gratis + premium) – kontraktslås. Förändringar kräver explicit ok från användaren.
+globs:
+  - frontend/src/app/[locale]/hudanalys/**/*
+  - frontend/src/app/[locale]/hudanalys-premium/**/*
+  - frontend/src/components/skin-scanner/**/*
+  - frontend/src/components/analysis-premium/**/*
+  - server.js
+  - services/premium-analysis-prompt.js
+alwaysApply: false
+---
+
+# Hudanalys – kontraktslås
+
+Hudanalysen är ett av två kärnflöden i 1753 SKINCARE och fungerar idag end-to-end.
+**Förbättra gärna design, kopia, prestanda och småinteraktioner – men ändra inget i listorna nedan utan att användaren explicit godkänner det.**
+
+## Frontend-flöde (gratis hudanalys)
+
+Stegmaskinen i `frontend/src/app/[locale]/hudanalys/page.tsx`:
+
+```ts
+type Step = "intro" | "email" | "demographics" | "scan" | 1 | 2 | 3 | 4 | 5 | 6 | 7 | "analyzing" | "result";
+const TOTAL_STEPS = 7;
+```
+
+- Antal quizsteg är **7**. Lägg inte till och ta inte bort steg.
+- Returnerande användare hoppar över `email`-steget (`isReturningUser`-grenen i `next()`/`back()`).
+- `QuizAnswers` har **14 fält** (`age, gender, skinType, concerns, routine, sleep, stress, diet, water, exercise, goals, sensitivities, sunProtection, hormonal`). Lägg inte till nya fält utan att uppdatera servern + alla språkfiler.
+- `AnalysisJSON` topp-fält som måste finnas i svaret: `score, summary, products[], lifestyle[], avoid[], nextAnalysis`. UI läser dessa direkt.
+- Resultatvyn ska kunna **spara historik, exportera PDF och delas** – behåll `snapshotSaved`/`token`-flödet.
+
+## Frontend-flöde (premium)
+
+`frontend/src/app/[locale]/hudanalys-premium/page.tsx` har tre faser: **checkout → webhook → resultat via token-länk**. Behåll de tre Viva-stegen (skapa order → vänta på webhook → öppna resultat). Frontend pollar `GET /api/analysis-premium/status/:token`.
+
+## Låsta API-endpoints
+
+Dessa rutter får **inte byta namn, response-shape eller slopas**:
+
+| Metod | Path | Auth |
+|---|---|---|
+| POST | `/api/analysis` | Frivillig (Bearer) |
+| POST | `/api/analysis/chat` | Ingen |
+| POST | `/api/analysis/classify` | Ingen |
+| GET  | `/api/analysis/history` | Required |
+| DELETE | `/api/analysis/:id` | Required |
+| POST | `/api/analysis/fusion` | Ingen |
+| GET  | `/api/analysis/diff` | Required |
+| POST | `/api/analysis-premium/checkout` | Ingen |
+| POST | `/api/analysis-premium/run` | Ingen (token) |
+| GET  | `/api/analysis-premium/status/:token` | Ingen |
+| GET  | `/api/analysis-premium/prefill` | Ingen |
+
+## Beteenden som inte får tas bort
+
+- **System prompt server-side.** `ANALYSIS_SYSTEM_PROMPT` och premium-prompten i `services/premium-analysis-prompt.js` ligger på servern. Skicka **aldrig** prompten från klienten.
+- **Holistisk grundfilosofi.** Prompten är skeptisk till konventionell hudvård och rekommenderar **max 2–3 produkter**. Mjuka inte upp det till "alla produkter passar alla".
+- **Auto-konto vid första analysen.** Om e-post anges och användaren inte har konto skapas det automatiskt med temporärt lösenord och setup-mail. Behåll `analysisPassword`/`sendPasswordSetupEmail`-flödet.
+- **Rate limit 10/min** på `/api/analysis` per IP. Sänk inte utan att resonera kring missbruk.
+- **i18n.** Alla 5 språk (`sv, en, es, de, fr`) ska fungera i frågor, prompt och svar. Lägger du till en sträng – lägg till alla 5 språk.
+- **Inga råbilder lagras.** Bilder lever i klientens minne och i analysens snapshot kopplad till användaren. Logga aldrig bilddata.
+
+## Tillåtna förbättringar (utan att fråga)
+
+- Visuell polering, animationer, micro-interactions, kopia.
+- Prestandafix, lazy-loading, bundle-storlek.
+- Tillgänglighet (a11y), tangentbordsnavigation, focus-rings.
+- Bugfixar som inte ändrar publika kontrakt.
+
+## Kräver explicit ok från användaren
+
+- Antal quizsteg eller `QuizAnswers`-fält.
+- API-paths, request-/response-shape, statuskoder.
+- Modell (`gpt-5.3-*`), prompt-strategi, temperature, max tokens.
+- Borttagning av PDF, historik, delning, premium-flödet eller webcam-stöd.
+- Att låta klienten styra prompten eller modellvalet.
+
+## Verifiera innan push
+
+- `cd frontend && npx tsc --noEmit` – noll fel.
+- `node -c server.js`.
+- Manuellt: kör hela flödet `intro → email → demographics → scan → 1..7 → analyzing → result` på minst två språk.

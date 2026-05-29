@@ -41,3 +41,14 @@ Agenten MÅSTE utföra dessa steg innan `git push`:
 - `frontend/src/lib/i18n/navigation.ts` – Lokaliserad routing
 - `frontend/src/providers/auth-provider.tsx` – Autentiseringskontext
 - `db.js` – Databasschema och queries
+
+## Specifika kontraktslås (LÄS dessa innan du rör flödet)
+
+Två kärnflöden har egna detaljerade lock-rules. **Läs och följ dem** så fort du jobbar i respektive område:
+
+- **Hudanalys (gratis + premium):** `.cursor/rules/hudanalys-lock.mdc`
+  - 7 quizsteg, `QuizAnswers`-fält, `AnalysisJSON`-shape, `/api/analysis*`-endpoints, server-side prompt, holistisk grundfilosofi (max 2–3 produkter), auto-konto-skapande.
+- **Köpprocess (kassa → Viva → Fortnox → Ongoing):** `.cursor/rules/kop-lock.mdc`
+  - `/api/orders/create`-kontrakt, `orderItems`-shape (inkl. `paidUnitPrice` för fixedAmount-rabatter), Fortnox-orchestreringsstegen 1–5, fraktkonstanter, subscription-rabatt 15 %.
+
+Dessa lås listar exakt vad som **får förbättras fritt** och vad som **kräver explicit ok**. Är du osäker – fråga först.
