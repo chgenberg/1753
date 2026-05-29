@@ -3403,6 +3403,29 @@ app.post("/api/orders/create", async (req, res) => {
 
     let totalAmount = orderItems.reduce((s, i) => s + i.price * i.quantity, 0);
     if (discount && discount.fixedAmount) {
+      // Distribute the fixed-amount discount proportionally over each item's paid unit price.
+      // This new field (paidUnitPrice) is read by the Fortnox order builder so the invoice
+      // matches the amount the customer actually paid. All other consumers continue to read
+      // `i.price` (unchanged) so emails, dashboards and returns behave exactly as today.
+      const subtotalBeforeFixed = totalAmount;
+      const cappedFixed = Math.min(discount.fixedAmount, subtotalBeforeFixed);
+      if (subtotalBeforeFixed > 0 && cappedFixed > 0) {
+        let distributed = 0;
+        orderItems.forEach((item, idx) => {
+          const isLast = idx === orderItems.length - 1;
+          const lineTotal = item.price * item.quantity;
+          let share;
+          if (isLast) {
+            share = cappedFixed - distributed;
+          } else {
+            share = Math.round((cappedFixed * lineTotal) / subtotalBeforeFixed);
+          }
+          share = Math.max(0, Math.min(share, lineTotal));
+          distributed += share;
+          const newLineTotal = lineTotal - share;
+          item.paidUnitPrice = Math.round((newLineTotal / item.quantity) * 100) / 100;
+        });
+      }
       totalAmount = Math.max(0, totalAmount - discount.fixedAmount);
     }
     const shippingAmount = currency === "EUR" ? SHIPPING_COST.EUR : SHIPPING_COST.SEK;
@@ -3687,7 +3710,11 @@ async function handleOrderCompletion(orderId) {
     try {
       const orderRows = items.map(i => {
         const vat = i.vatRate || 0.25;
-        const priceExVat = Math.round((i.price / (1 + vat)) * 100) / 100;
+        // paidUnitPrice is set in /api/orders/create when a fixed-amount discount
+        // was distributed across the items. Falls back to i.price for orders
+        // without a fixed-amount discount (and for legacy orders).
+        const paidPrice = typeof i.paidUnitPrice === "number" ? i.paidUnitPrice : i.price;
+        const priceExVat = Math.round((paidPrice / (1 + vat)) * 100) / 100;
         return {
           ArticleNumber: i.articleNumber,
           Description: i.name,
