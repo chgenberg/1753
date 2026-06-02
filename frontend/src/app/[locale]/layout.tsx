@@ -6,7 +6,6 @@ import { Footer } from "@/components/footer";
 import { CartDrawer } from "@/components/cart-drawer";
 import { ChatWidget } from "@/components/chat-widget";
 import { CookieBanner } from "@/components/cookie-banner";
-import { PodcastPopup } from "@/components/podcast-popup";
 import { Analytics } from "@/components/analytics";
 import { LocaleProvider } from "@/providers/locale-provider";
 import { getMessages } from "@/lib/i18n/messages";
@@ -275,7 +274,6 @@ export default async function LocaleLayout({
       <CartDrawer />
       <ChatWidget />
       <CookieBanner />
-      <PodcastPopup />
       <Analytics />
     </LocaleProvider>
   );
