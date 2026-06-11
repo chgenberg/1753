@@ -459,6 +459,16 @@ export default function AnalysisPage() {
   const condLabel = (key: string) => conditionLabel(key, locale);
 
   const [step, setStep] = useState<Step>("intro");
+  // Porträttfilm på mobil, landskapsfilm på md+ – väljs via matchMedia så att
+  // bara en variant laddas ner (två <video> i DOM laddar båda trots display:none)
+  const [demoVariant, setDemoVariant] = useState<"mobile" | "desktop" | null>(null);
+  useEffect(() => {
+    const mq = window.matchMedia("(min-width: 768px)");
+    const update = () => setDemoVariant(mq.matches ? "desktop" : "mobile");
+    update();
+    mq.addEventListener("change", update);
+    return () => mq.removeEventListener("change", update);
+  }, []);
   const [userEmail, setUserEmail] = useState("");
   const [emailConsent, setEmailConsent] = useState(false);
   const [emailError, setEmailError] = useState("");
@@ -899,25 +909,31 @@ export default function AnalysisPage() {
                   "Scannez votre visage avec la précision MediaPipe sur 12 zones, répondez à sept questions rapides et recevez 15 métriques cutanées scientifiques, un âge estimé de la peau, un graphique radar et des recommandations personnalisées.")}
               </p>
 
-              <div className="mx-auto mt-8 max-w-xl overflow-hidden rounded-3xl shadow-xl shadow-black/10 transition-shadow duration-300 hover:shadow-2xl">
-                {/* Demofilm finns på sv/en/es/de – franska faller tillbaka på engelska */}
-                <video
-                  src={`/Landing_page_skinanalys/hudanalys-demo-live-${["sv", "en", "es", "de"].includes(locale) ? locale : "en"}.mp4`}
-                  poster={`/Landing_page_skinanalys/hudanalys-demo-live-${["sv", "en", "es", "de"].includes(locale) ? locale : "en"}-poster.jpg`}
-                  autoPlay
-                  muted
-                  loop
-                  playsInline
-                  preload="metadata"
-                  aria-label={tx(locale,
-                    "Så här gör du hudanalysen – demonstration på 25 sekunder",
-                    "How to do the skin analysis – 25 second demonstration",
-                    "Cómo hacer el análisis de piel – demostración de 25 segundos",
-                    "So funktioniert die Hautanalyse – 25-Sekunden-Demonstration",
-                    "Comment faire l'analyse de peau – démonstration de 25 secondes")}
-                  className="block h-auto w-full"
-                />
-              </div>
+              {demoVariant && (
+                <div className={cn(
+                  "mx-auto mt-8 overflow-hidden rounded-3xl shadow-xl shadow-black/10 transition-shadow duration-300 hover:shadow-2xl",
+                  demoVariant === "mobile" ? "max-w-xs" : "max-w-xl"
+                )}>
+                  {/* Demofilm finns på sv/en/es/de – franska faller tillbaka på engelska */}
+                  <video
+                    key={demoVariant}
+                    src={`/Landing_page_skinanalys/hudanalys-demo-live-${["sv", "en", "es", "de"].includes(locale) ? locale : "en"}${demoVariant === "mobile" ? "-mobile" : ""}.mp4`}
+                    poster={`/Landing_page_skinanalys/hudanalys-demo-live-${["sv", "en", "es", "de"].includes(locale) ? locale : "en"}${demoVariant === "mobile" ? "-mobile" : ""}-poster.jpg`}
+                    autoPlay
+                    muted
+                    loop
+                    playsInline
+                    preload="metadata"
+                    aria-label={tx(locale,
+                      "Så här gör du hudanalysen – demonstration på 25 sekunder",
+                      "How to do the skin analysis – 25 second demonstration",
+                      "Cómo hacer el análisis de piel – demostración de 25 segundos",
+                      "So funktioniert die Hautanalyse – 25-Sekunden-Demonstration",
+                      "Comment faire l'analyse de peau – démonstration de 25 secondes")}
+                    className="block h-auto w-full"
+                  />
+                </div>
+              )}
 
               <div className="mx-auto mt-8 grid max-w-sm gap-4 text-left">
                 <div className="flex items-start gap-4 rounded-2xl border border-[#e6e6e6] bg-white p-4">

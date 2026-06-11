@@ -8,8 +8,18 @@ const path = require("path");
 const { spawnSync } = require("child_process");
 
 const LOCALE = process.argv[2] || process.env.LOCALE || "sv";
+const MODE = process.argv[3] || "desktop";
+const MOBILE = MODE === "mobile";
 const OUT = path.resolve(__dirname, "out", LOCALE);
-const { SCREEN, STATUS, marks } = JSON.parse(fs.readFileSync(path.join(OUT, "marks.json"), "utf8"));
+const { marks } = JSON.parse(fs.readFileSync(path.join(OUT, "marks.json"), "utf8"));
+
+// Geometri måste matcha frames.js. Mobil: rå-videon skalas upp 1.9x till
+// 788x1604 och telefonen centreras på en 1080x1920-canvas.
+const SCREEN = MOBILE
+  ? { w: 788, h: 1710, x: 146, y: 105 }
+  : { w: 415, h: 900, x: 752, y: 90 };
+const STATUS = MOBILE ? 106 : 56;
+const SUFFIX = MOBILE ? "-mobile" : "";
 
 const T = Object.fromEntries(marks.map((m) => [m.name, m.t]));
 const need = (n) => { if (T[n] == null) throw new Error(`Saknar mark: ${n}`); return T[n]; };
@@ -59,19 +69,21 @@ const filter = [
   `[m1][outro]xfade=transition=fade:duration=${FADE}:offset=${(INTRO + inner - 2 * FADE).toFixed(2)},format=yuv420p[vout]`,
 ].join(";");
 
+const outFile = path.join(OUT, `hudanalys-demo${SUFFIX}.mp4`);
+
 const args = [
   "-y",
   "-i", path.join(OUT, "raw.webm"),
-  "-loop", "1", "-t", String((inner + INTRO + 2).toFixed(2)), "-i", path.join(OUT, "bg.png"),
-  "-loop", "1", "-t", String((inner + INTRO + 2).toFixed(2)), "-i", path.join(OUT, "frame.png"),
-  "-loop", "1", "-t", String(INTRO.toFixed(2)), "-i", path.join(OUT, "intro.png"),
-  "-loop", "1", "-t", String(OUTRO.toFixed(2)), "-i", path.join(OUT, "outro.png"),
+  "-loop", "1", "-t", String((inner + INTRO + 2).toFixed(2)), "-i", path.join(OUT, `bg${SUFFIX}.png`),
+  "-loop", "1", "-t", String((inner + INTRO + 2).toFixed(2)), "-i", path.join(OUT, `frame${SUFFIX}.png`),
+  "-loop", "1", "-t", String(INTRO.toFixed(2)), "-i", path.join(OUT, `intro${SUFFIX}.png`),
+  "-loop", "1", "-t", String(OUTRO.toFixed(2)), "-i", path.join(OUT, `outro${SUFFIX}.png`),
   "-filter_complex", filter,
   "-map", "[vout]",
   "-an",
   "-c:v", "libx264", "-preset", "slow", "-crf", "21", "-pix_fmt", "yuv420p",
   "-movflags", "+faststart",
-  path.join(OUT, "hudanalys-demo.mp4"),
+  outFile,
 ];
 
 console.log("[compose] Kör ffmpeg...");
@@ -80,8 +92,8 @@ if (res.status !== 0) process.exit(res.status || 1);
 
 // Poster: en bra frame en bit in i filmen
 spawnSync("ffmpeg", [
-  "-y", "-ss", String((INTRO + 1.2).toFixed(2)), "-i", path.join(OUT, "hudanalys-demo.mp4"),
-  "-frames:v", "1", "-q:v", "3", path.join(OUT, "hudanalys-demo-poster.jpg"),
+  "-y", "-ss", String((INTRO + 1.2).toFixed(2)), "-i", outFile,
+  "-frames:v", "1", "-q:v", "3", path.join(OUT, `hudanalys-demo${SUFFIX}-poster.jpg`),
 ], { stdio: "ignore" });
 
-console.log(`[compose] Klart: ${path.join(OUT, "hudanalys-demo.mp4")}`);
+console.log(`[compose] Klart: ${outFile}`);
