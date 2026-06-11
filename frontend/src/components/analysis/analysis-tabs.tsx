@@ -25,6 +25,7 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { MethodologyModal } from "./methodology-modal";
+import { Reveal, displayFont } from "@/components/fx/motion";
 import { PremiumUpsell } from "@/components/analysis-premium/premium-upsell";
 import { cn } from "@/lib/utils";
 import type { Locale } from "@/lib/i18n/types";
@@ -728,11 +729,13 @@ function SkinTab({ score, scoreLabel, summary, skinAge, fitzpatrick, metrics, sk
   return (
     <div className="space-y-10">
       {/* Hero score */}
-      <ScoreRing score={score} label={scoreLabel} skinAge={skinAge} fitzpatrick={fitzpatrick} locale={locale} />
+      <Reveal>
+        <ScoreRing score={score} label={scoreLabel} skinAge={skinAge} fitzpatrick={fitzpatrick} locale={locale} />
+      </Reveal>
 
       {/* Face scan image – between score and summary so user sees their photo first */}
       {hasScan && scanImageSrc && (
-        <div className="space-y-4">
+        <Reveal className="space-y-4" delay={80}>
           <div className="flex items-center justify-center gap-2 text-xs font-bold uppercase tracking-widest text-[#108474]">
             <ScanFace className="h-3.5 w-3.5" />
             {tx(locale, "Din ansiktsskanning", "Your face scan", "Tu escaneo facial", "Dein Gesichtsscan", "Votre scan facial")}
@@ -827,7 +830,7 @@ function SkinTab({ score, scoreLabel, summary, skinAge, fitzpatrick, metrics, sk
               />
             </div>
           )}
-        </div>
+        </Reveal>
       )}
 
       {hasScan && !scanImageSrc && (
@@ -838,20 +841,28 @@ function SkinTab({ score, scoreLabel, summary, skinAge, fitzpatrick, metrics, sk
       )}
 
       {/* Summary */}
-      <Paragraphs
-        text={summary}
-        className="mx-auto max-w-lg text-center text-sm leading-relaxed text-[#515151]"
-      />
+      <Reveal>
+        <Paragraphs
+          text={summary}
+          className="mx-auto max-w-lg text-center text-sm leading-relaxed text-[#515151]"
+        />
+      </Reveal>
 
       {/* Radar chart */}
-      {hasMetrics && <SkinRadarChart metrics={metrics} locale={locale} />}
+      {hasMetrics && (
+        <Reveal>
+          <SkinRadarChart metrics={metrics} locale={locale} />
+        </Reveal>
+      )}
 
       {/* Focus areas */}
-      <FocusAreas entries={topConcerns} locale={locale} />
+      <Reveal>
+        <FocusAreas entries={topConcerns} locale={locale} />
+      </Reveal>
 
       {/* All metric cards – uniform grid */}
       {metricEntries.length > 0 && (
-        <div className="space-y-4">
+        <Reveal className="space-y-4">
           <h4 className="text-xs font-bold uppercase tracking-widest text-[#766a62]">
             {tx(locale, "Alla metriker", "All metrics", "Todas las métricas", "Alle Metriken", "Toutes les métriques")}
           </h4>
@@ -869,12 +880,12 @@ function SkinTab({ score, scoreLabel, summary, skinAge, fitzpatrick, metrics, sk
               <ChevronDown className="h-3.5 w-3.5" />
             </button>
           )}
-        </div>
+        </Reveal>
       )}
 
       {/* Skin analysis details */}
       {skinAnalysis && (
-        <div className="space-y-3">
+        <Reveal className="space-y-3">
           <ExpandableBox
             title={tx(locale, "Detaljerad analys", "Detailed analysis", "Análisis detallado", "Detaillierte Analyse", "Analyse détaillée")}
             icon={Sparkles}
@@ -944,12 +955,14 @@ function SkinTab({ score, scoreLabel, summary, skinAge, fitzpatrick, metrics, sk
               <p className="text-sm leading-relaxed text-[#515151]">{skinAnalysis.ecs}</p>
             </ExpandableBox>
           </div>
-        </div>
+        </Reveal>
       )}
 
       {/* Cross-sell CTA at bottom of skin tab */}
       {products.length > 0 && (
-        <InlineProductCTA products={products} locale={locale} />
+        <Reveal>
+          <InlineProductCTA products={products} locale={locale} />
+        </Reveal>
       )}
 
       {onNextTab && (
@@ -995,11 +1008,11 @@ function ProductsTab({ products, onNextTab }: { products: ProductRec[]; onNextTa
   return (
     <div className="space-y-8">
       {/* Discount hero card */}
-      <div className="overflow-hidden rounded-3xl bg-[#1d1d1f] p-6 text-center text-white sm:p-8">
-        <p className="text-xs font-medium uppercase tracking-widest text-white/60">
+      <Reveal className="overflow-hidden rounded-[32px] bg-[#1d1d1f] px-6 py-10 text-center text-white sm:px-8 sm:py-14">
+        <p className="text-xs font-medium uppercase tracking-[0.22em] text-white/60">
           {tx(locale, "Tack för din analys", "Thank you for your analysis", "Gracias por tu análisis", "Danke für deine Analyse", "Merci pour votre analyse")}
         </p>
-        <h3 className="mt-2 text-2xl font-bold tracking-tight sm:text-3xl">
+        <h3 className={`${displayFont} mt-3 text-4xl tracking-[-0.01em] sm:text-5xl`}>
           {tx(locale, "15% rabatt", "15% off", "15% descuento", "15% Rabatt", "15% de réduction")}
         </h3>
         <p className="mt-1 text-sm text-white/70">
@@ -1043,17 +1056,19 @@ function ProductsTab({ products, onNextTab }: { products: ProductRec[]; onNextTa
             HUDANALYS15
           </p>
         )}
-      </div>
+      </Reveal>
 
       {/* Products grid */}
       <div className="space-y-3">
-        <p className="text-xs font-bold uppercase tracking-widest text-[#766a62]">
-          {tx(locale, "Utvalda för din hud", "Chosen for your skin", "Elegidos para tu piel", "Ausgewählt für deine Haut", "Choisis pour votre peau")}
-        </p>
+        <Reveal>
+          <p className="text-xs font-bold uppercase tracking-widest text-[#766a62]">
+            {tx(locale, "Utvalda för din hud", "Chosen for your skin", "Elegidos para tu piel", "Ausgewählt für deine Haut", "Choisis pour votre peau")}
+          </p>
+        </Reveal>
 
         <div className="grid gap-5 sm:grid-cols-2">
-          {matched.map((p) => (
-            <div key={p.id} className="space-y-3">
+          {matched.map((p, idx) => (
+            <Reveal key={p.id} className="space-y-3" delay={idx * 90}>
               <ProductCard product={p} />
               <div className="rounded-2xl border border-[#e6e6e6]/80 bg-white p-4">
                 <div className="flex items-start gap-2">
@@ -1071,7 +1086,7 @@ function ProductsTab({ products, onNextTab }: { products: ProductRec[]; onNextTa
                   </div>
                 </div>
               </div>
-            </div>
+            </Reveal>
           ))}
         </div>
       </div>
@@ -1127,23 +1142,24 @@ function LifestyleTab({ lifestyle, avoid, products, onNextTab }: { lifestyle: Li
         const Icon = AREA_ICONS[item.area] ?? AREA_ICONS[areaLabel];
         const badge = getImpactBadge(item.impact, locale);
         return (
-          <ExpandableBox
-            key={i}
-            title={areaLabel}
-            icon={Icon}
-            defaultOpen={i < 2}
-            badge={badge.label}
-          >
-            <div className="space-y-3">
-              <p className="text-sm leading-relaxed text-[#1d1d1f]">{item.tip}</p>
-              {item.why && (
-                <p className="text-sm leading-relaxed text-[#766a62]">{item.why}</p>
-              )}
-              {item.source && (
-                <p className="text-xs italic text-[#766a62]/60">{item.source}</p>
-              )}
-            </div>
-          </ExpandableBox>
+          <Reveal key={i} delay={i * 70}>
+            <ExpandableBox
+              title={areaLabel}
+              icon={Icon}
+              defaultOpen={i < 2}
+              badge={badge.label}
+            >
+              <div className="space-y-3">
+                <p className="text-sm leading-relaxed text-[#1d1d1f]">{item.tip}</p>
+                {item.why && (
+                  <p className="text-sm leading-relaxed text-[#766a62]">{item.why}</p>
+                )}
+                {item.source && (
+                  <p className="text-xs italic text-[#766a62]/60">{item.source}</p>
+                )}
+              </div>
+            </ExpandableBox>
+          </Reveal>
         );
       })}
 
@@ -1201,13 +1217,13 @@ function RoutineTab({ routine, routineLegacy, products }: {
             <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#fcb237]/10">
               <Sun className="h-4 w-4 text-[#fcb237]" />
             </div>
-            <h3 className="text-lg font-bold tracking-tight text-[#1d1d1f]">
+            <h3 className={`${displayFont} text-2xl tracking-[-0.01em] text-[#1d1d1f]`}>
               {tx(locale, "Morgonrutin", "Morning routine", "Rutina matutina", "Morgenroutine", "Routine du matin")}
             </h3>
           </div>
           <div className="space-y-2.5">
             {morning.map((s, i) => (
-              <div key={i} className="flex gap-4 rounded-2xl border border-[#e6e6e6]/80 bg-white p-4 transition-all duration-300 hover:shadow-md hover:shadow-black/[0.03]">
+              <Reveal key={i} delay={i * 70} className="flex gap-4 rounded-2xl border border-[#e6e6e6]/80 bg-white p-4 transition-all duration-300 hover:shadow-md hover:shadow-black/[0.03]">
                 <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#108474]/10 text-xs font-bold text-[#108474]">
                   {i + 1}
                 </div>
@@ -1217,7 +1233,7 @@ function RoutineTab({ routine, routineLegacy, products }: {
                     <p className="mt-1 text-sm leading-relaxed text-[#766a62]">{s.why}</p>
                   )}
                 </div>
-              </div>
+              </Reveal>
             ))}
           </div>
         </div>
@@ -1229,13 +1245,13 @@ function RoutineTab({ routine, routineLegacy, products }: {
             <div className="flex h-8 w-8 items-center justify-center rounded-xl bg-[#766a62]/10">
               <Moon className="h-4 w-4 text-[#766a62]" />
             </div>
-            <h3 className="text-lg font-bold tracking-tight text-[#1d1d1f]">
+            <h3 className={`${displayFont} text-2xl tracking-[-0.01em] text-[#1d1d1f]`}>
               {tx(locale, "Kvällsrutin", "Evening routine", "Rutina nocturna", "Abendroutine", "Routine du soir")}
             </h3>
           </div>
           <div className="space-y-2.5">
             {evening.map((s, i) => (
-              <div key={i} className="flex gap-4 rounded-2xl border border-[#e6e6e6]/80 bg-white p-4 transition-all duration-300 hover:shadow-md hover:shadow-black/[0.03]">
+              <Reveal key={i} delay={i * 70} className="flex gap-4 rounded-2xl border border-[#e6e6e6]/80 bg-white p-4 transition-all duration-300 hover:shadow-md hover:shadow-black/[0.03]">
                 <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-[#766a62]/10 text-xs font-bold text-[#766a62]">
                   {i + 1}
                 </div>
@@ -1245,7 +1261,7 @@ function RoutineTab({ routine, routineLegacy, products }: {
                     <p className="mt-1 text-sm leading-relaxed text-[#766a62]">{s.why}</p>
                   )}
                 </div>
-              </div>
+              </Reveal>
             ))}
           </div>
         </div>
@@ -1465,7 +1481,7 @@ export function AnalysisTabs({
 
       {/* Next analysis hint */}
       {nextAnalysis && (
-        <div className="rounded-2xl border border-[#e6e6e6]/80 bg-[#f5f5f7] p-5 text-center">
+        <div className="rounded-[28px] bg-[#f5f5f7] p-6 text-center ring-1 ring-[#e6e6e6]/60">
           <p className="text-xs font-bold uppercase tracking-widest text-[#766a62]">
             {tx(locale, "Rekommenderad uppföljning", "Recommended follow-up", "Seguimiento recomendado", "Empfohlene Nachuntersuchung", "Suivi recommandé")}
           </p>

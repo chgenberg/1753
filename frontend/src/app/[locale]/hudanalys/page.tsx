@@ -25,6 +25,8 @@ import {
   Zap,
 } from "lucide-react";
 import { AnalysisTabs } from "@/components/analysis/analysis-tabs";
+import { Reveal, displayFont } from "@/components/fx/motion";
+import { Pill } from "@/components/fx/frames";
 import { apiFetch } from "@/lib/api";
 import { useLocale } from "@/providers/locale-provider";
 import { useAuth } from "@/providers/auth-provider";
@@ -394,7 +396,7 @@ function AnalyzingProgress({ locale }: { locale: string }) {
         </div>
       </div>
 
-      <h2 className="mt-4 text-xl font-bold tracking-tight text-[#1d1d1f]">
+      <h2 className={`${displayFont} mt-5 text-2xl tracking-[-0.01em] text-[#1d1d1f]`}>
         {steps[stepIdx].label}
       </h2>
 
@@ -894,24 +896,28 @@ export default function AnalysisPage() {
           {/* ---- INTRO ---- */}
           {step === "intro" && (
             <div className="text-center animate-fade-in">
-              <p className="mb-3 text-sm font-medium uppercase tracking-widest text-muted-foreground">
-                {a("badge")}
-              </p>
-              <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
-                {a("title")}
-              </h1>
-              <p className="mx-auto mt-4 max-w-lg text-base leading-relaxed text-muted-foreground">
-                {tx(locale,
-                  "Skanna ditt ansikte med MediaPipe-precision i 12 zoner, svara på sju korta frågor och få 15 vetenskapliga hudmetriker, estimerad hudålder, radardiagram och personliga rekommendationer.",
-                  "Scan your face with MediaPipe precision across 12 zones, answer seven quick questions, and receive 15 scientific skin metrics, estimated skin age, a radar chart and personalised recommendations.",
-                  "Escanea tu rostro con precisión MediaPipe en 12 zonas, responde siete preguntas rápidas y recibe 15 métricas científicas de la piel, edad estimada, gráfico radar y recomendaciones personalizadas.",
-                  "Scanne dein Gesicht mit MediaPipe-Präzision in 12 Zonen, beantworte sieben kurze Fragen und erhalte 15 wissenschaftliche Hautmetriken, geschätztes Hautalter, Radardiagramm und personalisierte Empfehlungen.",
-                  "Scannez votre visage avec la précision MediaPipe sur 12 zones, répondez à sept questions rapides et recevez 15 métriques cutanées scientifiques, un âge estimé de la peau, un graphique radar et des recommandations personnalisées.")}
-              </p>
+              <Reveal>
+                <Pill>{a("badge")}</Pill>
+              </Reveal>
+              <Reveal delay={80}>
+                <h1 className={`${displayFont} mt-6 text-4xl leading-[1.08] tracking-[-0.01em] text-[#1d1d1f] md:text-6xl`}>
+                  {a("title")}
+                </h1>
+              </Reveal>
+              <Reveal delay={160}>
+                <p className="mx-auto mt-5 max-w-lg text-base leading-relaxed text-muted-foreground">
+                  {tx(locale,
+                    "Skanna ditt ansikte med MediaPipe-precision i 12 zoner, svara på sju korta frågor och få 15 vetenskapliga hudmetriker, estimerad hudålder, radardiagram och personliga rekommendationer.",
+                    "Scan your face with MediaPipe precision across 12 zones, answer seven quick questions, and receive 15 scientific skin metrics, estimated skin age, a radar chart and personalised recommendations.",
+                    "Escanea tu rostro con precisión MediaPipe en 12 zonas, responde siete preguntas rápidas y recibe 15 métricas científicas de la piel, edad estimada, gráfico radar y recomendaciones personalizadas.",
+                    "Scanne dein Gesicht mit MediaPipe-Präzision in 12 Zonen, beantworte sieben kurze Fragen und erhalte 15 wissenschaftliche Hautmetriken, geschätztes Hautalter, Radardiagramm und personalisierte Empfehlungen.",
+                    "Scannez votre visage avec la précision MediaPipe sur 12 zones, répondez à sept questions rapides et recevez 15 métriques cutanées scientifiques, un âge estimé de la peau, un graphique radar et des recommandations personnalisées.")}
+                </p>
+              </Reveal>
 
               {demoVariant && (
-                <div className={cn(
-                  "mx-auto mt-8 overflow-hidden rounded-3xl shadow-xl shadow-black/10 transition-shadow duration-300 hover:shadow-2xl",
+                <Reveal delay={220} className={cn(
+                  "mx-auto mt-8 overflow-hidden rounded-[28px] shadow-xl shadow-black/10 transition-shadow duration-300 hover:shadow-2xl",
                   demoVariant === "mobile" ? "max-w-xs" : "max-w-xl"
                 )}>
                   {/* Demofilm finns på sv/en/es/de – franska faller tillbaka på engelska */}
@@ -932,31 +938,31 @@ export default function AnalysisPage() {
                       "Comment faire l'analyse de peau – démonstration de 25 secondes")}
                     className="block h-auto w-full"
                   />
-                </div>
+                </Reveal>
               )}
 
               <div className="mx-auto mt-8 grid max-w-sm gap-4 text-left">
-                <div className="flex items-start gap-4 rounded-2xl border border-[#e6e6e6] bg-white p-4">
+                <Reveal delay={60} className="flex items-start gap-4 rounded-[20px] bg-white p-4 shadow-sm ring-1 ring-[#e6e6e6]/70 transition-all duration-300 hover:shadow-md hover:ring-[#108474]/20">
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#108474]/10 text-sm font-bold text-[#108474]">1</div>
                   <div>
                     <p className="text-sm font-semibold text-[#1d1d1f]">{tx(locale, "Ansiktsskanning – 12 zoner", "Face scan – 12 zones", "Escaneo facial – 12 zonas", "Gesichtsscan – 12 Zonen", "Scan du visage – 12 zones")}</p>
                     <p className="mt-0.5 text-xs text-[#515151]">{tx(locale, "MediaPipe kartlägger 478 punkter och analyserar varje zon", "MediaPipe maps 478 points and analyses each zone", "MediaPipe mapea 478 puntos y analiza cada zona", "MediaPipe erfasst 478 Punkte und analysiert jede Zone", "MediaPipe cartographie 478 points et analyse chaque zone")}</p>
                   </div>
-                </div>
-                <div className="flex items-start gap-4 rounded-2xl border border-[#e6e6e6] bg-white p-4">
+                </Reveal>
+                <Reveal delay={140} className="flex items-start gap-4 rounded-[20px] bg-white p-4 shadow-sm ring-1 ring-[#e6e6e6]/70 transition-all duration-300 hover:shadow-md hover:ring-[#108474]/20">
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#108474]/10 text-sm font-bold text-[#108474]">2</div>
                   <div>
                     <p className="text-sm font-semibold text-[#1d1d1f]">{tx(locale, "Livsstilsfrågor", "Lifestyle questions", "Preguntas de estilo de vida", "Lebensstilfragen", "Questions sur le mode de vie")}</p>
                     <p className="mt-0.5 text-xs text-[#515151]">{tx(locale, "Sju frågor om hud, livsstil och mål", "Seven questions about skin, lifestyle & goals", "Siete preguntas sobre piel, estilo de vida y objetivos", "Sieben Fragen zu Haut, Lebensstil und Zielen", "Sept questions sur la peau, le mode de vie et les objectifs")}</p>
                   </div>
-                </div>
-                <div className="flex items-start gap-4 rounded-2xl border border-[#e6e6e6] bg-white p-4">
+                </Reveal>
+                <Reveal delay={220} className="flex items-start gap-4 rounded-[20px] bg-white p-4 shadow-sm ring-1 ring-[#e6e6e6]/70 transition-all duration-300 hover:shadow-md hover:ring-[#108474]/20">
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#108474]/10 text-sm font-bold text-[#108474]">3</div>
                   <div>
                     <p className="text-sm font-semibold text-[#1d1d1f]">{tx(locale, "15 metriker + hudålder + radardiagram", "15 metrics + skin age + radar chart", "15 métricas + edad de la piel + gráfico radar", "15 Metriken + Hautalter + Radardiagramm", "15 métriques + âge de la peau + graphique radar")}</p>
                     <p className="mt-0.5 text-xs text-[#515151]">{tx(locale, "Plus rutin, produkter och livsstilsråd", "Plus routine, products & lifestyle tips", "Más rutina, productos y consejos", "Plus Routine, Produkte und Lifestyle-Tipps", "Plus routine, produits et conseils de mode de vie")}</p>
                   </div>
-                </div>
+                </Reveal>
               </div>
 
               <div className="mx-auto mt-8 max-w-sm space-y-4">
@@ -1004,7 +1010,7 @@ export default function AnalysisPage() {
               </button>
 
               <div className="text-center">
-                <h2 className="text-2xl font-bold tracking-tight">
+                <h2 className={`${displayFont} text-3xl tracking-[-0.01em] text-[#1d1d1f] md:text-4xl`}>
                   {tx(locale, "Din e-postadress", "Your email", "Tu email", "Deine E-Mail", "Votre e-mail")}
                 </h2>
                 <p className="mt-2 text-sm text-muted-foreground">
@@ -1171,7 +1177,7 @@ export default function AnalysisPage() {
               </button>
 
               <div className="text-center">
-                <h2 className="text-2xl font-bold tracking-tight">
+                <h2 className={`${displayFont} text-3xl tracking-[-0.01em] text-[#1d1d1f] md:text-4xl`}>
                   {tx(locale, "Berätta lite om dig", "Tell us about yourself", "Cuéntanos sobre ti", "Erzähl uns von dir", "Parlez-nous de vous")}
                 </h2>
                 <p className="mt-2 text-sm text-muted-foreground">
@@ -1313,7 +1319,7 @@ export default function AnalysisPage() {
               {step === 1 && (
                 <div className="space-y-6">
                   <div className="text-center">
-                    <h2 className="text-2xl font-bold tracking-tight">{a("step1Title")}</h2>
+                    <h2 className={`${displayFont} text-3xl tracking-[-0.01em] text-[#1d1d1f] md:text-4xl`}>{a("step1Title")}</h2>
                     <p className="mt-1 text-sm text-muted-foreground">{a("step1Sub")}</p>
                   </div>
                   <div className="grid grid-cols-2 gap-3">
@@ -1335,7 +1341,7 @@ export default function AnalysisPage() {
               {step === 2 && (
                 <div className="space-y-6">
                   <div className="text-center">
-                    <h2 className="text-2xl font-bold tracking-tight">{a("step2Title")}</h2>
+                    <h2 className={`${displayFont} text-3xl tracking-[-0.01em] text-[#1d1d1f] md:text-4xl`}>{a("step2Title")}</h2>
                     <p className="mt-1 text-sm text-muted-foreground">{a("step2Sub")}</p>
                   </div>
                   <ChipSelect
@@ -1358,7 +1364,7 @@ export default function AnalysisPage() {
               {step === 3 && (
                 <div className="space-y-6">
                   <div className="text-center">
-                    <h2 className="text-2xl font-bold tracking-tight">{a("step3Title")}</h2>
+                    <h2 className={`${displayFont} text-3xl tracking-[-0.01em] text-[#1d1d1f] md:text-4xl`}>{a("step3Title")}</h2>
                     <p className="mt-1 text-sm text-muted-foreground">{a("step3Sub")}</p>
                   </div>
                   <ChipSelect
@@ -1378,7 +1384,7 @@ export default function AnalysisPage() {
               {step === 4 && (
                 <div className="space-y-6">
                   <div className="text-center">
-                    <h2 className="text-2xl font-bold tracking-tight">{a("step4Title")}</h2>
+                    <h2 className={`${displayFont} text-3xl tracking-[-0.01em] text-[#1d1d1f] md:text-4xl`}>{a("step4Title")}</h2>
                     <p className="mt-1 text-sm text-muted-foreground">{a("step4Sub")}</p>
                   </div>
                   <div className="space-y-5">
@@ -1463,7 +1469,7 @@ export default function AnalysisPage() {
               {step === 5 && (
                 <div className="space-y-6">
                   <div className="text-center">
-                    <h2 className="text-2xl font-bold tracking-tight">{a("step5Title")}</h2>
+                    <h2 className={`${displayFont} text-3xl tracking-[-0.01em] text-[#1d1d1f] md:text-4xl`}>{a("step5Title")}</h2>
                     <p className="mt-1 text-sm text-muted-foreground">{a("step5Sub")}</p>
                   </div>
 
@@ -1506,7 +1512,7 @@ export default function AnalysisPage() {
               {step === 6 && (
                 <div className="space-y-6">
                   <div className="text-center">
-                    <h2 className="text-2xl font-bold tracking-tight">
+                    <h2 className={`${displayFont} text-3xl tracking-[-0.01em] text-[#1d1d1f] md:text-4xl`}>
                       {tx(locale, "Solskydd", "Sun protection", "Protección solar", "Sonnenschutz", "Protection solaire")}
                     </h2>
                     <p className="mt-1 text-sm text-muted-foreground">
@@ -1535,7 +1541,7 @@ export default function AnalysisPage() {
               {step === 7 && (
                 <div className="space-y-6">
                   <div className="text-center">
-                    <h2 className="text-2xl font-bold tracking-tight">
+                    <h2 className={`${displayFont} text-3xl tracking-[-0.01em] text-[#1d1d1f] md:text-4xl`}>
                       {tx(locale, "Hormonell påverkan", "Hormonal influence", "Influencia hormonal", "Hormoneller Einfluss", "Influence hormonale")}
                     </h2>
                     <p className="mt-1 text-sm text-muted-foreground">
@@ -1603,7 +1609,8 @@ export default function AnalysisPage() {
           {step === "result" && result && (
             <div className="space-y-10">
               <div className="animate-fade-in text-center">
-                <h2 className="text-3xl font-bold tracking-tight">{a("resultTitle")}</h2>
+                <Pill>1753 SKINCARE</Pill>
+                <h2 className={`${displayFont} mt-5 text-4xl tracking-[-0.01em] text-[#1d1d1f] md:text-5xl`}>{a("resultTitle")}</h2>
               </div>
 
               {parsed ? (
@@ -1716,9 +1723,9 @@ export default function AnalysisPage() {
                 };
 
                 return (
-                <div className="mx-auto max-w-md rounded-2xl border border-[#e6e6e6] bg-white p-6 text-center">
+                <Reveal className="mx-auto max-w-md rounded-[28px] bg-white p-6 text-center shadow-sm ring-1 ring-[#e6e6e6]/70">
                   <Sparkles className="mx-auto mb-3 h-6 w-6 text-[#108474]" />
-                  <h3 className="text-lg font-bold tracking-tight text-[#1d1d1f]">
+                  <h3 className={`${displayFont} text-2xl tracking-[-0.01em] text-[#1d1d1f]`}>
                     {tx(locale, "Dela ditt resultat", "Share your result", "Comparte tu resultado", "Teile dein Ergebnis", "Partagez votre résultat")}
                   </h3>
                   <p className="mt-1 text-xs text-[#515151]">
@@ -1731,7 +1738,7 @@ export default function AnalysisPage() {
                   </p>
 
                   {/* Share card preview */}
-                  <div className="mx-auto mt-4 max-w-xs overflow-hidden rounded-2xl border border-[#e6e6e6] bg-gradient-to-br from-[#f5f5f7] to-white p-5">
+                  <div className="mx-auto mt-4 max-w-xs overflow-hidden rounded-[20px] bg-gradient-to-br from-[#f5f5f7] to-white p-5 ring-1 ring-[#e6e6e6]/70">
                     <p className="text-[10px] font-semibold uppercase tracking-widest text-[#766a62]">1753 SKINCARE</p>
                     <div className="mt-3 flex items-center justify-center gap-6">
                       <div className="text-center">
@@ -1829,7 +1836,7 @@ export default function AnalysisPage() {
                       "Teile das Bild auf Instagram und tagge @1753.skincare",
                       "Partagez l'image sur Instagram et identifiez @1753.skincare")}
                   </a>
-                </div>
+                </Reveal>
                 );
               })()}
 

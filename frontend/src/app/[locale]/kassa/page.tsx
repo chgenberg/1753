@@ -5,6 +5,8 @@ import Image from "next/image";
 import Link from "next/link";
 import { ArrowLeft, Check, CreditCard, Gift, Lock, Minus, Plus, RefreshCcw, ShieldCheck, Tag, Trash2, Truck, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Reveal, displayFont } from "@/components/fx/motion";
+import { Pill } from "@/components/fx/frames";
 import { useCart, type CartItem } from "@/providers/cart-provider";
 import { PRODUCTS, productDisplayName, productPrice } from "@/lib/products";
 import { formatPrice, getCurrency, getShippingCost } from "@/lib/currency";
@@ -230,19 +232,26 @@ export default function CheckoutPage() {
 
   if (cartProducts.length === 0) {
     return (
-      <section className="py-16 md:py-20">
+      <section className="py-20 md:py-28">
         <div className="mx-auto max-w-[1280px] px-6 md:px-10 text-center">
-          <h1 className="text-3xl font-bold tracking-tight">
-            {t("checkout.emptyTitle")}
-          </h1>
-          <p className="mt-3 text-muted-foreground">
-            {t("checkout.emptySub")}
-          </p>
-          <Link href={homeHash("#produkter")}>
-            <Button className="mt-6 rounded-xl h-12 px-8">
-              {t("home.ctaProducts")}
-            </Button>
-          </Link>
+          <Reveal>
+            <Pill>1753 SKINCARE</Pill>
+          </Reveal>
+          <Reveal delay={80}>
+            <h1 className={`${displayFont} mt-6 text-4xl tracking-[-0.01em] text-[#1d1d1f] md:text-5xl`}>
+              {t("checkout.emptyTitle")}
+            </h1>
+          </Reveal>
+          <Reveal delay={160}>
+            <p className="mt-4 text-muted-foreground">
+              {t("checkout.emptySub")}
+            </p>
+            <Link href={homeHash("#produkter")}>
+              <Button className="mt-8 h-12 rounded-full px-8">
+                {t("home.ctaProducts")}
+              </Button>
+            </Link>
+          </Reveal>
         </div>
       </section>
     );
@@ -253,17 +262,21 @@ export default function CheckoutPage() {
       <div className="mx-auto max-w-[1280px] px-6 md:px-10">
         <Link
           href={path("home")}
-          className="mb-8 inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-brand-900"
+          className="mb-8 inline-flex items-center gap-1.5 text-sm text-muted-foreground transition-colors hover:text-brand-900"
         >
           <ArrowLeft className="h-4 w-4" />
           {t("checkout.back")}
         </Link>
 
-        <h1 className="mb-8 text-3xl font-bold tracking-tight">{t("checkout.title")}</h1>
+        <Reveal>
+          <Pill>1753 SKINCARE</Pill>
+          <h1 className={`${displayFont} mb-10 mt-5 text-4xl tracking-[-0.01em] text-[#1d1d1f] md:text-5xl`}>{t("checkout.title")}</h1>
+        </Reveal>
 
         <div className="grid gap-10 lg:grid-cols-5">
-          <form onSubmit={handleSubmit} className="lg:col-span-3 space-y-5">
-            <h2 className="text-lg font-bold tracking-tight">
+          <Reveal delay={80} className="lg:col-span-3">
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <h2 className={`${displayFont} text-2xl tracking-[-0.01em] text-[#1d1d1f]`}>
               {t("checkout.yourDetails")}
             </h2>
 
@@ -517,7 +530,7 @@ export default function CheckoutPage() {
             <Button
               type="submit"
               disabled={loading}
-              className="h-13 w-full rounded-xl px-8 text-sm font-medium active:scale-[0.98]"
+              className="h-13 w-full rounded-full px-8 text-sm font-semibold shadow-lg shadow-[#108474]/15 transition-all hover:shadow-xl active:scale-[0.98]"
             >
               {loading ? (
                 t("checkout.processing")
@@ -540,9 +553,11 @@ export default function CheckoutPage() {
               </span>
             </div>
           </form>
+          </Reveal>
 
-          <aside className="rounded-2xl border border-border bg-brand-50/40 p-6 lg:col-span-2 self-start">
-            <h2 className="mb-4 text-lg font-bold tracking-tight">
+          <Reveal delay={160} className="lg:col-span-2 self-start lg:sticky lg:top-28">
+          <aside className="rounded-[28px] bg-white p-6 shadow-sm ring-1 ring-[#e6e6e6]/70 md:p-7">
+            <h2 className={`${displayFont} mb-5 text-2xl tracking-[-0.01em] text-[#1d1d1f]`}>
               {t("checkout.orderAsideTitle")}
             </h2>
             <div className="flex flex-col gap-4">
@@ -552,7 +567,7 @@ export default function CheckoutPage() {
                 return (
                   <div key={p.cartId}>
                     <div className="flex gap-3">
-                      <div className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-2xl bg-white ring-1 ring-inset ring-black/5">
+                      <div className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-2xl bg-[#f5f5f7] ring-1 ring-inset ring-black/5">
                         <Image
                           src={p.image}
                           alt={productDisplayName(p, locale)}
@@ -717,6 +732,7 @@ export default function CheckoutPage() {
               </Link>
             </div>
           </aside>
+          </Reveal>
         </div>
       </div>
     </section>
