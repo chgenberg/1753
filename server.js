@@ -429,6 +429,64 @@ const DISCOUNT_CODES = {
   },
 };
 
+// ---- PERSONLIGA RABATTKODER (auto-genererade vid mejlutskick) ----
+//
+// Bakgrund: AI-genererade nyhetsbrev har tidigare kunnat "hitta på" rabattkoder
+// som aldrig fanns i discount_codes → kunder fick mejl med obrukbara koder.
+// Regeln är nu: en kod får BARA nämnas i ett automatiskt mejl om den först har
+// skapats här. Koden skapas i DB innan mejlet skickas; misslyckas skapandet
+// skickas mejlet utan rabattblock (aldrig tvärtom).
+//
+// Format: TACK15-XXXXXX (lagras lowercase – /api/discount/validate lowercasar
+// alltid kundens inmatning, så visning i versaler fungerar).
+
+const PERSONAL_DISCOUNT_PERCENT = 15;
+const PERSONAL_DISCOUNT_VALID_DAYS = 30;
+
+async function createPersonalDiscountCode(recipientEmail) {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const suffix = crypto.randomBytes(3).toString("hex").toUpperCase();
+    const code = `TACK15-${suffix}`;
+    const validUntil = new Date(Date.now() + PERSONAL_DISCOUNT_VALID_DAYS * 24 * 3600 * 1000);
+    try {
+      await db.createDiscountCode({
+        code,
+        percent: PERSONAL_DISCOUNT_PERCENT,
+        fixedAmount: 0,
+        description: `${PERSONAL_DISCOUNT_PERCENT}% personlig kod (${recipientEmail || "okänd mottagare"})`,
+        productIds: null,
+        maxUses: 1,
+        validUntil: validUntil.toISOString(),
+      });
+      return code;
+    } catch (err) {
+      if (err.code === "23505") continue; // kollision på unik kod – försök igen
+      throw err;
+    }
+  }
+  throw new Error("Kunde inte generera unik rabattkod efter 3 försök");
+}
+
+function personalDiscountBlockHtml(code, locale = "sv") {
+  const t = {
+    sv: { label: "Din personliga rabattkod", body: `${PERSONAL_DISCOUNT_PERCENT}% på hela ordern. Gäller i ${PERSONAL_DISCOUNT_VALID_DAYS} dagar och kan användas en gång.`, hint: "Ange koden i kassan." },
+    en: { label: "Your personal discount code", body: `${PERSONAL_DISCOUNT_PERCENT}% off your entire order. Valid for ${PERSONAL_DISCOUNT_VALID_DAYS} days, single use.`, hint: "Enter the code at checkout." },
+    es: { label: "Tu código de descuento personal", body: `${PERSONAL_DISCOUNT_PERCENT}% en todo tu pedido. Válido ${PERSONAL_DISCOUNT_VALID_DAYS} días, un solo uso.`, hint: "Introduce el código al pagar." },
+    de: { label: "Dein persönlicher Rabattcode", body: `${PERSONAL_DISCOUNT_PERCENT}% auf deine gesamte Bestellung. ${PERSONAL_DISCOUNT_VALID_DAYS} Tage gültig, einmal einlösbar.`, hint: "Gib den Code an der Kasse ein." },
+    fr: { label: "Votre code de réduction personnel", body: `${PERSONAL_DISCOUNT_PERCENT}% sur toute votre commande. Valable ${PERSONAL_DISCOUNT_VALID_DAYS} jours, usage unique.`, hint: "Saisissez le code au moment du paiement." },
+  }[locale] || null;
+  const txt = t || {
+    label: "Din personliga rabattkod",
+    body: `${PERSONAL_DISCOUNT_PERCENT}% på hela ordern. Gäller i ${PERSONAL_DISCOUNT_VALID_DAYS} dagar och kan användas en gång.`,
+    hint: "Ange koden i kassan.",
+  };
+  return `<div style="margin:28px 0;padding:20px 24px;background:#f5f5f7;border-radius:16px;text-align:center">
+    <p style="font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#766a62;margin:0 0 8px">${txt.label}</p>
+    <p style="font-size:22px;font-weight:700;color:#108474;font-family:monospace;letter-spacing:2px;margin:0 0 8px">${code.toUpperCase()}</p>
+    <p style="font-size:13px;color:#515151;line-height:1.6;margin:0">${txt.body} ${txt.hint}</p>
+  </div>`;
+}
+
 async function generateOrderNumber() {
   return await db.nextSharedOrderNumber();
 }
@@ -4359,6 +4417,16 @@ async function sendAnalysisReport(email, analysisContent, locale, accountPasswor
   const loginSlug = { sv: "logga-in", en: "login", es: "iniciar-sesion", de: "anmelden", fr: "connexion" };
   const ctaUrl = `${baseUrl}/${locale}/${loginSlug[locale] || loginSlug.en}`;
 
+  // Personlig 15%-kod – skapas i DB FÖRE mejlet skickas. Misslyckas skapandet
+  // skickas mejlet utan rabattblock så att vi aldrig lovar en obrukbar kod.
+  let personalCode = null;
+  try {
+    personalCode = await createPersonalDiscountCode(email);
+  } catch (err) {
+    console.error("[Analysis] Kunde inte skapa personlig rabattkod (mejl skickas utan):", err.message);
+  }
+  const discountBlock = personalCode ? personalDiscountBlockHtml(personalCode, locale) : "";
+
   const accountBlockHtml = accountPassword ? `
     <div style="background:#f5f5f7;border-radius:16px;padding:20px 24px;margin-bottom:28px;border:1px solid #e6e6e6">
       <p style="font-size:14px;font-weight:600;color:#1d1d1f;margin:0 0 8px">
@@ -4455,6 +4523,8 @@ async function sendAnalysisReport(email, analysisContent, locale, accountPasswor
       ` : ""}
 
       ${routineHtml}
+
+      ${discountBlock}
 
       <div style="text-align:center;margin:32px 0">
         <a href="${ctaUrl}" style="display:inline-block;background:#108474;color:#fff;padding:14px 32px;border-radius:980px;text-decoration:none;font-weight:600;font-size:14px">${ctaLabel}</a>
@@ -4953,7 +5023,8 @@ REGLER:
 - Ge aldrig medicinsk rådgivning
 - Gör inga löften om resultat – formulera försiktigt ("många upplever", "de flesta märker skillnad")
 - Om du saknar info för att svara korrekt: skriv ett vänligt svar som förklarar att teamet kollar upp det och återkommer
-- Var generös med att hjälpa men aldrig säljig eller pushig`;
+- Var generös med att hjälpa men aldrig säljig eller pushig
+- Hitta ALDRIG på rabattkoder eller rabatterbjudanden. Du får bara nämna en rabattkod om den uttryckligen finns i kundens meddelande eller i kundkontexten. Om kunden frågar efter rabatt: skriv att teamet återkommer med en personlig kod`;
 
 async function generateEmailDraft(customerEmail, customerName, subject, bodyText, customerContext) {
   const apiKey = process.env.OPENAI_API_KEY;
@@ -6638,20 +6709,34 @@ app.post("/api/newsletter/broadcast", async (req, res) => {
     const baseUrl = process.env.BASE_URL || "https://api.1753skin.com";
     let sent = 0;
 
+    const wantsDiscountCode = /\{\{RABATTKOD\}\}/.test(html);
+
     for (const sub of subscribers) {
       try {
         const subL = sub.locale || "sv";
         const fnFallback = { sv: "du", en: "there", es: "amigo/a", de: "du", fr: "vous" };
         const unsubUrl = `${baseUrl}/api/newsletter/unsubscribe/${sub.unsubscribe_token}`;
+
+        let personalHtml = html.replace(/\{\{firstName\}\}/g, sub.first_name || (fnFallback[subL] || "du"));
+        if (wantsDiscountCode) {
+          // Skapa en riktig, unik engångskod per mottagare INNAN sändning.
+          // Misslyckas skapandet hoppar vi över mottagaren hellre än att
+          // skicka ett mejl som lovar en kod som inte finns.
+          let personalCode;
+          try {
+            personalCode = await createPersonalDiscountCode(sub.email);
+          } catch (codeErr) {
+            console.error(`[Broadcast] Hoppar över ${sub.email} – kunde inte skapa rabattkod:`, codeErr.message);
+            continue;
+          }
+          personalHtml = personalHtml.replace(/\{\{RABATTKOD\}\}/g, personalCode.toUpperCase());
+        }
+
         await resend.emails.send({
           from: fromEmail,
           to: sub.email,
           subject,
-          html: emailWrapper(
-            html.replace(/\{\{firstName\}\}/g, sub.first_name || (fnFallback[subL] || "du")),
-            unsubUrl,
-            subL
-          ),
+          html: emailWrapper(personalHtml, unsubUrl, subL),
           headers: newsletterHeaders(unsubUrl),
         });
         sent++;
@@ -6705,6 +6790,7 @@ app.post("/api/newsletter/broadcast-segmented", async (req, res) => {
 
       let sent = 0;
       let skipped = 0;
+      const wantsDiscountCode = /\{\{RABATTKOD\}\}/.test(html);
       for (const sub of subscribers) {
         try {
           const canSend = await db.canEmailSubscriber(sub.id, 24);
@@ -6716,15 +6802,25 @@ app.post("/api/newsletter/broadcast-segmented", async (req, res) => {
           const subL = sub.locale || "sv";
           const fnFallback2 = { sv: "du", en: "there", es: "amigo/a", de: "du", fr: "vous" };
           const unsubUrl = `${baseUrl}/api/newsletter/unsubscribe/${sub.unsubscribe_token}`;
+
+          let personalHtml = html.replace(/\{\{firstName\}\}/g, sub.first_name || (fnFallback2[subL] || "du"));
+          if (wantsDiscountCode) {
+            // Riktig, unik engångskod per mottagare – skapas innan sändning.
+            let personalCode;
+            try {
+              personalCode = await createPersonalDiscountCode(sub.email);
+            } catch (codeErr) {
+              console.error(`[SegBroadcast] Hoppar över ${sub.email} – kunde inte skapa rabattkod:`, codeErr.message);
+              continue;
+            }
+            personalHtml = personalHtml.replace(/\{\{RABATTKOD\}\}/g, personalCode.toUpperCase());
+          }
+
           await resend.emails.send({
             from: fromEmail,
             to: sub.email,
             subject,
-            html: emailWrapper(
-              html.replace(/\{\{firstName\}\}/g, sub.first_name || (fnFallback2[subL] || "du")),
-              unsubUrl,
-              subL
-            ),
+            html: emailWrapper(personalHtml, unsubUrl, subL),
             headers: newsletterHeaders(unsubUrl),
           });
           await db.touchSubscriberEmailed(sub.id);

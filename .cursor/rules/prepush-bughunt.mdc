@@ -1,0 +1,84 @@
+---
+description: Tvinga 1753-bug-hunter-prepush att köras innan varje produktionspush av 1753 SKINCARE
+alwaysApply: true
+---
+
+# Pre-push bug-hunt är obligatoriskt före produktionspush
+
+Innan agenten kör **något** kommando som deployar 1753 SKINCARE till
+produktion — eller på något annat sätt rullar ut nuvarande HEAD till en
+miljö som riktiga kunder ser — MÅSTE skillen
+[`1753-bug-hunter-prepush`](mdc:.cursor/skills/1753-bug-hunter-prepush/SKILL.md)
+ha körts mot diffen sedan senaste push, och en `CRITICAL`- och
+`HIGH`-fri rapport finnas i den pågående konversationen.
+
+Detta är inte en rekommendation. Det är en hård gate. Skillen tar ~1
+minut att köra; det är billigare än varje produktionsbugg vi har fixat
+i panik (fel fakturabelopp i Fortnox, försvunnen hudanalys-historik,
+rabattkod-mejl med koder som inte fanns).
+
+Bug-hunten **ersätter inte** regression-guardens mekaniska kontroller
+(`cd frontend && npx tsc --noEmit`, `node -c server.js`, `ReadLints`)
+— båda ska köras före push. Bug-hunten är kodgranskningen; guarden är
+kompilatorn.
+
+## Vad räknas som produktionspush
+
+Alla av följande kräver att bug-hunten körts först:
+
+- `git push` mot `main` (auto-deployar backend till Railway och
+  frontend till produktion)
+- `git push` mot andra grenar som någon miljö auto-deployar från
+- `railway up` eller andra Railway-deploykommandon
+- `vercel --prod` eller motsvarande frontend-deploy
+- Att ändra deploy-/infra-konfiguration (`Dockerfile`, Railway-config,
+  `package.json`-scripts som körs i produktion) och sedan trigga en
+  deploy
+
+Dev-only operationer omfattas **inte**: lokal `npm run dev`,
+`next build` lokalt utan deploy, `node -c`-syntaxkontroller,
+smoke-tester mot localhost, commits utan push.
+
+## Flödet agenten måste följa
+
+1. **Innan** något deploy-kommando ovan körs: kör skillen
+   `1753-bug-hunter-prepush` mot diffen sedan senaste push
+   (`git diff --name-only origin/main...HEAD` är default-scope).
+2. Vänta tills skillen producerat sin konsoliderade
+   CRITICAL / HIGH / MEDIUM / OK-rapport.
+3. **Om rapporten innehåller CRITICAL- eller HIGH-fynd**: stoppa
+   omedelbart. Visa rapporten för användaren. Föreslå fixar. Pusha
+   **inte** förrän användaren explicit säger något i stil med "kör
+   ändå", "pusha trots fyndet", "ignorera bug-hunten den här gången"
+   — och även då: upprepa fyndet i en sista bekräftelse innan du kör.
+4. **Om rapporten bara innehåller MEDIUM eller är ren ("Inga blocker
+   funna — OK att pusha.")**: kör regression-guardens mekaniska
+   kontroller och fortsätt sedan med push som vanligt.
+5. Sammanfatta resultatet kort i svaret: "Bug-hunt klar — 0 CRITICAL,
+   0 HIGH, N MEDIUM. Pushar nu." eller motsvarande.
+
+## Undantag
+
+Det finns ett enda legitimt undantag: om **användaren själv** explicit
+ber agenten hoppa över bug-hunten ("skip bug-hunt", "ingen bug-hunt
+behövs", "pusha direkt utan att kolla"), notera det i svaret
+("Hoppar över 1753-bug-hunter-prepush per ditt önskemål.") och
+fortsätt. Initiera aldrig själv en push utan bug-hunt — även om diffen
+ser liten ut, även om "det bara är en textändring".
+
+## Varför denna regel finns
+
+Tidigare push-vågor har fört med sig regressioner i:
+
+- **Fortnox-fakturabelopp** (SPARRE-buggen: fixedAmount-rabatten kom
+  inte med till Fortnox → fakturan blev högre än vad kunden betalade)
+- **Hudanalys-historiken** (tyst sväljd INSERT-fail + inkonsekvent
+  JWT-secret → inga analyser syntes i kundens dashboard)
+- **Rabattkod-mejl** (AI-genererade utskick lovade rabattkoder som
+  aldrig skapades i `discount_codes` → kunder med obrukbara koder)
+- **Case-känsliga rabattkoder** (koder lagrade med versaler kunde
+  aldrig lösas in eftersom valideringen gemenar inmatningen)
+
+Alla dessa hade fångats av en read-only diff-genomgång på ~1 minut
+innan push. Skillen finns specifikt för att fånga dem; regeln finns
+specifikt för att skillen faktiskt körs varje gång.

@@ -148,6 +148,7 @@ Ton: ärlig, varm, rebellisk -- aldrig klinisk eller korporativ. Du skriver som 
 Regler:
 - Skriv på svenska
 - Använd aldrig emojis
+- Skriv ALDRIG egna rabattkoder, rabattprocent eller erbjudanden. En riktig personlig rabattkod läggs till automatiskt av systemet efter din text
 - Max 400 ord (exkl. HTML-taggar)
 - Inkludera alltid källhänvisningar (länk + titel) för faktapåståenden
 - HTML-formatering: använd <h2>, <p>, <strong>, <em>, <a>, <blockquote>, <ul>/<li>
@@ -276,7 +277,16 @@ Svara ENBART med JSON:
        </div>`
     : "";
 
-  const fullHtml = newsletter.htmlBody + sourceFooter;
+  // Rabattblock med platshallare: {{RABATTKOD}} ersatts av
+  // /api/newsletter/broadcast med en riktig, unik engangskod per mottagare
+  // (skapas i discount_codes innan sandning).
+  const discountBlock = `<div style="margin:28px 0;padding:20px 24px;background:#f5f5f7;border-radius:16px;text-align:center">
+    <p style="font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#766a62;margin:0 0 8px">Din personliga rabattkod</p>
+    <p style="font-size:22px;font-weight:700;color:#108474;font-family:monospace;letter-spacing:2px;margin:0 0 8px">{{RABATTKOD}}</p>
+    <p style="font-size:13px;color:#515151;line-height:1.6;margin:0">15% på hela ordern. Gäller i 30 dagar och kan användas en gång. Ange koden i kassan.</p>
+  </div>`;
+
+  const fullHtml = newsletter.htmlBody + discountBlock + sourceFooter;
 
   // Update state
   segment.usedCount++;

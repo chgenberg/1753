@@ -246,6 +246,7 @@ Regler:
 - Inkludera källor när du refererar till forskning (endast om du faktiskt fått abstracts)
 - Lova inget du inte kan belägga
 - Aldrig "du borde" eller "du måste" - inbjudande ton
+- Skriv ALDRIG egna rabattkoder, rabattprocent eller erbjudanden. En riktig personlig rabattkod läggs till automatiskt av systemet efter din text
 - HTML-formatering: <h2>, <p>, <strong>, <em>, <a>, <blockquote>, <ul>/<li>
 - Styla: font-family inheritas från wrapper; font-size:15px; line-height:1.7; color:#515151
 - Rubriker: font-size:22px; font-weight:700; color:#1d1d1f
@@ -347,6 +348,55 @@ function sourceFooter(sources) {
    </div>`;
 }
 
+// ---- Personlig rabattkod (skapas i DB innan utskick) ----
+//
+// Spegel av createPersonalDiscountCode i server.js: koden måste finnas i
+// discount_codes INNAN mejlet går ut. I dry-run skapas ingen kod – previewn
+// får en exempelkod som tydligt inte är skarp.
+
+const DISCOUNT_PERCENT = 15;
+const DISCOUNT_VALID_DAYS = 30;
+
+async function createPersonalDiscountCode(recipientEmail) {
+  const crypto = require("crypto");
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const suffix = crypto.randomBytes(3).toString("hex").toUpperCase();
+    const code = `TACK15-${suffix}`;
+    const validUntil = new Date(Date.now() + DISCOUNT_VALID_DAYS * 24 * 3600 * 1000);
+    try {
+      await db.createDiscountCode({
+        code,
+        percent: DISCOUNT_PERCENT,
+        fixedAmount: 0,
+        description: `${DISCOUNT_PERCENT}% personlig kod (${recipientEmail})`,
+        productIds: null,
+        maxUses: 1,
+        validUntil: validUntil.toISOString(),
+      });
+      return code;
+    } catch (err) {
+      if (err.code === "23505") continue;
+      throw err;
+    }
+  }
+  throw new Error("Kunde inte generera unik rabattkod efter 3 försök");
+}
+
+function discountBlockHtml(code, locale) {
+  const t = {
+    sv: { label: "Din personliga rabattkod", body: `${DISCOUNT_PERCENT}% på hela ordern. Gäller i ${DISCOUNT_VALID_DAYS} dagar och kan användas en gång. Ange koden i kassan.` },
+    en: { label: "Your personal discount code", body: `${DISCOUNT_PERCENT}% off your entire order. Valid for ${DISCOUNT_VALID_DAYS} days, single use. Enter the code at checkout.` },
+    es: { label: "Tu código de descuento personal", body: `${DISCOUNT_PERCENT}% en todo tu pedido. Válido ${DISCOUNT_VALID_DAYS} días, un solo uso. Introduce el código al pagar.` },
+    de: { label: "Dein persönlicher Rabattcode", body: `${DISCOUNT_PERCENT}% auf deine gesamte Bestellung. ${DISCOUNT_VALID_DAYS} Tage gültig, einmal einlösbar. Gib den Code an der Kasse ein.` },
+    fr: { label: "Votre code de réduction personnel", body: `${DISCOUNT_PERCENT}% sur toute votre commande. Valable ${DISCOUNT_VALID_DAYS} jours, usage unique. Saisissez le code au moment du paiement.` },
+  }[locale] || { label: "Din personliga rabattkod", body: `${DISCOUNT_PERCENT}% på hela ordern. Gäller i ${DISCOUNT_VALID_DAYS} dagar och kan användas en gång. Ange koden i kassan.` };
+  return `<div style="margin:28px 0;padding:20px 24px;background:#f5f5f7;border-radius:16px;text-align:center">
+    <p style="font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#766a62;margin:0 0 8px">${t.label}</p>
+    <p style="font-size:22px;font-weight:700;color:#108474;font-family:monospace;letter-spacing:2px;margin:0 0 8px">${code.toUpperCase()}</p>
+    <p style="font-size:13px;color:#515151;line-height:1.6;margin:0">${t.body}</p>
+  </div>`;
+}
+
 // ---- Resend send with one-click unsubscribe headers ----
 
 async function sendViaResend({ to, subject, html, unsubUrl }) {
@@ -446,8 +496,27 @@ async function run() {
     }
 
     const unsubUrl = `${BASE_URL}/api/newsletter/unsubscribe/${c.unsubscribe_token}`;
+
+    // Rabattkoden skapas i DB FÖRE sändning (aldrig tvärtom). I dry-run
+    // skapas ingen riktig kod – previewn får en tydlig exempelkod.
+    let discountCode = "TACK15-EXEMPEL";
+    if (!DRY_RUN) {
+      const canSend = await db.canEmailSubscriber(c.subscriber_id, 20);
+      if (!canSend) {
+        console.log("   Hoppar över: canEmailSubscriber sa nej (kyligen mailad).");
+        continue;
+      }
+      try {
+        discountCode = await createPersonalDiscountCode(c.email);
+      } catch (err) {
+        console.error(`   Hoppar över: kunde inte skapa rabattkod (${err.message}).`);
+        failed++;
+        continue;
+      }
+    }
+
     const fullHtml = emailWrapper(
-      generated.htmlBody + sourceFooter(generated.sources) + analysisCta(locale),
+      generated.htmlBody + discountBlockHtml(discountCode, locale) + sourceFooter(generated.sources) + analysisCta(locale),
       unsubUrl
     );
 
@@ -456,11 +525,6 @@ async function run() {
       const fp = path.join(previewDir, `${safeName}.html`);
       fs.writeFileSync(fp, fullHtml, "utf-8");
     } else {
-      const canSend = await db.canEmailSubscriber(c.subscriber_id, 20);
-      if (!canSend) {
-        console.log("   Hoppar över: canEmailSubscriber sa nej (kyligen mailad).");
-        continue;
-      }
       try {
         await sendViaResend({
           to: c.email,
@@ -469,7 +533,7 @@ async function run() {
           unsubUrl,
         });
         await db.touchSubscriberEmailed(c.subscriber_id);
-        console.log("   Skickat.");
+        console.log(`   Skickat (kod: ${discountCode}).`);
       } catch (err) {
         console.error(`   Kunde inte skicka: ${err.message}`);
         failed++;

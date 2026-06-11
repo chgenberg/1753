@@ -285,6 +285,7 @@ Allt innehall ska vara relevant, vetenskapligt grundat och relaterat till just $
 Regler:
 - Skriv pa svenska
 - Anvand aldrig emojis
+- Skriv ALDRIG egna rabattkoder, rabattprocent eller erbjudanden. En riktig personlig rabattkod laggs till automatiskt av systemet efter din text
 - Max 500 ord (exkl. HTML-taggar)
 - Inkludera kallhanvisningar (lank + titel) for faktapastaenden nar kallor finns
 - HTML-formatering: <h2>, <p>, <strong>, <em>, <a>, <blockquote>, <ul>/<li>
@@ -418,7 +419,16 @@ Generera nyhetsbrevet nu.`;
         ${greenButton("Gor gratis hudanalys", "https://www.1753skin.com/hudanalys")}
       </div>`;
 
-      const fullHtml = nl.htmlBody + sourceFooter + analysisCta;
+      // Rabattblock med platshallare: {{RABATTKOD}} ersatts av
+      // /api/newsletter/broadcast-segmented med en riktig, unik engangskod
+      // per mottagare (skapas i discount_codes innan sandning).
+      const discountBlock = `<div style="margin:28px 0;padding:20px 24px;background:#f5f5f7;border-radius:16px;text-align:center">
+        <p style="font-size:11px;text-transform:uppercase;letter-spacing:1.5px;color:#766a62;margin:0 0 8px">Din personliga rabattkod</p>
+        <p style="font-size:22px;font-weight:700;color:#108474;font-family:monospace;letter-spacing:2px;margin:0 0 8px">{{RABATTKOD}}</p>
+        <p style="font-size:13px;color:#515151;line-height:1.6;margin:0">15% pa hela ordern. Galler i 30 dagar och kan anvandas en gang. Ange koden i kassan.</p>
+      </div>`;
+
+      const fullHtml = nl.htmlBody + discountBlock + sourceFooter + analysisCta;
 
       newsletters.push({
         skinCondition: condition,
