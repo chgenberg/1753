@@ -422,11 +422,9 @@ const DISCOUNT_CODES = {
     productIds: null,
     description: "5% rabatt -- valkommen tillbaka",
   },
-  hudanalys15: {
-    percent: 15,
-    productIds: null,
-    description: "15% rabatt -- tack for din hudanalys",
-  },
+  // hudanalys15 utfasad 2026-06-11: hudanalysrapporten skapar nu istället en
+  // personlig engångskod (TACK15-XXXXXX) per mottagare via
+  // createPersonalDiscountCode nedan.
 };
 
 // ---- PERSONLIGA RABATTKODER (auto-genererade vid mejlutskick) ----
@@ -6687,6 +6685,61 @@ app.post("/api/cron/check-shipments", async (req, res) => {
 
 // ---- BROADCAST ENDPOINT (admin) ----
 
+// Delad utskicksloop för broadcast + godkända utkast. Hanterar
+// {{firstName}}-personalisering och {{RABATTKOD}}-substitution (riktig,
+// unik engångskod per mottagare – skapas i DB innan sändning).
+async function broadcastNewsletterToAll(subject, html) {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) throw new Error("RESEND_API_KEY saknas");
+
+  const { Resend } = require("resend");
+  const resend = new Resend(apiKey);
+  const fromEmail = emailFromInfo();
+
+  const subscribers = await db.findActiveSubscribers();
+  const baseUrl = process.env.BASE_URL || "https://api.1753skin.com";
+  let sent = 0;
+
+  const wantsDiscountCode = /\{\{RABATTKOD\}\}/.test(html);
+
+  for (const sub of subscribers) {
+    try {
+      const subL = sub.locale || "sv";
+      const fnFallback = { sv: "du", en: "there", es: "amigo/a", de: "du", fr: "vous" };
+      const unsubUrl = `${baseUrl}/api/newsletter/unsubscribe/${sub.unsubscribe_token}`;
+
+      let personalHtml = html.replace(/\{\{firstName\}\}/g, sub.first_name || (fnFallback[subL] || "du"));
+      if (wantsDiscountCode) {
+        // Skapa en riktig, unik engångskod per mottagare INNAN sändning.
+        // Misslyckas skapandet hoppar vi över mottagaren hellre än att
+        // skicka ett mejl som lovar en kod som inte finns.
+        let personalCode;
+        try {
+          personalCode = await createPersonalDiscountCode(sub.email);
+        } catch (codeErr) {
+          console.error(`[Broadcast] Hoppar över ${sub.email} – kunde inte skapa rabattkod:`, codeErr.message);
+          continue;
+        }
+        personalHtml = personalHtml.replace(/\{\{RABATTKOD\}\}/g, personalCode.toUpperCase());
+      }
+
+      await resend.emails.send({
+        from: fromEmail,
+        to: sub.email,
+        subject,
+        html: emailWrapper(personalHtml, unsubUrl, subL),
+        headers: newsletterHeaders(unsubUrl),
+      });
+      sent++;
+    } catch (err) {
+      console.error(`[Broadcast] Failed to send to ${sub.email}:`, err.message);
+    }
+  }
+
+  console.log(`[Broadcast] Sent "${subject}" to ${sent}/${subscribers.length} subscribers`);
+  return { sent, total: subscribers.length };
+}
+
 app.post("/api/newsletter/broadcast", async (req, res) => {
   try {
     const { subject, html, adminKey } = req.body;
@@ -6698,58 +6751,107 @@ app.post("/api/newsletter/broadcast", async (req, res) => {
       return res.status(400).json({ message: "subject och html kravs" });
     }
 
-    const apiKey = process.env.RESEND_API_KEY;
-    if (!apiKey) return res.status(500).json({ message: "RESEND_API_KEY saknas" });
-
-    const { Resend } = require("resend");
-    const resend = new Resend(apiKey);
-    const fromEmail = emailFromInfo();
-
-    const subscribers = await db.findActiveSubscribers();
-    const baseUrl = process.env.BASE_URL || "https://api.1753skin.com";
-    let sent = 0;
-
-    const wantsDiscountCode = /\{\{RABATTKOD\}\}/.test(html);
-
-    for (const sub of subscribers) {
-      try {
-        const subL = sub.locale || "sv";
-        const fnFallback = { sv: "du", en: "there", es: "amigo/a", de: "du", fr: "vous" };
-        const unsubUrl = `${baseUrl}/api/newsletter/unsubscribe/${sub.unsubscribe_token}`;
-
-        let personalHtml = html.replace(/\{\{firstName\}\}/g, sub.first_name || (fnFallback[subL] || "du"));
-        if (wantsDiscountCode) {
-          // Skapa en riktig, unik engångskod per mottagare INNAN sändning.
-          // Misslyckas skapandet hoppar vi över mottagaren hellre än att
-          // skicka ett mejl som lovar en kod som inte finns.
-          let personalCode;
-          try {
-            personalCode = await createPersonalDiscountCode(sub.email);
-          } catch (codeErr) {
-            console.error(`[Broadcast] Hoppar över ${sub.email} – kunde inte skapa rabattkod:`, codeErr.message);
-            continue;
-          }
-          personalHtml = personalHtml.replace(/\{\{RABATTKOD\}\}/g, personalCode.toUpperCase());
-        }
-
-        await resend.emails.send({
-          from: fromEmail,
-          to: sub.email,
-          subject,
-          html: emailWrapper(personalHtml, unsubUrl, subL),
-          headers: newsletterHeaders(unsubUrl),
-        });
-        sent++;
-      } catch (err) {
-        console.error(`[Broadcast] Failed to send to ${sub.email}:`, err.message);
-      }
-    }
-
-    console.log(`[Broadcast] Sent "${subject}" to ${sent}/${subscribers.length} subscribers`);
-    res.json({ ok: true, sent, total: subscribers.length });
+    const { sent, total } = await broadcastNewsletterToAll(subject, html);
+    res.json({ ok: true, sent, total });
   } catch (err) {
     console.error("[Broadcast] Error:", err);
     res.status(500).json({ message: "Broadcast misslyckades" });
+  }
+});
+
+// ---- NEWSLETTER DRAFTS (admin) ----
+//
+// generate-newsletter.js sparar AI-genererade nyhetsbrev som utkast här.
+// Utkast skickas INTE automatiskt – de godkänns och skickas via
+// POST /api/newsletter/drafts/:id/send.
+
+function checkAdminKey(req) {
+  const adminKey = req.body?.adminKey || req.headers["x-admin-key"] || req.query.adminKey;
+  const expectedKey = process.env.ADMIN_API_KEY || "1753-admin-key";
+  return adminKey === expectedKey;
+}
+
+app.post("/api/newsletter/drafts", async (req, res) => {
+  try {
+    if (!checkAdminKey(req)) {
+      return res.status(403).json({ message: "Ogiltig admin-nyckel" });
+    }
+    const { issueNumber, type, subject, preheader, htmlBody, sources, segmentTitle } = req.body;
+    if (!subject || !htmlBody) {
+      return res.status(400).json({ message: "subject och htmlBody kravs" });
+    }
+    const draft = await db.createNewsletterDraft({
+      issueNumber: issueNumber || 0,
+      type: type || "value",
+      subject,
+      preheader,
+      htmlBody,
+      sources,
+      segmentTitle,
+    });
+    res.json({ ok: true, id: draft.id, status: draft.status });
+  } catch (err) {
+    console.error("[Drafts] Create error:", err);
+    res.status(500).json({ message: "Kunde inte spara utkast" });
+  }
+});
+
+app.get("/api/newsletter/drafts", async (req, res) => {
+  try {
+    if (!checkAdminKey(req)) {
+      return res.status(403).json({ message: "Ogiltig admin-nyckel" });
+    }
+    const drafts = await db.listNewsletterDrafts({
+      status: req.query.status || undefined,
+      limit: Math.min(parseInt(req.query.limit, 10) || 20, 100),
+    });
+    // Lista utan html_body (kan vara stora) – hämta enskilt utkast för preview
+    res.json({
+      drafts: drafts.map(({ html_body, ...rest }) => rest),
+    });
+  } catch (err) {
+    console.error("[Drafts] List error:", err);
+    res.status(500).json({ message: "Kunde inte hämta utkast" });
+  }
+});
+
+app.get("/api/newsletter/drafts/:id", async (req, res) => {
+  try {
+    if (!checkAdminKey(req)) {
+      return res.status(403).json({ message: "Ogiltig admin-nyckel" });
+    }
+    const draft = await db.getNewsletterDraft(parseInt(req.params.id, 10));
+    if (!draft) return res.status(404).json({ message: "Utkastet finns inte" });
+    res.json({ draft });
+  } catch (err) {
+    console.error("[Drafts] Get error:", err);
+    res.status(500).json({ message: "Kunde inte hämta utkast" });
+  }
+});
+
+app.post("/api/newsletter/drafts/:id/send", async (req, res) => {
+  try {
+    if (!checkAdminKey(req)) {
+      return res.status(403).json({ message: "Ogiltig admin-nyckel" });
+    }
+    const id = parseInt(req.params.id, 10);
+    const draft = await db.getNewsletterDraft(id);
+    if (!draft) return res.status(404).json({ message: "Utkastet finns inte" });
+    if (draft.status === "sent") {
+      return res.status(409).json({ message: "Utkastet är redan skickat" });
+    }
+
+    if (draft.status === "draft") {
+      await db.approveNewsletterDraft(id);
+    }
+
+    const { sent, total } = await broadcastNewsletterToAll(draft.subject, draft.html_body);
+    await db.markNewsletterSent(id, sent);
+
+    res.json({ ok: true, id, sent, total });
+  } catch (err) {
+    console.error("[Drafts] Send error:", err);
+    res.status(500).json({ message: "Utskicket misslyckades" });
   }
 });
 
