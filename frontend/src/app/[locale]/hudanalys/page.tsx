@@ -899,6 +899,25 @@ export default function AnalysisPage() {
                   "Scannez votre visage avec la précision MediaPipe sur 12 zones, répondez à sept questions rapides et recevez 15 métriques cutanées scientifiques, un âge estimé de la peau, un graphique radar et des recommandations personnalisées.")}
               </p>
 
+              <div className="mx-auto mt-8 max-w-xl overflow-hidden rounded-3xl shadow-xl shadow-black/10 transition-shadow duration-300 hover:shadow-2xl">
+                <video
+                  src="/Landing_page_skinanalys/hudanalys-demo-live.mp4"
+                  poster="/Landing_page_skinanalys/hudanalys-demo-live-poster.jpg"
+                  autoPlay
+                  muted
+                  loop
+                  playsInline
+                  preload="metadata"
+                  aria-label={tx(locale,
+                    "Så här gör du hudanalysen – demonstration på 25 sekunder",
+                    "How to do the skin analysis – 25 second demonstration",
+                    "Cómo hacer el análisis de piel – demostración de 25 segundos",
+                    "So funktioniert die Hautanalyse – 25-Sekunden-Demonstration",
+                    "Comment faire l'analyse de peau – démonstration de 25 secondes")}
+                  className="block h-auto w-full"
+                />
+              </div>
+
               <div className="mx-auto mt-8 grid max-w-sm gap-4 text-left">
                 <div className="flex items-start gap-4 rounded-2xl border border-[#e6e6e6] bg-white p-4">
                   <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-[#108474]/10 text-sm font-bold text-[#108474]">1</div>
