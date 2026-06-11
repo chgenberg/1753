@@ -1,15 +1,69 @@
 /**
- * Renderar ram-assets för filmen med Playwright (1920x1080):
- *   out/bg.png     – bakgrund med drop-shadow + glasplatta
- *   out/frame.png  – transparent telefonram (bezel, statusbar, Dynamic Island, hemindikator)
- *   out/intro.png  – brandat titelkort
- *   out/outro.png  – brandat slutkort
+ * Renderar ram-assets för filmen med Playwright (1920x1080), per språk:
+ *   out/<locale>/bg.png     – bakgrund med drop-shadow + glasplatta + brandtext
+ *   out/<locale>/frame.png  – transparent telefonram (bezel, statusbar, Dynamic Island)
+ *   out/<locale>/intro.png  – brandat titelkort
+ *   out/<locale>/outro.png  – brandat slutkort
+ *
+ * Användning:  node frames.js [sv|en|es|de]
  */
 const path = require("path");
 const fs = require("fs");
 const { chromium } = require("playwright");
 
-const OUT = path.resolve(__dirname, "out");
+const LOCALE = process.argv[2] || process.env.LOCALE || "sv";
+
+const COPY = {
+  sv: {
+    heroTitle: "Gratis AI-hudanalys<br><em>på 2 minuter</em>",
+    heroSub: "Skanna ansiktet, svara på sju korta frågor och få en komplett hudrapport – med PDF att ladda ner.",
+    pill1: "Helt gratis",
+    pill2: "Ingen app behövs",
+    introTitle: "Hur mår din hud <em>egentligen</em>?",
+    introSub: "Gör vår gratis AI-hudanalys – så här enkelt är det.",
+    outroKicker: "1753skin.com/hudanalys",
+    outroTitle: "Gör din egen analys – <em>helt gratis</em>",
+    outroSub: "2 minuter · 15 hudmetriker · PDF-rapport direkt till din mejl.",
+  },
+  en: {
+    heroTitle: "Free AI skin analysis<br><em>in 2 minutes</em>",
+    heroSub: "Scan your face, answer seven quick questions and get a complete skin report – with a PDF to download.",
+    pill1: "Completely free",
+    pill2: "No app needed",
+    introTitle: "How healthy is your skin <em>really</em>?",
+    introSub: "Take our free AI skin analysis – it's this easy.",
+    outroKicker: "1753skin.com/skin-analysis",
+    outroTitle: "Do your own analysis – <em>completely free</em>",
+    outroSub: "2 minutes · 15 skin metrics · PDF report straight to your inbox.",
+  },
+  es: {
+    heroTitle: "Análisis de piel con IA<br><em>gratis en 2 minutos</em>",
+    heroSub: "Escanea tu rostro, responde siete preguntas rápidas y recibe un informe completo de tu piel – con PDF para descargar.",
+    pill1: "Totalmente gratis",
+    pill2: "Sin app",
+    introTitle: "¿Cómo está tu piel <em>realmente</em>?",
+    introSub: "Haz nuestro análisis de piel con IA gratis – así de fácil.",
+    outroKicker: "1753skin.com/analisis-piel",
+    outroTitle: "Haz tu propio análisis – <em>totalmente gratis</em>",
+    outroSub: "2 minutos · 15 métricas de piel · informe PDF directo a tu correo.",
+  },
+  de: {
+    heroTitle: "Kostenlose KI-Hautanalyse<br><em>in 2 Minuten</em>",
+    heroSub: "Scanne dein Gesicht, beantworte sieben kurze Fragen und erhalte einen kompletten Hautbericht – mit PDF zum Herunterladen.",
+    pill1: "Komplett kostenlos",
+    pill2: "Keine App nötig",
+    introTitle: "Wie gesund ist deine Haut <em>wirklich</em>?",
+    introSub: "Mach unsere kostenlose KI-Hautanalyse – so einfach geht's.",
+    outroKicker: "1753skin.com/hautanalyse",
+    outroTitle: "Mach deine eigene Analyse – <em>komplett kostenlos</em>",
+    outroSub: "2 Minuten · 15 Hautmetriken · PDF-Bericht direkt in dein Postfach.",
+  },
+};
+
+const C = COPY[LOCALE];
+if (!C) throw new Error(`Okänt språk: ${LOCALE} (välj sv|en|es|de)`);
+
+const OUT = path.resolve(__dirname, "out", LOCALE);
 const SCREEN = { w: 415, h: 900, x: 752, y: 90 };
 const STATUS = 56;
 const BEZEL = 14;
@@ -46,9 +100,9 @@ function bgHtml() {
     <div class="plate"></div>
     <div class="brand">
       <div class="k">1753 Skincare</div>
-      <h1>Gratis AI-hudanalys<br><em>på 2 minuter</em></h1>
-      <p>Skanna ansiktet, svara på sju korta frågor och få en komplett hudrapport – med PDF att ladda ner.</p>
-      <div class="pill"><span>Helt gratis</span><span>Ingen app behövs</span></div>
+      <h1>${C.heroTitle}</h1>
+      <p>${C.heroSub}</p>
+      <div class="pill"><span>${C.pill1}</span><span>${C.pill2}</span></div>
     </div>
   </body></html>`;
 }
@@ -118,7 +172,7 @@ async function shoot(page, html, file, transparent) {
   await page.evaluate(() => document.fonts.ready);
   await page.waitForTimeout(250);
   await page.screenshot({ path: path.join(OUT, file), omitBackground: !!transparent });
-  console.log(`[frames] ${file}`);
+  console.log(`[frames] (${LOCALE}) ${file}`);
 }
 
 async function main() {
@@ -128,19 +182,11 @@ async function main() {
 
   await shoot(page, bgHtml(), "bg.png");
   await shoot(page, frameHtml(), "frame.png", true);
-  await shoot(page, cardHtml({
-    kicker: "1753 Skincare",
-    title: "Hur mår din hud <em>egentligen</em>?",
-    sub: "Gör vår gratis AI-hudanalys – så här enkelt är det.",
-  }), "intro.png");
-  await shoot(page, cardHtml({
-    kicker: "1753skin.com/hudanalys",
-    title: "Gör din egen analys – <em>helt gratis</em>",
-    sub: "2 minuter · 15 hudmetriker · PDF-rapport direkt till din mejl.",
-  }), "outro.png");
+  await shoot(page, cardHtml({ kicker: "1753 Skincare", title: C.introTitle, sub: C.introSub }), "intro.png");
+  await shoot(page, cardHtml({ kicker: C.outroKicker, title: C.outroTitle, sub: C.outroSub }), "outro.png");
 
   await browser.close();
-  console.log("[frames] Klart.");
+  console.log(`[frames] (${LOCALE}) Klart.`);
 }
 
 main().catch((err) => { console.error(err); process.exit(1); });

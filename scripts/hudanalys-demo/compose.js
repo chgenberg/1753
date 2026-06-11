@@ -7,7 +7,8 @@ const fs = require("fs");
 const path = require("path");
 const { spawnSync } = require("child_process");
 
-const OUT = path.resolve(__dirname, "out");
+const LOCALE = process.argv[2] || process.env.LOCALE || "sv";
+const OUT = path.resolve(__dirname, "out", LOCALE);
 const { SCREEN, STATUS, marks } = JSON.parse(fs.readFileSync(path.join(OUT, "marks.json"), "utf8"));
 
 const T = Object.fromEntries(marks.map((m) => [m.name, m.t]));

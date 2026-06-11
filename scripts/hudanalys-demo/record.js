@@ -1,9 +1,11 @@
 /**
  * Spelar in hudanalysflödet som video med Playwright (mobilkontext).
  *
- * Körs mot produktion (eller BASE_URL). Skriver:
- *   out/raw.webm    – rå inspelning (415x844)
- *   out/marks.json  – tidsmarkörer för klippningen i compose.js
+ * Körs mot produktion (eller BASE_URL). Skriver per språk:
+ *   out/<locale>/raw.webm    – rå inspelning (415x844)
+ *   out/<locale>/marks.json  – tidsmarkörer för klippningen i compose.js
+ *
+ * Användning:  node record.js [sv|en|es|de]
  *
  * Env:
  *   BASE_URL           (default https://www.1753skin.com)
@@ -14,10 +16,128 @@ const fs = require("fs");
 const path = require("path");
 const { chromium } = require("playwright");
 
+const LOCALE = process.argv[2] || process.env.LOCALE || "sv";
+
+// Alla UI-etiketter som flödet behöver, per språk. OBS: de.ts använder
+// en-dash i "1–2 Liter" / "3–5 Mal pro Woche" – måste matcha exakt.
+const L10N = {
+  sv: {
+    segment: "hudanalys",
+    start: "Starta analys",
+    consent: "Jag godkänner villkoren",
+    continue: "Fortsätt",
+    gender: "Kvinna",
+    toScan: "Fortsätt till skanning",
+    upload: "Ladda upp foto",
+    analyze: "Analysera min hy",
+    skinDry: "Torr",
+    skinCombo: "Kombinerad",
+    concern1: "Torrhet",
+    concern2: "Matt / livlös hy",
+    routine1: "Rengöring",
+    routine2: "Ansiktsolja",
+    stress: "Medel",
+    diet: "Balanserad / varierad",
+    water: "1-2 liter",
+    exercise: "3-5 gånger i veckan",
+    goal1: "Mer lyster och utstrålning",
+    goal2: "Djupare återfuktning",
+    sun: "Ibland",
+    hormonal: "Nej",
+    next: "Nästa",
+    getResults: "Visa min analys",
+    pdf: "Ladda ner som PDF",
+  },
+  en: {
+    segment: "skin-analysis",
+    start: "Start analysis",
+    consent: "I accept the terms",
+    continue: "Continue",
+    gender: "Woman",
+    toScan: "Continue to scan",
+    upload: "Upload photo",
+    analyze: "Analyse my skin",
+    skinDry: "Dry",
+    skinCombo: "Combination",
+    concern1: "Dryness",
+    concern2: "Dull / lifeless skin",
+    routine1: "Cleanser",
+    routine2: "Face oil",
+    stress: "Medium",
+    diet: "Balanced / varied",
+    water: "1-2 litres",
+    exercise: "3-5 times a week",
+    goal1: "More glow and radiance",
+    goal2: "Deeper hydration",
+    sun: "Sometimes",
+    hormonal: "No",
+    next: "Next",
+    getResults: "Show my analysis",
+    pdf: "Download as PDF",
+  },
+  es: {
+    segment: "analisis-piel",
+    start: "Iniciar análisis",
+    consent: "Acepto los términos",
+    continue: "Continuar",
+    gender: "Mujer",
+    toScan: "Continuar al escaneo",
+    upload: "Subir foto",
+    analyze: "Analizar mi piel",
+    skinDry: "Seca",
+    skinCombo: "Mixta",
+    concern1: "Sequedad",
+    concern2: "Piel apagada / sin vida",
+    routine1: "Limpiador",
+    routine2: "Aceite facial",
+    stress: "Medio",
+    diet: "Equilibrada / variada",
+    water: "1-2 litros",
+    exercise: "3-5 veces por semana",
+    goal1: "Más luminosidad y resplandor",
+    goal2: "Hidratación más profunda",
+    sun: "A veces",
+    hormonal: "No",
+    next: "Siguiente",
+    getResults: "Ver mi análisis",
+    pdf: "Descargar como PDF",
+  },
+  de: {
+    segment: "hautanalyse",
+    start: "Analyse starten",
+    consent: "Ich akzeptiere die Bedingungen",
+    continue: "Weiter",
+    gender: "Frau",
+    toScan: "Weiter zum Scan",
+    upload: "Foto hochladen",
+    analyze: "Meine Haut analysieren",
+    skinDry: "Trocken",
+    skinCombo: "Mischhaut",
+    concern1: "Trockenheit",
+    concern2: "Fahle / leblose Haut",
+    routine1: "Reinigung",
+    routine2: "Gesichtsöl",
+    stress: "Mittel",
+    diet: "Ausgewogen / abwechslungsreich",
+    water: "1\u20132 Liter",
+    exercise: "3\u20135 Mal pro Woche",
+    goal1: "Mehr Ausstrahlung und Glow",
+    goal2: "Tiefenwirksame Feuchtigkeit",
+    sun: "Manchmal",
+    hormonal: "Nein",
+    next: "Weiter",
+    getResults: "Meine Analyse anzeigen",
+    pdf: "Als PDF herunterladen",
+  },
+};
+
+const T = L10N[LOCALE];
+if (!T) throw new Error(`Okänt språk: ${LOCALE} (välj sv|en|es|de)`);
+
 const BASE_URL = process.env.BASE_URL || "https://www.1753skin.com";
 const DEMO_EMAIL = "info@1753skincare.com";
 const PHOTO = path.resolve(__dirname, "../../public/Ebbaanalys.png");
-const OUT = path.resolve(__dirname, "out");
+const OUT = path.resolve(__dirname, "out", LOCALE);
 
 // Geometri: telefonglaset är 415x900 på en 1920x1080-canvas. Översta 56px
 // reserveras för en fejkad iOS-statusbar, så sidan spelas in i 415x844.
@@ -65,6 +185,7 @@ async function main() {
     deviceScaleFactor: 3,
     isMobile: true,
     hasTouch: true,
+    locale: LOCALE,
     userAgent:
       "Mozilla/5.0 (iPhone; CPU iPhone OS 17_5 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.5 Mobile/15E148 Safari/604.1",
     recordVideo: { dir: OUT, size: { width: SCREEN.w, height: PAGE_H } }, // = viewport!
@@ -99,12 +220,9 @@ async function main() {
   page.on("response", async (res) => {
     if (res.url().includes("/api/analysis")) {
       let body = "";
-      try { body = (await res.text()).slice(0, 600); } catch {}
+      try { body = (await res.text()).slice(0, 300); } catch {}
       console.log(`[api] ${res.status()} ${res.url()}\n${body}`);
     }
-  });
-  page.on("console", (msg) => {
-    if (msg.type() === "error") console.log(`[console.error] ${msg.text().slice(0, 300)}`);
   });
 
   const marks = [];
@@ -120,7 +238,9 @@ async function main() {
     await loc.waitFor({ state: "visible", timeout: opts.timeout || 20000 });
     await loc.scrollIntoViewIfNeeded();
     await sleep(opts.before ?? 350);
-    await loc.tap();
+    // position används för consent: tap på checkbox-ikonen till vänster så att
+    // den nästlade "Läs villkoren"-länken (stopPropagation) aldrig träffas
+    await loc.tap(opts.position ? { position: opts.position } : undefined);
   };
 
   const softScroll = async (deltaY, steps = 40) => {
@@ -133,14 +253,14 @@ async function main() {
     }, { deltaY, steps });
   };
 
-  console.log(`[record] Går till ${BASE_URL}/sv/hudanalys`);
-  await page.goto(`${BASE_URL}/sv/hudanalys`, { waitUntil: "networkidle", timeout: 60000 });
+  console.log(`[record] (${LOCALE}) Går till ${BASE_URL}/${LOCALE}/${T.segment}`);
+  await page.goto(`${BASE_URL}/${LOCALE}/${T.segment}`, { waitUntil: "networkidle", timeout: 60000 });
   t0 = Date.now();
   await sleep(900);
   mark("start");
 
   // ---- INTRO ----
-  await tapText("Starta analys");
+  await tapText(T.start);
   mark("startTap");
 
   // ---- EMAIL ----
@@ -150,9 +270,9 @@ async function main() {
   await emailInput.tap();
   await emailInput.pressSequentially(DEMO_EMAIL, { delay: 38 });
   mark("typedEmail");
-  await tapText("Jag godkänner villkoren");
+  await tapText(T.consent, { position: { x: 26, y: 22 } });
   await sleep(350);
-  await tapText("Fortsätt");
+  await tapText(T.continue);
   mark("emailNext");
 
   // ---- DEMOGRAPHICS ----
@@ -161,20 +281,20 @@ async function main() {
   await sleep(450);
   await ageInput.tap();
   await ageInput.pressSequentially("28", { delay: 120 });
-  await tapText("Kvinna");
+  await tapText(T.gender);
   mark("demoFilled");
-  await tapText("Fortsätt till skanning");
+  await tapText(T.toScan);
   mark("demoNext");
 
   // ---- SCAN: ladda upp foto ----
-  await page.locator('button:has-text("Ladda upp foto")').waitFor({ state: "visible" });
+  await page.locator(`button:has-text("${T.upload}")`).waitFor({ state: "visible" });
   await sleep(700);
   mark("scanShown");
   await page.locator('input[type="file"]').first().setInputFiles(PHOTO);
-  await page.locator('button:has-text("Analysera min hy")').waitFor({ state: "visible", timeout: 30000 });
+  await page.locator(`button:has-text("${T.analyze}")`).waitFor({ state: "visible", timeout: 30000 });
   await sleep(800);
   mark("photoSet");
-  await tapText("Analysera min hy");
+  await tapText(T.analyze);
   mark("analyzeTap");
   // Scanner-stegen byter layout – se till att laddaren är i bild
   await sleep(250);
@@ -182,72 +302,71 @@ async function main() {
 
   // Vänta på att skanningen blir klar och quiz steg 1 dyker upp
   // (modellnedladdning ~87 MB första gången – komprimeras i klippet)
-  await page.locator('button:has-text("Torr")').first().waitFor({ state: "visible", timeout: 300000 });
+  await page.locator(`button:has-text("${T.skinDry}")`).first().waitFor({ state: "visible", timeout: 300000 });
   await sleep(400);
   mark("quizShown");
 
   // ---- QUIZ 1: hudtyp ----
-  await tapText("Kombinerad");
+  await tapText(T.skinCombo);
   await sleep(450);
-  await tapText("Nästa");
+  await tapText(T.next);
   mark("q1");
 
   // ---- QUIZ 2: besvär ----
-  await tapText("Torrhet");
+  await tapText(T.concern1);
   await sleep(300);
-  await tapText("Matt / livlös hy");
+  await tapText(T.concern2);
   await sleep(400);
-  await tapText("Nästa");
+  await tapText(T.next);
   mark("q2");
 
   // ---- QUIZ 3: rutin ----
-  await tapText("Rengöring");
+  await tapText(T.routine1);
   await sleep(300);
-  await tapText("Ansiktsolja");
+  await tapText(T.routine2);
   await sleep(400);
-  await tapText("Nästa");
+  await tapText(T.next);
   mark("q3");
 
   // ---- QUIZ 4: livsstil ----
-  await tapText("Medel");
+  await tapText(T.stress);
   await sleep(280);
-  await tapText("Balanserad / varierad");
+  await tapText(T.diet);
   await sleep(280);
-  await tapText("1-2 liter");
+  await tapText(T.water);
   await sleep(280);
-  await tapText("3-5 gånger i veckan");
+  await tapText(T.exercise);
   await sleep(400);
-  await tapText("Nästa");
+  await tapText(T.next);
   mark("q4");
 
   // ---- QUIZ 5: mål ----
-  await tapText("Mer lyster och utstrålning");
+  await tapText(T.goal1);
   await sleep(300);
-  await tapText("Djupare återfuktning");
+  await tapText(T.goal2);
   await sleep(400);
-  await tapText("Nästa");
+  await tapText(T.next);
   mark("q5");
 
   // ---- QUIZ 6: solskydd ----
-  await tapText("Ibland");
+  await tapText(T.sun);
   await sleep(400);
-  await tapText("Nästa");
+  await tapText(T.next);
   mark("q6");
 
   // ---- QUIZ 7: hormonell ----
-  await tapText("Nej");
+  await tapText(T.hormonal);
   await sleep(400);
-  await tapText("Visa min analys");
+  await tapText(T.getResults);
   mark("resultsTap");
 
   // ---- Vänta på resultatet (AI-analysen, komprimeras i klippet) ----
   try {
-    await page.locator('button:has-text("Ladda ner som PDF")').waitFor({ state: "visible", timeout: 240000 });
+    await page.locator(`button:has-text("${T.pdf}")`).waitFor({ state: "visible", timeout: 240000 });
   } catch (e) {
     await page.screenshot({ path: path.join(OUT, "fail.png"), fullPage: true });
     throw e;
   }
-  await page.locator('h2:has-text("Din hudanalys")').first().waitFor({ state: "visible", timeout: 10000 }).catch(() => {});
   await sleep(600);
   mark("resultShown");
 
@@ -261,7 +380,7 @@ async function main() {
   mark("scrolled2");
 
   // ---- Ladda ner PDF ----
-  const pdfBtn = page.locator('button:has-text("Ladda ner som PDF")');
+  const pdfBtn = page.locator(`button:has-text("${T.pdf}")`);
   await pdfBtn.scrollIntoViewIfNeeded();
   await sleep(800);
   mark("pdfShown");
@@ -281,10 +400,10 @@ async function main() {
 
   fs.copyFileSync(videoPath, path.join(OUT, "raw.webm"));
   fs.writeFileSync(path.join(OUT, "marks.json"), JSON.stringify({ SCREEN, STATUS, marks }, null, 2));
-  console.log(`\n[record] Klart. raw.webm + marks.json i ${OUT}`);
+  console.log(`\n[record] (${LOCALE}) Klart. raw.webm + marks.json i ${OUT}`);
 }
 
-main().catch(async (err) => {
+main().catch((err) => {
   console.error("[record] FEL:", err);
   process.exit(1);
 });

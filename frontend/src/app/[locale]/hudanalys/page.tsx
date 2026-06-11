@@ -900,9 +900,10 @@ export default function AnalysisPage() {
               </p>
 
               <div className="mx-auto mt-8 max-w-xl overflow-hidden rounded-3xl shadow-xl shadow-black/10 transition-shadow duration-300 hover:shadow-2xl">
+                {/* Demofilm finns på sv/en/es/de – franska faller tillbaka på engelska */}
                 <video
-                  src="/Landing_page_skinanalys/hudanalys-demo-live.mp4"
-                  poster="/Landing_page_skinanalys/hudanalys-demo-live-poster.jpg"
+                  src={`/Landing_page_skinanalys/hudanalys-demo-live-${["sv", "en", "es", "de"].includes(locale) ? locale : "en"}.mp4`}
+                  poster={`/Landing_page_skinanalys/hudanalys-demo-live-${["sv", "en", "es", "de"].includes(locale) ? locale : "en"}-poster.jpg`}
                   autoPlay
                   muted
                   loop
