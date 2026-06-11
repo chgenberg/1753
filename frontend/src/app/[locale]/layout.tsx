@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import { TopBanner } from "@/components/top-banner";
+import { LenisProvider } from "@/components/fx/lenis-provider";
 import { Header } from "@/components/header";
 import { Footer } from "@/components/footer";
 import { CartDrawer } from "@/components/cart-drawer";
@@ -267,6 +268,7 @@ export default async function LocaleLayout({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(navSchema) }}
       />
+      <LenisProvider />
       <TopBanner />
       <Header />
       <main id="main-content" className="flex-1">{children}</main>

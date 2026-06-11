@@ -1067,6 +1067,7 @@ export default function AnalysisPage() {
                     <div
                       role="dialog"
                       aria-modal="true"
+                      data-lenis-prevent
                       className="relative mx-4 max-h-[85vh] w-full max-w-md overflow-y-auto rounded-3xl bg-white p-6 shadow-2xl md:p-8"
                       onClick={(e) => e.stopPropagation()}
                     >

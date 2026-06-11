@@ -1,5 +1,5 @@
 import type { Metadata, Viewport } from "next";
-import { Inter } from "next/font/google";
+import { Inter, Fraunces } from "next/font/google";
 import Script from "next/script";
 import "./globals.css";
 import { CartProvider } from "@/providers/cart-provider";
@@ -13,6 +13,15 @@ const META_PIXEL_ID = "418230511894981";
 const inter = Inter({
   variable: "--font-inter",
   subsets: ["latin"],
+  display: "swap",
+});
+
+// Display-serif för stora rubriker i det nya designspråket.
+const fraunces = Fraunces({
+  subsets: ["latin"],
+  style: ["normal", "italic"],
+  weight: ["300", "400", "500"],
+  variable: "--font-fraunces",
   display: "swap",
 });
 
@@ -49,7 +58,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="sv" className={`${inter.variable} h-full`} suppressHydrationWarning>
+    <html lang="sv" className={`${inter.variable} ${fraunces.variable} h-full`} suppressHydrationWarning>
       <head>
         <link rel="preconnect" href="https://www.googletagmanager.com" />
         <link rel="preconnect" href="https://cdn.shopify.com" />

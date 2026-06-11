@@ -15,13 +15,20 @@ alwaysApply: true
 - **Superminimalistisk** – varje element måste motivera sin existens
 - **Icke-AI-känsla** – undvik perfekt symmetri, generiska gradients, stockfoto-estetik
 - **Interaktivitet** – smooth scroll-animationer, hover-effekter med elevation, micro-interactions; målet är en **enormt interaktiv** upplevelse utan att det blir rörigt
-- **Fyra menypunkter i header**: Hem, Produkter, Om oss, Kontakt – inget mer (plus Mitt konto/Logga in). Hudanalys exponeras medvetet **enbart i footer** (sekundär ingång, inte primär nav).
+- **Header (sedan 2026-06-11, claudetype-redesignen)**: centrerad frosted glass-pill med **logotypen i mitten** mellan "Om oss" och "Hudanalys". Ordning: Produkter, Om oss, [logo = Hem], Hudanalys, Kontakt. Ikonkluster till höger (språk, Mitt konto, varukorg). Mobilmenyn behåller alla fem punkter inkl. "Hem".
+
+### Designspråk sedan 2026-06-11 (claudetype-inspirerat, beslutat av användaren)
+
+- **Motion-primitiver** i `frontend/src/components/fx/`: `Reveal` (IntersectionObserver fade/slide), `Parallax`, `Marquee`, `MediaFrame` (valvbågsramar: arch/arch-bl/arch-br/circle/wide), `Pill` (kicker-badge), `LenisProvider` (global smooth scroll, aktiv i `[locale]/layout.tsx`)
+- **Typografi**: display-serif **Fraunces** (`--font-fraunces`, `displayFont` i `fx/fonts.ts`) för stora rubriker; Inter för brödtext
+- **Signaturformer**: valvbågsramar med parallax-media, färgblockskort (#108474/#766a62/#1d1d1f) med stor serif, jättelik "1753"-ordbild i footern
+- **Lenis**: scrollbara overlays MÅSTE ha `data-lenis-prevent` (varukorgs-drawern, chatwidgeten, modaler)
 
 ### Produktpresentation och minimalistiska ramar
 
 - **Produktbilder** ska presenteras i **snygga, minimalistiska ramar**: tydlig yta, luft, subtil skugga och/eller lätt inre kontur (box-shadow / inset), aldrig tunga ram-listor
 - **Grid och produktsida**: kort och detaljbild ska kännas som medveten **retail-presentationsdesign** (Apple Store-lik: ren yta, fokus på produkten)
-- **Hero på startsidan**: responsiv bild (`public/1753desktop.png` / `public/1753mobile.png`) med läsbar text ovanpå (gradient/scrim)
+- **Hero på startsidan**: tre valvbågsramar (MediaFrame arch-bl/arch/arch-br) med parallax under serif-rubrik och pill-kicker
 
 ### Apple-designdetaljer
 - Stora border-radius (16px kort, 980px pill-knappar)

@@ -29,34 +29,34 @@ const FEATURED_GUIDES: Record<string, { slug: string; label: string }[]> = {
     { slug: "diet-and-skin", label: "Diet and skin" },
   ],
   es: [
-    { slug: "cbd-skincare", label: "Cuidado con CBD" },
-    { slug: "best-skincare-routine", label: "Mejor rutina facial" },
-    { slug: "cbd-for-acne", label: "CBD para el acné" },
-    { slug: "natural-skincare", label: "Cosmética natural" },
-    { slug: "cbd-for-rosacea", label: "CBD para rosácea" },
-    { slug: "dry-skin-treatment", label: "Piel seca" },
-    { slug: "cbd-vs-cbg", label: "CBD vs CBG" },
-    { slug: "diet-and-skin", label: "Dieta y piel" },
+    { slug: "cuidado-piel-cbd", label: "Cuidado con CBD" },
+    { slug: "mejor-rutina-cuidado-piel", label: "Mejor rutina facial" },
+    { slug: "cbd-contra-el-acne", label: "CBD para el acné" },
+    { slug: "cuidado-piel-natural", label: "Cosmética natural" },
+    { slug: "cbd-para-la-rosacea", label: "CBD para rosácea" },
+    { slug: "tratamiento-piel-seca", label: "Piel seca" },
+    { slug: "diferencias-cbd-cbg", label: "CBD vs CBG" },
+    { slug: "alimentacion-y-piel", label: "Dieta y piel" },
   ],
   de: [
-    { slug: "cbd-skincare", label: "CBD-Hautpflege" },
-    { slug: "best-skincare-routine", label: "Beste Hautpflege-Routine" },
-    { slug: "cbd-for-acne", label: "CBD gegen Akne" },
-    { slug: "natural-skincare", label: "Natürliche Hautpflege" },
-    { slug: "cbd-for-rosacea", label: "CBD gegen Rosazea" },
-    { slug: "dry-skin-treatment", label: "Trockene Haut" },
-    { slug: "cbd-vs-cbg", label: "CBD vs CBG" },
-    { slug: "diet-and-skin", label: "Ernährung und Haut" },
+    { slug: "cbd-hautpflege", label: "CBD-Hautpflege" },
+    { slug: "beste-hautpflegeroutine", label: "Beste Hautpflege-Routine" },
+    { slug: "cbd-gegen-akne", label: "CBD gegen Akne" },
+    { slug: "natuerliche-hautpflege", label: "Natürliche Hautpflege" },
+    { slug: "cbd-gegen-rosacea", label: "CBD gegen Rosazea" },
+    { slug: "trockene-haut-behandlung", label: "Trockene Haut" },
+    { slug: "cbd-cbg-unterschied", label: "CBD vs CBG" },
+    { slug: "ernaehrung-und-haut", label: "Ernährung und Haut" },
   ],
   fr: [
-    { slug: "cbd-skincare", label: "Soins au CBD" },
-    { slug: "best-skincare-routine", label: "Meilleure routine soin" },
-    { slug: "cbd-for-acne", label: "CBD contre l'acné" },
-    { slug: "natural-skincare", label: "Soins naturels" },
-    { slug: "cbd-for-rosacea", label: "CBD contre la rosacée" },
-    { slug: "dry-skin-treatment", label: "Peau sèche" },
-    { slug: "cbd-vs-cbg", label: "CBD vs CBG" },
-    { slug: "diet-and-skin", label: "Alimentation et peau" },
+    { slug: "soin-peau-cbd", label: "Soins au CBD" },
+    { slug: "meilleure-routine-soins-peau", label: "Meilleure routine soin" },
+    { slug: "cbd-pour-acne", label: "CBD contre l'acné" },
+    { slug: "soin-peau-naturel", label: "Soins naturels" },
+    { slug: "cbd-pour-la-rosacee", label: "CBD contre la rosacée" },
+    { slug: "traitement-peau-seche", label: "Peau sèche" },
+    { slug: "differences-cbd-cbg", label: "CBD vs CBG" },
+    { slug: "alimentation-et-peau", label: "Alimentation et peau" },
   ],
 };
 
@@ -78,9 +78,14 @@ export function Footer() {
       setStatus("success");
       setMsg(t("footer.thanks"));
       setEmail("");
-    } catch {
+    } catch (err) {
       setStatus("error");
-      setMsg(t("footer.subscribeError"));
+      // Servern svarar med ett lokaliserat, specifikt meddelande (t.ex. rate limit)
+      const serverMsg =
+        err instanceof Error && err.message && !err.message.startsWith("API error")
+          ? err.message
+          : "";
+      setMsg(serverMsg || t("footer.subscribeError"));
     }
   };
 
@@ -109,10 +114,13 @@ export function Footer() {
   ];
 
   return (
-    <footer className="border-t border-brand-100 bg-brand-50/60">
-      <div className="mx-auto max-w-[1280px] px-6 py-20 md:px-10">
+    <footer className="relative overflow-hidden border-t border-brand-100/60 bg-white">
+      <div className="mx-auto max-w-[1280px] px-6 pt-20 md:px-10">
         <div className="mb-16 flex flex-col items-center text-center">
-          <h3 className="text-lg font-bold tracking-tight text-brand-900">
+          <span className="mb-4 inline-block rounded-full border border-[#1d1d1f]/15 px-4 pt-[5px] pb-[3px] text-[11px] font-semibold uppercase tracking-[0.22em] text-[#766a62]">
+            1753 Skincare
+          </span>
+          <h3 className="font-[family-name:var(--font-fraunces)] text-2xl tracking-[-0.01em] text-brand-900 md:text-3xl">
             {t("footer.newsletterTitle")}
           </h3>
           <p className="mt-2 max-w-md text-sm text-brand-500">
@@ -132,12 +140,12 @@ export function Footer() {
                 setStatus("idle");
               }}
               placeholder={t("footer.emailPlaceholder")}
-              className="flex-1 rounded-xl border border-brand-200 bg-white px-4 py-3 text-sm shadow-sm placeholder:text-brand-400 focus:outline-none focus:ring-1 focus:ring-brand-900/20"
+              className="flex-1 rounded-full border border-brand-200 bg-white px-5 py-3 text-sm shadow-sm placeholder:text-brand-400 focus:outline-none focus:ring-1 focus:ring-brand-900/20"
             />
             <button
               type="submit"
               disabled={status === "loading"}
-              className="flex h-[46px] items-center gap-1.5 rounded-xl bg-brand-900 px-5 text-sm font-medium text-white transition-all hover:bg-brand-800 active:scale-[0.97] disabled:opacity-60"
+              className="flex h-[46px] items-center gap-1.5 rounded-full bg-[#108474] px-6 text-sm font-medium text-white transition-all hover:bg-[#0d6e60] active:scale-[0.97] disabled:opacity-60"
             >
               {status === "loading" ? (
                 <Loader2 className="h-4 w-4 animate-spin" />
@@ -251,7 +259,19 @@ export function Footer() {
           </div>
         </div>
 
-        <div className="mt-16 flex flex-col items-center justify-between gap-4 border-t border-brand-200/60 pt-8 md:flex-row">
+      </div>
+
+      {/* Jättelik ordbild – det nya designspråkets signaturavslut */}
+      <div
+        className="mt-16 select-none whitespace-nowrap text-center font-[family-name:var(--font-fraunces)] leading-[0.8] tracking-[0.02em] text-[#1d1d1f]"
+        style={{ fontSize: "clamp(110px, 20vw, 380px)" }}
+        aria-hidden
+      >
+        1753
+      </div>
+
+      <div className="mx-auto max-w-[1280px] px-6 md:px-10">
+        <div className="flex flex-col items-center justify-between gap-4 border-t border-brand-200/60 py-8 md:flex-row">
           <p className="text-xs text-brand-500">
             &copy; {new Date().getFullYear()} {t("footer.copyright")}
           </p>

@@ -1908,7 +1908,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          <nav aria-label={d("menu")} className="flex-1 overflow-y-auto px-3 py-4">
+          <nav aria-label={d("menu")} data-lenis-prevent className="flex-1 overflow-y-auto px-3 py-4">
             <div className="flex flex-col gap-1">
               {SIDEBAR_ITEMS.map((item) => (
                 <button

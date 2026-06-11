@@ -180,36 +180,39 @@ export function switchLocalePath(
 
   if (rest.length === 0) return `/${toLocale}`;
 
-  const firstSeg = rest[0];
+  const restPath = rest.join("/");
   const sourceSegments = LOCALE_SEGMENTS[fromLocale] || SV_SEGMENT;
   const targetSegments = LOCALE_SEGMENTS[toLocale] || SV_SEGMENT;
 
-  let matchedRoute: AppRoute | null = null;
-  for (const [route, seg] of Object.entries(sourceSegments)) {
-    if (seg && seg === firstSeg) {
-      matchedRoute = route as AppRoute;
-      break;
+  // Vissa routes har flersegments-värden (t.ex. paymentSuccess = "betalning/lyckad",
+  // de: "zahlung/erfolgreich") – matcha därför hela prefix, längsta först.
+  const findRoute = (segments: Record<AppRoute, string>): { route: AppRoute; segLen: number } | null => {
+    let best: { route: AppRoute; segLen: number } | null = null;
+    for (const [route, seg] of Object.entries(segments)) {
+      if (!seg) continue;
+      if (restPath === seg || restPath.startsWith(`${seg}/`)) {
+        const segLen = seg.split("/").length;
+        if (!best || segLen > best.segLen) best = { route: route as AppRoute, segLen };
+      }
     }
-  }
+    return best;
+  };
+
+  let match = findRoute(sourceSegments);
 
   // Middleware rewrites pretty URLs to Swedish filesystem paths,
   // so usePathname() returns e.g. "/en/hudanalys" not "/en/skin-analysis".
   // Fall back to checking SV_SEGMENT for the internal/rewritten path.
-  if (!matchedRoute && fromLocale !== "sv") {
-    for (const [route, seg] of Object.entries(SV_SEGMENT)) {
-      if (seg && seg === firstSeg) {
-        matchedRoute = route as AppRoute;
-        break;
-      }
-    }
+  if (!match && fromLocale !== "sv") {
+    match = findRoute(SV_SEGMENT);
   }
 
-  if (!matchedRoute) {
-    return `/${toLocale}/${rest.join("/")}`;
+  if (!match) {
+    return `/${toLocale}/${restPath}`;
   }
 
-  const targetSeg = targetSegments[matchedRoute];
-  const remaining = rest.slice(1);
+  const targetSeg = targetSegments[match.route];
+  const remaining = rest.slice(match.segLen);
 
   if (!targetSeg) return `/${toLocale}`;
 

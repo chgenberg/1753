@@ -1,0 +1,51 @@
+---
+description: Säkerhetsregler för kundsimuleringen (sim-150). Gäller all agentkörning av scripts/sim-150 och all triage/fix som följer av den.
+globs:
+  - scripts/sim-150/**/*
+  - sim-findings/**/*
+alwaysApply: false
+---
+
+# Sim-150 – säkerhetsregler för kundsimulering
+
+Simuleringen låter ~150 fiktiva kunder stresstesta sajten. Den får ALDRIG
+påverka riktiga kunder, riktig bokföring eller riktiga utskick.
+
+## Absoluta förbud
+
+1. **Ingen produktionsdatabas.** Simuleringen körs ENBART mot en lokal,
+   isolerad Postgres (Docker). `DATABASE_URL` får aldrig peka på Railway
+   (`rlwy.net`/`railway`) när sim-backend startas. Verifiera före start.
+2. **Inga riktiga mejl.** Backend startas UTAN `RESEND_API_KEY`.
+   Persona-adresser använder alltid `@sim1753.invalid` och får aldrig
+   skickas till Resend, ens i test.
+3. **Inga fullföljda betalningar.** Kassan testas som längst till att
+   `checkoutUrl` returneras. Ingen agent öppnar Viva Wallet-checkouten
+   och genomför betalning. Webhooks simuleras inte mot produktion.
+4. **Ingen Fortnox/Ongoing-trafik.** Backend startas utan
+   `FORTNOX_*`- och `ONGOING_*`-nycklar. Skapa aldrig kunder, ordrar,
+   fakturor eller leveransordrar i de systemen från simuleringen.
+5. **AI-budget.** Max 5 fulla hudanalyser (`POST /api/analysis`) per
+   körning. Övriga personas avbryter före analyssteget. Budgeten
+   hårdkodas i sim-runnern och höjs inte utan explicit ok.
+6. **Respektera rate limits.** 429-svar är förväntat beteende vid
+   stresstest och loggas som INFO, inte som bugg. Kringgå aldrig
+   rate limits genom IP-spoofing eller header-manipulation.
+
+## Fix-fasen (triage)
+
+- Alla fixar som följer av simuleringens fynd lyder under
+  `hudanalys-lock.mdc`, `kop-lock.mdc` och `regression-guard.mdc`.
+  Fynd vars åtgärd kräver kontraktsändring eskaleras till användaren
+  istället för att fixas direkt.
+- Testkod (`scripts/sim-150/`) och fynd (`sim-findings/`) får aldrig
+  importeras från produktionskod, och sim-specifika hooks får aldrig
+  läggas in i `server.js`, `db.js` eller frontend-koden.
+- Fynd-screenshots kan innehålla persona-data – det är fiktiv data och
+  ofarligt, men committa inte `sim-findings/` till git (lägg i .gitignore).
+
+## Städning efter körning
+
+- Stoppa sim-backend/frontend-processerna och Docker-containern.
+- Sim-databasen kan kastas (`docker rm -f sim1753-pg`) – den ska aldrig
+  återanvändas som källa till produktionsdata.

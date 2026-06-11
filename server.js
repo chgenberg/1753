@@ -6128,8 +6128,8 @@ app.post("/api/loyalty/redeem", authMiddleware, async (req, res) => {
 
 app.get("/api/recommendations", authMiddleware, async (req, res) => {
   try {
-    const orders = await db.listOrders({ limit: 100, offset: 0 });
-    const userOrders = orders.rows.filter(o => o.customer_email === req.user.email && o.payment_status === "paid");
+    const orders = await db.findOrdersByEmail(req.user.email);
+    const userOrders = orders.filter(o => o.payment_status === "paid");
     const boughtIds = new Set();
     for (const o of userOrders) {
       const items = typeof o.items === "string" ? JSON.parse(o.items) : (o.items || []);

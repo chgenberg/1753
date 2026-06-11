@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
-import Image from "next/image";
+import { useState, useRef, useEffect, useCallback, type ReactNode } from "react";
 import Link from "next/link";
 import {
   ArrowRight,
@@ -23,6 +22,8 @@ import { PRODUCTS, getProduct, productDisplayName } from "@/lib/products";
 import { apiFetch } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { useLocale } from "@/providers/locale-provider";
+import { Reveal, Marquee, displayFont } from "@/components/fx/motion";
+import { MediaFrame, Pill } from "@/components/fx/frames";
 
 const FEATURE_ICONS: LucideIcon[] = [Leaf, Droplets, Sparkles];
 
@@ -264,6 +265,72 @@ function FeatureModal({ feature, onClose }: { feature: FeatureItem | null; onClo
   );
 }
 
+/** Färgblockskort + media-rad i demo-designens formspråk. */
+function ShowcaseSection({
+  title,
+  sub,
+  href,
+  bg,
+  heroImg,
+  heroAlt,
+  detailImg,
+  detailShape,
+  reverse = false,
+}: {
+  title: ReactNode;
+  sub: string;
+  href: string;
+  bg: string;
+  heroImg: string;
+  heroAlt: string;
+  detailImg: string;
+  detailShape: "arch" | "circle" | "rounded";
+  reverse?: boolean;
+}) {
+  return (
+    <section className="mx-auto mt-20 w-full max-w-[1400px] px-4 md:mt-28">
+      <Reveal>
+        <Link
+          href={href}
+          className={`block ${bg} rounded-[32px] px-6 py-20 text-center transition-transform duration-700 hover:scale-[1.005] md:py-32`}
+        >
+          <Pill dark>1753</Pill>
+          <h2 className={`${displayFont} mx-auto mt-8 max-w-4xl text-5xl leading-[1.05] tracking-[-0.01em] text-white md:text-7xl`}>
+            {title}
+          </h2>
+          <div className="mx-auto mt-8 h-px w-12 bg-white/40" />
+          <p className="mt-7 text-[13px] font-semibold uppercase tracking-[0.22em] text-white/75">
+            {sub}
+          </p>
+        </Link>
+      </Reveal>
+
+      <div className={`mt-5 grid grid-cols-1 gap-5 md:grid-cols-3 ${reverse ? "md:[direction:rtl]" : ""}`}>
+        <Reveal className="md:col-span-2 md:[direction:ltr]" delay={80}>
+          <MediaFrame
+            src={heroImg}
+            alt={heroAlt}
+            shape="wide"
+            depth={60}
+            sizes="(max-width: 768px) 100vw, 66vw"
+            className="aspect-[4/3] md:aspect-[16/10]"
+          />
+        </Reveal>
+        <Reveal className="md:[direction:ltr]" delay={200}>
+          <MediaFrame
+            src={detailImg}
+            alt={heroAlt}
+            shape={detailShape}
+            depth={40}
+            sizes="(max-width: 768px) 100vw, 33vw"
+            className="h-full min-h-[320px]"
+          />
+        </Reveal>
+      </div>
+    </section>
+  );
+}
+
 function tx(locale: string, sv: string, en: string, es?: string, de?: string, fr?: string) {
   if (locale === "sv") return sv;
   if (locale === "es") return es || en;
@@ -327,118 +394,224 @@ export default function HomePage() {
         </div>
       )}
 
-      <section className="py-10 md:py-16 lg:py-20">
-        <div className="mx-auto max-w-[1280px] px-6 md:px-10">
-          <div className="grid grid-cols-1 gap-6 md:grid-cols-2 md:gap-8">
-            {/* Text box – same 1:1 aspect as image (order-2 on mobile so image stacks above) */}
-            <div className="relative order-2 flex aspect-square flex-col justify-center rounded-3xl bg-[#f5f5f7] p-8 shadow-lg shadow-brand-900/5 ring-1 ring-brand-100/60 md:order-1 md:p-12 lg:p-16">
-              <h1 className="text-4xl font-bold tracking-tight text-brand-900 md:text-5xl lg:text-[3.5rem] lg:leading-[1.08]">
-                {t("home.heroLine1")}
-                <br />
-                {t("home.heroLine2")}
-              </h1>
-              <p className="mt-5 max-w-sm text-base leading-relaxed text-brand-500 md:text-lg">
-                {t("home.heroSub")}
-              </p>
-
-              <div className="mt-8 flex flex-wrap gap-4">
-                <Link href={homeHash("#produkter")}>
-                  <Button size="lg" pulse>
-                    {t("home.ctaProducts")}
-                    <ArrowRight className="ml-2 h-4 w-4" />
-                  </Button>
-                </Link>
-              </div>
-
-              <div className="mt-8 flex flex-wrap items-center gap-5">
-                {trustItems.map((item) => (
-                  <div
-                    key={item.text}
-                    className="flex items-center gap-1.5 text-[12px] font-medium text-brand-500"
-                  >
-                    <item.icon className="h-3.5 w-3.5" />
-                    <span>{item.text}</span>
-                  </div>
-                ))}
-              </div>
-            </div>
-
-            {/* Image box – 1:1 aspect (order-1 on mobile: hero image above text) */}
-            <div className="relative order-1 aspect-square overflow-hidden rounded-3xl shadow-lg shadow-brand-900/5 ring-1 ring-brand-100/60 md:order-2">
-              <Image
-                src="/Bakgrund_hero_2.jpg"
-                alt={t("home.heroImageAlt")}
-                fill
-                priority
-                className="object-cover"
-                sizes="(max-width: 768px) 100vw, 50vw"
-              />
-              <div className="pointer-events-none absolute inset-0 rounded-3xl ring-1 ring-inset ring-black/5" />
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <SectionWrapper className="!py-10 md:!py-14">
-        <div id="produkter" className="-mt-20 pt-20" />
-        <div className="mb-12 text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-brand-900">{t("home.sortimentTitle")}</h2>
-          <p className="mx-auto mt-3 max-w-md text-base leading-relaxed text-brand-500">{t("home.sortimentSub")}</p>
-        </div>
-
-        <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-          {PRODUCTS.map((product, i) => (
-            <ProductCard key={product.id} product={product} priority={i < 2} />
-          ))}
-        </div>
-      </SectionWrapper>
-
-      <ReviewCarousel />
-
-      <SectionWrapper alt>
-        <div className="mb-12 text-center">
-          <h2 className="text-3xl font-bold tracking-tight text-brand-900">{t("home.whyTitle")}</h2>
-          <p className="mx-auto mt-3 max-w-md text-base leading-relaxed text-brand-500">{t("home.whySub")}</p>
-        </div>
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-          {features.map((f) => (
-            <button
-              key={f.title}
-              onClick={() => setActiveFeature(f)}
-              className="group cursor-pointer rounded-2xl bg-white p-6 text-left shadow-sm ring-1 ring-brand-100/60 transition-all duration-300 hover:shadow-lg hover:shadow-brand-900/5 hover:scale-[1.02]"
-            >
-              <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-brand-50 ring-1 ring-brand-100 transition-colors group-hover:bg-green/10 group-hover:ring-green/20">
-                <f.icon className="h-5 w-5 text-brand-700 transition-colors group-hover:text-green" />
-              </div>
-              <h3 className="mb-1.5 text-sm font-bold tracking-tight text-brand-900">{f.title}</h3>
-              <p className="text-[13px] leading-relaxed text-brand-500">{f.desc}</p>
-              <span className="mt-3 inline-block text-[12px] font-medium text-green opacity-0 transition-opacity group-hover:opacity-100">
-                {t("home.readMore")}
-              </span>
-            </button>
-          ))}
-        </div>
-      </SectionWrapper>
-
-      <SectionWrapper alt>
-        <div className="relative overflow-hidden rounded-3xl bg-brand-900 px-8 py-16 text-center shadow-xl md:px-16 md:py-20">
-          <div className="pointer-events-none absolute -left-20 -top-20 h-64 w-64 rounded-full border border-white/5 animate-float" />
-          <div className="pointer-events-none absolute -bottom-16 -right-16 h-48 w-48 rounded-full border border-white/5 animate-float [animation-delay:2s]" />
-
-          <div className="relative z-10">
-            <h2 className="text-3xl font-bold tracking-tight text-white md:text-4xl">{t("home.ctaAnalysisTitle")}</h2>
-            <p className="mx-auto mt-4 max-w-lg text-base leading-relaxed text-brand-300">{t("home.ctaAnalysisSub")}</p>
-            <div className="mt-10">
-              <Link href={path("skinAnalysis")}>
-                <Button size="lg" className="bg-white text-brand-900 shadow-lg hover:bg-brand-50 hover:shadow-xl">
-                  {t("home.ctaAnalysisButton")}
+      {/* ── HERO – tre valvbågsramar i nya formspråket ── */}
+      <section className="relative z-[2] -mt-[76px] overflow-hidden rounded-b-[48px] bg-[#f5f5f7] pb-10 shadow-[0_30px_60px_rgba(0,0,0,0.06)]">
+        <div className="flex flex-col gap-10 pt-32 md:pt-36">
+          <Reveal className="flex flex-col items-center gap-5 px-6 text-center">
+            <Pill>1753 Skincare</Pill>
+            <h1 className={`${displayFont} text-5xl leading-[1.05] tracking-[-0.01em] text-[#1d1d1f] md:text-7xl`}>
+              {t("home.heroLine1")} <em className="text-[#108474] [font-style:italic]">{t("home.heroLine2")}</em>
+            </h1>
+            <p className="text-[13px] font-semibold uppercase tracking-[0.22em] text-[#766a62]">
+              {t("home.heroSub")}
+            </p>
+            <div className="mt-2 flex flex-wrap items-center justify-center gap-4">
+              <Link href={homeHash("#produkter")}>
+                <Button size="lg" pulse className="rounded-full">
+                  {t("home.ctaProducts")}
                   <ArrowRight className="ml-2 h-4 w-4" />
                 </Button>
               </Link>
             </div>
+            <div className="flex flex-wrap items-center justify-center gap-5">
+              {trustItems.map((item) => (
+                <div
+                  key={item.text}
+                  className="flex items-center gap-1.5 text-[12px] font-medium text-brand-500"
+                >
+                  <item.icon className="h-3.5 w-3.5" />
+                  <span>{item.text}</span>
+                </div>
+              ))}
+            </div>
+          </Reveal>
+
+          <div className="grid grid-cols-1 gap-4 px-4 md:grid-cols-3">
+            <Reveal delay={100} className="max-md:hidden">
+              <MediaFrame
+                src="/New_Products/DUOwoman.jpg"
+                alt={t("home.heroImageAlt")}
+                shape="arch-bl"
+                depth={70}
+                priority
+                className="h-[64vh] min-h-[420px]"
+              />
+            </Reveal>
+            <Reveal delay={220}>
+              <MediaFrame
+                src="/Bakgrund_hero_2.jpg"
+                alt={t("home.heroImageAlt")}
+                shape="arch"
+                depth={70}
+                priority
+                sizes="(max-width: 768px) 100vw, 33vw"
+                className="h-[64vh] min-h-[420px] max-md:h-[56vh]"
+              />
+            </Reveal>
+            <Reveal delay={340} className="max-md:hidden">
+              <MediaFrame
+                src="/New_Products/TheONE.jpg"
+                alt={t("home.heroImageAlt")}
+                shape="arch-br"
+                depth={70}
+                priority
+                className="h-[64vh] min-h-[420px]"
+              />
+            </Reveal>
           </div>
         </div>
-      </SectionWrapper>
+      </section>
+
+      {/* Resten glider upp under heron – sektionsöverlappet */}
+      <div className="relative z-[1] -mt-12 pt-12">
+        {/* ── STATEMENT ── */}
+        <section className="flex flex-col items-center gap-7 px-6 py-24 text-center md:py-36">
+          <Reveal>
+            <Pill>1753</Pill>
+          </Reveal>
+          <Reveal delay={120}>
+            <h2 className={`${displayFont} mx-auto max-w-3xl text-4xl leading-[1.15] tracking-[-0.01em] text-[#1d1d1f] md:text-6xl`}>
+              {t("home.statement1")}
+              <em className="text-[#108474] [font-style:italic]">{t("home.statementAccent")}</em>
+              {t("home.statement2")}
+            </h2>
+          </Reveal>
+        </section>
+
+        <SectionWrapper className="!py-6 md:!py-10">
+          <div id="produkter" className="-mt-24 pt-24" />
+          <Reveal className="mb-12 text-center">
+            <h2 className={`${displayFont} text-4xl tracking-[-0.01em] text-brand-900 md:text-5xl`}>{t("home.sortimentTitle")}</h2>
+            <p className="mx-auto mt-4 max-w-md text-base leading-relaxed text-brand-500">{t("home.sortimentSub")}</p>
+          </Reveal>
+
+          <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+            {PRODUCTS.map((product, i) => (
+              <Reveal key={product.id} delay={(i % 4) * 80}>
+                <ProductCard product={product} priority={i < 2} />
+              </Reveal>
+            ))}
+          </div>
+        </SectionWrapper>
+
+        {/* ── SHOWCASE: DUO-KIT ── */}
+        <ShowcaseSection
+          title={<>The ONE <em className="[font-style:italic]">+</em> I LOVE</>}
+          sub={`DUO-kit – ${t("home.explore")}`}
+          href={path("product", { productId: "duo-kit" })}
+          bg="bg-[#108474]"
+          heroImg="/New_Products/DUO+TA-DAWoman.jpg"
+          heroAlt="DUO-kit"
+          detailImg="/New_Products/DUO.jpg"
+          detailShape="arch"
+        />
+
+        {/* ── SHOWCASE: TA-DA SERUM ── */}
+        <ShowcaseSection
+          title={<>TA-DA <em className="[font-style:italic]">Serum</em></>}
+          sub={`CBD & CBG – ${t("home.explore")}`}
+          href={path("product", { productId: "ta-da-serum" })}
+          bg="bg-[#766a62]"
+          heroImg="/New_Products/TA-DAWoman.jpg"
+          heroAlt="TA-DA Serum"
+          detailImg="/New_Products/TA-DA.jpg"
+          detailShape="circle"
+          reverse
+        />
+
+        {/* ── MARQUEE ── */}
+        <Marquee
+          items={["CBD", "CBG", "MCT", "Jojoba", "Chaga", "Lion's Mane", "Cordyceps", "Reishi"]}
+          className={`${displayFont} mt-20 py-2 text-3xl text-[#766a62]/60 [font-style:italic] md:mt-28 md:text-5xl`}
+        />
+
+        {/* ── SHOWCASE: FUNGTASTIC ── */}
+        <ShowcaseSection
+          title={<>Fungtastic <em className="[font-style:italic]">Mushroom</em></>}
+          sub={`Chaga · Lion's Mane · Cordyceps · Reishi – ${t("home.explore")}`}
+          href={path("product", { productId: "fungtastic-mushroom-extract" })}
+          bg="bg-[#1d1d1f]"
+          heroImg="/New_Products/Fungtasticwoman.jpg"
+          heroAlt="Fungtastic Mushroom Extract"
+          detailImg="/New_Products/Fungtastic.jpg"
+          detailShape="rounded"
+        />
+
+        <div className="mt-12">
+          <ReviewCarousel />
+        </div>
+
+        <SectionWrapper alt>
+          <Reveal className="mb-12 text-center">
+            <h2 className={`${displayFont} text-4xl tracking-[-0.01em] text-brand-900 md:text-5xl`}>{t("home.whyTitle")}</h2>
+            <p className="mx-auto mt-4 max-w-md text-base leading-relaxed text-brand-500">{t("home.whySub")}</p>
+          </Reveal>
+          <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {features.map((f, i) => (
+              <Reveal key={f.title} delay={i * 100}>
+                <button
+                  onClick={() => setActiveFeature(f)}
+                  className="group h-full w-full cursor-pointer rounded-[28px] bg-white p-6 text-left shadow-sm ring-1 ring-brand-100/60 transition-all duration-300 hover:shadow-lg hover:shadow-brand-900/5 hover:scale-[1.02]"
+                >
+                  <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-full bg-brand-50 ring-1 ring-brand-100 transition-colors group-hover:bg-green/10 group-hover:ring-green/20">
+                    <f.icon className="h-5 w-5 text-brand-700 transition-colors group-hover:text-green" />
+                  </div>
+                  <h3 className="mb-1.5 text-sm font-bold tracking-tight text-brand-900">{f.title}</h3>
+                  <p className="text-[13px] leading-relaxed text-brand-500">{f.desc}</p>
+                  <span className="mt-3 inline-block text-[12px] font-medium text-green opacity-0 transition-opacity group-hover:opacity-100">
+                    {t("home.readMore")}
+                  </span>
+                </button>
+              </Reveal>
+            ))}
+          </div>
+        </SectionWrapper>
+
+        {/* ── CIRKELRAM ── */}
+        <section className="flex flex-col items-center gap-8 px-6 py-16 md:py-24">
+          <Reveal className="w-full max-w-[700px]">
+            <MediaFrame
+              src="/stock5.jpg"
+              alt={t("home.heroImageAlt")}
+              shape="circle"
+              depth={60}
+              sizes="(max-width: 768px) 100vw, 700px"
+              className="aspect-square w-full"
+            />
+          </Reveal>
+          <Reveal delay={150}>
+            <p className="max-w-md text-center text-[12px] font-semibold uppercase tracking-[0.22em] text-[#766a62]">
+              {t("footer.tagline")}
+            </p>
+          </Reveal>
+        </section>
+
+        {/* ── CTA: HUDANALYS ── */}
+        <SectionWrapper alt className="!pt-0">
+          <Reveal>
+            <div className="relative overflow-hidden rounded-[32px] bg-brand-900 px-8 py-16 text-center shadow-xl md:px-16 md:py-24">
+              <div className="pointer-events-none absolute -left-20 -top-20 h-64 w-64 rounded-full border border-white/5 animate-float" />
+              <div className="pointer-events-none absolute -bottom-16 -right-16 h-48 w-48 rounded-full border border-white/5 animate-float [animation-delay:2s]" />
+
+              <div className="relative z-10">
+                <Pill dark>AI</Pill>
+                <h2 className={`${displayFont} mx-auto mt-6 max-w-2xl text-4xl leading-[1.1] tracking-[-0.01em] text-white md:text-5xl`}>
+                  {t("home.ctaAnalysisTitle")}
+                </h2>
+                <p className="mx-auto mt-5 max-w-lg text-base leading-relaxed text-brand-300">{t("home.ctaAnalysisSub")}</p>
+                <div className="mt-10">
+                  <Link href={path("skinAnalysis")}>
+                    <Button size="lg" className="rounded-full bg-white text-brand-900 shadow-lg hover:bg-brand-50 hover:shadow-xl">
+                      {t("home.ctaAnalysisButton")}
+                      <ArrowRight className="ml-2 h-4 w-4" />
+                    </Button>
+                  </Link>
+                </div>
+              </div>
+            </div>
+          </Reveal>
+        </SectionWrapper>
+      </div>
     </>
   );
 }

@@ -1,12 +1,13 @@
 "use client";
 
 import { useState } from "react";
-import Image from "next/image";
 import { Mail, MapPin, Phone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { SectionWrapper } from "@/components/section-wrapper";
 import { apiFetch } from "@/lib/api";
 import { useLocale } from "@/providers/locale-provider";
+import { Reveal, displayFont } from "@/components/fx/motion";
+import { MediaFrame, Pill } from "@/components/fx/frames";
 
 export default function ContactPage() {
   const { t, locale } = useLocale();
@@ -38,28 +39,26 @@ export default function ContactPage() {
       <section className="py-16 md:py-20">
         <div className="mx-auto max-w-[1280px] px-6 md:px-10">
           <div className="grid items-center gap-10 md:grid-cols-2 lg:gap-16">
-            <div className="animate-fade-in">
-              <p className="mb-3 text-[11px] font-bold uppercase tracking-[0.15em] text-brand-500">
-                {p("kicker")}
-              </p>
-              <h1 className="text-3xl font-bold tracking-tight md:text-4xl">
+            <Reveal>
+              <Pill>{p("kicker")}</Pill>
+              <h1 className={`${displayFont} mt-4 text-4xl tracking-[-0.01em] md:text-6xl`}>
                 {p("h1")}
               </h1>
-              <p className="mt-3 max-w-lg text-base leading-relaxed text-brand-500">
+              <p className="mt-4 max-w-lg text-base leading-relaxed text-brand-500">
                 {p("lead")}
               </p>
-            </div>
+            </Reveal>
 
-            <div className="group relative aspect-[4/3] overflow-hidden rounded-3xl shadow-xl shadow-brand-900/5">
-              <Image
+            <Reveal delay={150}>
+              <MediaFrame
                 src="/stock5.jpg"
                 alt={p("heroImgAlt")}
-                fill
-                className="object-cover transition-transform duration-700 ease-out group-hover:scale-[1.02]"
+                shape="arch"
+                depth={50}
                 sizes="(max-width: 768px) 100vw, 50vw"
+                className="aspect-[4/5] max-h-[520px] w-full"
               />
-              <div className="pointer-events-none absolute inset-0 rounded-3xl ring-1 ring-inset ring-black/5" />
-            </div>
+            </Reveal>
           </div>
         </div>
       </section>
@@ -67,7 +66,7 @@ export default function ContactPage() {
       <SectionWrapper alt>
         <div className="grid gap-10 md:grid-cols-2 lg:gap-16">
           <div className="flex flex-col gap-6">
-            <h2 className="text-lg font-bold tracking-tight">
+            <h2 className={`${displayFont} text-2xl tracking-[-0.01em]`}>
               {p("infoTitle")}
             </h2>
 
@@ -127,7 +126,7 @@ export default function ContactPage() {
             </div>
           ) : (
             <form onSubmit={handleSubmit} className="space-y-5">
-              <h2 className="text-lg font-bold tracking-tight">
+              <h2 className={`${displayFont} text-2xl tracking-[-0.01em]`}>
                 {p("formTitle")}
               </h2>
               <div>

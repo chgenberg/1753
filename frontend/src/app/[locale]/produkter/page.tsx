@@ -132,7 +132,7 @@ export default async function ProductsPage({
             <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-[#108474]">
               {tx(l, "Jämför", "Compare", "Comparar", "Vergleich", "Comparer")}
             </p>
-            <h2 className="text-2xl font-bold tracking-tight text-[#1d1d1f] md:text-3xl">
+            <h2 className="font-[family-name:var(--font-fraunces)] text-3xl tracking-[-0.01em] text-[#1d1d1f] md:text-4xl">
               {tx(
                 l,
                 "Översikt över alla produkter",

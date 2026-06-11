@@ -295,7 +295,7 @@ export function ChatWidget() {
             </button>
           </div>
 
-          <div className="cw-messages" aria-live="polite">
+          <div className="cw-messages" aria-live="polite" data-lenis-prevent>
             {rows.map((row) => {
               if (row.kind === "user") {
                 return (
@@ -354,7 +354,7 @@ export function ChatWidget() {
                 &times;
               </button>
             </div>
-            <div className="cw-tips-grid">
+            <div className="cw-tips-grid" data-lenis-prevent>
               {tips.map((tip) => (
                 <button
                   key={tip}

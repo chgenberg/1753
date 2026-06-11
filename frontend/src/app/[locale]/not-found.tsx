@@ -1,7 +1,7 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
 import { Button } from "@/components/ui/button";
 import { getMessages } from "@/lib/i18n/messages";
 import type { Locale } from "@/lib/i18n/types";
@@ -9,9 +9,16 @@ import { locales } from "@/lib/i18n/types";
 import { localizePath } from "@/lib/i18n/navigation";
 
 export default function NotFound() {
-  const pathname = usePathname() || "/sv";
-  const seg = pathname.split("/")[1];
-  const locale = (locales.includes(seg as Locale) ? seg : "sv") as Locale;
+  // Locale härleds först efter mount – SSR och första klient-rendering måste
+  // vara identiska ("sv"), annars uppstår hydration mismatch (React #418)
+  // eftersom usePathname() kan skilja sig mellan server och klient på 404-sidor.
+  const [locale, setLocale] = useState<Locale>("sv");
+  useEffect(() => {
+    const seg = window.location.pathname.split("/")[1];
+    if (locales.includes(seg as Locale) && seg !== "sv") {
+      setLocale(seg as Locale);
+    }
+  }, []);
   const m = getMessages(locale);
   const t = (key: string) => {
     const parts = key.split(".");

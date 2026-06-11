@@ -28,6 +28,7 @@ import {
 import { formatPrice } from "@/lib/currency";
 import { cn } from "@/lib/utils";
 import { useLocale } from "@/providers/locale-provider";
+import { Reveal } from "@/components/fx/motion";
 
 export default function ProductDetail({ id }: { id: string }) {
   const { t, path, locale } = useLocale();
@@ -174,7 +175,7 @@ export default function ProductDetail({ id }: { id: string }) {
               </div>
 
               <div className="flex items-start justify-between gap-3">
-                <h1 className="text-3xl font-bold tracking-tight md:text-4xl">{pname}</h1>
+                <h1 className="font-[family-name:var(--font-fraunces)] text-4xl tracking-[-0.01em] md:text-5xl">{pname}</h1>
                 <button
                   onClick={toggleWishlist}
                   aria-label={
@@ -322,12 +323,16 @@ export default function ProductDetail({ id }: { id: string }) {
 
       {related.length > 0 && (
         <SectionWrapper alt>
-          <h2 className="mb-8 text-3xl font-bold tracking-tight">
-            {t("productDetail.relatedTitle")}
-          </h2>
+          <Reveal>
+            <h2 className="mb-8 font-[family-name:var(--font-fraunces)] text-3xl tracking-[-0.01em] md:text-4xl">
+              {t("productDetail.relatedTitle")}
+            </h2>
+          </Reveal>
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-            {related.map((p) => (
-              <ProductCard key={p.id} product={p} />
+            {related.map((p, i) => (
+              <Reveal key={p.id} delay={i * 80}>
+                <ProductCard product={p} />
+              </Reveal>
             ))}
           </div>
         </SectionWrapper>

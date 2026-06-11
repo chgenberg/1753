@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -12,60 +12,26 @@ import { useLocale } from "@/providers/locale-provider";
 import { switchLocalePath } from "@/lib/i18n/navigation";
 import type { Locale } from "@/lib/i18n/types";
 
-function usePrefersReducedMotion() {
-  const [reduced, setReduced] = useState(false);
-  useEffect(() => {
-    const mq = window.matchMedia("(prefers-reduced-motion: reduce)");
-    setReduced(mq.matches);
-    const handler = (e: MediaQueryListEvent) => setReduced(e.matches);
-    mq.addEventListener("change", handler);
-    return () => mq.removeEventListener("change", handler);
-  }, []);
-  return reduced;
-}
-
-function MagneticLink({
+function NavPillLink({
   href,
-  children,
-  className,
+  label,
+  active,
 }: {
   href: string;
-  children: React.ReactNode;
-  className?: string;
+  label: string;
+  active: boolean;
 }) {
-  const ref = useRef<HTMLAnchorElement>(null);
-  const [offset, setOffset] = useState({ x: 0, y: 0 });
-  const reducedMotion = usePrefersReducedMotion();
-
-  const handleMove = useCallback(
-    (e: React.MouseEvent) => {
-      if (reducedMotion) return;
-      const el = ref.current;
-      if (!el) return;
-      const rect = el.getBoundingClientRect();
-      const x = e.clientX - rect.left - rect.width / 2;
-      const y = e.clientY - rect.top - rect.height / 2;
-      setOffset({ x: x * 0.15, y: y * 0.2 });
-    },
-    [reducedMotion]
-  );
-
   return (
     <Link
-      ref={ref}
       href={href}
-      className={cn("group relative", className)}
-      onMouseMove={handleMove}
-      onMouseLeave={() => setOffset({ x: 0, y: 0 })}
-      style={{
-        transform: reducedMotion ? undefined : `translate(${offset.x}px, ${offset.y}px)`,
-        transition: reducedMotion ? undefined : "transform 0.3s cubic-bezier(0.22,1,0.36,1)",
-      }}
+      className={cn(
+        "rounded-full px-4 py-2 text-[13px] font-medium transition-colors",
+        active
+          ? "pointer-events-none bg-black/[0.06] text-[#108474]"
+          : "text-brand-900 hover:bg-black/[0.05]"
+      )}
     >
-      <span className="relative">
-        {children}
-        <span className="absolute -bottom-0.5 left-0 h-[1.5px] w-0 bg-brand-900 transition-all duration-500 ease-[cubic-bezier(0.77,0,0.18,1)] group-hover:w-full" />
-      </span>
+      {label}
     </Link>
   );
 }
@@ -76,12 +42,24 @@ export function Header() {
   const { t, path, locale } = useLocale();
   const pathname = usePathname();
   const [progress, setProgress] = useState(0);
+  const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  // Fullständig nav (används i mobilmenyn). På desktop ersätter logotypen
+  // "Hem" och sitter centrerad mellan "Om oss" och "Hudanalys".
   const nav = [
     { href: path("home"), label: t("header.navHome") },
     { href: path("products"), label: t("header.navProducts") },
     { href: path("about"), label: t("header.navAbout") },
+    { href: path("skinAnalysis"), label: t("header.navAnalysis") },
+    { href: path("contact"), label: t("header.navContact") },
+  ];
+
+  const navLeft = [
+    { href: path("products"), label: t("header.navProducts") },
+    { href: path("about"), label: t("header.navAbout") },
+  ];
+  const navRight = [
     { href: path("skinAnalysis"), label: t("header.navAnalysis") },
     { href: path("contact"), label: t("header.navContact") },
   ];
@@ -92,7 +70,9 @@ export function Header() {
     const onScroll = () => {
       const docH = document.documentElement.scrollHeight - window.innerHeight;
       setProgress(docH > 0 ? (window.scrollY / docH) * 100 : 0);
+      setScrolled(window.scrollY > 40);
     };
+    onScroll();
     window.addEventListener("scroll", onScroll, { passive: true });
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
@@ -193,6 +173,11 @@ export function Header() {
 
   const currentFlag = flags[locale] || flags.sv;
 
+  const pillSurface = cn(
+    "pointer-events-auto rounded-full bg-white/60 backdrop-blur-[20px] transition-shadow duration-500",
+    scrolled ? "shadow-[0_8px_30px_rgba(0,0,0,0.10)]" : "shadow-[0_2px_12px_rgba(0,0,0,0.05)]"
+  );
+
   return (
     <>
       <div
@@ -200,41 +185,58 @@ export function Header() {
         style={{ width: `${progress}%` }}
       />
 
-      <header className="sticky top-0 z-50 h-16 border-b border-brand-100 bg-white">
-        <div className="mx-auto flex h-full max-w-[1280px] items-center justify-between px-6 md:px-10">
-          <Link href={path("home")} className="flex-shrink-0">
-            <Image
-              src="/1753.webp"
-              alt={t("header.logoAlt")}
-              width={48}
-              height={48}
-              priority
-            />
-          </Link>
-
-          <nav aria-label={t("header.mainNavAria")} className="hidden items-center gap-10 md:flex">
-            {nav.map((link) => {
-              const isActive = pathname === link.href;
-              return (
-                <MagneticLink
-                  key={link.href}
-                  href={link.href}
-                  className={cn(
-                    "text-[13px] font-semibold uppercase tracking-[0.08em]",
-                    isActive ? "text-brand-700 pointer-events-none" : "text-brand-900"
-                  )}
-                >
-                  {link.label}
-                </MagneticLink>
-              );
-            })}
+      <header className="pointer-events-none sticky top-0 z-50 h-[76px]">
+        <div className="relative mx-auto flex h-full max-w-[1400px] items-start justify-between gap-3 px-3 pt-3 md:justify-end md:px-5">
+          {/* Centrerad pill-nav med logotypen i mitten */}
+          <nav
+            aria-label={t("header.mainNavAria")}
+            className={cn(
+              pillSurface,
+              "absolute left-1/2 top-3 hidden -translate-x-1/2 items-center gap-1 px-2 py-1.5 md:flex"
+            )}
+          >
+            {navLeft.map((link) => (
+              <NavPillLink
+                key={link.href}
+                href={link.href}
+                label={link.label}
+                active={pathname === link.href}
+              />
+            ))}
+            <Link href={path("home")} className="px-4" aria-label={t("header.navHome")}>
+              <Image
+                src="/1753.webp"
+                alt={t("header.logoAlt")}
+                width={40}
+                height={40}
+                priority
+              />
+            </Link>
+            {navRight.map((link) => (
+              <NavPillLink
+                key={link.href}
+                href={link.href}
+                label={link.label}
+                active={pathname === link.href}
+              />
+            ))}
           </nav>
 
-          <div className="flex items-center gap-1">
+          {/* Mobil: logotyp i egen pill till vänster */}
+          <Link
+            href={path("home")}
+            className={cn(pillSurface, "flex h-12 w-12 items-center justify-center md:hidden")}
+            aria-label={t("header.navHome")}
+          >
+            <Image src="/1753.webp" alt={t("header.logoAlt")} width={36} height={36} priority />
+          </Link>
+
+          {/* Höger: språk, konto, varukorg (+ mobilmeny) */}
+          <div className={cn(pillSurface, "flex items-center gap-0.5 px-1.5 py-1.5")}>
             <div ref={langRef} className="relative">
               <button
                 onClick={() => setLangOpen(o => !o)}
-                className="group relative flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-brand-50"
+                className="group relative flex h-9 w-9 items-center justify-center rounded-full transition-colors hover:bg-black/[0.05]"
                 aria-label={t("header.langSwitch")}
                 aria-expanded={langOpen}
               >
@@ -245,7 +247,7 @@ export function Header() {
 
               <div
                 className={cn(
-                  "absolute right-0 top-full mt-2 flex items-center gap-1.5 rounded-2xl border border-brand-100 bg-white/95 px-2.5 py-2 shadow-lg backdrop-blur-xl transition-all duration-300",
+                  "absolute right-0 top-full mt-3 flex items-center gap-1.5 rounded-2xl border border-brand-100 bg-white/95 px-2.5 py-2 shadow-lg backdrop-blur-xl transition-all duration-300",
                   langOpen
                     ? "pointer-events-auto translate-y-0 opacity-100 scale-100"
                     : "pointer-events-none -translate-y-1 opacity-0 scale-95"
@@ -272,7 +274,7 @@ export function Header() {
 
             <Link
               href={accountHref}
-              className="flex h-10 w-10 items-center justify-center rounded-full text-brand-900 transition-colors hover:bg-brand-50"
+              className="flex h-9 w-9 items-center justify-center rounded-full text-brand-900 transition-colors hover:bg-black/[0.05]"
               aria-label={t("header.accountAria")}
             >
               <User className="h-[18px] w-[18px]" />
@@ -280,7 +282,7 @@ export function Header() {
 
             <button
               onClick={toggleCart}
-              className="relative flex h-10 w-10 items-center justify-center rounded-full text-brand-900 transition-colors hover:bg-brand-50"
+              className="relative flex h-9 w-9 items-center justify-center rounded-full text-brand-900 transition-colors hover:bg-black/[0.05]"
               aria-label={t("header.cartAria")}
             >
               <ShoppingBag className="h-[18px] w-[18px]" />
@@ -292,9 +294,11 @@ export function Header() {
             </button>
 
             <button
+              type="button"
               onClick={() => setMobileOpen(true)}
-              className="flex h-10 w-10 flex-col items-center justify-center gap-[5px] rounded-full transition-colors hover:bg-brand-50 md:hidden"
+              className="flex h-9 w-9 flex-col items-center justify-center gap-[5px] rounded-full transition-colors hover:bg-black/[0.05] md:hidden"
               aria-label={t("header.openMenuAria")}
+              aria-expanded={mobileOpen}
             >
               <span className="block h-[1.5px] w-[18px] bg-brand-900" />
               <span className="block h-[1.5px] w-[18px] bg-brand-900" />

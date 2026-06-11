@@ -268,17 +268,37 @@ async function initSchema() {
 
     CREATE TABLE IF NOT EXISTS wishlists (
       id              SERIAL PRIMARY KEY,
-      user_id         INTEGER NOT NULL,
+      user_id         UUID NOT NULL,
       product_id      VARCHAR(50) NOT NULL,
       created_at      TIMESTAMPTZ DEFAULT NOW(),
       UNIQUE(user_id, product_id)
     );
 
+    -- Migrering: user_id var tidigare INTEGER trots att users.id är UUID,
+    -- vilket gjorde att varje wishlist/adress-anrop kraschade med typfel.
+    -- Eventuella INTEGER-rader kan aldrig ha pekat på en riktig användare.
+    DO $mig$
+    BEGIN
+      IF EXISTS (SELECT 1 FROM information_schema.columns
+                 WHERE table_name = 'wishlists' AND column_name = 'user_id'
+                   AND data_type = 'integer') THEN
+        DELETE FROM wishlists;
+        ALTER TABLE wishlists ALTER COLUMN user_id TYPE UUID USING NULL;
+      END IF;
+      IF EXISTS (SELECT 1 FROM information_schema.columns
+                 WHERE table_name = 'addresses' AND column_name = 'user_id'
+                   AND data_type = 'integer') THEN
+        DELETE FROM addresses;
+        ALTER TABLE addresses ALTER COLUMN user_id TYPE UUID USING NULL;
+      END IF;
+    END
+    $mig$;
+
     CREATE INDEX IF NOT EXISTS idx_wishlists_user ON wishlists (user_id);
 
     CREATE TABLE IF NOT EXISTS addresses (
       id              SERIAL PRIMARY KEY,
-      user_id         INTEGER NOT NULL,
+      user_id         UUID NOT NULL,
       label           VARCHAR(100) DEFAULT 'Hem',
       address         VARCHAR(255) NOT NULL,
       zip             VARCHAR(10) NOT NULL,

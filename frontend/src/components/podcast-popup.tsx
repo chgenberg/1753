@@ -109,7 +109,7 @@ export function PodcastPopup() {
           <X className="h-4 w-4" />
         </button>
 
-        <div className="grid min-h-0 flex-1 overflow-y-auto sm:grid-cols-[42%_58%] sm:overflow-visible">
+        <div className="grid min-h-0 flex-1 overflow-y-auto sm:grid-cols-[42%_58%] sm:overflow-visible" data-lenis-prevent>
           <div className="relative h-40 w-full shrink-0 overflow-hidden bg-[#f5f5f7] sm:h-full sm:min-h-[420px]">
             <Image
               src="/podcast.png"

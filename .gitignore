@@ -8,3 +8,25 @@ services/*
 !services/premium-analysis-prompt.js
 public/Landing_page_skinanalys/
 public/Landing-pages/
+sim-findings/
+
+# Lokala dev-artefakter (simulering, träning, inspelningar)
+logs/
+checkpoints/
+feedback/
+screenshots-personas/
+scripts/.cache/
+scripts/_face_model/
+scripts/claudetype-scrape/
+scripts/demo-redesign/
+scripts/hudanalys-demo/out/
+scripts/sim-150/
+frontend/scripts/demo-redesign/
+video/output/
+data/rejected-images/
+data/training-dataset/
+data/training-pipeline.log
+docs/smoketest/
+schedule-*-log-*.json
+schedule-*-output.log
+*.nohup.log

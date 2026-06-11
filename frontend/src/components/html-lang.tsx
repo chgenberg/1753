@@ -30,8 +30,12 @@ export function SkipLink() {
   const pathname = usePathname();
   const lang = detectLang(pathname);
   return (
+    // suppressHydrationWarning: den statiskt prerendrade 404-sidan SSR:as med
+    // pathname "/_not-found" (svensk etikett) medan klienten hydrerar på den
+    // faktiska URL:en (t.ex. /en/...), vilket annars ger React-fel #418.
     <a
       href="#main-content"
+      suppressHydrationWarning
       className="sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[9999] focus:rounded-lg focus:bg-[#108474] focus:px-4 focus:py-2 focus:text-sm focus:font-medium focus:text-white"
     >
       {SKIP_LABELS[lang] ?? SKIP_LABELS.sv}

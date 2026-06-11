@@ -28,7 +28,7 @@ Agenten MÅSTE utföra dessa steg innan `git push`:
 ## Regler vid kodändringar
 
 - **Ta aldrig bort befintlig funktionalitet** utan explicit begäran från användaren.
-- **Ändra aldrig dessa utan manuell bekräftelse:** `PRODUCTS`-arrayen (app.js), färgschemat (CSS-variabler), navigationsstrukturen (4 menypunkter + Mitt konto), API-nycklar/secrets, `ANALYSIS_SYSTEM_PROMPT` grundfilosofi.
+- **Ändra aldrig dessa utan manuell bekräftelse:** `PRODUCTS`-arrayen (app.js), färgschemat (CSS-variabler), navigationsstrukturen (pill-nav: Produkter, Om oss, [logo=Hem], Hudanalys, Kontakt + ikoner för språk/Mitt konto/varukorg; bekräftad av användaren 2026-06-11), API-nycklar/secrets, `ANALYSIS_SYSTEM_PROMPT` grundfilosofi.
 - **Kontrollera importer:** Säkerställ att alla borttagna/omdöpta exporter fortfarande importeras korrekt i alla filer som använder dem.
 - **i18n-konsistens:** Om en sträng läggs till i ett språk, kontrollera att motsvarande nyckel finns i alla 5 språkfiler (`sv.ts`, `en.ts`, `es.ts`, `de.ts`, `fr.ts`).
 - **Middleware-routing:** Vid ändringar i `navigation.ts`, `middleware.ts` eller `LOCALE_SEGMENTS`, verifiera att URL-omskrivningar fortfarande matchar och att `switchLocalePath` fungerar korrekt.

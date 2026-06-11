@@ -725,7 +725,7 @@ export function MethodologyModal({
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto overscroll-contain px-5 py-5 sm:px-6 [-webkit-overflow-scrolling:touch]">
+        <div className="flex-1 overflow-y-auto overscroll-contain px-5 py-5 sm:px-6 [-webkit-overflow-scrolling:touch]" data-lenis-prevent>
           <TabContent tabId={activeTab} locale={locale} />
         </div>
       </div>

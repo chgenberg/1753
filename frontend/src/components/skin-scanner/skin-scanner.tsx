@@ -812,6 +812,7 @@ export function SkinScanner({ onComplete }: SkinScannerProps) {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm" onClick={() => setShowSecurity(false)}>
           <div
             className="relative mx-4 max-h-[85vh] w-full max-w-md overflow-y-auto rounded-3xl bg-white p-6 shadow-2xl md:p-8"
+            data-lenis-prevent
             onClick={(e) => e.stopPropagation()}
           >
             <button

@@ -376,6 +376,8 @@ export function middleware(request: NextRequest) {
     pathname.startsWith("/_next") ||
     pathname.startsWith("/api") ||
     pathname.startsWith("/admin") ||
+    pathname === "/demo" ||
+    pathname.startsWith("/demo/") ||
     STATIC_EXT.test(pathname)
   ) {
     return NextResponse.next();
