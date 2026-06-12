@@ -65,30 +65,27 @@ export function ProductCard({
   return (
     <Link
       href={href}
-      className={cn(
-        "group relative block overflow-hidden rounded-2xl bg-white shadow-sm ring-1 ring-brand-100/80 transition-all duration-300 hover:shadow-xl hover:shadow-brand-900/5 hover:ring-brand-200",
-        className
-      )}
+      className={cn("group relative block", className)}
     >
-      <div className="relative aspect-[4/5] overflow-hidden bg-brand-50">
+      <div className="relative aspect-[4/5] overflow-hidden rounded-[24px] bg-[#f5f5f7] shadow-sm transition-all duration-500 ease-out group-hover:shadow-xl group-hover:shadow-black/[0.08]">
         <Image
           src={product.image}
           alt={name}
           fill
           priority={priority}
-          className="object-cover transition-all duration-700 ease-out group-hover:opacity-0 group-hover:scale-[1.03]"
+          className="object-cover transition-all duration-700 ease-out group-hover:opacity-0 group-hover:scale-[1.04]"
           sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
         />
         <Image
           src={product.imageAlt}
           alt={`${name}${t("productDetail.lifestyleAltSuffix")}`}
           fill
-          className="object-cover opacity-0 transition-all duration-700 ease-out group-hover:opacity-100 group-hover:scale-[1.03]"
+          className="object-cover opacity-0 transition-all duration-700 ease-out group-hover:opacity-100 group-hover:scale-[1.04]"
           sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
         />
-        <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-black/5" />
+        <div className="pointer-events-none absolute inset-0 rounded-[24px] ring-1 ring-inset ring-black/5" />
         {origPrice && (
-          <span className="absolute left-3 top-3 rounded-full bg-brand-800 px-3 py-1 text-[11px] font-semibold text-white shadow-lg">
+          <span className="absolute left-4 top-4 rounded-full bg-white/85 px-3 pt-[5px] pb-[3px] text-[10px] font-semibold uppercase tracking-[0.14em] text-[#1d1d1f] shadow-sm backdrop-blur-sm">
             {t("productCard.save")}{" "}
             {formatPrice(origPrice - price, locale)}
           </span>
@@ -96,58 +93,58 @@ export function ProductCard({
         <button
           onClick={handleWishlistClick}
           aria-label={inWishlist ? t("productCard.wishlistRemove") : t("productCard.wishlistAdd")}
-          className="absolute right-3 top-3 z-10 flex h-8 w-8 items-center justify-center rounded-full bg-white/80 shadow-sm backdrop-blur-sm transition-all hover:bg-white hover:shadow-md"
+          className="absolute right-4 top-4 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white/85 shadow-sm backdrop-blur-sm transition-all duration-300 hover:bg-white hover:shadow-md active:scale-90"
         >
           <Heart className={cn("h-4 w-4 transition-colors", inWishlist ? "fill-red-500 text-red-500" : "text-brand-400")} />
         </button>
+        <button
+          onClick={handleAddToCart}
+          aria-label={t("productCard.addToCart")}
+          className={cn(
+            "absolute bottom-4 right-4 z-10 flex h-10 w-10 items-center justify-center rounded-full shadow-md backdrop-blur-sm transition-all duration-300 active:scale-90",
+            justAdded
+              ? "bg-[#108474] text-white shadow-[#108474]/25"
+              : "bg-white/90 text-[#1d1d1f] hover:bg-[#108474] hover:text-white hover:shadow-lg hover:shadow-[#108474]/20"
+          )}
+        >
+          {justAdded ? (
+            <Check className="h-4 w-4 animate-in zoom-in-50 duration-200" />
+          ) : (
+            <Plus className="h-4 w-4" />
+          )}
+        </button>
       </div>
-      <div className="p-4 pb-5">
-        <div className="mb-2 flex items-center gap-1.5">
-          <div className="flex">
-            {[...Array(5)].map((_, i) => (
-              <Star
-                key={i}
-                className="h-3.5 w-3.5 fill-amber-400 text-amber-400"
-              />
-            ))}
-          </div>
-          <span className="text-xs font-medium text-brand-500">
-            ({product.reviews})
-          </span>
-        </div>
-        <h3 className="text-sm font-semibold tracking-tight text-brand-900">
-          {name}
-        </h3>
-        <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-brand-500">
-          {shortDesc}
-        </p>
-        <div className="mt-3 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <span className="text-base font-bold text-brand-900">
+      <div className="px-1 pt-4">
+        <div className="flex items-start justify-between gap-3">
+          <h3 className="font-[family-name:var(--font-fraunces)] text-lg leading-snug tracking-[-0.01em] text-brand-900">
+            {name}
+          </h3>
+          <div className="shrink-0 pt-1 text-right">
+            <span className="text-sm font-medium text-brand-900">
               {formatPrice(price, locale)}
             </span>
             {origPrice && (
-              <span className="text-xs font-medium text-brand-500 line-through">
+              <span className="ml-1.5 text-xs text-brand-400 line-through">
                 {formatPrice(origPrice, locale)}
               </span>
             )}
           </div>
-          <button
-            onClick={handleAddToCart}
-            aria-label={t("productCard.addToCart")}
-            className={cn(
-              "flex h-9 w-9 items-center justify-center rounded-full shadow-sm transition-all duration-300 active:scale-90",
-              justAdded
-                ? "bg-[#108474] text-white shadow-[#108474]/25"
-                : "bg-brand-50 text-brand-700 hover:bg-[#108474] hover:text-white hover:shadow-md hover:shadow-[#108474]/20"
-            )}
-          >
-            {justAdded ? (
-              <Check className="h-4 w-4 animate-in zoom-in-50 duration-200" />
-            ) : (
-              <Plus className="h-4 w-4" />
-            )}
-          </button>
+        </div>
+        <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-brand-500">
+          {shortDesc}
+        </p>
+        <div className="mt-2 flex items-center gap-1.5">
+          <div className="flex">
+            {[...Array(5)].map((_, i) => (
+              <Star
+                key={i}
+                className="h-3 w-3 fill-amber-400 text-amber-400"
+              />
+            ))}
+          </div>
+          <span className="text-[11px] font-medium text-brand-400">
+            ({product.reviews})
+          </span>
         </div>
       </div>
     </Link>

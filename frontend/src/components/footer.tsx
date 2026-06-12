@@ -261,16 +261,7 @@ export function Footer() {
 
       </div>
 
-      {/* Jättelik ordbild – det nya designspråkets signaturavslut */}
-      <div
-        className="mt-16 select-none whitespace-nowrap text-center font-[family-name:var(--font-fraunces)] leading-[0.8] tracking-[0.02em] text-[#1d1d1f]"
-        style={{ fontSize: "clamp(110px, 20vw, 380px)" }}
-        aria-hidden
-      >
-        1753
-      </div>
-
-      <div className="mx-auto max-w-[1280px] px-6 md:px-10">
+      <div className="mx-auto mt-16 max-w-[1280px] px-6 md:px-10">
         <div className="flex flex-col items-center justify-between gap-4 border-t border-brand-200/60 py-8 md:flex-row">
           <p className="text-xs text-brand-500">
             &copy; {new Date().getFullYear()} {t("footer.copyright")}
