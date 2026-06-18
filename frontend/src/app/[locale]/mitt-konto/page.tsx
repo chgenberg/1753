@@ -21,12 +21,13 @@ import {
   Sparkles,
   Trash2,
   TrendingUp,
-  User,
   Loader2,
   Save,
   Minus,
   Plus,
   X,
+  Menu,
+  ChevronRight,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useAuth } from "@/providers/auth-provider";
@@ -1950,11 +1951,25 @@ export default function DashboardPage() {
         <div className="flex-1 overflow-y-auto px-6 py-8 md:px-10">
           <button
             type="button"
-            className="mb-4 flex items-center gap-2 text-sm text-muted-foreground md:hidden"
+            className="mb-5 flex w-full items-center justify-between gap-3 rounded-2xl border border-border bg-white px-4 py-3 text-left shadow-sm transition-colors hover:bg-brand-50 active:scale-[0.99] md:hidden"
             onClick={() => setSidebarOpen(true)}
+            aria-haspopup="menu"
+            aria-expanded={sidebarOpen}
           >
-            <User className="h-4 w-4" />
-            {d("menu")}
+            <span className="flex items-center gap-3">
+              <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-brand-900 text-white">
+                <Menu className="h-4 w-4" />
+              </span>
+              <span className="flex flex-col">
+                <span className="text-[11px] font-medium uppercase tracking-wide text-muted-foreground">
+                  {d("menu")}
+                </span>
+                <span className="text-sm font-bold text-brand-900">
+                  {t(`account.sidebar.${activeView}`)}
+                </span>
+              </span>
+            </span>
+            <ChevronRight className="h-4 w-4 text-brand-400" />
           </button>
           <div className="mx-auto max-w-4xl" key={activeView} style={{ animation: "var(--animate-fade-in)" }}>
             {renderView()}
