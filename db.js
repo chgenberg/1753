@@ -458,6 +458,68 @@ async function initSchema() {
       error_message   TEXT,
       created_at      TIMESTAMPTZ DEFAULT NOW()
     );
+
+    CREATE TABLE IF NOT EXISTS outreach_contacts (
+      id               SERIAL PRIMARY KEY,
+      email            VARCHAR(255) NOT NULL,
+      name             VARCHAR(255) DEFAULT '',
+      segment          VARCHAR(32) DEFAULT 'newsletter',
+      locale           VARCHAR(5) DEFAULT 'sv',
+      status           VARCHAR(24) DEFAULT 'queued',
+      reply_token      VARCHAR(64) UNIQUE NOT NULL,
+      context_summary  TEXT DEFAULT '',
+      campaign         VARCHAR(64) DEFAULT '',
+      bought_duo_tada  BOOLEAN DEFAULT false,
+      auto_replies     INTEGER DEFAULT 0,
+      next_action_at   TIMESTAMPTZ,
+      last_inbound_at  TIMESTAMPTZ,
+      last_outbound_at TIMESTAMPTZ,
+      last_error       TEXT DEFAULT '',
+      created_at       TIMESTAMPTZ DEFAULT NOW(),
+      updated_at       TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    CREATE UNIQUE INDEX IF NOT EXISTS idx_outreach_contacts_email_campaign
+      ON outreach_contacts (LOWER(email), campaign);
+    CREATE INDEX IF NOT EXISTS idx_outreach_contacts_status
+      ON outreach_contacts (status, next_action_at);
+
+    CREATE TABLE IF NOT EXISTS outreach_messages (
+      id            SERIAL PRIMARY KEY,
+      contact_id    INTEGER REFERENCES outreach_contacts(id) ON DELETE CASCADE,
+      direction     VARCHAR(10) NOT NULL,
+      subject       TEXT DEFAULT '',
+      body          TEXT DEFAULT '',
+      from_email    VARCHAR(255) DEFAULT '',
+      to_email      VARCHAR(255) DEFAULT '',
+      provider_id   VARCHAR(255) DEFAULT '',
+      status        VARCHAR(20) DEFAULT 'sent',
+      first_touch   BOOLEAN DEFAULT false,
+      intent        VARCHAR(40) DEFAULT '',
+      scheduled_at  TIMESTAMPTZ,
+      created_at    TIMESTAMPTZ DEFAULT NOW(),
+      sent_at       TIMESTAMPTZ
+    );
+
+    CREATE INDEX IF NOT EXISTS idx_outreach_messages_contact
+      ON outreach_messages (contact_id, created_at);
+    CREATE INDEX IF NOT EXISTS idx_outreach_messages_scheduled
+      ON outreach_messages (status, scheduled_at);
+
+    CREATE TABLE IF NOT EXISTS outreach_settings (
+      id              VARCHAR(20) PRIMARY KEY DEFAULT 'default',
+      paused          BOOLEAN DEFAULT true,
+      autonomous      BOOLEAN DEFAULT true,
+      daily_cap       INTEGER DEFAULT 15,
+      from_name       VARCHAR(120) DEFAULT 'Christopher Genberg',
+      from_email      VARCHAR(255) DEFAULT '',
+      reply_email     VARCHAR(255) DEFAULT '',
+      handoff_emails  JSONB DEFAULT '[]',
+      campaign        VARCHAR(64) DEFAULT 'sparre',
+      updated_at      TIMESTAMPTZ DEFAULT NOW()
+    );
+
+    INSERT INTO outreach_settings (id) VALUES ('default') ON CONFLICT (id) DO NOTHING;
   `);
 
   // Migrations
@@ -2207,6 +2269,210 @@ async function getDueSocialPosts() {
   return rows;
 }
 
+// ---- OUTREACH (autonom mejlagent) helpers ----
+
+async function getOutreachSettings() {
+  let { rows } = await pool.query("SELECT * FROM outreach_settings WHERE id = 'default' LIMIT 1");
+  if (!rows[0]) {
+    await pool.query("INSERT INTO outreach_settings (id) VALUES ('default') ON CONFLICT (id) DO NOTHING");
+    ({ rows } = await pool.query("SELECT * FROM outreach_settings WHERE id = 'default' LIMIT 1"));
+  }
+  return rows[0] || null;
+}
+
+async function updateOutreachSettings(fields) {
+  const allowed = ["paused", "autonomous", "daily_cap", "from_name", "from_email", "reply_email", "handoff_emails", "campaign"];
+  const keys = Object.keys(fields).filter(k => allowed.includes(k));
+  if (keys.length === 0) return getOutreachSettings();
+  const setClauses = keys.map((k, i) => `${k} = $${i + 1}`);
+  setClauses.push("updated_at = NOW()");
+  const values = keys.map(k => (k === "handoff_emails" ? JSON.stringify(fields[k]) : fields[k]));
+  const { rows } = await pool.query(
+    `UPDATE outreach_settings SET ${setClauses.join(", ")} WHERE id = 'default' RETURNING *`,
+    values
+  );
+  return rows[0] || null;
+}
+
+// Skapar en kontakt om den inte redan finns för samma (email, campaign).
+// Returnerar { contact, created }. reply_token genereras här.
+async function enqueueOutreachContact({ email, name, segment, locale, campaign, boughtDuoTada, contextSummary }) {
+  const normEmail = String(email || "").toLowerCase().trim();
+  if (!normEmail) throw new Error("email krävs");
+  const camp = campaign || "";
+  const existing = await pool.query(
+    "SELECT * FROM outreach_contacts WHERE LOWER(email) = $1 AND campaign = $2 LIMIT 1",
+    [normEmail, camp]
+  );
+  if (existing.rows[0]) return { contact: existing.rows[0], created: false };
+
+  const token = crypto.randomBytes(16).toString("hex");
+  try {
+    const { rows } = await pool.query(
+      `INSERT INTO outreach_contacts
+         (email, name, segment, locale, campaign, bought_duo_tada, context_summary, reply_token, status)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,'queued')
+       RETURNING *`,
+      [normEmail, name || "", segment || "newsletter", locale || "sv", camp, !!boughtDuoTada, contextSummary || "", token]
+    );
+    return { contact: rows[0], created: true };
+  } catch (err) {
+    if (err.code === "23505") {
+      const again = await pool.query(
+        "SELECT * FROM outreach_contacts WHERE LOWER(email) = $1 AND campaign = $2 LIMIT 1",
+        [normEmail, camp]
+      );
+      if (again.rows[0]) return { contact: again.rows[0], created: false };
+    }
+    throw err;
+  }
+}
+
+async function findOutreachContactByToken(token) {
+  const { rows } = await pool.query(
+    "SELECT * FROM outreach_contacts WHERE reply_token = $1 LIMIT 1",
+    [token]
+  );
+  return rows[0] || null;
+}
+
+async function findOutreachContactByEmail(email) {
+  const { rows } = await pool.query(
+    `SELECT * FROM outreach_contacts WHERE LOWER(email) = $1
+     ORDER BY last_outbound_at DESC NULLS LAST, created_at DESC LIMIT 1`,
+    [String(email || "").toLowerCase().trim()]
+  );
+  return rows[0] || null;
+}
+
+async function findDueOutreachFirstTouch(limit = 15) {
+  const { rows } = await pool.query(
+    `SELECT * FROM outreach_contacts WHERE status = 'queued'
+     ORDER BY created_at ASC LIMIT $1`,
+    [limit]
+  );
+  return rows;
+}
+
+async function countOutreachFirstTouchLast24h() {
+  const { rows } = await pool.query(
+    `SELECT COUNT(*) AS count FROM outreach_messages
+     WHERE first_touch = true AND status IN ('sent','sending')
+       AND COALESCE(sent_at, created_at) > NOW() - INTERVAL '24 hours'`
+  );
+  return parseInt(rows[0].count, 10);
+}
+
+async function updateOutreachContact(id, fields) {
+  const keys = Object.keys(fields);
+  if (keys.length === 0) return null;
+  const setClauses = keys.map((k, i) => `${k} = $${i + 2}`);
+  setClauses.push("updated_at = NOW()");
+  const { rows } = await pool.query(
+    `UPDATE outreach_contacts SET ${setClauses.join(", ")} WHERE id = $1 RETURNING *`,
+    [id, ...keys.map(k => fields[k])]
+  );
+  return rows[0] || null;
+}
+
+async function createOutreachMessage({ contactId, direction, subject, body, fromEmail, toEmail, providerId, status, firstTouch, intent, scheduledAt, sentAt }) {
+  const { rows } = await pool.query(
+    `INSERT INTO outreach_messages
+       (contact_id, direction, subject, body, from_email, to_email, provider_id, status, first_touch, intent, scheduled_at, sent_at)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)
+     RETURNING *`,
+    [contactId, direction, subject || "", body || "", fromEmail || "", toEmail || "",
+     providerId || "", status || "sent", !!firstTouch, intent || "",
+     scheduledAt || null, sentAt || null]
+  );
+  return rows[0];
+}
+
+async function findDueScheduledOutreach(limit = 10) {
+  const { rows } = await pool.query(
+    `SELECT * FROM outreach_messages
+     WHERE status = 'scheduled' AND scheduled_at <= NOW()
+     ORDER BY scheduled_at ASC LIMIT $1`,
+    [limit]
+  );
+  return rows;
+}
+
+// Atomisk reservation: bara EN tick kan ta en schemalagd rad (scheduled -> sending).
+async function reserveScheduledOutreach(id) {
+  const { rows } = await pool.query(
+    `UPDATE outreach_messages SET status = 'sending'
+     WHERE id = $1 AND status = 'scheduled' RETURNING *`,
+    [id]
+  );
+  return rows[0] || null;
+}
+
+async function markOutreachMessageSent(id, providerId) {
+  const { rows } = await pool.query(
+    `UPDATE outreach_messages SET status = 'sent', provider_id = $2, sent_at = NOW() WHERE id = $1 RETURNING *`,
+    [id, providerId || ""]
+  );
+  return rows[0] || null;
+}
+
+// Tar bort ännu icke-skickade schemalagda svar för en kontakt – så en mejlskur
+// inte staplar flera svar (vi schemalägger ett nytt fräscht svar istället).
+async function cancelScheduledOutreachForContact(contactId) {
+  await pool.query(
+    "DELETE FROM outreach_messages WHERE contact_id = $1 AND status = 'scheduled'",
+    [contactId]
+  );
+}
+
+async function listOutreachContacts({ status, page = 1, perPage = 50 } = {}) {
+  const offset = (Math.max(1, page) - 1) * perPage;
+  const where = status && status !== "all" ? "WHERE status = $3" : "";
+  const params = status && status !== "all" ? [perPage, offset, status] : [perPage, offset];
+  const { rows } = await pool.query(
+    `SELECT c.*,
+            (SELECT COUNT(*) FROM outreach_messages m WHERE m.contact_id = c.id) AS message_count
+     FROM outreach_contacts c
+     ${where}
+     ORDER BY GREATEST(COALESCE(c.last_inbound_at, c.created_at), COALESCE(c.last_outbound_at, c.created_at)) DESC
+     LIMIT $1 OFFSET $2`,
+    params
+  );
+  const countRes = await pool.query(
+    `SELECT COUNT(*) AS total FROM outreach_contacts ${status && status !== "all" ? "WHERE status = $1" : ""}`,
+    status && status !== "all" ? [status] : []
+  );
+  return { contacts: rows, total: parseInt(countRes.rows[0].total, 10), page, perPage };
+}
+
+async function getOutreachThread(contactId) {
+  const contactRes = await pool.query("SELECT * FROM outreach_contacts WHERE id = $1 LIMIT 1", [contactId]);
+  if (!contactRes.rows[0]) return null;
+  const msgRes = await pool.query(
+    "SELECT * FROM outreach_messages WHERE contact_id = $1 ORDER BY created_at ASC",
+    [contactId]
+  );
+  return { contact: contactRes.rows[0], messages: msgRes.rows };
+}
+
+async function getOutreachStats() {
+  const byStatus = await pool.query(
+    "SELECT status, COUNT(*) AS count FROM outreach_contacts GROUP BY status"
+  );
+  const sent24 = await countOutreachFirstTouchLast24h();
+  const totals = await pool.query(
+    `SELECT
+       (SELECT COUNT(*) FROM outreach_contacts) AS contacts,
+       (SELECT COUNT(*) FROM outreach_messages WHERE direction='outbound') AS outbound,
+       (SELECT COUNT(*) FROM outreach_messages WHERE direction='inbound') AS inbound`
+  );
+  return {
+    byStatus: byStatus.rows,
+    firstTouchLast24h: sent24,
+    totals: totals.rows[0],
+  };
+}
+
 module.exports = {
   pool,
   initSchema,
@@ -2335,4 +2601,20 @@ module.exports = {
   getSocialPost,
   deleteSocialPost,
   getDueSocialPosts,
+  getOutreachSettings,
+  updateOutreachSettings,
+  enqueueOutreachContact,
+  findOutreachContactByToken,
+  findOutreachContactByEmail,
+  findDueOutreachFirstTouch,
+  countOutreachFirstTouchLast24h,
+  updateOutreachContact,
+  createOutreachMessage,
+  findDueScheduledOutreach,
+  reserveScheduledOutreach,
+  markOutreachMessageSent,
+  cancelScheduledOutreachForContact,
+  listOutreachContacts,
+  getOutreachThread,
+  getOutreachStats,
 };

@@ -21,6 +21,12 @@ const {
   buildPremiumAnalysisPrompt,
 } = require("./services/premium-analysis-prompt");
 
+// Autonom mejlagent ("som Christopher") – se outreach/ och .cursor/plans.
+const outreachRun = require("./outreach/run");
+const outreachSegment = require("./outreach/segment");
+const outreachSend = require("./outreach/send");
+const { isCampaignCodeActive: outreachCampaignActive } = require("./outreach/campaign");
+
 let bcrypt, jwt;
 try { bcrypt = require("bcryptjs"); } catch { bcrypt = null; }
 try { jwt = require("jsonwebtoken"); } catch { jwt = null; }
@@ -5380,6 +5386,210 @@ app.post("/api/admin/inbox/:id/dismiss", adminAuthMiddleware, async (req, res) =
   }
 });
 
+// ================= OUTREACH-MEJLAGENT (autonom, "som Christopher") =================
+// Separat från /api/email/inbound (support-inkorgen) – den lämnas orörd.
+
+function timingSafeEqualStr(a, b) {
+  const ba = Buffer.from(String(a || ""));
+  const bb = Buffer.from(String(b || ""));
+  if (ba.length !== bb.length) return false;
+  try { return crypto.timingSafeEqual(ba, bb); } catch { return false; }
+}
+
+// Cron-skydd: x-cron-secret. Fail-closed i produktion om secret saknas.
+function outreachCronGuard(req, res) {
+  const expected = process.env.OUTREACH_CRON_SECRET;
+  if (!expected) {
+    if (process.env.NODE_ENV === "production") {
+      res.status(503).json({ message: "OUTREACH_CRON_SECRET ej konfigurerad" });
+      return false;
+    }
+    return true; // dev: tillåt
+  }
+  const provided = req.headers["x-cron-secret"] || "";
+  if (!timingSafeEqualStr(provided, expected)) {
+    res.status(401).json({ message: "Ogiltig cron-secret" });
+    return false;
+  }
+  return true;
+}
+
+// Svix-kompatibel signaturverifiering (Resend webhooks). Använder rawBody.
+function verifyResendWebhook(req) {
+  const secret = process.env.RESEND_WEBHOOK_SECRET;
+  if (!secret) return process.env.NODE_ENV !== "production"; // dev utan secret: tillåt
+  try {
+    const id = req.headers["svix-id"];
+    const ts = req.headers["svix-timestamp"];
+    const sigHeader = req.headers["svix-signature"];
+    if (!id || !ts || !sigHeader || !req.rawBody) return false;
+    const secretBytes = Buffer.from(secret.replace(/^whsec_/, ""), "base64");
+    const signed = `${id}.${ts}.${req.rawBody.toString("utf8")}`;
+    const expected = crypto.createHmac("sha256", secretBytes).update(signed).digest("base64");
+    return String(sigHeader).split(" ").some((part) => {
+      const sig = part.includes(",") ? part.split(",")[1] : part;
+      return timingSafeEqualStr(sig, expected);
+    });
+  } catch (_) {
+    return false;
+  }
+}
+
+function extractEmailAddress(str) {
+  const s = String(str || "");
+  const m = s.match(/<([^>]+)>/);
+  return (m ? m[1] : s).trim().toLowerCase();
+}
+
+// Tick: levererar schemalagda svar + skickar dagens första-mejl. Skyddad av cron-secret.
+// Anropas även internt via setInterval (se START) så vi inte är beroende av extern cron.
+app.post("/api/outreach/tick", async (req, res) => {
+  if (!outreachCronGuard(req, res)) return;
+  try {
+    const scheduled = await outreachRun.processScheduledReplies();
+    const batch = await outreachRun.runOutreachBatch();
+    res.json({ ok: true, scheduled, batch });
+  } catch (err) {
+    console.error("[Outreach] tick error:", err.message);
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Inbound webhook (Resend). Svix-verifierad. Returnerar alltid 200 så Resend inte retryar i evighet.
+app.post("/api/outreach/inbound", async (req, res) => {
+  if (!verifyResendWebhook(req)) {
+    return res.status(401).json({ message: "Ogiltig signatur" });
+  }
+  try {
+    const payload = req.body || {};
+    const data = payload.data || payload;
+    const fromEmail = extractEmailAddress(data.from || data.From || data.sender || "");
+    const toRaw = Array.isArray(data.to) ? data.to[0] : (data.to || data.To || "");
+    const toEmail = extractEmailAddress(toRaw);
+    const subject = data.subject || data.Subject || "";
+    const text = data.text || data.TextBody || data.text_body || data.html || data.HtmlBody || "";
+    const headers = data.headers || {};
+
+    if (fromEmail) {
+      const result = await outreachRun.handleInboundEmail({ fromEmail, toEmail, subject, text, headers });
+      console.log(`[Outreach] inbound ${fromEmail}: ${JSON.stringify(result)}`);
+    }
+    res.json({ ok: true });
+  } catch (err) {
+    console.error("[Outreach] inbound error:", err.message);
+    res.json({ ok: true }); // 200 ändå – undvik retry-storm
+  }
+});
+
+// ---- ADMIN: OUTREACH ----
+
+app.get("/api/admin/outreach", adminAuthMiddleware, async (req, res) => {
+  try {
+    const settings = await db.getOutreachSettings();
+    const stats = await db.getOutreachStats();
+    const campaignActive = await outreachCampaignActive();
+    res.json({
+      settings,
+      stats,
+      campaignActive,
+      emailConfigured: outreachSend.emailConfigured(),
+      fromEmail: outreachSend.fromEmail(),
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+app.post("/api/admin/outreach/settings", adminAuthMiddleware, async (req, res) => {
+  try {
+    const allowed = ["paused", "autonomous", "daily_cap", "from_name", "from_email", "reply_email", "handoff_emails", "campaign"];
+    const patch = {};
+    for (const k of allowed) if (k in req.body) patch[k] = req.body[k];
+    const settings = await db.updateOutreachSettings(patch);
+    res.json({ ok: true, settings });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+app.get("/api/admin/outreach/contacts", adminAuthMiddleware, async (req, res) => {
+  try {
+    const data = await db.listOutreachContacts({
+      status: req.query.status || "all",
+      page: parseInt(req.query.page) || 1,
+    });
+    res.json(data);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+app.get("/api/admin/outreach/contacts/:id", adminAuthMiddleware, async (req, res) => {
+  try {
+    const thread = await db.getOutreachThread(parseInt(req.params.id, 10));
+    if (!thread) return res.status(404).json({ message: "Hittades inte" });
+    res.json(thread);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Manuellt utskick i en tråd (admin skriver eller skickar agentens utkast).
+app.post("/api/admin/outreach/contacts/:id/send", adminAuthMiddleware, async (req, res) => {
+  try {
+    const thread = await db.getOutreachThread(parseInt(req.params.id, 10));
+    if (!thread) return res.status(404).json({ message: "Hittades inte" });
+    const { subject, body } = req.body;
+    if (!body) return res.status(400).json({ message: "Meddelande krävs" });
+    if (!outreachSend.emailConfigured()) return res.status(400).json({ message: "Outreach-mejl ej konfigurerad (RESEND_API_KEY / OUTREACH_FROM_EMAIL)" });
+    const c = thread.contact;
+    const contact = { id: c.id, email: c.email, name: c.name, locale: c.locale || "sv" };
+    await outreachSend.sendOutreachEmail({ contact, subject: subject || "Re: ditt mejl", body, firstTouch: false });
+    await db.updateOutreachContact(c.id, { status: "awaiting_reply" });
+    res.json({ ok: true });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Seed audience: ta en lista e-postadresser, klassificera segment och köa.
+// Hoppar över avprenumererade och redan köade. Skickar INGET (paus styr utskick).
+app.post("/api/admin/outreach/seed", adminAuthMiddleware, async (req, res) => {
+  try {
+    const settings = await db.getOutreachSettings();
+    const campaign = settings?.campaign || "sparre";
+    const emails = Array.isArray(req.body.emails) ? req.body.emails : [];
+    if (!emails.length) return res.status(400).json({ message: "Ange en lista med e-postadresser i 'emails'" });
+
+    let queued = 0, skippedSuppressed = 0, skippedExisting = 0, failed = 0;
+    const limit = Math.min(emails.length, 500);
+    for (let i = 0; i < limit; i++) {
+      const email = String(emails[i] || "").toLowerCase().trim();
+      if (!email || !email.includes("@")) { failed++; continue; }
+      try {
+        const ctx = await outreachSegment.buildContactContext(email);
+        if (!ctx) { failed++; continue; }
+        if (ctx.suppressed) { skippedSuppressed++; continue; }
+        const { created } = await db.enqueueOutreachContact({
+          email: ctx.email,
+          name: ctx.name,
+          segment: ctx.segment,
+          locale: ctx.locale,
+          campaign,
+          boughtDuoTada: ctx.boughtDuoTada,
+          contextSummary: ctx.contextSummary,
+        });
+        if (created) queued++; else skippedExisting++;
+      } catch (err) {
+        failed++;
+      }
+    }
+    res.json({ ok: true, queued, skippedSuppressed, skippedExisting, failed });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // ---- CONTACT FORM ----
 
 app.post("/api/contact", async (req, res) => {
@@ -8284,6 +8494,20 @@ app.post("/api/admin/social/daily-generate", adminAuthMiddleware, async (req, re
     setInterval(processSocialMediaQueue, 5 * 60_000);
     setTimeout(processSocialMediaQueue, 120_000);
     console.log("[OK] Social media scheduler started (every 5min)");
+
+    // Autonom mejlagent: leverera schemalagda svar + skicka dagens första-mejl.
+    // Master-paus + dagskvot styrs i outreach_settings; cron-job.org kan läggas som redundans.
+    const runOutreachTick = async () => {
+      try {
+        await outreachRun.processScheduledReplies();
+        await outreachRun.runOutreachBatch();
+      } catch (err) {
+        console.error("[Outreach] internal tick error:", err.message);
+      }
+    };
+    setInterval(runOutreachTick, 60_000);
+    setTimeout(runOutreachTick, 45_000);
+    console.log("[OK] Outreach email agent started (every 60s, paused by default)");
 
     scheduleDailyAt(10, 0, dailySocialMediaGeneration);
     console.log("[OK] Daily social media auto-generation scheduled (10:00 CET)");
