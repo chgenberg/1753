@@ -5441,6 +5441,47 @@ function extractEmailAddress(str) {
   return (m ? m[1] : s).trim().toLowerCase();
 }
 
+// Resend inbound-webhooks bär ENDAST metadata – kroppen måste hämtas separat
+// via Receiving API (resend.emails.receiving.get). Utan detta blir svaren tomma.
+async function fetchInboundContent(emailId) {
+  if (!emailId || !process.env.RESEND_API_KEY) return null;
+  try {
+    const { Resend } = require("resend");
+    const resend = new Resend(process.env.RESEND_API_KEY);
+    const { data, error } = await resend.emails.receiving.get(emailId);
+    if (error || !data) return null;
+    return data; // { subject, text, html, html_format, headers, from, to }
+  } catch (e) {
+    console.error("[Outreach] receiving.get misslyckades:", e.message);
+    return null;
+  }
+}
+
+function inboundHtmlToText(html, format) {
+  let s = String(html || "");
+  if (!s) return "";
+  if (format === "data_uri" || s.startsWith("data:")) {
+    const b64 = s.match(/^data:[^,]*;base64,(.*)$/);
+    if (b64) {
+      try { s = Buffer.from(b64[1], "base64").toString("utf8"); } catch (_) {}
+    } else {
+      const c = s.indexOf(",");
+      if (c >= 0) { try { s = decodeURIComponent(s.slice(c + 1)); } catch (_) { s = s.slice(c + 1); } }
+    }
+  }
+  return s
+    .replace(/<style[\s\S]*?<\/style>/gi, " ")
+    .replace(/<script[\s\S]*?<\/script>/gi, " ")
+    .replace(/<br\s*\/?>(?=)/gi, "\n")
+    .replace(/<\/(p|div|tr|li|h[1-6])>/gi, "\n")
+    .replace(/<[^>]+>/g, " ")
+    .replace(/&nbsp;/g, " ")
+    .replace(/&amp;/g, "&")
+    .replace(/[ \t]+/g, " ")
+    .replace(/\n{3,}/g, "\n\n")
+    .trim();
+}
+
 // Tick: levererar schemalagda svar + skickar dagens första-mejl. Skyddad av cron-secret.
 // Anropas även internt via setInterval (se START) så vi inte är beroende av extern cron.
 app.post("/api/outreach/tick", async (req, res) => {
@@ -5463,12 +5504,30 @@ app.post("/api/outreach/inbound", async (req, res) => {
   try {
     const payload = req.body || {};
     const data = payload.data || payload;
-    const fromEmail = extractEmailAddress(data.from || data.From || data.sender || "");
+    let fromEmail = extractEmailAddress(data.from || data.From || data.sender || "");
     const toRaw = Array.isArray(data.to) ? data.to[0] : (data.to || data.To || "");
-    const toEmail = extractEmailAddress(toRaw);
-    const subject = data.subject || data.Subject || "";
-    const text = data.text || data.TextBody || data.text_body || data.html || data.HtmlBody || "";
-    const headers = data.headers || {};
+    let toEmail = extractEmailAddress(toRaw);
+    let subject = data.subject || data.Subject || "";
+    let text = data.text || data.TextBody || data.text_body || "";
+    let headers = data.headers || {};
+
+    // Hämta riktig kropp via Receiving API (webhooken bär bara metadata).
+    const emailId = data.email_id || data.id || payload.email_id;
+    if (emailId && !text) {
+      const full = await fetchInboundContent(emailId);
+      if (full) {
+        subject = full.subject || subject;
+        text = full.text || inboundHtmlToText(full.html, full.html_format) || "";
+        headers = full.headers || headers;
+        if (!fromEmail) fromEmail = extractEmailAddress(full.from || "");
+        if (!toEmail) {
+          const t = Array.isArray(full.to) ? full.to[0] : full.to;
+          toEmail = extractEmailAddress(t || "");
+        }
+      }
+    }
+    // Sista fallback om API:t inte gav text men webhooken hade html.
+    if (!text && (data.html || data.HtmlBody)) text = inboundHtmlToText(data.html || data.HtmlBody);
 
     if (fromEmail) {
       const result = await outreachRun.handleInboundEmail({ fromEmail, toEmail, subject, text, headers });
