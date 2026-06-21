@@ -529,6 +529,11 @@ async function initSchema() {
     await pool.query(`ALTER TABLE social_posts ADD COLUMN IF NOT EXISTS caption_linkedin_en TEXT`);
   } catch (_) {}
 
+  // Outreach: schemalagd go-live. När satt och passerad avpausas agenten av tick:en.
+  try {
+    await pool.query(`ALTER TABLE outreach_settings ADD COLUMN IF NOT EXISTS scheduled_start_at TIMESTAMPTZ`);
+  } catch (_) {}
+
   // Migration (idempotent): link orphan skin_analyses rows back to users via email.
   // Fixes the "Min hudresa" view being empty for accounts auto-created from the
   // skin-analysis flow when user_id never got populated. Safe to re-run: all
@@ -2281,7 +2286,7 @@ async function getOutreachSettings() {
 }
 
 async function updateOutreachSettings(fields) {
-  const allowed = ["paused", "autonomous", "daily_cap", "from_name", "from_email", "reply_email", "handoff_emails", "campaign"];
+  const allowed = ["paused", "autonomous", "daily_cap", "from_name", "from_email", "reply_email", "handoff_emails", "campaign", "scheduled_start_at"];
   const keys = Object.keys(fields).filter(k => allowed.includes(k));
   if (keys.length === 0) return getOutreachSettings();
   const setClauses = keys.map((k, i) => `${k} = $${i + 1}`);

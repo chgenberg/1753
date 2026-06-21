@@ -14,6 +14,7 @@ interface OutreachSettings {
   reply_email: string;
   handoff_emails: string[] | string;
   campaign: string;
+  scheduled_start_at?: string | null;
 }
 
 interface StatusCount { status: string; count: string | number; }
@@ -94,6 +95,7 @@ export default function OutreachAdminPage() {
   const [thread, setThread] = useState<ThreadResponse | null>(null);
   const [reply, setReply] = useState("");
   const [sendingReply, setSendingReply] = useState(false);
+  const [startInput, setStartInput] = useState("");
 
   const loadOverview = useCallback(async () => {
     if (!token) return;
@@ -268,6 +270,49 @@ export default function OutreachAdminPage() {
             <Badge ok={overview?.campaignActive} okText={`Kampanjkod "${s?.campaign}" aktiv`} badText={`Kod "${s?.campaign}" inaktiv – nämns ej`} />
           </div>
         </div>
+
+        {/* Schemalagd go-live */}
+        {!live && (
+          <div className="mt-6 rounded-xl border border-[#e6e6e6] bg-[#f5f5f7] p-4">
+            <p className="text-sm font-medium text-[#1d1d1f]">Schemalägg start</p>
+            <p className="mt-0.5 text-xs text-[#766a62]">
+              Agenten avpausas automatiskt vid vald tid (din lokala tid). Skickar inget innan dess – och inget alls om Resend saknas.
+            </p>
+            {s?.scheduled_start_at ? (
+              <div className="mt-3 flex flex-wrap items-center gap-3">
+                <span className="rounded-full bg-[#108474]/10 px-3 py-1.5 text-xs font-medium text-[#108474]">
+                  Startar {fmt(s.scheduled_start_at)}
+                </span>
+                <button
+                  disabled={saving}
+                  onClick={() => patchSettings({ scheduled_start_at: null })}
+                  className="rounded-full border border-[#e6e6e6] bg-white px-4 py-1.5 text-xs font-medium text-[#b3261e] hover:bg-[#f5f5f7] disabled:opacity-50"
+                >
+                  Avbryt schemalagd start
+                </button>
+              </div>
+            ) : (
+              <div className="mt-3 flex flex-wrap items-center gap-3">
+                <input
+                  type="datetime-local"
+                  value={startInput}
+                  onChange={(e) => setStartInput(e.target.value)}
+                  className="h-11 rounded-xl border border-[#e6e6e6] px-3 text-sm text-[#1d1d1f] focus:border-[#108474] focus:outline-none focus:ring-2 focus:ring-[#108474]/20"
+                />
+                <button
+                  disabled={saving || !startInput}
+                  onClick={() => {
+                    const iso = startInput ? new Date(startInput).toISOString() : null;
+                    if (iso) patchSettings({ scheduled_start_at: iso });
+                  }}
+                  className="rounded-full bg-[#1d1d1f] px-5 py-2.5 text-sm font-semibold text-white hover:bg-black disabled:opacity-50"
+                >
+                  Schemalägg
+                </button>
+              </div>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Statistik */}

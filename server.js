@@ -5502,7 +5502,7 @@ app.get("/api/admin/outreach", adminAuthMiddleware, async (req, res) => {
 
 app.post("/api/admin/outreach/settings", adminAuthMiddleware, async (req, res) => {
   try {
-    const allowed = ["paused", "autonomous", "daily_cap", "from_name", "from_email", "reply_email", "handoff_emails", "campaign"];
+    const allowed = ["paused", "autonomous", "daily_cap", "from_name", "from_email", "reply_email", "handoff_emails", "campaign", "scheduled_start_at"];
     const patch = {};
     for (const k of allowed) if (k in req.body) patch[k] = req.body[k];
     const settings = await db.updateOutreachSettings(patch);
@@ -8499,6 +8499,12 @@ app.post("/api/admin/social/daily-generate", adminAuthMiddleware, async (req, re
     // Master-paus + dagskvot styrs i outreach_settings; cron-job.org kan läggas som redundans.
     const runOutreachTick = async () => {
       try {
+        // Schemalagd go-live: när scheduled_start_at passerats avpausas agenten en gång.
+        const s = await db.getOutreachSettings();
+        if (s && s.paused && s.scheduled_start_at && new Date(s.scheduled_start_at) <= new Date()) {
+          await db.updateOutreachSettings({ paused: false, scheduled_start_at: null });
+          console.log(`[Outreach] Schemalagd start nådd (${new Date(s.scheduled_start_at).toISOString()}) → agenten är nu LIVE`);
+        }
         await outreachRun.processScheduledReplies();
         await outreachRun.runOutreachBatch();
       } catch (err) {
