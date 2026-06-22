@@ -40,8 +40,24 @@ function humanDelayMs() {
   return (4 * 60 + Math.floor(Math.random() * 6 * 60)) * 1000;
 }
 
+// Plockar ut ett rent FÖRNAMN ur ett ostädat namnfält.
+// Källdatan är blandad: "Angelica Svärd" (ok), "Emelie Rick91" (siffror),
+// "Tovarobertsson"/"Martinacarlson2" (för+efternamn ihopklistrat utan mellanslag).
+// Går namnet inte att dela säkert → returnera "" så agenten hälsar varmt utan namn
+// istället för att skriva fel ("Hej Tovarobertsson").
 function firstNameOf(name) {
-  return String(name || "").trim().split(/\s+/)[0] || "";
+  const raw = String(name || "").trim();
+  if (!raw) return "";
+  const hadSpace = /\s/.test(raw);
+  let first = raw.split(/\s+/)[0].replace(/[0-9]+/g, "").trim();
+  if (!first) return "";
+  // Ett enda ord utan mellanslag och ovanligt långt = troligen ihopklistrat för+efternamn.
+  if (!hadSpace && first.length >= 12) return "";
+  // Snygga till versalisering om allt är gemener/versaler ("anna" -> "Anna").
+  if (first === first.toLowerCase() || first === first.toUpperCase()) {
+    first = first.charAt(0).toUpperCase() + first.slice(1).toLowerCase();
+  }
+  return first;
 }
 
 function ctxFromContact(row) {

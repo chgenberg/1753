@@ -163,7 +163,9 @@ function classify(email, { paidMap, analysisSet, subMap, userMap }) {
   else if (hasAnalysis) segment = "analysis";
   else segment = "newsletter";
 
-  const name = (user?.name || sub?.firstName || "").trim();
+  // subscribers.first_name är rena förnamn ("Angelica"); users.name är ostädat
+  // ("Tovarobertsson", "Emelie Rick91"). Föredra därför prenumerantens förnamn.
+  const name = ((sub?.firstName || "").trim() || (user?.name || "").trim());
   const locale = user?.locale || sub?.locale || "sv";
 
   const facts = [];

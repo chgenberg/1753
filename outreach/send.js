@@ -33,6 +33,26 @@ function withUnsubLine(body, locale) {
   return String(body || "").trimEnd() + (UNSUB_LINE[locale] || UNSUB_LINE.sv);
 }
 
+function escapeHtml(s) {
+  return String(s || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+// Bygger en enkel, personlig HTML-version av brödtexten med KLICKBARA länkar.
+// Multipart text+html är best practice och ger bättre leverans än ren text.
+// Ingen marknadsföringslayout – bara text, systemfont och länkar (känns som ett vanligt mejl).
+function bodyToHtml(text) {
+  const escaped = escapeHtml(text);
+  const linked = escaped.replace(
+    /(https?:\/\/[^\s<]+[^\s<.,;:!?)\]])/g,
+    '<a href="$1" style="color:#108474;text-decoration:underline">$1</a>'
+  );
+  const html = linked.replace(/\r?\n/g, "<br>");
+  return `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:15px;line-height:1.6;color:#1d1d1f">${html}</div>`;
+}
+
 function unsubscribeHeaders() {
   const addr = replyEmail();
   if (!addr) return {};
@@ -84,6 +104,7 @@ async function sendOutreachEmail({ contact, subject, body, firstTouch = false, a
       replyTo: replyEmail(),
       subject,
       text: finalBody,
+      html: bodyToHtml(finalBody),
       headers: unsubscribeHeaders(),
     };
     if (attachments.length) payload.attachments = attachments;
@@ -141,6 +162,7 @@ async function deliverScheduledMessage(messageRow, contact) {
         replyTo: replyEmail(),
         subject: reserved.subject,
         text: reserved.body,
+        html: bodyToHtml(reserved.body),
         headers: unsubscribeHeaders(),
       });
       providerId = result?.data?.id || result?.id || "";
