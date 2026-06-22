@@ -5561,7 +5561,7 @@ app.get("/api/admin/outreach", adminAuthMiddleware, async (req, res) => {
 
 app.post("/api/admin/outreach/settings", adminAuthMiddleware, async (req, res) => {
   try {
-    const allowed = ["paused", "autonomous", "daily_cap", "from_name", "from_email", "reply_email", "handoff_emails", "campaign", "scheduled_start_at"];
+    const allowed = ["paused", "autonomous", "daily_cap", "from_name", "from_email", "reply_email", "handoff_emails", "campaign", "scheduled_start_at", "ramp_json"];
     const patch = {};
     for (const k of allowed) if (k in req.body) patch[k] = req.body[k];
     const settings = await db.updateOutreachSettings(patch);
@@ -8563,6 +8563,23 @@ app.post("/api/admin/social/daily-generate", adminAuthMiddleware, async (req, re
         if (s && s.paused && s.scheduled_start_at && new Date(s.scheduled_start_at) <= new Date()) {
           await db.updateOutreachSettings({ paused: false, scheduled_start_at: null });
           console.log(`[Outreach] Schemalagd start nådd (${new Date(s.scheduled_start_at).toISOString()}) → agenten är nu LIVE`);
+        }
+        // Ramp-schema: sätt dagens dagskvot enligt ramp_json och pausa efter sista datum.
+        if (s && !s.paused) {
+          let ramp = [];
+          try { ramp = Array.isArray(s.ramp_json) ? s.ramp_json : JSON.parse(s.ramp_json || "[]"); } catch (_) { ramp = []; }
+          if (ramp.length) {
+            const today = new Intl.DateTimeFormat("en-CA", { timeZone: "Europe/Stockholm", year: "numeric", month: "2-digit", day: "2-digit" }).format(new Date());
+            const entry = ramp.find(r => r && r.date === today);
+            const lastDate = ramp.map(r => r && r.date).filter(Boolean).sort().pop();
+            if (entry && Number(s.daily_cap) !== Number(entry.cap)) {
+              await db.updateOutreachSettings({ daily_cap: Number(entry.cap) });
+              console.log(`[Outreach] Ramp: dagskvot satt till ${entry.cap} för ${today}`);
+            } else if (lastDate && today > lastDate) {
+              await db.updateOutreachSettings({ paused: true, ramp_json: [] });
+              console.log(`[Outreach] Ramp-schema klart (sista dag ${lastDate}) → agenten pausad.`);
+            }
+          }
         }
         await outreachRun.processScheduledReplies();
         await outreachRun.runOutreachBatch();

@@ -532,6 +532,8 @@ async function initSchema() {
   // Outreach: schemalagd go-live. När satt och passerad avpausas agenten av tick:en.
   try {
     await pool.query(`ALTER TABLE outreach_settings ADD COLUMN IF NOT EXISTS scheduled_start_at TIMESTAMPTZ`);
+    // Ramp-schema [{date:'YYYY-MM-DD', cap:N}] – tick:en sätter dagens cap och pausar efter sista datum.
+    await pool.query(`ALTER TABLE outreach_settings ADD COLUMN IF NOT EXISTS ramp_json JSONB DEFAULT '[]'`);
   } catch (_) {}
 
   // Migration (idempotent): link orphan skin_analyses rows back to users via email.
@@ -2286,12 +2288,12 @@ async function getOutreachSettings() {
 }
 
 async function updateOutreachSettings(fields) {
-  const allowed = ["paused", "autonomous", "daily_cap", "from_name", "from_email", "reply_email", "handoff_emails", "campaign", "scheduled_start_at"];
+  const allowed = ["paused", "autonomous", "daily_cap", "from_name", "from_email", "reply_email", "handoff_emails", "campaign", "scheduled_start_at", "ramp_json"];
   const keys = Object.keys(fields).filter(k => allowed.includes(k));
   if (keys.length === 0) return getOutreachSettings();
   const setClauses = keys.map((k, i) => `${k} = $${i + 1}`);
   setClauses.push("updated_at = NOW()");
-  const values = keys.map(k => (k === "handoff_emails" ? JSON.stringify(fields[k]) : fields[k]));
+  const values = keys.map(k => ((k === "handoff_emails" || k === "ramp_json") ? JSON.stringify(fields[k]) : fields[k]));
   const { rows } = await pool.query(
     `UPDATE outreach_settings SET ${setClauses.join(", ")} WHERE id = 'default' RETURNING *`,
     values
@@ -2366,6 +2368,19 @@ async function countOutreachFirstTouchLast24h() {
        AND COALESCE(sent_at, created_at) > NOW() - INTERVAL '24 hours'`
   );
   return parseInt(rows[0].count, 10);
+}
+
+// Tidpunkt för senaste första-mejlet – används för pacing (sprid utskick, ingen skur).
+async function getLastFirstTouchAt() {
+  try {
+    const { rows } = await pool.query(
+      `SELECT MAX(COALESCE(sent_at, created_at)) AS last FROM outreach_messages
+       WHERE first_touch = true AND status IN ('sent','sending')`
+    );
+    return rows[0] && rows[0].last ? rows[0].last : null;
+  } catch (_) {
+    return null;
+  }
 }
 
 async function updateOutreachContact(id, fields) {
@@ -2613,6 +2628,7 @@ module.exports = {
   findOutreachContactByEmail,
   findDueOutreachFirstTouch,
   countOutreachFirstTouchLast24h,
+  getLastFirstTouchAt,
   updateOutreachContact,
   createOutreachMessage,
   findDueScheduledOutreach,

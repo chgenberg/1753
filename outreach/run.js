@@ -58,6 +58,27 @@ function ctxFromContact(row) {
 }
 
 // ---- 1. Första-mejl ----
+//
+// Anti-spam-pacing: agenten skickar ALDRIG hela dagskvoten på en gång (det ser ut
+// som massutskick och triggar skräppostfilter). Istället skickas max ETT första-mejl
+// per tick, bara inom sändfönstret (svensk dagtid) och med 18-40 min slumpat
+// mellanrum. Dagskvoten (daily_cap) sätter taket per rullande 24 h.
+
+const SEND_WINDOW_START = 8;   // 08:00 svensk tid
+const SEND_WINDOW_END = 21;    // skickar t.o.m. 20:59
+const PACE_BASE_MIN = 18;      // minst så här många minuter mellan första-mejl
+const PACE_JITTER_MIN = 22;    // + 0-22 min slump → 18-40 min, mänskligt oregelbundet
+
+function stockholmHour() {
+  try {
+    return parseInt(
+      new Intl.DateTimeFormat("en-US", { timeZone: "Europe/Stockholm", hour: "numeric", hour12: false }).format(new Date()),
+      10
+    );
+  } catch (_) {
+    return new Date().getHours();
+  }
+}
 
 async function runOutreachBatch() {
   const settings = await db.getOutreachSettings();
@@ -67,35 +88,42 @@ async function runOutreachBatch() {
   const canSend = settings.autonomous && send.emailConfigured();
   if (!canSend) return { skipped: "not-autonomous-or-unconfigured" };
 
+  // Sändfönster: bara dagtid – inga mejl mitt i natten.
+  const hour = stockholmHour();
+  if (hour < SEND_WINDOW_START || hour >= SEND_WINDOW_END) return { skipped: "outside-window", hour };
+
   const cap = settings.daily_cap || 15;
   const sent24 = await db.countOutreachFirstTouchLast24h();
-  const remaining = cap - sent24;
-  if (remaining <= 0) return { skipped: "daily-cap-reached", sent24, cap };
+  if (sent24 >= cap) return { skipped: "daily-cap-reached", sent24, cap };
+
+  // Pacing: håll minst 18-40 min mellan första-mejl så det sprids över dagen.
+  const lastAt = await db.getLastFirstTouchAt();
+  if (lastAt) {
+    const gapMs = (PACE_BASE_MIN + Math.random() * PACE_JITTER_MIN) * 60000;
+    if (Date.now() - new Date(lastAt).getTime() < gapMs) return { skipped: "pacing" };
+  }
 
   const campaignActive = await isCampaignCodeActive();
-  const contacts = await db.findDueOutreachFirstTouch(remaining);
+  const contacts = await db.findDueOutreachFirstTouch(1); // exakt ETT per tick
+  if (!contacts.length) return { skipped: "empty-queue", sent24, cap };
 
-  let sent = 0, errors = 0;
-  for (const row of contacts) {
-    const contact = ctxFromContact(row);
-    try {
-      const email = await agent.composeFirstEmail(contact, { campaignActive });
-      if (!email) {
-        errors++;
-        await db.updateOutreachContact(row.id, { status: "error", last_error: "compose_failed" });
-        continue;
-      }
-      const attachImage = campaignActive && contact.segment !== "buyer_duotada";
-      await send.sendOutreachEmail({ contact, subject: email.subject, body: email.body, firstTouch: true, attachImage });
-      await db.updateOutreachContact(row.id, { status: "awaiting_reply", last_error: "" });
-      sent++;
-    } catch (err) {
-      errors++;
-      console.error(`[Outreach][run] first-touch failed for ${row.email}:`, err.message);
-      try { await db.updateOutreachContact(row.id, { status: "error", last_error: String(err.message).slice(0, 400) }); } catch (_) {}
+  const row = contacts[0];
+  const contact = ctxFromContact(row);
+  try {
+    const email = await agent.composeFirstEmail(contact, { campaignActive });
+    if (!email) {
+      await db.updateOutreachContact(row.id, { status: "error", last_error: "compose_failed" });
+      return { sent: 0, errors: 1, sent24, cap };
     }
+    const attachImage = campaignActive && contact.segment !== "buyer_duotada";
+    await send.sendOutreachEmail({ contact, subject: email.subject, body: email.body, firstTouch: true, attachImage });
+    await db.updateOutreachContact(row.id, { status: "awaiting_reply", last_error: "" });
+    return { sent: 1, errors: 0, sent24: sent24 + 1, cap, campaignActive };
+  } catch (err) {
+    console.error(`[Outreach][run] first-touch failed for ${row.email}:`, err.message);
+    try { await db.updateOutreachContact(row.id, { status: "error", last_error: String(err.message).slice(0, 400) }); } catch (_) {}
+    return { sent: 0, errors: 1, sent24, cap };
   }
-  return { sent, errors, remaining, campaignActive };
 }
 
 // ---- 2. Inkommande svar ----
