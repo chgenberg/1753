@@ -18,6 +18,26 @@ const CAMPAIGN = {
   link: "https://www.1753skin.com/sv/produkter/duo-ta-da",
 };
 
+const SITE_BASE = "https://www.1753skin.com";
+const LINK_LOCALES = ["sv", "en", "es", "de", "fr"];
+
+/**
+ * Bygger en friktionsfri, mätbar kampanjlänk per segment/språk:
+ *  - ?kampanj=<kod> → produktsidan lägger paketet i varukorgen + förbereder koden
+ *  - utm_* → klick/köp kan mätas per segment i analytics
+ */
+function buildCampaignLink(segment = "outreach", locale = "sv") {
+  const loc = LINK_LOCALES.includes(locale) ? locale : "sv";
+  const params = new URLSearchParams({
+    kampanj: CAMPAIGN.code,
+    utm_source: "email",
+    utm_medium: "outreach",
+    utm_campaign: CAMPAIGN.code,
+    utm_content: segment || "outreach",
+  });
+  return `${SITE_BASE}/${loc}/produkter/${CAMPAIGN.packageId}?${params.toString()}`;
+}
+
 // Verifierad produktkatalog (svenska priser). Endast dessa fakta får uppges.
 const PRODUCT_FACTS = `VERIFIERAD PRODUKTKATALOG (enda tillåtna källan för priser/innehåll):
 1. DUO-kit + TA-DA Serum (id: duo-ta-da, 1 495 kr) – komplett rutin: The ONE + I LOVE ansiktsoljor + TA-DA Serum.
@@ -53,4 +73,4 @@ async function isCampaignCodeActive() {
   }
 }
 
-module.exports = { CAMPAIGN, PRODUCT_FACTS, CAMPAIGN_BRIEF, isCampaignCodeActive };
+module.exports = { CAMPAIGN, PRODUCT_FACTS, CAMPAIGN_BRIEF, buildCampaignLink, isCampaignCodeActive };

@@ -112,8 +112,8 @@ async function runOutreachBatch() {
   const sent24 = await db.countOutreachFirstTouchLast24h();
   if (sent24 >= cap) return { skipped: "daily-cap-reached", sent24, cap };
 
-  // Pacing: håll minst 18-40 min mellan första-mejl så det sprids över dagen.
-  const lastAt = await db.getLastFirstTouchAt();
+  // Pacing: håll minst 18-40 min mellan proaktiva utskick så det sprids över dagen.
+  const lastAt = await db.getLastCampaignSendAt();
   if (lastAt) {
     const gapMs = (PACE_BASE_MIN + Math.random() * PACE_JITTER_MIN) * 60000;
     if (Date.now() - new Date(lastAt).getTime() < gapMs) return { skipped: "pacing" };
@@ -139,6 +139,59 @@ async function runOutreachBatch() {
     console.error(`[Outreach][run] first-touch failed for ${row.email}:`, err.message);
     try { await db.updateOutreachContact(row.id, { status: "error", last_error: String(err.message).slice(0, 400) }); } catch (_) {}
     return { sent: 0, errors: 1, sent24, cap };
+  }
+}
+
+// ---- 1b. Uppföljning (en enda, efter ~3,5 dygn utan svar) ----
+//
+// Samma anti-spam-regler som första-mejlet: sändfönster, pacing (delad rytm via
+// getLastCampaignSendAt) och ett per tick. Egen 24h-kvot. Efter utskick markeras
+// kontakten 'followed_up' → vi hör aldrig av oss proaktivt igen.
+
+const FOLLOWUP_AFTER_HOURS = 84; // ~3,5 dygn
+
+async function runFollowupBatch() {
+  const settings = await db.getOutreachSettings();
+  if (!settings) return { skipped: "no-settings" };
+  if (settings.paused) return { skipped: "paused" };
+
+  const canSend = settings.autonomous && send.emailConfigured();
+  if (!canSend) return { skipped: "not-autonomous-or-unconfigured" };
+
+  const hour = stockholmHour();
+  if (hour < SEND_WINDOW_START || hour >= SEND_WINDOW_END) return { skipped: "outside-window", hour };
+
+  const cap = settings.daily_cap || 15;
+  const sent24 = await db.countOutreachFollowupsLast24h();
+  if (sent24 >= cap) return { skipped: "followup-cap-reached", sent24, cap };
+
+  const lastAt = await db.getLastCampaignSendAt();
+  if (lastAt) {
+    const gapMs = (PACE_BASE_MIN + Math.random() * PACE_JITTER_MIN) * 60000;
+    if (Date.now() - new Date(lastAt).getTime() < gapMs) return { skipped: "pacing" };
+  }
+
+  const contacts = await db.findDueOutreachFollowups(1, FOLLOWUP_AFTER_HOURS);
+  if (!contacts.length) return { skipped: "empty-queue" };
+
+  const row = contacts[0];
+  const contact = ctxFromContact(row);
+  try {
+    const campaignActive = await isCampaignCodeActive();
+    const email = await agent.composeFollowup(contact, { campaignActive });
+    if (!email) {
+      // Misslyckad compose ska inte fastna i loop – markera som uppföljd ändå.
+      await db.updateOutreachContact(row.id, { followup_count: 1 });
+      return { sent: 0, errors: 1 };
+    }
+    const attachImage = campaignActive && contact.segment !== "buyer_duotada";
+    await send.sendOutreachEmail({ contact, subject: email.subject, body: email.body, firstTouch: false, attachImage, intent: "followup" });
+    await db.updateOutreachContact(row.id, { followup_count: 1, status: "followed_up", last_error: "" });
+    return { sent: 1, errors: 0, followup: true };
+  } catch (err) {
+    console.error(`[Outreach][run] followup failed for ${row.email}:`, err.message);
+    try { await db.updateOutreachContact(row.id, { followup_count: 1, last_error: String(err.message).slice(0, 400) }); } catch (_) {}
+    return { sent: 0, errors: 1 };
   }
 }
 
@@ -263,4 +316,4 @@ async function processScheduledReplies() {
   return { delivered };
 }
 
-module.exports = { runOutreachBatch, handleInboundEmail, processScheduledReplies };
+module.exports = { runOutreachBatch, runFollowupBatch, handleInboundEmail, processScheduledReplies };

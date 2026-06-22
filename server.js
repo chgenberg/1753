@@ -8582,7 +8582,11 @@ app.post("/api/admin/social/daily-generate", adminAuthMiddleware, async (req, re
           }
         }
         await outreachRun.processScheduledReplies();
-        await outreachRun.runOutreachBatch();
+        // Ett proaktivt utskick per tick: första-mejl prioriteras, annars en uppföljning.
+        const firstTouch = await outreachRun.runOutreachBatch();
+        if (!(firstTouch && firstTouch.sent)) {
+          await outreachRun.runFollowupBatch();
+        }
       } catch (err) {
         console.error("[Outreach] internal tick error:", err.message);
       }

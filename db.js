@@ -534,6 +534,8 @@ async function initSchema() {
     await pool.query(`ALTER TABLE outreach_settings ADD COLUMN IF NOT EXISTS scheduled_start_at TIMESTAMPTZ`);
     // Ramp-schema [{date:'YYYY-MM-DD', cap:N}] – tick:en sätter dagens cap och pausar efter sista datum.
     await pool.query(`ALTER TABLE outreach_settings ADD COLUMN IF NOT EXISTS ramp_json JSONB DEFAULT '[]'`);
+    // En (1) vänlig uppföljning per kontakt om första-mejlet inte fått svar.
+    await pool.query(`ALTER TABLE outreach_contacts ADD COLUMN IF NOT EXISTS followup_count INTEGER DEFAULT 0`);
   } catch (_) {}
 
   // Migration (idempotent): link orphan skin_analyses rows back to users via email.
@@ -2370,17 +2372,45 @@ async function countOutreachFirstTouchLast24h() {
   return parseInt(rows[0].count, 10);
 }
 
-// Tidpunkt för senaste första-mejlet – används för pacing (sprid utskick, ingen skur).
-async function getLastFirstTouchAt() {
+// Tidpunkt för senaste PROAKTIVA utskicket (första-mejl + uppföljning) – pacing.
+// Delas av första-mejl och uppföljningar så hela den utgående strömmen sprids jämnt.
+async function getLastCampaignSendAt() {
   try {
     const { rows } = await pool.query(
       `SELECT MAX(COALESCE(sent_at, created_at)) AS last FROM outreach_messages
-       WHERE first_touch = true AND status IN ('sent','sending')`
+       WHERE direction = 'outbound' AND status IN ('sent','sending')
+         AND (first_touch = true OR intent = 'followup')`
     );
     return rows[0] && rows[0].last ? rows[0].last : null;
   } catch (_) {
     return null;
   }
+}
+
+// Antal uppföljningar skickade senaste 24h (egen kvot, separat från första-mejl).
+async function countOutreachFollowupsLast24h() {
+  const { rows } = await pool.query(
+    `SELECT COUNT(*) AS count FROM outreach_messages
+     WHERE intent = 'followup' AND status IN ('sent','sending')
+       AND COALESCE(sent_at, created_at) > NOW() - INTERVAL '24 hours'`
+  );
+  return parseInt(rows[0].count, 10);
+}
+
+// Kontakter som väntar på svar, inte svarat, och inte redan följts upp – äldsta först.
+async function findDueOutreachFollowups(limit = 1, minHours = 84) {
+  const { rows } = await pool.query(
+    `SELECT * FROM outreach_contacts
+      WHERE status = 'awaiting_reply'
+        AND COALESCE(followup_count, 0) = 0
+        AND last_inbound_at IS NULL
+        AND segment <> 'buyer_duotada'
+        AND last_outbound_at IS NOT NULL
+        AND last_outbound_at < NOW() - ($2 || ' hours')::interval
+      ORDER BY last_outbound_at ASC LIMIT $1`,
+    [limit, minHours]
+  );
+  return rows;
 }
 
 async function updateOutreachContact(id, fields) {
@@ -2628,7 +2658,9 @@ module.exports = {
   findOutreachContactByEmail,
   findDueOutreachFirstTouch,
   countOutreachFirstTouchLast24h,
-  getLastFirstTouchAt,
+  getLastCampaignSendAt,
+  countOutreachFollowupsLast24h,
+  findDueOutreachFollowups,
   updateOutreachContact,
   createOutreachMessage,
   findDueScheduledOutreach,

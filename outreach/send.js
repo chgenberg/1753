@@ -40,17 +40,34 @@ function escapeHtml(s) {
     .replace(/>/g, "&gt;");
 }
 
-// Bygger en enkel, personlig HTML-version av brödtexten med KLICKBARA länkar.
-// Multipart text+html är best practice och ger bättre leverans än ren text.
-// Ingen marknadsföringslayout – bara text, systemfont och länkar (känns som ett vanligt mejl).
+const LINK_STYLE = "color:#108474;text-decoration:underline";
+const MD_LINK_RE = /\[([^\]]+)\]\((https?:\/\/[^\s)]+)\)/g;
+
+// Ren text-version: markdown-länkar -> "text: url" (läsbart + klickbart i de flesta klienter).
+function mdLinksToText(s) {
+  return String(s || "").replace(MD_LINK_RE, "$1: $2");
+}
+
+// HTML-version med KLICKBARA länkar. Markdown-länkar [text](url) blir <a> med
+// beskrivande text; lösa URL:er linkifieras också. Multipart text+html är best
+// practice och ger bättre leverans. Ingen marknadslayout – känns som ett vanligt mejl.
 function bodyToHtml(text) {
-  const escaped = escapeHtml(text);
-  const linked = escaped.replace(
+  const placeholders = [];
+  let s = String(text || "").replace(MD_LINK_RE, (_m, label, url) => {
+    const i = placeholders.push({ label, url }) - 1;
+    return `\u0000L${i}\u0000`;
+  });
+  s = escapeHtml(s);
+  s = s.replace(
     /(https?:\/\/[^\s<]+[^\s<.,;:!?)\]])/g,
-    '<a href="$1" style="color:#108474;text-decoration:underline">$1</a>'
+    `<a href="$1" style="${LINK_STYLE}">$1</a>`
   );
-  const html = linked.replace(/\r?\n/g, "<br>");
-  return `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:15px;line-height:1.6;color:#1d1d1f">${html}</div>`;
+  s = s.replace(/\u0000L(\d+)\u0000/g, (_m, i) => {
+    const p = placeholders[Number(i)];
+    return `<a href="${escapeHtml(p.url)}" style="${LINK_STYLE}">${escapeHtml(p.label)}</a>`;
+  });
+  s = s.replace(/\r?\n/g, "<br>");
+  return `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;font-size:15px;line-height:1.6;color:#1d1d1f">${s}</div>`;
 }
 
 function unsubscribeHeaders() {
@@ -89,9 +106,10 @@ async function buildCampaignAttachment() {
  * Skickar ett mejl direkt via Resend och speglar det i outreach_messages.
  * Returnerar { ok, providerId, message }.
  */
-async function sendOutreachEmail({ contact, subject, body, firstTouch = false, attachImage = false }) {
+async function sendOutreachEmail({ contact, subject, body, firstTouch = false, attachImage = false, intent = "" }) {
   const locale = contact.locale || "sv";
   const finalBody = withUnsubLine(body, locale);
+  const textBody = mdLinksToText(finalBody);
   let providerId = "";
   let attachments = [];
   if (attachImage) attachments = await buildCampaignAttachment();
@@ -103,7 +121,7 @@ async function sendOutreachEmail({ contact, subject, body, firstTouch = false, a
       to: contact.email,
       replyTo: replyEmail(),
       subject,
-      text: finalBody,
+      text: textBody,
       html: bodyToHtml(finalBody),
       headers: unsubscribeHeaders(),
     };
@@ -116,12 +134,13 @@ async function sendOutreachEmail({ contact, subject, body, firstTouch = false, a
     contactId: contact.id,
     direction: "outbound",
     subject,
-    body: finalBody,
+    body: textBody,
     fromEmail: fromEmail(),
     toEmail: contact.email,
     providerId,
     status: "sent",
     firstTouch,
+    intent,
     sentAt: new Date(),
   });
 
@@ -161,7 +180,7 @@ async function deliverScheduledMessage(messageRow, contact) {
         to: contact.email,
         replyTo: replyEmail(),
         subject: reserved.subject,
-        text: reserved.body,
+        text: mdLinksToText(reserved.body),
         html: bodyToHtml(reserved.body),
         headers: unsubscribeHeaders(),
       });

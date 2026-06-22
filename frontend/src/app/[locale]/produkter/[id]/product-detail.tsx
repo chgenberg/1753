@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -38,7 +38,7 @@ export default function ProductDetail({ id }: { id: string }) {
   const [activeImg, setActiveImg] = useState(0);
   const [subInterval, setSubInterval] = useState(60);
   const [showSubOptions, setShowSubOptions] = useState(false);
-  const { addItem } = useCart();
+  const { addItem, openCart } = useCart();
   const { token, isLoggedIn } = useAuth();
   const { showToast } = useToast();
   const router = useRouter();
@@ -50,6 +50,31 @@ export default function ProductDetail({ id }: { id: string }) {
     apiFetch<{ stats: { count: number; avg: number } }>(`/reviews/${id}?limit=1&offset=0`)
       .then((d) => setReviewStats(d.stats))
       .catch(() => {});
+  }, [id]);
+
+  // Friktionsfri kampanjlänk (från mejlutskick): ?kampanj=sparre eller ?code=...
+  // Lägger produkten i varukorgen, förbereder rabattkoden (valideras server-side
+  // i kassan) och öppnar varukorgen. Koden appliceras aldrig utan giltig validering.
+  const campaignHandledRef = useRef(false);
+  useEffect(() => {
+    if (campaignHandledRef.current || typeof window === "undefined") return;
+    const params = new URLSearchParams(window.location.search);
+    const code = params.get("kampanj") || params.get("code");
+    if (!code) return;
+    campaignHandledRef.current = true;
+    addItem(id, 1);
+    try {
+      localStorage.setItem("1753_auto_discount", code.toLowerCase());
+    } catch {
+      /* ignore */
+    }
+    try {
+      window.history.replaceState(null, "", window.location.pathname);
+    } catch {
+      /* ignore */
+    }
+    openCart();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [id]);
 
   useEffect(() => {
