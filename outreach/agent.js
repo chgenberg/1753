@@ -10,7 +10,7 @@
 
 const fs = require("fs");
 const path = require("path");
-const { PRODUCT_FACTS, CAMPAIGN_BRIEF, CAMPAIGN } = require("./campaign");
+const { PRODUCT_FACTS, CAMPAIGN } = require("./campaign");
 
 const PRIMARY_MODEL = process.env.OPENAI_MODEL_NEWSLETTER || "gpt-5.4";
 const FALLBACK_MODEL = "gpt-5.4-mini";
@@ -74,7 +74,12 @@ function campaignBriefFor(segment, campaignActive) {
   if (!campaignActive) {
     return `KAMPANJ: Koden "${CAMPAIGN.code}" är just nu INTE aktiverad i systemet. Nämn därför INGEN rabattkod. Du får beskriva vår kompletta rutin (${CAMPAIGN.packageName}) och länka till ${CAMPAIGN.link}, men hitta inte på något erbjudande.`;
   }
-  return CAMPAIGN_BRIEF;
+  return `KAMPANJ (detta är HELA syftet med mejlet – väv in det naturligt och varmt, men det MÅSTE vara med i texten):
+- Erbjudande: vid köp av ${CAMPAIGN.packageName} får man ett ${CAMPAIGN.giftName} (värde ${CAMPAIGN.giftValueSek} kr) helt utan kostnad.
+- Skriv rabattkoden exakt så här (gemener): ${CAMPAIGN.code}
+- Länk att handla: ${CAMPAIGN.link}
+- Mjuk brådska: nämn att erbjudandet håller på att ta slut / är begränsat. Ange ALDRIG ett exakt slutdatum eller antal.
+- Ton: fortfarande personligt och lågmält, inte pushigt – men gåvan OCH koden "${CAMPAIGN.code}" ska finnas med. Lägg gärna erbjudandet sist, efter den personliga inledningen.`;
 }
 
 // ---- OpenAI Responses API (fail-soft, modellfallback) ----
