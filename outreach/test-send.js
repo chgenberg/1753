@@ -29,22 +29,33 @@ const db = require("../db");
   }
   const c = found.rows[0];
 
+  // Baslinje: högsta befintliga outbound-id (så vi bara reagerar på ETT NYTT mejl).
+  const baseline = await db.pool.query(
+    "SELECT COALESCE(MAX(id),0) AS maxid FROM outreach_messages WHERE contact_id=$1 AND direction='outbound'",
+    [c.id]
+  );
+  const sinceId = parseInt(baseline.rows[0].maxid, 10) || 0;
+
   // Gör testkontakten till äldsta queued så cap=1 garanterat plockar just den.
   await db.pool.query(
     "UPDATE outreach_contacts SET status='queued', created_at='2000-01-01', auto_replies=0, last_error='' WHERE id=$1",
     [c.id]
   );
-  console.log(`Testkontakt #${c.id} (${email}), segment=${c.segment}, kampanj=${camp}`);
+  // Dagskvoten räknar första-mejl senaste 24h. Sätt cap = sent24 + 1 så att
+  // EXAKT ett nytt mejl får gå (till äldsta queued = testkontakten), aldrig fler.
+  const sent24 = await db.countOutreachFirstTouchLast24h();
+  const testCap = sent24 + 1;
+  console.log(`Testkontakt #${c.id} (${email}), segment=${c.segment}, kampanj=${camp} (baslinje msg-id=${sinceId}, sent24=${sent24})`);
 
-  await db.updateOutreachSettings({ daily_cap: 1, paused: false });
-  console.log("Agenten LIVE med cap=1. Väntar på utskick (intern tick var ~60s)...");
+  await db.updateOutreachSettings({ daily_cap: testCap, paused: false });
+  console.log(`Agenten LIVE med cap=${testCap} (=> 1 nytt mejl). Väntar på NYTT utskick (intern tick var ~60s)...`);
 
   let msg = null;
   const start = Date.now();
   while (Date.now() - start < 175000) {
     const r = await db.pool.query(
-      "SELECT * FROM outreach_messages WHERE contact_id=$1 AND direction='outbound' ORDER BY created_at DESC LIMIT 1",
-      [c.id]
+      "SELECT * FROM outreach_messages WHERE contact_id=$1 AND direction='outbound' AND id>$2 ORDER BY id DESC LIMIT 1",
+      [c.id, sinceId]
     );
     if (r.rows.length) { msg = r.rows[0]; break; }
     await new Promise((res) => setTimeout(res, 5000));
