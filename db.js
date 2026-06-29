@@ -2367,9 +2367,19 @@ async function findOutreachContactByEmail(email) {
   return rows[0] || null;
 }
 
-async function findDueOutreachFirstTouch(limit = 15) {
+// campaign = null → standardkö (sparre m.fl.), EXKLUDERAR alltid recensionskampanjen
+// så sälj-batchen aldrig råkar plocka recensionskontakter. campaign satt → bara den.
+async function findDueOutreachFirstTouch(limit = 15, campaign = null) {
+  if (campaign) {
+    const { rows } = await pool.query(
+      `SELECT * FROM outreach_contacts WHERE status = 'queued' AND campaign = $2
+       ORDER BY created_at ASC LIMIT $1`,
+      [limit, campaign]
+    );
+    return rows;
+  }
   const { rows } = await pool.query(
-    `SELECT * FROM outreach_contacts WHERE status = 'queued'
+    `SELECT * FROM outreach_contacts WHERE status = 'queued' AND campaign <> 'recension'
      ORDER BY created_at ASC LIMIT $1`,
     [limit]
   );
@@ -2392,7 +2402,7 @@ async function getLastCampaignSendAt() {
     const { rows } = await pool.query(
       `SELECT MAX(COALESCE(sent_at, created_at)) AS last FROM outreach_messages
        WHERE direction = 'outbound' AND status IN ('sent','sending')
-         AND (first_touch = true OR intent = 'followup')`
+         AND (first_touch = true OR intent IN ('followup','review'))`
     );
     return rows[0] && rows[0].last ? rows[0].last : null;
   } catch (_) {
@@ -2411,6 +2421,7 @@ async function countOutreachFollowupsLast24h() {
 }
 
 // Kontakter som väntar på svar, inte svarat, och inte redan följts upp – äldsta först.
+// Recensionskampanjen (segment 'review') exkluderas: den gör ingen proaktiv uppföljning.
 async function findDueOutreachFollowups(limit = 1, minHours = 84) {
   const { rows } = await pool.query(
     `SELECT * FROM outreach_contacts
@@ -2418,12 +2429,51 @@ async function findDueOutreachFollowups(limit = 1, minHours = 84) {
         AND COALESCE(followup_count, 0) = 0
         AND last_inbound_at IS NULL
         AND segment <> 'buyer_duotada'
+        AND segment <> 'review'
         AND last_outbound_at IS NOT NULL
         AND last_outbound_at < NOW() - ($2 || ' hours')::interval
       ORDER BY last_outbound_at ASC LIMIT $1`,
     [limit, minHours]
   );
   return rows;
+}
+
+// Antal recensionsmejl (intent='review') skickade senaste 24h – egen dagskvot.
+async function countReviewSendsLast24h() {
+  const { rows } = await pool.query(
+    `SELECT COUNT(*) AS count FROM outreach_messages
+     WHERE intent = 'review' AND status IN ('sent','sending')
+       AND COALESCE(sent_at, created_at) > NOW() - INTERVAL '24 hours'`
+  );
+  return parseInt(rows[0].count, 10);
+}
+
+// Egen inställningsrad för recensionskampanjen (skild från sälj-agentens 'default').
+async function getReviewSettings() {
+  let { rows } = await pool.query("SELECT * FROM outreach_settings WHERE id = 'review' LIMIT 1");
+  if (!rows[0]) {
+    await pool.query(
+      `INSERT INTO outreach_settings (id, paused, autonomous, daily_cap, campaign)
+       VALUES ('review', true, true, 20, 'recension') ON CONFLICT (id) DO NOTHING`
+    );
+    ({ rows } = await pool.query("SELECT * FROM outreach_settings WHERE id = 'review' LIMIT 1"));
+  }
+  return rows[0] || null;
+}
+
+async function updateReviewSettings(fields) {
+  const allowed = ["paused", "autonomous", "daily_cap"];
+  const keys = Object.keys(fields).filter(k => allowed.includes(k));
+  if (keys.length === 0) return getReviewSettings();
+  await getReviewSettings(); // säkerställ att raden finns
+  const setClauses = keys.map((k, i) => `${k} = $${i + 1}`);
+  setClauses.push("updated_at = NOW()");
+  const values = keys.map(k => fields[k]);
+  const { rows } = await pool.query(
+    `UPDATE outreach_settings SET ${setClauses.join(", ")} WHERE id = 'review' RETURNING *`,
+    values
+  );
+  return rows[0] || null;
 }
 
 async function updateOutreachContact(id, fields) {
@@ -2666,6 +2716,9 @@ module.exports = {
   getDueSocialPosts,
   getOutreachSettings,
   updateOutreachSettings,
+  getReviewSettings,
+  updateReviewSettings,
+  countReviewSendsLast24h,
   enqueueOutreachContact,
   findOutreachContactByToken,
   findOutreachContactByEmail,

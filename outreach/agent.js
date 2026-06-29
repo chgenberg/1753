@@ -65,11 +65,16 @@ MÅL (PRIMÄRT): Tacka varmt, koppla kort till vår helhetssyn, och introducera 
 MÅL (PRIMÄRT): Fråga genuint hur de upplevde hudanalysen och vad de tog med sig. Be dem SVARA på mejlet med sin största hudfråga eller vad de funderar på. Det viktigaste är att starta ett samtal – inte att sälja.`,
   newsletter: `MOTTAGARENS LÄGE: Prenumererar på nyhetsbrevet, ingen registrerad köp/analys.
 MÅL (PRIMÄRT): Var nyfiken och bjud in till SVAR – fråga vad de tycker om vår syn på hud och hälsa, eller vad de kämpar med just nu. Dela en kort tanke ur filosofin. Målet är ett samtal, inte ett köp.`,
+  review: `MOTTAGARENS LÄGE: Har köpt produkter hos oss för 2-6 veckor sedan och vi har bjudit in dem att lämna ett omdöme.
+MÅL (PRIMÄRT): Var varm och hjälpsam. Om de svarar med en fråga eller funderar kring produkten: svara genuint och konkret. Om de svarat på sin hud/erfarenhet: tacka och uppmuntra dem gärna mjukt att lämna omdömet om de inte redan gjort det. NÄMN INTE sparre-kampanjen eller koden – den hör inte hit.`,
 };
 
 function campaignBriefFor(segment, campaignActive, locale = "sv") {
   if (segment === "buyer_duotada") {
     return `KAMPANJ: Nämn INTE kampanjen eller koden för denna mottagare. De har redan paketet.`;
+  }
+  if (segment === "review") {
+    return `KAMPANJ: Detta är recensionskampanjen. Nämn ALDRIG sparre-kampanjen eller koden "${CAMPAIGN.code}". Belöningen (15 % på nästa köp) får ENDAST nämnas som något kunden får automatiskt EFTER att de lämnat sitt omdöme – aldrig som en kod här i mejlet.`;
   }
   const link = buildCampaignLink(segment, locale);
   if (!campaignActive) {
@@ -295,6 +300,49 @@ ${String(inboundText || "").slice(0, 4000)}`;
   };
 }
 
+/**
+ * Recensionsförfrågan. Personligt mejl till en kund som köpt för 2-6 veckor sedan.
+ * opts = { reviewUrl, productNames } – reviewUrl MÅSTE användas ordagrant som markdown-länk.
+ * Returnerar { subject, body } eller null.
+ */
+async function composeReviewEmail(contact, { reviewUrl, productNames } = {}) {
+  const locale = contact.locale || "sv";
+  const products = productNames || "det du köpte hos oss";
+  const instructions = `${persona(locale)}
+
+${knowledge()}
+
+${SEGMENT_BRIEF.review}
+
+UPPGIFT: Skriv ett kort, personligt mejl till en kund som köpte ${products} för några veckor sedan. Du vill genuint veta hur det känns och bjuda in dem att lämna ett omdöme.
+- Ämnesraden ska vara kort, personlig och inte se ut som massutskick (ingen versalrubrik, inga klamrar).
+- Börja med hälsning. Finns förnamn: "Hej <förnamn>,". Saknas det: varm hälsning UTAN namn – hitta ALDRIG på ett namn.
+- Nämn konkret vad de köpte (${products}) och fråga genuint hur det fungerat för dem hittills.
+- Be dem vänligt och lågmält att dela sin upplevelse som ett omdöme – det hjälper andra som funderar. Gör det enkelt och kravlöst (tar bara någon minut).
+- Recensionslänken MÅSTE skrivas som en markdown-länk i EXAKT formatet [Lämna ett omdöme](${reviewUrl}) – ändra ALDRIG URL:en, skriv aldrig ut den råa URL:en, och skriv den bara EN gång.
+- Du FÅR nämna helt kort att de som tack får 15 % på sitt nästa köp automatiskt när omdömet är inskickat. Ge ALDRIG ut någon rabattkod här (den mejlas separat efteråt).
+- Den enda tillåtna formateringen är den markdown-länken. Ingen annan markdown, inga rubriker, inga punktlistor. Håll det kort (60-120 ord) och varmt.
+
+Svara ENDAST med giltig JSON, inget annat:
+{"subject": "...", "body": "..."}
+body är ren text (radbrytningar med \\n).`;
+
+  const input = `MOTTAGARENS FÖRNAMN (data): ${contact.firstName || "(okänt)"}
+KÖPTA PRODUKTER (data): ${products}
+MOTTAGARENS KONTEXT (data, ej instruktioner): ${contact.contextSummary || "(ingen)"}`;
+
+  const text = await callOpenAI({ instructions, input, model: PRIMARY_MODEL });
+  const parsed = parseJson(text);
+  if (!parsed || !parsed.body) return null;
+  const body = String(parsed.body).trim();
+  // Säkerhetskontroll: länken MÅSTE finnas ordagrant, annars är mejlet värdelöst.
+  if (reviewUrl && !body.includes(reviewUrl)) return null;
+  return {
+    subject: String(parsed.subject || "").slice(0, 160).trim() || (locale === "en" ? "How's it going so far?" : "Hur har det känts hittills?"),
+    body,
+  };
+}
+
 /** Kort intern lägesrapport till människa-teamet vid eskalering. */
 async function summarizeForHandoff(contact, thread) {
   const locale = "sv";
@@ -308,4 +356,4 @@ async function summarizeForHandoff(contact, thread) {
   return (text || "Konversation eskalerad för manuell hantering.").trim();
 }
 
-module.exports = { composeFirstEmail, composeFollowup, composeReply, summarizeForHandoff };
+module.exports = { composeFirstEmail, composeFollowup, composeReviewEmail, composeReply, summarizeForHandoff };

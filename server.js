@@ -504,6 +504,150 @@ function personalDiscountBlockHtml(code, locale = "sv") {
   </div>`;
 }
 
+// ---- RECENSIONER: token + belöning ----
+//
+// Signerar en kortlivad JWT som /api/reviews + /skriv-omdome verifierar (purpose:"review").
+// Innehåller kundens namn/e-post, ordernr och de köpta produkterna så att kunden kan
+// välja vilken produkt hen recenserar. locale styr språk i belöningsmejlet.
+function signReviewToken({ customerName, customerEmail, orderNumber, products, locale }) {
+  const jwtLib = require("jsonwebtoken");
+  return jwtLib.sign(
+    {
+      purpose: "review",
+      customerName: customerName || "",
+      customerEmail: customerEmail || "",
+      orderNumber: orderNumber || "",
+      products: Array.isArray(products) ? products : [],
+      locale: ["sv", "en", "es", "de", "fr"].includes(locale) ? locale : "sv",
+    },
+    JWT_SECRET,
+    { expiresIn: "60d" }
+  );
+}
+
+// 15 %-belöning som tack för en lämnad recension. Egen beskrivnings-tagg så vi kan
+// deduplicera (en belöning per kund) och hålla den isär från övriga personliga koder.
+const REVIEW_REWARD_PERCENT = 15;
+const REVIEW_REWARD_VALID_DAYS = 60;
+
+async function createReviewRewardCode(email) {
+  for (let attempt = 0; attempt < 3; attempt++) {
+    const suffix = crypto.randomBytes(3).toString("hex").toUpperCase();
+    const code = `TACK15-${suffix}`;
+    const validUntil = new Date(Date.now() + REVIEW_REWARD_VALID_DAYS * 24 * 3600 * 1000);
+    try {
+      await db.createDiscountCode({
+        code,
+        percent: REVIEW_REWARD_PERCENT,
+        fixedAmount: 0,
+        description: `15% recension-tack (${email || "okänd"})`,
+        productIds: null,
+        maxUses: 1,
+        validUntil: validUntil.toISOString(),
+      });
+      return code;
+    } catch (err) {
+      if (err.code === "23505") continue; // unik kollision – försök igen
+      throw err;
+    }
+  }
+  throw new Error("Kunde inte generera recensionskod efter 3 försök");
+}
+
+const REVIEW_REWARD_COPY = {
+  sv: {
+    subject: "Tack för din recension – en liten present till dig",
+    greeting: (n) => (n ? `Hej ${n},` : "Hej,"),
+    intro: "Tack för att du tog dig tiden att lämna ett omdöme. Det betyder mer för oss än du tror – riktiga ord från riktiga människor är det enda vi litar på.",
+    reward: "Som ett litet tack vill jag bjuda dig på 15 % på ditt nästa köp.",
+    cta: "Till butiken",
+    signoff: "Christopher\n1753 SKINCARE",
+  },
+  en: {
+    subject: "Thank you for your review – a small gift",
+    greeting: (n) => (n ? `Hi ${n},` : "Hi,"),
+    intro: "Thank you for taking the time to leave a review. It means more to us than you might think.",
+    reward: "As a small thank you, here is 15% off your next order.",
+    cta: "To the shop",
+    signoff: "Christopher\n1753 SKINCARE",
+  },
+  es: {
+    subject: "Gracias por tu reseña – un pequeño regalo",
+    greeting: (n) => (n ? `Hola ${n},` : "Hola,"),
+    intro: "Gracias por tomarte el tiempo de dejar una reseña. Significa más de lo que crees.",
+    reward: "Como pequeño agradecimiento, aquí tienes un 15% en tu próxima compra.",
+    cta: "Ir a la tienda",
+    signoff: "Christopher\n1753 SKINCARE",
+  },
+  de: {
+    subject: "Danke für deine Bewertung – ein kleines Geschenk",
+    greeting: (n) => (n ? `Hallo ${n},` : "Hallo,"),
+    intro: "Danke, dass du dir die Zeit für eine Bewertung genommen hast. Das bedeutet uns mehr, als du denkst.",
+    reward: "Als kleines Dankeschön bekommst du 15% auf deinen nächsten Einkauf.",
+    cta: "Zum Shop",
+    signoff: "Christopher\n1753 SKINCARE",
+  },
+  fr: {
+    subject: "Merci pour votre avis – un petit cadeau",
+    greeting: (n) => (n ? `Bonjour ${n},` : "Bonjour,"),
+    intro: "Merci d'avoir pris le temps de laisser un avis. Cela compte plus que vous ne le pensez.",
+    reward: "En guise de remerciement, voici 15% sur votre prochaine commande.",
+    cta: "Vers la boutique",
+    signoff: "Christopher\n1753 SKINCARE",
+  },
+};
+
+async function sendReviewRewardEmail(email, customerName, code, locale = "sv") {
+  const apiKey = process.env.RESEND_API_KEY;
+  if (!apiKey) {
+    console.warn("[ReviewReward] RESEND_API_KEY saknas – kunde inte skicka belöningsmejl");
+    return;
+  }
+  const c = REVIEW_REWARD_COPY[locale] || REVIEW_REWARD_COPY.sv;
+  const firstName = String(customerName || "").trim().split(/\s+/)[0].replace(/[0-9]+/g, "");
+  const shopBase = process.env.FRONTEND_URL || "https://www.1753skin.com";
+  const shopUrl = `${shopBase}/${emailPath(locale, "products")}`;
+  const html = `<div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;max-width:560px;margin:0 auto;color:#1d1d1f;line-height:1.6">
+    <p style="font-size:16px;margin:0 0 16px">${c.greeting(firstName)}</p>
+    <p style="font-size:15px;color:#515151;margin:0 0 16px">${c.intro}</p>
+    <p style="font-size:15px;color:#515151;margin:0 0 8px">${c.reward}</p>
+    ${personalDiscountBlockHtml(code, locale)}
+    <p style="text-align:center;margin:24px 0">
+      <a href="${shopUrl}" style="background:#108474;color:#fff;padding:12px 28px;border-radius:980px;text-decoration:none;font-weight:600;font-size:14px;display:inline-block">${c.cta}</a>
+    </p>
+    <p style="font-size:15px;color:#1d1d1f;white-space:pre-line;margin:24px 0 0">${c.signoff}</p>
+  </div>`;
+  try {
+    const { Resend } = require("resend");
+    const resend = new Resend(apiKey);
+    await resend.emails.send({
+      from: `1753 SKINCARE <${emailFromInfo()}>`,
+      to: email,
+      subject: c.subject,
+      html,
+    });
+    console.log(`[ReviewReward] 15%-kod ${code} skickad till ${email}`);
+  } catch (err) {
+    console.error("[ReviewReward] kunde inte skicka:", err.message);
+  }
+}
+
+// Belönar en kund EN gång efter inskickad recension (dedup via beskrivnings-tagg).
+async function issueReviewReward(decoded) {
+  const email = String(decoded?.customerEmail || "").toLowerCase().trim();
+  if (!email) return;
+  const locale = ["sv", "en", "es", "de", "fr"].includes(decoded.locale) ? decoded.locale : "sv";
+  try {
+    const { rows } = await db.pool.query(
+      "SELECT 1 FROM discount_codes WHERE description ILIKE $1 LIMIT 1",
+      [`%recension-tack (${email})%`]
+    );
+    if (rows.length) return; // redan belönad – ge aldrig dubbla koder
+  } catch (_) { /* fortsätt – hellre belöna än blockera */ }
+  const code = await createReviewRewardCode(email);
+  await sendReviewRewardEmail(email, decoded.customerName, code, locale);
+}
+
 async function generateOrderNumber() {
   return await db.nextSharedOrderNumber();
 }
@@ -6185,9 +6329,13 @@ app.post("/api/reviews", async (req, res) => {
       processReviewReply(review, productName, decoded.customerName).catch(err =>
         console.error("[ReviewAI] Error:", err.message)
       );
+      // Tack-belöning: 15 %-kod mejlas automatiskt (en gång per kund).
+      issueReviewReward(decoded).catch(err =>
+        console.error("[ReviewReward] Error:", err.message)
+      );
     }
 
-    res.json({ success: true, review });
+    res.json({ success: true, review, rewarded: true });
   } catch (err) { res.status(500).json({ message: "Kunde inte spara omdömet" }); }
 });
 
@@ -8618,6 +8766,20 @@ app.post("/api/admin/social/daily-generate", adminAuthMiddleware, async (req, re
     setInterval(runOutreachTick, 60_000);
     setTimeout(runOutreachTick, 45_000);
     console.log("[OK] Outreach email agent started (every 60s, paused by default)");
+
+    // Recensionskampanjen: egen tick (vardagar, dagtid, 1/tick) – skild från sälj-agenten.
+    const outreachReview = require("./outreach/review");
+    const runReviewTick = async () => {
+      try {
+        const r = await outreachReview.runReviewBatch();
+        if (r && r.sent) console.log(`[Review] skickade recensionsförfrågan (${r.sent24}/${r.cap} idag)`);
+      } catch (err) {
+        console.error("[Review] tick error:", err.message);
+      }
+    };
+    setInterval(runReviewTick, 90_000);
+    setTimeout(runReviewTick, 75_000);
+    console.log("[OK] Review-request campaign started (weekdays 09-18, paused by default)");
 
     scheduleDailyAt(10, 0, dailySocialMediaGeneration);
     console.log("[OK] Daily social media auto-generation scheduled (10:00 CET)");
