@@ -433,6 +433,19 @@ const DISCOUNT_CODES = {
   // createPersonalDiscountCode nedan.
 };
 
+// Slår upp en statisk rabattkod toleranta mot versaler/bindestreck/mellanslag.
+// Returnerar { key, discount } där key är den kanoniska koden, annars null.
+function findStaticDiscount(input) {
+  const key = String(input || "").toLowerCase().trim();
+  if (DISCOUNT_CODES[key]) return { key, discount: DISCOUNT_CODES[key] };
+  const norm = key.replace(/[^a-z0-9]/g, "");
+  if (!norm) return null;
+  for (const k of Object.keys(DISCOUNT_CODES)) {
+    if (k.replace(/[^a-z0-9]/g, "") === norm) return { key: k, discount: DISCOUNT_CODES[k] };
+  }
+  return null;
+}
+
 // ---- PERSONLIGA RABATTKODER (auto-genererade vid mejlutskick) ----
 //
 // Bakgrund: AI-genererade nyhetsbrev har tidigare kunnat "hitta på" rabattkoder
@@ -3333,12 +3346,18 @@ app.post("/api/discount/validate", async (req, res) => {
   const { code, items } = req.body;
   if (!code) return res.status(400).json({ message: apiMsg("discountEnter", reqLocale(req)) });
 
-  const key = code.toLowerCase().trim();
-  let discount = DISCOUNT_CODES[key];
+  // Kanonisk kod som returneras till frontend (så kassan får exakt rätt sträng).
+  let resolvedCode = code.toLowerCase().trim();
+  let discount = null;
+
+  const stat = findStaticDiscount(code);
+  if (stat) { discount = stat.discount; resolvedCode = stat.key; }
 
   if (!discount) {
-    const dbCode = await db.findDiscountCode(key);
+    // findDiscountCode är tolerant mot bindestreck/mellanslag/versaler.
+    const dbCode = await db.findDiscountCode(code);
     if (dbCode && dbCode.active) {
+      resolvedCode = dbCode.code;
       const now = new Date();
       if (dbCode.valid_from && new Date(dbCode.valid_from) > now) { discount = null; }
       else if (dbCode.valid_until && new Date(dbCode.valid_until) < now) { discount = null; }
@@ -3368,7 +3387,7 @@ app.post("/api/discount/validate", async (req, res) => {
   }
 
   res.json({
-    code: key,
+    code: resolvedCode,
     percent: discount.percent || 0,
     fixedAmount: discount.fixedAmount || 0,
     minOrderAmount: discount.minOrderAmount || 0,
@@ -3424,7 +3443,11 @@ app.post("/api/orders/create", async (req, res) => {
         typeof i.subscription.intervalDays === "number"
     );
 
-    let discount = discountCode ? DISCOUNT_CODES[discountCode.toLowerCase().trim()] : null;
+    let discount = null;
+    if (discountCode) {
+      const stat = findStaticDiscount(discountCode);
+      if (stat) discount = stat.discount;
+    }
     if (!discount && discountCode) {
       const dbCode = await db.findDiscountCode(discountCode);
       if (dbCode && dbCode.active) {
@@ -3440,7 +3463,8 @@ app.post("/api/orders/create", async (req, res) => {
             productIds: dbCode.product_ids,
             description: dbCode.description
           };
-          await db.incrementDiscountUsage(discountCode);
+          // Räkna av på den kanoniska koden, inte kundens (ev. felstavade) inmatning.
+          await db.incrementDiscountUsage(dbCode.code);
         }
       }
     }

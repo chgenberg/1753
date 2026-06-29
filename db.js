@@ -1314,10 +1314,23 @@ async function listDiscountCodes() {
 }
 
 async function findDiscountCode(code) {
-  const { rows } = await pool.query(
+  const lc = String(code || "").toLowerCase().trim();
+  if (!lc) return null;
+  // 1) Exakt match (snabbast, träffar index).
+  let { rows } = await pool.query(
     "SELECT * FROM discount_codes WHERE code = $1 LIMIT 1",
-    [code.toLowerCase()]
+    [lc]
   );
+  if (rows[0]) return rows[0];
+  // 2) Tolerant fallback: ignorera bindestreck/mellanslag. Kunder skriver ofta
+  //    TACK15-XXXXXX som "TACK-15XXXXXX" (bindestrecket hamnar fel). Vi matchar
+  //    då på enbart bokstäver+siffror. Kör bara när exakt match misslyckats.
+  const norm = lc.replace(/[^a-z0-9]/g, "");
+  if (!norm) return null;
+  ({ rows } = await pool.query(
+    "SELECT * FROM discount_codes WHERE regexp_replace(lower(code), '[^a-z0-9]', '', 'g') = $1 LIMIT 1",
+    [norm]
+  ));
   return rows[0] || null;
 }
 
