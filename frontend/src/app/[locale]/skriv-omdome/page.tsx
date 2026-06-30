@@ -1,8 +1,11 @@
 import type { Metadata } from "next";
-import { Suspense } from "react";
 import ReviewForm from "./review-form";
 import { getMessages } from "@/lib/i18n/messages";
 import type { Locale } from "@/lib/i18n/types";
+
+// Sidan beror helt på ?token= och får ALDRIG serveras som en statiskt cachead
+// prerender (då bakas en token-lös "Ingen giltig länk"/spinner in och visas för alla).
+export const dynamic = "force-dynamic";
 
 const BASE_URL = "https://www.1753skin.com";
 
@@ -40,16 +43,11 @@ export async function generateMetadata({
   };
 }
 
-export default function SkrivOmdomePage() {
-  return (
-    <Suspense
-      fallback={
-        <div className="flex min-h-[60vh] items-center justify-center">
-          <div className="h-8 w-8 animate-spin rounded-full border-2 border-brand-200 border-t-brand-900" />
-        </div>
-      }
-    >
-      <ReviewForm />
-    </Suspense>
-  );
+export default async function SkrivOmdomePage({
+  searchParams,
+}: {
+  searchParams: Promise<{ token?: string }>;
+}) {
+  const { token } = await searchParams;
+  return <ReviewForm token={token ?? null} />;
 }

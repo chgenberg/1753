@@ -1,7 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
 import { Star, CheckCircle2, AlertCircle, Loader2 } from "lucide-react";
 import { apiFetch } from "@/lib/api";
 import { cn } from "@/lib/utils";
@@ -15,13 +14,11 @@ interface TokenData {
   products: { id: string; name: string }[];
 }
 
-export default function ReviewForm() {
+export default function ReviewForm({ token }: { token: string | null }) {
   const { t, path } = useLocale();
   const r = (key: string, vars?: Record<string, string | number>) => t(`reviewForm.${key}`, vars);
   const noToken = t("reviewForm.noToken");
   const tokenExpired = t("reviewForm.tokenExpired");
-  const searchParams = useSearchParams();
-  const token = searchParams.get("token");
 
   const [tokenData, setTokenData] = useState<TokenData | null>(null);
   const [loading, setLoading] = useState(true);
