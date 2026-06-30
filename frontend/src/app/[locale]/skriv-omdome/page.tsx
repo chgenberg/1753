@@ -43,11 +43,50 @@ export async function generateMetadata({
   };
 }
 
+interface ReviewTokenData {
+  customerName: string;
+  customerEmail: string;
+  orderNumber: string;
+  products: { id: string; name: string }[];
+}
+
+const API_BASE =
+  process.env.NEXT_PUBLIC_API_URL?.replace(/\/$/, "") || "https://api.1753skin.com/api";
+
 export default async function SkrivOmdomePage({
   searchParams,
 }: {
   searchParams: Promise<{ token?: string }>;
 }) {
   const { token } = await searchParams;
-  return <ReviewForm token={token ?? null} />;
+
+  // Verifiera token server-side så formuläret renderas färdigt direkt i HTML:en.
+  // Då fastnar sidan aldrig i en spinner som väntar på ett klient-anrop (t.ex. i
+  // långsamma eller script-begränsade webbläsare). initialData = giltig token,
+  // tokenInvalid = utgången/ogiltig, båda null = nätfel → klienten försöker igen.
+  let initialData: ReviewTokenData | null = null;
+  let tokenInvalid = false;
+  if (token) {
+    try {
+      const res = await fetch(
+        `${API_BASE}/reviews/verify-token/${encodeURIComponent(token)}`,
+        { cache: "no-store" },
+      );
+      if (res.ok) {
+        initialData = (await res.json()) as ReviewTokenData;
+      } else {
+        tokenInvalid = true;
+      }
+    } catch {
+      // Nätfel server-side – låt klienten göra ett nytt försök.
+    }
+  }
+
+  return (
+    <ReviewForm
+      token={token ?? null}
+      initialData={initialData}
+      tokenInvalid={tokenInvalid}
+    />
+  );
 }

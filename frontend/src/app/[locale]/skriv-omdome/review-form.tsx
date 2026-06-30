@@ -14,17 +14,35 @@ interface TokenData {
   products: { id: string; name: string }[];
 }
 
-export default function ReviewForm({ token }: { token: string | null }) {
+export default function ReviewForm({
+  token,
+  initialData = null,
+  tokenInvalid = false,
+}: {
+  token: string | null;
+  initialData?: TokenData | null;
+  tokenInvalid?: boolean;
+}) {
   const { t, path } = useLocale();
   const r = (key: string, vars?: Record<string, string | number>) => t(`reviewForm.${key}`, vars);
   const noToken = t("reviewForm.noToken");
   const tokenExpired = t("reviewForm.tokenExpired");
 
-  const [tokenData, setTokenData] = useState<TokenData | null>(null);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
+  // Servern har redan försökt verifiera token. Är resultatet känt (giltig token,
+  // ogiltig token eller helt saknad token) startar vi UTAN spinner och renderar
+  // formuläret/felet direkt. Endast vid server-nätfel faller vi tillbaka till
+  // ett klient-anrop.
+  const serverResolved = !token || tokenInvalid || initialData !== null;
 
-  const [selectedProduct, setSelectedProduct] = useState("");
+  const [tokenData, setTokenData] = useState<TokenData | null>(initialData);
+  const [loading, setLoading] = useState(!serverResolved);
+  const [error, setError] = useState(
+    !token ? noToken : tokenInvalid ? tokenExpired : "",
+  );
+
+  const [selectedProduct, setSelectedProduct] = useState(
+    initialData?.products?.length === 1 ? initialData.products[0].id : "",
+  );
   const [rating, setRating] = useState(0);
   const [hoverRating, setHoverRating] = useState(0);
   const [title, setTitle] = useState("");
@@ -34,6 +52,8 @@ export default function ReviewForm({ token }: { token: string | null }) {
   const [submitError, setSubmitError] = useState("");
 
   useEffect(() => {
+    // Server-side redan klar – inget klient-anrop behövs.
+    if (serverResolved) return;
     if (!token) {
       setError(noToken);
       setLoading(false);
@@ -48,7 +68,7 @@ export default function ReviewForm({ token }: { token: string | null }) {
       })
       .catch(() => setError(tokenExpired))
       .finally(() => setLoading(false));
-  }, [token, noToken, tokenExpired]);
+  }, [token, noToken, tokenExpired, serverResolved]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
