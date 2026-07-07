@@ -124,6 +124,18 @@ export default function LoginPage() {
                         "S'il existe un compte lié à cette adresse, nous avons envoyé un lien pour choisir un nouveau mot de passe. Le lien est valide pendant 1 heure."
                       )}
                     </p>
+                    <p className="mt-4 text-sm leading-relaxed text-muted-foreground">
+                      {tx(locale,
+                        "Har du aldrig skapat ett konto? ",
+                        "Never created an account? ",
+                        "¿Nunca has creado una cuenta? ",
+                        "Noch kein Konto erstellt? ",
+                        "Vous n'avez jamais créé de compte ? "
+                      )}
+                      <Link href={path("register")} className="font-medium text-[#108474] hover:underline">
+                        {tx(locale, "Registrera dig här", "Register here", "Regístrate aquí", "Hier registrieren", "Inscrivez-vous ici")}
+                      </Link>
+                    </p>
                     <button
                       onClick={() => { setForgotMode(false); setForgotSent(false); setForgotEmail(""); }}
                       className="mt-6 text-sm font-medium text-[#108474] hover:underline"
