@@ -12,12 +12,14 @@ const CONTENT_UPDATED = new Date("2026-04-16");
 const GUIDES_UPDATED = new Date("2026-04-16");
 const PRODUCTS_UPDATED = new Date("2026-04-16");
 
+// Obs: "skinAnalysis" (verktyget /hudanalys) ingår medvetet INTE här. Det är en
+// interaktiv funnel som canonicaliseras till landningssidan /gratis-hudanalys
+// (tillagd separat nedan). Att lista båda splittrade tidigare rankningssignalerna.
 const PUBLIC_ROUTES: AppRoute[] = [
   "home",
   "products",
   "about",
   "contact",
-  "skinAnalysis",
   "terms",
   "privacy",
   "loyalty",
@@ -106,6 +108,16 @@ function buildCoreEntries(): MetadataRoute.Sitemap {
       changeFrequency: "weekly",
       priority: 0.8,
       alternates: hreflang(guideAlternates),
+    });
+
+    const guideAllAlternates: Record<string, string> = {};
+    for (const l of locales) guideAllAlternates[l] = `/${l}/guide/alla`;
+    out.push({
+      url: `${BASE}/${locale}/guide/alla`,
+      lastModified: CONTENT_UPDATED,
+      changeFrequency: "weekly",
+      priority: 0.6,
+      alternates: hreflang(guideAllAlternates),
     });
 
     const galleryAlternates: Record<string, string> = {};

@@ -669,7 +669,7 @@ export default async function GuidePage({ params }: Props) {
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
-                href={localizePath(l, "skinAnalysis")}
+                href={localizePath(l, "skinAnalysisLanding")}
                 className="inline-flex h-[52px] items-center gap-2 rounded-full border border-[#e6e6e6] bg-white/80 px-8 text-sm font-medium text-[#1d1d1f] backdrop-blur-sm transition-all duration-300 hover:border-[#108474] hover:shadow-md"
               >
                 <Sparkles className="h-4 w-4 text-[#108474]" />
@@ -953,7 +953,7 @@ export default async function GuidePage({ params }: Props) {
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
-                href={localizePath(l, "skinAnalysis")}
+                href={localizePath(l, "skinAnalysisLanding")}
                 className="inline-flex h-[52px] items-center gap-2 rounded-full border border-white/20 px-8 text-sm font-medium text-white transition-all duration-300 hover:border-white/40 hover:bg-white/5"
               >
                 <Sparkles className="h-4 w-4" />

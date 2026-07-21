@@ -124,13 +124,6 @@ export default async function LocaleLayout({
       "https://www.youtube.com/@1753skincare",
       "https://www.1753skincare.com",
     ],
-    aggregateRating: {
-      "@type": "AggregateRating",
-      ratingValue: "4.8",
-      bestRating: "5",
-      worstRating: "1",
-      reviewCount: String(PRODUCTS.reduce((sum, p) => sum + (p.reviews || 0), 0)),
-    },
   };
 
   const localBusinessSchema = {
@@ -189,7 +182,7 @@ export default async function LocaleLayout({
       "@type": "SearchAction",
       target: {
         "@type": "EntryPoint",
-        urlTemplate: `https://www.1753skin.com/${locale}/guide?q={search_term_string}`,
+        urlTemplate: `https://www.1753skin.com/${locale}/guide/alla?q={search_term_string}`,
       },
       "query-input": "required name=search_term_string",
     },
@@ -231,12 +224,14 @@ export default async function LocaleLayout({
       messages.header.navHome,
       messages.header.navProducts,
       messages.header.navAbout,
+      messages.header.navAnalysis,
       messages.header.navContact,
     ],
     url: [
       `https://www.1753skin.com${localizePath(l, "home")}`,
       `https://www.1753skin.com${localizePath(l, "products")}`,
       `https://www.1753skin.com${localizePath(l, "about")}`,
+      `https://www.1753skin.com${localizePath(l, "skinAnalysisLanding")}`,
       `https://www.1753skin.com${localizePath(l, "contact")}`,
     ],
   };

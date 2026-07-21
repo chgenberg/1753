@@ -9,6 +9,7 @@ export type AppRoute =
   | "contact"
   | "checkout"
   | "skinAnalysis"
+  | "skinAnalysisLanding"
   | "terms"
   | "privacy"
   | "login"
@@ -28,6 +29,7 @@ const SV_SEGMENT: Record<AppRoute, string> = {
   contact: "kontakt",
   checkout: "kassa",
   skinAnalysis: "hudanalys",
+  skinAnalysisLanding: "gratis-hudanalys",
   terms: "villkor",
   privacy: "integritetspolicy",
   login: "logga-in",
@@ -49,6 +51,7 @@ const EN_SEGMENT: Record<AppRoute, string> = {
   contact: "contact",
   checkout: "checkout",
   skinAnalysis: "skin-analysis",
+  skinAnalysisLanding: "free-skin-analysis",
   terms: "terms",
   privacy: "privacy",
   login: "login",
@@ -69,6 +72,7 @@ const ES_SEGMENT: Record<AppRoute, string> = {
   contact: "contacto",
   checkout: "pagar",
   skinAnalysis: "analisis-piel",
+  skinAnalysisLanding: "analisis-piel-gratis",
   terms: "terminos",
   privacy: "privacidad",
   login: "iniciar-sesion",
@@ -89,6 +93,7 @@ const DE_SEGMENT: Record<AppRoute, string> = {
   contact: "kontakt",
   checkout: "kasse",
   skinAnalysis: "hautanalyse",
+  skinAnalysisLanding: "kostenlose-hautanalyse",
   terms: "agb",
   privacy: "datenschutz",
   login: "anmelden",
@@ -109,6 +114,7 @@ const FR_SEGMENT: Record<AppRoute, string> = {
   contact: "contact",
   checkout: "paiement",
   skinAnalysis: "analyse-peau",
+  skinAnalysisLanding: "analyse-de-peau-gratuite",
   terms: "cgv",
   privacy: "confidentialite",
   login: "connexion",

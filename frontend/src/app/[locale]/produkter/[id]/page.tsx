@@ -103,9 +103,46 @@ function tx(locale: string, sv: string, en: string, es?: string, de?: string, fr
   return en;
 }
 
+// Server-side bas för att hämta riktig recensionsdata (aldrig localhost i prod-build).
+const API_BASE_SERVER = process.env.NEXT_PUBLIC_API_URL || "https://api.1753skin.com/api";
+
+interface ReviewSchemaData {
+  stats: { count: number; avg: number };
+  reviews: {
+    reviewer_name: string;
+    rating: number;
+    title: string;
+    body: string;
+    review_date: string;
+  }[];
+}
+
+/**
+ * Hämtar verklig aggregerad rating + ett fåtal recensioner server-side så att
+ * JSON-LD (AggregateRating + Review) speglar databasen i stället för hårdkodat
+ * 4.8. ISR via revalidate; misslyckas anropet faller vi tillbaka på statiska
+ * värden (ingen build-krasch, ingen regression).
+ */
+async function fetchReviewData(productId: string, locale: string): Promise<ReviewSchemaData | null> {
+  try {
+    const res = await fetch(
+      `${API_BASE_SERVER}/reviews/${productId}?limit=5&offset=0&locale=${locale}`,
+      { next: { revalidate: 3600 }, signal: AbortSignal.timeout(5000) },
+    );
+    if (!res.ok) return null;
+    const data = (await res.json()) as ReviewSchemaData;
+    if (!data?.stats || !data.stats.count) return null;
+    return data;
+  } catch {
+    return null;
+  }
+}
+
 export default async function ProductPage({ params }: Props) {
   const { id, locale } = await params;
   const l = locale as Locale;
+
+  const reviewData = getProduct(id) ? await fetchReviewData(id, l) : null;
 
   // Om id inte längre finns i PRODUCTS men är en känd legacy-slug,
   // skicka 308 till nuvarande sellable produkt istället för att rendera 404.
@@ -157,14 +194,38 @@ export default async function ProductPage({ params }: Props) {
           returnFees: "https://schema.org/FreeReturn",
         },
       },
-      aggregateRating: {
-        "@type": "AggregateRating",
-        ratingValue: "4.8",
-        bestRating: "5",
-        worstRating: "1",
-        reviewCount: String(product.reviews),
-      },
+      aggregateRating: reviewData
+        ? {
+            "@type": "AggregateRating",
+            ratingValue: reviewData.stats.avg.toFixed(1),
+            bestRating: "5",
+            worstRating: "1",
+            reviewCount: String(reviewData.stats.count),
+          }
+        : {
+            "@type": "AggregateRating",
+            ratingValue: "4.8",
+            bestRating: "5",
+            worstRating: "1",
+            reviewCount: String(product.reviews),
+          },
     };
+
+    if (reviewData && reviewData.reviews.length > 0) {
+      schema.review = reviewData.reviews.slice(0, 5).map((r) => ({
+        "@type": "Review",
+        reviewRating: {
+          "@type": "Rating",
+          ratingValue: String(r.rating),
+          bestRating: "5",
+          worstRating: "1",
+        },
+        author: { "@type": "Person", name: r.reviewer_name },
+        ...(r.review_date ? { datePublished: new Date(r.review_date).toISOString().slice(0, 10) } : {}),
+        ...(r.title ? { name: r.title } : {}),
+        ...(r.body || r.title ? { reviewBody: r.body || r.title } : {}),
+      }));
+    }
 
     if (product.size) schema.weight = product.size;
     if (product.ingredients) {

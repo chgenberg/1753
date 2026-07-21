@@ -21,7 +21,7 @@
 - Website: https://www.1753skin.com
 - Languages: Swedish, English, Spanish, German, French
 - Currency: SEK (Sweden), EUR (international)
-- Free shipping: orders over 700 SEK / €60
+- Free shipping: orders over 600 SEK / €60
 - Return policy: 30 days, return by mail
 
 ## Philosophy
@@ -137,9 +137,9 @@ A: The face scan runs 100% locally. Zone images are sent encrypted to GPT-5.4 fo
 - About us: https://www.1753skin.com/sv/om-oss
 - Contact: https://www.1753skin.com/sv/kontakt
 - Skin analysis: https://www.1753skin.com/sv/gratis-hudanalys
-- Skin analysis quiz: https://www.1753skin.com/sv/hudanalys
+- Free skin analysis (15 metrics, skin age, personal routine): https://www.1753skin.com/sv/gratis-hudanalys
 - Guide hub (grouped by topic): https://www.1753skin.com/sv/guide
-- All guides (A–Z sitemap index, 1 000+ articles): https://www.1753skin.com/sv/guide/alla
+- All guides (A–Z sitemap index, ~400 articles): https://www.1753skin.com/sv/guide/alla
 - RSS feed of all guides: https://www.1753skin.com/guide/rss.xml
 - Loyalty program: https://www.1753skin.com/sv/lojalitetsprogram
 - Terms: https://www.1753skin.com/sv/villkor

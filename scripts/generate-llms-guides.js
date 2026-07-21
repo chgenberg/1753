@@ -19,6 +19,7 @@ const SEO_DIR = path.join(ROOT, "frontend", "src", "lib", "seo");
 const OUT = path.join(ROOT, "frontend", "public", "llms-guides.txt");
 
 const FILES = [
+  "pages-skinanalysis.ts",
   "pages-tier1.ts",
   "pages-cbd.ts",
   "pages-cbg.ts",
@@ -75,21 +76,23 @@ const CATEGORY_LABELS = {
  */
 function extractPages(src) {
   const out = [];
-  // Each page block starts with `{ "svSlug": "..."` and ends at the matching `},`.
-  const blockRe = /\{\s*"svSlug":\s*"([^"]+)"[\s\S]*?\n  \},/g;
+  // Each page block starts with `{ svSlug: "..."` (quoted OR unquoted keys are
+  // both supported so hand-written and generated files parse identically) and
+  // ends at the matching 2-space-indented `},`.
+  const blockRe = /\{\s*"?svSlug"?:\s*"([^"]+)"[\s\S]*?\n  \},/g;
   let m;
   while ((m = blockRe.exec(src))) {
     const block = m[0];
     const svSlug = m[1];
-    const enSlug = (block.match(/"enSlug":\s*"([^"]+)"/) || [])[1] || svSlug;
-    const category = (block.match(/"category":\s*"([^"]+)"/) || [])[1] || "general";
+    const enSlug = (block.match(/"?enSlug"?:\s*"([^"]+)"/) || [])[1] || svSlug;
+    const category = (block.match(/"?category"?:\s*"([^"]+)"/) || [])[1] || "general";
     // Prefer SV meta description (canonical); fall back to lead or H1.
-    const svBlock = (block.match(/"sv":\s*\{([\s\S]*?)\n    \}/) || [])[1] || "";
+    const svBlock = (block.match(/"?sv"?:\s*\{([\s\S]*?)\n    \}/) || [])[1] || "";
     const lead =
-      (svBlock.match(/"metaDescription":\s*"([^"]+)"/) || [])[1] ||
-      (svBlock.match(/"lead":\s*"([^"]+)"/) || [])[1] ||
+      (svBlock.match(/"?metaDescription"?:\s*"([^"]+)"/) || [])[1] ||
+      (svBlock.match(/"?lead"?:\s*"([^"]+)"/) || [])[1] ||
       "";
-    const h1 = (svBlock.match(/"h1":\s*"([^"]+)"/) || [])[1] || svSlug;
+    const h1 = (svBlock.match(/"?h1"?:\s*"([^"]+)"/) || [])[1] || svSlug;
     out.push({ svSlug, enSlug, category, h1, lead: lead.replace(/\s+/g, " ").trim() });
   }
   return out;
@@ -131,8 +134,8 @@ function main() {
 
 This file enumerates every guide article on https://www.1753skin.com so that
 language models can reason over the full content map without crawling the
-entire sitemap. Every guide exists in Swedish (canonical), English, Spanish,
-German and French (hreflang alternates).
+entire sitemap. Every guide exists in Swedish (canonical) and English; most
+also exist in Spanish, German and French (hreflang alternates).
 
 - Canonical URL pattern (Swedish): https://www.1753skin.com/sv/guide/<svSlug>
 - English URL pattern: https://www.1753skin.com/en/guide/<enSlug>

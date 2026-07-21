@@ -220,7 +220,7 @@ export default async function GuidePage({ params }: Props) {
             </p>
           </div>
           <Link
-            href={localizePath(l, "skinAnalysis")}
+            href={localizePath(l, "skinAnalysisLanding")}
             className="inline-flex items-center gap-2 rounded-full bg-[#108474] px-7 py-3 text-sm font-semibold text-white transition-all hover:bg-[#0d6e62]"
           >
             <Sparkles className="h-4 w-4" />
@@ -299,7 +299,7 @@ export default async function GuidePage({ params }: Props) {
           </p>
           <div className="mt-6 flex items-center justify-center gap-4">
             <Link
-              href={localizePath(l, "skinAnalysis")}
+              href={localizePath(l, "skinAnalysisLanding")}
               className="inline-flex items-center gap-2 rounded-full bg-[#108474] px-6 py-3 text-sm font-semibold text-white transition-all hover:bg-[#0d6e62]"
             >
               {tx("Gor hudanalys", "Take skin analysis", "Analisis de piel", "Hautanalyse starten", "Faire une analyse de peau")}

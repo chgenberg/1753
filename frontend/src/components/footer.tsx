@@ -105,7 +105,7 @@ export function Footer() {
     { href: path("products"), label: t("header.navProducts") },
     { href: path("about"), label: t("header.navAbout") },
     { href: path("contact"), label: t("header.navContact") },
-    { href: path("skinAnalysis"), label: t("footer.navAnalysis") },
+    { href: path("skinAnalysisLanding"), label: t("footer.navAnalysis") },
     { href: path("loyalty"), label: t("loyaltyPage.navLabel") },
     { href: `/${locale}/guide`, label: t("footer.navGuide") },
     { href: `/${locale}/guide/alla`, label: t("footer.navAllGuides") },

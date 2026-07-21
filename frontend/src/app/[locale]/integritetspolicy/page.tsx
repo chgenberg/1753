@@ -6,34 +6,29 @@ import { localizePath } from "@/lib/i18n/navigation";
 
 const BASE_URL = "https://www.1753skin.com";
 
-const PRIVACY_PATHS: Record<string, string> = {
-  sv: "/sv/integritetspolicy",
-  en: "/en/privacy-policy",
-  es: "/es/politica-de-privacidad",
-  de: "/de/datenschutz",
-  fr: "/fr/politique-de-confidentialite",
-};
-
+// Använd localizePath så att canonical/hreflang alltid matchar de riktiga
+// pretty-URL:erna (middleware) – tidigare hårdkodade sökvägar pekade fel
+// (t.ex. /en/privacy-policy medan live-URL är /en/privacy).
 export async function generateMetadata({
   params,
 }: {
   params: Promise<{ locale: string }>;
 }): Promise<Metadata> {
   const { locale } = await params;
-  const m = getMessages(locale as Locale);
-  const canonicalPath = PRIVACY_PATHS[locale] ?? PRIVACY_PATHS.en;
+  const l = locale as Locale;
+  const m = getMessages(l);
   return {
     title: m.legalPrivacy.metaTitle,
     description: m.legalPrivacy.metaDescription,
     alternates: {
-      canonical: `${BASE_URL}${canonicalPath}`,
+      canonical: `${BASE_URL}${localizePath(l, "privacy")}`,
       languages: {
-        sv: `${BASE_URL}${PRIVACY_PATHS.sv}`,
-        en: `${BASE_URL}${PRIVACY_PATHS.en}`,
-        es: `${BASE_URL}${PRIVACY_PATHS.es}`,
-        de: `${BASE_URL}${PRIVACY_PATHS.de}`,
-        fr: `${BASE_URL}${PRIVACY_PATHS.fr}`,
-        "x-default": `${BASE_URL}${PRIVACY_PATHS.sv}`,
+        sv: `${BASE_URL}${localizePath("sv", "privacy")}`,
+        en: `${BASE_URL}${localizePath("en", "privacy")}`,
+        es: `${BASE_URL}${localizePath("es", "privacy")}`,
+        de: `${BASE_URL}${localizePath("de", "privacy")}`,
+        fr: `${BASE_URL}${localizePath("fr", "privacy")}`,
+        "x-default": `${BASE_URL}${localizePath("sv", "privacy")}`,
       },
     },
   };

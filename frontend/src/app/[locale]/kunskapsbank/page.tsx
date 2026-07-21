@@ -434,7 +434,7 @@ export default async function KnowledgeHubPage({
                 <ArrowRight className="h-4 w-4" />
               </Link>
               <Link
-                href={localizePath(l, "skinAnalysis")}
+                href={localizePath(l, "skinAnalysisLanding")}
                 className="inline-flex h-[52px] items-center gap-2 rounded-full border border-white/20 px-8 text-sm font-medium text-white transition-all duration-300 hover:border-white/40 hover:bg-white/5"
               >
                 {tx(l, "Gratis hudanalys", "Free skin analysis", "Análisis gratis", "Kostenlose Hautanalyse", "Analyse gratuite")}

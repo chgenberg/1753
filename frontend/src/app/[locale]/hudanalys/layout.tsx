@@ -4,12 +4,16 @@ import type { Locale } from "@/lib/i18n/types";
 
 const BASE_URL = "https://www.1753skin.com";
 
-const ANALYSIS_PATHS: Record<string, string> = {
-  sv: "/sv/hudanalys",
-  en: "/en/skin-analysis",
-  es: "/es/analisis-piel",
-  de: "/de/hautanalyse",
-  fr: "/fr/analyse-peau",
+// SEO-konsolidering: verktygssidan (/hudanalys) är en interaktiv funnel utan
+// unikt rankningsbart innehåll. Vi canonicaliserar den till den innehållsrika
+// landningssidan (/gratis-hudanalys) så att all "hudanalys"-signal samlas där.
+// OBS: endast metadata – själva analysflödet påverkas inte.
+const LANDING_PATHS: Record<string, string> = {
+  sv: "/sv/gratis-hudanalys",
+  en: "/en/free-skin-analysis",
+  es: "/es/analisis-piel-gratis",
+  de: "/de/kostenlose-hautanalyse",
+  fr: "/fr/analyse-de-peau-gratuite",
 };
 
 export async function generateMetadata({
@@ -19,7 +23,7 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { locale } = await params;
   const m = getMessages(locale as Locale).analysisLayoutSeo;
-  const canonicalPath = ANALYSIS_PATHS[locale] ?? ANALYSIS_PATHS.en;
+  const canonicalPath = LANDING_PATHS[locale] ?? LANDING_PATHS.en;
   return {
     title: m.title,
     description: m.description,
@@ -30,12 +34,12 @@ export async function generateMetadata({
     alternates: {
       canonical: `${BASE_URL}${canonicalPath}`,
       languages: {
-        sv: `${BASE_URL}${ANALYSIS_PATHS.sv}`,
-        en: `${BASE_URL}${ANALYSIS_PATHS.en}`,
-        es: `${BASE_URL}${ANALYSIS_PATHS.es}`,
-        de: `${BASE_URL}${ANALYSIS_PATHS.de}`,
-        fr: `${BASE_URL}${ANALYSIS_PATHS.fr}`,
-        "x-default": `${BASE_URL}${ANALYSIS_PATHS.sv}`,
+        sv: `${BASE_URL}${LANDING_PATHS.sv}`,
+        en: `${BASE_URL}${LANDING_PATHS.en}`,
+        es: `${BASE_URL}${LANDING_PATHS.es}`,
+        de: `${BASE_URL}${LANDING_PATHS.de}`,
+        fr: `${BASE_URL}${LANDING_PATHS.fr}`,
+        "x-default": `${BASE_URL}${LANDING_PATHS.sv}`,
       },
     },
   };

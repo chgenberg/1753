@@ -20,7 +20,6 @@ const tabIcons: Record<string, React.FC<{ className?: string }>> = {
 
 export function TechTabs({ tabs }: { tabs: Tab[] }) {
   const [active, setActive] = useState(tabs[0]?.id || "");
-  const current = tabs.find((t) => t.id === active) || tabs[0];
 
   return (
     <div>
@@ -46,20 +45,25 @@ export function TechTabs({ tabs }: { tabs: Tab[] }) {
         })}
       </div>
 
-      {/* Tab content */}
-      {current && (
-        <div className="mx-auto max-w-4xl rounded-2xl bg-white p-8 shadow-sm shadow-black/5 md:p-12">
+      {/* Tab content – ALLA paneler renderas i DOM (crawlbart SSR-innehåll);
+          inaktiva döljs med `hidden` så att den interaktiva tab-UX:en bevaras. */}
+      {tabs.map((tab) => (
+        <div
+          key={tab.id}
+          hidden={tab.id !== active}
+          className="mx-auto max-w-4xl rounded-2xl bg-white p-8 shadow-sm shadow-black/5 md:p-12"
+        >
           <h3 className="mb-4 text-xl font-bold tracking-tight text-[#1d1d1f] md:text-2xl">
-            {current.title}
+            {tab.title}
           </h3>
           <div className="space-y-3 text-sm leading-relaxed text-[#515151] md:text-base">
-            {current.body.split("\n\n").map((para, i) => (
+            {tab.body.split("\n\n").map((para, i) => (
               <p key={i}>{para}</p>
             ))}
           </div>
-          {current.highlights.length > 0 && (
+          {tab.highlights.length > 0 && (
             <div className="mt-8 grid gap-3 sm:grid-cols-2">
-              {current.highlights.map((h, i) => (
+              {tab.highlights.map((h, i) => (
                 <div
                   key={i}
                   className="flex items-start gap-3 rounded-xl bg-[#f5f5f7] px-4 py-3"
@@ -75,7 +79,7 @@ export function TechTabs({ tabs }: { tabs: Tab[] }) {
             </div>
           )}
         </div>
-      )}
+      ))}
     </div>
   );
 }

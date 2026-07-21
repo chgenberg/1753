@@ -51,7 +51,7 @@ export function Header() {
     { href: path("home"), label: t("header.navHome") },
     { href: path("products"), label: t("header.navProducts") },
     { href: path("about"), label: t("header.navAbout") },
-    { href: path("skinAnalysis"), label: t("header.navAnalysis") },
+    { href: path("skinAnalysisLanding"), label: t("header.navAnalysis") },
     { href: path("contact"), label: t("header.navContact") },
   ];
 
@@ -60,7 +60,7 @@ export function Header() {
     { href: path("about"), label: t("header.navAbout") },
   ];
   const navRight = [
-    { href: path("skinAnalysis"), label: t("header.navAnalysis") },
+    { href: path("skinAnalysisLanding"), label: t("header.navAnalysis") },
     { href: path("contact"), label: t("header.navContact") },
   ];
 

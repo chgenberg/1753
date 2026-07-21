@@ -10,6 +10,7 @@ const PRIVATE_PATHS = [
   "/sv/logga-in",
   "/sv/registrera",
   "/sv/skriv-omdome",
+  "/sv/valj-losenord",
   // EN
   "/en/my-account",
   "/en/checkout",
@@ -17,6 +18,7 @@ const PRIVATE_PATHS = [
   "/en/login",
   "/en/register",
   "/en/write-review",
+  "/en/set-password",
   // ES
   "/es/mi-cuenta",
   "/es/pagar",
@@ -24,6 +26,7 @@ const PRIVATE_PATHS = [
   "/es/iniciar-sesion",
   "/es/registro",
   "/es/escribir-resena",
+  "/es/establecer-contrasena",
   // DE
   "/de/mein-konto",
   "/de/kasse",
@@ -31,12 +34,14 @@ const PRIVATE_PATHS = [
   "/de/anmelden",
   "/de/registrieren",
   "/de/bewertung-schreiben",
+  "/de/passwort-setzen",
   // FR
   "/fr/mon-compte",
   "/fr/paiement",
   "/fr/connexion",
   "/fr/inscription",
   "/fr/ecrire-avis",
+  "/fr/choisir-mot-de-passe",
 ];
 
 const LLM_FILES = [

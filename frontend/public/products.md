@@ -6,7 +6,7 @@
 **English URL:** https://www.1753skin.com/en/products
 **Last updated:** 2026-04-16
 
-All products are vegan, cruelty-free, manufactured in Sweden under GMP. Free shipping on orders over 700 SEK / 60 EUR. 30-day free return.
+All products are vegan, cruelty-free, manufactured in Sweden under GMP. Free shipping on orders over 600 SEK / 60 EUR. 30-day free return.
 
 ## The DUO kit + TA-DA Serum — Best value bundle
 
@@ -84,7 +84,7 @@ Inside-out support for immunity, focus, energy and sleep. Aligns with the gut-sk
 Every product is available as a subscription:
 
 - Choose delivery frequency: 30, 60 or 90 days
-- **Save 10%** on every recurring order
+- **Save 15%** on every recurring order
 - **Free shipping** from the first recurring delivery
 - Pause or cancel any time from your customer dashboard
 
@@ -106,7 +106,7 @@ See our [scientific references](https://www.1753skin.com/llms-science.txt) for p
 
 ## Shipping and returns
 
-- **Free shipping:** orders over 700 SEK / 60 EUR
+- **Free shipping:** orders over 600 SEK / 60 EUR
 - **Shipped from:** Sweden, to the entire EU
 - **Delivery time:** 1–3 business days (handling) + 1–3 business days (transit)
 - **Returns:** 30 days, free return by mail

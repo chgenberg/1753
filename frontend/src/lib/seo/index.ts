@@ -21,8 +21,10 @@ import { WELLNESS_PAGES } from "./pages-wellness";
 import { PROFESSION_PAGES } from "./pages-profession";
 import { CITY_V2_PAGES } from "./pages-cities-v2";
 import { SCIENCE_PAGES } from "./pages-science";
+import { SKINANALYSIS_PAGES } from "./pages-skinanalysis";
 
 export const ALL_LANDING_PAGES: LandingPage[] = [
+  ...SKINANALYSIS_PAGES,
   ...TIER1_PAGES,
   ...INGREDIENT_PAGES,
   ...MYTH_PAGES,

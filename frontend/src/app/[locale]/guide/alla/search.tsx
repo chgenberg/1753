@@ -19,7 +19,12 @@ interface Labels {
 }
 
 export default function AllGuidesSearch({ items, labels }: { items: Item[]; labels: Labels }) {
-  const [q, setQ] = useState("");
+  // Initiera från ?q= så att WebSite SearchAction faktiskt fungerar
+  // (t.ex. Google Sitelinks Searchbox → /guide/alla?q=...).
+  const [q, setQ] = useState(() => {
+    if (typeof window === "undefined") return "";
+    return new URLSearchParams(window.location.search).get("q") || "";
+  });
 
   const filtered = useMemo(() => {
     const needle = q.trim().toLowerCase();

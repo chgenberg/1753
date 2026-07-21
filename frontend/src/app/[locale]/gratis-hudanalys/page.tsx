@@ -617,10 +617,36 @@ export default async function FreeAnalysisLanding({ params }: Props) {
     ],
   };
 
+  // Beskriver själva verktyget för sök- och svarsmotorer (AEO). Gratis,
+  // körs i webbläsaren, ingen fabricerad rating.
+  const webAppSchema = {
+    "@context": "https://schema.org",
+    "@type": "WebApplication",
+    name: tx(l, "1753 AI Hudanalys", "1753 AI Skin Analysis", "1753 Análisis de Piel con IA", "1753 KI-Hautanalyse", "1753 Analyse de Peau IA"),
+    url: `${BASE_URL}${freeAnalysisPaths[l] || freeAnalysisPaths.sv}`,
+    description: c.metaDescription,
+    applicationCategory: "HealthApplication",
+    operatingSystem: tx(l, "Alla (webbläsare)", "All (web browser)", "Todos (navegador web)", "Alle (Webbrowser)", "Tous (navigateur web)"),
+    browserRequirements: tx(l, "Kräver en modern webbläsare med kamera", "Requires a modern browser with camera", "Requiere un navegador moderno con cámara", "Erfordert einen modernen Browser mit Kamera", "Nécessite un navigateur moderne avec caméra"),
+    inLanguage: l,
+    isAccessibleForFree: true,
+    offers: { "@type": "Offer", price: "0", priceCurrency: "SEK", availability: "https://schema.org/InStock" },
+    featureList: tx(
+      l,
+      "15 hudmetriker, estimerad hudålder, radardiagram, 12 ansiktszoner, personlig hudvårdsrutin",
+      "15 skin metrics, estimated skin age, radar chart, 12 facial zones, personalized skincare routine",
+      "15 métricas de piel, edad estimada de la piel, gráfico radar, 12 zonas faciales, rutina personalizada",
+      "15 Hautmetriken, geschätztes Hautalter, Radardiagramm, 12 Gesichtszonen, personalisierte Hautpflegeroutine",
+      "15 métriques cutanées, âge estimé de la peau, graphique radar, 12 zones du visage, routine personnalisée",
+    ),
+    provider: { "@type": "Organization", name: "1753 SKINCARE", url: BASE_URL },
+  };
+
   return (
     <>
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(serviceSchema) }} />
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(webAppSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbSchema) }} />
       <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify({
         "@context": "https://schema.org",

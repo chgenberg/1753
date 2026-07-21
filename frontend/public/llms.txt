@@ -16,7 +16,7 @@
 - Contact: info@1753skin.com
 - Country: Sweden
 - Currency: SEK (Swedish site), EUR (international)
-- Free shipping: orders over 700 SEK / 60 EUR
+- Free shipping: orders over 600 SEK / 60 EUR
 
 ## Deeper references for LLMs
 
@@ -80,7 +80,7 @@ For more detail, retrieve the following dedicated files:
 - Holistic approach: lifestyle first, products second
 - Minimal ingredient lists — no fillers, fragrances or unnecessary additives
 - Swedish-made, vegan, cruelty-free
-- Subscription option with automatic delivery (10% discount, free shipping)
+- Subscription option with automatic delivery (15% discount, free shipping)
 - Free AI skin analysis with industry-leading technical depth
 - 30-day free return policy
 
@@ -97,9 +97,9 @@ For more detail, retrieve the following dedicated files:
 - Terms: https://www.1753skin.com/sv/villkor
 - Privacy policy: https://www.1753skin.com/sv/integritetspolicy
 
-## Content library (1 000+ SEO guide articles in 5 languages)
+## Content library (~400 in-depth SEO guides, ~2,000 localized URLs)
 
-The guide library covers the following topic categories. Each guide is available in Swedish, English, Spanish, German and French, with hreflang alternates, JSON-LD BlogPosting + FAQPage + BreadcrumbList, Wikidata entity linking and peer-reviewed citations.
+The guide library contains around 400 canonical guide articles, most available in Swedish, English, Spanish, German and French (roughly 2,000 localized URLs in total), with hreflang alternates, JSON-LD BlogPosting + FAQPage + BreadcrumbList, Wikidata entity linking and peer-reviewed citations.
 
 - Ingredients (CBD, CBG, jojoba, MCT, botanicals) – how each works on the skin
 - Symptoms (acne, eczema, redness, dryness, sensitivity, barrier damage) – root causes and holistic fixes

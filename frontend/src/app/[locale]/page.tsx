@@ -600,7 +600,7 @@ export default function HomePage() {
                 </h2>
                 <p className="mx-auto mt-5 max-w-lg text-base leading-relaxed text-brand-300">{t("home.ctaAnalysisSub")}</p>
                 <div className="mt-10">
-                  <Link href={path("skinAnalysis")}>
+                  <Link href={path("skinAnalysisLanding")}>
                     <Button size="lg" className="rounded-full bg-white text-brand-900 shadow-lg hover:bg-brand-50 hover:shadow-xl">
                       {t("home.ctaAnalysisButton")}
                       <ArrowRight className="ml-2 h-4 w-4" />
