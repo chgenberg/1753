@@ -1450,6 +1450,19 @@ app.post("/api/orders/:id/resend-email", adminOnly, async (req, res) => {
   }
 });
 
+// Reconcile pending-ordrar mot Viva och återhämta de som faktiskt betalats.
+// ?dryRun=true → rapportera bara, ändra inget. Utan dryRun → fullfölj betalda.
+app.post("/api/admin/orders/reconcile-pending", adminOnly, async (req, res) => {
+  try {
+    const dryRun = req.query.dryRun === "true" || req.query.dryRun === "1" || req.body?.dryRun === true;
+    const result = await reconcilePendingOrders({ dryRun });
+    res.json(result);
+  } catch (err) {
+    console.error("[Reconcile] endpoint error:", err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // ---- ADMIN: CANCEL ORDER ----
 
 async function vivaRefund(transactionId, amountInCents) {
@@ -4295,6 +4308,90 @@ async function handleOrderCompletion(orderId) {
   }
 
   return { fortnoxInvoiceNumber, ongoingOrderId, notes };
+}
+
+// ---- PENDING-ORDER RECONCILIATION (självläkning vid missad Viva-webhook) ----
+//
+// Betalningsbekräftelse förlitar sig på (1) Viva-webhooken (EventTypeId 1796/1797)
+// och (2) success-sidans /api/orders/verify. Om BÅDA missar – webhooken kommer
+// aldrig fram OCH kunden stänger fliken innan hen når "tack"-sidan – fastnar ordern
+// som "pending". Kunden debiteras men får varken leverans eller orderbekräftelse.
+//
+// Detta jobb frågar Viva (Retrieve Order: GET /checkout/v2/orders/{orderCode}) om
+// varje pending-orders verkliga status och återhämtar de som FAKTISKT betalats.
+// Säkerhet: fullföljer ENDAST om Viva svarar StateId === 3 (Paid). Idempotent via
+// processed_at-låset i handleOrderCompletion. Viva StateId: 0=Pending, 1=Expired,
+// 2=Canceled, 3=Paid.
+let _reconcileRunning = false;
+
+async function reconcilePendingOrders({ dryRun = false, maxAgeDays = 30, minAgeMinutes = 20 } = {}) {
+  const result = { checked: 0, paidRecovered: [], closed: [], stillPending: [], errors: [], dryRun };
+
+  if (!process.env.VIVA_CLIENT_ID || !process.env.VIVA_CLIENT_SECRET) {
+    result.errors.push({ error: "VIVA_CLIENT_ID/VIVA_CLIENT_SECRET saknas – kan inte fråga Viva" });
+    return result;
+  }
+
+  // Endast obehandlade, ej betalda ordrar med ett Viva-orderCode, i ett rimligt
+  // åldersfönster (undvik race med in-flight/asynkrona betalningar de första minuterna).
+  const { rows } = await db.pool.query(
+    `SELECT id, order_number, customer_email, viva_order_code, created_at, total_amount
+       FROM orders
+      WHERE processed_at IS NULL
+        AND payment_status <> 'paid'
+        AND status NOT IN ('paid','completed','processing','shipped','fulfilled','confirmed','cancelled','expired')
+        AND viva_order_code IS NOT NULL
+        AND created_at BETWEEN (NOW() - ($1 * INTERVAL '1 day')) AND (NOW() - ($2 * INTERVAL '1 minute'))
+      ORDER BY created_at ASC`,
+    [maxAgeDays, minAgeMinutes]
+  );
+
+  for (const o of rows) {
+    result.checked++;
+    let vivaOrder;
+    try {
+      vivaOrder = await vivaFetch(`/checkout/v2/orders/${o.viva_order_code}`);
+    } catch (err) {
+      result.errors.push({ order: o.order_number, error: `viva: ${err.message}` });
+      continue;
+    }
+    const stateId = Number(vivaOrder?.StateId ?? vivaOrder?.stateId);
+
+    if (stateId === 3) {
+      // Betald hos Viva men obekräftad hos oss → återhämta (samma väg som webhooken).
+      if (dryRun) {
+        result.paidRecovered.push({ order: o.order_number, email: o.customer_email, amount: o.total_amount });
+        continue;
+      }
+      try {
+        await db.updateOrder(o.id, { payment_status: "paid", status: "confirmed" });
+        await db.appendNotes(o.id, `Reconcile: Viva StateId=3 (Paid) – återhämtad ${new Date().toISOString()}`);
+        await handleOrderCompletion(o.id);
+        result.paidRecovered.push({ order: o.order_number, email: o.customer_email, amount: o.total_amount });
+        console.log(`[Reconcile] Order ${o.order_number} var betald hos Viva – återhämtad + bekräftelse skickad`);
+      } catch (err) {
+        result.errors.push({ order: o.order_number, error: `recover: ${err.message}` });
+        console.error(`[Reconcile] Kunde inte återhämta ${o.order_number}:`, err.message);
+      }
+    } else if (stateId === 1 || stateId === 2) {
+      // Expired (1) / Canceled (2) → kan aldrig bli betald. Stäng så pending-listan
+      // inte växer i onödan (dessa kollas då inte igen).
+      if (!dryRun) {
+        try {
+          await db.updateOrder(o.id, {
+            status: "cancelled",
+            payment_status: stateId === 1 ? "expired" : "cancelled",
+          });
+          await db.appendNotes(o.id, `Reconcile: Viva StateId=${stateId} (${stateId === 1 ? "Expired" : "Canceled"}) – stängd ${new Date().toISOString()}`);
+        } catch (_) { /* icke-kritiskt */ }
+      }
+      result.closed.push({ order: o.order_number, stateId });
+    } else {
+      // 0 = Pending (kan fortfarande betalas, t.ex. asynkron metod) → lämna orörd.
+      result.stillPending.push({ order: o.order_number, stateId });
+    }
+  }
+  return result;
 }
 
 // ---- TEAM NOTIFICATIONS ----
@@ -8783,5 +8880,26 @@ app.post("/api/admin/social/daily-generate", adminAuthMiddleware, async (req, re
 
     scheduleDailyAt(10, 0, dailySocialMediaGeneration);
     console.log("[OK] Daily social media auto-generation scheduled (10:00 CET)");
+
+    // Självläkning: fånga upp betalda ordrar där Viva-webhooken missades så att
+    // kunden alltid får leverans + orderbekräftelse även om webhook + success-sida
+    // båda missar. Kör var 30:e minut; fullföljer endast ordrar Viva bekräftar betalda.
+    const runReconcileTick = async () => {
+      if (_reconcileRunning) return;
+      _reconcileRunning = true;
+      try {
+        const r = await reconcilePendingOrders();
+        if (r.paidRecovered.length || r.errors.length) {
+          console.log(`[Reconcile] tick: kollade ${r.checked}, återhämtade ${r.paidRecovered.length}, stängde ${r.closed.length}, fel ${r.errors.length}`);
+        }
+      } catch (err) {
+        console.error("[Reconcile] tick error:", err.message);
+      } finally {
+        _reconcileRunning = false;
+      }
+    };
+    setInterval(runReconcileTick, 30 * 60_000);
+    setTimeout(runReconcileTick, 3 * 60_000);
+    console.log("[OK] Pending-order reconciliation started (every 30min)");
   });
 })();
