@@ -8724,6 +8724,24 @@ async function dailySocialMediaGeneration() {
     return;
   }
 
+  // Manuell paus: sätts i system_config ('social_daily_paused_until' = 'YYYY-MM-DD').
+  // Används t.ex. under kampanjer där vi kör kuraterade bilder (Lotta) istället för
+  // auto-genererade. Pausen gäller t.o.m. det angivna datumet (CET).
+  try {
+    const pausedUntil = await db.getConfig("social_daily_paused_until");
+    if (pausedUntil) {
+      const todayCET = new Intl.DateTimeFormat("en-CA", {
+        timeZone: "Europe/Stockholm", year: "numeric", month: "2-digit", day: "2-digit",
+      }).format(new Date());
+      if (todayCET <= String(pausedUntil).trim()) {
+        console.log(`[Social] Daily generation pausad t.o.m. ${pausedUntil} (idag ${todayCET}) – hoppar över`);
+        return;
+      }
+    }
+  } catch (err) {
+    console.error("[Social] Kunde inte läsa paus-flagga (fortsätter):", err.message);
+  }
+
   try {
     const type = POST_TYPES[Math.floor(Math.random() * POST_TYPES.length)];
     console.log(`[Social] Daily auto-generation starting (type: ${type})...`);
