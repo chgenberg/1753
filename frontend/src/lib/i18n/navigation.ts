@@ -214,6 +214,16 @@ export function switchLocalePath(
   }
 
   if (!match) {
+    // Guide-artiklar har språkspecifika slugs (t.ex. sv "torr-hud" vs fr
+    // "peau-seche"). Att bara byta språkprefix och behålla sluggen ger en
+    // korsspråkig URL som 301-redirectar till rätt slug – vilket Google
+    // rapporterar som "Sida med omdirigering". Peka istället på guide-hubben i
+    // målspråket (en riktig 200-sida, ingen redirect). Headern uppgraderar
+    // länken till exakt översatt artikel via hreflang när JS körts.
+    const guideArticle = restPath.match(/^guide\/(.+)$/);
+    if (guideArticle && guideArticle[1] !== "alla") {
+      return `/${toLocale}/guide`;
+    }
     return `/${toLocale}/${restPath}`;
   }
 

@@ -44,6 +44,7 @@ export function Header() {
   const [progress, setProgress] = useState(0);
   const [scrolled, setScrolled] = useState(false);
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [localeAlternates, setLocaleAlternates] = useState<Record<string, string>>({});
 
   // Fullständig nav (används i mobilmenyn). På desktop ersätter logotypen
   // "Hem" och sitter centrerad mellan "Om oss" och "Hudanalys".
@@ -116,8 +117,32 @@ export function Header() {
     };
   }, [langOpen]);
 
+  // Dynamiska slug-sidor (guide-artiklar) har språkspecifika slugs.
+  // switchLocalePath känner inte till dem och behåller sluggen vid språkbyte
+  // → en korsspråkig URL som 301-redirectar (GSC: "Sida med omdirigering").
+  // Läs istället de korrekta hreflang-alternativen som sidan renderar
+  // server-side och använd dem för växlaren. Faller tillbaka på
+  // switchLocalePath för sidor utan hreflang.
+  useEffect(() => {
+    const map: Record<string, string> = {};
+    const links = document.querySelectorAll<HTMLLinkElement>('link[rel="alternate"][hreflang]');
+    links.forEach((el) => {
+      const lang = el.getAttribute("hreflang");
+      const href = el.getAttribute("href");
+      if (!lang || !href || lang === "x-default") return;
+      try {
+        const u = new URL(href, window.location.origin);
+        if (u.origin === window.location.origin) map[lang] = `${u.pathname}${u.search}`;
+      } catch {
+        /* ignorera trasig href */
+      }
+    });
+    setLocaleAlternates(map);
+  }, [pathname]);
+
   const localeOrder = ["sv", "en", "es", "de", "fr"] as const;
   const otherLocales = localeOrder.filter(l => l !== locale);
+  const localeHref = (l: Locale) => localeAlternates[l] || switchLocalePath(pathname, l);
 
   const localeLabels: Record<string, string> = {
     sv: "Svenska",
@@ -256,7 +281,7 @@ export function Header() {
                 {otherLocales.map(l => (
                   <Link
                     key={l}
-                    href={switchLocalePath(pathname, l as Locale)}
+                    href={localeHref(l as Locale)}
                     onClick={() => setLangOpen(false)}
                     className="group/flag flex flex-col items-center gap-1 rounded-xl px-2 py-1.5 transition-colors hover:bg-brand-50"
                     title={localeLabels[l]}
@@ -345,7 +370,7 @@ export function Header() {
               {otherLocales.map(l => (
                 <Link
                   key={l}
-                  href={switchLocalePath(pathname, l as Locale)}
+                  href={localeHref(l as Locale)}
                   onClick={() => setMobileOpen(false)}
                   className="flex flex-col items-center gap-1.5 rounded-xl px-3 py-2 transition-colors hover:bg-brand-50"
                 >
