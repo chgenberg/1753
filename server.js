@@ -2445,7 +2445,14 @@ Vid allvarliga hudtillstånd: rekommendera dermatolog som komplement.`;
 
 // ---- OPENAI HUDANALYS (Responses API) ----
 
-const OPENAI_MODEL = process.env.OPENAI_MODEL || "gpt-5.4";
+// Hudanalys-modell. GPT-5.6 Terra (nyare + billigare än 5.4: $2/$12 vs $2.5/$15
+// per 1M tokens) med reasoning.effort "low" ger ~lika bra eller bättre resultat
+// till klart lägre kostnad. OBS: sätt/uppdatera OPENAI_MODEL i Railway till
+// "gpt-5.6-terra" (eller ta bort variabeln så gäller defaulten nedan).
+const OPENAI_MODEL = process.env.OPENAI_MODEL || "gpt-5.6-terra";
+// Reasoning-nivå för hudanalysen. "low" räcker gott för denna strukturerade
+// uppgift (ONNX gör bildmätningen client-side) och skär bort dyra reasoning-tokens.
+const ANALYSIS_REASONING_EFFORT = process.env.OPENAI_REASONING_EFFORT || "low";
 
 function extractOutputText(data) {
   // 1. SDK-style helper (if present)
@@ -2692,6 +2699,7 @@ app.post("/api/analysis", async (req, res) => {
         input: [
           { role: "user", content: contentParts }
         ],
+        reasoning: { effort: ANALYSIS_REASONING_EFFORT },
         max_output_tokens: 16384,
         store: true
       })
@@ -2714,6 +2722,17 @@ app.post("/api/analysis", async (req, res) => {
     }
 
     console.log("[Analysis] Success, output length:", outputText.length);
+
+    // Token-/kostnadslogg för att verifiera modell- och reasoning-utfall i prod.
+    // Priser per 1M tokens för gpt-5.6-terra: input $2, output $12.
+    if (data.usage) {
+      const u = data.usage;
+      const inTok = u.input_tokens ?? 0;
+      const outTok = u.output_tokens ?? 0;
+      const reasonTok = u.output_tokens_details?.reasoning_tokens ?? 0;
+      const estUsd = (inTok / 1e6) * 2 + (outTok / 1e6) * 12;
+      console.log(`[Analysis] Usage: model=${OPENAI_MODEL} effort=${ANALYSIS_REASONING_EFFORT} input=${inTok} output=${outTok} (reasoning=${reasonTok}) ~$${estUsd.toFixed(4)}`);
+    }
 
     let analysisId = null;
     let savedToHistory = false;
@@ -3198,6 +3217,7 @@ app.post("/api/analysis-premium/run", async (req, res) => {
         model: OPENAI_MODEL,
         instructions: systemPromptFull,
         input: [{ role: "user", content: contentParts }],
+        reasoning: { effort: ANALYSIS_REASONING_EFFORT },
         max_output_tokens: 32000,
         store: true,
       }),
@@ -3471,6 +3491,7 @@ app.post("/api/analysis/chat", async (req, res) => {
         model: OPENAI_MODEL,
         input: message,
         previous_response_id: previousResponseId,
+        reasoning: { effort: ANALYSIS_REASONING_EFFORT },
         store: true
       })
     });
