@@ -1463,6 +1463,35 @@ app.post("/api/admin/orders/reconcile-pending", adminOnly, async (req, res) => {
   }
 });
 
+// Efterregistrera Fortnox-fakturor för betalda ordrar som saknar faktura (t.ex. efter
+// ett Fortnox-tokenhaveri). Kör ENDAST Fortnox-stegen – ingen ny leverans, inga extra
+// lojalitetspoäng, inga omskickade bekräftelser.
+// ?dryRun=true → lista vad som skulle faktureras. body.orderNumbers=["20571",...] → begränsa urvalet.
+app.post("/api/admin/orders/backfill-fortnox", adminOnly, async (req, res) => {
+  try {
+    const dryRun = req.query.dryRun === "true" || req.query.dryRun === "1" || req.body?.dryRun === true;
+    const orderNumbers = Array.isArray(req.body?.orderNumbers) ? req.body.orderNumbers : null;
+    const result = await backfillFortnoxInvoices({ dryRun, orderNumbers });
+    res.json(result);
+  } catch (err) {
+    console.error("[FortnoxBackfill] endpoint error:", err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// Hälsokontroll: larmar om Fortnox-anslutningen är död eller om betalda ordrar
+// saknar faktura. ?notify=false → returnera bara status utan att mejla teamet.
+app.post("/api/admin/health/integrations", adminOnly, async (req, res) => {
+  try {
+    const notify = !(req.query.notify === "false" || req.body?.notify === false);
+    const result = await checkIntegrationHealth({ notify });
+    res.json(result);
+  } catch (err) {
+    console.error("[Health] endpoint error:", err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // ---- ADMIN: CANCEL ORDER ----
 
 async function vivaRefund(transactionId, amountInCents) {
@@ -4413,6 +4442,328 @@ async function reconcilePendingOrders({ dryRun = false, maxAgeDays = 30, minAgeM
     }
   }
   return result;
+}
+
+// ---- FORTNOX-BACKFILL (efterregistrering av saknade fakturor) ----
+//
+// Bakgrund: om Fortnox-anslutningen dör (t.ex. förbrukad refresh token) fortsätter
+// handleOrderCompletion att köra – varje Fortnox-steg ligger i eget try/catch – så
+// Ongoing/Emotions packar och skickar, kunden får bekräftelse, men ingen faktura
+// skapas. Ordern hamnar i status 'partial' med fortnox_invoice_number = NULL.
+// Det hände 2026-08-03: refresh token avvisades (invalid_grant), raderades ur
+// system_config, access token dog 12:58 och 11 ordrar (12 554 kr) blev obokförda.
+//
+// Detta jobb kör ENBART Fortnox-stegen (kund → order → faktura → bokför → betalning)
+// för sådana ordrar. Det rör medvetet INTE Ongoing, lojalitetspoäng, orderbekräftelse
+// eller post-purchase-automation – därför kan det inte användas som ersättning för
+// handleOrderCompletion, och därför dubbleras inga mejl eller poäng vid omkörning.
+// (Den befintliga /api/orders/:id/reprocess nollar processed_at och kör om ALLT,
+// vilket skulle dubbla poäng och skicka om bekräftelser.)
+//
+// Fakturan dateras med orderns ursprungsdatum, inte dagens, så att bokföringen och
+// betalningsrapporterna hamnar på samma dag som försäljningen faktiskt skedde.
+let _fortnoxBackfillRunning = false;
+
+async function backfillFortnoxInvoices({ dryRun = false, orderNumbers = null, maxAgeDays = 30 } = {}) {
+  const result = { candidates: 0, invoiced: [], skipped: [], errors: [], dryRun };
+
+  if (_fortnoxBackfillRunning) {
+    result.errors.push({ error: "Backfill körs redan – avbryter för att undvika dubbletter" });
+    return result;
+  }
+  _fortnoxBackfillRunning = true;
+
+  try {
+    // Verifiera Fortnox-anslutningen FÖRST. Utan giltig token skulle varje order
+    // bara generera ett nytt fel-notat, och vi vill inte spamma internal_notes.
+    try {
+      await ensureFortnoxToken();
+      if (!fortnoxTokens.refreshToken) {
+        result.errors.push({ error: "Fortnox refresh token saknas – kör /api/fortnox/auth först" });
+        return result;
+      }
+      await fortnoxFetch("/companyinformation");
+    } catch (err) {
+      result.errors.push({ error: `Fortnox-anslutning ej OK: ${err.message} – kör /api/fortnox/auth först` });
+      return result;
+    }
+
+    const params = [maxAgeDays];
+    let scopeSql = "";
+    if (Array.isArray(orderNumbers) && orderNumbers.length > 0) {
+      params.push(orderNumbers.map(String));
+      scopeSql = " AND order_number = ANY($2)";
+    }
+
+    const { rows } = await db.pool.query(
+      `SELECT id, order_number, customer_email, customer_name, customer_phone,
+              address, zip, city, country_code, currency, items,
+              total_amount, shipping_cost, ongoing_order_id, created_at,
+              fortnox_customer_number, fortnox_order_number
+         FROM orders
+        WHERE fortnox_invoice_number IS NULL
+          AND payment_status = 'paid'
+          AND processed_at IS NOT NULL
+          AND created_at > (NOW() - ($1 * INTERVAL '1 day'))
+          ${scopeSql}
+        ORDER BY order_number ASC`,
+      params
+    );
+
+    result.candidates = rows.length;
+
+    for (const order of rows) {
+      const items = typeof order.items === "string" ? JSON.parse(order.items) : order.items;
+      if (!Array.isArray(items) || items.length === 0) {
+        result.skipped.push({ order: order.order_number, reason: "inga orderrader" });
+        continue;
+      }
+
+      const amount = Number(order.total_amount) + Number(order.shipping_cost || 0);
+
+      if (dryRun) {
+        result.invoiced.push({ order: order.order_number, email: order.customer_email, amount, dryRun: true });
+        continue;
+      }
+
+      const notes = [];
+      let fxCustomerNumber = null;
+      let fxOrderNumber = null;
+      let fxInvoiceNumber = null;
+
+      try {
+        // 1. Kund: hitta eller skapa (samma uppslag som handleOrderCompletion).
+        try {
+          const existing = await fortnoxFetch(`/customers?filter=email&email=${encodeURIComponent(order.customer_email)}`);
+          fxCustomerNumber = existing?.Customers?.[0]?.CustomerNumber;
+        } catch (_) { /* not found */ }
+
+        if (!fxCustomerNumber) {
+          const created = await fortnoxFetch("/customers", "POST", {
+            Customer: {
+              Name: order.customer_name,
+              Email: order.customer_email,
+              Phone1: order.customer_phone || "",
+              Address1: order.address || "",
+              ZipCode: order.zip || "",
+              City: order.city || "",
+              CountryCode: order.country_code || "SE"
+            }
+          });
+          fxCustomerNumber = created?.Customer?.CustomerNumber;
+          notes.push(`Backfill: Fortnox kund skapad ${fxCustomerNumber}`);
+        } else {
+          notes.push(`Backfill: Fortnox kund hittad ${fxCustomerNumber}`);
+        }
+        if (!fxCustomerNumber) throw new Error("Kunde inte hitta/skapa Fortnox-kund");
+
+        // 2. Order. Identisk radbyggnad som handleOrderCompletion: paidUnitPrice
+        // (fördelad fixedAmount-rabatt) före i.price, priser ex moms, frakt som
+        // artikelrad om 44 kr ex moms. Se kop-lock kontrakt #3 och #4.
+        const orderRows = items.map(i => {
+          const vat = i.vatRate || 0.25;
+          const paidPrice = typeof i.paidUnitPrice === "number" ? i.paidUnitPrice : i.price;
+          const priceExVat = Math.round((paidPrice / (1 + vat)) * 100) / 100;
+          return {
+            ArticleNumber: i.articleNumber,
+            Description: i.name,
+            OrderedQuantity: i.quantity,
+            DeliveredQuantity: i.quantity,
+            Price: priceExVat,
+            VAT: Math.round(vat * 100)
+          };
+        });
+
+        if (Number(order.shipping_cost) > 0) {
+          orderRows.push({ Description: "Frakt", OrderedQuantity: 1, DeliveredQuantity: 1, Price: 44, VAT: 25 });
+        }
+
+        const orderDate = new Date(order.created_at).toISOString().split("T")[0];
+
+        // Återupptagbarhet: om en tidigare körning hann skapa Fortnox-ordern men dog
+        // innan fakturan, återanvänd den istället för att skapa en dubblett.
+        if (order.fortnox_order_number) {
+          fxOrderNumber = order.fortnox_order_number;
+          notes.push(`Backfill: återanvänder Fortnox order ${fxOrderNumber}`);
+        } else {
+          const fxOrder = await fortnoxFetch("/orders", "POST", {
+            Order: {
+              CustomerNumber: fxCustomerNumber,
+              OrderDate: orderDate,
+              DeliveryDate: orderDate,
+              DeliveryAddress1: order.address || "",
+              DeliveryZipCode: order.zip || "",
+              DeliveryCity: order.city || "",
+              DeliveryCountry: (order.currency || "SEK") === "EUR" ? "" : "Sverige",
+              YourReference: order.customer_name,
+              YourOrderNumber: order.order_number,
+              ExternalInvoiceReference1: order.order_number,
+              Currency: order.currency || "SEK",
+              Freight: 0,
+              OrderRows: orderRows,
+              Remarks: `Order ${order.order_number} – betald via Viva Wallet (efterregistrerad ${new Date().toISOString().split("T")[0]})`
+            }
+          });
+          fxOrderNumber = fxOrder?.Order?.DocumentNumber;
+          if (!fxOrderNumber) throw new Error("Fortnox returnerade inget ordernummer");
+          notes.push(`Backfill: Fortnox order ${fxOrderNumber}`);
+
+          // Persistera direkt – gör steget ovan återupptagbart om fakturan faller.
+          try {
+            await db.updateOrder(order.id, {
+              fortnox_customer_number: String(fxCustomerNumber),
+              fortnox_order_number: String(fxOrderNumber),
+            });
+          } catch (_) { /* icke-kritiskt, notes bär spåret */ }
+        }
+
+        // 3. Faktura ur ordern (samma parsning som handleOrderCompletion).
+        const fxInvoiceResult = await fortnoxFetch(`/orders/${fxOrderNumber}/createinvoice`, "PUT");
+        fxInvoiceNumber = fxInvoiceResult?.Invoice?.DocumentNumber
+          || fxInvoiceResult?.DocumentNumber
+          || fxInvoiceResult?.invoice?.DocumentNumber
+          || fxInvoiceResult?.Invoice?.InvoiceNumber
+          || fxInvoiceResult?.Order?.InvoiceReference
+          || fxInvoiceResult?.Order?.DocumentNumber;
+
+        if (!fxInvoiceNumber) {
+          try {
+            const orderCheck = await fortnoxFetch(`/orders/${fxOrderNumber}`);
+            fxInvoiceNumber = orderCheck?.Order?.InvoiceReference;
+          } catch { /* non-critical */ }
+        }
+        if (!fxInvoiceNumber) throw new Error("Kunde inte läsa ut fakturanummer");
+        notes.push(`Backfill: Fortnox faktura ${fxInvoiceNumber}`);
+
+        // 4. Bokför fakturan.
+        try {
+          await fortnoxFetch(`/invoices/${fxInvoiceNumber}/bookkeep`, "PUT");
+          notes.push("Backfill: faktura bokford");
+        } catch (err) {
+          notes.push(`Backfill: bokforing FEL ${err.message}`);
+        }
+
+        // 5. Registrera betalningen (kräver 'payment'-scope).
+        try {
+          await fortnoxFetch("/invoicepayments", "POST", {
+            InvoicePayment: {
+              InvoiceNumber: fxInvoiceNumber,
+              Amount: amount,
+              AmountCurrency: amount,
+              PaymentDate: orderDate
+            }
+          });
+          notes.push("Backfill: betalning registrerad");
+        } catch (err) {
+          notes.push(`Backfill: betalning FEL ${err.message}`);
+        }
+
+        // 6. Skriv tillbaka referenserna. Ongoing rörs inte – ordern är redan skickad.
+        await db.updateOrder(order.id, {
+          fortnox_customer_number: fxCustomerNumber ? String(fxCustomerNumber) : null,
+          fortnox_order_number: fxOrderNumber ? String(fxOrderNumber) : null,
+          fortnox_invoice_number: String(fxInvoiceNumber),
+          status: order.ongoing_order_id ? "fulfilled" : "partial",
+        });
+        await db.appendNotes(order.id, notes.join(" | "));
+
+        result.invoiced.push({
+          order: order.order_number,
+          email: order.customer_email,
+          amount,
+          invoiceNumber: String(fxInvoiceNumber),
+        });
+        console.log(`[FortnoxBackfill] ${order.order_number}: faktura ${fxInvoiceNumber} (${amount} ${order.currency || "SEK"})`);
+      } catch (err) {
+        if (notes.length > 0) {
+          try { await db.appendNotes(order.id, notes.concat(`Backfill AVBRUTEN: ${err.message}`).join(" | ")); } catch (_) { /* ignore */ }
+        }
+        result.errors.push({ order: order.order_number, error: err.message });
+        console.error(`[FortnoxBackfill] ${order.order_number} misslyckades:`, err.message);
+      }
+    }
+
+    return result;
+  } finally {
+    _fortnoxBackfillRunning = false;
+  }
+}
+
+// ---- INTEGRATIONSHÄLSA (larm så tysta fel inte pågår i dagar) ----
+//
+// Fortnox-haveriet 2026-08-03 upptäcktes först efter tre dagar, av en människa som
+// stämde av betalningsrapporter mot bokföringen. Grundproblemet var inte att token
+// dog – det var att ingen fick veta. Detta jobb larmar på de två signalerna som
+// hade fångat det direkt: tom refresh token och ordrar utan faktura.
+async function checkIntegrationHealth({ notify = true, days = 7 } = {}) {
+  const problems = [];
+
+  let refreshToken = null;
+  try {
+    refreshToken = await db.getConfig("fortnox_refresh_token");
+  } catch (err) {
+    problems.push(`Kunde inte läsa Fortnox-tokenstatus: ${err.message}`);
+  }
+  if (!refreshToken) {
+    problems.push("Fortnox refresh token är TOM – inga fakturor kan skapas. Åtgärd: kör /api/fortnox/auth.");
+  }
+
+  let missing = [];
+  try {
+    const { rows } = await db.pool.query(
+      `SELECT order_number, customer_email, total_amount, shipping_cost
+         FROM orders
+        WHERE fortnox_invoice_number IS NULL
+          AND payment_status = 'paid'
+          AND processed_at IS NOT NULL
+          AND created_at > (NOW() - ($1 * INTERVAL '1 day'))
+        ORDER BY order_number ASC`,
+      [days]
+    );
+    missing = rows;
+  } catch (err) {
+    problems.push(`Kunde inte kontrollera ordrar utan faktura: ${err.message}`);
+  }
+
+  if (missing.length > 0) {
+    const sum = missing.reduce((s, o) => s + Number(o.total_amount) + Number(o.shipping_cost || 0), 0);
+    problems.push(`${missing.length} betalda ordrar saknar Fortnox-faktura (${sum} kr): ${missing.map(o => o.order_number).join(", ")}`);
+  }
+
+  const healthy = problems.length === 0;
+  if (healthy) {
+    console.log("[Health] Fortnox OK – token satt, inga betalda ordrar utan faktura");
+    return { healthy, problems, missingCount: 0 };
+  }
+
+  console.error("[Health] PROBLEM:", problems.join(" | "));
+
+  if (notify && process.env.RESEND_API_KEY) {
+    try {
+      const { Resend } = require("resend");
+      const resend = new Resend(process.env.RESEND_API_KEY);
+      await resend.emails.send({
+        from: `1753 SKINCARE <${emailFromInfo()}>`,
+        to: TEAM_EMAILS,
+        subject: `Varning: ${missing.length > 0 ? `${missing.length} ordrar utan faktura` : "Fortnox ej ansluten"}`,
+        html: `
+          <div style="font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Helvetica,Arial,sans-serif;max-width:560px;margin:0 auto">
+            <h2 style="color:#1d1d1f;font-size:20px;margin-bottom:8px">Integrationsvarning</h2>
+            <p style="color:#515151;font-size:14px;line-height:1.6">Automatisk kontroll hittade följande:</p>
+            <ul style="color:#515151;font-size:14px;line-height:1.7">
+              ${problems.map(p => `<li>${p}</li>`).join("")}
+            </ul>
+            <p style="color:#515151;font-size:13px;line-height:1.6">Ordrar levereras via Ongoing även när Fortnox ligger nere, så kunderna märker inget – men bokföringen tappas. Efterregistrera med <code>POST /api/admin/orders/backfill-fortnox</code> när anslutningen är återställd.</p>
+          </div>
+        `
+      });
+      console.log("[Health] Varningsmejl skickat till teamet");
+    } catch (err) {
+      console.error("[Health] Kunde inte skicka varningsmejl:", err.message);
+    }
+  }
+
+  return { healthy, problems, missingCount: missing.length };
 }
 
 // ---- TEAM NOTIFICATIONS ----
@@ -8940,5 +9291,16 @@ app.post("/api/admin/social/daily-generate", adminAuthMiddleware, async (req, re
     setInterval(runReconcileTick, 30 * 60_000);
     setTimeout(runReconcileTick, 3 * 60_000);
     console.log("[OK] Pending-order reconciliation started (every 30min)");
+
+    // Integrationshälsa: larmar om Fortnox-anslutningen dött eller om betalda ordrar
+    // saknar faktura. Fortnox-haveriet 2026-08-03 pågick tyst i tre dagar – den här
+    // kontrollen är vad som fångar det inom ett dygn istället.
+    setInterval(() => {
+      checkIntegrationHealth().catch(err => console.error("[Health] tick error:", err.message));
+    }, 24 * 60 * 60_000);
+    setTimeout(() => {
+      checkIntegrationHealth().catch(err => console.error("[Health] startup check error:", err.message));
+    }, 5 * 60_000);
+    console.log("[OK] Integration health check scheduled (daily + 5min after boot)");
   });
 })();
