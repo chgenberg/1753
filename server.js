@@ -1479,6 +1479,22 @@ app.post("/api/admin/orders/backfill-fortnox", adminOnly, async (req, res) => {
   }
 });
 
+// Bokför + betalningsregistrera fakturor som redan finns men blivit liggande
+// (t.ex. skapade när OAuth-scopen saknade fakturarättigheter). Idempotent: styrs
+// av Fortnox Booked-flagga och Balance, inte av våra notes.
+// ?dryRun=true → visa nuvarande tillstånd utan att ändra något.
+app.post("/api/admin/orders/repair-fortnox-invoices", adminOnly, async (req, res) => {
+  try {
+    const dryRun = req.query.dryRun === "true" || req.query.dryRun === "1" || req.body?.dryRun === true;
+    const orderNumbers = Array.isArray(req.body?.orderNumbers) ? req.body.orderNumbers : null;
+    const result = await repairFortnoxInvoices({ dryRun, orderNumbers });
+    res.json(result);
+  } catch (err) {
+    console.error("[FortnoxRepair] endpoint error:", err);
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // Hälsokontroll: larmar om Fortnox-anslutningen är död eller om betalda ordrar
 // saknar faktura. ?notify=false → returnera bara status utan att mejla teamet.
 app.post("/api/admin/health/integrations", adminOnly, async (req, res) => {
@@ -3986,10 +4002,19 @@ async function handleOrderCompletion(orderId) {
   let ongoingOrderId = null;
 
   // 1. Fortnox: find or create customer
+  //
+  // OBS: tidigare användes `?filter=email&email=...` här. I Fortnox är `filter`
+  // reserverat för fördefinierade filter (active/inactive) – `filter=email` är
+  // ogiltigt, anropet failade varje gång och catch-satsen ledde till att en NY
+  // kundpost skapades vid varje order. Det gav dubbletter i Fortnox (t.ex.
+  // adressentill@hotmail.com fick 3771, 3940 och 4070). Rätt sökning är att
+  // skicka e-posten som query-parameter direkt.
   try {
-    const existing = await fortnoxFetch(`/customers?filter=email&email=${encodeURIComponent(order.customer_email)}`);
+    const existing = await fortnoxFetch(`/customers?email=${encodeURIComponent(order.customer_email)}`);
     fortnoxCustomerNumber = existing?.Customers?.[0]?.CustomerNumber;
-  } catch (_) { /* not found */ }
+  } catch (err) {
+    console.warn(`[Order] Fortnox kundsökning misslyckades för ${order.customer_email}: ${err.message}`);
+  }
 
   if (!fortnoxCustomerNumber) {
     try {
@@ -4534,9 +4559,11 @@ async function backfillFortnoxInvoices({ dryRun = false, orderNumbers = null, ma
       try {
         // 1. Kund: hitta eller skapa (samma uppslag som handleOrderCompletion).
         try {
-          const existing = await fortnoxFetch(`/customers?filter=email&email=${encodeURIComponent(order.customer_email)}`);
+          const existing = await fortnoxFetch(`/customers?email=${encodeURIComponent(order.customer_email)}`);
           fxCustomerNumber = existing?.Customers?.[0]?.CustomerNumber;
-        } catch (_) { /* not found */ }
+        } catch (err) {
+          console.warn(`[FortnoxBackfill] kundsökning misslyckades för ${order.customer_email}: ${err.message}`);
+        }
 
         if (!fxCustomerNumber) {
           const created = await fortnoxFetch("/customers", "POST", {
@@ -4689,6 +4716,140 @@ async function backfillFortnoxInvoices({ dryRun = false, orderNumbers = null, ma
   }
 }
 
+// ---- FORTNOX-REPARATION (bokför + betalningsregistrera befintliga fakturor) ----
+//
+// Skild från backfillen ovan: här FINNS fakturan redan, men den kan ha blivit
+// liggande obokförd eller utan registrerad betalning – t.ex. om OAuth-scopen
+// saknade fakturarättigheter när den skapades ("Du saknar behörighet att hämta
+// faktura"). Det hände för 10418–10428 den 6 augusti.
+//
+// Jobbet styrs av Fortnox FAKTISKA tillstånd (Booked-flaggan och Balance), inte
+// av våra notes. Därför är det idempotent: en redan bokförd och betald faktura
+// rörs inte. Bokföring måste ske före betalningsregistrering – Fortnox tillåter
+// inte betalning på en obokförd faktura.
+let _fortnoxRepairRunning = false;
+
+async function repairFortnoxInvoices({ dryRun = false, orderNumbers = null, maxAgeDays = 60 } = {}) {
+  const result = { candidates: 0, repaired: [], alreadyOk: [], mismatches: [], errors: [], dryRun };
+
+  if (_fortnoxRepairRunning) {
+    result.errors.push({ error: "Reparation körs redan – avbryter" });
+    return result;
+  }
+  _fortnoxRepairRunning = true;
+
+  try {
+    try {
+      await ensureFortnoxToken();
+      await fortnoxFetch("/companyinformation");
+    } catch (err) {
+      result.errors.push({ error: `Fortnox-anslutning ej OK: ${err.message}` });
+      return result;
+    }
+
+    const params = [maxAgeDays];
+    let scopeSql = "";
+    if (Array.isArray(orderNumbers) && orderNumbers.length > 0) {
+      params.push(orderNumbers.map(String));
+      scopeSql = " AND order_number = ANY($2)";
+    }
+
+    const { rows } = await db.pool.query(
+      `SELECT id, order_number, customer_email, total_amount, shipping_cost, created_at,
+              fortnox_invoice_number
+         FROM orders
+        WHERE fortnox_invoice_number IS NOT NULL
+          AND payment_status = 'paid'
+          AND created_at > (NOW() - ($1 * INTERVAL '1 day'))
+          ${scopeSql}
+        ORDER BY order_number ASC`,
+      params
+    );
+
+    result.candidates = rows.length;
+
+    for (const order of rows) {
+      const invoiceNumber = order.fortnox_invoice_number;
+      const expected = Number(order.total_amount) + Number(order.shipping_cost || 0);
+      const orderDate = new Date(order.created_at).toISOString().split("T")[0];
+
+      try {
+        let invoice = (await fortnoxFetch(`/invoices/${invoiceNumber}`))?.Invoice;
+        if (!invoice) throw new Error("Fakturan kunde inte läsas");
+
+        let booked = invoice.Booked === true;
+        let balance = Number(invoice.Balance ?? 0);
+        const total = Number(invoice.Total ?? 0);
+        const actions = [];
+
+        // Avvikelse mellan fakturasumman och vad kunden faktiskt betalade ska
+        // synas – vi vill inte tysta ned ett felaktigt fakturabelopp.
+        if (Math.abs(total - expected) > 1) {
+          result.mismatches.push({
+            order: order.order_number, invoiceNumber, fortnoxTotal: total, forvantat: expected,
+          });
+        }
+
+        if (booked && balance <= 0) {
+          result.alreadyOk.push({ order: order.order_number, invoiceNumber });
+          continue;
+        }
+
+        if (dryRun) {
+          result.repaired.push({
+            order: order.order_number, invoiceNumber, booked, balance, forvantat: expected,
+            skulleGora: [...(booked ? [] : ["bokfora"]), ...(balance > 0 ? ["registrera betalning"] : [])],
+            dryRun: true,
+          });
+          continue;
+        }
+
+        const notes = [];
+
+        if (!booked) {
+          const res = await fortnoxFetch(`/invoices/${invoiceNumber}/bookkeep`, "PUT");
+          const updated = res?.Invoice;
+          if (updated) {
+            booked = updated.Booked === true;
+            balance = Number(updated.Balance ?? balance);
+          } else {
+            booked = true;
+          }
+          actions.push("bokford");
+          notes.push(`Reparation: faktura ${invoiceNumber} bokford`);
+        }
+
+        if (balance > 0) {
+          await fortnoxFetch("/invoicepayments", "POST", {
+            InvoicePayment: {
+              InvoiceNumber: invoiceNumber,
+              Amount: balance,
+              AmountCurrency: balance,
+              PaymentDate: orderDate
+            }
+          });
+          actions.push(`betalning ${balance} registrerad`);
+          notes.push(`Reparation: betalning ${balance} registrerad pa faktura ${invoiceNumber}`);
+        }
+
+        if (notes.length > 0) {
+          try { await db.appendNotes(order.id, notes.join(" | ")); } catch (_) { /* icke-kritiskt */ }
+        }
+
+        result.repaired.push({ order: order.order_number, invoiceNumber, actions });
+        console.log(`[FortnoxRepair] ${order.order_number} / faktura ${invoiceNumber}: ${actions.join(", ")}`);
+      } catch (err) {
+        result.errors.push({ order: order.order_number, invoiceNumber, error: err.message });
+        console.error(`[FortnoxRepair] ${order.order_number} misslyckades:`, err.message);
+      }
+    }
+
+    return result;
+  } finally {
+    _fortnoxRepairRunning = false;
+  }
+}
+
 // ---- INTEGRATIONSHÄLSA (larm så tysta fel inte pågår i dagar) ----
 //
 // Fortnox-haveriet 2026-08-03 upptäcktes först efter tre dagar, av en människa som
@@ -4728,6 +4889,27 @@ async function checkIntegrationHealth({ notify = true, days = 7 } = {}) {
   if (missing.length > 0) {
     const sum = missing.reduce((s, o) => s + Number(o.total_amount) + Number(o.shipping_cost || 0), 0);
     problems.push(`${missing.length} betalda ordrar saknar Fortnox-faktura (${sum} kr): ${missing.map(o => o.order_number).join(", ")}`);
+  }
+
+  // Fakturan kan finnas men ha fastnat obokförd – det var exakt vad som hände
+  // 2026-08-06 när OAuth-scopen saknade fakturarättigheter. Notes bär spåret.
+  try {
+    const { rows } = await db.pool.query(
+      `SELECT order_number
+         FROM orders
+        WHERE created_at > (NOW() - ($1 * INTERVAL '1 day'))
+          AND (internal_notes ILIKE '%bokforing FEL%' OR internal_notes ILIKE '%betalning FEL%')
+          -- internal_notes är append-only: en lyckad reparation raderar inte det
+          -- gamla FEL-spåret. Utan detta villkor skulle larmet aldrig tystna.
+          AND internal_notes NOT ILIKE '%Reparation:%'
+        ORDER BY order_number ASC`,
+      [days]
+    );
+    if (rows.length > 0) {
+      problems.push(`${rows.length} ordrar har faktura men misslyckad bokföring/betalningsregistrering: ${rows.map(o => o.order_number).join(", ")}. Åtgärd: POST /api/admin/orders/repair-fortnox-invoices`);
+    }
+  } catch (err) {
+    problems.push(`Kunde inte kontrollera bokföringsstatus: ${err.message}`);
   }
 
   const healthy = problems.length === 0;
