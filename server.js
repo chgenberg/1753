@@ -987,6 +987,35 @@ async function fortnoxFetch(path, method, body, _retried) {
   return data;
 }
 
+// Skapa OCH bokför en fakturabetalning. POST /invoicepayments skapar bara ett
+// utkast (Booked:false) – fakturans Balance nollställs först när betalningen
+// bokförs via PUT /invoicepayments/{id}/bookkeep. Utan det andra steget syns
+// fakturan som obetald i Fortnox trots att Viva redan tagit betalt.
+async function registerAndBookFortnoxPayment(invoiceNumber, amount, paymentDate) {
+  let payDate = paymentDate || new Date().toISOString().split("T")[0];
+  try {
+    const inv = (await fortnoxFetch(`/invoices/${invoiceNumber}`))?.Invoice;
+    const invDate = inv?.InvoiceDate;
+    // Fortnox nekar betaldatum före fakturadatum (vanligt efter backfill).
+    if (invDate && payDate < invDate) payDate = invDate;
+  } catch (_) { /* icke-kritiskt – Fortnox validerar själv */ }
+
+  const created = await fortnoxFetch("/invoicepayments", "POST", {
+    InvoicePayment: {
+      InvoiceNumber: invoiceNumber,
+      Amount: amount,
+      AmountCurrency: amount,
+      PaymentDate: payDate,
+    },
+  });
+  const paymentNumber = created?.InvoicePayment?.Number;
+  if (!paymentNumber) {
+    throw new Error("Fortnox skapade betalning utan Number");
+  }
+  await fortnoxFetch(`/invoicepayments/${paymentNumber}/bookkeep`, "PUT");
+  return { paymentNumber, paymentDate: payDate };
+}
+
 async function ongoingFetch(path, method, body) {
   const fetch = (await import("node-fetch")).default;
   const baseUrl = process.env.ONGOING_BASE_URL;
@@ -4161,28 +4190,19 @@ async function handleOrderCompletion(orderId) {
     }
   }
 
-  // 4. Fortnox: register payment on invoice (requires 'payment' scope)
+  // 4. Fortnox: registrera OCH bokför betalning (kräver invoice+payment-rättigheter)
   if (fortnoxInvoiceNumber) {
     try {
       const paymentAmount = order.total_amount + (order.shipping_cost || 0);
-      await fortnoxFetch("/invoicepayments", "POST", {
-        InvoicePayment: {
-          InvoiceNumber: fortnoxInvoiceNumber,
-          Amount: paymentAmount,
-          AmountCurrency: paymentAmount,
-          PaymentDate: new Date().toISOString().split("T")[0]
-        }
-      });
-      notes.push("Fortnox betalning registrerad");
+      const pay = await registerAndBookFortnoxPayment(
+        fortnoxInvoiceNumber,
+        paymentAmount,
+        new Date().toISOString().split("T")[0]
+      );
+      notes.push(`Fortnox betalning registrerad och bokford (#${pay.paymentNumber})`);
     } catch (err) {
-      const isScope = err.message?.includes("scope") || err.message?.includes("behörighet");
-      if (isScope) {
-        notes.push("Fortnox betalning hoppades over (payment scope saknas i OAuth-appen)");
-        console.warn(`[Order] Fortnox payment scope missing -- add 'payment' scope in Fortnox developer portal to auto-register payments`);
-      } else {
-        notes.push(`Fortnox betalning FEL: ${err.message}`);
-        console.error("[Order] Fortnox payment error:", err);
-      }
+      notes.push(`Fortnox betalning FEL: ${err.message}`);
+      console.error("[Order] Fortnox payment error:", err);
     }
   }
 
@@ -4670,17 +4690,10 @@ async function backfillFortnoxInvoices({ dryRun = false, orderNumbers = null, ma
           notes.push(`Backfill: bokforing FEL ${err.message}`);
         }
 
-        // 5. Registrera betalningen (kräver 'payment'-scope).
+        // 5. Registrera OCH bokför betalningen.
         try {
-          await fortnoxFetch("/invoicepayments", "POST", {
-            InvoicePayment: {
-              InvoiceNumber: fxInvoiceNumber,
-              Amount: amount,
-              AmountCurrency: amount,
-              PaymentDate: orderDate
-            }
-          });
-          notes.push("Backfill: betalning registrerad");
+          const pay = await registerAndBookFortnoxPayment(fxInvoiceNumber, amount, orderDate);
+          notes.push(`Backfill: betalning registrerad och bokford (#${pay.paymentNumber})`);
         } catch (err) {
           notes.push(`Backfill: betalning FEL ${err.message}`);
         }
@@ -4820,16 +4833,9 @@ async function repairFortnoxInvoices({ dryRun = false, orderNumbers = null, maxA
         }
 
         if (balance > 0) {
-          await fortnoxFetch("/invoicepayments", "POST", {
-            InvoicePayment: {
-              InvoiceNumber: invoiceNumber,
-              Amount: balance,
-              AmountCurrency: balance,
-              PaymentDate: orderDate
-            }
-          });
-          actions.push(`betalning ${balance} registrerad`);
-          notes.push(`Reparation: betalning ${balance} registrerad pa faktura ${invoiceNumber}`);
+          const pay = await registerAndBookFortnoxPayment(invoiceNumber, balance, orderDate);
+          actions.push(`betalning ${balance} bokford (#${pay.paymentNumber})`);
+          notes.push(`Reparation: betalning ${balance} bokford pa faktura ${invoiceNumber} (#${pay.paymentNumber})`);
         }
 
         if (notes.length > 0) {
