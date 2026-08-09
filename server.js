@@ -400,7 +400,7 @@ const PRODUCTS_MAP = {
   "ta-da-serum":                { name: "TA-DA Serum", price: 699, priceEur: 59, articleNumber: "1005", vatRate: 0.25 },
   "duo-kit":                    { name: "DUO-kit", price: 1099, priceEur: 95, articleNumber: "1003", vatRate: 0.25 },
   "au-naturel-makeup-remover":  { name: "Au Naturel Makeup Remover", price: 399, priceEur: 34, articleNumber: "1004", vatRate: 0.25 },
-  "fungtastic-mushroom-extract":{ name: "Fungtastic Mushroom Extract", price: 399, priceEur: 32, articleNumber: "4001", vatRate: 0.06 }
+  "fungtastic-mushroom-extract":{ name: "Fungtastic Mushroom Extract", price: 377, priceEur: 32, articleNumber: "4001", vatRate: 0.06 }
 };
 
 const FREE_SHIPPING_THRESHOLD = { SEK: 600, EUR: 60 };
@@ -670,8 +670,9 @@ app.post("/api/subscriptions/create", authMiddleware, async (req, res) => {
     const interval = allowedIntervals.includes(intervalDays) ? intervalDays : 60;
     const discountPercent = 15;
     const basePrice = currency === "EUR" ? (product.priceEur || product.price) : product.price;
+    // Matcha varukorg/kassa: avrunda per enhet, sedan × qty (annars 377×2×0.85 → 641 vs 640).
     const originalPrice = basePrice * qty;
-    const recurringPrice = Math.round(originalPrice * (1 - discountPercent / 100));
+    const recurringPrice = Math.round(basePrice * (1 - discountPercent / 100)) * qty;
     const vivaAmount = recurringPrice * 100;
 
     const orderNumber = await generateOrderNumber();
@@ -780,7 +781,7 @@ app.put("/api/subscriptions/:id", authMiddleware, async (req, res) => {
       const discountPercent = sub.discount_percent || 15;
       fields.quantity = qty;
       fields.original_price = unitPrice * qty;
-      fields.recurring_price = Math.round(unitPrice * qty * (1 - discountPercent / 100));
+      fields.recurring_price = Math.round(unitPrice * (1 - discountPercent / 100)) * qty;
     }
 
     if (intervalDays !== undefined) {
@@ -4292,10 +4293,17 @@ async function handleOrderCompletion(orderId) {
       if (subUser) {
         for (const item of subItems) {
           const intervalDays = item.intervalDays || item.subscription?.intervalDays || 30;
-          const product = PRODUCTS_MAP[item.articleNumber] || PRODUCTS_MAP[item.id];
-          const originalPrice = item.price || (product ? (order.currency === "EUR" ? product.priceEUR : product.price) : 0);
+          const product = PRODUCTS_MAP[item.productId] || PRODUCTS_MAP[item.id]
+            || Object.values(PRODUCTS_MAP).find(p => p.articleNumber === item.articleNumber);
+          const qty = item.quantity || 1;
           const discountPercent = 15;
-          const recurringPrice = Math.round(originalPrice * (1 - discountPercent / 100));
+          // Listpris (INTE item.price som redan är 15%-rabatterat) × antal.
+          // Enhetsavrundning matchar varukorg/kassa: Math.round(unit*0.85)*qty.
+          const unitList = product
+            ? (order.currency === "EUR" ? (product.priceEur || product.price) : product.price)
+            : (typeof item.originalPrice === "number" ? item.originalPrice : item.price);
+          const originalPrice = unitList * qty;
+          const recurringPrice = Math.round(unitList * (1 - discountPercent / 100)) * qty;
 
           const existingSubs = await db.findSubscriptionsByUser(subUser.id);
           const alreadyExists = existingSubs.some(s =>
@@ -4308,7 +4316,7 @@ async function handleOrderCompletion(orderId) {
               userId: subUser.id,
               productId: item.articleNumber || item.id,
               productName: item.name || (product ? product.name : "Produkt"),
-              quantity: item.quantity || 1,
+              quantity: qty,
               intervalDays,
               discountPercent,
               originalPrice,
@@ -5845,7 +5853,7 @@ PRODUKTER:
 2. TA-DA Serum (699 kr, 30 ml) – CBG 3% i ekologisk jojobaolja
 3. DUO-kit (1 099 kr) – The ONE (10% CBD) + I LOVE (10% CBD, 5% CBG) ansiktsoljor
 4. Au Naturel Makeup Remover (399 kr, 100 ml) – MCT-olja + CBD
-5. Fungtastic Mushroom Extract (399 kr, 60 kapslar) – Chaga, Lion's Mane, Cordyceps, Reishi
+5. Fungtastic Mushroom Extract (377 kr, 60 kapslar) – Chaga, Lion's Mane, Cordyceps, Reishi
 
 REGLER:
 - Om kunden frågar om specifik order: ange ordernummer och status om du har kontexten, annars be om ordernummer
@@ -8728,36 +8736,45 @@ async function processRecurringCharges() {
           continue;
         }
 
-        const vivaAmount = sub.recurring_price * 100;
+        const qty = Math.max(1, sub.quantity || 1);
+        const credit = Math.max(0, Number(sub.next_charge_credit) || 0);
+        const chargeAmount = Math.max(0, Number(sub.recurring_price) - credit);
+        if (chargeAmount <= 0) {
+          console.warn(`[Recurring] Sub ${sub.id}: chargeAmount ${chargeAmount} efter kredit ${credit} – hoppar över Viva-dragning`);
+        }
+        const vivaAmount = chargeAmount * 100;
         const subCurrency = sub.currency || "SEK";
         const chargeUrl = `https://${env}api.vivapayments.com/api/transactions/${sub.viva_initial_tx_id}`;
 
-        const chargeRes = await fetch(chargeUrl, {
-          method: "POST",
-          headers: {
-            "Authorization": `Basic ${basicAuth}`,
-            "Content-Type": "application/json"
-          },
-          body: JSON.stringify({
-            amount: vivaAmount,
-            currencyCode: String(VIVA_CURRENCY_CODE[subCurrency] || 752)
-          })
-        });
-
-        const chargeData = await chargeRes.json().catch(() => null);
-
-        if (!chargeRes.ok) {
-          console.error(`[Recurring] Charge failed for sub ${sub.id}:`, chargeData);
-          await db.updateSubscription(sub.id, { status: "payment_failed" });
-          await db.createSubscriptionCharge({
-            subscriptionId: sub.id,
-            amount: sub.recurring_price,
-            status: "failed"
+        let newTxId = null;
+        if (chargeAmount > 0) {
+          const chargeRes = await fetch(chargeUrl, {
+            method: "POST",
+            headers: {
+              "Authorization": `Basic ${basicAuth}`,
+              "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+              amount: vivaAmount,
+              currencyCode: String(VIVA_CURRENCY_CODE[subCurrency] || 752)
+            })
           });
-          continue;
+
+          const chargeData = await chargeRes.json().catch(() => null);
+
+          if (!chargeRes.ok) {
+            console.error(`[Recurring] Charge failed for sub ${sub.id}:`, chargeData);
+            await db.updateSubscription(sub.id, { status: "payment_failed" });
+            await db.createSubscriptionCharge({
+              subscriptionId: sub.id,
+              amount: chargeAmount,
+              status: "failed"
+            });
+            continue;
+          }
+          newTxId = chargeData?.TransactionId || chargeData?.transactionId;
         }
 
-        const newTxId = chargeData?.TransactionId || chargeData?.transactionId;
         const orderNumber = await generateOrderNumber();
 
         const user = await db.findUserById(sub.user_id);
@@ -8769,10 +8786,14 @@ async function processRecurringCharges() {
         const product = Object.values(PRODUCTS_MAP).find(p => p.articleNumber === sub.product_id) ||
                          Object.entries(PRODUCTS_MAP).find(([k]) => k === sub.product_id)?.[1];
 
+        // Enhetspris efter prenumerationsrabatt; engångskredit läggs som paidUnitPrice-justering.
+        const unitRecurring = Math.round(Number(sub.recurring_price) / qty);
+        const unitPaid = Math.round((chargeAmount / qty) * 100) / 100;
+
         const newOrder = await db.createOrder({
           orderNumber,
-          customerName: user?.name || sub.product_name,
-          customerEmail: user?.email || "",
+          customerName: user?.name || sub.customer_name || sub.product_name,
+          customerEmail: user?.email || sub.customer_email || "",
           customerPhone: user?.phone || lastOrder?.customer_phone || "",
           address: lastOrder?.address || "",
           zip: lastOrder?.zip || "",
@@ -8782,13 +8803,22 @@ async function processRecurringCharges() {
           items: [{
             id: sub.product_id,
             name: sub.product_name,
-            qty: sub.quantity,
-            price: sub.recurring_price,
+            quantity: qty,
+            price: unitRecurring,
+            originalPrice: product
+              ? (subCurrency === "EUR" ? (product.priceEur || product.price) : product.price)
+              : unitRecurring,
+            ...(credit > 0 ? { paidUnitPrice: unitPaid } : {}),
             articleNumber: product?.articleNumber || sub.product_id,
-            vatRate: product?.vatRate || 0.25
+            vatRate: product?.vatRate || 0.25,
+            subscription: true,
+            intervalDays: sub.interval_days,
           }],
-          totalAmount: sub.recurring_price,
-          shippingCost: 0
+          totalAmount: chargeAmount,
+          shippingCost: 0,
+          currency: subCurrency,
+          userId: sub.user_id || null,
+          locale: sub.locale || "sv",
         });
 
         await db.updateOrder(newOrder.id, {
@@ -8801,19 +8831,21 @@ async function processRecurringCharges() {
           subscriptionId: sub.id,
           orderId: newOrder.id,
           vivaTxId: newTxId || null,
-          amount: sub.recurring_price,
+          amount: chargeAmount,
           status: "charged"
         });
 
         const nextCharge = new Date();
         nextCharge.setDate(nextCharge.getDate() + sub.interval_days);
 
+        // Nollställ engångskredit efter lyckad charge (även 0-kr om kredit ≥ recurring).
         await db.updateSubscription(sub.id, {
           next_charge_date: nextCharge.toISOString().split("T")[0],
-          last_charge_date: new Date().toISOString().split("T")[0]
+          last_charge_date: new Date().toISOString().split("T")[0],
+          next_charge_credit: 0,
         });
 
-        console.log(`[Recurring] Sub ${sub.id} charged ${sub.recurring_price} kr, new order ${orderNumber}, next: ${nextCharge.toISOString().split("T")[0]}`);
+        console.log(`[Recurring] Sub ${sub.id} charged ${chargeAmount} kr${credit ? ` (kredit -${credit})` : ""}, new order ${orderNumber}, next: ${nextCharge.toISOString().split("T")[0]}`);
 
         try {
           await handleOrderCompletion(newOrder.id);

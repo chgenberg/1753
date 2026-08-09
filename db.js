@@ -154,6 +154,8 @@ async function initSchema() {
     ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS order_number VARCHAR(50);
     ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS currency VARCHAR(3) DEFAULT 'SEK';
     ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS locale VARCHAR(5) DEFAULT 'sv';
+    -- Engångskredit (SEK/EUR hela kronor) som dras av på nästa recurring-charge, sedan nollställs.
+    ALTER TABLE subscriptions ADD COLUMN IF NOT EXISTS next_charge_credit INTEGER DEFAULT 0;
 
     ALTER TABLE orders ADD COLUMN IF NOT EXISTS currency VARCHAR(3) DEFAULT 'SEK';
     ALTER TABLE orders ADD COLUMN IF NOT EXISTS locale VARCHAR(5) DEFAULT 'sv';
