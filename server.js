@@ -4907,15 +4907,16 @@ async function checkIntegrationHealth({ notify = true, days = 7 } = {}) {
 
   // Fakturan kan finnas men ha fastnat obokförd – det var exakt vad som hände
   // 2026-08-06 när OAuth-scopen saknade fakturarättigheter. Notes bär spåret.
+  // internal_notes är append-only: en lyckad reparation raderar inte det gamla
+  // FEL-spåret, så vi exkluderar ordrar som senare markerats som reparerade.
   try {
     const { rows } = await db.pool.query(
       `SELECT order_number
          FROM orders
         WHERE created_at > (NOW() - ($1 * INTERVAL '1 day'))
           AND (internal_notes ILIKE '%bokforing FEL%' OR internal_notes ILIKE '%betalning FEL%')
-          -- internal_notes är append-only: en lyckad reparation raderar inte det
-          -- gamla FEL-spåret. Utan detta villkor skulle larmet aldrig tystna.
           AND internal_notes NOT ILIKE '%Reparation:%'
+          AND internal_notes NOT ILIKE '%betalning registrerad och bokford%'
         ORDER BY order_number ASC`,
       [days]
     );
