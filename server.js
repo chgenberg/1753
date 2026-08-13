@@ -988,21 +988,63 @@ async function fortnoxFetch(path, method, body, _retried) {
   return data;
 }
 
-// Automatisk betalningsregistrering i Fortnox är AV som default.
-// Utan ModeOfPayment/konto landar Viva-betalningar på Fortnox default (BG/1930),
-// vilket revisorn flaggade 2026-08-13 som fel konto. Sätt
-// FORTNOX_AUTO_REGISTER_PAYMENTS=true i Railway FÖRST när rätt betalningssätt
-// (FORTNOX_PAYMENT_MODE / FORTNOX_PAYMENT_ACCOUNT) är bekräftat.
+// Automatisk betalningsregistrering i Fortnox.
+// Kill-switch: FORTNOX_AUTO_REGISTER_PAYMENTS=false
+//
+// Karin (2026-08-13): Swish går till Handelsbanken (1930), kort till Viva-kontot
+// (1940). Viva anger typ via transactionTypeId (70 = Swish, 5 = kortcharge m.fl.).
+// Utan känd kanal hoppar vi över – hellre manuellt än fel konto.
 function fortnoxAutoPaymentsEnabled() {
-  return process.env.FORTNOX_AUTO_REGISTER_PAYMENTS === "true";
+  return process.env.FORTNOX_AUTO_REGISTER_PAYMENTS !== "false";
 }
 
-// Skapa OCH bokför en fakturabetalning. POST /invoicepayments skapar bara ett
-// utkast (Booked:false) – fakturans Balance nollställs först när betalningen
-// bokförs via PUT /invoicepayments/{id}/bookkeep.
-async function registerAndBookFortnoxPayment(invoiceNumber, amount, paymentDate) {
+const FORTNOX_PAY_SWISH = {
+  mode: process.env.FORTNOX_MODE_SWISH || "BG",
+  account: Number(process.env.FORTNOX_ACCOUNT_SWISH || 1930),
+  label: "Swish→1930",
+};
+const FORTNOX_PAY_CARD = {
+  mode: process.env.FORTNOX_MODE_CARD || "VIVA",
+  account: Number(process.env.FORTNOX_ACCOUNT_CARD || 1940),
+  label: "Kort→1940",
+};
+
+// Viva transactionTypeId → Fortnox betalningssätt/konto.
+// https://developer.vivawallet.com/integration-reference/response-codes/
+const VIVA_SWISH_TYPE_IDS = new Set([70]); // Swish charge (71 = Swish refund)
+const VIVA_CARD_TYPE_IDS = new Set([
+  0,  // Card capture
+  5,  // Card charge (inkl. Apple Pay / Google Pay / MobilePay Online via kortspår)
+  6,  // Card charge (installments)
+  9,  // Viva Wallet charge
+]);
+
+async function resolveFortnoxPaymentChannel(order) {
+  const txId = order.viva_transaction_id;
+  if (!txId) return null;
+
+  const tx = await vivaFetch(`/checkout/v2/transactions/${txId}`);
+  const typeId = Number(tx?.transactionTypeId ?? tx?.TransactionTypeId);
+  if (!Number.isFinite(typeId)) return null;
+
+  if (VIVA_SWISH_TYPE_IDS.has(typeId)) {
+    return { ...FORTNOX_PAY_SWISH, transactionTypeId: typeId };
+  }
+  if (VIVA_CARD_TYPE_IDS.has(typeId)) {
+    return { ...FORTNOX_PAY_CARD, transactionTypeId: typeId };
+  }
+  console.warn(`[Fortnox] Okänd Viva transactionTypeId=${typeId} for tx ${txId} – hoppar betalningsbokning`);
+  return null;
+}
+
+// Skapa OCH bokför en fakturabetalning. Kräver ModeOfPayment + konto – annars
+// defaultar Fortnox till BG/1930 även för kort (revisorslarm 2026-08-13).
+async function registerAndBookFortnoxPayment(invoiceNumber, amount, paymentDate, channel) {
   if (!fortnoxAutoPaymentsEnabled()) {
-    throw new Error("Fortnox auto-betalning pausad (FORTNOX_AUTO_REGISTER_PAYMENTS != true)");
+    throw new Error("Fortnox auto-betalning pausad (FORTNOX_AUTO_REGISTER_PAYMENTS=false)");
+  }
+  if (!channel?.mode || !channel?.account) {
+    throw new Error("Fortnox-betalning saknar ModeOfPayment/konto");
   }
 
   let payDate = paymentDate || new Date().toISOString().split("T")[0];
@@ -1013,29 +1055,22 @@ async function registerAndBookFortnoxPayment(invoiceNumber, amount, paymentDate)
     if (invDate && payDate < invDate) payDate = invDate;
   } catch (_) { /* icke-kritiskt – Fortnox validerar själv */ }
 
-  const paymentBody = {
-    InvoiceNumber: invoiceNumber,
-    Amount: amount,
-    AmountCurrency: amount,
-    PaymentDate: payDate,
-  };
-  // Valfritt: rätt konto för Viva. Utan dessa använder Fortnox default BG/1930.
-  if (process.env.FORTNOX_PAYMENT_MODE) {
-    paymentBody.ModeOfPayment = process.env.FORTNOX_PAYMENT_MODE;
-  }
-  if (process.env.FORTNOX_PAYMENT_ACCOUNT) {
-    paymentBody.ModeOfPaymentAccount = Number(process.env.FORTNOX_PAYMENT_ACCOUNT);
-  }
-
   const created = await fortnoxFetch("/invoicepayments", "POST", {
-    InvoicePayment: paymentBody,
+    InvoicePayment: {
+      InvoiceNumber: invoiceNumber,
+      Amount: amount,
+      AmountCurrency: amount,
+      PaymentDate: payDate,
+      ModeOfPayment: channel.mode,
+      ModeOfPaymentAccount: channel.account,
+    },
   });
   const paymentNumber = created?.InvoicePayment?.Number;
   if (!paymentNumber) {
     throw new Error("Fortnox skapade betalning utan Number");
   }
   await fortnoxFetch(`/invoicepayments/${paymentNumber}/bookkeep`, "PUT");
-  return { paymentNumber, paymentDate: payDate };
+  return { paymentNumber, paymentDate: payDate, channel };
 }
 
 async function ongoingFetch(path, method, body) {
@@ -4212,20 +4247,26 @@ async function handleOrderCompletion(orderId) {
     }
   }
 
-  // 4. Fortnox: registrera OCH bokför betalning (pausad som default – se
-  // fortnoxAutoPaymentsEnabled). Faktura + bokföring av fakturan körs fortfarande.
+  // 4. Fortnox: registrera OCH bokför betalning på rätt konto
+  // (Swish→1930 / kort→1940 via Viva transactionTypeId).
   if (fortnoxInvoiceNumber) {
     if (!fortnoxAutoPaymentsEnabled()) {
-      notes.push("Fortnox betalning hoppades over (auto-betalning pausad – invantar ratt konto fran revisorn)");
+      notes.push("Fortnox betalning hoppades over (auto-betalning pausad via env)");
     } else {
       try {
-        const paymentAmount = order.total_amount + (order.shipping_cost || 0);
-        const pay = await registerAndBookFortnoxPayment(
-          fortnoxInvoiceNumber,
-          paymentAmount,
-          new Date().toISOString().split("T")[0]
-        );
-        notes.push(`Fortnox betalning registrerad och bokford (#${pay.paymentNumber})`);
+        const channel = await resolveFortnoxPaymentChannel(order);
+        if (!channel) {
+          notes.push("Fortnox betalning hoppades over (kunde inte avgora Swish/kort via Viva – manuell bokning)");
+        } else {
+          const paymentAmount = order.total_amount + (order.shipping_cost || 0);
+          const pay = await registerAndBookFortnoxPayment(
+            fortnoxInvoiceNumber,
+            paymentAmount,
+            new Date().toISOString().split("T")[0],
+            channel
+          );
+          notes.push(`Fortnox betalning registrerad och bokford (#${pay.paymentNumber}, ${channel.label}, typeId=${channel.transactionTypeId})`);
+        }
       } catch (err) {
         notes.push(`Fortnox betalning FEL: ${err.message}`);
         console.error("[Order] Fortnox payment error:", err);
@@ -4578,7 +4619,7 @@ async function backfillFortnoxInvoices({ dryRun = false, orderNumbers = null, ma
       `SELECT id, order_number, customer_email, customer_name, customer_phone,
               address, zip, city, country_code, currency, items,
               total_amount, shipping_cost, ongoing_order_id, created_at,
-              fortnox_customer_number, fortnox_order_number
+              fortnox_customer_number, fortnox_order_number, viva_transaction_id
          FROM orders
         WHERE fortnox_invoice_number IS NULL
           AND payment_status = 'paid'
@@ -4724,13 +4765,18 @@ async function backfillFortnoxInvoices({ dryRun = false, orderNumbers = null, ma
           notes.push(`Backfill: bokforing FEL ${err.message}`);
         }
 
-        // 5. Registrera OCH bokför betalningen (pausad som default).
+        // 5. Registrera OCH bokför betalningen (Swish→1930 / kort→1940).
         if (!fortnoxAutoPaymentsEnabled()) {
-          notes.push("Backfill: betalning hoppades over (auto-betalning pausad)");
+          notes.push("Backfill: betalning hoppades over (auto-betalning pausad via env)");
         } else {
           try {
-            const pay = await registerAndBookFortnoxPayment(fxInvoiceNumber, amount, orderDate);
-            notes.push(`Backfill: betalning registrerad och bokford (#${pay.paymentNumber})`);
+            const channel = await resolveFortnoxPaymentChannel(order);
+            if (!channel) {
+              notes.push("Backfill: betalning hoppades over (kunde inte avgora Swish/kort via Viva)");
+            } else {
+              const pay = await registerAndBookFortnoxPayment(fxInvoiceNumber, amount, orderDate, channel);
+              notes.push(`Backfill: betalning registrerad och bokford (#${pay.paymentNumber}, ${channel.label})`);
+            }
           } catch (err) {
             notes.push(`Backfill: betalning FEL ${err.message}`);
           }
@@ -4807,7 +4853,7 @@ async function repairFortnoxInvoices({ dryRun = false, orderNumbers = null, maxA
 
     const { rows } = await db.pool.query(
       `SELECT id, order_number, customer_email, total_amount, shipping_cost, created_at,
-              fortnox_invoice_number
+              fortnox_invoice_number, viva_transaction_id
          FROM orders
         WHERE fortnox_invoice_number IS NOT NULL
           AND payment_status = 'paid'
@@ -4872,12 +4918,18 @@ async function repairFortnoxInvoices({ dryRun = false, orderNumbers = null, maxA
 
         if (balance > 0) {
           if (!fortnoxAutoPaymentsEnabled()) {
-            actions.push("betalning hoppad (auto-betalning pausad)");
-            notes.push(`Reparation: betalning hoppad pa faktura ${invoiceNumber} (auto-betalning pausad)`);
+            actions.push("betalning hoppad (auto-betalning pausad via env)");
+            notes.push(`Reparation: betalning hoppad pa faktura ${invoiceNumber} (auto-betalning pausad via env)`);
           } else {
-            const pay = await registerAndBookFortnoxPayment(invoiceNumber, balance, orderDate);
-            actions.push(`betalning ${balance} bokford (#${pay.paymentNumber})`);
-            notes.push(`Reparation: betalning ${balance} bokford pa faktura ${invoiceNumber} (#${pay.paymentNumber})`);
+            const channel = await resolveFortnoxPaymentChannel(order);
+            if (!channel) {
+              actions.push("betalning hoppad (okand Viva-kanal)");
+              notes.push(`Reparation: betalning hoppad pa faktura ${invoiceNumber} (kunde inte avgora Swish/kort via Viva)`);
+            } else {
+              const pay = await registerAndBookFortnoxPayment(invoiceNumber, balance, orderDate, channel);
+              actions.push(`betalning ${balance} bokford (#${pay.paymentNumber}, ${channel.label})`);
+              notes.push(`Reparation: betalning ${balance} bokford pa faktura ${invoiceNumber} (#${pay.paymentNumber}, ${channel.label})`);
+            }
           }
         }
 
