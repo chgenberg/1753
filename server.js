@@ -8806,7 +8806,12 @@ async function processRecurringCharges() {
     console.log(`[Recurring] ${due.length} subscription(s) due for charge`);
 
     const fetch = (await import("node-fetch")).default;
-    const env = process.env.VIVA_ENVIRONMENT === "production" ? "" : "demo-";
+    // Recurring charges använder Payment API (Basic Auth) på www/demo.vivapayments.com
+    // – INTE api.vivapayments.com (Smart Checkout). Fel host → 404 på varje dragning
+    // (2026-08-14: 15/15 historiska charges misslyckades av den orsaken).
+    const baseHost = process.env.VIVA_ENVIRONMENT === "production"
+      ? "www.vivapayments.com"
+      : "demo.vivapayments.com";
     const merchantId = process.env.VIVA_MERCHANT_ID;
     const apiKey = process.env.VIVA_API_KEY;
 
@@ -8832,7 +8837,7 @@ async function processRecurringCharges() {
         }
         const vivaAmount = chargeAmount * 100;
         const subCurrency = sub.currency || "SEK";
-        const chargeUrl = `https://${env}api.vivapayments.com/api/transactions/${sub.viva_initial_tx_id}`;
+        const chargeUrl = `https://${baseHost}/api/transactions/${sub.viva_initial_tx_id}`;
 
         let newTxId = null;
         if (chargeAmount > 0) {
@@ -8844,14 +8849,17 @@ async function processRecurringCharges() {
             },
             body: JSON.stringify({
               amount: vivaAmount,
-              currencyCode: String(VIVA_CURRENCY_CODE[subCurrency] || 752)
+              // Payment API förväntar numerisk currencyCode (752 = SEK).
+              currencyCode: Number(VIVA_CURRENCY_CODE[subCurrency] || 752),
             })
           });
 
-          const chargeData = await chargeRes.json().catch(() => null);
+          const chargeRaw = await chargeRes.text();
+          let chargeData = null;
+          try { chargeData = JSON.parse(chargeRaw); } catch { /* tom/icke-JSON */ }
 
           if (!chargeRes.ok) {
-            console.error(`[Recurring] Charge failed for sub ${sub.id}:`, chargeData);
+            console.error(`[Recurring] Charge failed for sub ${sub.id}: HTTP ${chargeRes.status}`, chargeRaw.slice(0, 400));
             await db.updateSubscription(sub.id, { status: "payment_failed" });
             await db.createSubscriptionCharge({
               subscriptionId: sub.id,
@@ -8861,6 +8869,16 @@ async function processRecurringCharges() {
             continue;
           }
           newTxId = chargeData?.TransactionId || chargeData?.transactionId;
+          if (!newTxId) {
+            console.error(`[Recurring] Charge OK men saknar TransactionId for sub ${sub.id}:`, chargeRaw.slice(0, 400));
+            await db.updateSubscription(sub.id, { status: "payment_failed" });
+            await db.createSubscriptionCharge({
+              subscriptionId: sub.id,
+              amount: chargeAmount,
+              status: "failed"
+            });
+            continue;
+          }
         }
 
         const orderNumber = await generateOrderNumber();
