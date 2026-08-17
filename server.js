@@ -3690,7 +3690,15 @@ app.post("/api/discount/validate", async (req, res) => {
     return res.status(400).json({ message: apiMsg("discountWrongProducts", reqLocale(req)) });
   }
 
-  const itemsTotal = applicableItems.reduce((sum, i) => sum + (i.price || 0) * (i.qty || 1), 0);
+  // Kassan skickar bara { id, qty } – räkna alltid från PRODUCTS_MAP, aldrig klientens price
+  // (annars blir minOrderAmount alltid 0 → falskt "Ordervärdet är för lågt").
+  const currency = req.body?.currency === "EUR" ? "EUR" : "SEK";
+  const itemsTotal = applicableItems.reduce((sum, i) => {
+    const p = PRODUCTS_MAP[i.id];
+    if (!p) return sum;
+    const unit = currency === "EUR" ? (p.priceEur || p.price) : p.price;
+    return sum + unit * (i.qty || 1);
+  }, 0);
   if (discount.minOrderAmount && itemsTotal < discount.minOrderAmount) {
     return res.status(400).json({ message: apiMsg("discountMinOrder", reqLocale(req)), minOrderAmount: discount.minOrderAmount });
   }
@@ -3779,7 +3787,9 @@ app.post("/api/orders/create", async (req, res) => {
     }
 
     if (discount && discount.minOrderAmount) {
+      // Vid produktlåst kod: mät bara tillämpliga rader (samma logik som /api/discount/validate).
       const cartTotal = items.reduce((sum, i) => {
+        if (discount.productIds && !discount.productIds.includes(i.id)) return sum;
         const p = PRODUCTS_MAP[i.id];
         return sum + (p ? (currency === "EUR" ? (p.priceEur || p.price) : p.price) * (i.qty || 1) : 0);
       }, 0);
