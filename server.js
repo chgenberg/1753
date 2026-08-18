@@ -8889,6 +8889,33 @@ async function processRecurringCharges() {
             });
             continue;
           }
+
+          // Payment API kan svara 200 + TransactionId även vid misslyckad dragning
+          // (StatusId E). Verifiera alltid mot checkout-API innan order/Fortnox.
+          // (2026-08-14: Cristina/10457 bokades i FN trots Viva StatusId=E.)
+          try {
+            const verify = await vivaFetch(`/checkout/v2/transactions/${newTxId}`);
+            const statusId = String(verify?.statusId || verify?.StatusId || "").toUpperCase();
+            if (statusId !== "F") {
+              console.error(`[Recurring] Charge avvisad for sub ${sub.id}: StatusId=${statusId} tx=${newTxId}`);
+              await db.updateSubscription(sub.id, { status: "payment_failed" });
+              await db.createSubscriptionCharge({
+                subscriptionId: sub.id,
+                amount: chargeAmount,
+                status: "failed"
+              });
+              continue;
+            }
+          } catch (verifyErr) {
+            console.error(`[Recurring] Kunde inte verifiera tx ${newTxId} for sub ${sub.id}:`, verifyErr.message || verifyErr);
+            await db.updateSubscription(sub.id, { status: "payment_failed" });
+            await db.createSubscriptionCharge({
+              subscriptionId: sub.id,
+              amount: chargeAmount,
+              status: "failed"
+            });
+            continue;
+          }
         }
 
         const orderNumber = await generateOrderNumber();
