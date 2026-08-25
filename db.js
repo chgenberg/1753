@@ -2190,9 +2190,9 @@ async function createScheduledNewsletterDraft({
   const { rows } = await pool.query(
     `INSERT INTO newsletter_drafts
        (issue_number, type, subject, preheader, html_body, sources, segment_title, status, scheduled_at)
-     SELECT $1, $2, $3, $4, $5, $6, $7, 'scheduled', $8
+     SELECT $1::int, $2::varchar, $3::varchar, $4::varchar, $5::text, $6::jsonb, $7::varchar, 'scheduled', $8::timestamptz
       WHERE NOT EXISTS (
-        SELECT 1 FROM newsletter_drafts WHERE type = $2
+        SELECT 1 FROM newsletter_drafts WHERE type = $2::varchar
       )
      RETURNING *`,
     [
