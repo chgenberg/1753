@@ -430,6 +430,9 @@ async function initSchema() {
       sent_count      INTEGER DEFAULT 0,
       created_at      TIMESTAMPTZ DEFAULT NOW()
     );
+    ALTER TABLE newsletter_drafts ADD COLUMN IF NOT EXISTS scheduled_at TIMESTAMPTZ;
+    CREATE UNIQUE INDEX IF NOT EXISTS newsletter_drafts_sparre_deadline_uidx
+      ON newsletter_drafts (type) WHERE type = 'sparre-deadline';
 
     CREATE TABLE IF NOT EXISTS system_config (
       key             VARCHAR(100) PRIMARY KEY,
@@ -2148,6 +2151,64 @@ async function markNewsletterSent(id, sentCount) {
   return rows[0] || null;
 }
 
+async function claimDueScheduledDrafts() {
+  const { rows } = await pool.query(
+    `UPDATE newsletter_drafts
+        SET status = 'sending'
+      WHERE status = 'scheduled'
+        AND sent_at IS NULL
+        AND scheduled_at IS NOT NULL
+        AND scheduled_at <= NOW()
+      RETURNING *`
+  );
+  return rows;
+}
+
+async function listUnfinishedScheduledDrafts() {
+  const { rows } = await pool.query(
+    `SELECT * FROM newsletter_drafts
+      WHERE status = 'sending'
+        AND sent_at IS NULL
+        AND scheduled_at IS NOT NULL
+        AND scheduled_at <= NOW()
+      ORDER BY id`
+  );
+  return rows;
+}
+
+async function findNewsletterDraftByType(type) {
+  const { rows } = await pool.query(
+    "SELECT * FROM newsletter_drafts WHERE type = $1 ORDER BY id DESC LIMIT 1",
+    [type]
+  );
+  return rows[0] || null;
+}
+
+async function createScheduledNewsletterDraft({
+  issueNumber, type, subject, preheader, htmlBody, sources, segmentTitle, scheduledAt,
+}) {
+  const { rows } = await pool.query(
+    `INSERT INTO newsletter_drafts
+       (issue_number, type, subject, preheader, html_body, sources, segment_title, status, scheduled_at)
+     SELECT $1, $2, $3, $4, $5, $6, $7, 'scheduled', $8
+      WHERE NOT EXISTS (
+        SELECT 1 FROM newsletter_drafts WHERE type = $2
+      )
+     RETURNING *`,
+    [
+      issueNumber || 0,
+      type,
+      subject,
+      preheader || "",
+      htmlBody,
+      JSON.stringify(sources || []),
+      segmentTitle || "",
+      scheduledAt,
+    ]
+  );
+  return rows[0] || null;
+}
+
 // ---- EMAIL CONVERSATIONS ----
 
 async function createEmailConversation({ fromEmail, fromName, subject, bodyText, bodyHtml, aiDraft, category, customerContext }) {
@@ -2697,6 +2758,10 @@ module.exports = {
   listNewsletterDrafts,
   approveNewsletterDraft,
   markNewsletterSent,
+  claimDueScheduledDrafts,
+  listUnfinishedScheduledDrafts,
+  findNewsletterDraftByType,
+  createScheduledNewsletterDraft,
   createEmailConversation,
   listEmailConversations,
   getEmailConversation,

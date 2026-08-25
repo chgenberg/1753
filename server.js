@@ -7892,22 +7892,32 @@ app.post("/api/cron/check-shipments", async (req, res) => {
 // Delad utskicksloop för broadcast + godkända utkast. Hanterar
 // {{firstName}}-personalisering och {{RABATTKOD}}-substitution (riktig,
 // unik engångskod per mottagare – skapas i DB innan sändning).
-async function broadcastNewsletterToAll(subject, html) {
+async function broadcastNewsletterToAll(subject, html, options = {}) {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) throw new Error("RESEND_API_KEY saknas");
 
   const { Resend } = require("resend");
   const resend = new Resend(apiKey);
   const fromEmail = emailFromInfo();
+  const delayMs = Number(options.delayMs) || 0;
+  const skipEmailedSince = options.skipEmailedSince ? new Date(options.skipEmailedSince) : null;
+  const touch = options.touch === true;
 
   const subscribers = await db.findActiveSubscribers();
   const baseUrl = process.env.BASE_URL || "https://api.1753skin.com";
   let sent = 0;
+  let skipped = 0;
 
   const wantsDiscountCode = /\{\{RABATTKOD\}\}/.test(html);
+  const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
   for (const sub of subscribers) {
     try {
+      if (skipEmailedSince && sub.last_emailed_at && new Date(sub.last_emailed_at) >= skipEmailedSince) {
+        skipped++;
+        continue;
+      }
+
       const subL = sub.locale || "sv";
       const fnFallback = { sv: "du", en: "there", es: "amigo/a", de: "du", fr: "vous" };
       const unsubUrl = `${baseUrl}/api/newsletter/unsubscribe/${sub.unsubscribe_token}`;
@@ -7934,14 +7944,107 @@ async function broadcastNewsletterToAll(subject, html) {
         html: emailWrapper(personalHtml, unsubUrl, subL),
         headers: newsletterHeaders(unsubUrl),
       });
+      if (touch) await db.touchSubscriberEmailed(sub.id);
       sent++;
+      if (delayMs) await sleep(delayMs);
     } catch (err) {
       console.error(`[Broadcast] Failed to send to ${sub.email}:`, err.message);
     }
   }
 
-  console.log(`[Broadcast] Sent "${subject}" to ${sent}/${subscribers.length} subscribers`);
-  return { sent, total: subscribers.length };
+  console.log(`[Broadcast] Sent "${subject}" to ${sent}/${subscribers.length} subscribers (skipped ${skipped})`);
+  return { sent, total: subscribers.length, skipped };
+}
+
+const SPARRE_DEADLINE_TYPE = "sparre-deadline";
+const SPARRE_DEADLINE_AT = "2026-08-26T07:00:00.000Z";
+const SPARRE_REMINDER_SUBJECT = "En sista påminnelse om 4Health-erbjudandet";
+const SPARRE_REMINDER_HTML = `
+<p style="margin:0;font-family:Georgia,'Times New Roman',serif;font-size:11px;letter-spacing:0.16em;text-transform:uppercase;color:#108474;text-align:center">
+  4Health · Anna Sparre
+</p>
+<h1 style="margin:12px 0 20px;font-family:Georgia,'Times New Roman',serif;font-size:28px;line-height:1.25;font-weight:600;letter-spacing:-0.02em;color:#1d1d1f;text-align:center">
+  En sista påminnelse
+</h1>
+<img src="https://www.1753skin.com/New_Products/DUO+TA-DA.jpg" alt="DUO-kit + TA-DA Serum" width="488" style="width:100%;max-width:488px;height:auto;border-radius:16px;display:block;margin:0 auto 24px"/>
+<p style="margin:0 0 16px;color:#1d1d1f;font-size:16px;line-height:1.7">Hej {{firstName}},</p>
+<p style="margin:0 0 16px;font-size:16px;line-height:1.7;color:#515151">
+  Efter samtalet med Anna Sparre i 4Health har vi haft ett enkelt erbjudande öppet:
+  köp DUO-kitet, så följer TA-DA Serum med – utan extra kostnad.
+</p>
+<p style="margin:0 0 16px;font-size:16px;line-height:1.7;color:#515151">
+  Serumet är värt 699 kr. Du betalar alltså bara för kitet, 1&nbsp;099 kr, och får hela rutinen.
+</p>
+<p style="margin:0 0 8px;font-size:16px;line-height:1.7;color:#515151">
+  Bara en kort påminnelse: koden
+  <strong style="color:#108474;letter-spacing:0.04em;">sparre</strong>
+  gäller till <strong style="color:#1d1d1f;">27 augusti kl 23:59</strong>.
+  Därefter stänger vi den.
+</p>
+${greenButton("Se DUO-kit + TA-DA", "https://www.1753skin.com/sv/produkter/duo-ta-da?kampanj=sparre&utm_source=email&utm_medium=newsletter&utm_campaign=sparre&utm_content=deadline-reminder")}
+<p style="margin:0 0 16px;font-size:15px;line-height:1.7;color:#515151">
+  Inget krav, ingen brådska utöver datumet. Om det inte är läge nu är det helt okej.
+</p>
+<p style="margin:0;font-size:15px;line-height:1.7;color:#1d1d1f">
+  / Christopher<br/>
+  <span style="color:#766a62;">1753 SKINCARE</span>
+</p>`;
+
+let _scheduledNewsletterRunning = false;
+
+async function seedSparreDeadlineDraft() {
+  const existing = await db.findNewsletterDraftByType(SPARRE_DEADLINE_TYPE);
+  if (existing) {
+    console.log(`[ScheduledNL] SPARRE-utkast finns redan (id=${existing.id}, status=${existing.status})`);
+    return existing;
+  }
+  let draft;
+  try {
+    draft = await db.createScheduledNewsletterDraft({
+      issueNumber: 0,
+      type: SPARRE_DEADLINE_TYPE,
+      subject: SPARRE_REMINDER_SUBJECT,
+      preheader: "Koden sparre gäller till 27 augusti kl 23:59. TA-DA Serum följer med när du köper DUO-kitet.",
+      htmlBody: SPARRE_REMINDER_HTML,
+      sources: [{ name: "4Health SPARRE deadline" }],
+      segmentTitle: "Alla aktiva prenumeranter",
+      scheduledAt: SPARRE_DEADLINE_AT,
+    });
+  } catch (err) {
+    if (err.code !== "23505") throw err;
+    draft = null;
+  }
+  if (!draft) {
+    return db.findNewsletterDraftByType(SPARRE_DEADLINE_TYPE);
+  }
+  console.log(`[ScheduledNL] Schemalagt SPARRE-påminnelse id=${draft.id} till 2026-08-26 09:00 Europe/Stockholm`);
+  return draft;
+}
+
+async function processScheduledNewsletters() {
+  if (_scheduledNewsletterRunning) return;
+  _scheduledNewsletterRunning = true;
+  try {
+    const claimed = await db.claimDueScheduledDrafts();
+    const unfinished = await db.listUnfinishedScheduledDrafts();
+    const drafts = new Map();
+    for (const draft of claimed) drafts.set(draft.id, draft);
+    for (const draft of unfinished) drafts.set(draft.id, draft);
+    for (const draft of drafts.values()) {
+      console.log(`[ScheduledNL] Skickar "${draft.subject}" (id=${draft.id})`);
+      const result = await broadcastNewsletterToAll(draft.subject, draft.html_body, {
+        delayMs: 150,
+        skipEmailedSince: draft.scheduled_at,
+        touch: true,
+      });
+      await db.markNewsletterSent(draft.id, result.sent);
+      console.log(`[ScheduledNL] Klart id=${draft.id} sent=${result.sent} skipped=${result.skipped || 0}`);
+    }
+  } catch (err) {
+    console.error("[ScheduledNL] tick error:", err.message);
+  } finally {
+    _scheduledNewsletterRunning = false;
+  }
 }
 
 app.post("/api/newsletter/broadcast", async (req, res) => {
@@ -7966,8 +8069,9 @@ app.post("/api/newsletter/broadcast", async (req, res) => {
 // ---- NEWSLETTER DRAFTS (admin) ----
 //
 // generate-newsletter.js sparar AI-genererade nyhetsbrev som utkast här.
-// Utkast skickas INTE automatiskt – de godkänns och skickas via
-// POST /api/newsletter/drafts/:id/send.
+// Vanliga utkast skickas INTE automatiskt – de godkänns och skickas via
+// POST /api/newsletter/drafts/:id/send. Status scheduled + scheduled_at
+// skickas av processScheduledNewsletters när tiden är inne.
 
 function checkAdminKey(req) {
   const adminKey = req.body?.adminKey || req.headers["x-admin-key"] || req.query.adminKey;
@@ -9553,6 +9657,11 @@ app.post("/api/admin/social/daily-generate", adminAuthMiddleware, async (req, re
   } catch (err) {
     console.error("[DB] Schema init failed – running without database:", err.message);
   }
+  try {
+    await seedSparreDeadlineDraft();
+  } catch (err) {
+    console.error("[ScheduledNL] Kunde inte seeda SPARRE-utkast:", err.message);
+  }
   app.listen(PORT, () => {
     console.log(`1753 SKINCARE backend kör på port ${PORT}`);
     if (!process.env.OPENAI_API_KEY) console.warn("[WARN] OPENAI_API_KEY saknas – hudanalys och chatt fungerar inte!");
@@ -9571,6 +9680,10 @@ app.post("/api/admin/social/daily-generate", adminAuthMiddleware, async (req, re
     setInterval(processAutomationQueue, 60_000);
     setTimeout(processAutomationQueue, 30_000);
     console.log("[OK] Email automation engine started (every 60s)");
+
+    setInterval(processScheduledNewsletters, 60_000);
+    setTimeout(processScheduledNewsletters, 20_000);
+    console.log("[OK] Scheduled newsletter ticker started (every 60s)");
 
     setInterval(processSocialMediaQueue, 5 * 60_000);
     setTimeout(processSocialMediaQueue, 120_000);
