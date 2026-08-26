@@ -193,6 +193,7 @@ const API_MSG = {
   discountEnter:      { sv: "Ange en rabattkod", en: "Enter a discount code", es: "Introduce un código de descuento", de: "Gib einen Rabattcode ein", fr: "Saisissez un code de réduction" },
   discountInvalid:    { sv: "Ogiltig rabattkod", en: "Invalid discount code", es: "Código de descuento inválido", de: "Ungültiger Rabattcode", fr: "Code de réduction invalide" },
   discountWrongProducts: { sv: "Rabattkoden gäller inte för dessa produkter", en: "Discount code does not apply to these products", es: "El código no aplica a estos productos", de: "Der Rabattcode gilt nicht für diese Produkte", fr: "Le code ne s'applique pas à ces produits" },
+  discountBundleRequired: { sv: "Koden gäller när DUO-kitet och Au Naturel Makeup Remover ligger i varukorgen", en: "This code applies when the DUO kit and Au Naturel Makeup Remover are in the cart", es: "Este código aplica cuando el kit DUO y Au Naturel Makeup Remover están en el carrito", de: "Dieser Code gilt, wenn das DUO-Kit und Au Naturel Makeup Remover im Warenkorb liegen", fr: "Ce code s'applique lorsque le kit DUO et Au Naturel Makeup Remover sont dans le panier" },
   discountMinOrder:   { sv: "Ordervärdet är för lågt för denna rabattkod", en: "Order value is too low for this discount code", es: "El valor del pedido es demasiado bajo para este código", de: "Der Bestellwert ist zu niedrig für diesen Rabattcode", fr: "Le montant de la commande est trop bas pour ce code" },
   analysisNoKey:      { sv: "AI-tjänsten är inte konfigurerad.", en: "AI service is not configured.", es: "El servicio de IA no está configurado.", de: "Der KI-Dienst ist nicht konfiguriert.", fr: "Le service IA n'est pas configuré." },
   analysisFailed:     { sv: "Analysen kunde inte genomföras just nu.", en: "The analysis could not be completed right now.", es: "El análisis no pudo completarse ahora.", de: "Die Analyse konnte gerade nicht durchgeführt werden.", fr: "L'analyse n'a pas pu être effectuée pour le moment." },
@@ -428,6 +429,12 @@ const DISCOUNT_CODES = {
     productIds: null,
     description: "5% rabatt -- valkommen tillbaka",
   },
+  gabriellaschmidt: {
+    percent: 100,
+    productIds: ["au-naturel-makeup-remover"],
+    requiredProductIds: ["duo-kit", "au-naturel-makeup-remover"],
+    description: "Au Naturel Makeup Remover utan kostnad vid köp av DUO-kit",
+  },
   // hudanalys15 utfasad 2026-06-11: hudanalysrapporten skapar nu istället en
   // personlig engångskod (TACK15-XXXXXX) per mottagare via
   // createPersonalDiscountCode nedan.
@@ -444,6 +451,12 @@ function findStaticDiscount(input) {
     if (k.replace(/[^a-z0-9]/g, "") === norm) return { key: k, discount: DISCOUNT_CODES[k] };
   }
   return null;
+}
+
+function cartHasRequiredProducts(items, requiredProductIds) {
+  if (!requiredProductIds || requiredProductIds.length === 0) return true;
+  const ids = new Set((items || []).map((i) => i && i.id).filter(Boolean));
+  return requiredProductIds.every((id) => ids.has(id));
 }
 
 // ---- PERSONLIGA RABATTKODER (auto-genererade vid mejlutskick) ----
@@ -3685,6 +3698,10 @@ app.post("/api/discount/validate", async (req, res) => {
 
   if (!discount) return res.status(404).json({ message: apiMsg("discountInvalid", reqLocale(req)) });
 
+  if (!cartHasRequiredProducts(items, discount.requiredProductIds)) {
+    return res.status(400).json({ message: apiMsg("discountBundleRequired", reqLocale(req)) });
+  }
+
   const applicableItems = (items || []).filter(i => !discount.productIds || discount.productIds.includes(i.id));
   if (applicableItems.length === 0) {
     return res.status(400).json({ message: apiMsg("discountWrongProducts", reqLocale(req)) });
@@ -3784,6 +3801,10 @@ app.post("/api/orders/create", async (req, res) => {
           await db.incrementDiscountUsage(dbCode.code);
         }
       }
+    }
+
+    if (discount && !cartHasRequiredProducts(items, discount.requiredProductIds)) {
+      return res.status(400).json({ message: apiMsg("discountBundleRequired", locale) });
     }
 
     if (discount && discount.minOrderAmount) {
