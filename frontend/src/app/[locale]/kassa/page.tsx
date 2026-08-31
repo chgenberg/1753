@@ -25,6 +25,7 @@ interface ActiveDiscount {
   fixedAmount?: number;
   description: string;
   applicableProductIds: string[] | null;
+  freeProductIds?: string[] | null;
 }
 
 export default function CheckoutPage() {
@@ -76,6 +77,9 @@ export default function CheckoutPage() {
           const realId = productIdFromCartId(p.cartId);
           const base = productPrice(p, locale);
           const unitPrice = p.subscription ? Math.round(base * 0.85) : base;
+          if (activeDiscount.freeProductIds && activeDiscount.freeProductIds.includes(realId)) {
+            return s + unitPrice * p.qty;
+          }
           if (!activeDiscount.applicableProductIds || activeDiscount.applicableProductIds.includes(realId)) {
             return s + Math.round(unitPrice * p.qty * (activeDiscount.percent / 100));
           }

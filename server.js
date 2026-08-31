@@ -435,6 +435,12 @@ const DISCOUNT_CODES = {
     requiredProductIds: ["duo-kit", "au-naturel-makeup-remover"],
     description: "Au Naturel Makeup Remover utan kostnad vid köp av DUO-kit",
   },
+  cecilia: {
+    percent: 15,
+    productIds: null,
+    freeProductIds: ["ta-da-serum"],
+    description: "15% på ordern, TA-DA Serum utan kostnad",
+  },
   // hudanalys15 utfasad 2026-06-11: hudanalysrapporten skapar nu istället en
   // personlig engångskod (TACK15-XXXXXX) per mottagare via
   // createPersonalDiscountCode nedan.
@@ -3727,6 +3733,7 @@ app.post("/api/discount/validate", async (req, res) => {
     minOrderAmount: discount.minOrderAmount || 0,
     description: discount.description,
     applicableProductIds: discount.productIds || null,
+    freeProductIds: discount.freeProductIds || null,
   });
 });
 
@@ -3828,7 +3835,10 @@ app.post("/api/orders/create", async (req, res) => {
       if (isSubscription) {
         price = Math.round(price * 0.85);
       }
-      if (discount && (!discount.productIds || discount.productIds.includes(item.id))) {
+      const isFreeGift = discount && Array.isArray(discount.freeProductIds) && discount.freeProductIds.includes(item.id);
+      if (isFreeGift) {
+        price = 0;
+      } else if (discount && (!discount.productIds || discount.productIds.includes(item.id))) {
         if (discount.percent) {
           price = Math.round(price * (1 - discount.percent / 100));
         }
