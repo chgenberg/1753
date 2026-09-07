@@ -408,6 +408,42 @@ const FREE_SHIPPING_THRESHOLD = { SEK: 600, EUR: 60 };
 const SHIPPING_COST = { SEK: 55, EUR: 6 };
 const VIVA_CURRENCY_CODE = { SEK: 752, EUR: 978 };
 
+const SHIP_COUNTRY_CODES = new Set([
+  "AT", "BE", "BG", "CH", "CY", "CZ", "DE", "DK", "EE", "ES", "FI", "FR", "GB",
+  "GR", "HR", "HU", "IE", "IS", "IT", "LI", "LT", "LU", "LV", "MT", "NL", "NO",
+  "PL", "PT", "RO", "SE", "SI", "SK",
+]);
+
+function resolveShipCountry(code) {
+  const cc = String(code || "SE").toUpperCase();
+  return SHIP_COUNTRY_CODES.has(cc) ? cc : null;
+}
+
+function ongoingTransporterForCountry(countryCode) {
+  if (!countryCode || countryCode === "SE") {
+    return { transporterCode: "PBREV", transporterServiceCode: "PUA" };
+  }
+  return {
+    transporterCode: process.env.ONGOING_EU_TRANSPORTER_CODE || "PN",
+    transporterServiceCode: process.env.ONGOING_EU_SERVICE_CODE || "19",
+  };
+}
+
+const FORTNOX_COUNTRY_SV = {
+  AT: "Österrike", BE: "Belgien", BG: "Bulgarien", CH: "Schweiz", CY: "Cypern",
+  CZ: "Tjeckien", DE: "Tyskland", DK: "Danmark", EE: "Estland", ES: "Spanien",
+  FI: "Finland", FR: "Frankrike", GB: "Storbritannien", GR: "Grekland",
+  HR: "Kroatien", HU: "Ungern", IE: "Irland", IS: "Island", IT: "Italien",
+  LI: "Liechtenstein", LT: "Litauen", LU: "Luxemburg", LV: "Lettland",
+  MT: "Malta", NL: "Nederländerna", NO: "Norge", PL: "Polen", PT: "Portugal",
+  RO: "Rumänien", SE: "Sverige", SI: "Slovenien", SK: "Slovakien",
+};
+
+function fortnoxDeliveryCountry(countryCode) {
+  const cc = String(countryCode || "SE").toUpperCase();
+  return FORTNOX_COUNTRY_SV[cc] || "Sverige";
+}
+
 const DISCOUNT_CODES = {
   test: {
     percent: 97,
@@ -3772,6 +3808,16 @@ app.post("/api/orders/create", async (req, res) => {
     if (!deliveryAddress?.address || !deliveryAddress?.zip || !deliveryAddress?.city) {
       return res.status(400).json({ message: orderMsg("Leveransadress krävs", "Delivery address is required", "Se requiere dirección de entrega", "Lieferadresse erforderlich", "Adresse de livraison requise") });
     }
+    const shipCountry = resolveShipCountry(deliveryAddress.country || deliveryAddress.countryCode);
+    if (!shipCountry) {
+      return res.status(400).json({ message: orderMsg(
+        "Vi skickar till länder i Europa. Välj land i kassan.",
+        "We ship within Europe. Please choose a country at checkout.",
+        "Enviamos dentro de Europa. Elige un país en el pago.",
+        "Wir liefern in Europa. Bitte wähle ein Land in der Kasse.",
+        "Nous livrons en Europe. Choisissez un pays à la caisse."
+      ) });
+    }
     if (!items || items.length === 0) {
       return res.status(400).json({ message: orderMsg("Varukorgen är tom", "Your cart is empty", "El carrito está vacío", "Dein Warenkorb ist leer", "Votre panier est vide") });
     }
@@ -3949,6 +3995,7 @@ app.post("/api/orders/create", async (req, res) => {
       address: deliveryAddress.address,
       zip: deliveryAddress.zip,
       city: deliveryAddress.city,
+      countryCode: shipCountry,
       vivaOrderCode: vivaData.orderCode,
       merchantTrns: orderNumber,
       items: orderItems,
@@ -4207,7 +4254,7 @@ async function handleOrderCompletion(orderId) {
           DeliveryAddress1: order.address || "",
           DeliveryZipCode: order.zip || "",
           DeliveryCity: order.city || "",
-          DeliveryCountry: (order.currency || "SEK") === "EUR" ? "" : "Sverige",
+          DeliveryCountry: fortnoxDeliveryCountry(order.country_code),
           YourReference: order.customer_name,
           YourOrderNumber: sharedOrderNumber,
           ExternalInvoiceReference1: sharedOrderNumber,
@@ -4325,9 +4372,9 @@ async function handleOrderCompletion(orderId) {
       orderNumber: sharedOrderNumber,
       deliveryDate,
       referenceNumber: "1753 Skincare",
-      orderRemark: `Webborder ${order.order_number} – ${order.customer_email}`,
+      orderRemark: `Webborder ${order.order_number} – ${order.customer_email}${order.country_code && order.country_code !== "SE" ? ` – UTRIKES ${order.country_code}` : ""}`,
       orderType: { code: "B2C", name: "B2C" },
-      transporter: { transporterCode: "PBREV", transporterServiceCode: "PUA" },
+      transporter: ongoingTransporterForCountry(order.country_code),
       consignee: {
         customerNumber: order.customer_email,
         name: order.customer_name,
@@ -4757,7 +4804,7 @@ async function backfillFortnoxInvoices({ dryRun = false, orderNumbers = null, ma
               DeliveryAddress1: order.address || "",
               DeliveryZipCode: order.zip || "",
               DeliveryCity: order.city || "",
-              DeliveryCountry: (order.currency || "SEK") === "EUR" ? "" : "Sverige",
+              DeliveryCountry: fortnoxDeliveryCountry(order.country_code),
               YourReference: order.customer_name,
               YourOrderNumber: order.order_number,
               ExternalInvoiceReference1: order.order_number,
@@ -9076,6 +9123,7 @@ async function processRecurringCharges() {
           address: lastOrder?.address || "",
           zip: lastOrder?.zip || "",
           city: lastOrder?.city || "",
+          countryCode: lastOrder?.country_code || "SE",
           vivaOrderCode: null,
           merchantTrns: `RSUB-${orderNumber}`,
           items: [{

@@ -10,6 +10,12 @@ import { Pill } from "@/components/fx/frames";
 import { useCart, type CartItem } from "@/providers/cart-provider";
 import { PRODUCTS, productDisplayName, productPrice } from "@/lib/products";
 import { formatPrice, getCurrency, getShippingCost } from "@/lib/currency";
+import {
+  SHIP_COUNTRIES,
+  defaultShipCountry,
+  isValidCheckoutPhone,
+  normalizeCheckoutPhone,
+} from "@/lib/shipping-countries";
 import { apiFetch } from "@/lib/api";
 import { useLocale } from "@/providers/locale-provider";
 import type { Locale } from "@/lib/i18n/types";
@@ -53,6 +59,7 @@ export default function CheckoutPage() {
     address: "",
     zip: "",
     city: "",
+    country: defaultShipCountry(locale),
   });
 
   const cartProducts = items
@@ -160,8 +167,13 @@ export default function CheckoutPage() {
   };
 
   const handlePhoneChange = (value: string) => {
-    const digits = value.replace(/\D/g, "").slice(0, 10);
-    setForm((prev) => ({ ...prev, phone: formatPhone(digits) }));
+    if (form.country === "SE") {
+      const digits = value.replace(/\D/g, "").slice(0, 10);
+      setForm((prev) => ({ ...prev, phone: formatPhone(digits) }));
+      return;
+    }
+    const cleaned = value.replace(/[^\d+\s-]/g, "").slice(0, 20);
+    setForm((prev) => ({ ...prev, phone: cleaned }));
   };
 
   const checkEmailMembership = (email: string) => {
@@ -188,8 +200,7 @@ export default function CheckoutPage() {
     setError("");
     setLoading(true);
 
-    const phoneDigits = form.phone.replace(/\D/g, "");
-    if (phoneDigits.length < 10) {
+    if (!isValidCheckoutPhone(form.phone, form.country)) {
       setError(t("checkout.phoneError"));
       setLoading(false);
       return;
@@ -204,12 +215,13 @@ export default function CheckoutPage() {
             customer: {
               name: `${form.firstname} ${form.lastname}`.trim(),
               email: form.email,
-              phone: phoneDigits.replace(/^0/, ""),
+              phone: normalizeCheckoutPhone(form.phone, form.country),
             },
             deliveryAddress: {
               address: form.address,
               zip: form.zip.replace(/\s/g, ""),
               city: form.city,
+              country: form.country,
             },
             items: items.map((i) => ({
               id: productIdFromCartId(i.id),
@@ -418,6 +430,27 @@ export default function CheckoutPage() {
                   placeholder={t("checkout.city")}
                 />
               </div>
+            </div>
+
+            <div>
+              <label className="mb-1.5 block text-sm font-medium">
+                {t("checkout.country")}
+              </label>
+              <select
+                required
+                autoComplete="country"
+                value={form.country}
+                onChange={(e) =>
+                  setForm((p) => ({ ...p, country: e.target.value }))
+                }
+                className="w-full rounded-xl border border-input bg-background px-4 py-3 text-sm shadow-sm focus-visible:ring-1 focus-visible:ring-ring focus:outline-none"
+              >
+                {SHIP_COUNTRIES.map((c) => (
+                  <option key={c.code} value={c.code}>
+                    {c.names[locale] || c.names.en}
+                  </option>
+                ))}
+              </select>
             </div>
 
             {hasSubscription && (

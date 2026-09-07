@@ -159,6 +159,7 @@ async function initSchema() {
 
     ALTER TABLE orders ADD COLUMN IF NOT EXISTS currency VARCHAR(3) DEFAULT 'SEK';
     ALTER TABLE orders ADD COLUMN IF NOT EXISTS locale VARCHAR(5) DEFAULT 'sv';
+    ALTER TABLE orders ADD COLUMN IF NOT EXISTS country_code VARCHAR(2) DEFAULT 'SE';
     ALTER TABLE orders ADD COLUMN IF NOT EXISTS tracking_number VARCHAR(255);
     ALTER TABLE orders ADD COLUMN IF NOT EXISTS tracking_url TEXT;
     ALTER TABLE orders ADD COLUMN IF NOT EXISTS shipped_at TIMESTAMPTZ;
@@ -695,18 +696,18 @@ async function initSchema() {
 
 async function createOrder({
   orderNumber, customerName, customerEmail, customerPhone,
-  address, zip, city, vivaOrderCode, merchantTrns,
+  address, zip, city, countryCode, vivaOrderCode, merchantTrns,
   items, totalAmount, shippingCost, currency, userId, locale
 }) {
   const { rows } = await pool.query(
     `INSERT INTO orders
        (order_number, customer_name, customer_email, customer_phone,
-        address, zip, city, viva_order_code, merchant_trns,
+        address, zip, city, country_code, viva_order_code, merchant_trns,
         items, total_amount, shipping_cost, currency, user_id, locale)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)
      RETURNING *`,
     [orderNumber, customerName, customerEmail, customerPhone || null,
-     address, zip, city, vivaOrderCode, merchantTrns,
+     address, zip, city, countryCode || "SE", vivaOrderCode, merchantTrns,
      JSON.stringify(items), totalAmount, shippingCost || 0, currency || "SEK",
      userId || null, locale || "sv"]
   );
