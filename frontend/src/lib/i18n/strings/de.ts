@@ -183,6 +183,7 @@ export const de: Messages = {
     zip: "PLZ",
     city: "Ort/Stadt",
     country: "Land",
+    addressSuggestions: "Adressvorschläge",
     orderSummary: "Deine Bestellung",
     subtotal: "Zwischensumme",
     discount: "Rabatt",

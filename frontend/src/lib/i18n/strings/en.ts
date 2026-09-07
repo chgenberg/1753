@@ -183,6 +183,7 @@ export const en: Messages = {
     zip: "Postal code",
     city: "City",
     country: "Country",
+    addressSuggestions: "Address suggestions",
     orderSummary: "Your order",
     subtotal: "Subtotal",
     discount: "Discount",

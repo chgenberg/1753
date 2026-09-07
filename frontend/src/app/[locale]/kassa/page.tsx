@@ -17,6 +17,7 @@ import {
   normalizeCheckoutPhone,
 } from "@/lib/shipping-countries";
 import { apiFetch } from "@/lib/api";
+import { AddressAutocomplete } from "@/components/address-autocomplete";
 import { useLocale } from "@/providers/locale-provider";
 import type { Locale } from "@/lib/i18n/types";
 import { useAuth } from "@/providers/auth-provider";
@@ -381,19 +382,24 @@ export default function CheckoutPage() {
             </div>
 
             <div>
-              <label className="mb-1.5 block text-sm font-medium">
+              <label htmlFor="checkout-address" className="mb-1.5 block text-sm font-medium">
                 {t("checkout.address")}
               </label>
-              <input
-                type="text"
-                required
-                autoComplete="street-address"
+              <AddressAutocomplete
                 value={form.address}
-                onChange={(e) =>
-                  setForm((p) => ({ ...p, address: e.target.value }))
-                }
-                className="w-full rounded-xl border border-input bg-background px-4 py-3 text-sm shadow-sm placeholder:text-muted-foreground focus-visible:ring-1 focus-visible:ring-ring focus:outline-none"
+                country={form.country}
+                locale={locale}
                 placeholder={t("checkout.address")}
+                listLabel={t("checkout.addressSuggestions")}
+                onChange={(address) => setForm((p) => ({ ...p, address }))}
+                onSelect={(s) =>
+                  setForm((p) => ({
+                    ...p,
+                    address: s.address,
+                    zip: s.zip || p.zip,
+                    city: s.city || p.city,
+                  }))
+                }
               />
             </div>
 

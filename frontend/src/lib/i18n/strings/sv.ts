@@ -182,6 +182,7 @@ const bundle = {
     zip: "Postnummer",
     city: "Ort",
     country: "Land",
+    addressSuggestions: "Adressförslag",
     orderSummary: "Din beställning",
     subtotal: "Delsumma",
     discount: "Rabatt",

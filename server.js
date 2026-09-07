@@ -414,6 +414,68 @@ const SHIP_COUNTRY_CODES = new Set([
   "PL", "PT", "RO", "SE", "SI", "SK",
 ]);
 
+// [minLon, minLat, maxLon, maxLat] – begränsar OSM/Photon till valt land.
+const SHIP_COUNTRY_BBOX = {
+  AT: [9.479, 46.372, 17.161, 49.021],
+  BE: [2.524, 49.493, 6.408, 51.505],
+  BG: [22.357, 41.235, 28.612, 44.216],
+  CH: [5.956, 45.818, 10.492, 47.808],
+  CY: [32.256, 34.633, 34.605, 35.707],
+  CZ: [12.091, 48.552, 18.859, 51.055],
+  DE: [5.866, 47.270, 15.042, 55.058],
+  DK: [8.072, 54.559, 15.158, 57.752],
+  EE: [21.764, 57.509, 28.210, 59.685],
+  ES: [-9.392, 35.946, 4.328, 43.791],
+  FI: [20.556, 59.808, 31.587, 70.092],
+  FR: [-5.142, 41.333, 9.560, 51.089],
+  GB: [-8.650, 49.860, 1.770, 60.860],
+  GR: [19.373, 34.801, 29.645, 41.749],
+  HR: [13.493, 42.392, 19.427, 46.555],
+  HU: [16.114, 45.737, 22.896, 48.585],
+  IE: [-10.480, 51.390, -5.990, 55.390],
+  IS: [-24.546, 63.286, -13.495, 66.536],
+  IT: [6.627, 36.619, 18.521, 47.092],
+  LI: [9.471, 47.048, 9.636, 47.271],
+  LT: [20.941, 53.897, 26.836, 56.450],
+  LU: [5.736, 49.448, 6.531, 50.182],
+  LV: [20.970, 55.675, 28.241, 58.085],
+  MT: [14.183, 35.806, 14.577, 36.082],
+  NL: [3.331, 50.750, 7.228, 53.555],
+  NO: [4.788, 57.979, 31.168, 71.185],
+  PL: [14.123, 49.002, 24.145, 54.836],
+  PT: [-9.526, 36.961, -6.189, 42.154],
+  RO: [20.262, 43.619, 29.713, 48.265],
+  SE: [10.963, 55.337, 24.167, 69.060],
+  SI: [13.375, 45.422, 16.610, 46.877],
+  SK: [16.833, 47.731, 22.558, 49.613],
+};
+
+const PHOTON_LANG = { sv: "en", en: "en", es: "en", de: "de", fr: "fr" };
+const addressSuggestCache = new Map();
+
+function photonToSuggestion(props, country) {
+  const cc = String(props.countrycode || "").toUpperCase();
+  if (cc && cc !== country) return null;
+  const street = props.street || "";
+  const name = props.name || "";
+  const hn = props.housenumber || "";
+  const zip = String(props.postcode || "").trim();
+  const city = props.city || props.town || props.village || props.municipality || "";
+  const line = street
+    ? (hn ? `${street} ${hn}` : street)
+    : (hn ? `${name} ${hn}`.trim() : name);
+  if (!line) return null;
+  if (line === props.country || line === props.state) return null;
+  if (!street && !zip && !city) return null;
+  const extra = [zip, city].filter(Boolean).join(" ");
+  return {
+    label: extra ? `${line}, ${extra}` : line,
+    address: line,
+    zip,
+    city,
+  };
+}
+
 function resolveShipCountry(code) {
   const cc = String(code || "SE").toUpperCase();
   return SHIP_COUNTRY_CODES.has(cc) ? cc : null;
@@ -3783,6 +3845,75 @@ app.post("/api/account/check-email", async (req, res) => {
     res.json({ exists: !!user, name: user ? (user.name || "").split(" ")[0] : null });
   } catch (err) {
     res.json({ exists: false });
+  }
+});
+
+app.get("/api/address/suggest", async (req, res) => {
+  try {
+    const clientIp = req.ip || req.connection.remoteAddress;
+    if (!checkRateLimit(clientIp, "address-suggest", 150)) {
+      return res.json({ suggestions: [] });
+    }
+
+    const q = String(req.query.q || "").trim();
+    const country = resolveShipCountry(req.query.country);
+    const locale = ["sv", "en", "es", "de", "fr"].includes(req.query.locale) ? req.query.locale : "en";
+    if (q.length < 3 || q.length > 80 || !country) {
+      return res.json({ suggestions: [] });
+    }
+
+    const cacheKey = `${country}|${locale}|${q.toLowerCase()}`;
+    const cached = addressSuggestCache.get(cacheKey);
+    if (cached && Date.now() - cached.at < 5 * 60 * 1000) {
+      return res.json({ suggestions: cached.suggestions });
+    }
+
+    const bbox = SHIP_COUNTRY_BBOX[country];
+    const params = new URLSearchParams({
+      q,
+      limit: "12",
+      lang: PHOTON_LANG[locale] || "en",
+    });
+    if (bbox) params.set("bbox", bbox.join(","));
+
+    const fetch = (await import("node-fetch")).default;
+    const ctrl = new AbortController();
+    const kill = setTimeout(() => ctrl.abort(), 4000);
+    let photonRes;
+    try {
+      photonRes = await fetch(`https://photon.komoot.io/api/?${params}`, {
+        headers: { "User-Agent": "1753SKINCARE/1.0 (address-suggest; https://www.1753skin.com)" },
+        signal: ctrl.signal,
+      });
+    } finally {
+      clearTimeout(kill);
+    }
+    if (!photonRes.ok) {
+      return res.json({ suggestions: [] });
+    }
+
+    const data = await photonRes.json();
+    const seen = new Set();
+    const suggestions = [];
+    for (const feature of data.features || []) {
+      const item = photonToSuggestion(feature.properties || {}, country);
+      if (!item) continue;
+      const key = `${item.address}|${item.zip}|${item.city}`;
+      if (seen.has(key)) continue;
+      seen.add(key);
+      suggestions.push(item);
+      if (suggestions.length >= 7) break;
+    }
+
+    if (addressSuggestCache.size > 300) {
+      const oldest = addressSuggestCache.keys().next().value;
+      addressSuggestCache.delete(oldest);
+    }
+    addressSuggestCache.set(cacheKey, { at: Date.now(), suggestions });
+    res.json({ suggestions });
+  } catch (err) {
+    console.warn("[AddressSuggest] Photon misslyckades:", err.message);
+    res.json({ suggestions: [] });
   }
 });
 
