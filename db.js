@@ -528,6 +528,65 @@ async function initSchema() {
     INSERT INTO outreach_settings (id) VALUES ('default') ON CONFLICT (id) DO NOTHING;
   `);
 
+  try {
+    await pool.query(`
+      CREATE TABLE IF NOT EXISTS conductor_desks (
+        id              SERIAL PRIMARY KEY,
+        key             TEXT UNIQUE NOT NULL,
+        name            TEXT NOT NULL,
+        blurb           TEXT DEFAULT '',
+        briefing        TEXT DEFAULT '',
+        refs_json       JSONB DEFAULT '[]',
+        portrait        INTEGER,
+        accent          TEXT DEFAULT 'ink',
+        seeded          BOOLEAN DEFAULT false,
+        created_at      TIMESTAMPTZ DEFAULT NOW(),
+        updated_at      TIMESTAMPTZ DEFAULT NOW()
+      );
+
+      CREATE TABLE IF NOT EXISTS conductor_messages (
+        id              SERIAL PRIMARY KEY,
+        desk_id         INTEGER REFERENCES conductor_desks(id) ON DELETE CASCADE,
+        thread          TEXT DEFAULT 'desk',
+        role            TEXT NOT NULL,
+        name            TEXT DEFAULT '',
+        text            TEXT NOT NULL,
+        created_at      TIMESTAMPTZ DEFAULT NOW()
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_conductor_messages_desk
+        ON conductor_messages (desk_id, thread, created_at);
+
+      CREATE TABLE IF NOT EXISTS conductor_rules (
+        id              SERIAL PRIMARY KEY,
+        desk_id         INTEGER REFERENCES conductor_desks(id) ON DELETE SET NULL,
+        title           TEXT NOT NULL,
+        trigger         TEXT NOT NULL,
+        action          TEXT NOT NULL,
+        gate            TEXT DEFAULT 'email',
+        approved        BOOLEAN DEFAULT FALSE,
+        enabled         BOOLEAN DEFAULT FALSE,
+        last_ran_at     TIMESTAMPTZ,
+        created_at      TIMESTAMPTZ DEFAULT NOW()
+      );
+
+      CREATE TABLE IF NOT EXISTS conductor_refs (
+        id              SERIAL PRIMARY KEY,
+        desk_id         INTEGER REFERENCES conductor_desks(id) ON DELETE CASCADE,
+        kind            TEXT DEFAULT 'ref',
+        mime            TEXT NOT NULL,
+        image_data      TEXT NOT NULL,
+        feel            TEXT DEFAULT '',
+        created_at      TIMESTAMPTZ DEFAULT NOW()
+      );
+
+      CREATE INDEX IF NOT EXISTS idx_conductor_refs_desk
+        ON conductor_refs (desk_id, created_at);
+    `);
+  } catch (err) {
+    console.warn("[DB] conductor schema:", err.message);
+  }
+
   // Migrations
   try {
     await pool.query(`ALTER TABLE social_posts ADD COLUMN IF NOT EXISTS li_post_id VARCHAR(100)`);
@@ -2650,6 +2709,175 @@ async function getOutreachStats() {
   };
 }
 
+async function listConductorDesks() {
+  const { rows } = await pool.query(
+    `SELECT * FROM conductor_desks ORDER BY seeded DESC, id ASC`
+  );
+  return rows;
+}
+
+async function getConductorDesk(id) {
+  const { rows } = await pool.query(
+    `SELECT * FROM conductor_desks WHERE id = $1`,
+    [id]
+  );
+  return rows[0] || null;
+}
+
+async function findConductorDeskByKey(key) {
+  const { rows } = await pool.query(
+    `SELECT * FROM conductor_desks WHERE key = $1`,
+    [key]
+  );
+  return rows[0] || null;
+}
+
+async function createConductorDesk({ key, name, blurb = "", briefing = "", portrait = null, accent = "ink", seeded = false }) {
+  const { rows } = await pool.query(
+    `INSERT INTO conductor_desks (key, name, blurb, briefing, portrait, accent, seeded)
+     VALUES ($1, $2, $3, $4, $5, $6, $7)
+     RETURNING *`,
+    [key, name, blurb, briefing, portrait, accent, seeded]
+  );
+  return rows[0];
+}
+
+async function updateConductorDesk(id, fields) {
+  const allowed = ["name", "blurb", "briefing", "refs_json", "portrait", "accent"];
+  const sets = [];
+  const vals = [];
+  let i = 1;
+  for (const key of allowed) {
+    if (fields[key] === undefined) continue;
+    sets.push(`${key} = $${i++}`);
+    vals.push(key === "refs_json" && fields[key] && typeof fields[key] !== "string"
+      ? JSON.stringify(fields[key])
+      : fields[key]);
+  }
+  if (!sets.length) return getConductorDesk(id);
+  sets.push("updated_at = NOW()");
+  vals.push(id);
+  const { rows } = await pool.query(
+    `UPDATE conductor_desks SET ${sets.join(", ")} WHERE id = $${i} RETURNING *`,
+    vals
+  );
+  return rows[0] || null;
+}
+
+async function deleteConductorDesk(id) {
+  const desk = await getConductorDesk(id);
+  if (!desk || desk.seeded) return false;
+  await pool.query(`DELETE FROM conductor_desks WHERE id = $1`, [id]);
+  return true;
+}
+
+async function listConductorMessages(deskId) {
+  const { rows } = await pool.query(
+    `SELECT * FROM conductor_messages
+      WHERE thread = 'desk' AND desk_id = $1
+      ORDER BY created_at ASC`,
+    [deskId]
+  );
+  return rows;
+}
+
+async function listGroupConductorMessages() {
+  const { rows } = await pool.query(
+    `SELECT * FROM conductor_messages
+      WHERE thread = 'group'
+      ORDER BY created_at ASC`
+  );
+  return rows;
+}
+
+async function addConductorMessage({ deskId = null, thread = "desk", role, text, name = "" }) {
+  const { rows } = await pool.query(
+    `INSERT INTO conductor_messages (desk_id, thread, role, name, text)
+     VALUES ($1, $2, $3, $4, $5)
+     RETURNING *`,
+    [deskId, thread, role, name, String(text || "").slice(0, 4000)]
+  );
+  return rows[0];
+}
+
+async function listConductorRules(deskId) {
+  const { rows } = await pool.query(
+    `SELECT * FROM conductor_rules WHERE desk_id = $1 ORDER BY created_at ASC`,
+    [deskId]
+  );
+  return rows;
+}
+
+async function getConductorRule(id) {
+  const { rows } = await pool.query(
+    `SELECT * FROM conductor_rules WHERE id = $1`,
+    [id]
+  );
+  return rows[0] || null;
+}
+
+async function createConductorRule({ deskId, title, trigger, action, gate = "email" }) {
+  const { rows } = await pool.query(
+    `INSERT INTO conductor_rules (desk_id, title, trigger, action, gate)
+     VALUES ($1, $2, $3, $4, $5)
+     RETURNING *`,
+    [deskId, title, trigger, action, gate]
+  );
+  return rows[0];
+}
+
+async function updateConductorRule(id, fields) {
+  const allowed = ["approved", "enabled", "last_ran_at"];
+  const sets = [];
+  const vals = [];
+  let i = 1;
+  for (const key of allowed) {
+    if (fields[key] === undefined) continue;
+    sets.push(`${key} = $${i++}`);
+    vals.push(fields[key]);
+  }
+  if (!sets.length) return getConductorRule(id);
+  vals.push(id);
+  const { rows } = await pool.query(
+    `UPDATE conductor_rules SET ${sets.join(", ")} WHERE id = $${i} RETURNING *`,
+    vals
+  );
+  return rows[0] || null;
+}
+
+async function deleteConductorRule(id) {
+  await pool.query(`DELETE FROM conductor_rules WHERE id = $1`, [id]);
+}
+
+async function addConductorRef({ deskId, kind = "ref", mime, imageData, feel = "" }) {
+  const { rows } = await pool.query(
+    `INSERT INTO conductor_refs (desk_id, kind, mime, image_data, feel)
+     VALUES ($1, $2, $3, $4, $5)
+     RETURNING id, desk_id, kind, mime, feel, created_at`,
+    [deskId, kind, mime, imageData, feel]
+  );
+  return rows[0];
+}
+
+async function getConductorRef(id) {
+  const { rows } = await pool.query(
+    `SELECT * FROM conductor_refs WHERE id = $1`,
+    [id]
+  );
+  return rows[0] || null;
+}
+
+async function listConductorRefs(deskId) {
+  const { rows } = await pool.query(
+    `SELECT id, desk_id, kind, feel, created_at
+       FROM conductor_refs
+      WHERE desk_id = $1
+      ORDER BY created_at ASC`,
+    [deskId]
+  );
+  return rows;
+}
+
 module.exports = {
   pool,
   initSchema,
@@ -2804,4 +3032,21 @@ module.exports = {
   listOutreachContacts,
   getOutreachThread,
   getOutreachStats,
+  listConductorDesks,
+  getConductorDesk,
+  findConductorDeskByKey,
+  createConductorDesk,
+  updateConductorDesk,
+  deleteConductorDesk,
+  listConductorMessages,
+  listGroupConductorMessages,
+  addConductorMessage,
+  listConductorRules,
+  getConductorRule,
+  createConductorRule,
+  updateConductorRule,
+  deleteConductorRule,
+  addConductorRef,
+  getConductorRef,
+  listConductorRefs,
 };

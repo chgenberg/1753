@@ -20,6 +20,7 @@ const {
   PREMIUM_ANALYSIS_SYSTEM_PROMPT,
   buildPremiumAnalysisPrompt,
 } = require("./services/premium-analysis-prompt");
+const agentArmy = require("./services/agent-army");
 
 // Autonom mejlagent ("som Christopher") – se outreach/ och .cursor/plans.
 const outreachRun = require("./outreach/run");
@@ -2410,6 +2411,101 @@ app.get("/api/admin/me", adminAuthMiddleware, async (req, res) => {
     const user = await db.findUserById(req.userId);
     if (!user) return res.status(404).json({ message: "Användare hittades inte" });
     res.json({ id: user.id, name: user.name, email: user.email, role: user.role || "customer" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+// ---- ADMIN: AGENTARMÉN (additivt, rör inte kassa/analys) ----
+
+app.get("/api/admin/agenter", adminAuthMiddleware, async (req, res) => {
+  try {
+    res.json(await agentArmy.loadArmy());
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+app.post("/api/admin/agenter", adminAuthMiddleware, async (req, res) => {
+  try {
+    const result = await agentArmy.hireDesk(req.body || {});
+    res.status(result.status).json(result.body);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+app.post("/api/admin/agenter/group", adminAuthMiddleware, async (req, res) => {
+  try {
+    const result = await agentArmy.chatGroup(req.body || {});
+    res.status(result.status).json(result.body);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+app.get("/api/admin/agenter/refs/:id", adminAuthMiddleware, async (req, res) => {
+  try {
+    const row = await agentArmy.readRef(req.params.id);
+    if (!row) return res.status(404).json({ message: "Bilden hittades inte" });
+    const buf = Buffer.from(row.data, "base64");
+    res.setHeader("Content-Type", row.mime || "image/jpeg");
+    res.setHeader("Cache-Control", "private, max-age=3600");
+    res.send(buf);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+app.patch("/api/admin/agenter/rules/:id", adminAuthMiddleware, async (req, res) => {
+  try {
+    const result = await agentArmy.patchRule(req.params.id, req.body?.action);
+    res.status(result.status).json(result.body);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+app.delete("/api/admin/agenter/rules/:id", adminAuthMiddleware, async (req, res) => {
+  try {
+    const result = await agentArmy.removeRule(req.params.id);
+    res.status(result.status).json(result.body);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+app.patch("/api/admin/agenter/:id", adminAuthMiddleware, async (req, res) => {
+  try {
+    const result = await agentArmy.renameDesk(req.params.id, req.body?.name);
+    res.status(result.status).json(result.body);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+app.delete("/api/admin/agenter/:id", adminAuthMiddleware, async (req, res) => {
+  try {
+    const result = await agentArmy.fireDesk(req.params.id);
+    res.status(result.status).json(result.body);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+app.post("/api/admin/agenter/:id/chat", adminAuthMiddleware, async (req, res) => {
+  try {
+    const result = await agentArmy.chatDesk(req.params.id, req.body || {});
+    res.status(result.status).json(result.body);
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+app.post("/api/admin/agenter/:id/brief", adminAuthMiddleware, async (req, res) => {
+  try {
+    const result = await agentArmy.ingestBrief(req.params.id, req.body || {});
+    res.status(result.status).json(result.body);
   } catch (err) {
     res.status(500).json({ message: err.message });
   }
@@ -10137,6 +10233,11 @@ app.post("/api/admin/social/daily-generate", adminAuthMiddleware, async (req, re
     await db.initSchema();
     await seedAutomationFlows();
     await seedAdminAccounts();
+    try {
+      await agentArmy.ensureSeededDesks();
+    } catch (seedErr) {
+      console.warn("[AgentArmy] seed:", seedErr.message);
+    }
   } catch (err) {
     console.error("[DB] Schema init failed – running without database:", err.message);
   }

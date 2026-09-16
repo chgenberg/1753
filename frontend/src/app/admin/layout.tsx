@@ -20,6 +20,7 @@ import {
   LogOut,
   Camera,
   Send,
+  Hexagon,
 } from "lucide-react";
 
 interface AdminUser {
@@ -39,6 +40,7 @@ const NAV_ITEMS = [
   { href: "/admin/prenumerationer", label: "Prenumerationer", icon: Repeat },
   { href: "/admin/recensioner", label: "Recensioner", icon: MessageSquare },
   { href: "/admin/nyhetsbrev", label: "Nyhetsbrev", icon: Mail },
+  { href: "/admin/agenter", label: "Agentarmén", icon: Hexagon },
   { href: "/admin/outreach", label: "Mejlagent", icon: Send },
   { href: "/admin/social", label: "Sociala medier", icon: Camera },
 ];

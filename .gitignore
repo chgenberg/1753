@@ -6,6 +6,7 @@ frontend/public/models/skin_classifier.onnx
 .vscode/
 services/*
 !services/premium-analysis-prompt.js
+!services/agent-army.js
 public/Landing_page_skinanalys/
 public/Landing-pages/
 sim-findings/
