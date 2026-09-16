@@ -2341,6 +2341,68 @@ app.get("/api/admin/newsletter/subscribers", adminAuthMiddleware, async (req, re
   }
 });
 
+app.get("/api/admin/automation/settings", adminAuthMiddleware, async (req, res) => {
+  try {
+    res.json({ winbackEnabled: (await db.getConfig("winback_enabled")) === "true" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+app.post("/api/admin/automation/settings", adminAuthMiddleware, async (req, res) => {
+  try {
+    if (typeof req.body?.winbackEnabled === "boolean") {
+      await db.setConfig("winback_enabled", req.body.winbackEnabled ? "true" : "false");
+    }
+    res.json({ winbackEnabled: (await db.getConfig("winback_enabled")) === "true" });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+app.post("/api/admin/newsletter/preview-flow", adminAuthMiddleware, async (req, res) => {
+  try {
+    const slug = String(req.body?.slug || "").trim();
+    if (!slug) return res.status(400).json({ message: "slug krävs" });
+    const flow = await db.findFlowBySlug(slug);
+    if (!flow) return res.status(404).json({ message: "Flöde hittades inte" });
+    const steps = typeof flow.steps === "string" ? JSON.parse(flow.steps) : flow.steps;
+    const step = Array.isArray(steps) ? steps[0] : null;
+    if (!step) return res.status(400).json({ message: "Flödet saknar steg" });
+
+    const apiKey = process.env.RESEND_API_KEY;
+    if (!apiKey) return res.status(503).json({ message: "RESEND_API_KEY saknas" });
+
+    const adminUser = await db.findUserById(req.userId);
+    const to = adminUser?.email || "ch.genberg@gmail.com";
+    const subLocale = "sv";
+    const resolvedSubject = typeof step.subject === "object" ? emailT(subLocale, step.subject) : step.subject;
+    const resolvedHtml = typeof step.html === "object" ? emailT(subLocale, step.html) : step.html;
+    const html = emailWrapper(
+      String(resolvedHtml || "")
+        .replace(/\{\{firstName\}\}/g, "Christopher")
+        .replace(/\{\{email\}\}/g, to)
+        .replace(/\{\{context\.productName\}\}/g, "DUO-kitet")
+        .replace(/\{\{context\.productUrl\}\}/g, "https://www.1753skin.com/sv/produkter/duo-kit")
+        .replace(/\{\{context\.(\w+)\}\}/g, ""),
+      "",
+      subLocale
+    );
+    const { Resend } = require("resend");
+    const resend = new Resend(apiKey);
+    const sent = await resend.emails.send({
+      from: `1753 SKINCARE <${emailFromInfo()}>`,
+      to,
+      subject: `[PREVIEW] ${String(resolvedSubject || flow.name).replace(/\{\{firstName\}\}/g, "Christopher")}`,
+      html,
+    });
+    if (sent.error) throw new Error(sent.error.message || JSON.stringify(sent.error));
+    res.json({ ok: true, to, slug, id: sent.data?.id || null });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // ---- ADMIN: AUTH CHECK ----
 
 app.get("/api/admin/me", adminAuthMiddleware, async (req, res) => {
@@ -3031,6 +3093,18 @@ app.post("/api/analysis", async (req, res) => {
         }
       } catch (tagErr) {
         console.error("[Analysis] Auto-tag failed (non-fatal):", tagErr.message);
+      }
+
+      if (savedToHistory && req.body.questions?.email) {
+        const q = req.body.questions || {};
+        enqueueAnalysisFollowup({
+          email: q.email,
+          firstName: String(q.name || q.firstName || "").trim().split(/\s+/)[0] || "",
+          locale: q.locale,
+          products: parsedResult?.products,
+        }).catch((err) => {
+          console.error("[Analysis] followup enqueue failed (non-fatal):", err.message);
+        });
       }
     } catch (saveErr) {
       // Tidigare loggades enbart .message vilket dolde grundorsaken (t.ex.
@@ -8096,6 +8170,57 @@ app.post("/api/cron/check-shipments", async (req, res) => {
   }
 });
 
+app.post("/api/cron/subscription-invite", async (req, res) => {
+  try {
+    const adminKey = req.body.adminKey || req.headers["x-admin-key"];
+    const expectedKey = process.env.ADMIN_API_KEY || "1753-admin-key";
+    if (adminKey !== expectedKey) {
+      return res.status(403).json({ message: "Ogiltig admin-nyckel" });
+    }
+    const send = req.body.send === true;
+    const preview = req.body.preview === true;
+    const { execFile } = require("child_process");
+    const scriptPath = require("path").join(__dirname, "scripts", "send-subscription-invite.js");
+    const args = send ? [] : preview ? ["--preview"] : ["--dry-run"];
+    res.json({ ok: true, mode: send ? "send" : preview ? "preview" : "dry-run" });
+    execFile("node", [scriptPath, ...args], { env: process.env, timeout: 180_000 }, (err, stdout, stderr) => {
+      if (err) {
+        console.error("[SubInvite] cron misslyckades:", err.message);
+        if (stderr) console.error(stderr);
+      } else {
+        console.log("[SubInvite] cron:", String(stdout).trim().split("\n").slice(-3).join(" | "));
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
+app.post("/api/cron/personal-newsletters", async (req, res) => {
+  try {
+    const adminKey = req.body.adminKey || req.headers["x-admin-key"];
+    const expectedKey = process.env.ADMIN_API_KEY || "1753-admin-key";
+    if (adminKey !== expectedKey) {
+      return res.status(403).json({ message: "Ogiltig admin-nyckel" });
+    }
+    const send = req.body.send === true;
+    const { execFile } = require("child_process");
+    const scriptPath = require("path").join(__dirname, "scripts", "generate-personal-newsletters.js");
+    const args = send ? ["--send", "--limit=25"] : ["--limit=10"];
+    res.json({ ok: true, mode: send ? "send" : "dry-run" });
+    execFile("node", [scriptPath, ...args], { env: process.env, timeout: 300_000 }, (err, stdout, stderr) => {
+      if (err) {
+        console.error("[PersonalNL] cron misslyckades:", err.message);
+        if (stderr) console.error(stderr);
+      } else {
+        console.log("[PersonalNL] cron:", String(stdout).trim().split("\n").slice(-3).join(" | "));
+      }
+    });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 // ---- BROADCAST ENDPOINT (admin) ----
 
 // Delad utskicksloop för broadcast + godkända utkast. Hanterar
@@ -8527,13 +8652,13 @@ async function seedAutomationFlows() {
       },
       {
         delay_hours: 120,
-        subject: { sv: "Ditt exklusiva erbjudande väntar, {{firstName}}", en: "Your exclusive offer awaits, {{firstName}}", es: "Tu oferta exclusiva te espera, {{firstName}}", de: "Dein exklusives Angebot wartet, {{firstName}}", fr: "Votre offre exclusive vous attend, {{firstName}}" },
+        subject: { sv: "{{firstName}}, 15 % om du prenumererar", en: "{{firstName}}, 15% if you subscribe", es: "{{firstName}}, 15% si te suscribes", de: "{{firstName}}, 15% mit Abo", fr: "{{firstName}}, 15% si vous vous abonnez" },
         html: {
-          sv: `${h2("Bara för dig")}${pp("Du har följt med oss i två veckor nu – tack för det! Vi hoppas att du lärt dig något nytt om holistisk hudvård.")}${pp("Som tack vill vi ge dig ett exklusivt erbjudande: <strong>fri frakt + 15% rabatt</strong> på hela sortimentet.")}<p style="font-size:17px;font-weight:700;color:#108474;text-align:center;margin:20px 0">Kod: INSIDER15</p><p style="font-size:13px;color:#766a62;text-align:center">Giltig i 7 dagar. Kan inte kombineras med andra erbjudanden.</p>${greenButton("Handla nu", p("sv","products"))}`,
-          en: `${h2("Just for you")}${pp("You've been with us for two weeks now – thank you! We hope you've learned something new about holistic skincare.")}${pp("As a thank you, we'd like to offer you: <strong>free shipping + 15% off</strong> the entire range.")}<p style="font-size:17px;font-weight:700;color:#108474;text-align:center;margin:20px 0">Code: INSIDER15</p><p style="font-size:13px;color:#766a62;text-align:center">Valid for 7 days. Cannot be combined with other offers.</p>${greenButton("Shop now", p("en","products"))}`,
-          es: `${h2("Solo para ti")}${pp("Llevas dos semanas con nosotros – ¡gracias! Esperamos que hayas aprendido algo nuevo sobre el cuidado holístico.")}${pp("Como agradecimiento, te ofrecemos: <strong>envío gratis + 15% de descuento</strong> en toda la gama.")}<p style="font-size:17px;font-weight:700;color:#108474;text-align:center;margin:20px 0">Código: INSIDER15</p><p style="font-size:13px;color:#766a62;text-align:center">Válido por 7 días. No combinable con otras ofertas.</p>${greenButton("Comprar ahora", p("es","products"))}`,
-          de: `${h2("Nur für dich")}${pp("Du bist jetzt seit zwei Wochen bei uns – danke dafür! Wir hoffen, du hast etwas Neues über ganzheitliche Hautpflege gelernt.")}${pp("Als Dankeschön möchten wir dir ein exklusives Angebot machen: <strong>kostenloser Versand + 15% Rabatt</strong> auf das gesamte Sortiment.")}<p style="font-size:17px;font-weight:700;color:#108474;text-align:center;margin:20px 0">Code: INSIDER15</p><p style="font-size:13px;color:#766a62;text-align:center">Gültig für 7 Tage. Nicht mit anderen Angeboten kombinierbar.</p>${greenButton("Jetzt shoppen", p("de","products"))}`,
-          fr: `${h2("Rien que pour vous")}${pp("Cela fait deux semaines que vous êtes avec nous – merci ! Nous espérons que vous avez appris de nouvelles choses sur les soins holistiques.")}${pp("Pour vous remercier, nous vous offrons : <strong>livraison gratuite + 15% de réduction</strong> sur toute la gamme.")}<p style="font-size:17px;font-weight:700;color:#108474;text-align:center;margin:20px 0">Code : INSIDER15</p><p style="font-size:13px;color:#766a62;text-align:center">Valable 7 jours. Non cumulable avec d'autres offres.</p>${greenButton("Acheter maintenant", p("fr","products"))}`
+          sv: `${h2("Bara för dig")}${pp("Du har följt med oss i två veckor nu – tack för det! Vi hoppas att du lärt dig något nytt om holistisk hudvård.")}${pp("Om du hittat något som funkar: prenumerera så får du <strong>15&nbsp;% lägre pris</strong> på varje leverans. Ingen bindningstid. Fri frakt över 600&nbsp;kr.")}${greenButton("Se produkterna", p("sv","products"))}`,
+          en: `${h2("Just for you")}${pp("You've been with us for two weeks now – thank you! We hope you've learned something new about holistic skincare.")}${pp("If you've found something that works: subscribe and get <strong>15% off</strong> every delivery. No lock-in. Free shipping over 600 SEK.")}${greenButton("See the products", p("en","products"))}`,
+          es: `${h2("Solo para ti")}${pp("Llevas dos semanas con nosotros – ¡gracias! Esperamos que hayas aprendido algo nuevo sobre el cuidado holístico.")}${pp("Si ya encontraste algo que funciona: suscríbete y paga un <strong>15% menos</strong> en cada entrega. Sin permanencia. Envío gratis a partir de 600 SEK.")}${greenButton("Ver productos", p("es","products"))}`,
+          de: `${h2("Nur für dich")}${pp("Du bist jetzt seit zwei Wochen bei uns – danke dafür! Wir hoffen, du hast etwas Neues über ganzheitliche Hautpflege gelernt.")}${pp("Wenn du etwas gefunden hast, das funktioniert: abonniere und zahle <strong>15% weniger</strong> bei jeder Lieferung. Keine Bindung. Kostenloser Versand ab 600 SEK.")}${greenButton("Produkte ansehen", p("de","products"))}`,
+          fr: `${h2("Rien que pour vous")}${pp("Cela fait deux semaines que vous êtes avec nous – merci ! Nous espérons que vous avez appris de nouvelles choses sur les soins holistiques.")}${pp("Si vous avez trouvé ce qui vous convient : abonnez-vous et payez <strong>15% de moins</strong> à chaque livraison. Sans engagement. Livraison offerte dès 600 SEK.")}${greenButton("Voir les produits", p("fr","products"))}`
         }
       }
     ]
@@ -8581,11 +8706,11 @@ async function seedAutomationFlows() {
         delay_hours: 1080,
         subject: { sv: "Dags att fylla på? Spara med prenumeration", en: "Time to restock? Save with a subscription", es: "¿Hora de reponer? Ahorra con una suscripción", de: "Zeit zum Nachfüllen? Spare mit einem Abo", fr: "Il est temps de réapprovisionner ? Économisez avec un abonnement" },
         html: {
-          sv: `${h2("Slipp att ta slut")}${pp("Beroende på hur mycket du använder borde det snart vara dags för påfyllning.")}${pp("Med våra prenumerationer får du <strong>15% rabatt</strong> på varje leverans, och du väljer själv intervall (30, 60 eller 90 dagar). Avbryt när du vill.")}${greenButton("Beställ igen", p("sv","products"))}`,
-          en: `${h2("Never run out")}${pp("Depending on how much you use, it might be time to restock soon.")}${pp("With our subscriptions, you get <strong>15% off</strong> every delivery, and you choose your own interval (30, 60 or 90 days). Cancel anytime.")}${greenButton("Order again", p("en","products"))}`,
-          es: `${h2("Que no se te acabe")}${pp("Dependiendo de cuánto uses, pronto podría ser hora de reponer.")}${pp("Con nuestras suscripciones, obtienes un <strong>15% de descuento</strong> en cada entrega, y eliges tu propio intervalo (30, 60 o 90 días). Cancela cuando quieras.")}${greenButton("Pedir de nuevo", p("es","products"))}`,
-          de: `${h2("Nie wieder leer")}${pp("Je nachdem wie viel du verwendest, könnte es bald Zeit zum Nachfüllen sein.")}${pp("Mit unseren Abos bekommst du <strong>15% Rabatt</strong> auf jede Lieferung, und du wählst dein eigenes Intervall (30, 60 oder 90 Tage). Jederzeit kündbar.")}${greenButton("Nachbestellen", p("de","products"))}`,
-          fr: `${h2("Ne soyez jamais à court")}${pp("Selon votre utilisation, il est peut-être bientôt temps de réapprovisionner.")}${pp("Avec nos abonnements, vous bénéficiez de <strong>15% de réduction</strong> sur chaque livraison, et vous choisissez votre intervalle (30, 60 ou 90 jours). Annulable à tout moment.")}${greenButton("Commander à nouveau", p("fr","products"))}`
+          sv: `${h2("Slipp att ta slut")}${pp("Beroende på hur mycket du använder borde det snart vara dags för påfyllning.")}${pp("Med prenumeration får du <strong>15&nbsp;% rabatt</strong> på varje leverans. Du väljer 30, 60 eller 90 dagar. Pausa eller avsluta när du vill under Mitt konto.")}${greenButton("Prenumerera och spara 15 %", p("sv","products"))}`,
+          en: `${h2("Never run out")}${pp("Depending on how much you use, it might be time to restock soon.")}${pp("Subscribe and get <strong>15% off</strong> every delivery. Choose 30, 60 or 90 days. Pause or cancel anytime from My account.")}${greenButton("Subscribe and save 15%", p("en","products"))}`,
+          es: `${h2("Que no se te acabe")}${pp("Dependiendo de cuánto uses, pronto podría ser hora de reponer.")}${pp("Con una suscripción pagas un <strong>15% menos</strong> en cada entrega. Elige 30, 60 o 90 días. Pausa o cancela cuando quieras en Mi cuenta.")}${greenButton("Suscribirse y ahorrar 15%", p("es","products"))}`,
+          de: `${h2("Nie wieder leer")}${pp("Je nachdem wie viel du verwendest, könnte es bald Zeit zum Nachfüllen sein.")}${pp("Mit einem Abo bekommst du <strong>15% Rabatt</strong> auf jede Lieferung. 30, 60 oder 90 Tage. Pause oder kündigen jederzeit unter Mein Konto.")}${greenButton("Abonnieren und 15% sparen", p("de","products"))}`,
+          fr: `${h2("Ne soyez jamais à court")}${pp("Selon votre utilisation, il est peut-être bientôt temps de réapprovisionner.")}${pp("Avec un abonnement, vous payez <strong>15% de moins</strong> à chaque livraison. 30, 60 ou 90 jours. Pause ou annulation à tout moment depuis Mon compte.")}${greenButton("S'abonner et économiser 15%", p("fr","products"))}`
         }
       }
     ]
@@ -8609,30 +8734,114 @@ async function seedAutomationFlows() {
       },
       {
         delay_hours: 24,
-        subject: { sv: "Fortfarande intresserad? Fri frakt på oss", en: "Still interested? Free shipping on us", es: "¿Sigues interesado/a? Envío gratis por nuestra cuenta", de: "Noch interessiert? Versandkostenfrei auf uns", fr: "Toujours intéressé(e) ? Livraison offerte" },
+        subject: { sv: "Fortfarande intresserad?", en: "Still interested?", es: "¿Sigues interesado/a?", de: "Noch interessiert?", fr: "Toujours intéressé(e) ?" },
         html: {
-          sv: `${h2("Vi bjuder på frakten")}${pp("Vi vill göra det enkelt för dig. Slutför din beställning idag så står vi för fraktkostnaden – oavsett ordervärde.")}${greenButton("Handla med fri frakt", p("sv","checkout"))}`,
-          en: `${h2("Shipping's on us")}${pp("We want to make it easy for you. Complete your order today and we'll cover the shipping cost – regardless of order value.")}${greenButton("Shop with free shipping", p("en","checkout"))}`,
-          es: `${h2("El envío corre por nuestra cuenta")}${pp("Queremos hacértelo fácil. Completa tu pedido hoy y cubrimos el costo de envío – sin importar el valor del pedido.")}${greenButton("Comprar con envío gratis", p("es","checkout"))}`,
-          de: `${h2("Versand geht auf uns")}${pp("Wir möchten es dir einfach machen. Schließe deine Bestellung heute ab und wir übernehmen die Versandkosten – unabhängig vom Bestellwert.")}${greenButton("Mit kostenlosem Versand bestellen", p("de","checkout"))}`,
-          fr: `${h2("La livraison est pour nous")}${pp("Nous voulons vous faciliter la tâche. Finalisez votre commande aujourd'hui et nous prenons en charge les frais de livraison – quel que soit le montant.")}${greenButton("Acheter avec livraison gratuite", p("fr","checkout"))}`
+          sv: `${h2("Din varukorg väntar fortfarande")}${pp("Inget har ändrats i kassan. Fri frakt över 600&nbsp;kr – samma regel som alltid.")}${greenButton("Till kassan", p("sv","checkout"))}`,
+          en: `${h2("Your cart is still here")}${pp("Nothing in checkout has changed. Free shipping over 600 SEK – the same rule as always.")}${greenButton("Go to checkout", p("en","checkout"))}`,
+          es: `${h2("Tu carrito sigue aquí")}${pp("Nada ha cambiado en el pago. Envío gratis a partir de 600 SEK – la misma regla de siempre.")}${greenButton("Ir al pago", p("es","checkout"))}`,
+          de: `${h2("Dein Warenkorb ist noch da")}${pp("An der Kasse hat sich nichts geändert. Kostenloser Versand ab 600 SEK – dieselbe Regel wie immer.")}${greenButton("Zur Kasse", p("de","checkout"))}`,
+          fr: `${h2("Votre panier est toujours là")}${pp("Rien n'a changé à la caisse. Livraison offerte dès 600 SEK – la même règle qu'avant.")}${greenButton("Passer au paiement", p("fr","checkout"))}`
         }
       },
       {
         delay_hours: 72,
-        subject: { sv: "Sista chansen – 5% extra rabatt", en: "Last chance – 5% extra off", es: "Última oportunidad – 5% de descuento extra", de: "Letzte Chance – 5% Extra-Rabatt", fr: "Dernière chance – 5% de réduction supplémentaire" },
+        subject: { sv: "Din varukorg är kvar", en: "Your cart is still waiting", es: "Tu carrito sigue esperando", de: "Dein Warenkorb wartet noch", fr: "Votre panier attend encore" },
         html: {
-          sv: `${h2("Sista knuffen")}${pp("Vi ger inte upp så lätt! Här är <strong>5% extra rabatt</strong> på hela din varukorg. Använd koden:")}<p style="font-size:17px;font-weight:700;color:#108474;text-align:center;margin:20px 0">KOMTILLBAKA5</p>${greenButton("Slutför ditt köp", p("sv","checkout"))}<p style="font-size:13px;color:#766a62;text-align:center">Erbjudandet är giltigt i 48 timmar.</p>`,
-          en: `${h2("One last nudge")}${pp("We don't give up easily! Here's <strong>5% extra off</strong> your entire cart. Use the code:")}<p style="font-size:17px;font-weight:700;color:#108474;text-align:center;margin:20px 0">COMEBACK5</p>${greenButton("Complete your purchase", p("en","checkout"))}<p style="font-size:13px;color:#766a62;text-align:center">Offer valid for 48 hours.</p>`,
-          es: `${h2("Último empujón")}${pp("¡No nos rendimos fácilmente! Aquí tienes un <strong>5% de descuento extra</strong> en todo tu carrito. Usa el código:")}<p style="font-size:17px;font-weight:700;color:#108474;text-align:center;margin:20px 0">VUELVE5</p>${greenButton("Completar tu compra", p("es","checkout"))}<p style="font-size:13px;color:#766a62;text-align:center">Oferta válida por 48 horas.</p>`,
-          de: `${h2("Ein letzter Anstoß")}${pp("Wir geben nicht so leicht auf! Hier sind <strong>5% Extra-Rabatt</strong> auf deinen gesamten Warenkorb. Nutze den Code:")}<p style="font-size:17px;font-weight:700;color:#108474;text-align:center;margin:20px 0">COMEBACK5</p>${greenButton("Kauf abschließen", p("de","checkout"))}<p style="font-size:13px;color:#766a62;text-align:center">Angebot gültig für 48 Stunden.</p>`,
-          fr: `${h2("Un dernier coup de pouce")}${pp("Nous n'abandonnons pas facilement ! Voici <strong>5% de réduction supplémentaire</strong> sur tout votre panier. Utilisez le code :")}<p style="font-size:17px;font-weight:700;color:#108474;text-align:center;margin:20px 0">RETOUR5</p>${greenButton("Finaliser votre achat", p("fr","checkout"))}<p style="font-size:13px;color:#766a62;text-align:center">Offre valable 48 heures.</p>`
+          sv: `${h2("Sista påminnelsen")}${pp("Produkterna ligger kvar. Om du fortfarande vill ha dem – kassan tar en minut. Fri frakt över 600&nbsp;kr.")}${greenButton("Slutför ditt köp", p("sv","checkout"))}`,
+          en: `${h2("One last reminder")}${pp("Your products are still there. Checkout takes a minute. Free shipping over 600 SEK.")}${greenButton("Complete your purchase", p("en","checkout"))}`,
+          es: `${h2("Último recordatorio")}${pp("Tus productos siguen ahí. El pago lleva un minuto. Envío gratis a partir de 600 SEK.")}${greenButton("Completar tu compra", p("es","checkout"))}`,
+          de: `${h2("Letzte Erinnerung")}${pp("Deine Produkte sind noch da. Die Kasse dauert eine Minute. Kostenloser Versand ab 600 SEK.")}${greenButton("Kauf abschließen", p("de","checkout"))}`,
+          fr: `${h2("Dernier rappel")}${pp("Vos produits sont toujours là. Le paiement prend une minute. Livraison offerte dès 600 SEK.")}${greenButton("Finaliser votre achat", p("fr","checkout"))}`
         }
       }
     ]
   });
 
-  console.log("[Automation] Flows seeded (welcome, post-purchase, cart-abandoned)");
+  await db.upsertFlow({
+    slug: "analysis-followup",
+    name: "Efter hudanalys",
+    triggerEvent: "analysis_complete",
+    steps: [
+      {
+        delay_hours: 0,
+        subject: {
+          sv: "{{firstName}}, hur känns det efter analysen?",
+          en: "{{firstName}}, how does it feel after the analysis?",
+          es: "{{firstName}}, ¿cómo te sientes después del análisis?",
+          de: "{{firstName}}, wie fühlt es sich nach der Analyse an?",
+          fr: "{{firstName}}, comment vous sentez-vous après l'analyse ?",
+        },
+        html: {
+          sv: `${h2("Din hudanalys väntar inte på mer snack")}${pp("För några dagar sedan tittade vi på din hud. Om du vill testa det vi föreslog ligger {{context.productName}} här – eller hela sortimentet om du hellre väljer själv.")}${pp("Inget tvång. Bara en påminnelse så det inte drunknar i inkorgen.")}<p style="text-align:center;margin:28px 0"><a href="{{context.productUrl}}" style="display:inline-block;background:#108474;color:#fff;padding:14px 32px;border-radius:980px;font-size:15px;font-weight:600;text-decoration:none">Se {{context.productName}}</a></p>`,
+          en: `${h2("Your analysis doesn't need more talk")}${pp("A few days ago we looked at your skin. If you want to try what we suggested, {{context.productName}} is here – or browse the shop if you'd rather choose.")}${pp("No pressure. Just so it doesn't get lost.")}<p style="text-align:center;margin:28px 0"><a href="{{context.productUrl}}" style="display:inline-block;background:#108474;color:#fff;padding:14px 32px;border-radius:980px;font-size:15px;font-weight:600;text-decoration:none">See {{context.productName}}</a></p>`,
+          es: `${h2("Tu análisis no necesita más palabras")}${pp("Hace unos días miramos tu piel. Si quieres probar lo que sugerimos, {{context.productName}} está aquí.")}<p style="text-align:center;margin:28px 0"><a href="{{context.productUrl}}" style="display:inline-block;background:#108474;color:#fff;padding:14px 32px;border-radius:980px;font-size:15px;font-weight:600;text-decoration:none">Ver {{context.productName}}</a></p>`,
+          de: `${h2("Deine Analyse braucht keine weiteren Worte")}${pp("Vor ein paar Tagen haben wir deine Haut angesehen. Wenn du ausprobieren willst, was wir vorgeschlagen haben, liegt {{context.productName}} hier.")}<p style="text-align:center;margin:28px 0"><a href="{{context.productUrl}}" style="display:inline-block;background:#108474;color:#fff;padding:14px 32px;border-radius:980px;font-size:15px;font-weight:600;text-decoration:none">{{context.productName}} ansehen</a></p>`,
+          fr: `${h2("Votre analyse n'a pas besoin de plus de mots")}${pp("Il y a quelques jours, nous avons regardé votre peau. Si vous voulez essayer ce que nous avons proposé, {{context.productName}} est ici.")}<p style="text-align:center;margin:28px 0"><a href="{{context.productUrl}}" style="display:inline-block;background:#108474;color:#fff;padding:14px 32px;border-radius:980px;font-size:15px;font-weight:600;text-decoration:none">Voir {{context.productName}}</a></p>`,
+        },
+      },
+      {
+        delay_hours: 168,
+        subject: {
+          sv: "En vecka senare – fortfarande nyfiken",
+          en: "A week later – still curious",
+          es: "Una semana después – seguimos con ganas de saber",
+          de: "Eine Woche später – immer noch neugierig",
+          fr: "Une semaine plus tard – toujours curieux",
+        },
+        html: {
+          sv: `${h2("Inget mer än så här")}${pp("Om analysen landade rätt: {{context.productName}} är fortfarande där vi pekade. Prenumerera så är priset 15&nbsp;% lägre varje gång. Ingen bindning.")}${greenButton("Till butiken", p("sv","products"))}`,
+          en: `${h2("That's all")}${pp("If the analysis landed: {{context.productName}} is still where we pointed. Subscribe and every delivery is 15% less. No lock-in.")}${greenButton("To the shop", p("en","products"))}`,
+          es: `${h2("Nada más")}${pp("Si el análisis encajó: {{context.productName}} sigue ahí. Suscríbete y cada entrega cuesta un 15% menos.")}${greenButton("A la tienda", p("es","products"))}`,
+          de: `${h2("Mehr nicht")}${pp("Wenn die Analyse stimmte: {{context.productName}} liegt noch da. Mit Abo zahlst du 15% weniger pro Lieferung.")}${greenButton("Zum Shop", p("de","products"))}`,
+          fr: `${h2("Rien de plus")}${pp("Si l'analyse était juste : {{context.productName}} est toujours là. Avec un abonnement, chaque livraison coûte 15% de moins.")}${greenButton("Vers la boutique", p("fr","products"))}`,
+        },
+      },
+    ],
+  });
+
+  await db.upsertFlow({
+    slug: "win-back",
+    name: "Win-back",
+    triggerEvent: "win_back",
+    steps: [
+      {
+        delay_hours: 0,
+        subject: {
+          sv: "{{firstName}}, hur mår huden nu?",
+          en: "{{firstName}}, how's the skin now?",
+          es: "{{firstName}}, ¿cómo va la piel ahora?",
+          de: "{{firstName}}, wie geht es der Haut jetzt?",
+          fr: "{{firstName}}, comment va la peau maintenant ?",
+        },
+        html: {
+          sv: `${h2("Det är ett tag sedan")}${pp("Du handlade hos oss för ett tag sedan. Jag är nyfiken på hur huden har tagit emot det – inte sälj, bara hur det känts.")}${pp("Om du vill fylla på: prenumeration är 15&nbsp;% lägre varje leverans. Fri frakt över 600&nbsp;kr. Ingen kod behövs.")}${greenButton("Se produkterna", p("sv","products"))}`,
+          en: `${h2("It's been a while")}${pp("You shopped with us a while ago. I'm curious how your skin has taken it.")}${pp("If you want to restock: a subscription is 15% less every delivery. Free shipping over 600 SEK. No code needed.")}${greenButton("See the products", p("en","products"))}`,
+          es: `${h2("Hace un tiempo")}${pp("Compraste con nosotros hace un tiempo. Tengo curiosidad por cómo le ha sentado a tu piel.")}${pp("Si quieres reponer: la suscripción cuesta un 15% menos en cada entrega. Envío gratis a partir de 600 SEK.")}${greenButton("Ver productos", p("es","products"))}`,
+          de: `${h2("Es ist eine Weile her")}${pp("Du hast vor einer Weile bei uns gekauft. Ich bin neugierig, wie deine Haut es aufgenommen hat.")}${pp("Zum Nachfüllen: Abo ist 15% günstiger pro Lieferung. Kostenloser Versand ab 600 SEK.")}${greenButton("Produkte ansehen", p("de","products"))}`,
+          fr: `${h2("Cela fait un moment")}${pp("Vous avez commandé chez nous il y a quelque temps. Je suis curieux de savoir comment votre peau l'a reçu.")}${pp("Pour réapprovisionner : l'abonnement coûte 15% de moins à chaque livraison. Livraison offerte dès 600 SEK.")}${greenButton("Voir les produits", p("fr","products"))}`,
+        },
+      },
+      {
+        delay_hours: 120,
+        subject: {
+          sv: "Bara så du vet att vi finns kvar",
+          en: "Just so you know we're still here",
+          es: "Solo para que sepas que seguimos aquí",
+          de: "Nur damit du weißt, dass wir noch da sind",
+          fr: "Juste pour vous dire qu'on est toujours là",
+        },
+        html: {
+          sv: `${h2("Sista vinken")}${pp("Inget mer efter det här. Om du vill tillbaka finns butiken, hudanalysen och 15&nbsp;% på prenumeration – samma regler som för alla andra.")}${greenButton("Till butiken", p("sv","products"))}`,
+          en: `${h2("Last note")}${pp("Nothing more after this. The shop, the skin analysis and 15% on subscription are there if you want them – same rules as everyone else.")}${greenButton("To the shop", p("en","products"))}`,
+          es: `${h2("Última nota")}${pp("Nada más después de esto. La tienda, el análisis y el 15% de suscripción siguen ahí.")}${greenButton("A la tienda", p("es","products"))}`,
+          de: `${h2("Letzte Notiz")}${pp("Danach nichts mehr. Shop, Hautanalyse und 15% im Abo sind da, wenn du willst.")}${greenButton("Zum Shop", p("de","products"))}`,
+          fr: `${h2("Dernier mot")}${pp("Rien après ceci. La boutique, l'analyse et 15% sur l'abonnement sont là si vous voulez.")}${greenButton("Vers la boutique", p("fr","products"))}`,
+        },
+      },
+    ],
+  });
+
+  console.log("[Automation] Flows seeded (welcome, post-purchase, cart-abandoned, analysis-followup, win-back)");
 }
 
 // ---- ORDER VERIFICATION (backup from success page) ----
@@ -9318,50 +9527,114 @@ async function processRecurringCharges() {
   }
 }
 
-// ---- WIN-BACK CHECKER ----
+// ---- WIN-BACK + ANALYS-UPPFÖLJNING (rör inte köpkontraktet) ----
+
+async function isWinbackEnabled() {
+  const v = await db.getConfig("winback_enabled");
+  return v === "true";
+}
 
 async function checkWinbackEligibility() {
   try {
+    if (!(await isWinbackEnabled())) {
+      return { queued: 0, skipped: "paused" };
+    }
     const winbackFlows = await db.findFlowByTrigger("win_back");
-    if (winbackFlows.length === 0) return;
+    if (winbackFlows.length === 0) return { queued: 0, skipped: "no-flow" };
 
     const cutoffDate = new Date(Date.now() - 60 * 24 * 60 * 60 * 1000).toISOString();
     const { rows: candidates } = await db.pool.query(`
-      SELECT customer_email, MAX(customer_name) as customer_name, MAX(created_at) as last_order
-      FROM orders
-      WHERE payment_status = 'paid' AND created_at < $1
-      GROUP BY customer_email
-      HAVING MAX(created_at) < $1
+      SELECT o.customer_email, MAX(o.customer_name) AS customer_name, MAX(o.created_at) AS last_order
+        FROM orders o
+       WHERE o.payment_status = 'paid'
+         AND o.customer_email IS NOT NULL AND o.customer_email <> ''
+         AND o.customer_email NOT ILIKE '%1753skin%'
+         AND o.customer_email NOT ILIKE '%1753skincare%'
+       GROUP BY o.customer_email
+      HAVING MAX(o.created_at) < $1
+         AND NOT EXISTS (
+           SELECT 1 FROM subscriptions s
+           LEFT JOIN users u ON u.id = s.user_id
+           WHERE s.cancelled_at IS NULL
+             AND s.status IN ('active','paused','pending','payment_failed')
+             AND LOWER(COALESCE(NULLIF(s.customer_email,''), u.email)) = LOWER(o.customer_email)
+         )
     `, [cutoffDate]);
 
     let queued = 0;
     for (const c of candidates) {
-      let subscriber = await db.findSubscriberByEmail(c.customer_email);
-      if (!subscriber) continue;
-      if (subscriber.status !== "active") continue;
+      const subscriber = await db.findSubscriberByEmail(c.customer_email);
+      if (!subscriber || subscriber.status !== "active") continue;
 
-      const alreadyQueued = await db.pool.query(
+      const already = await db.pool.query(
         `SELECT 1 FROM automation_queue aq
          JOIN automation_flows af ON af.id = aq.flow_id
-         WHERE aq.subscriber_id = $1 AND af.trigger_event = 'win_back' AND aq.status IN ('pending','active')
+         WHERE aq.subscriber_id = $1 AND af.trigger_event = 'win_back'
+           AND (aq.status IN ('pending','active')
+                OR aq.last_sent_at > NOW() - INTERVAL '180 days'
+                OR aq.created_at > NOW() - INTERVAL '180 days')
          LIMIT 1`,
         [subscriber.id]
       );
-      if (alreadyQueued.rows.length > 0) continue;
+      if (already.rows.length > 0) continue;
 
       for (const flow of winbackFlows) {
         await db.enqueueAutomation({
-          subscriberId: subscriber.id, flowId: flow.id,
-          context: { firstName: subscriber.first_name },
-          nextSendAt: new Date()
+          subscriberId: subscriber.id,
+          flowId: flow.id,
+          context: { firstName: subscriber.first_name || (c.customer_name || "").split(/\s+/)[0] || "" },
+          nextSendAt: new Date(),
         });
       }
       queued++;
     }
 
-    if (queued > 0) console.log(`[Win-back] Queued ${queued} customers for win-back`);
+    if (queued > 0) console.log(`[Win-back] Queued ${queued} customers`);
+    return { queued };
   } catch (err) {
     console.error("[Win-back] Error:", err.message);
+    return { queued: 0, error: err.message };
+  }
+}
+
+async function enqueueAnalysisFollowup({ email, firstName, locale, products }) {
+  const addr = String(email || "").trim().toLowerCase();
+  if (!addr || addr.includes("1753skin")) return;
+  const loc = ["sv", "en", "es", "de", "fr"].includes(locale) ? locale : "sv";
+
+  const paid = await db.pool.query(
+    `SELECT 1 FROM orders WHERE LOWER(customer_email) = $1 AND payment_status = 'paid' LIMIT 1`,
+    [addr]
+  );
+  if (paid.rows.length) return;
+
+  let subscriber = await db.findSubscriberByEmail(addr);
+  if (!subscriber) {
+    subscriber = await db.createSubscriber({
+      email: addr,
+      firstName: firstName || "",
+      source: "analysis",
+      unsubscribeToken: crypto.randomBytes(32).toString("hex"),
+      locale: loc,
+    });
+  }
+  if (!subscriber || subscriber.status !== "active") return;
+
+  const rec = Array.isArray(products) ? products.find((p) => p && (p.id || p.productId)) : null;
+  const pid = rec ? (rec.id || rec.productId) : "duo-kit";
+  const catalog = PRODUCTS_MAP[pid] || PRODUCTS_MAP["duo-kit"];
+  const productName = rec?.name || catalog?.name || "DUO-kit";
+  const site = "https://www.1753skin.com";
+  const productUrl = `${site}/${emailPath(loc, "products")}/${pid}`;
+
+  const flows = await db.findFlowByTrigger("analysis_complete");
+  for (const flow of flows) {
+    await db.enqueueAutomation({
+      subscriberId: subscriber.id,
+      flowId: flow.id,
+      context: { firstName: firstName || subscriber.first_name || "", productName, productUrl },
+      nextSendAt: new Date(Date.now() + 72 * 3600 * 1000),
+    });
   }
 }
 
@@ -9890,6 +10163,15 @@ app.post("/api/admin/social/daily-generate", adminAuthMiddleware, async (req, re
     setInterval(processAutomationQueue, 60_000);
     setTimeout(processAutomationQueue, 30_000);
     console.log("[OK] Email automation engine started (every 60s)");
+
+    const ONE_DAY_MS = 24 * 60 * 60 * 1000;
+    setInterval(() => {
+      checkWinbackEligibility().catch((err) => console.error("[Win-back] tick:", err.message));
+    }, ONE_DAY_MS);
+    setTimeout(() => {
+      checkWinbackEligibility().catch((err) => console.error("[Win-back] tick:", err.message));
+    }, 12 * 60_000);
+    console.log("[OK] Win-back checker started (daily, paused until winback_enabled=true)");
 
     setInterval(processScheduledNewsletters, 60_000);
     setTimeout(processScheduledNewsletters, 20_000);

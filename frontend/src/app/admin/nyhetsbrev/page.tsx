@@ -83,6 +83,10 @@ export default function AdminNewsletterPage() {
   const [statusFilter, setStatusFilter] = useState("all");
   const [subLoading, setSubLoading] = useState(true);
   const [subError, setSubError] = useState("");
+  const [winbackEnabled, setWinbackEnabled] = useState(false);
+  const [winbackBusy, setWinbackBusy] = useState(false);
+  const [previewSlug, setPreviewSlug] = useState("");
+  const [previewMsg, setPreviewMsg] = useState("");
 
   const totalPages = Math.max(1, Math.ceil(subTotal / perPage));
 
@@ -110,6 +114,11 @@ export default function AdminNewsletterPage() {
     }
 
     load();
+    authFetch<{ winbackEnabled: boolean }>("/admin/automation/settings", token!)
+      .then((s) => {
+        if (!cancelled) setWinbackEnabled(!!s.winbackEnabled);
+      })
+      .catch(() => {});
     return () => {
       cancelled = true;
     };
@@ -143,6 +152,51 @@ export default function AdminNewsletterPage() {
   useEffect(() => {
     fetchSubscribers();
   }, [fetchSubscribers]);
+
+  async function toggleWinback() {
+    if (!token) return;
+    setWinbackBusy(true);
+    setPreviewMsg("");
+    try {
+      const next = !winbackEnabled;
+      const s = await authFetch<{ winbackEnabled: boolean }>(
+        "/admin/automation/settings",
+        token,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ winbackEnabled: next }),
+        }
+      );
+      setWinbackEnabled(!!s.winbackEnabled);
+    } catch (err) {
+      setPreviewMsg(err instanceof Error ? err.message : "Kunde inte spara win-back");
+    } finally {
+      setWinbackBusy(false);
+    }
+  }
+
+  async function sendFlowPreview(slug: string) {
+    if (!token) return;
+    setPreviewSlug(slug);
+    setPreviewMsg("");
+    try {
+      const r = await authFetch<{ ok: boolean; to: string }>(
+        "/admin/newsletter/preview-flow",
+        token,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ slug }),
+        }
+      );
+      setPreviewMsg(`Preview skickad till ${r.to}`);
+    } catch (err) {
+      setPreviewMsg(err instanceof Error ? err.message : "Preview misslyckades");
+    } finally {
+      setPreviewSlug("");
+    }
+  }
 
   return (
     <div className="space-y-8">
@@ -201,6 +255,33 @@ export default function AdminNewsletterPage() {
             </ChartCard>
           </div>
 
+          <div className="rounded-2xl bg-white p-5 shadow-sm ring-1 ring-[#e6e6e6]">
+            <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+              <div>
+                <p className="text-sm font-medium text-[#1d1d1f]">Win-back</p>
+                <p className="mt-0.5 text-xs text-[#766a62]">
+                  Mejl till kunder utan köp på 60 dagar. Ingen rabattkod. Av tills du slår på.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={toggleWinback}
+                disabled={winbackBusy}
+                className={`rounded-full px-4 py-2 text-xs font-semibold transition-colors disabled:opacity-50 ${
+                  winbackEnabled
+                    ? "bg-[#108474] text-white"
+                    : "bg-[#f5f5f7] text-[#515151]"
+                }`}
+              >
+                {winbackBusy ? "Sparar…" : winbackEnabled ? "På" : "Av"}
+              </button>
+            </div>
+          </div>
+
+          {previewMsg && (
+            <p className="text-sm text-[#515151]">{previewMsg}</p>
+          )}
+
           {/* Automation flows */}
           {stats.flows.length > 0 && (
             <div className="space-y-3">
@@ -240,6 +321,14 @@ export default function AdminNewsletterPage() {
                     <p className="mt-3 text-xs text-[#515151]">
                       {Array.isArray(flow.steps) ? flow.steps.length : 0} steg i flödet
                     </p>
+                    <button
+                      type="button"
+                      onClick={() => sendFlowPreview(flow.slug)}
+                      disabled={previewSlug === flow.slug}
+                      className="mt-3 text-xs font-medium text-[#108474] underline-offset-2 hover:underline disabled:opacity-50"
+                    >
+                      {previewSlug === flow.slug ? "Skickar…" : "Skicka preview"}
+                    </button>
                   </div>
                 ))}
               </div>
