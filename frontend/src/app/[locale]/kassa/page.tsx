@@ -842,7 +842,7 @@ function SubscriptionUpsell({
       </div>
 
       <div className="flex gap-2">
-        {[30, 60].map((days) => (
+        {[30, 60, 90].map((days) => (
           <button
             key={days}
             type="button"

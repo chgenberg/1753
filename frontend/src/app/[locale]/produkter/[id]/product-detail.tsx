@@ -284,7 +284,7 @@ export default function ProductDetail({ id }: { id: string }) {
                   <div className="border-t border-brand-200 bg-white px-4 py-4 space-y-4">
                     <p className="text-xs text-brand-500">{t("productDetail.chooseInterval")}</p>
                     <div className="flex gap-2">
-                      {[30, 60].map((days) => (
+                      {[30, 60, 90].map((days) => (
                         <button
                           key={days}
                           type="button"
