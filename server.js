@@ -528,12 +528,6 @@ const DISCOUNT_CODES = {
     productIds: null,
     description: "5% rabatt -- valkommen tillbaka",
   },
-  gabriellaschmidt: {
-    percent: 100,
-    productIds: ["au-naturel-makeup-remover"],
-    requiredProductIds: ["duo-kit", "au-naturel-makeup-remover"],
-    description: "Au Naturel Makeup Remover utan kostnad vid köp av DUO-kit",
-  },
   cecilia: {
     percent: 15,
     productIds: null,
