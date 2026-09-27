@@ -163,6 +163,8 @@ async function initSchema() {
     ALTER TABLE orders ADD COLUMN IF NOT EXISTS tracking_number VARCHAR(255);
     ALTER TABLE orders ADD COLUMN IF NOT EXISTS tracking_url TEXT;
     ALTER TABLE orders ADD COLUMN IF NOT EXISTS shipped_at TIMESTAMPTZ;
+    ALTER TABLE orders ADD COLUMN IF NOT EXISTS discount_code VARCHAR(100);
+    ALTER TABLE orders ADD COLUMN IF NOT EXISTS discount_counted_at TIMESTAMPTZ;
 
     CREATE INDEX IF NOT EXISTS idx_subscriptions_user ON subscriptions (user_id);
     CREATE INDEX IF NOT EXISTS idx_subscriptions_status ON subscriptions (status);
@@ -756,21 +758,36 @@ async function initSchema() {
 async function createOrder({
   orderNumber, customerName, customerEmail, customerPhone,
   address, zip, city, countryCode, vivaOrderCode, merchantTrns,
-  items, totalAmount, shippingCost, currency, userId, locale
+  items, totalAmount, shippingCost, currency, userId, locale, discountCode
 }) {
   const { rows } = await pool.query(
     `INSERT INTO orders
        (order_number, customer_name, customer_email, customer_phone,
         address, zip, city, country_code, viva_order_code, merchant_trns,
-        items, total_amount, shipping_cost, currency, user_id, locale)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16)
+        items, total_amount, shipping_cost, currency, user_id, locale, discount_code)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15,$16,$17)
      RETURNING *`,
     [orderNumber, customerName, customerEmail, customerPhone || null,
      address, zip, city, countryCode || "SE", vivaOrderCode, merchantTrns,
      JSON.stringify(items), totalAmount, shippingCost || 0, currency || "SEK",
-     userId || null, locale || "sv"]
+     userId || null, locale || "sv", discountCode || null]
   );
   return rows[0];
+}
+
+// Räknar av orderns rabattkod exakt en gång, först när betalningen är bekräftad.
+// Returnerar koden som räknades av, eller null om det inte fanns något att räkna.
+async function countOrderDiscountUsage(orderId) {
+  const { rows } = await pool.query(
+    `UPDATE orders SET discount_counted_at = NOW()
+      WHERE id = $1 AND discount_code IS NOT NULL AND discount_counted_at IS NULL
+      RETURNING discount_code`,
+    [orderId]
+  );
+  const code = rows[0]?.discount_code;
+  if (!code) return null;
+  await incrementDiscountUsage(code);
+  return code;
 }
 
 async function findOrderByMerchantTrns(merchantTrns) {
@@ -2935,6 +2952,7 @@ module.exports = {
   updateDiscountCode,
   deleteDiscountCode,
   incrementDiscountUsage,
+  countOrderDiscountUsage,
   createReturn,
   findReturnsByOrder,
   adminListSubscriptions,

@@ -4126,6 +4126,7 @@ app.post("/api/orders/create", async (req, res) => {
     );
 
     let discount = null;
+    let countableDiscountCode = null;
     if (discountCode) {
       const stat = findStaticDiscount(discountCode);
       if (stat) discount = stat.discount;
@@ -4145,8 +4146,9 @@ app.post("/api/orders/create", async (req, res) => {
             productIds: dbCode.product_ids,
             description: dbCode.description
           };
-          // Räkna av på den kanoniska koden, inte kundens (ev. felstavade) inmatning.
-          await db.incrementDiscountUsage(dbCode.code);
+          // Räknas av i handleOrderCompletion när betalningen är bekräftad – annars
+          // bränns engångskoder av kunder som avbryter eller får nekad betalning.
+          countableDiscountCode = dbCode.code;
         }
       }
     }
@@ -4166,6 +4168,7 @@ app.post("/api/orders/create", async (req, res) => {
         discount = null;
       }
     }
+    if (!discount) countableDiscountCode = null;
 
     const orderItems = items.map(item => {
       const product = PRODUCTS_MAP[item.id];
@@ -4298,7 +4301,8 @@ app.post("/api/orders/create", async (req, res) => {
       shippingCost,
       currency,
       userId: checkoutUserId,
-      locale
+      locale,
+      discountCode: countableDiscountCode
     });
 
     console.log(`[Order] Created ${orderNumber} (${currency}), vivaOrderCode=${vivaData.orderCode}${checkoutUserId ? `, userId=${checkoutUserId}` : ""}`);
@@ -4469,6 +4473,13 @@ async function handleOrderCompletion(orderId) {
   let fortnoxInvoiceNumber = null;
   let fortnoxCustomerNumber = null;
   let ongoingOrderId = null;
+
+  try {
+    const counted = await db.countOrderDiscountUsage(order.id);
+    if (counted) notes.push(`Rabattkod ${counted} avräknad`);
+  } catch (err) {
+    console.error(`[Order] ${order.order_number}: kunde inte räkna av rabattkod:`, err.message);
+  }
 
   // 1. Fortnox: find or create customer
   //

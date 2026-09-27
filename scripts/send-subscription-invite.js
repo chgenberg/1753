@@ -1,22 +1,58 @@
 /**
- * Engångsutskick: personligt prenumerationsmejl till kunder med ≥3 köp
- * som är aktiva i nyhetsbrevet men saknar produktprenumeration.
+ * Personligt prenumerationsmejl till kunder med minst ett betalt köp som
+ * är aktiva i nyhetsbrevet men saknar produktprenumeration. Texten anpassas
+ * efter den produkt kunden köpt mest av och efter antal köp.
  *
- * Kör: railway run -- node scripts/send-subscription-invite.js
+ * Kör:
+ *   railway run -- node scripts/send-subscription-invite.js --dry-run
+ *   railway run -- node scripts/send-subscription-invite.js --preview   (en per produkt till ägaren)
+ *   railway run -- node scripts/send-subscription-invite.js             (skarpt)
+ *
+ * Skarpa utskick loggas i logs/subscription-invite-sent.json; adresser där
+ * hoppas över vid omkörning.
  */
+const fs = require("fs");
+const path = require("path");
 const db = require("../db");
 
 const FROM = "1753 SKINCARE <info@1753skin.com>";
+const REPLY_TO = "info@1753skin.com";
 const SITE = "https://www.1753skin.com";
+const PREVIEW_TO = "ch.genberg@gmail.com";
 const EXCLUDE = new Set(["ch.genberg@gmail.com", "christopher@1753skincare.com"]);
+const SENT_LOG = path.join(__dirname, "..", "logs", "subscription-invite-sent.json");
+const SEND_DELAY_MS = 400;
+const EXAMPLE_INTERVAL_DAYS = 60;
 
-const PRODUCT_URL = {
-  "duo-kit": `${SITE}/sv/produkter/duo-kit`,
-  "duo-ta-da": `${SITE}/sv/produkter/duo-ta-da`,
-  "fungtastic-mushroom-extract": `${SITE}/sv/produkter/fungtastic-mushroom-extract`,
-  "au-naturel-makeup-remover": `${SITE}/sv/produkter/au-naturel-makeup-remover`,
-  "ta-da-serum": `${SITE}/sv/produkter/ta-da-serum`,
+const PRODUCTS = {
+  "duo-kit": { name: "DUO-kit", phrase: "DUO-kitet", list: 1099 },
+  "duo-ta-da": { name: "DUO-kit + TA-DA Serum", phrase: "DUO-kitet och TA-DA Serum", list: 1495 },
+  "fungtastic-mushroom-extract": { name: "Fungtastic Mushroom Extract", phrase: "Fungtastic Mushroom Extract", list: 377 },
+  "au-naturel-makeup-remover": { name: "Au Naturel Makeup Remover", phrase: "Au Naturel Makeup Remover", list: 399 },
+  "ta-da-serum": { name: "TA-DA Serum", phrase: "TA-DA Serum", list: 699 },
 };
+
+function subPrice(list) {
+  return Math.round(list * 0.85);
+}
+
+function kr(n) {
+  return n.toLocaleString("sv-SE").replace(/\s/g, "&nbsp;");
+}
+
+function krText(n) {
+  return n.toLocaleString("sv-SE").replace(/\s/g, " ");
+}
+
+function firstName(full) {
+  const raw = (full || "").trim().split(/\s+/)[0] || "";
+  if (!raw || raw.includes("@")) return "";
+  return raw
+    .toLowerCase()
+    .split("-")
+    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
+    .join("-");
+}
 
 function wrapper(content, unsubUrl) {
   return `
@@ -41,60 +77,99 @@ function btn(text, href) {
   </div>`;
 }
 
-function firstName(full) {
-  return (full || "").trim().split(/\s+/)[0] || "du";
-}
+const P = "font-size:15px;line-height:1.7;color:#515151;margin:0 0 14px";
 
-function buildEmail({ name, topProductId, topProductName, orderCount, subPrice, listPrice, unsubUrl }) {
+function buildEmail({ name, productId, orderCount, unsubUrl }) {
+  const p = PRODUCTS[productId];
   const fn = firstName(name);
-  const url = PRODUCT_URL[topProductId] || `${SITE}/sv/produkter`;
-  const subject = `${fn}, du handlar redan – då ska du ha bättre pris`;
+  const sub = subPrice(p.list);
+  const saving = p.list - sub;
+  const yearly = saving * Math.round(365 / EXAMPLE_INTERVAL_DAYS);
+  const url = `${SITE}/sv/produkter/${productId}`;
+  const repeat = orderCount >= 2;
+
+  const subject = fn ? `${fn}, en sak om ${p.phrase}` : `En sak om ${p.phrase}`;
+  const greeting = fn ? `Hej ${fn},` : "Hej,";
+
+  const intro = repeat
+    ? `Vi ser att du har handlat hos oss flera gånger, och att ${p.phrase} är det du oftast väljer. Det gör oss glada. Det säger oss att du har hittat något som fungerar för dig.`
+    : `Vi ser att du har köpt ${p.phrase} hos oss. Tack för det, på riktigt.`;
+
+  const subStrong = `<strong style="color:#1d1d1f">${kr(sub)}&nbsp;kr</strong>`;
+  const pitch = repeat
+    ? `Då tycker vi inte att du ska betala fullpris varje gång. Som prenumerant betalar du ${subStrong} i stället för ${kr(p.list)}&nbsp;kr. Det blir ${kr(saving)}&nbsp;kr mindre per leverans.`
+    : `Visste du att du kan få det billigare? Som prenumerant betalar du ${subStrong} i stället för ${kr(p.list)}&nbsp;kr, varje gång. Det blir ${kr(saving)}&nbsp;kr mindre per leverans.`;
+
+  const pitchText = repeat
+    ? `Då tycker vi inte att du ska betala fullpris varje gång. Som prenumerant betalar du ${krText(sub)} kr i stället för ${krText(p.list)} kr. Det blir ${krText(saving)} kr mindre per leverans.`
+    : `Visste du att du kan få det billigare? Som prenumerant betalar du ${krText(sub)} kr i stället för ${krText(p.list)} kr, varje gång. Det blir ${krText(saving)} kr mindre per leverans.`;
+
+  const yearLine = `Väljer du leverans var ${EXAMPLE_INTERVAL_DAYS}:e dag blir det ungefär ${kr(yearly)}&nbsp;kr kvar i plånboken på ett år.`;
+  const yearLineText = `Väljer du leverans var ${EXAMPLE_INTERVAL_DAYS}:e dag blir det ungefär ${krText(yearly)} kr kvar i plånboken på ett år.`;
+
+  const how = "Du väljer själv om det ska komma var 30:e, 60:e eller 90:e dag, och du slipper komma ihåg att beställa. Ingen bindningstid. Du kan ändra intervall, pausa eller avsluta när du vill under Mitt konto.";
+  const card = "En sak att veta: prenumerationen betalas med kort, eftersom Swish inte klarar automatiska dragningar. Första leveransen betalar du direkt, sedan dras resten automatiskt.";
+  const cta = `Prenumerera på ${p.name}`;
 
   const html = wrapper(`
-    <p style="font-size:16px;line-height:1.7;margin:24px 0 12px">Hej ${fn},</p>
-    <p style="font-size:15px;line-height:1.7;color:#515151;margin:0 0 14px">
-      Du har handlat hos oss ${orderCount} gånger nu. Det märks – och det betyder att du redan har hittat något som funkar.
-      Då tycker vi att du ska betala mindre för det, inte samma pris om och om igen.
-    </p>
-    <p style="font-size:15px;line-height:1.7;color:#515151;margin:0 0 14px">
-      Med en prenumeration får du <strong style="color:#1d1d1f">15&nbsp;% rabatt</strong> på varje leverans.
-      På ${topProductName} betyder det <strong style="color:#1d1d1f">${subPrice}&nbsp;kr</strong> i stället för ${listPrice}&nbsp;kr – och du slipper komma ihåg att beställa.
-    </p>
-    <p style="font-size:15px;line-height:1.7;color:#515151;margin:0 0 8px">
-      Så här gör du:
-    </p>
-    <ol style="font-size:15px;line-height:1.8;color:#515151;padding-left:20px;margin:0 0 14px">
-      <li>Gå in på produktsidan för ${topProductName}.</li>
-      <li>Klicka på <em>Prenumerera &amp; spara 15&nbsp;%</em>.</li>
-      <li>Välj om du vill ha leverans var 30:e eller var 60:e dag.</li>
-      <li>Slutför köpet – sen sköter vi resten. Du kan pausa eller avsluta när du vill under Mitt konto.</li>
-    </ol>
-    ${btn(`Prenumerera på ${topProductName}`, url)}
-    <p style="font-size:15px;line-height:1.7;color:#515151;margin:0 0 14px">
-      Inget krångel, ingen bindningstid. Bara ett ärligare pris för dig som redan är med oss.
-    </p>
+    <p style="font-size:16px;line-height:1.7;margin:24px 0 12px">${greeting}</p>
+    <p style="${P}">${intro}</p>
+    <p style="${P}">${pitch}</p>
+    <p style="${P}">${yearLine}</p>
+    <p style="${P}">${how}</p>
+    <p style="${P}">${card}</p>
+    ${btn(cta, url)}
     <p style="font-size:15px;line-height:1.7;color:#515151;margin:0">
-      Hör gärna av dig om du undrar något.<br><br>
+      Hör av dig om du undrar något. Svara bara på det här mejlet, jag läser själv.<br><br>
       / Christopher<br>
       <span style="color:#766a62">1753 SKINCARE</span>
     </p>
   `, unsubUrl);
 
-  return { subject, html, url };
+  const text = [
+    greeting,
+    "",
+    intro,
+    "",
+    pitchText,
+    "",
+    yearLineText,
+    "",
+    how,
+    "",
+    card,
+    "",
+    `${cta}: ${url}`,
+    "",
+    "Hör av dig om du undrar något. Svara bara på det här mejlet, jag läser själv.",
+    "",
+    "/ Christopher",
+    "1753 SKINCARE",
+    "",
+    unsubUrl ? `Avprenumerera: ${unsubUrl}` : "",
+  ].join("\n");
+
+  return { subject, html, text };
 }
 
-const PRICE = {
-  "duo-kit": { name: "DUO-kit", list: 1099, sub: 934 },
-  "duo-ta-da": { name: "DUO-kit + TA-DA Serum", list: 1495, sub: 1271 },
-  "fungtastic-mushroom-extract": { name: "Fungtastic Mushroom Extract", list: 377, sub: 320 },
-  "au-naturel-makeup-remover": { name: "Au Naturel Makeup Remover", list: 399, sub: 339 },
-  "ta-da-serum": { name: "TA-DA Serum", list: 699, sub: 594 },
-};
+function readSentLog() {
+  try {
+    return JSON.parse(fs.readFileSync(SENT_LOG, "utf8"));
+  } catch {
+    return {};
+  }
+}
+
+function writeSentLog(log) {
+  fs.mkdirSync(path.dirname(SENT_LOG), { recursive: true });
+  fs.writeFileSync(SENT_LOG, JSON.stringify(log, null, 2));
+}
+
+const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 async function main() {
   const dryRun = process.argv.includes("--dry-run");
   const previewOnly = process.argv.includes("--preview");
-  const fetch = (await import("node-fetch")).default;
   const { Resend } = require("resend");
   const apiKey = process.env.RESEND_API_KEY;
   if (!dryRun && !apiKey) throw new Error("RESEND_API_KEY saknas");
@@ -110,7 +185,6 @@ async function main() {
       WHERE payment_status = 'paid'
         AND customer_email IS NOT NULL AND customer_email != ''
       GROUP BY 1
-      HAVING COUNT(*) >= 3
     ),
     product_subs AS (
       SELECT DISTINCT LOWER(COALESCE(NULLIF(s.customer_email,''), u.email)) AS email
@@ -122,7 +196,8 @@ async function main() {
     top_product AS (
       SELECT LOWER(o.customer_email) AS email,
              COALESCE(i->>'productId', i->>'id') AS product_id,
-             SUM(COALESCE((i->>'quantity')::int, 1)) AS qty
+             SUM(COALESCE((i->>'quantity')::int, 1)) AS qty,
+             MAX(o.created_at) AS last_bought
       FROM orders o
       CROSS JOIN LATERAL jsonb_array_elements(
         CASE WHEN jsonb_typeof(o.items::jsonb) = 'array' THEN o.items::jsonb ELSE '[]'::jsonb END
@@ -133,9 +208,9 @@ async function main() {
     ranked AS (
       SELECT DISTINCT ON (email) email, product_id
       FROM top_product
-      ORDER BY email, qty DESC
+      ORDER BY email, qty DESC, last_bought DESC
     )
-    SELECT b.email, b.name, b.orders, s.id AS subscriber_id, s.unsubscribe_token,
+    SELECT b.email, b.name, b.orders::int AS orders, s.id AS subscriber_id, s.unsubscribe_token,
            r.product_id AS top_product_id
     FROM buyers b
     JOIN subscribers s ON LOWER(s.email) = b.email
@@ -146,43 +221,53 @@ async function main() {
     ORDER BY b.orders DESC, b.email
   `);
 
-  const toSend = targets.filter((t) => !EXCLUDE.has(t.email.toLowerCase()));
-  console.log(`[SubInvite] ${toSend.length} mottagare (exkl. interna)${dryRun ? " [dry-run]" : ""}${previewOnly ? " [preview]" : ""}`);
+  const sentLog = readSentLog();
+  const toSend = targets
+    .filter((t) => !EXCLUDE.has(t.email.toLowerCase()))
+    .filter((t) => !sentLog[t.email.toLowerCase()])
+    .map((t) => ({ ...t, productId: PRODUCTS[t.top_product_id] ? t.top_product_id : "duo-kit" }));
+
+  const byProduct = {};
+  for (const t of toSend) byProduct[t.productId] = (byProduct[t.productId] || 0) + 1;
+  console.log(`[SubInvite] ${toSend.length} mottagare (exkl. interna och redan skickade)${dryRun ? " [dry-run]" : ""}${previewOnly ? " [preview]" : ""}`);
+  console.log(`[SubInvite] Per produkt: ${JSON.stringify(byProduct)}`);
 
   if (dryRun) {
-    console.log(JSON.stringify(toSend.map((t) => ({ email: t.email, name: t.name, orders: t.orders })), null, 2));
+    console.log(JSON.stringify(toSend.map((t) => ({
+      email: t.email, name: firstName(t.name) || "(inget namn)", orders: t.orders, product: PRODUCTS[t.productId].name,
+    })), null, 2));
+    await db.pool.end();
+    return;
+  }
+
+  let sendList;
+  if (previewOnly) {
+    const onlySingle = process.argv.includes("--single");
+    const samples = onlySingle
+      ? [toSend.find((t) => t.orders === 1)]
+      : Object.keys(PRODUCTS).map((pid) => toSend.find((t) => t.productId === pid));
+    sendList = samples
+      .filter(Boolean)
+      .map((t) => ({ ...t, email: PREVIEW_TO, subscriber_id: null }));
+  } else {
+    sendList = toSend;
+  }
+  if (sendList.length === 0) {
+    console.log("[SubInvite] Inga mottagare");
     await db.pool.end();
     return;
   }
 
   const results = [];
-  const sendList = previewOnly
-    ? [{ ...toSend[0], email: "ch.genberg@gmail.com", name: toSend[0]?.name || "Christopher Genberg" }]
-    : toSend;
-  if (previewOnly && !toSend[0]) {
-    console.log("[SubInvite] Ingen mottagare att förhandsvisa");
-    await db.pool.end();
-    return;
-  }
-  if (!resend) throw new Error("RESEND_API_KEY saknas");
   for (const t of sendList) {
-    const pid = t.top_product_id && PRICE[t.top_product_id] ? t.top_product_id : "duo-kit";
-    const p = PRICE[pid];
-    const unsubUrl = `${apiBase}/api/newsletter/unsubscribe/${t.unsubscribe_token}`;
-    const built = buildEmail({
-      name: t.name,
-      topProductId: pid,
-      topProductName: p.name,
-      orderCount: t.orders,
-      subPrice: p.sub,
-      listPrice: p.list,
-      unsubUrl,
-    });
-    const subject = previewOnly ? `[PREVIEW] ${built.subject}` : built.subject;
-    const html = built.html;
+    const unsubUrl = t.unsubscribe_token ? `${apiBase}/api/newsletter/unsubscribe/${t.unsubscribe_token}` : null;
+    const built = buildEmail({ name: t.name, productId: t.productId, orderCount: t.orders, unsubUrl });
+    const subject = previewOnly
+      ? `[TEST ${PRODUCTS[t.productId].name}, ${t.orders} köp] ${built.subject}`
+      : built.subject;
 
     try {
-      const payload = { from: FROM, to: t.email, subject, html };
+      const payload = { from: FROM, to: t.email, replyTo: REPLY_TO, subject, html: built.html, text: built.text };
       if (!previewOnly && unsubUrl) {
         payload.headers = {
           "List-Unsubscribe": `<${unsubUrl}>`,
@@ -191,18 +276,24 @@ async function main() {
       }
       const { data, error } = await resend.emails.send(payload);
       if (error) throw new Error(error.message || JSON.stringify(error));
-      if (!previewOnly && t.subscriber_id) await db.touchSubscriberEmailed(t.subscriber_id);
-      console.log(`[SubInvite] OK → ${t.email} (${firstName(t.name)}, ${p.name}) id=${data?.id || "?"}`);
-      results.push({ email: t.email, ok: true, product: p.name, subject });
+      if (!previewOnly) {
+        if (t.subscriber_id) await db.touchSubscriberEmailed(t.subscriber_id);
+        sentLog[t.email.toLowerCase()] = { at: new Date().toISOString(), product: t.productId, id: data?.id || null };
+        writeSentLog(sentLog);
+      }
+      console.log(`[SubInvite] OK → ${t.email} (${firstName(t.name) || "-"}, ${PRODUCTS[t.productId].name}, ${t.orders} köp) id=${data?.id || "?"}`);
+      results.push({ email: t.email, ok: true });
     } catch (err) {
       console.error(`[SubInvite] FEL → ${t.email}:`, err.message);
       results.push({ email: t.email, ok: false, error: err.message });
     }
+    await sleep(SEND_DELAY_MS);
   }
 
   const ok = results.filter((r) => r.ok).length;
   console.log(`[SubInvite] Klart: ${ok}/${results.length}`);
-  console.log(JSON.stringify(results, null, 2));
+  const failed = results.filter((r) => !r.ok);
+  if (failed.length) console.log(JSON.stringify(failed, null, 2));
   await db.pool.end();
   process.exit(ok === results.length ? 0 : 1);
 }
