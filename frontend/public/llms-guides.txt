@@ -7,14 +7,25 @@ also exist in Spanish, German and French (hreflang alternates).
 
 - Canonical URL pattern (Swedish): https://www.1753skin.com/sv/guide/<svSlug>
 - English URL pattern: https://www.1753skin.com/en/guide/<enSlug>
-- Total guides (canonical): 379
-- Last generated: 2026-07-21
+- Total guides (canonical): 387
+- Last generated: 2026-10-26
 - Human-readable index: https://www.1753skin.com/sv/guide/alla
 - RSS feed: https://www.1753skin.com/guide/rss.xml
 - Sitemap: https://www.1753skin.com/sitemap.xml
 
 Format per entry:
     <svSlug> | <enSlug> | <one-sentence summary>
+
+## Questions and answers (honest short answers to common skin questions) (8)
+
+hur-lang-tid-tar-det-innan-cbd-hudvard-ger-effekt | how-long-does-cbd-skincare-take-to-work | Räkna med fyra till sex veckor. Varför det tar tid, vad du kan märka tidigare och när du ska ge upp. Ett ärligt svar från 1753 SKINCARE.
+kan-man-anvanda-ansiktsolja-om-man-har-finnar | can-you-use-face-oil-if-you-have-acne | Det är inte oljan i sig som ger finnar, utan vilken olja och hur mycket. Ett ärligt svar om ansiktsolja, jojoba och CBD vid akne.
+kan-man-anvanda-ansiktsolja-vid-seborroiskt-eksem | can-you-use-face-oil-with-seborrheic-dermatitis | Seborroiskt eksem hänger ihop med en jästsvamp som trivs på hudens fetter. Därför spelar valet av olja roll. Ett ärligt svar om vad som är känt.
+kan-man-anvanda-cbd-hudvard-nar-man-ar-gravid | can-you-use-cbd-skincare-while-pregnant | Det finns för lite forskning för att säga att CBD är säkert under graviditet och amning. Vårt ärliga svar och vad du kan göra istället.
+kan-man-anvanda-cbd-vid-perioral-dermatit | can-you-use-cbd-for-perioral-dermatitis | Perioral dermatit blir ofta värre av krämer och många ingredienser. Vad vi vet, vad vi inte vet och hur du testar CBD-hudvård försiktigt.
+kan-man-anvanda-cbd-vid-rosacea | can-you-use-cbd-with-rosacea | CBD är ingen behandling för rosacea, men många med rosacea söker milda produkter med få ingredienser. Ett ärligt svar om vad som är känt.
+kan-man-bli-allergisk-mot-cbd-hudvard | can-you-be-allergic-to-cbd-skincare | Ja, i sällsynta fall, som mot all hudvård. Så skiljer du irritation från allergi, och så testar du en ny produkt säkert.
+vilken-cbd-olja-ska-man-borja-med-vid-kanslig-hud | which-cbd-oil-to-start-with-for-sensitive-skin | Har du torr, känslig hud som reagerar på det mesta? Börja med en enda produkt med så få ingredienser som möjligt. Så testar du försiktigt.
 
 ## CBD (15)
 

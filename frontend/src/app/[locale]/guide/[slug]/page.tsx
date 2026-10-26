@@ -20,6 +20,7 @@ const OG_LOCALE: Record<string, string> = { sv: "sv_SE", en: "en_US", es: "es_ES
 
 const ARTICLE_PUBLISHED = "2026-01-15";
 const ARTICLE_MODIFIED_FALLBACK = "2026-04-16";
+const CATEGORY_PUBLISHED: Record<string, string> = { question: "2026-10-26" };
 
 /**
  * Map each page category to its source data file, so we can derive a
@@ -50,6 +51,7 @@ const CATEGORY_FILE: Record<string, string> = {
   wellness: "pages-wellness.ts",
   profession: "pages-profession.ts",
   science: "pages-science.ts",
+  question: "pages-questions.ts",
 };
 
 const SEO_DIR = path.join(process.cwd(), "src", "lib", "seo");
@@ -176,6 +178,12 @@ const CATEGORY_SOURCES: Record<string, SourceRef[]> = {
     { text: "Tóth KF, Ádám D, Bíró T, Oláh A. Cannabinoid signaling in the skin: therapeutic potential of the c(ut)annabinoid system. Molecules 2019;24(5):918.", href: "https://doi.org/10.3390/molecules24050918" },
     { text: "Byrd AL, Belkaid Y, Segre JA. The human skin microbiome. Nat Rev Microbiol 2018;16(3):143–155.", href: "https://doi.org/10.1038/nrmicro.2017.157" },
   ],
+  question: [
+    { text: "Baswan SM, Klosner AE, Glynn K, et al. Therapeutic Potential of Cannabidiol (CBD) for Skin Health and Disorders. Clin Cosmet Investig Dermatol 2020;13:927–942.", href: "https://doi.org/10.2147/CCID.S286411" },
+    { text: "Oláh A, Tóth BI, Borbíró I, et al. Cannabidiol exerts sebostatic and antiinflammatory effects on human sebocytes. J Clin Invest 2014;124(9):3713–3724.", href: "https://doi.org/10.1172/JCI64628" },
+    { text: "Tóth KF, Ádám D, Bíró T, Oláh A. Cannabinoid signaling in the skin: therapeutic potential of the c(ut)annabinoid system. Molecules 2019;24(5):918.", href: "https://doi.org/10.3390/molecules24050918" },
+    { text: "Lin TK, Zhong L, Santiago JL. Anti-Inflammatory and Skin Barrier Repair Effects of Topical Application of Some Plant Oils. Int J Mol Sci 2017;19(1):70." },
+  ],
 };
 
 function getSources(category: string): SourceRef[] {
@@ -202,8 +210,9 @@ const CATEGORY_AFFINITY: Record<string, string[]> = {
   comparison: ["ingredient", "cbd", "cbg", "myth"],
   myth: ["science", "comparison", "ingredient"],
   science: ["cbd", "cbg", "ingredient", "myth"],
-  symptom: ["condition", "howto", "ingredient", "bodypart"],
-  condition: ["symptom", "howto", "lifestyle", "ingredient"],
+  question: ["condition", "symptom", "cbd", "cbg"],
+  symptom: ["condition", "question", "howto", "ingredient"],
+  condition: ["symptom", "question", "howto", "lifestyle"],
   bodypart: ["symptom", "condition", "howto"],
   lifecycle: ["audience", "symptom", "wellness"],
   audience: ["lifecycle", "wellness", "lifestyle"],
@@ -285,6 +294,7 @@ const CATEGORY_IMAGES: Record<string, { hero: string; secondary?: string }> = {
   stad_v2:    { hero: `${LP}/6.webp`, secondary: `${LP}/7.webp` },
   stad_eu:    { hero: `${LP}/6.webp`, secondary: `${LP}/2.webp` },
   science:    { hero: `${LP}/3.webp`, secondary: `${LP}/4.webp` },
+  question:   { hero: `${LP}/3.webp`, secondary: `${LP}/5.webp` },
 };
 
 const FALLBACK = { hero: `${LP}/1.webp` };
@@ -388,6 +398,7 @@ export default async function GuidePage({ params }: Props) {
   const t = getMessages(l);
   const images = getImages(page.category);
   const articleModified = getCategoryModifiedDate(page.category);
+  const articlePublished = CATEGORY_PUBLISHED[page.category] || ARTICLE_PUBLISHED;
   const products = page.productIds
     .map((id) => PRODUCTS.find((p) => p.id === id))
     .filter(Boolean);
@@ -514,6 +525,11 @@ export default async function GuidePage({ params }: Props) {
       { name: "Skin microbiome", sameAs: "https://www.wikidata.org/wiki/Q19342040" },
       { name: "Dermatology", sameAs: "https://www.wikidata.org/wiki/Q171171" },
     ],
+    question: [
+      { name: "Cannabidiol", sameAs: "https://www.wikidata.org/wiki/Q422197" },
+      { name: "Skin condition", sameAs: "https://www.wikidata.org/wiki/Q47526" },
+      { name: "Dermatology", sameAs: "https://www.wikidata.org/wiki/Q171171" },
+    ],
   };
 
   const aboutEntities = (CATEGORY_ENTITIES[page.category] || CATEGORY_ENTITIES.general).map((e) => ({
@@ -533,7 +549,7 @@ export default async function GuidePage({ params }: Props) {
       width: 1200,
       height: 1200,
     },
-    datePublished: ARTICLE_PUBLISHED,
+    datePublished: articlePublished,
     dateModified: articleModified,
     author: {
       "@type": "Person",
@@ -649,8 +665,8 @@ export default async function GuidePage({ params }: Props) {
                 </Link>
               </span>
               <span className="text-[#e6e6e6]" aria-hidden="true">|</span>
-              <time dateTime={ARTICLE_PUBLISHED}>
-                {tx(l, "Publicerad", "Published", "Publicado", "Veröffentlicht", "Publié")} {formatDate(ARTICLE_PUBLISHED, l)}
+              <time dateTime={articlePublished}>
+                {tx(l, "Publicerad", "Published", "Publicado", "Veröffentlicht", "Publié")} {formatDate(articlePublished, l)}
               </time>
               <span className="text-[#e6e6e6]" aria-hidden="true">|</span>
               <time dateTime={articleModified} className="text-[#108474]">

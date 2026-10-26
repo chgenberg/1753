@@ -19,6 +19,7 @@ const SEO_DIR = path.join(ROOT, "frontend", "src", "lib", "seo");
 const OUT = path.join(ROOT, "frontend", "public", "llms-guides.txt");
 
 const FILES = [
+  "pages-questions.ts",
   "pages-skinanalysis.ts",
   "pages-tier1.ts",
   "pages-cbd.ts",
@@ -45,6 +46,7 @@ const FILES = [
 ];
 
 const CATEGORY_LABELS = {
+  question: "Questions and answers (honest short answers to common skin questions)",
   tier1: "Tier 1 hub pages",
   cbd: "CBD",
   cbg: "CBG",
@@ -124,7 +126,7 @@ function main() {
   }
 
   const order = [
-    "tier1", "cbd", "cbg", "ingredient", "comparison", "myth", "trend", "science",
+    "question", "tier1", "cbd", "cbg", "ingredient", "comparison", "myth", "trend", "science",
     "symptom", "condition", "bodypart", "lifecycle", "audience", "wellness",
     "lifestyle", "seasonal", "profession", "howto",
     "stad", "stad_v2", "stad_eu", "general",

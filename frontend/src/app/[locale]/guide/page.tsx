@@ -23,6 +23,7 @@ function getSlug(page: LandingPage, locale: Locale): string {
 }
 
 const CATEGORIES: Record<string, Record<string, string>> = {
+  question:   { sv: "Frågor och svar", en: "Questions and answers", es: "Preguntas y respuestas", de: "Fragen und Antworten", fr: "Questions et réponses", icon: "/landing-pages/3.webp" },
   howto:      { sv: "Guides och rutiner", en: "Guides & routines", es: "Guías y rutinas", de: "Guides & Routinen", fr: "Guides et routines", icon: "/landing-pages/1.webp" },
   condition:  { sv: "Hudtillstånd", en: "Skin conditions", es: "Afecciones cutáneas", de: "Hautzustände", fr: "Affections cutanées", icon: "/landing-pages/3.webp" },
   symptom:    { sv: "Hudsymtom", en: "Skin symptoms", es: "Síntomas cutáneos", de: "Hautsymptome", fr: "Symptômes cutanés", icon: "/landing-pages/3.webp" },
@@ -110,6 +111,7 @@ export default async function GuidePage({ params }: Props) {
   }
 
   const categoryOrder = [
+    "question",
     "howto",
     "condition",
     "symptom",
