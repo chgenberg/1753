@@ -161,6 +161,7 @@ export default function AdminInboxPage() {
       orders?: { order_number: string; status: string; total_amount: number }[];
       loyaltyPoints?: number;
       tier?: string;
+      facts?: string[];
     };
 
     return (
@@ -194,7 +195,20 @@ export default function AdminInboxPage() {
               {selected.body_text}
             </div>
 
-            {ctx.orders?.length ? (
+            {ctx.facts?.length ? (
+              <div className="mt-4">
+                <p className="text-xs font-medium text-[#766a62] mb-2 flex items-center gap-1">
+                  <User className="h-3 w-3" /> Kundfakta
+                </p>
+                <ul className="space-y-1.5">
+                  {ctx.facts.map((f, i) => (
+                    <li key={i} className="text-xs leading-relaxed text-[#515151]">
+                      {f}
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            ) : ctx.orders?.length ? (
               <div className="mt-4">
                 <p className="text-xs font-medium text-[#766a62] mb-2 flex items-center gap-1">
                   <User className="h-3 w-3" /> Kundkontext

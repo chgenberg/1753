@@ -6328,7 +6328,7 @@ async function sendPremiumAnalysisReady(purchase) {
 
 // ---- AI EMAIL ASSISTANT ----
 
-const EMAIL_AI_MODEL = "gpt-5.4";
+const EMAIL_AI_MODEL = process.env.EMAIL_AI_MODEL || OPENAI_MODEL;
 
 const EMAIL_SYSTEM_PROMPT = `Du är 1753 SKINCAREs kundtjänst-assistent. Du skriver mejlsvar åt teamet.
 
@@ -6337,6 +6337,7 @@ DITT UPPDRAG:
 - Svara på det språk kunden skriver (svenska eller engelska)
 - Tonen: varm, ärlig, lite rebellisk men alltid hjälpsam. Aldrig korporativ eller klinisk
 - Använd ALDRIG emojis
+- Skriv ren text: ingen ämnesrad, ingen markdown (inga ** eller #). Svaret skickas som det står
 - Signera alltid med:
 
 Varma hälsningar,
@@ -6347,21 +6348,24 @@ info@1753skin.com | 0732-30 55 21
 KUNSKAP:
 - 1753 SKINCARE är ett svenskt familjeföretag grundat av Christopher och Ebba Genberg
 - Adress: Södra Skjutbanevägen 10, 439 55 Åsa
-- Fri frakt (0 kr)
-- Produkter: CBD/CBG-baserad hudvård (ansiktsoljor, serum, makeup remover, svamptillskott)
-- Prenumeration ger 15% rabatt
+- Frakt: fri frakt över 600 kr (60 EUR), annars 55 kr. Skickas med PostNord från lagret, normalt 2–5 arbetsdagar till brevlådan eller ett utlämningsställe
+- Gåva: ordrar på minst 1 500 kr (130 EUR) efter rabatter får Au Naturel Makeup Remover på köpet automatiskt
+- Prenumeration: 15% rabatt, leverans var 30:e, 60:e eller 90:e dag, betalas med kort (inte Swish), ingen bindningstid. Kunden pausar, ändrar intervall eller avslutar under Mitt konto
+- Ångerrätt 14 dagar från mottagandet, oanvänd produkt i originalförpackning
+- Lojalitetsprogram: Silver (2 000 poäng), Guld (5 000), Platina (10 000). Nivårabatten dras inte automatiskt i kassan i dag. Om kunden saknar sin nivårabatt: be om ursäkt och skriv att teamet skickar en personlig rabattkod
 - Vi har AI-driven hudanalys på sajten (gratis)
 - Hemsida: www.1753skin.com
 
 PRODUKTER:
 1. DUO-kit + TA-DA Serum (1 495 kr) – The ONE + I LOVE ansiktsoljor + TA-DA Serum
-2. TA-DA Serum (699 kr, 30 ml) – CBG 3% i ekologisk jojobaolja
-3. DUO-kit (1 099 kr) – The ONE (10% CBD) + I LOVE (10% CBD, 5% CBG) ansiktsoljor
+2. TA-DA Serum (699 kr, 30 ml) – ekologisk jojobaolja och CBG 3%, bara två ingredienser
+3. DUO-kit (1 099 kr) – The ONE (10% CBD, 0,2% CBG, morgon) + I LOVE (10% CBD, 5% CBG, kväll), 2 × 10 ml
 4. Au Naturel Makeup Remover (399 kr, 100 ml) – MCT-olja + CBD
-5. Fungtastic Mushroom Extract (377 kr, 60 kapslar) – Chaga, Lion's Mane, Cordyceps, Reishi
+5. Fungtastic Mushroom Extract har utgått. Den ersätts av ett nytt chagatillskott som inte är lanserat ännu – lova inget datum
 
 REGLER:
-- Om kunden frågar om specifik order: ange ordernummer och status om du har kontexten, annars be om ordernummer
+- KUNDFAKTA i meddelandet är hämtade ur vårt system just nu. Använd dem: ordernummer, spårningslänk, prenumerationsdatum, rabattkoder. Påstå aldrig något om kundens order som inte står i KUNDFAKTA
+- Om kunden frågar om specifik order och KUNDFAKTA saknar den: be om ordernummer
 - Ge aldrig medicinsk rådgivning
 - Gör inga löften om resultat – formulera försiktigt ("många upplever", "de flesta märker skillnad")
 - Om du saknar info för att svara korrekt: skriv ett vänligt svar som förklarar att teamet kollar upp det och återkommer
@@ -6373,6 +6377,9 @@ async function generateEmailDraft(customerEmail, customerName, subject, bodyText
   if (!apiKey) return "";
 
   let contextBlock = "";
+  if (customerContext?.facts?.length) {
+    contextBlock += `\n\nKUNDFAKTA (från vårt system):\n${customerContext.facts.map(f => `- ${f}`).join("\n")}`;
+  }
   if (customerContext) {
     if (customerContext.orders?.length) {
       contextBlock += `\n\nKUNDENS ORDERHISTORIK:\n${customerContext.orders.map(o => `- ${o.order_number}: ${o.status}, ${o.total_amount} kr (${new Date(o.created_at).toLocaleDateString("sv-SE")})`).join("\n")}`;
@@ -6416,26 +6423,135 @@ ${contextBlock}`;
   }
 }
 
-async function fetchCustomerContext(email) {
+function escHtml(v) {
+  return String(v ?? "").replace(/[&<>"']/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c]));
+}
+
+function isLikelySpamMessage(name, message) {
+  const gibberish = (v) => {
+    const t = String(v || "").trim();
+    return t.length >= 12 && !/\s/.test(t) && /^[A-Za-z]+$/.test(t)
+      && (t.match(/[A-Z]/g) || []).length >= 3 && /[a-z][A-Z]/.test(t);
+  };
+  const msg = String(message || "").trim();
+  return gibberish(msg) || (gibberish(name) && !/\s/.test(msg));
+}
+
+function orderProductsLabel(items) {
+  const list = typeof items === "string" ? JSON.parse(items) : (items || []);
+  return list.map((i) => `${i.name}${i.quantity > 1 ? ` x${i.quantity}` : ""}${i.gift ? " (gåva)" : ""}${i.subscription ? " (prenumeration)" : ""}`).join(", ");
+}
+
+// Samlar det teamet annars slår upp för hand: ordrar (även gästköp), spårning,
+// misslyckade betalningar, prenumerationer, personliga rabattkoder och nivå.
+// `facts` är färdiga meningar som visas för teamet och matas till svarsutkastet.
+async function fetchCustomerContext(email, name) {
   const context = {};
+  const facts = [];
+  const lc = String(email || "").trim().toLowerCase();
+  if (!lc) return context;
+  const day = (d) => new Date(d).toLocaleDateString("sv-SE");
   try {
-    const user = await db.findUserByEmail(email);
+    const user = await db.findUserByEmail(lc);
     if (user) {
       context.name = user.name;
       context.loyaltyPoints = user.loyalty_points;
       context.tier = user.tier;
-      const orders = await db.findOrdersByEmail(email);
-      if (orders?.length) context.orders = orders.slice(0, 10);
-      const subs = await db.findSubscriptionsByUser(user.id);
-      if (subs?.length) context.subscriptions = subs;
+    }
+
+    const { rows: orders } = await db.pool.query(
+      `SELECT order_number, status, payment_status, items, total_amount, shipping_cost, created_at,
+              shipped_at, tracking_number, tracking_url, discount_code, ongoing_order_id
+         FROM orders WHERE LOWER(customer_email) = $1 ORDER BY created_at DESC LIMIT 10`,
+      [lc]
+    );
+    if (orders.length) {
+      context.orders = orders.map((o) => ({
+        order_number: o.order_number,
+        status: o.payment_status === "paid" ? o.status : `obetald (${o.payment_status})`,
+        total_amount: o.total_amount,
+        created_at: o.created_at,
+      }));
+      const paid = orders.filter((o) => o.payment_status === "paid");
+      const paidSum = paid.reduce((s, o) => s + Number(o.total_amount || 0), 0);
+      facts.push(`Betalda ordrar: ${paid.length} st, ${paidSum} kr totalt (senaste 10 ordrarna).`);
+
+      const latest = paid[0];
+      if (latest) {
+        facts.push(`Senaste betalda order ${latest.order_number} (${day(latest.created_at)}): ${orderProductsLabel(latest.items)}, ${latest.total_amount} kr${latest.discount_code ? `, rabattkod ${latest.discount_code}` : ""}.`);
+        if (latest.tracking_number || latest.tracking_url) {
+          facts.push(`Order ${latest.order_number} är skickad${latest.shipped_at ? ` ${day(latest.shipped_at)}` : ""}. Spårning: ${latest.tracking_url || latest.tracking_number}`);
+        } else if (latest.ongoing_order_id && Date.now() - new Date(latest.created_at).getTime() < 45 * 86_400_000) {
+          try {
+            const og = await ongoingFetch(`/orders?orderNumber=${encodeURIComponent(latest.ongoing_order_id)}`);
+            const o = Array.isArray(og) ? og[0] : og;
+            const statusText = o?.orderInfo?.orderStatus?.text;
+            const parcel = (o?.parcels || []).find((p) => p?.tracking?.waybill || p?.tracking?.trackingUrl);
+            if (statusText) {
+              facts.push(`Lagret (Ongoing) säger om order ${latest.order_number}: ${statusText}${parcel ? `. Spårning: ${parcel.tracking.trackingUrl || parcel.tracking.waybill}` : ""}.`);
+            }
+          } catch (err) {
+            facts.push(`Lagerstatus för order ${latest.order_number} kunde inte hämtas just nu.`);
+          }
+        }
+      }
+
+      const unpaidRecent = orders.filter((o) => o.payment_status !== "paid"
+        && Date.now() - new Date(o.created_at).getTime() < 14 * 86_400_000
+        && (!latest || new Date(o.created_at) > new Date(latest.created_at)));
+      if (unpaidRecent.length) {
+        const u = unpaidRecent[0];
+        facts.push(`Obetalt köpförsök ${u.order_number} (${day(u.created_at)}, ${u.total_amount} kr${u.discount_code ? `, kod ${u.discount_code}` : ""}): betalningen gick troligen inte igenom.`);
+      }
+    }
+
+    const { rows: subs } = await db.pool.query(
+      `SELECT product_name, status, interval_days, recurring_price, next_charge_date, last_charge_date
+         FROM subscriptions
+        WHERE cancelled_at IS NULL
+          AND (LOWER(customer_email) = $1 OR ($2::uuid IS NOT NULL AND user_id = $2::uuid))`,
+      [lc, user?.id || null]
+    );
+    if (subs.length) {
+      context.subscriptions = subs;
+      for (const sub of subs) {
+        facts.push(`Prenumeration: ${sub.product_name}, ${sub.status}, var ${sub.interval_days}:e dag, ${sub.recurring_price} kr${sub.last_charge_date ? `, senast dragen ${day(sub.last_charge_date)}` : ""}${sub.next_charge_date ? `, nästa dragning ${day(sub.next_charge_date)}` : ""}.`);
+      }
+    }
+
+    const displayName = String(name || context.name || "").trim().toLowerCase();
+    const candidates = [...new Set([
+      displayName.split(/\s+/)[0],
+      displayName.replace(/[^a-z0-9åäö]/g, ""),
+    ].filter((c) => c && c.length >= 3))];
+    if (candidates.length) {
+      const { rows: codes } = await db.pool.query(
+        `SELECT code, percent, fixed_amount, max_uses, used_count, active, valid_until
+           FROM discount_codes WHERE code = ANY($1)`,
+        [candidates]
+      );
+      for (const c of codes) {
+        const value = c.fixed_amount ? `${c.fixed_amount} kr` : `${c.percent}%`;
+        const uses = c.max_uses ? `${c.used_count}/${c.max_uses} använd` : `${c.used_count} användningar, obegränsad`;
+        const expired = c.valid_until && new Date(c.valid_until) < new Date();
+        facts.push(`Personlig rabattkod "${c.code}": ${value}, ${uses}${!c.active ? ", inaktiv" : ""}${expired ? ", har gått ut" : ""}.`);
+      }
+    }
+
+    if (["Silver", "Guld", "Platina"].includes(context.tier)) {
+      facts.push(`Lojalitetsnivå ${context.tier} (${context.loyaltyPoints ?? 0} poäng). Nivårabatten dras inte automatiskt i kassan i dag.`);
+    }
+    if (!user && !orders.length) {
+      facts.push("Inget konto och ingen order hittades på den här e-postadressen.");
     }
   } catch (err) {
     console.error("[EmailAI] Context fetch error:", err.message);
   }
+  context.facts = facts;
   return context;
 }
 
-async function sendAdminNotification(fromEmail, fromName, subject) {
+async function sendAdminNotification(fromEmail, fromName, subject, details = {}) {
   try {
     const apiKey = process.env.RESEND_API_KEY;
     if (!apiKey) return;
@@ -6452,7 +6568,9 @@ async function sendAdminNotification(fromEmail, fromName, subject) {
           <h3 style="color:#1d1d1f;margin-bottom:8px">Nytt inkommande meddelande</h3>
           <p style="color:#515151"><strong>Fran:</strong> ${fromName || "Okant"} &lt;${fromEmail}&gt;</p>
           <p style="color:#515151"><strong>Amne:</strong> ${subject}</p>
-          <p style="color:#515151">Ett AI-genererat svarsutkast vantar pa godkannande i admin-panelen.</p>
+          ${details.message ? `<div style="background:#f5f5f7;border-radius:12px;padding:14px 16px;margin:12px 0;white-space:pre-wrap;color:#1d1d1f;font-size:14px;line-height:1.6">${escHtml(details.message)}</div>` : ""}
+          ${details.facts?.length ? `<p style="color:#766a62;font-size:12px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;margin:18px 0 6px">Kundfakta</p><ul style="color:#515151;font-size:13px;line-height:1.6;padding-left:18px;margin:0">${details.facts.map((f) => `<li>${escHtml(f)}</li>`).join("")}</ul>` : ""}
+          ${details.draft ? `<p style="color:#766a62;font-size:12px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;margin:18px 0 6px">Förslag på svar</p><div style="border-left:3px solid #108474;padding:4px 0 4px 14px;white-space:pre-wrap;color:#1d1d1f;font-size:14px;line-height:1.6">${escHtml(details.draft)}</div>` : '<p style="color:#515151">Ett AI-genererat svarsutkast vantar pa godkannande i admin-panelen.</p>'}
           <p style="margin-top:16px"><a href="https://www.1753skin.com/admin/inkorg" style="display:inline-block;background:#108474;color:#fff;padding:10px 24px;border-radius:980px;text-decoration:none;font-weight:600;font-size:14px">Oppna inkorg</a></p>
         </div>
       `
@@ -6570,7 +6688,7 @@ app.post("/api/email/inbound", async (req, res) => {
       }
     }
 
-    const customerContext = await fetchCustomerContext(fromEmail);
+    const customerContext = await fetchCustomerContext(fromEmail, fromName);
     const aiDraft = await generateEmailDraft(fromEmail, fromName, subject, bodyText, customerContext);
 
     const conversation = await db.createEmailConversation({
@@ -6584,7 +6702,7 @@ app.post("/api/email/inbound", async (req, res) => {
       customerContext
     });
 
-    await sendAdminNotification(fromEmail, fromName, subject);
+    await sendAdminNotification(fromEmail, fromName, subject, { message: bodyText, facts: customerContext.facts, draft: aiDraft });
 
     console.log(`[EmailAI] Conversation #${conversation.id} created with AI draft`);
     res.json({ ok: true, id: conversation.id });
@@ -6600,6 +6718,15 @@ app.post("/api/email/from-contact", async (req, res) => {
     const { name, email, message } = req.body;
     if (!email || !message) return res.status(400).json({ message: "Email and message required" });
 
+    if (isLikelySpamMessage(name, message)) {
+      const conversation = await db.createEmailConversation({
+        fromEmail: email, fromName: name, subject: "Kontaktformulär (spam)", bodyText: message,
+        aiDraft: "", category: "spam", customerContext: {}
+      });
+      await db.updateEmailConversation(conversation.id, { status: "dismissed" });
+      return res.json({ ok: true, id: conversation.id });
+    }
+
     if (isUnsubscribeRequest(message)) {
       const unsub = await handleAutoUnsubscribe(email, name);
       if (unsub.handled) {
@@ -6614,7 +6741,7 @@ app.post("/api/email/from-contact", async (req, res) => {
       }
     }
 
-    const customerContext = await fetchCustomerContext(email);
+    const customerContext = await fetchCustomerContext(email, name);
     const aiDraft = await generateEmailDraft(email, name, "Kontaktformulär", message, customerContext);
 
     const conversation = await db.createEmailConversation({
@@ -6627,7 +6754,7 @@ app.post("/api/email/from-contact", async (req, res) => {
       customerContext
     });
 
-    await sendAdminNotification(email, name, "Kontaktformulär");
+    await sendAdminNotification(email, name, "Kontaktformulär", { message, facts: customerContext.facts, draft: aiDraft });
     res.json({ ok: true, id: conversation.id });
   } catch (err) {
     console.error("[EmailAI] Contact form error:", err);
@@ -6666,10 +6793,10 @@ app.post("/api/admin/inbox/:id/regenerate", adminAuthMiddleware, async (req, res
     const conv = await db.getEmailConversation(req.params.id);
     if (!conv) return res.status(404).json({ message: "Hittades inte" });
 
-    const customerContext = await fetchCustomerContext(conv.from_email);
+    const customerContext = await fetchCustomerContext(conv.from_email, conv.from_name);
     const aiDraft = await generateEmailDraft(conv.from_email, conv.from_name, conv.subject, conv.body_text, customerContext);
 
-    await db.updateEmailConversation(conv.id, { ai_draft: aiDraft });
+    await db.updateEmailConversation(conv.id, { ai_draft: aiDraft, customer_context: JSON.stringify(customerContext) });
     res.json({ ok: true, aiDraft });
   } catch (err) {
     res.status(500).json({ message: err.message });
@@ -7000,6 +7127,18 @@ app.post("/api/contact", async (req, res) => {
       return res.status(400).json({ message: apiMsg("allFieldsRequired", reqLocale(req)) });
     }
 
+    // Botar fyller i slumpade bokstavssträngar. Svara ok (avslöja inget) men
+    // skicka inget mejl och kör inget AI-utkast.
+    if (isLikelySpamMessage(name, message)) {
+      console.log(`[Contact] Spam stoppat från ${email}`);
+      db.createEmailConversation({
+        fromEmail: email, fromName: name, subject: "Kontaktformulär (spam)", bodyText: message,
+        aiDraft: "", category: "spam", customerContext: {}
+      }).then((c) => db.updateEmailConversation(c.id, { status: "dismissed" }))
+        .catch((err) => console.error("[Contact] Spam log error:", err.message));
+      return res.json({ ok: true });
+    }
+
     // Auto-unsubscribe if message is about newsletter opt-out
     if (isUnsubscribeRequest(message)) {
       const unsub = await handleAutoUnsubscribe(email, name);
@@ -7050,13 +7189,13 @@ app.post("/api/contact", async (req, res) => {
     // Generate AI draft in background
     (async () => {
       try {
-        const customerContext = await fetchCustomerContext(email);
+        const customerContext = await fetchCustomerContext(email, name);
         const aiDraft = await generateEmailDraft(email, name, "Kontaktformulär", message, customerContext);
         await db.createEmailConversation({
           fromEmail: email, fromName: name, subject: "Kontaktformulär",
           bodyText: message, aiDraft, category: "contact_form", customerContext
         });
-        await sendAdminNotification(email, name, "Kontaktformulär");
+        await sendAdminNotification(email, name, `Kontaktformulär: ${name}`, { message, facts: customerContext.facts, draft: aiDraft });
       } catch (err) { console.error("[Contact] AI draft error:", err.message); }
     })();
 
@@ -8227,7 +8366,90 @@ app.post("/api/newsletter/generate-skin", async (req, res) => {
   }
 });
 
-// ---- SHIPMENT TRACKING CHECK (cron-job.org trigger, every 15 min) ----
+// ---- SHIPMENT TRACKING CHECK (intern timer var 30:e min + cron-job.org) ----
+//
+// Ongoing svarar på /orders?orderNumber=… (goodsOwnerOrderId ger alltid tom lista)
+// med orderInfo.orderStatus { number, text } och parcels[].tracking { waybill, trackingUrl }.
+// Bara ordrar från de senaste SHIPMENT_EMAIL_DAYS får mejl; äldre (upp till
+// SHIPMENT_BACKFILL_DAYS) får spårningsnumret sparat tyst, så att en första körning
+// inte mejlar kunder om paket de fick för länge sedan.
+const SHIPMENT_EMAIL_DAYS = 5;
+const SHIPMENT_BACKFILL_DAYS = 60;
+let _shipmentCheckRunning = false;
+
+async function checkShipments() {
+  if (_shipmentCheckRunning) return { skipped: true };
+  _shipmentCheckRunning = true;
+  const result = { checked: 0, shipped: 0, emailed: 0, backfilled: 0, errors: 0 };
+  try {
+    const { rows: pendingOrders } = await db.pool.query(`
+      SELECT id, order_number, ongoing_order_id, created_at
+      FROM orders
+      WHERE payment_status = 'paid'
+        AND shipped_at IS NULL
+        AND ongoing_order_id IS NOT NULL
+        AND status NOT IN ('cancelled', 'returned', 'partially_returned', 'refunded')
+        AND created_at > NOW() - ($1 * INTERVAL '1 day')
+      ORDER BY created_at ASC
+    `, [SHIPMENT_BACKFILL_DAYS]);
+    result.checked = pendingOrders.length;
+
+    for (const row of pendingOrders) {
+      try {
+        const ogData = await ongoingFetch(`/orders?orderNumber=${encodeURIComponent(row.ongoing_order_id)}`);
+        const ogOrder = Array.isArray(ogData) ? ogData[0] : ogData;
+        if (!ogOrder) continue;
+
+        const status = ogOrder.orderInfo?.orderStatus || {};
+        const statusText = String(status.text || "").toLowerCase();
+        const isSent = Number(status.number) === 450
+          || statusText.includes("skickad") || statusText.includes("sent") || statusText.includes("shipped");
+        if (!isSent) continue;
+
+        const parcel = (ogOrder.parcels || []).find((p) => p?.tracking?.waybill || p?.tracking?.trackingUrl);
+        const trackingNumber = parcel?.tracking?.waybill || null;
+        const trackingUrl = parcel?.tracking?.trackingUrl
+          || (trackingNumber ? `https://tracking.postnord.com/se/?id=${encodeURIComponent(trackingNumber)}` : null);
+
+        await db.pool.query(
+          `UPDATE orders SET tracking_number = $1, tracking_url = $2, shipped_at = NOW()
+           WHERE id = $3`,
+          [trackingNumber, trackingUrl, row.id]
+        );
+        result.shipped++;
+
+        const ageDays = (Date.now() - new Date(row.created_at).getTime()) / 86_400_000;
+        if (ageDays <= SHIPMENT_EMAIL_DAYS) {
+          const fullOrder = await db.findOrderByNumber(row.order_number);
+          if (fullOrder) {
+            const items = typeof fullOrder.items === "string" ? JSON.parse(fullOrder.items) : fullOrder.items;
+            let mail;
+            try {
+              mail = await sendShippingConfirmation(fullOrder, items, trackingNumber, trackingUrl);
+            } catch (err) {
+              mail = { sent: false, skipReason: err.message };
+            }
+            const sent = mail?.sent !== false;
+            if (sent) result.emailed++;
+            await db.appendNotes(row.id, sent
+              ? `Leveransbekräftelse skickad${trackingNumber ? ` (${trackingNumber})` : ""}`
+              : `Leveransbekräftelse EJ skickad (${mail?.skipReason || "okänt"})`);
+          }
+        } else {
+          result.backfilled++;
+          await db.appendNotes(row.id, `Spårning sparad i efterhand${trackingNumber ? ` (${trackingNumber})` : ""}, inget mejl`);
+        }
+        console.log(`[Shipment] Order ${row.order_number} skickad, spårning: ${trackingNumber || "saknas"}`);
+      } catch (err) {
+        result.errors++;
+        console.error(`[Shipment] Fel vid kontroll av ${row.order_number}:`, err.message);
+      }
+    }
+    return result;
+  } finally {
+    _shipmentCheckRunning = false;
+  }
+}
 
 app.post("/api/cron/check-shipments", async (req, res) => {
   try {
@@ -8236,58 +8458,7 @@ app.post("/api/cron/check-shipments", async (req, res) => {
     if (adminKey !== expectedKey) {
       return res.status(403).json({ message: "Ogiltig admin-nyckel" });
     }
-
-    const { rows: pendingOrders } = await db.pool.query(`
-      SELECT id, order_number, ongoing_order_id, customer_email, customer_name, locale
-      FROM orders
-      WHERE payment_status = 'paid'
-        AND shipped_at IS NULL
-        AND ongoing_order_id IS NOT NULL
-    `);
-
-    if (pendingOrders.length === 0) {
-      return res.json({ checked: 0, shipped: 0 });
-    }
-
-    let shipped = 0;
-    for (const row of pendingOrders) {
-      try {
-        const ogData = await ongoingFetch(`/orders?goodsOwnerOrderId=${encodeURIComponent(row.ongoing_order_id)}`);
-        const ogOrder = Array.isArray(ogData) ? ogData[0] : ogData;
-        if (!ogOrder) continue;
-
-        const orderInfo = ogOrder.orderInfo || ogOrder;
-        const orderStatus = (orderInfo.orderStatusText || orderInfo.currentOrderStatus || "").toLowerCase();
-        const isSent = orderStatus.includes("sent") || orderStatus.includes("shipped") || orderStatus.includes("skickad");
-        if (!isSent) continue;
-
-        const tracking = orderInfo.tracking || orderInfo.shipmentInfo || {};
-        const trackingNumber = tracking.shipmentId || tracking.trackingNumber || tracking.waybillNumber || null;
-        const trackingUrl = trackingNumber
-          ? `https://tracking.postnord.com/tracking.html?id=${trackingNumber}`
-          : null;
-
-        await db.pool.query(
-          `UPDATE orders SET tracking_number = $1, tracking_url = $2, shipped_at = NOW(), status = 'shipped'
-           WHERE id = $3`,
-          [trackingNumber, trackingUrl, row.id]
-        );
-
-        const fullOrder = await db.findOrderByNumber(row.order_number);
-        if (fullOrder) {
-          const items = typeof fullOrder.items === "string" ? JSON.parse(fullOrder.items) : fullOrder.items;
-          await sendShippingConfirmation(fullOrder, items, trackingNumber, trackingUrl);
-          await db.appendNotes(row.id, `Leveransbekräftelse skickad${trackingNumber ? ` (${trackingNumber})` : ""}`);
-        }
-
-        shipped++;
-        console.log(`[Shipment] Order ${row.order_number} shipped, tracking: ${trackingNumber || "n/a"}`);
-      } catch (err) {
-        console.error(`[Shipment] Error checking ${row.order_number}:`, err.message);
-      }
-    }
-
-    res.json({ checked: pendingOrders.length, shipped });
+    res.json(await checkShipments());
   } catch (err) {
     console.error("[Shipment] Cron error:", err);
     res.status(500).json({ message: err.message });
@@ -10388,6 +10559,19 @@ app.post("/api/admin/social/daily-generate", adminAuthMiddleware, async (req, re
     setInterval(runReconcileTick, 30 * 60_000);
     setTimeout(runReconcileTick, 3 * 60_000);
     console.log("[OK] Pending-order reconciliation started (every 30min)");
+
+    const runShipmentTick = () => {
+      checkShipments()
+        .then((r) => {
+          if (r && !r.skipped && r.shipped) {
+            console.log(`[Shipment] tick: kollade ${r.checked}, skickade ${r.shipped}, mejl ${r.emailed}, tyst ${r.backfilled}, fel ${r.errors}`);
+          }
+        })
+        .catch((err) => console.error("[Shipment] tick error:", err.message));
+    };
+    setInterval(runShipmentTick, 30 * 60_000);
+    setTimeout(runShipmentTick, 4 * 60_000);
+    console.log("[OK] Shipment tracking check started (every 30min)");
 
     // Integrationshälsa: larmar om Fortnox-anslutningen dött eller om betalda ordrar
     // saknar faktura. Fortnox-haveriet 2026-08-03 pågick tyst i tre dagar – den här
