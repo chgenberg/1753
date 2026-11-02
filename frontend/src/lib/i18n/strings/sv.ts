@@ -267,6 +267,15 @@ const bundle = {
     title: "Produkter",
     sub: "Utvalda produkter för din hud.",
   },
+  cartBoost: {
+    upgradeKicker: "Komplettera rutinen",
+    upgradeTitle: "Uppgradera till {product}",
+    upgradeBody: "Lägg till TA-DA Serum för {amount}. Styckpris {regular}.",
+    upgradeCta: "Uppgradera",
+    giftProgress: "Handla för {amount} till, så får du {product} på köpet.",
+    giftUnlocked: "{product} ingår som gåva. Vi lägger den i paketet.",
+    giftLabel: "Gåva",
+  },
   cartDrawer: {
     title: "Varukorg",
     empty: "Din varukorg är tom",

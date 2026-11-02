@@ -408,6 +408,9 @@ const PRODUCTS_MAP = {
 const FREE_SHIPPING_THRESHOLD = { SEK: 600, EUR: 60 };
 const SHIPPING_COST = { SEK: 55, EUR: 6 };
 const VIVA_CURRENCY_CODE = { SEK: 752, EUR: 978 };
+// Gåva på köpet: frontend visar samma gräns (frontend/src/lib/gift.ts) men servern avgör.
+const GIFT_THRESHOLD = { SEK: 1500, EUR: 130 };
+const GIFT_PRODUCT_ID = "au-naturel-makeup-remover";
 
 const SHIP_COUNTRY_CODES = new Set([
   "AT", "BE", "BG", "CH", "CY", "CZ", "DE", "DK", "EE", "ES", "FI", "FR", "GB",
@@ -4226,6 +4229,23 @@ app.post("/api/orders/create", async (req, res) => {
       }
       totalAmount = Math.max(0, totalAmount - discount.fixedAmount);
     }
+
+    // Läggs till efter fixedAmount-fördelningen så att gåvoraden aldrig får en andel
+    // av rabatten.
+    if (totalAmount >= GIFT_THRESHOLD[currency]) {
+      const gift = PRODUCTS_MAP[GIFT_PRODUCT_ID];
+      orderItems.push({
+        articleNumber: gift.articleNumber,
+        productId: GIFT_PRODUCT_ID,
+        name: gift.name,
+        quantity: 1,
+        price: 0,
+        originalPrice: currency === "EUR" ? (gift.priceEur || gift.price) : gift.price,
+        vatRate: gift.vatRate || 0.25,
+        gift: true,
+      });
+    }
+
     const shippingAmount = currency === "EUR" ? SHIPPING_COST.EUR : SHIPPING_COST.SEK;
     const threshold = currency === "EUR" ? FREE_SHIPPING_THRESHOLD.EUR : FREE_SHIPPING_THRESHOLD.SEK;
     const shippingCost = totalAmount >= threshold ? 0 : shippingAmount;
@@ -5513,8 +5533,11 @@ async function sendOrderConfirmation(order, items) {
     const subBadge = isSubItem
       ? `<br><span style="display:inline-block;margin-top:4px;background:#108474;color:#fff;font-size:10px;font-weight:600;padding:2px 8px;border-radius:4px">${emailT(l, { sv: `Prenumeration var ${intervalDays}:e dag`, en: `Subscription every ${intervalDays} days`, es: `Suscripción cada ${intervalDays} días`, de: `Abo alle ${intervalDays} Tage`, fr: `Abonnement tous les ${intervalDays} jours` })}</span>`
       : "";
+    const giftBadge = i.gift
+      ? `<br><span style="display:inline-block;margin-top:4px;background:#766a62;color:#fff;font-size:10px;font-weight:600;padding:2px 8px;border-radius:4px">${emailT(l, { sv: "Gåva på köpet", en: "Free gift", es: "Regalo", de: "Geschenk", fr: "Cadeau offert" })}</span>`
+      : "";
     return `<tr>
-      <td style="padding:10px 0;border-bottom:1px solid #eee">${i.name}${subBadge}</td>
+      <td style="padding:10px 0;border-bottom:1px solid #eee">${i.name}${subBadge}${giftBadge}</td>
       <td style="padding:10px 0;border-bottom:1px solid #eee;text-align:center">${i.quantity}</td>
       <td style="padding:10px 0;border-bottom:1px solid #eee;text-align:right">${fmt(i.price * i.quantity)}</td>
     </tr>`;

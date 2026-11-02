@@ -269,6 +269,15 @@ export const fr: Messages = {
     title: "Produits",
     sub: "Une gamme courte, pensée avec intention.",
   },
+  cartBoost: {
+    upgradeKicker: "Complétez votre routine",
+    upgradeTitle: "Passez au {product}",
+    upgradeBody: "Ajoutez le TA-DA Serum pour {amount}. Prix normal {regular}.",
+    upgradeCta: "Passer au kit",
+    giftProgress: "Plus que {amount} pour recevoir {product} en cadeau.",
+    giftUnlocked: "{product} vous est offert. Nous l'ajoutons à votre colis.",
+    giftLabel: "Cadeau",
+  },
   cartDrawer: {
     title: "Panier",
     empty: "Ton panier est vide",

@@ -22,6 +22,7 @@ interface CartContextValue {
   addItem: (id: string, qty?: number, subscription?: { intervalDays: number }) => void;
   addItems: (items: { id: string; qty: number }[]) => void;
   removeItem: (id: string) => void;
+  replaceItem: (cartId: string, newProductId: string) => void;
   updateQty: (id: string, qty: number) => void;
   clearCart: () => void;
   totalItems: number;
@@ -97,6 +98,21 @@ export function CartProvider({ children }: { children: ReactNode }) {
     setItems((prev) => prev.filter((i) => i.id !== id));
   }, []);
 
+  // Byter produkt på en rad men behåller antal och ev. prenumeration.
+  const replaceItem = useCallback((cartId: string, newProductId: string) => {
+    setItems((prev) => {
+      const line = prev.find((i) => i.id === cartId);
+      if (!line) return prev;
+      const newCartId = line.subscription ? `${newProductId}__sub` : newProductId;
+      const rest = prev.filter((i) => i.id !== cartId);
+      const existing = rest.find((i) => i.id === newCartId);
+      if (existing) {
+        return rest.map((i) => (i.id === newCartId ? { ...i, qty: i.qty + line.qty } : i));
+      }
+      return [...rest, { id: newCartId, qty: line.qty, subscription: line.subscription }];
+    });
+  }, []);
+
   const updateQty = useCallback((id: string, qty: number) => {
     if (qty <= 0) {
       setItems((prev) => prev.filter((i) => i.id !== id));
@@ -120,6 +136,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
         addItem,
         addItems,
         removeItem,
+        replaceItem,
         updateQty,
         clearCart,
         totalItems,

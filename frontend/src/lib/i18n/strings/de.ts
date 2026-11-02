@@ -269,6 +269,15 @@ export const de: Messages = {
     title: "Produkte",
     sub: "Ein kleines Sortiment – mit Absicht.",
   },
+  cartBoost: {
+    upgradeKicker: "Vervollständige deine Routine",
+    upgradeTitle: "Upgrade auf {product}",
+    upgradeBody: "Füge TA-DA Serum für {amount} hinzu. Einzelpreis {regular}.",
+    upgradeCta: "Upgraden",
+    giftProgress: "Noch {amount}, dann bekommst du {product} geschenkt.",
+    giftUnlocked: "{product} ist als Geschenk dabei. Wir legen es in dein Paket.",
+    giftLabel: "Geschenk",
+  },
   cartDrawer: {
     title: "Warenkorb",
     empty: "Dein Warenkorb ist leer",

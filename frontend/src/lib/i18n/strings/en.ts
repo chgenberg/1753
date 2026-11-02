@@ -269,6 +269,15 @@ export const en: Messages = {
     title: "Products",
     sub: "A short range, made on purpose.",
   },
+  cartBoost: {
+    upgradeKicker: "Complete your routine",
+    upgradeTitle: "Upgrade to {product}",
+    upgradeBody: "Add TA-DA Serum for {amount}. Regular price {regular}.",
+    upgradeCta: "Upgrade",
+    giftProgress: "Spend {amount} more and get {product} as a gift.",
+    giftUnlocked: "{product} is included as a gift. We'll pack it with your order.",
+    giftLabel: "Gift",
+  },
   cartDrawer: {
     title: "Cart",
     empty: "Your cart is empty",

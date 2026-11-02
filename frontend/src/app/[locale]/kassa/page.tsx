@@ -18,6 +18,7 @@ import {
 } from "@/lib/shipping-countries";
 import { apiFetch } from "@/lib/api";
 import { AddressAutocomplete } from "@/components/address-autocomplete";
+import { DuoUpgrade, GiftLine, GiftProgress } from "@/components/cart-boosters";
 import { useLocale } from "@/providers/locale-provider";
 import type { Locale } from "@/lib/i18n/types";
 import { useAuth } from "@/providers/auth-provider";
@@ -686,7 +687,9 @@ export default function CheckoutPage() {
                   </div>
                 );
               })}
+              <GiftLine amount={discountedSubtotal} />
             </div>
+            <DuoUpgrade className="mt-5" />
             <div className="mt-6 border-t border-border pt-4">
               {activeDiscount ? (
                 <div className="mb-4 flex items-center justify-between rounded-xl bg-green-50 px-3 py-2.5">
@@ -740,6 +743,7 @@ export default function CheckoutPage() {
                 </div>
               )}
 
+              <GiftProgress amount={discountedSubtotal} className="mb-4" />
               <div className="space-y-2">
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">{t("checkout.subtotal")}</span>
