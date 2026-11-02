@@ -170,6 +170,9 @@ export const es: Messages = {
     logout: "Cerrar sesión",
   },
   checkout: {
+    tierDiscount: "Descuento {tier} ({percent} %)",
+    tierBeatsCode: "Tu descuento de miembro es mayor que el código, así que lo usamos en su lugar.",
+    tierWelcome: "Tu descuento {tier} del {percent} % se aplica automáticamente (no en suscripciones).",
     title: "Pago",
     emptyTitle: "Tu carrito está vacío",
     emptySub: "Añade productos antes de ir al pago.",

@@ -170,6 +170,9 @@ export const en: Messages = {
     logout: "Log out",
   },
   checkout: {
+    tierDiscount: "{tier} discount ({percent}%)",
+    tierBeatsCode: "Your member discount is bigger than the code, so we're using it instead.",
+    tierWelcome: "Your {tier} discount of {percent}% is applied automatically (not on subscriptions).",
     title: "Checkout",
     emptyTitle: "Your cart is empty",
     emptySub: "Add products before you go to checkout.",

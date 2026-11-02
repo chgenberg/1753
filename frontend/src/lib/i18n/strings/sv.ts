@@ -169,6 +169,9 @@ const bundle = {
     logout: "Logga ut",
   },
   checkout: {
+    tierDiscount: "{tier}-rabatt ({percent} %)",
+    tierBeatsCode: "Din medlemsrabatt ger mer än koden och används i stället.",
+    tierWelcome: "Din {tier}-rabatt på {percent} % dras automatiskt (gäller inte prenumerationer).",
     title: "Kassa",
     emptyTitle: "Din varukorg är tom",
     emptySub: "Lägg till produkter innan du går till kassan.",

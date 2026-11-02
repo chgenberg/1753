@@ -411,6 +411,10 @@ const VIVA_CURRENCY_CODE = { SEK: 752, EUR: 978 };
 // Gåva på köpet: frontend visar samma gräns (frontend/src/lib/gift.ts) men servern avgör.
 const GIFT_THRESHOLD = { SEK: 1500, EUR: 130 };
 const GIFT_PRODUCT_ID = "au-naturel-makeup-remover";
+// Lojalitetsnivåns rabatt, dras automatiskt när e-posten hör till ett konto på
+// nivån. Gäller inte prenumerationsrader och kombineras inte med rabattkoder:
+// kunden får den större av nivårabatt och kod.
+const TIER_DISCOUNT_PERCENT = { Silver: 5, Guld: 8, Platina: 12 };
 
 const SHIP_COUNTRY_CODES = new Set([
   "AT", "BE", "BG", "CH", "CY", "CZ", "DE", "DK", "EE", "ES", "FI", "FR", "GB",
@@ -4009,7 +4013,12 @@ app.post("/api/account/check-email", async (req, res) => {
     const { email } = req.body;
     if (!email) return res.status(400).json({ exists: false });
     const user = await db.findUserByEmail(email.trim().toLowerCase());
-    res.json({ exists: !!user, name: user ? (user.name || "").split(" ")[0] : null });
+    res.json({
+      exists: !!user,
+      name: user ? (user.name || "").split(" ")[0] : null,
+      tier: user?.tier || null,
+      tierPercent: TIER_DISCOUNT_PERCENT[user?.tier] || 0,
+    });
   } catch (err) {
     res.json({ exists: false });
   }
@@ -4173,6 +4182,43 @@ app.post("/api/orders/create", async (req, res) => {
     }
     if (!discount) countableDiscountCode = null;
 
+    // Nivårabatt mot rabattkod: kunden får den som ger mest. Båda räknas med samma
+    // avrundning som prisberäkningen nedan (per enhet).
+    const member = await db.findUserByEmail(customer.email);
+    const tierPercent = TIER_DISCOUNT_PERCENT[member?.tier] || 0;
+    let useTier = false;
+    if (tierPercent) {
+      let tierValue = 0;
+      let codeValue = 0;
+      let subtotalAfterCode = 0;
+      for (const item of items) {
+        const product = PRODUCTS_MAP[item.id];
+        if (!product) continue;
+        const qty = item.qty || 1;
+        const base = currency === "EUR" ? (product.priceEur || product.price) : product.price;
+        const isSub = item.subscription && typeof item.subscription === "object" && typeof item.subscription.intervalDays === "number";
+        const unit = isSub ? Math.round(base * 0.85) : base;
+        if (!isSub) tierValue += (unit - Math.round(unit * (1 - tierPercent / 100))) * qty;
+        if (discount) {
+          if (Array.isArray(discount.freeProductIds) && discount.freeProductIds.includes(item.id)) {
+            codeValue += unit * qty;
+          } else if (discount.percent && (!discount.productIds || discount.productIds.includes(item.id))) {
+            const discounted = Math.round(unit * (1 - discount.percent / 100));
+            codeValue += (unit - discounted) * qty;
+            subtotalAfterCode += discounted * qty;
+          } else {
+            subtotalAfterCode += unit * qty;
+          }
+        }
+      }
+      if (discount?.fixedAmount) codeValue += Math.min(discount.fixedAmount, subtotalAfterCode);
+      if (tierValue > codeValue) {
+        useTier = true;
+        discount = null;
+        countableDiscountCode = null;
+      }
+    }
+
     const orderItems = items.map(item => {
       const product = PRODUCTS_MAP[item.id];
       if (!product) throw { status: 400, message: `Okänd produkt: ${item.id}` };
@@ -4190,6 +4236,10 @@ app.post("/api/orders/create", async (req, res) => {
           price = Math.round(price * (1 - discount.percent / 100));
         }
       }
+      const tierApplied = useTier && !isSubscription;
+      if (tierApplied) {
+        price = Math.round(price * (1 - tierPercent / 100));
+      }
       return {
         articleNumber: product.articleNumber || item.id,
         productId: item.id,
@@ -4198,7 +4248,8 @@ app.post("/api/orders/create", async (req, res) => {
         price,
         originalPrice,
         vatRate: product.vatRate || 0.25,
-        ...(isSubscription && { subscription: true, intervalDays: item.subscription.intervalDays })
+        ...(isSubscription && { subscription: true, intervalDays: item.subscription.intervalDays }),
+        ...(tierApplied && { tierDiscountPercent: tierPercent })
       };
     });
 
@@ -6352,7 +6403,7 @@ KUNSKAP:
 - Gåva: ordrar på minst 1 500 kr (130 EUR) efter rabatter får Au Naturel Makeup Remover på köpet automatiskt
 - Prenumeration: 15% rabatt, leverans var 30:e, 60:e eller 90:e dag, betalas med kort (inte Swish), ingen bindningstid. Kunden pausar, ändrar intervall eller avslutar under Mitt konto
 - Ångerrätt 14 dagar från mottagandet, oanvänd produkt i originalförpackning
-- Lojalitetsprogram: Silver (2 000 poäng), Guld (5 000), Platina (10 000). Nivårabatten dras inte automatiskt i kassan i dag. Om kunden saknar sin nivårabatt: be om ursäkt och skriv att teamet skickar en personlig rabattkod
+- Lojalitetsprogram: Silver (2 000 poäng) 5%, Guld (5 000) 8%, Platina (10 000) 12%. Rabatten dras automatiskt i kassan när kunden anger e-postadressen som hör till kontot. Den gäller inte prenumerationer och kombineras inte med rabattkoder: kunden får den större av nivårabatt och kod
 - Vi har AI-driven hudanalys på sajten (gratis)
 - Hemsida: www.1753skin.com
 
@@ -6539,7 +6590,7 @@ async function fetchCustomerContext(email, name) {
     }
 
     if (["Silver", "Guld", "Platina"].includes(context.tier)) {
-      facts.push(`Lojalitetsnivå ${context.tier} (${context.loyaltyPoints ?? 0} poäng). Nivårabatten dras inte automatiskt i kassan i dag.`);
+      facts.push(`Lojalitetsnivå ${context.tier} (${context.loyaltyPoints ?? 0} poäng): ${TIER_DISCOUNT_PERCENT[context.tier]}% dras automatiskt i kassan när kunden anger ${lc} (inte på prenumerationer, inte ihop med rabattkod). Infördes 2026-11-02.`);
     }
     if (!user && !orders.length) {
       facts.push("Inget konto och ingen order hittades på den här e-postadressen.");

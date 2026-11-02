@@ -170,6 +170,9 @@ export const de: Messages = {
     logout: "Abmelden",
   },
   checkout: {
+    tierDiscount: "{tier}-Rabatt ({percent} %)",
+    tierBeatsCode: "Dein Mitgliederrabatt ist höher als der Code und wird stattdessen verwendet.",
+    tierWelcome: "Dein {tier}-Rabatt von {percent} % wird automatisch abgezogen (nicht bei Abos).",
     title: "Kasse",
     emptyTitle: "Dein Warenkorb ist leer",
     emptySub: "Füge Produkte hinzu, bevor du zur Kasse gehst.",

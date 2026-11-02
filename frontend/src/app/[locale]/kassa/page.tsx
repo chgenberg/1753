@@ -48,7 +48,7 @@ export default function CheckoutPage() {
   const [discountLoading, setDiscountLoading] = useState(false);
   const [activeDiscount, setActiveDiscount] = useState<ActiveDiscount | null>(null);
   const [createAccount, setCreateAccount] = useState(false);
-  const [knownMember, setKnownMember] = useState<{ exists: boolean; name: string | null }>({ exists: false, name: null });
+  const [knownMember, setKnownMember] = useState<{ exists: boolean; name: string | null; tier?: string | null; tierPercent?: number }>({ exists: false, name: null });
   const emailCheckTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   useEffect(() => {
     return () => { if (emailCheckTimer.current) clearTimeout(emailCheckTimer.current); };
@@ -96,7 +96,20 @@ export default function CheckoutPage() {
         }, 0)
     : 0;
 
-  const discountedSubtotal = subtotal - discountAmount;
+  // Nivårabatt (Silver/Guld/Platina) mot rabattkod: servern ger den större av de två.
+  const tierPercent = knownMember.tierPercent || 0;
+  const tierDiscountAmount = tierPercent
+    ? cartProducts.reduce((s, p) => {
+        if (p.subscription) return s;
+        const base = productPrice(p, locale);
+        return s + (base - Math.round(base * (1 - tierPercent / 100))) * p.qty;
+      }, 0)
+    : 0;
+  const useTier = tierDiscountAmount > 0 && tierDiscountAmount > discountAmount;
+  const effectiveDiscount = useTier ? tierDiscountAmount : discountAmount;
+  const tierName = knownMember.tier ? t(`account.tier.${knownMember.tier}`) : "";
+
+  const discountedSubtotal = subtotal - effectiveDiscount;
   const FREE_SHIPPING_THRESHOLD = currency === "EUR" ? 60 : 600;
   const freeShipping = discountedSubtotal >= FREE_SHIPPING_THRESHOLD;
   const shipping = freeShipping ? 0 : getShippingCost(locale);
@@ -186,7 +199,7 @@ export default function CheckoutPage() {
     }
     emailCheckTimer.current = setTimeout(async () => {
       try {
-        const data = await apiFetch<{ exists: boolean; name: string | null }>("/account/check-email", {
+        const data = await apiFetch<{ exists: boolean; name: string | null; tier?: string | null; tierPercent?: number }>("/account/check-email", {
           method: "POST",
           body: JSON.stringify({ email: email.trim().toLowerCase() }),
         });
@@ -362,6 +375,11 @@ export default function CheckoutPage() {
                       if (locale === "fr") return `Bon retour${name} ! La commande sera liée à votre compte.`;
                       return `Welcome back${name}! This order will be linked to your account.`;
                     })()}
+                    {tierPercent > 0 && (
+                      <span className="mt-1 block font-medium">
+                        {t("checkout.tierWelcome", { tier: tierName, percent: String(tierPercent) })}
+                      </span>
+                    )}
                   </p>
                 </div>
               )}
@@ -702,6 +720,11 @@ export default function CheckoutPage() {
                       <p className="text-xs text-green-600">
                         {activeDiscount.description}
                       </p>
+                      {useTier && (
+                        <p className="mt-0.5 text-xs text-green-700">
+                          {t("checkout.tierBeatsCode")}
+                        </p>
+                      )}
                     </div>
                   </div>
                   <button
@@ -749,10 +772,14 @@ export default function CheckoutPage() {
                   <span className="text-muted-foreground">{t("checkout.subtotal")}</span>
                   <span>{formatPrice(subtotal, locale)}</span>
                 </div>
-                {discountAmount > 0 && (
+                {effectiveDiscount > 0 && (
                   <div className="flex justify-between text-sm text-green-700">
-                    <span>{t("checkout.discount")}</span>
-                    <span>-{formatPrice(discountAmount, locale)}</span>
+                    <span>
+                      {useTier
+                        ? t("checkout.tierDiscount", { tier: tierName, percent: String(tierPercent) })
+                        : t("checkout.discount")}
+                    </span>
+                    <span>-{formatPrice(effectiveDiscount, locale)}</span>
                   </div>
                 )}
                 <div className="flex justify-between text-sm">

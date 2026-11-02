@@ -170,6 +170,9 @@ export const fr: Messages = {
     logout: "Se déconnecter",
   },
   checkout: {
+    tierDiscount: "Remise {tier} ({percent} %)",
+    tierBeatsCode: "Votre remise membre est plus avantageuse que le code et s'applique à la place.",
+    tierWelcome: "Votre remise {tier} de {percent} % est appliquée automatiquement (hors abonnements).",
     title: "Paiement",
     emptyTitle: "Ton panier est vide",
     emptySub: "Ajoute des produits avant de passer au paiement.",
