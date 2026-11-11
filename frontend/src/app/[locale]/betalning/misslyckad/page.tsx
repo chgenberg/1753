@@ -1,12 +1,17 @@
 "use client";
 
+import { useEffect } from "react";
 import Link from "next/link";
 import { AlertCircle, ArrowLeft } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { trackFunnel } from "@/lib/funnel";
 import { useLocale } from "@/providers/locale-provider";
 
 export default function PaymentFailedPage() {
   const { t, path } = useLocale();
+  useEffect(() => {
+    trackFunnel("payment_failed");
+  }, []);
   return (
     <section className="py-16 md:py-20">
       <div className="mx-auto max-w-lg px-6 text-center">

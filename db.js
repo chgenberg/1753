@@ -443,6 +443,17 @@ async function initSchema() {
       updated_at      TIMESTAMPTZ DEFAULT NOW()
     );
 
+    -- Trattmätning: enbart räknare per dag, steg, språk och enhetsklass.
+    -- Inga personuppgifter, inga id:n, ingen IP-adress.
+    CREATE TABLE IF NOT EXISTS funnel_events (
+      day             DATE NOT NULL,
+      event           VARCHAR(40) NOT NULL,
+      locale          VARCHAR(5) NOT NULL DEFAULT 'sv',
+      device          VARCHAR(10) NOT NULL DEFAULT 'desktop',
+      count           INTEGER NOT NULL DEFAULT 0,
+      PRIMARY KEY (day, event, locale, device)
+    );
+
     CREATE TABLE IF NOT EXISTS social_posts (
       id              SERIAL PRIMARY KEY,
       platform        VARCHAR(20) NOT NULL DEFAULT 'all',
@@ -1191,6 +1202,16 @@ async function createAbandonedCart({ email, items }) {
     [email.toLowerCase(), JSON.stringify(items)]
   );
   return rows[0];
+}
+
+async function incrementFunnelEvent({ event, locale, device }) {
+  await pool.query(
+    `INSERT INTO funnel_events (day, event, locale, device, count)
+     VALUES ((NOW() AT TIME ZONE 'Europe/Stockholm')::date, $1, $2, $3, 1)
+     ON CONFLICT (day, event, locale, device)
+     DO UPDATE SET count = funnel_events.count + 1`,
+    [event, locale, device]
+  );
 }
 
 async function markCartRecovered(email) {
@@ -2938,6 +2959,7 @@ module.exports = {
   cancelAutomationsForSubscriber,
   createAbandonedCart,
   markCartRecovered,
+  incrementFunnelEvent,
   nextOngoingOrderNumber,
   nextSharedOrderNumber,
   findUserRole,

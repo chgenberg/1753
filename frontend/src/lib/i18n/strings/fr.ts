@@ -501,6 +501,8 @@ export const fr: Messages = {
     subscribeCta: "S'abonner – {price} tous les {interval} jours",
     addedSubscription: "{name} ajouté en abonnement",
     subDisclaimer: "Annule à tout moment. Sans engagement.",
+    oneTime: "Achat unique",
+    purchaseOptions: "Options d'achat",
     freeShippingHint: "Livraison gratuite dès 60\u20AC",
     ingredientsTitle: "Ingrédients",
     relatedTitle: "Autres produits de la routine",

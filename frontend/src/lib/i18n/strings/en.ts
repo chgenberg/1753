@@ -501,6 +501,8 @@ export const en: Messages = {
     subscribeCta: "Subscribe \u2013 {price} every {interval} days",
     addedSubscription: "{name} added as subscription",
     subDisclaimer: "Cancel anytime. No lock-in.",
+    oneTime: "One-time purchase",
+    purchaseOptions: "Purchase options",
     freeShippingHint: "Free shipping over \u20AC60",
     ingredientsTitle: "Ingredients",
     relatedTitle: "Other parts of the routine",

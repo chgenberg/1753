@@ -501,6 +501,8 @@ export const es: Messages = {
     subscribeCta: "Suscribir \u2013 {price} cada {interval} días",
     addedSubscription: "{name} añadido como suscripción",
     subDisclaimer: "Cancela cuando quieras. Sin permanencia.",
+    oneTime: "Compra única",
+    purchaseOptions: "Opciones de compra",
     freeShippingHint: "Envío gratis a partir de \u20AC60",
     ingredientsTitle: "Ingredientes",
     relatedTitle: "Otros productos de la rutina",

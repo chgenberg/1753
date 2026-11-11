@@ -501,6 +501,8 @@ export const de: Messages = {
     subscribeCta: "Abonnieren – {price} alle {interval} Tage",
     addedSubscription: "{name} als Abonnement hinzugefügt",
     subDisclaimer: "Jederzeit kündbar. Keine Mindestlaufzeit.",
+    oneTime: "Einmalkauf",
+    purchaseOptions: "Kaufoptionen",
     freeShippingHint: "Kostenloser Versand ab €60",
     ingredientsTitle: "Inhaltsstoffe",
     relatedTitle: "Passt auch in deine Routine",

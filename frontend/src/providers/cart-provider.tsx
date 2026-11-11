@@ -8,6 +8,7 @@ import {
   useState,
   type ReactNode,
 } from "react";
+import { trackFunnel } from "@/lib/funnel";
 
 export interface CartItem {
   id: string;
@@ -76,6 +77,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       return [...prev, { id: cartId, qty, subscription }];
     });
     setIsOpen(true);
+    trackFunnel("add_to_cart");
   }, []);
 
   const addItems = useCallback((newItems: { id: string; qty: number }[]) => {
@@ -92,6 +94,7 @@ export function CartProvider({ children }: { children: ReactNode }) {
       return updated;
     });
     setIsOpen(true);
+    trackFunnel("add_to_cart");
   }, []);
 
   const removeItem = useCallback((id: string) => {

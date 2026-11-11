@@ -499,6 +499,8 @@ const bundle = {
     subscribeCta: "Prenumerera – {price} var {interval}:e dag",
     addedSubscription: "{name} tillagd som prenumeration",
     subDisclaimer: "Avbryt när som helst. Ingen bindningstid.",
+    oneTime: "Engångsköp",
+    purchaseOptions: "Köpalternativ",
     freeShippingHint: "Fri frakt över 600 kr",
     ingredientsTitle: "Ingredienser",
     relatedTitle: "Du kanske också gillar",

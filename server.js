@@ -21,6 +21,7 @@ const {
   buildPremiumAnalysisPrompt,
 } = require("./services/premium-analysis-prompt");
 const agentArmy = require("./services/agent-army");
+const checkoutHelpers = require("./services/checkout-helpers");
 
 // Autonom mejlagent ("som Christopher") – se outreach/ och .cursor/plans.
 const outreachRun = require("./outreach/run");
@@ -58,14 +59,43 @@ app.get("/robots.txt", (_req, res) => {
   res.type("text/plain").send("User-agent: *\nDisallow: /\n");
 });
 
-app.get("/payment-fail.html", (req, res) => {
-  const qs = req.url.includes("?") ? req.url.slice(req.url.indexOf("?")) : "";
-  res.redirect(302, `${PUBLIC_STORE_URL}/betalning/misslyckad${qs}`);
+// Viva skickar kunden hit efter betalning med ?t=…&s=<orderCode>&lang=…&eventId=….
+// Vi skickar vidare till tack-/felsidan på kundens språk. Tidigare hamnade alla
+// på svenska, även tyska och engelska kunder.
+// Språket tas i första hand från ordern, i andra hand från Vivas lang-parameter.
+//
+// Parametrarna skickas medvetet INTE vidare. Så har det i praktiken alltid varit:
+// den gamla omdirigeringen gick via en sökväg utan språk, där butikens middleware
+// lade på /sv och tappade query-strängen. Får tack-sidan ?t= börjar den anropa
+// /api/orders/verify, som då bekräftar ordrar parallellt med webhooken. Den vägen
+// har aldrig varit aktiv i produktion, och webhooken skriver över orderstatus
+// utan att kolla om ordern redan är behandlad. Aktivera den först när webhooken
+// är idempotent mot redan behandlade ordrar.
+async function paymentReturnLocale(req) {
+  const orderCode = String(req.query.s || "");
+  if (/^\d{6,20}$/.test(orderCode)) {
+    try {
+      const { rows } = await db.pool.query(
+        "SELECT locale FROM orders WHERE viva_order_code = $1 LIMIT 1",
+        [orderCode]
+      );
+      const fromOrder = checkoutHelpers.storeLocale(rows[0]?.locale);
+      if (fromOrder) return fromOrder;
+    } catch (err) {
+      console.error("[Payment return] locale lookup failed:", err.message);
+    }
+  }
+  return checkoutHelpers.storeLocaleFromVivaLang(req.query.lang);
+}
+
+app.get("/payment-fail.html", async (req, res) => {
+  const loc = await paymentReturnLocale(req);
+  res.redirect(302, `${PUBLIC_STORE_URL}/${loc}/betalning/misslyckad`);
 });
 
-app.get("/payment-success.html", (req, res) => {
-  const qs = req.url.includes("?") ? req.url.slice(req.url.indexOf("?")) : "";
-  res.redirect(302, `${PUBLIC_STORE_URL}/betalning/lyckad${qs}`);
+app.get("/payment-success.html", async (req, res) => {
+  const loc = await paymentReturnLocale(req);
+  res.redirect(302, `${PUBLIC_STORE_URL}/${loc}/betalning/lyckad`);
 });
 
 app.use((req, res, next) => {
@@ -2696,17 +2726,12 @@ Svara ENBART med ett JSON-block (inget annat). JSON-blocket ska vara markerat me
   },
   "products": [
     {
-      "id": "au-naturel-makeup-remover",
-      "reason": "Personlig motivering (3-4 meningar) kopplad till just denna kunds hudtillstånd, livsstil och mål. Förklara specifikt VARFÖR denna produkt passar ur ECS/mikrobiom-perspektiv.",
+      "id": "huvudproduktens id – duo-ta-da, duo-kit eller ta-da-serum (se == PRODUKTREKOMMENDATIONER ==)",
+      "reason": "Personlig motivering (3-4 meningar) kopplad till just denna kunds hudtillstånd, livsstil och mål. Förklara specifikt VARFÖR denna produkt passar ur ECS/mikrobiom-perspektiv och varför den är rätt start.",
       "usage": "Kort användningstips anpassat till kunden"
     },
     {
-      "id": "duo-kit",
-      "reason": "Personlig motivering...",
-      "usage": "..."
-    },
-    {
-      "id": "ta-da-serum",
+      "id": "id för ett komplement – ta bara med detta objekt om ett komplement passar kunden",
       "reason": "Personlig motivering...",
       "usage": "..."
     }
@@ -2802,19 +2827,24 @@ VIKTIGT: De flesta människor har mestadels frisk hud. Det är HELT NORMALT att 
 Returnera BARA zoner som syns i bilden. Om ingen bild bifogades, returnera en tom array [].
 
 == PRODUKTREKOMMENDATIONER ==
-Du ska ALLTID rekommendera dessa tre produkter (i denna ordning):
-1. "au-naturel-makeup-remover" – Au Naturel Makeup Remover (399 kr) – rengöringsolja med MCT + CBD, varsam mot mikrobiom
-2. "duo-kit" – DUO-kit (1 099 kr) – The ONE Facial Oil (morgon, 10% CBD) + I LOVE Facial Oil (kväll, 10% CBD + 5% CBG)
-3. "ta-da-serum" – TA-DA Serum (699 kr) – 3% CBG i ekologisk jojobaolja, fukt och lyster
+Rekommendera 1–3 produkter, aldrig fler. Den FÖRSTA produkten i listan är kundens huvudprodukt – den kunden ska börja med. Välj den utifrån just den här kundens hudtyp, besvär och mål, inte av vana.
 
-Dessa tre bildar grundrutinen. Men skriv UNIKA, PERSONLIGA motiveringar för VARJE produkt kopplat till just denna kunds hudtyp, besvär, livsstil och mål. Förklara ur ECS/mikrobiom-perspektiv.
+Välj EN av dessa tre som huvudprodukt:
+- "duo-ta-da" – DUO-kit + TA-DA Serum (1 495 kr) – hela rutinen: The ONE Facial Oil (morgon, 10% CBD), I LOVE Facial Oil (kväll, 10% CBD + 5% CBG) och TA-DA Serum (3% CBG). Välj vid torr eller känslig hud, vid flera besvär samtidigt, eller när kunden saknar en fungerande rutin och behöver en komplett.
+- "duo-kit" – DUO-kit (1 099 kr) – The ONE Facial Oil (morgon) + I LOVE Facial Oil (kväll). Välj när fokus är åldrande och fina linjer, rodnad, eller en hud som behöver lugnas och återhämta sig över natten.
+- "ta-da-serum" – TA-DA Serum (699 kr) – 3% CBG i ekologisk jojobaolja, fukt och lyster. Välj vid fet eller aknebenägen hud, eller när kunden redan har en enkel rutin som fungerar och bara behöver ett tillägg.
 
-Valfritt tillägg om relevant:
-- "fungtastic-mushroom-extract" – Fungtastic Mushroom Extract (377 kr) – Chaga, Lion's Mane, Cordyceps, Reishi. Rekommendera vid hög stress, dålig sömn eller om kunden vill jobba inifrån.
+Lägg därefter till ett komplement, men bara om det passar den här kunden:
+- "au-naturel-makeup-remover" – Au Naturel Makeup Remover (399 kr) – rengöringsolja med MCT + CBD, varsam mot mikrobiom. Rekommendera när kunden använder makeup eller solskydd, eller rengör med något som torkar ut huden eller stör hudbarriären.
+- "duo-kit" eller "ta-da-serum" kan också vara komplement, men bara om produkten inte redan ingår i huvudprodukten.
 
-Övriga kit-ID:n (om priseffektivt):
-- "duo-ta-da" (1 495 kr) – DUO + TA-DA (spar 302 kr)
-- "the-one-i-love-ta-da" (1 795 kr) – komplett 3-produkt
+REGLER:
+- "duo-ta-da" innehåller redan DUO-kit och TA-DA Serum. Rekommendera ALDRIG "duo-ta-da" tillsammans med "duo-kit" eller "ta-da-serum".
+- Vill du rekommendera både "duo-kit" och "ta-da-serum": rekommendera "duo-ta-da" i stället. Det är samma produkter till lägre pris.
+- Fyll inte ut listan. En väl motiverad huvudprodukt räcker om inget komplement passar kunden.
+- Rekommendera inga kosttillskott. Stress, sömn och "inifrån" hanteras i livsstilsråden, inte med en produkt.
+- Använd ENBART produkt-id:n från listorna ovan.
+- Skriv UNIKA, PERSONLIGA motiveringar för VARJE produkt kopplat till just denna kunds hudtyp, besvär, livsstil och mål. Förklara ur ECS/mikrobiom-perspektiv. För huvudprodukten: förklara varför just den är rätt start för den här kunden.
 
 == LIVSSTILSRÅD ==
 Basera på kundens specifika svar om sömn, stress, kost, vatten och träning. Ge EXAKT 5 konkreta, personliga tips – ett för varje kategori: "Sömn", "Stress", "Kost", "Rörelse", "Tarmhälsa". Varje tip ska ha:
@@ -3219,17 +3249,32 @@ app.post("/api/analysis", async (req, res) => {
       });
     }
 
+    // Personlig 15 %-kod (TACK15-XXXXXX). Skapas här, före svaret, så att
+    // resultatsidan kan visa samma kod som rapportmejlet. Resultatsidan lovade
+    // tidigare den utfasade koden HUDANALYS15, som inte längre gick att lösa in.
+    // Misslyckas skapandet skickas ingen kod, och sidan visar då ingen rabatt.
+    let analysisDiscountCode = null;
+    if (req.body.questions?.email) {
+      try {
+        analysisDiscountCode = await createPersonalDiscountCode(req.body.questions.email);
+      } catch (err) {
+        console.error("[Analysis] Kunde inte skapa personlig rabattkod (resultat visas utan):", err.message);
+      }
+    }
+
     res.json({
       content: outputText,
       responseId: data.id || null,
       analysisId,
       savedToHistory,
-      usage: data.usage
+      usage: data.usage,
+      discountCode: analysisDiscountCode ? analysisDiscountCode.toUpperCase() : null,
+      discountPercent: analysisDiscountCode ? PERSONAL_DISCOUNT_PERCENT : null
     });
 
     // Send analysis report email (async, non-blocking)
     if (req.body.questions?.email) {
-      sendAnalysisReport(req.body.questions.email, outputText, req.body.questions?.locale || "sv", analysisPassword).catch(err => {
+      sendAnalysisReport(req.body.questions.email, outputText, req.body.questions?.locale || "sv", analysisPassword, analysisDiscountCode).catch(err => {
         console.error("[Analysis] Report email error:", err.message);
       });
     }
@@ -4338,6 +4383,12 @@ app.post("/api/orders/create", async (req, res) => {
       }
     }
 
+    // Viva förifyller Swish med telefonnumret och sätter +46 framför. Nummer som
+    // skrivits med landskod (+46…) gav därför en Swish-förfrågan till ett nummer
+    // som inte finns, och betalningen blev aldrig klar. Vi skickar bara med
+    // numret när det är ett svenskt mobilnummer i rätt format, annars får kunden
+    // skriva in sitt Swish-nummer hos Viva.
+    const vivaPhone = checkoutHelpers.vivaCustomerPhone(customer.phone, shipCountry);
     const vivaOrderBody = {
       amount: vivaAmount,
       currencyCode: VIVA_CURRENCY_CODE[currency],
@@ -4347,7 +4398,9 @@ app.post("/api/orders/create", async (req, res) => {
       customer: {
         email: customer.email,
         fullName: customer.name,
-        phone: (customer.phone || "").replace(/^0/, "")
+        ...(vivaPhone ? { phone: vivaPhone } : {}),
+        // Betalsidan visas på kundens språk i stället för alltid på svenska.
+        requestLang: checkoutHelpers.vivaRequestLang(locale)
       }
     };
     if (hasSubscription) {
@@ -4360,7 +4413,7 @@ app.post("/api/orders/create", async (req, res) => {
       orderNumber,
       customerName: customer.name,
       customerEmail: customer.email,
-      customerPhone: (customer.phone || "").replace(/^0/, ""),
+      customerPhone: checkoutHelpers.orderCustomerPhone(customer.phone, shipCountry),
       address: deliveryAddress.address,
       zip: deliveryAddress.zip,
       city: deliveryAddress.city,
@@ -5723,7 +5776,7 @@ async function sendOrderConfirmation(order, items) {
 
 // ---- ANALYSIS REPORT EMAIL ----
 
-async function sendAnalysisReport(email, analysisContent, locale, accountPassword) {
+async function sendAnalysisReport(email, analysisContent, locale, accountPassword, presetDiscountCode) {
   const apiKey = process.env.RESEND_API_KEY;
   if (!apiKey) return;
 
@@ -5812,11 +5865,15 @@ async function sendAnalysisReport(email, analysisContent, locale, accountPasswor
 
   // Personlig 15%-kod – skapas i DB FÖRE mejlet skickas. Misslyckas skapandet
   // skickas mejlet utan rabattblock så att vi aldrig lovar en obrukbar kod.
-  let personalCode = null;
-  try {
-    personalCode = await createPersonalDiscountCode(email);
-  } catch (err) {
-    console.error("[Analysis] Kunde inte skapa personlig rabattkod (mejl skickas utan):", err.message);
+  // presetDiscountCode: koden som /api/analysis redan skapat och visat på
+  // resultatsidan – då får kunden samma kod i mejlet i stället för två olika.
+  let personalCode = presetDiscountCode || null;
+  if (!personalCode) {
+    try {
+      personalCode = await createPersonalDiscountCode(email);
+    } catch (err) {
+      console.error("[Analysis] Kunde inte skapa personlig rabattkod (mejl skickas utan):", err.message);
+    }
   }
   const discountBlock = personalCode ? personalDiscountBlockHtml(personalCode, locale) : "";
 
@@ -8094,6 +8151,43 @@ app.post("/api/newsletter/unsubscribe/:token", async (req, res) => {
 
 // ---- AUTOMATION EVENT ENDPOINT ----
 
+// ---- TRATTMÄTNING (anonyma räknare) ----
+//
+// Sajten hade ingen mätning alls av var besökare faller bort före köp. Här räknas
+// stegen i köp- och analysflödet per dag, språk och enhetsklass. Inget kopplas
+// till person, IP eller session. Frontend skickar bara händelser när besökaren
+// godkänt statistik i cookie-rutan. Svarar alltid 204 och får aldrig störa köpet.
+app.post("/api/funnel", async (req, res) => {
+  res.status(204).end();
+  try {
+    const event = String(req.body?.event || "");
+    if (!checkoutHelpers.isFunnelEvent(event)) return;
+    const clientIp = req.ip || req.connection.remoteAddress;
+    if (!checkRateLimit(clientIp, "funnel", 300)) return;
+    const locale = checkoutHelpers.storeLocale(req.body?.locale) || "sv";
+    const device = checkoutHelpers.deviceFromUserAgent(req.headers["user-agent"]);
+    await db.incrementFunnelEvent({ event, locale, device });
+  } catch (err) {
+    console.error("[Funnel] kunde inte räkna händelse:", err.message);
+  }
+});
+
+app.get("/api/admin/funnel", adminAuthMiddleware, async (req, res) => {
+  try {
+    const days = Math.min(Math.max(parseInt(req.query.days) || 30, 1), 365);
+    const { rows } = await db.pool.query(
+      `SELECT day, event, locale, device, count
+         FROM funnel_events
+        WHERE day >= (NOW() AT TIME ZONE 'Europe/Stockholm')::date - ($1 * INTERVAL '1 day')
+        ORDER BY day DESC, event, locale, device`,
+      [days]
+    );
+    res.json({ days, rows });
+  } catch (err) {
+    res.status(500).json({ message: err.message });
+  }
+});
+
 app.post("/api/automation/event", async (req, res) => {
   try {
     const { event, email, context } = req.body;
@@ -9193,6 +9287,10 @@ async function seedAutomationFlows() {
 // ---- ORDER VERIFICATION (backup from success page) ----
 
 app.post("/api/orders/verify", async (req, res) => {
+  // totalAmount i svaret är i hela kronor/euro, samma enhet som orders.total_amount.
+  // (Tidigare delades det med 100, vilket hade gett 4,54 i stället för 454 till köp-pixeln.)
+  // OBS: tack-sidan anropar i dag aldrig denna med transaktions-id – se kommentaren vid
+  // /payment-success.html.
   try {
     const { orderNumber, transactionId } = req.body;
 
@@ -9215,7 +9313,7 @@ app.post("/api/orders/verify", async (req, res) => {
         success: true,
         orderNumber: order.order_number,
         status: order.status,
-        totalAmount: (Number(order.total_amount || 0) + Number(order.shipping_cost || 0)) / 100,
+        totalAmount: Number(order.total_amount || 0) + Number(order.shipping_cost || 0),
         currency: order.currency || "SEK",
         message: "Ordern är redan behandlad"
       });
@@ -9224,7 +9322,16 @@ app.post("/api/orders/verify", async (req, res) => {
     if (transactionId && order.payment_status !== "paid") {
       try {
         const vivaData = await vivaFetch(`/checkout/v2/transactions/${transactionId}`);
-        if (vivaData && (vivaData.statusId === "F" || vivaData.StatusId === "F")) {
+        const vivaPaid = vivaData && (vivaData.statusId === "F" || vivaData.StatusId === "F");
+        // Transaktionen måste höra till just den här ordern. Annars skulle ett
+        // betalt transaktions-id från en annan order kunna markera denna som betald.
+        const vivaOrderCode = vivaData?.orderCode ?? vivaData?.OrderCode;
+        const sameOrder = vivaOrderCode != null && order.viva_order_code != null
+          && String(vivaOrderCode) === String(order.viva_order_code);
+        if (vivaPaid && !sameOrder) {
+          console.warn(`[Verify] Transaktion ${transactionId} hör inte till order ${order.order_number} – ignoreras`);
+        }
+        if (vivaPaid && sameOrder) {
           await db.updateOrder(order.id, {
             payment_status: "paid",
             status: "confirmed",
@@ -9236,7 +9343,7 @@ app.post("/api/orders/verify", async (req, res) => {
             success: true,
             orderNumber: order.order_number,
             status: "fulfilled",
-            totalAmount: (Number(order.total_amount || 0) + Number(order.shipping_cost || 0)) / 100,
+            totalAmount: Number(order.total_amount || 0) + Number(order.shipping_cost || 0),
             currency: order.currency || "SEK",
             firstPurchase: true,
             message: "Beställningen har behandlats"
@@ -9258,7 +9365,7 @@ app.post("/api/orders/verify", async (req, res) => {
       orderNumber: updated.order_number,
       status: updated.status,
       paymentStatus: updated.payment_status,
-      totalAmount: (Number(updated.total_amount || 0) + Number(updated.shipping_cost || 0)) / 100,
+      totalAmount: Number(updated.total_amount || 0) + Number(updated.shipping_cost || 0),
       currency: updated.currency || "SEK",
       firstPurchase: wasJustProcessed,
       message: updated.processed_at ? "Beställningen har behandlats" : "Beställningen väntar på behandling"

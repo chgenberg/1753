@@ -26,6 +26,7 @@ import {
   productOriginalPrice,
 } from "@/lib/products";
 import { formatPrice } from "@/lib/currency";
+import { trackFunnel } from "@/lib/funnel";
 import { cn } from "@/lib/utils";
 import { useLocale } from "@/providers/locale-provider";
 import { Reveal } from "@/components/fx/motion";
@@ -37,7 +38,7 @@ export default function ProductDetail({ id }: { id: string }) {
   const [qty, setQty] = useState(1);
   const [activeImg, setActiveImg] = useState(0);
   const [subInterval, setSubInterval] = useState(60);
-  const [showSubOptions, setShowSubOptions] = useState(false);
+  const [purchaseMode, setPurchaseMode] = useState<"once" | "sub">("once");
   const { addItem, openCart } = useCart();
   const { token, isLoggedIn } = useAuth();
   const { showToast } = useToast();
@@ -45,6 +46,10 @@ export default function ProductDetail({ id }: { id: string }) {
   const [wishlisted, setWishlisted] = useState(false);
 
   const [reviewStats, setReviewStats] = useState<{ count: number; avg: number } | null>(null);
+
+  useEffect(() => {
+    if (getProduct(id)) trackFunnel("view_product");
+  }, [id]);
 
   useEffect(() => {
     apiFetch<{ stats: { count: number; avg: number } }>(`/reviews/${id}?limit=1&offset=0`)
@@ -122,6 +127,8 @@ export default function ProductDetail({ id }: { id: string }) {
   const ingredients = productIngredients(product, locale);
   const descHtml = productDescriptionHtml(product, locale);
   const sizeLabel = productSize(product, locale);
+  // Samma avrundning som varukorg, kassa och server: per enhet, sedan × antal.
+  const subUnitPrice = Math.round(price * 0.85);
 
   return (
     <>
@@ -236,9 +243,104 @@ export default function ProductDetail({ id }: { id: string }) {
                 <p className="mt-2 text-sm text-brand-500">{sizeLabel}</p>
               )}
 
-              <div className="mt-8 flex flex-wrap items-center gap-3">
+              {/* Köpalternativ: engångsköp eller prenumeration, båda synliga från start. */}
+              <div
+                role="group"
+                aria-label={t("productDetail.purchaseOptions")}
+                className="mt-8 space-y-2.5"
+              >
+                <button
+                  type="button"
+                  aria-pressed={purchaseMode === "once"}
+                  onClick={() => setPurchaseMode("once")}
+                  className={cn(
+                    "flex w-full items-center justify-between gap-3 rounded-2xl border-2 px-4 py-3.5 text-left text-sm transition-all duration-300",
+                    purchaseMode === "once"
+                      ? "border-brand-900 bg-white shadow-sm"
+                      : "border-brand-200 bg-brand-50/30 hover:border-brand-400"
+                  )}
+                >
+                  <span className="flex items-center gap-3">
+                    <span
+                      aria-hidden="true"
+                      className={cn(
+                        "flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full border-2 transition-colors",
+                        purchaseMode === "once" ? "border-brand-900" : "border-brand-300"
+                      )}
+                    >
+                      {purchaseMode === "once" && <span className="h-2 w-2 rounded-full bg-brand-900" />}
+                    </span>
+                    <span className="font-medium text-brand-900">{t("productDetail.oneTime")}</span>
+                  </span>
+                  <span className="font-semibold text-brand-900">{formatPrice(price * qty, locale)}</span>
+                </button>
+
+                <div
+                  className={cn(
+                    "overflow-hidden rounded-2xl border-2 transition-all duration-300",
+                    purchaseMode === "sub"
+                      ? "border-brand-900 bg-white shadow-sm"
+                      : "border-brand-200 bg-brand-50/30 hover:border-brand-400"
+                  )}
+                >
+                  <button
+                    type="button"
+                    aria-pressed={purchaseMode === "sub"}
+                    onClick={() => setPurchaseMode("sub")}
+                    className="flex w-full items-center justify-between gap-3 px-4 py-3.5 text-left text-sm"
+                  >
+                    <span className="flex items-center gap-3">
+                      <span
+                        aria-hidden="true"
+                        className={cn(
+                          "flex h-[18px] w-[18px] shrink-0 items-center justify-center rounded-full border-2 transition-colors",
+                          purchaseMode === "sub" ? "border-brand-900" : "border-brand-300"
+                        )}
+                      >
+                        {purchaseMode === "sub" && <span className="h-2 w-2 rounded-full bg-brand-900" />}
+                      </span>
+                      <span className="flex items-center gap-1.5 font-medium text-brand-900">
+                        <RefreshCcw className="h-3.5 w-3.5 shrink-0" aria-hidden="true" />
+                        {t("productCard.subscribeSave")}
+                      </span>
+                    </span>
+                    <span className="flex shrink-0 items-baseline gap-2">
+                      <span className="text-xs text-brand-500 line-through">{formatPrice(price * qty, locale)}</span>
+                      <span className="font-semibold text-[#108474]">{formatPrice(subUnitPrice * qty, locale)}</span>
+                    </span>
+                  </button>
+
+                  {purchaseMode === "sub" && (
+                    <div className="space-y-3 px-4 pb-4">
+                      <p className="text-xs text-brand-500">{t("productDetail.chooseInterval")}</p>
+                      <div className="flex gap-2">
+                        {[30, 60, 90].map((days) => (
+                          <button
+                            key={days}
+                            type="button"
+                            aria-pressed={subInterval === days}
+                            onClick={() => setSubInterval(days)}
+                            className={cn(
+                              "flex-1 rounded-lg border-2 px-3 py-2.5 text-center text-sm font-medium transition-all cursor-pointer",
+                              subInterval === days
+                                ? "border-brand-900 bg-brand-900 text-white shadow-md"
+                                : "border-brand-200 text-brand-700 hover:border-brand-400"
+                            )}
+                          >
+                            {days} {t("productDetail.days")}
+                          </button>
+                        ))}
+                      </div>
+                      <p className="text-[11px] text-brand-500">{t("productDetail.subDisclaimer")}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+
+              <div className="mt-4 flex flex-wrap items-center gap-3">
                 <div className="flex items-center gap-2 rounded-xl border border-brand-200 px-2">
                   <button
+                    type="button"
                     onClick={() => setQty(Math.max(1, qty - 1))}
                     aria-label={t("productDetail.decQty")}
                     className="flex h-10 w-10 items-center justify-center rounded-lg hover:bg-brand-50"
@@ -247,6 +349,7 @@ export default function ProductDetail({ id }: { id: string }) {
                   </button>
                   <span className="w-8 text-center font-medium">{qty}</span>
                   <button
+                    type="button"
                     onClick={() => setQty(qty + 1)}
                     aria-label={t("productDetail.incQty")}
                     className="flex h-10 w-10 items-center justify-center rounded-lg hover:bg-brand-50"
@@ -258,65 +361,21 @@ export default function ProductDetail({ id }: { id: string }) {
                   size="lg"
                   className="flex-1"
                   onClick={() => {
+                    if (purchaseMode === "sub") {
+                      addItem(product.id, qty, { intervalDays: subInterval });
+                      router.push(path("checkout"));
+                      return;
+                    }
                     addItem(product.id, qty);
                   }}
                 >
-                  {t("productDetail.addToCart")}
-                </Button>
-              </div>
-
-              <div className="mt-3 overflow-hidden rounded-xl border-2 border-brand-200 bg-brand-50/30 transition-all">
-                <button
-                  type="button"
-                  onClick={() => setShowSubOptions(!showSubOptions)}
-                  className="flex w-full items-center justify-between px-4 py-3 text-sm font-medium text-brand-900 transition-colors hover:bg-brand-100/50"
-                >
-                  <span className="flex items-center gap-2">
-                    <RefreshCcw className="h-4 w-4" />
-                    {t("productCard.subscribeSave")}
-                  </span>
-                  <span className="text-brand-600">
-                    {formatPrice(Math.round(price * qty * 0.85), locale)}
-                  </span>
-                </button>
-
-                {showSubOptions && (
-                  <div className="border-t border-brand-200 bg-white px-4 py-4 space-y-4">
-                    <p className="text-xs text-brand-500">{t("productDetail.chooseInterval")}</p>
-                    <div className="flex gap-2">
-                      {[30, 60, 90].map((days) => (
-                        <button
-                          key={days}
-                          type="button"
-                          onClick={() => setSubInterval(days)}
-                          className={cn(
-                            "flex-1 rounded-lg border-2 px-3 py-2.5 text-center text-sm font-medium transition-all cursor-pointer",
-                            subInterval === days
-                              ? "border-brand-900 bg-brand-900 text-white shadow-md"
-                              : "border-brand-200 text-brand-700 hover:border-brand-400"
-                          )}
-                        >
-                          {days} {t("productDetail.days")}
-                        </button>
-                      ))}
-                    </div>
-                    <button
-                      onClick={() => {
-                        addItem(product.id, qty, { intervalDays: subInterval });
-                        router.push(path("checkout"));
-                      }}
-                      className="flex w-full items-center justify-center gap-2 rounded-xl bg-brand-900 px-4 py-3 text-sm font-semibold text-white shadow-sm transition-all hover:bg-brand-800 active:scale-[0.98]"
-                    >
-                      {t("productDetail.subscribeCta", {
-                        price: formatPrice(Math.round(price * qty * 0.85), locale),
+                  {purchaseMode === "sub"
+                    ? t("productDetail.subscribeCta", {
+                        price: formatPrice(subUnitPrice * qty, locale),
                         interval: String(subInterval),
-                      })}
-                    </button>
-                    <p className="text-center text-[11px] text-brand-400">
-                      {t("productDetail.subDisclaimer")}
-                    </p>
-                  </div>
-                )}
+                      })
+                    : t("productDetail.addToCart")}
+                </Button>
               </div>
 
               <div className="mt-8 flex flex-col gap-3">

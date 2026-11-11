@@ -13,10 +13,14 @@ import { formatPrice, getCurrency, getShippingCost } from "@/lib/currency";
 import {
   SHIP_COUNTRIES,
   defaultShipCountry,
+  isShipCountry,
   isValidCheckoutPhone,
   normalizeCheckoutPhone,
+  swedishNationalDigits,
 } from "@/lib/shipping-countries";
 import { apiFetch } from "@/lib/api";
+import { loadCheckoutForm, saveCheckoutForm } from "@/lib/checkout-form-storage";
+import { trackFunnel } from "@/lib/funnel";
 import { AddressAutocomplete } from "@/components/address-autocomplete";
 import { DuoUpgrade, GiftLine, GiftProgress } from "@/components/cart-boosters";
 import { useLocale } from "@/providers/locale-provider";
@@ -157,6 +161,36 @@ export default function CheckoutPage() {
 
   const abandonSent = useRef(false);
 
+  // Återställ kunduppgifterna från ett tidigare betalningsförsök som inte blev klart.
+  const formRestored = useRef(false);
+  useEffect(() => {
+    if (formRestored.current) return;
+    formRestored.current = true;
+    const saved = loadCheckoutForm();
+    if (!saved) return;
+    // Uppgifterna kommer från ett försök som redan nått betalningen. Skicka inte
+    // ett nytt "övergiven varukorg"-utskick bara för att kunden kom tillbaka.
+    abandonSent.current = true;
+    setForm((prev) => ({
+      ...prev,
+      firstname: prev.firstname || saved.firstname,
+      lastname: prev.lastname || saved.lastname,
+      email: prev.email || saved.email,
+      phone: prev.phone || saved.phone,
+      address: prev.address || saved.address,
+      zip: prev.zip || saved.zip,
+      city: prev.city || saved.city,
+      country: isShipCountry(saved.country) ? saved.country : prev.country,
+    }));
+    if (saved.email) checkEmailMembership(saved.email);
+    // Körs en gång vid sidladdning.
+  }, []);
+
+  const hasCartItems = items.length > 0;
+  useEffect(() => {
+    if (hasCartItems) trackFunnel("begin_checkout");
+  }, [hasCartItems]);
+
   useEffect(() => {
     if (!form.email || !form.email.includes("@") || items.length === 0 || abandonSent.current) return;
     const timer = setTimeout(() => {
@@ -183,7 +217,9 @@ export default function CheckoutPage() {
 
   const handlePhoneChange = (value: string) => {
     if (form.country === "SE") {
-      const digits = value.replace(/\D/g, "").slice(0, 10);
+      // swedishNationalDigits gör om +46…/0046…/46… till 07… innan numret kapas
+      // till tio siffror. Annars blir ett autoifyllt "+46701234567" fel nummer.
+      const digits = swedishNationalDigits(value).slice(0, 10);
       setForm((prev) => ({ ...prev, phone: formatPhone(digits) }));
       return;
     }
@@ -253,6 +289,9 @@ export default function CheckoutPage() {
       if (data.orderNumber) {
         sessionStorage.setItem("1753_orderNumber", data.orderNumber);
       }
+      // Sparas så att kunden slipper fylla i allt igen om betalningen inte blir klar.
+      saveCheckoutForm(form);
+      trackFunnel("submit_payment");
       window.location.href = data.checkoutUrl;
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : t("common.error");

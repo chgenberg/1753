@@ -7,6 +7,8 @@ import { CheckCircle, ArrowRight, Package } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useCart } from "@/providers/cart-provider";
 import { apiFetch } from "@/lib/api";
+import { clearCheckoutForm } from "@/lib/checkout-form-storage";
+import { trackFunnel } from "@/lib/funnel";
 import { useLocale } from "@/providers/locale-provider";
 
 function PaymentSuccessContent() {
@@ -20,6 +22,8 @@ function PaymentSuccessContent() {
     if (verified.current) return;
     verified.current = true;
     clearCart();
+    clearCheckoutForm();
+    trackFunnel("purchase");
 
     const storedOrder = sessionStorage.getItem("1753_orderNumber");
     if (storedOrder) setOrderNumber(storedOrder);

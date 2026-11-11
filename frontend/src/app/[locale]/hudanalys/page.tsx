@@ -28,6 +28,7 @@ import { AnalysisTabs } from "@/components/analysis/analysis-tabs";
 import { Reveal, displayFont } from "@/components/fx/motion";
 import { Pill } from "@/components/fx/frames";
 import { apiFetch } from "@/lib/api";
+import { trackFunnel } from "@/lib/funnel";
 import { useLocale } from "@/providers/locale-provider";
 import { useAuth } from "@/providers/auth-provider";
 import { cn } from "@/lib/utils";
@@ -125,6 +126,9 @@ interface AnalysisResponse {
   content: string;
   responseId: string | null;
   analysisId?: number;
+  /** Personlig engångskod (TACK15-XXXXXX) som resultatsidan visar och kassan drar. */
+  discountCode?: string | null;
+  discountPercent?: number | null;
 }
 
 const TOTAL_STEPS = 7;
@@ -461,6 +465,14 @@ export default function AnalysisPage() {
   const condLabel = (key: string) => conditionLabel(key, locale);
 
   const [step, setStep] = useState<Step>("intro");
+
+  // Anonym trattmätning (bara räknare, och bara med samtycke till statistik).
+  // Påverkar inte flödet.
+  useEffect(() => {
+    if (step === "email" || step === "demographics") trackFunnel("analysis_start");
+    else if (step === 1) trackFunnel("analysis_quiz");
+    else if (step === "result") trackFunnel("analysis_result");
+  }, [step]);
   // Porträttfilm på mobil, landskapsfilm på md+ – väljs via matchMedia så att
   // bara en variant laddas ner (två <video> i DOM laddar båda trots display:none)
   const [demoVariant, setDemoVariant] = useState<"mobile" | "desktop" | null>(null);
@@ -1633,6 +1645,8 @@ export default function AnalysisPage() {
                   scanZoneResults={scanSummary?.zones || undefined}
                   faceZonesGPT={parsed.faceZones || undefined}
                   zoneAnchors={scanSummary?.zoneAnchors || undefined}
+                  discountCode={result.discountCode}
+                  discountPercent={result.discountPercent}
                 />
               ) : (
                 <div className="rounded-2xl border border-border bg-white p-6 md:p-8">

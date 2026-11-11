@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { createContext, useContext, useEffect, useMemo, useRef, useState } from "react";
 import {
   ArrowRight,
   Check,
@@ -34,6 +34,7 @@ import { ProductCard } from "@/components/product-card";
 import { useLocale } from "@/providers/locale-provider";
 import { useCart } from "@/providers/cart-provider";
 import { formatPrice } from "@/lib/currency";
+import { trackFunnel } from "@/lib/funnel";
 import {
   conditionLabel as getCondLabel,
   type ZoneResult,
@@ -141,6 +142,9 @@ export interface AnalysisTabsProps {
   scanZoneResults?: ZoneResult[];
   faceZonesGPT?: FaceZoneGPT[];
   zoneAnchors?: Record<string, { x: number; y: number }>;
+  /** Personlig engångskod från /api/analysis (TACK15-XXXXXX). Saknas den visas ingen rabatt. */
+  discountCode?: string | null;
+  discountPercent?: number | null;
 }
 
 /* ------------------------------------------------------------------ */
@@ -385,25 +389,100 @@ function NextStepButton({ label, subtext, onClick }: {
 }
 
 /* ------------------------------------------------------------------ */
+/*  Erbjudande: huvudprodukt, komplement och personlig rabattkod       */
+/* ------------------------------------------------------------------ */
+
+const AUTO_DISCOUNT_KEY = "1753_auto_discount";
+const MAIN_PRODUCT_IDS = ["duo-ta-da", "duo-kit", "ta-da-serum"];
+
+interface AnalysisOffer {
+  /** Personlig engångskod från servern, eller null om ingen skapades. */
+  code: string | null;
+  percent: number;
+}
+
+const AnalysisOfferContext = createContext<AnalysisOffer>({ code: null, percent: 0 });
+
+type RecommendedProduct = Product & { reason: string; usage?: string };
+
+/**
+ * Gör om analysens produktlista till en huvudprodukt och upp till två komplement.
+ * - DUO-kit och TA-DA Serum var för sig blir kitet "duo-ta-da": samma produkter
+ *   till lägre pris. Gäller framför allt äldre analyser, som alltid listade båda.
+ * - Ingår en produkt redan i kitet visas den inte en gång till.
+ */
+function buildRecommendation(products: ProductRec[]): {
+  main: RecommendedProduct | null;
+  extras: RecommendedProduct[];
+} {
+  const seen = new Set<string>();
+  let recs = (products || []).filter((r) => {
+    if (!r || !r.id || seen.has(r.id)) return false;
+    seen.add(r.id);
+    return true;
+  });
+  const has = (id: string) => recs.some((r) => r.id === id);
+
+  if (!has("duo-ta-da") && has("duo-kit") && has("ta-da-serum")) {
+    const duo = recs.find((r) => r.id === "duo-kit")!;
+    const serum = recs.find((r) => r.id === "ta-da-serum")!;
+    const bundle: ProductRec = {
+      id: "duo-ta-da",
+      reason: [duo.reason, serum.reason].filter(Boolean).join("\n\n"),
+      usage: [duo.usage, serum.usage].filter(Boolean).join(" ") || undefined,
+    };
+    recs = [bundle, ...recs.filter((r) => r.id !== "duo-kit" && r.id !== "ta-da-serum")];
+  } else if (has("duo-ta-da")) {
+    recs = recs.filter((r) => r.id !== "duo-kit" && r.id !== "ta-da-serum");
+  }
+
+  const matched = recs
+    .map((rec) => {
+      const p = PRODUCTS.find((prod) => prod.id === rec.id);
+      return p ? { ...p, reason: rec.reason, usage: rec.usage } : null;
+    })
+    .filter(Boolean) as RecommendedProduct[];
+
+  if (matched.length === 0) return { main: null, extras: [] };
+  const main = matched.find((p) => MAIN_PRODUCT_IDS.includes(p.id)) || matched[0];
+  const extras = matched.filter((p) => p.id !== main.id).slice(0, 2);
+  return { main, extras };
+}
+
+/** Samma avrundning som servern: per enhet. */
+function discountedPrice(price: number, percent: number): number {
+  return percent > 0 ? Math.round(price * (1 - percent / 100)) : price;
+}
+
+/** Förbereder den personliga koden så att kassan drar den automatiskt. */
+function prepareOfferDiscount(code: string | null) {
+  if (!code) return;
+  try {
+    localStorage.setItem(AUTO_DISCOUNT_KEY, code.toLowerCase());
+  } catch {
+    /* utan storage får kunden ange koden själv – den står på sidan och i mejlet */
+  }
+}
+
+/* ------------------------------------------------------------------ */
 /*  Inline product CTA (mini card for cross-sell)                      */
 /* ------------------------------------------------------------------ */
 
 function InlineProductCTA({ products, locale }: { products: ProductRec[]; locale: Locale }) {
   const { addItems, openCart } = useCart();
+  const offer = useContext(AnalysisOfferContext);
+  const { main } = buildRecommendation(products);
 
-  const matched = products
-    .slice(0, 2)
-    .map((rec) => {
-      const p = PRODUCTS.find((prod) => prod.id === rec.id);
-      return p ? { ...p, reason: rec.reason } : null;
-    })
-    .filter(Boolean) as (Product & { reason: string })[];
+  if (!main) return null;
 
-  if (matched.length === 0) return null;
+  const hasDiscount = !!offer.code && offer.percent > 0;
+  const price = productPrice(main, locale) ?? 0;
+  const payPrice = hasDiscount ? discountedPrice(price, offer.percent) : price;
 
-  const handleAddAll = () => {
-    addItems(matched.map((p) => ({ id: p.id, qty: 1 })));
-    localStorage.setItem("1753_auto_discount", "HUDANALYS15");
+  const handleAdd = () => {
+    addItems([{ id: main.id, qty: 1 }]);
+    prepareOfferDiscount(offer.code);
+    trackFunnel("analysis_add_to_cart");
     openCart();
   };
 
@@ -413,29 +492,38 @@ function InlineProductCTA({ products, locale }: { products: ProductRec[]; locale
         <ShoppingBag className="h-3.5 w-3.5" />
         {tx(locale, "Rekommenderat för dig", "Recommended for you", "Recomendado para ti", "Empfohlen für dich", "Recommandé pour vous")}
       </div>
-      <div className="mt-3 space-y-2.5">
-        {matched.map((p) => (
-          <div key={p.id} className="flex items-center gap-3">
-            <div className="h-10 w-10 shrink-0 overflow-hidden rounded-xl bg-[#f5f5f7]">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img src={p.image} alt={productDisplayName(p, locale)} className="h-full w-full object-cover" />
-            </div>
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-xs font-semibold text-[#1d1d1f]">{productDisplayName(p, locale)}</p>
-              <p className="truncate text-xs text-[#766a62]">{p.reason}</p>
-            </div>
-            <span className="shrink-0 text-xs font-bold text-[#1d1d1f]">
-              {formatPrice(productPrice(p, locale), locale)}
-            </span>
-          </div>
-        ))}
+      <div className="mt-3 flex items-center gap-3">
+        <div className="h-10 w-10 shrink-0 overflow-hidden rounded-xl bg-[#f5f5f7]">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={main.image} alt={productDisplayName(main, locale)} className="h-full w-full object-cover" />
+        </div>
+        <div className="min-w-0 flex-1">
+          <p className="truncate text-xs font-semibold text-[#1d1d1f]">{productDisplayName(main, locale)}</p>
+          <p className="truncate text-xs text-[#766a62]">{main.reason}</p>
+        </div>
+        <span className="shrink-0 text-right text-xs font-bold text-[#1d1d1f]">
+          {hasDiscount && (
+            <span className="mr-1.5 font-normal text-[#766a62] line-through">{formatPrice(price, locale)}</span>
+          )}
+          {formatPrice(payPrice, locale)}
+        </span>
       </div>
       <button
-        onClick={handleAddAll}
+        type="button"
+        onClick={handleAdd}
         className="mt-4 inline-flex w-full items-center justify-center gap-2 rounded-full bg-[#108474] px-5 py-3 text-xs font-semibold text-white shadow-md shadow-[#108474]/20 transition-all duration-300 hover:bg-[#0d6e62] hover:shadow-lg active:scale-[0.97]"
       >
-        <Gift className="h-3.5 w-3.5" />
-        {tx(locale, "Lägg till med 15% rabatt", "Add with 15% off", "Añadir con 15% descuento", "Mit 15% Rabatt hinzufügen", "Ajouter avec 15% de réduction")}
+        {hasDiscount ? <Gift className="h-3.5 w-3.5" /> : <ShoppingBag className="h-3.5 w-3.5" />}
+        {hasDiscount
+          ? tx(
+              locale,
+              `Lägg till med ${offer.percent}% rabatt`,
+              `Add with ${offer.percent}% off`,
+              `Añadir con ${offer.percent}% de descuento`,
+              `Mit ${offer.percent}% Rabatt hinzufügen`,
+              `Ajouter avec ${offer.percent}% de réduction`
+            )
+          : tx(locale, "Lägg i varukorgen", "Add to cart", "Añadir al carrito", "In den Warenkorb", "Ajouter au panier")}
       </button>
     </div>
   );
@@ -983,53 +1071,68 @@ function SkinTab({ score, scoreLabel, summary, skinAge, fitzpatrick, metrics, sk
 function ProductsTab({ products, onNextTab }: { products: ProductRec[]; onNextTab?: () => void }) {
   const { locale } = useLocale();
   const { addItems, openCart } = useCart();
+  const offer = useContext(AnalysisOfferContext);
   const [added, setAdded] = useState(false);
 
-  const matched: (Product & { reason: string; usage?: string })[] = products
-    .map((rec) => {
-      const p = PRODUCTS.find((prod) => prod.id === rec.id);
-      return p ? { ...p, reason: rec.reason, usage: rec.usage } : null;
-    })
-    .filter(Boolean) as (Product & { reason: string; usage?: string })[];
+  const { main, extras } = buildRecommendation(products);
 
-  if (matched.length === 0) return null;
+  if (!main) return null;
 
-  const totalBefore = matched.reduce((s, p) => s + (productPrice(p, locale) ?? 0), 0);
-  const discount = Math.round(totalBefore * 0.15);
-  const totalAfter = totalBefore - discount;
+  const hasDiscount = !!offer.code && offer.percent > 0;
+  const mainPrice = productPrice(main, locale) ?? 0;
+  const mainPay = hasDiscount ? discountedPrice(mainPrice, offer.percent) : mainPrice;
+  const cards: { product: RecommendedProduct; isMain: boolean }[] = [
+    { product: main, isMain: true },
+    ...extras.map((product) => ({ product, isMain: false })),
+  ];
 
-  const handleAddAll = () => {
-    addItems(matched.map((p) => ({ id: p.id, qty: 1 })));
-    localStorage.setItem("1753_auto_discount", "HUDANALYS15");
+  const handleAddMain = () => {
+    addItems([{ id: main.id, qty: 1 }]);
+    prepareOfferDiscount(offer.code);
+    trackFunnel("analysis_add_to_cart");
     setAdded(true);
     openCart();
   };
 
   return (
     <div className="space-y-8">
-      {/* Discount hero card */}
+      {/* Huvudprodukten: en tydlig rekommendation i stället för en hel varukorg */}
       <Reveal className="overflow-hidden rounded-[32px] bg-[#1d1d1f] px-6 py-10 text-center text-white sm:px-8 sm:py-14">
         <p className="text-xs font-medium uppercase tracking-[0.22em] text-white/60">
-          {tx(locale, "Tack för din analys", "Thank you for your analysis", "Gracias por tu análisis", "Danke für deine Analyse", "Merci pour votre analyse")}
+          {tx(locale, "Börja här", "Start here", "Empieza aquí", "Starte hier", "Commencez ici")}
         </p>
         <h3 className={`${displayFont} mt-3 text-4xl tracking-[-0.01em] sm:text-5xl`}>
-          {tx(locale, "15% rabatt", "15% off", "15% descuento", "15% Rabatt", "15% de réduction")}
+          {productDisplayName(main, locale)}
         </h3>
-        <p className="mt-1 text-sm text-white/70">
-          {tx(locale, "På dina rekommenderade produkter", "On your recommended products", "En tus productos recomendados", "Auf deine empfohlenen Produkte", "Sur vos produits recommandés")}
-        </p>
+        {hasDiscount && (
+          <p className="mt-2 text-sm text-white/70">
+            {tx(
+              locale,
+              `${offer.percent}% rabatt med din personliga kod`,
+              `${offer.percent}% off with your personal code`,
+              `${offer.percent}% de descuento con tu código personal`,
+              `${offer.percent}% Rabatt mit deinem persönlichen Code`,
+              `${offer.percent}% de réduction avec votre code personnel`
+            )}
+          </p>
+        )}
 
         <div className="mx-auto mt-5 inline-flex items-center gap-3 rounded-full bg-white/10 px-5 py-2.5 backdrop-blur-sm">
-          <span className="text-sm text-white/50 line-through">{formatPrice(totalBefore, locale)}</span>
-          <span className="text-xl font-bold text-white">{formatPrice(totalAfter, locale)}</span>
-          <span className="rounded-full bg-[#108474] px-3 py-1 text-xs font-bold text-white">
-            -{formatPrice(discount, locale)}
-          </span>
+          {hasDiscount && (
+            <span className="text-sm text-white/50 line-through">{formatPrice(mainPrice, locale)}</span>
+          )}
+          <span className="text-xl font-bold text-white">{formatPrice(mainPay, locale)}</span>
+          {hasDiscount && (
+            <span className="rounded-full bg-[#108474] px-3 py-1 text-xs font-bold text-white">
+              -{formatPrice(mainPrice - mainPay, locale)}
+            </span>
+          )}
         </div>
 
         <div className="mt-6">
           <button
-            onClick={handleAddAll}
+            type="button"
+            onClick={handleAddMain}
             disabled={added}
             className={cn(
               "inline-flex items-center gap-2.5 rounded-full px-8 py-4 text-sm font-semibold transition-all duration-300 active:scale-[0.97]",
@@ -1041,19 +1144,35 @@ function ProductsTab({ products, onNextTab }: { products: ProductRec[]; onNextTa
             {added ? (
               <>
                 <Check className="h-4 w-4" />
-                {tx(locale, "Tillagda!", "Added!", "Añadidos!", "Hinzugefügt!", "Ajoutés!")}
+                {tx(locale, "Tillagd", "Added", "Añadido", "Hinzugefügt", "Ajouté")}
               </>
             ) : (
               <>
-                <Gift className="h-4 w-4" />
-                {tx(locale, `Lägg alla i varukorgen — ${formatPrice(totalAfter, locale)}`, `Add all — ${formatPrice(totalAfter, locale)}`, `Añadir todo — ${formatPrice(totalAfter, locale)}`, `Alle hinzufügen — ${formatPrice(totalAfter, locale)}`, `Tout ajouter — ${formatPrice(totalAfter, locale)}`)}
+                <ShoppingBag className="h-4 w-4" />
+                {tx(
+                  locale,
+                  `Lägg i varukorgen — ${formatPrice(mainPay, locale)}`,
+                  `Add to cart — ${formatPrice(mainPay, locale)}`,
+                  `Añadir al carrito — ${formatPrice(mainPay, locale)}`,
+                  `In den Warenkorb — ${formatPrice(mainPay, locale)}`,
+                  `Ajouter au panier — ${formatPrice(mainPay, locale)}`
+                )}
               </>
             )}
           </button>
         </div>
-        {!added && (
-          <p className="mt-3 text-xs text-white/40">
-            HUDANALYS15
+        {hasDiscount && (
+          <p className="mx-auto mt-4 max-w-sm text-xs leading-relaxed text-white/50">
+            <span className="font-mono tracking-wider text-white/80">{offer.code}</span>
+            {" · "}
+            {tx(
+              locale,
+              "Dras automatiskt i kassan. Koden finns också i ditt mejl.",
+              "Applied automatically at checkout. The code is in your email too.",
+              "Se aplica automáticamente al pagar. El código también está en tu correo.",
+              "Wird an der Kasse automatisch abgezogen. Der Code steht auch in deiner E-Mail.",
+              "Appliqué automatiquement au paiement. Le code figure aussi dans votre e-mail."
+            )}
           </p>
         )}
       </Reveal>
@@ -1067,17 +1186,22 @@ function ProductsTab({ products, onNextTab }: { products: ProductRec[]; onNextTa
         </Reveal>
 
         <div className="grid gap-5 sm:grid-cols-2">
-          {matched.map((p, idx) => (
+          {cards.map(({ product: p, isMain }, idx) => (
             <Reveal key={p.id} className="space-y-3" delay={idx * 90}>
               <ProductCard product={p} />
               <div className="rounded-2xl border border-[#e6e6e6]/80 bg-white p-4">
+                <p className="mb-2 text-[11px] font-bold uppercase tracking-widest text-[#108474]">
+                  {isMain
+                    ? tx(locale, "Din huvudprodukt", "Your main product", "Tu producto principal", "Dein Hauptprodukt", "Votre produit principal")
+                    : tx(locale, "Tillval", "Optional add-on", "Complemento opcional", "Optionale Ergänzung", "Complément facultatif")}
+                </p>
                 <div className="flex items-start gap-2">
                   <ChevronRight className="mt-0.5 h-3.5 w-3.5 shrink-0 text-[#108474]" />
                   <div>
                     <p className="text-xs font-semibold text-[#1d1d1f]">
                       {tx(locale, "Varför just denna", "Why this product", "Por qué este producto", "Warum dieses Produkt", "Pourquoi ce produit")}
                     </p>
-                    <p className="mt-1 text-sm leading-relaxed text-[#515151]">{p.reason}</p>
+                    <p className="mt-1 whitespace-pre-line text-sm leading-relaxed text-[#515151]">{p.reason}</p>
                     {p.usage && (
                       <p className="mt-2 border-t border-[#f5f5f7] pt-2 text-sm leading-relaxed text-[#766a62]">
                         {p.usage}
@@ -1298,8 +1422,28 @@ export function AnalysisTabs({
   scanZoneResults,
   faceZonesGPT,
   zoneAnchors,
+  discountCode,
+  discountPercent,
 }: AnalysisTabsProps) {
   const { locale } = useLocale();
+  const offer = useMemo<AnalysisOffer>(
+    () => ({ code: discountCode || null, percent: discountCode ? discountPercent || 0 : 0 }),
+    [discountCode, discountPercent]
+  );
+  // Förbered kundens personliga kod så att den dras i kassan oavsett var på
+  // sajten produkten läggs i varukorgen. Skriver inte över en annan aktiv kod,
+  // men ersätter den utfasade HUDANALYS15 som äldre besök kan ha lämnat kvar.
+  useEffect(() => {
+    if (!offer.code) return;
+    try {
+      const current = localStorage.getItem(AUTO_DISCOUNT_KEY);
+      if (!current || current.toLowerCase() === "hudanalys15") {
+        localStorage.setItem(AUTO_DISCOUNT_KEY, offer.code.toLowerCase());
+      }
+    } catch {
+      /* ignore */
+    }
+  }, [offer.code]);
   const [activeTab, setActiveTab] = useState<TabId>("skin");
   const [pdfLoading, setPdfLoading] = useState(false);
   const [methodOpen, setMethodOpen] = useState(false);
@@ -1357,6 +1501,7 @@ export function AnalysisTabs({
   const currentIdx = tabOrder.indexOf(activeTab);
 
   return (
+    <AnalysisOfferContext.Provider value={offer}>
     <div className="space-y-6">
       {/* Sticky tab bar */}
       <div ref={tabBarRef} className="sticky top-[64px] z-40 -mx-6 bg-white/90 px-6 pb-4 pt-2 shadow-[0_2px_12px_rgba(0,0,0,0.04)] backdrop-blur-xl md:-mx-10 md:px-10">
@@ -1493,5 +1638,6 @@ export function AnalysisTabs({
 
       <MethodologyModal open={methodOpen} onClose={() => setMethodOpen(false)} />
     </div>
+    </AnalysisOfferContext.Provider>
   );
 }

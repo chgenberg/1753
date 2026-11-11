@@ -59,9 +59,29 @@ export function countryCallingCode(countryCode: string): string {
   return SHIP_COUNTRIES.find((c) => c.code === countryCode)?.calling || "";
 }
 
+/**
+ * Svenskt nummer → nationella siffror med inledande nolla ("0701234567").
+ * Hanterar nummer skrivna eller autoifyllda med landskod: "+46 70…", "0046 70…",
+ * "46 70…" och "+46 (0)70…". Nationella nummer börjar alltid med 0, så siffror
+ * som börjar med 46 kan bara vara landskoden.
+ *
+ * Tidigare kapades "+46701234567" till de tio första siffrorna ("4670123456").
+ * Det numret skickades till Viva, som förifyllde Swish med det – och
+ * Swish-förfrågan kom aldrig fram.
+ */
+export function swedishNationalDigits(raw: string): string {
+  const trimmed = String(raw || "").trim();
+  const digits = trimmed.replace(/\D/g, "");
+  if (digits.startsWith("0046")) return "0" + digits.slice(4).replace(/^0+/, "");
+  if (digits.startsWith("46") && (digits.length >= 3 || trimmed.startsWith("+"))) {
+    return "0" + digits.slice(2).replace(/^0+/, "");
+  }
+  return digits;
+}
+
 export function normalizeCheckoutPhone(raw: string, countryCode: string): string {
   const digits = String(raw || "").replace(/\D/g, "");
-  if (countryCode === "SE") return digits.replace(/^0/, "");
+  if (countryCode === "SE") return swedishNationalDigits(raw).replace(/^0/, "");
   const calling = countryCallingCode(countryCode);
   if (calling && digits.startsWith("0")) return calling + digits.slice(1);
   return digits;
@@ -69,6 +89,6 @@ export function normalizeCheckoutPhone(raw: string, countryCode: string): string
 
 export function isValidCheckoutPhone(raw: string, countryCode: string): boolean {
   const digits = String(raw || "").replace(/\D/g, "");
-  if (countryCode === "SE") return digits.length === 10;
+  if (countryCode === "SE") return swedishNationalDigits(raw).length === 10;
   return digits.length >= 8 && digits.length <= 15;
 }
