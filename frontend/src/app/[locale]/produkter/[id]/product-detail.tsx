@@ -15,6 +15,7 @@ import { useToast } from "@/components/notification";
 import { useRouter } from "next/navigation";
 import { apiFetch, authFetch } from "@/lib/api";
 import {
+  cartProductId,
   getProduct,
   getRelatedProducts,
   productDescriptionHtml,
@@ -30,11 +31,18 @@ import { trackFunnel } from "@/lib/funnel";
 import { cn } from "@/lib/utils";
 import { useLocale } from "@/providers/locale-provider";
 import { Reveal } from "@/components/fx/motion";
+import { useJulCampaignActive } from "@/hooks/use-jul-campaign";
 
 export default function ProductDetail({ id }: { id: string }) {
   const { t, path, locale } = useLocale();
   const loc = ({ sv: "sv-SE", en: "en-GB", es: "es-ES", de: "de-DE", fr: "fr-FR" }[locale] || "en-GB");
   const product = getProduct(id);
+  // Kampanjprodukter säljer en befintlig produkt: det är den som läggs i
+  // varukorgen och som recensionerna hör till.
+  const sellId = product ? cartProductId(product) : id;
+  const isCampaignProduct = Boolean(product?.campaign);
+  const campaignActive = useJulCampaignActive();
+  const campaignOver = isCampaignProduct && !campaignActive;
   const [qty, setQty] = useState(1);
   const [activeImg, setActiveImg] = useState(0);
   const [subInterval, setSubInterval] = useState(60);
@@ -52,10 +60,16 @@ export default function ProductDetail({ id }: { id: string }) {
   }, [id]);
 
   useEffect(() => {
-    apiFetch<{ stats: { count: number; avg: number } }>(`/reviews/${id}?limit=1&offset=0`)
+    apiFetch<{ stats: { count: number; avg: number } }>(`/reviews/${sellId}?limit=1&offset=0`)
       .then((d) => setReviewStats(d.stats))
       .catch(() => {});
-  }, [id]);
+  }, [sellId]);
+
+  // När kampanjen är över finns kampanjsidan inte kvar: skicka vidare till
+  // produkten den sålde.
+  useEffect(() => {
+    if (campaignOver) router.replace(path("product", { productId: sellId }));
+  }, [campaignOver, router, path, sellId]);
 
   // Friktionsfri kampanjlänk (från mejlutskick): ?kampanj=sparre eller ?code=...
   // Lägger produkten i varukorgen, förbereder rabattkoden (valideras server-side
@@ -67,7 +81,7 @@ export default function ProductDetail({ id }: { id: string }) {
     const code = params.get("kampanj") || params.get("code");
     if (!code) return;
     campaignHandledRef.current = true;
-    addItem(id, 1);
+    addItem(sellId, 1);
     try {
       localStorage.setItem("1753_auto_discount", code.toLowerCase());
     } catch {
@@ -112,6 +126,7 @@ export default function ProductDetail({ id }: { id: string }) {
   };
 
   if (!product) return notFound();
+  if (campaignOver) return null;
 
   const related = getRelatedProducts(id, 4);
   const pname = productDisplayName(product, locale);
@@ -282,6 +297,8 @@ export default function ProductDetail({ id }: { id: string }) {
                   <span className="font-semibold text-brand-900">{formatPrice(price * qty, locale)}</span>
                 </button>
 
+                {/* Kampanjkit säljs bara som engångsköp: gåvan följer inte med i förnyelserna. */}
+                {!isCampaignProduct && (
                 <div
                   className={cn(
                     "overflow-hidden rounded-2xl border-2 transition-all duration-300",
@@ -342,6 +359,7 @@ export default function ProductDetail({ id }: { id: string }) {
                     </div>
                   )}
                 </div>
+                )}
               </div>
 
               <div className="mt-4 flex flex-wrap items-center gap-3">
@@ -369,11 +387,11 @@ export default function ProductDetail({ id }: { id: string }) {
                   className="flex-1"
                   onClick={() => {
                     if (purchaseMode === "sub") {
-                      addItem(product.id, qty, { intervalDays: subInterval });
+                      addItem(sellId, qty, { intervalDays: subInterval });
                       router.push(path("checkout"));
                       return;
                     }
-                    addItem(product.id, qty);
+                    addItem(sellId, qty);
                   }}
                 >
                   {purchaseMode === "sub"
@@ -410,7 +428,7 @@ export default function ProductDetail({ id }: { id: string }) {
         </div>
       </section>
 
-      <ReviewsSection productId={id} />
+      <ReviewsSection productId={sellId} />
 
       {related.length > 0 && (
         <SectionWrapper alt>

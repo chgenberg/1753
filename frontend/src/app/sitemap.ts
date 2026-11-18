@@ -1,5 +1,5 @@
 import type { MetadataRoute } from "next";
-import { PRODUCTS } from "@/lib/products";
+import { visibleProducts } from "@/lib/products";
 import { localizePath, type AppRoute } from "@/lib/i18n/navigation";
 import { locales } from "@/lib/i18n/types";
 import type { Locale } from "@/lib/i18n/types";
@@ -79,7 +79,7 @@ function buildCoreEntries(): MetadataRoute.Sitemap {
       if (route === "home") {
         entry.images = HERO_IMAGES;
       } else if (route === "products") {
-        entry.images = PRODUCTS.map((p) => `${BASE}${p.image}`);
+        entry.images = visibleProducts().map((p) => `${BASE}${p.image}`);
       }
 
       out.push(entry);
@@ -148,7 +148,7 @@ function buildProductEntries(): MetadataRoute.Sitemap {
   const out: MetadataRoute.Sitemap = [];
 
   for (const locale of locales) {
-    for (const p of PRODUCTS) {
+    for (const p of visibleProducts()) {
       const pathsByLocale: Record<string, string> = {};
       for (const l of locales) pathsByLocale[l] = localizePath(l as Locale, "product", { productId: p.id });
       out.push({

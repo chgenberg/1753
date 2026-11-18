@@ -10,7 +10,7 @@ import { CookieBanner } from "@/components/cookie-banner";
 import { Analytics } from "@/components/analytics";
 import { LocaleProvider } from "@/providers/locale-provider";
 import { getMessages } from "@/lib/i18n/messages";
-import { PRODUCTS, productDisplayName, productShortDesc, productPrice } from "@/lib/products";
+import { visibleProducts, productDisplayName, productShortDesc, productPrice } from "@/lib/products";
 import { getCurrency } from "@/lib/currency";
 import { localizePath } from "@/lib/i18n/navigation";
 import type { Locale } from "@/lib/i18n/types";
@@ -190,12 +190,13 @@ export default async function LocaleLayout({
 
   const l = locale as Locale;
   const currency = getCurrency(l);
+  const listedProducts = visibleProducts();
   const itemListSchema = {
     "@context": "https://schema.org",
     "@type": "ItemList",
     name: l === "sv" ? "1753 SKINCARE Produkter" : l === "de" ? "1753 SKINCARE Produkte" : l === "es" ? "1753 SKINCARE Productos" : l === "fr" ? "1753 SKINCARE Produits" : "1753 SKINCARE Products",
-    numberOfItems: PRODUCTS.length,
-    itemListElement: PRODUCTS.map((p, i) => ({
+    numberOfItems: listedProducts.length,
+    itemListElement: listedProducts.map((p, i) => ({
       "@type": "ListItem",
       position: i + 1,
       item: {

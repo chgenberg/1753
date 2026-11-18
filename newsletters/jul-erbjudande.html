@@ -1,0 +1,118 @@
+<!--
+  JULERBJUDANDE 2026 — 1753 SKINCARE
+  Köp DUO-kit, få Chagala på köpet. Gäller till och med 24 december 2026.
+
+  STATUS: EJ SKICKAT. Inget utkast är skapat och inget är schemalagt.
+
+  Ämnesrad:  Köp DUO-kit, få Chagala på köpet
+  Alternativ: Ingen rea i år. Bara en burk till i paketet.
+  Preheader: Vår nya chaga i kapslar följer med när du köper DUO-kit. Till och med 24 december.
+
+  Skickas via: POST /api/newsletter/broadcast (subject, html, adminKey)
+  {{firstName}} ersätts automatiskt av broadcast-endpointen.
+  emailWrapper() lägger till logo, footer och avprenumerera-länk automatiskt.
+  Utskicket går till alla aktiva prenumeranter, oavsett språk. Texten är på svenska.
+
+  Erbjudandet måste vara aktivt på sajten när mejlet går ut
+  (JUL_CAMPAIGN i server.js och frontend/src/lib/campaign.ts).
+-->
+
+<!-- Preheader: syns i inkorgen, inte i mejlet -->
+<div style="display:none;max-height:0;overflow:hidden;opacity:0;color:transparent;font-size:1px;line-height:1px">
+  Vår nya chaga i kapslar följer med när du köper DUO-kit. Till och med 24 december.
+</div>
+
+<!-- ====== HERO ====== -->
+<div style="text-align:center;padding:24px 0 0">
+  <p style="font-size:13px;font-weight:600;color:#108474;letter-spacing:0.12em;text-transform:uppercase;margin:0 0 8px">Julerbjudande</p>
+  <h1 style="font-size:28px;font-weight:700;color:#1d1d1f;line-height:1.2;margin:0 0 16px;letter-spacing:-0.02em">
+    Ingen rea i år. Bara en burk till i paketet.
+  </h1>
+  <p style="font-size:16px;color:#515151;line-height:1.6;margin:0 auto;max-width:460px">
+    Hej {{firstName}}. Vi har aldrig varit bra på röda lappar. Så i stället för att sänka priset inför jul lägger vi något i paketet: köper du ett DUO-kit får du Chagala, vår nya chaga i kapslar, på köpet.
+  </p>
+</div>
+
+<!-- ====== BILD ====== -->
+<div style="margin:28px 0 0">
+  <a href="https://www.1753skin.com/sv/produkter/jul-duo-chagala" style="display:block;text-decoration:none">
+    <img
+      src="https://www.1753skin.com/jul/jul-erbjudande-mejl.jpg"
+      alt="Kvinna i stickad tröja vid ett stenbord med DUO-kit och en burk Chagala, och en liten gran med ljusslinga bakom"
+      width="560"
+      style="display:block;width:100%;max-width:560px;height:auto;border-radius:20px;border:0"
+    />
+  </a>
+</div>
+
+<!-- ====== ERBJUDANDET ====== -->
+<div style="margin:28px 0;background:#f5f5f7;border-radius:20px;padding:32px 28px;text-align:center">
+  <p style="font-size:12px;font-weight:600;color:#108474;letter-spacing:0.12em;text-transform:uppercase;margin:0 0 6px">Till och med 24 december</p>
+  <h2 style="font-size:22px;font-weight:700;color:#1d1d1f;margin:0 0 10px;letter-spacing:-0.01em">Köp DUO-kit, få Chagala på köpet</h2>
+  <p style="margin:0 0 4px;font-size:26px;font-weight:700;color:#1d1d1f;letter-spacing:-0.02em">
+    1 099 kr
+    <span style="font-size:16px;font-weight:400;color:#766a62;text-decoration:line-through">1 476 kr</span>
+  </p>
+  <p style="margin:0;font-size:14px;color:#515151">Du betalar för oljorna. Burken bjuder vi på.</p>
+
+  <div style="margin:22px 0 20px">
+    <table role="presentation" style="margin:0 auto;text-align:left">
+      <tr><td style="padding:4px 0;font-size:14px;color:#1d1d1f">&#10003;&nbsp;&nbsp;The ONE Facial Oil, 10 ml. Morgonens olja</td></tr>
+      <tr><td style="padding:4px 0;font-size:14px;color:#1d1d1f">&#10003;&nbsp;&nbsp;I LOVE Facial Oil, 10 ml. Kvällens olja</td></tr>
+      <tr><td style="padding:4px 0;font-size:14px;color:#108474;font-weight:600">&#10003;&nbsp;&nbsp;Chagala, 60 kapslar. På köpet, värde 377 kr</td></tr>
+      <tr><td style="padding:4px 0;font-size:14px;color:#1d1d1f">&#10003;&nbsp;&nbsp;Fri frakt</td></tr>
+    </table>
+  </div>
+
+  <div style="text-align:center;margin:24px 0 0">
+    <a href="https://www.1753skin.com/sv/produkter/jul-duo-chagala" style="display:inline-block;background:#108474;color:#fff;padding:14px 36px;border-radius:980px;font-size:15px;font-weight:600;text-decoration:none">
+      Till julerbjudandet
+    </a>
+  </div>
+  <p style="margin:16px auto 0;font-size:12px;color:#766a62;line-height:1.6;max-width:400px">
+    Chagala läggs till automatiskt när du har ett DUO-kit i varukorgen. Gäller även DUO-kit + TA-DA Serum. En burk per order.
+  </p>
+</div>
+
+<!-- ====== NYHETEN ====== -->
+<div style="margin:28px 0;padding:0 4px">
+  <h2 style="font-size:20px;font-weight:700;color:#1d1d1f;margin:0 0 10px">Nyheten: en svamp, inget annat</h2>
+  <p style="font-size:15px;color:#515151;line-height:1.7;margin:0 0 12px">
+    Chagala är ekologiskt chagaextrakt i en vegansk kapsel, av chaga som vuxit vilt på björk. Ingen blandning och inga fyllnadsmedel. 400 mg per kapsel, två om dagen, och en burk räcker i 30 dagar.
+  </p>
+  <p style="font-size:15px;color:#515151;line-height:1.7;margin:0">
+    Vi lovar inga mirakel av en svamp. Vi lovar vad som finns i burken: varje batch testas för sitt innehåll.
+  </p>
+</div>
+
+<!-- ====== VARFÖR IHOP ====== -->
+<div style="margin:28px 0;padding:0 4px">
+  <h2 style="font-size:20px;font-weight:700;color:#1d1d1f;margin:0 0 10px">Varför två oljor och en svamp?</h2>
+  <p style="font-size:15px;color:#515151;line-height:1.7;margin:0">
+    För att hud inte bara är yta. Vi har byggt 1753 kring tanken att huden hänger ihop med resten av dig: sömn, mat, stress och mage. The ONE på morgonen och I LOVE på kvällen är det vi gör för utsidan. Chagala är där vi börjar med insidan. En burk räcker in i januari, när julen har lagt sig och vardagen är tillbaka.
+  </p>
+</div>
+
+<!-- ====== JULKLAPP ====== -->
+<div style="margin:28px 0;padding:0 4px">
+  <h2 style="font-size:20px;font-weight:700;color:#1d1d1f;margin:0 0 10px">Till dig själv eller under granen</h2>
+  <p style="font-size:15px;color:#515151;line-height:1.7;margin:0 0 12px">
+    Vi slår inte in något i glitter. Det får du göra själv, om du vill. Tre produkter som används varje dag är en bättre julklapp än en pryl som blir liggande.
+  </p>
+  <div style="text-align:center;margin:20px 0 0">
+    <a href="https://www.1753skin.com/sv/produkter/jul-duo-chagala" style="display:inline-block;background:#108474;color:#fff;padding:14px 36px;border-radius:980px;font-size:15px;font-weight:600;text-decoration:none">
+      Handla julkitet
+    </a>
+  </div>
+</div>
+
+<!-- ====== AVSLUTNING ====== -->
+<div style="margin:32px 0 8px;padding:24px 0 0;border-top:1px solid #e6e6e6;text-align:center">
+  <p style="font-size:15px;color:#515151;line-height:1.7;margin:0 auto;max-width:400px">
+    Tack för att du är med oss. God jul, när den kommer.
+  </p>
+  <p style="font-size:15px;color:#1d1d1f;font-weight:600;margin:16px 0 0">/ Christopher, 1753 SKINCARE</p>
+  <p style="font-size:11px;color:#999;line-height:1.6;margin:20px auto 0;max-width:440px">
+    Chagala är ett kosttillskott. Överskrid inte rekommenderad daglig dos, 2 kapslar. Kosttillskott ersätter inte en varierad kost. Rekommenderas inte för barn, gravida eller ammande. Förvaras oåtkomligt för barn.
+  </p>
+</div>

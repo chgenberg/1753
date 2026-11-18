@@ -6,6 +6,7 @@ import { CartProvider } from "@/providers/cart-provider";
 import { AuthProvider } from "@/providers/auth-provider";
 import { Toaster } from "@/components/notification";
 import { HtmlLang, SkipLink } from "@/components/html-lang";
+import { isJulCampaignActive } from "@/lib/campaign";
 
 const GA_ID = "G-R3H0MEB7V4";
 const META_PIXEL_ID = "418230511894981";
@@ -58,7 +59,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="sv" className={`${inter.variable} ${fraunces.variable} h-full`} suppressHydrationWarning>
+    <html
+      lang="sv"
+      className={`${inter.variable} ${fraunces.variable} h-full`}
+      // Julkampanjens läge när sidan byggdes. Läses av useJulCampaignActive under hydreringen.
+      data-jul={isJulCampaignActive() ? "1" : "0"}
+      suppressHydrationWarning
+    >
       <head>
         <link rel="preconnect" href="https://www.googletagmanager.com" />
         <link rel="preconnect" href="https://cdn.shopify.com" />

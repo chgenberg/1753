@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { ProductGrid } from "./product-grid";
 import { getMessages } from "@/lib/i18n/messages";
 import type { Locale } from "@/lib/i18n/types";
-import { PRODUCTS, productDisplayName, productPrice } from "@/lib/products";
+import { visibleProducts, productDisplayName, productPrice } from "@/lib/products";
 import { localizePath } from "@/lib/i18n/navigation";
 import { getCurrency } from "@/lib/currency";
 import Link from "next/link";
@@ -18,6 +18,17 @@ function tx(locale: string, sv: string, en: string, es?: string, de?: string, fr
 }
 
 const PRODUCT_BRIEF: Record<string, { actives: string; for: { sv: string; en: string; es: string; de: string; fr: string }; size: string }> = {
+  "jul-duo-chagala": {
+    actives: "10% CBD, 0.2–5% CBG + 400 mg chaga",
+    size: "2 × 10 ml + 60 caps",
+    for: {
+      sv: "Julerbjudande: Chagala på köpet",
+      en: "Christmas offer: Chagala on us",
+      es: "Oferta de Navidad: Chagala de regalo",
+      de: "Weihnachtsangebot: Chagala geschenkt",
+      fr: "Offre de Noël : Chagala offert",
+    },
+  },
   "duo-ta-da": {
     actives: "10% CBD, 0.2–5% CBG",
     size: "2 × 10 ml + 30 ml",
@@ -197,7 +208,7 @@ export default async function ProductsPage({
                 </tr>
               </thead>
               <tbody className="text-sm text-[#1d1d1f]">
-                {PRODUCTS.map((p) => {
+                {visibleProducts().map((p) => {
                   const brief = PRODUCT_BRIEF[p.id];
                   const href = localizePath(l, "product", { productId: p.id });
                   return (

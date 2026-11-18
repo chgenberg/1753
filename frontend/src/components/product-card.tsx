@@ -10,7 +10,7 @@ import { useCart } from "@/providers/cart-provider";
 import { useToast } from "@/components/notification";
 import { useRouter } from "next/navigation";
 import type { Product } from "@/lib/products";
-import { productDisplayName, productShortDesc, productPrice, productOriginalPrice } from "@/lib/products";
+import { cartProductId, productDisplayName, productShortDesc, productPrice, productOriginalPrice } from "@/lib/products";
 import { formatPrice } from "@/lib/currency";
 import { useLocale } from "@/providers/locale-provider";
 
@@ -54,7 +54,7 @@ export function ProductCard({
   const handleAddToCart = (e: React.MouseEvent) => {
     e.preventDefault();
     e.stopPropagation();
-    addItem(product.id);
+    addItem(cartProductId(product));
     openCart();
     setJustAdded(true);
     setTimeout(() => setJustAdded(false), 1200);

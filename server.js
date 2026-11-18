@@ -443,6 +443,21 @@ const VIVA_CURRENCY_CODE = { SEK: 752, EUR: 978 };
 // Gåva på köpet: frontend visar samma gräns (frontend/src/lib/gift.ts) men servern avgör.
 const GIFT_THRESHOLD = { SEK: 1500, EUR: 130 };
 const GIFT_PRODUCT_ID = "au-naturel-makeup-remover";
+
+// Julkampanj 2026: en burk Chagala på köpet till den som köper ett DUO-kit
+// (även DUO-kit + TA-DA Serum). En burk per order. Samma värden finns i
+// frontend/src/lib/campaign.ts, där de bara styr vad kunden får se. Det är
+// servern som avgör om burken läggs i ordern.
+const JUL_CAMPAIGN = {
+  giftProductId: "chagala",
+  qualifyingProductIds: ["duo-kit", "duo-ta-da"],
+  startsAt: Date.parse("2026-11-18T00:00:00+01:00"),
+  endsAt: Date.parse("2026-12-25T00:00:00+01:00"),
+};
+function julCampaignGiftApplies(items, now = Date.now()) {
+  if (now < JUL_CAMPAIGN.startsAt || now >= JUL_CAMPAIGN.endsAt) return false;
+  return Array.isArray(items) && items.some(i => i && JUL_CAMPAIGN.qualifyingProductIds.includes(i.id));
+}
 // Lojalitetsnivåns rabatt, dras automatiskt när e-posten hör till ett konto på
 // nivån. Gäller inte prenumerationsrader och kombineras inte med rabattkoder:
 // kunden får den större av nivårabatt och kod.
@@ -4340,6 +4355,22 @@ app.post("/api/orders/create", async (req, res) => {
         price: 0,
         originalPrice: currency === "EUR" ? (gift.priceEur || gift.price) : gift.price,
         vatRate: gift.vatRate || 0.25,
+        gift: true,
+      });
+    }
+
+    // Julkampanjen: Chagala på köpet vid köp av DUO-kit. Samma radform som gåvan
+    // ovan, så Fortnox, Ongoing och orderbekräftelsen hanterar den likadant.
+    if (julCampaignGiftApplies(items)) {
+      const julGift = PRODUCTS_MAP[JUL_CAMPAIGN.giftProductId];
+      orderItems.push({
+        articleNumber: julGift.articleNumber,
+        productId: JUL_CAMPAIGN.giftProductId,
+        name: julGift.name,
+        quantity: 1,
+        price: 0,
+        originalPrice: currency === "EUR" ? (julGift.priceEur || julGift.price) : julGift.price,
+        vatRate: julGift.vatRate || 0.25,
         gift: true,
       });
     }

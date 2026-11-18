@@ -13,6 +13,8 @@ import {
   UPGRADE_FROM_ID,
   UPGRADE_TO_ID,
 } from "@/lib/gift";
+import { JUL_CAMPAIGN } from "@/lib/campaign";
+import { useJulCampaignActive } from "@/hooks/use-jul-campaign";
 import { cn } from "@/lib/utils";
 
 function productIdFromCartId(cartId: string) {
@@ -111,10 +113,30 @@ export function GiftLine({ amount }: { amount: number }) {
   const { t, locale } = useLocale();
   const gift = findProduct(GIFT_PRODUCT_ID);
   if (!gift || !giftUnlocked(amount, locale)) return null;
+  return <GiftRow productId={GIFT_PRODUCT_ID} label={t("cartBoost.giftLabel")} />;
+}
+
+/**
+ * Julkampanjen: Chagala på köpet när varukorgen innehåller ett DUO-kit.
+ * Raden är bara en förhandsvisning. Det är servern som lägger burken i ordern.
+ */
+export function JulGiftLine({ className }: { className?: string }) {
+  const { items } = useCart();
+  const { t } = useLocale();
+  const active = useJulCampaignActive();
+  const qualifying: readonly string[] = JUL_CAMPAIGN.qualifyingProductIds;
+  if (!active || !items.some((i) => qualifying.includes(productIdFromCartId(i.id)))) return null;
+  return <GiftRow productId={JUL_CAMPAIGN.giftProductId} label={t("jul.giftLabel")} className={className} />;
+}
+
+function GiftRow({ productId, label, className }: { productId: string; label: string; className?: string }) {
+  const { locale } = useLocale();
+  const gift = findProduct(productId);
+  if (!gift) return null;
   const name = productDisplayName(gift, locale);
 
   return (
-    <div className="flex gap-3">
+    <div className={cn("flex gap-3", className)}>
       <div className="relative h-16 w-16 flex-shrink-0 overflow-hidden rounded-2xl bg-[#f5f5f7] ring-1 ring-inset ring-black/5">
         <Image src={gift.image} alt={name} fill className="object-cover" sizes="64px" />
       </div>
@@ -122,7 +144,7 @@ export function GiftLine({ amount }: { amount: number }) {
         <p className="truncate text-sm font-medium">{name}</p>
         <span className="mt-1.5 inline-flex items-center gap-1 rounded-md bg-[#766a62] px-1.5 py-0.5 text-[10px] font-semibold text-white">
           <Gift className="h-2.5 w-2.5" aria-hidden />
-          {t("cartBoost.giftLabel")}
+          {label}
         </span>
       </div>
       <div className="shrink-0 text-right">

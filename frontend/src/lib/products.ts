@@ -1,4 +1,5 @@
 import type { Locale } from "@/lib/i18n/types";
+import { isJulCampaignActive } from "@/lib/campaign";
 
 export interface Product {
   id: string;
@@ -32,9 +33,212 @@ export interface Product {
   guarantee: string;
   guaranteeEn?: string;
   vatRate: number;
+  /**
+   * Produkt-id som läggs i varukorgen i stället för produktens eget id.
+   * Används av kampanjprodukter som säljer en befintlig produkt (servern
+   * känner bara till riktiga produkter).
+   */
+  cartProductId?: string;
+  /** Kampanj som produkten hör till. Visas bara medan kampanjen pågår. */
+  campaign?: "jul";
 }
 
 export const PRODUCTS: Product[] = [
+  {
+    // Julkampanj 2026. Lägger ett DUO-kit i varukorgen; servern lägger till en
+    // burk Chagala som gåva (se JUL_CAMPAIGN i server.js och lib/campaign.ts).
+    id: "jul-duo-chagala",
+    articleNumber: "1003",
+    category: "kit",
+    campaign: "jul",
+    cartProductId: "duo-kit",
+    name: "Julkit: DUO + Chagala",
+    nameEn: "Christmas kit: DUO + Chagala",
+    price: 1099,
+    priceEur: 95,
+    originalPrice: 1476,
+    originalPriceEur: 127,
+    reviews: 0,
+    image: "/jul/jul-duo-chagala.jpg",
+    imageAlt: "/jul/jul-duo-chagala-miljo.jpg",
+    shortDesc:
+      "Två ansiktsoljor för morgon och kväll, och en burk Chagala på köpet. Värde 1 476 kr. Gäller till och med 24 december.",
+    shortDescEn:
+      "Two face oils for morning and evening, and a jar of Chagala on us. Worth €127. Until 24 December.",
+    shortDescEs:
+      "Dos aceites faciales para la mañana y la noche, y un bote de Chagala de regalo. Valor: 127 €. Hasta el 24 de diciembre.",
+    shortDescDe:
+      "Zwei Gesichtsöle für morgens und abends, dazu ein Glas Chagala geschenkt. Wert: 127 €. Bis einschließlich 24. Dezember.",
+    shortDescFr:
+      "Deux huiles visage pour le matin et le soir, et un pot de Chagala offert. Valeur : 127 €. Jusqu'au 24 décembre.",
+    description: `<p>Ingen rea. Inga röda lappar. Bara en burk till i paketet.</p>
+<p>Köper du ett DUO-kit före jul lägger vi med Chagala, vår nya chaga i kapslar. Du betalar för oljorna, 1 099 kr. Burken, som annars kostar 377 kr, bjuder vi på.</p>
+
+<h3>Det här ligger i paketet</h3>
+<ul>
+<li><strong>The ONE Facial Oil, 10 ml.</strong> Morgonens olja, med 10 % CBD och 0,2 % CBG.</li>
+<li><strong>I LOVE Facial Oil, 10 ml.</strong> Kvällens olja, med 10 % CBD och 5 % CBG.</li>
+<li><strong>Chagala, 60 kapslar.</strong> Ekologiskt chagaextrakt, 400 mg per kapsel. Räcker i 30 dagar. På köpet.</li>
+</ul>
+
+<h3>Utsidan: två oljor, ingen tiostegsrutin</h3>
+<p>The ONE på morgonen, I LOVE på kvällen. 3–4 droppar på ren hud, sedan är du klar. Oljorna är gjorda för att arbeta med hudens endocannabinoidsystem och låta hudens egna bakterier vara i fred, så att huden klarar mer på egen hand.</p>
+<p><em>Tänk "The ONE I LOVE" så minns du ordningen.</em></p>
+
+<h3>Insidan: en svamp, inget annat</h3>
+<p>Chagala är chaga som vuxit vilt på björk, i en vegansk kapsel. Ingen blandning och inga fyllnadsmedel. 2 kapslar om dagen ger 800 mg extrakt, och varje batch testas för sitt innehåll. Vi lovar inga mirakel av en svamp. Vi lovar vad som finns i burken.</p>
+
+<h3>Varför de hör ihop</h3>
+<p>Hud är inte bara yta. Vi har byggt 1753 kring tanken att huden hänger ihop med resten av dig: sömn, mat, stress och mage. Oljorna är det vi gör för utsidan. Chagala är där vi börjar med insidan. En burk räcker in i januari, när julen har lagt sig och vardagen är tillbaka.</p>
+
+<h3>Till dig själv eller under granen</h3>
+<p>Vi slår inte in något i glitter. Det får du göra själv, om du vill. Tre produkter som används varje dag är en bättre julklapp än en pryl som blir liggande.</p>
+
+<h3>Så fungerar erbjudandet</h3>
+<ul>
+<li>Lägg kitet i varukorgen. Chagala läggs till automatiskt och kostar 0 kr.</li>
+<li>Gäller även dig som väljer DUO-kit + TA-DA Serum.</li>
+<li>En burk per order, till och med 24 december 2026.</li>
+<li>Fri frakt ingår.</li>
+</ul>
+
+<p><em>Chagala är ett kosttillskott. Överskrid inte rekommenderad daglig dos, 2 kapslar. Kosttillskott ersätter inte en varierad kost. Rekommenderas inte för barn, gravida eller ammande. Äter du blodförtunnande eller diabetesläkemedel, eller har njursjukdom eller njursten, ska du prata med din läkare först. Förvaras oåtkomligt för barn.</em></p>`,
+    descriptionEn: `<p>No sale. No red tags. Just one more jar in the parcel.</p>
+<p>Buy a DUO kit before Christmas and we add Chagala, our new chaga in capsules. You pay for the oils, €95. The jar, which otherwise costs €32, is on us.</p>
+
+<h3>What is in the parcel</h3>
+<ul>
+<li><strong>The ONE Facial Oil, 10 ml.</strong> The morning oil, with 10% CBD and 0.2% CBG.</li>
+<li><strong>I LOVE Facial Oil, 10 ml.</strong> The evening oil, with 10% CBD and 5% CBG.</li>
+<li><strong>Chagala, 60 capsules.</strong> Organic chaga extract, 400 mg per capsule. Lasts 30 days. On us.</li>
+</ul>
+
+<h3>The outside: two oils, no ten-step routine</h3>
+<p>The ONE in the morning, I LOVE in the evening. 3–4 drops on clean skin, and you are done. The oils are made to work with the skin's endocannabinoid system and to leave the skin's own bacteria alone, so your skin can manage more by itself.</p>
+<p><em>Think "The ONE I LOVE" and you will remember the order.</em></p>
+
+<h3>The inside: one mushroom, nothing else</h3>
+<p>Chagala is chaga that grew wild on birch, in a vegan capsule. No blend and no fillers. 2 capsules a day give 800 mg of extract, and every batch is tested for what it contains. We do not promise miracles from a mushroom. We promise what is in the jar.</p>
+
+<h3>Why they belong together</h3>
+<p>Skin is not just surface. We built 1753 around the idea that skin is connected to the rest of you: sleep, food, stress and gut. The oils are what we do for the outside. Chagala is where we start with the inside. One jar lasts into January, when Christmas has settled and everyday life is back.</p>
+
+<h3>For yourself or under the tree</h3>
+<p>We do not wrap anything in glitter. You can do that yourself, if you like. Three products that get used every day make a better present than something that ends up in a drawer.</p>
+
+<h3>How the offer works</h3>
+<ul>
+<li>Add the kit to your cart. Chagala is added automatically and costs €0.</li>
+<li>Also applies if you choose DUO kit + TA-DA Serum.</li>
+<li>One jar per order, until 24 December 2026.</li>
+<li>Free shipping included.</li>
+</ul>
+
+<p><em>Chagala is a food supplement. Do not exceed the recommended daily dose of 2 capsules. Food supplements are not a substitute for a varied diet. Not recommended for children or during pregnancy or breastfeeding. If you take blood thinners or diabetes medication, or have kidney disease or kidney stones, talk to your doctor first. Keep out of reach of children.</em></p>`,
+    descriptionEs: `<p>Sin rebajas. Sin etiquetas rojas. Solo un bote más en el paquete.</p>
+<p>Si compras un kit DUO antes de Navidad, añadimos Chagala, nuestro nuevo chaga en cápsulas. Pagas los aceites, 95 €. El bote, que normalmente cuesta 32 €, corre de nuestra cuenta.</p>
+
+<h3>Lo que va en el paquete</h3>
+<ul>
+<li><strong>The ONE Facial Oil, 10 ml.</strong> El aceite de la mañana, con 10 % de CBD y 0,2 % de CBG.</li>
+<li><strong>I LOVE Facial Oil, 10 ml.</strong> El aceite de la noche, con 10 % de CBD y 5 % de CBG.</li>
+<li><strong>Chagala, 60 cápsulas.</strong> Extracto ecológico de chaga, 400 mg por cápsula. Dura 30 días. De regalo.</li>
+</ul>
+
+<h3>Por fuera: dos aceites, ninguna rutina de diez pasos</h3>
+<p>The ONE por la mañana, I LOVE por la noche. 3–4 gotas sobre la piel limpia, y listo. Los aceites están hechos para trabajar con el sistema endocannabinoide de la piel y dejar en paz a sus propias bacterias, para que tu piel se las arregle mejor por sí sola.</p>
+<p><em>Piensa en "The ONE I LOVE" y recordarás el orden.</em></p>
+
+<h3>Por dentro: un hongo, nada más</h3>
+<p>Chagala es chaga que ha crecido de forma silvestre en abedul, en una cápsula vegana. Sin mezclas y sin rellenos. 2 cápsulas al día aportan 800 mg de extracto, y cada lote se analiza para comprobar su contenido. No prometemos milagros de un hongo. Prometemos lo que hay en el bote.</p>
+
+<h3>Por qué van juntos</h3>
+<p>La piel no es solo superficie. Construimos 1753 sobre la idea de que la piel está conectada con el resto de ti: el sueño, la comida, el estrés y el intestino. Los aceites son lo que hacemos por fuera. Chagala es donde empezamos por dentro. Un bote dura hasta enero, cuando la Navidad ha pasado y vuelve la rutina.</p>
+
+<h3>Para ti o para poner bajo el árbol</h3>
+<p>No envolvemos nada en purpurina. Eso puedes hacerlo tú, si quieres. Tres productos que se usan cada día son mejor regalo que algo que acaba en un cajón.</p>
+
+<h3>Cómo funciona la oferta</h3>
+<ul>
+<li>Añade el kit al carrito. Chagala se añade automáticamente y cuesta 0 €.</li>
+<li>También vale si eliges kit DUO + TA-DA Serum.</li>
+<li>Un bote por pedido, hasta el 24 de diciembre de 2026.</li>
+<li>Envío gratis incluido.</li>
+</ul>
+
+<p><em>Chagala es un complemento alimenticio. No superes la dosis diaria recomendada de 2 cápsulas. Los complementos alimenticios no sustituyen una dieta variada. No recomendado para niños ni durante el embarazo o la lactancia. Si tomas anticoagulantes o medicación para la diabetes, o tienes enfermedad renal o cálculos renales, consulta antes a tu médico. Mantener fuera del alcance de los niños.</em></p>`,
+    descriptionDe: `<p>Kein Sale. Keine roten Schilder. Nur ein Glas mehr im Paket.</p>
+<p>Wenn du vor Weihnachten ein DUO-Kit kaufst, legen wir Chagala dazu, unseren neuen Chaga in Kapseln. Du bezahlst die Öle, 95 €. Das Glas, das sonst 32 € kostet, geht auf uns.</p>
+
+<h3>Das liegt im Paket</h3>
+<ul>
+<li><strong>The ONE Facial Oil, 10 ml.</strong> Das Öl für den Morgen, mit 10 % CBD und 0,2 % CBG.</li>
+<li><strong>I LOVE Facial Oil, 10 ml.</strong> Das Öl für den Abend, mit 10 % CBD und 5 % CBG.</li>
+<li><strong>Chagala, 60 Kapseln.</strong> Bio-Chaga-Extrakt, 400 mg pro Kapsel. Reicht für 30 Tage. Geschenkt.</li>
+</ul>
+
+<h3>Außen: zwei Öle, keine Zehn-Schritte-Routine</h3>
+<p>The ONE am Morgen, I LOVE am Abend. 3–4 Tropfen auf die saubere Haut, fertig. Die Öle sind dafür gemacht, mit dem Endocannabinoid-System der Haut zu arbeiten und die hauteigenen Bakterien in Ruhe zu lassen, damit deine Haut mehr aus eigener Kraft schafft.</p>
+<p><em>Denk an "The ONE I LOVE", dann merkst du dir die Reihenfolge.</em></p>
+
+<h3>Innen: ein Pilz, sonst nichts</h3>
+<p>Chagala ist Chaga, der wild an der Birke gewachsen ist, in einer veganen Kapsel. Keine Mischung und keine Füllstoffe. 2 Kapseln am Tag liefern 800 mg Extrakt, und jede Charge wird auf ihren Inhalt geprüft. Wir versprechen keine Wunder von einem Pilz. Wir versprechen, was im Glas ist.</p>
+
+<h3>Warum sie zusammengehören</h3>
+<p>Haut ist nicht nur Oberfläche. Wir haben 1753 um den Gedanken gebaut, dass die Haut mit dem Rest von dir zusammenhängt: Schlaf, Essen, Stress und Darm. Die Öle sind das, was wir für außen tun. Chagala ist der Punkt, an dem wir innen anfangen. Ein Glas reicht bis in den Januar, wenn Weihnachten vorbei ist und der Alltag zurück.</p>
+
+<h3>Für dich oder unter den Baum</h3>
+<p>Wir packen nichts in Glitzer ein. Das kannst du selbst tun, wenn du magst. Drei Produkte, die jeden Tag benutzt werden, sind ein besseres Geschenk als etwas, das in der Schublade landet.</p>
+
+<h3>So funktioniert das Angebot</h3>
+<ul>
+<li>Leg das Kit in den Warenkorb. Chagala wird automatisch hinzugefügt und kostet 0 €.</li>
+<li>Gilt auch, wenn du DUO-Kit + TA-DA Serum wählst.</li>
+<li>Ein Glas pro Bestellung, bis einschließlich 24. Dezember 2026.</li>
+<li>Kostenloser Versand inklusive.</li>
+</ul>
+
+<p><em>Chagala ist ein Nahrungsergänzungsmittel. Die empfohlene Tagesdosis von 2 Kapseln nicht überschreiten. Nahrungsergänzungsmittel ersetzen keine abwechslungsreiche Ernährung. Nicht empfohlen für Kinder, Schwangere oder Stillende. Wenn du Blutverdünner oder Diabetesmedikamente nimmst oder eine Nierenerkrankung oder Nierensteine hast, sprich vorher mit deinem Arzt. Außerhalb der Reichweite von Kindern aufbewahren.</em></p>`,
+    descriptionFr: `<p>Pas de soldes. Pas d'étiquettes rouges. Juste un pot de plus dans le colis.</p>
+<p>Si tu achètes un kit DUO avant Noël, nous ajoutons Chagala, notre nouveau chaga en gélules. Tu paies les huiles, 95 €. Le pot, qui coûte sinon 32 €, c'est pour nous.</p>
+
+<h3>Ce qu'il y a dans le colis</h3>
+<ul>
+<li><strong>The ONE Facial Oil, 10 ml.</strong> L'huile du matin, avec 10 % de CBD et 0,2 % de CBG.</li>
+<li><strong>I LOVE Facial Oil, 10 ml.</strong> L'huile du soir, avec 10 % de CBD et 5 % de CBG.</li>
+<li><strong>Chagala, 60 gélules.</strong> Extrait de chaga bio, 400 mg par gélule. Dure 30 jours. Offert.</li>
+</ul>
+
+<h3>L'extérieur : deux huiles, pas de routine en dix étapes</h3>
+<p>The ONE le matin, I LOVE le soir. 3–4 gouttes sur une peau propre, et c'est tout. Les huiles sont conçues pour travailler avec le système endocannabinoïde de la peau et laisser ses propres bactéries tranquilles, pour que ta peau se débrouille mieux toute seule.</p>
+<p><em>Pense à "The ONE I LOVE" et tu te souviendras de l'ordre.</em></p>
+
+<h3>L'intérieur : un champignon, rien d'autre</h3>
+<p>Chagala, c'est du chaga qui a poussé à l'état sauvage sur le bouleau, dans une gélule végane. Pas de mélange, pas d'agents de charge. 2 gélules par jour apportent 800 mg d'extrait, et chaque lot est analysé pour vérifier son contenu. Nous ne promettons pas de miracles d'un champignon. Nous promettons ce qu'il y a dans le pot.</p>
+
+<h3>Pourquoi ils vont ensemble</h3>
+<p>La peau n'est pas qu'une surface. Nous avons construit 1753 autour de l'idée que la peau est liée au reste de toi : le sommeil, l'alimentation, le stress et l'intestin. Les huiles, c'est ce que nous faisons pour l'extérieur. Chagala, c'est là que nous commençons par l'intérieur. Un pot dure jusqu'en janvier, quand Noël est passé et que le quotidien reprend.</p>
+
+<h3>Pour toi ou sous le sapin</h3>
+<p>Nous n'emballons rien dans des paillettes. Tu peux le faire toi-même, si tu veux. Trois produits utilisés chaque jour font un meilleur cadeau qu'un objet qui finit dans un tiroir.</p>
+
+<h3>Comment fonctionne l'offre</h3>
+<ul>
+<li>Ajoute le kit à ton panier. Chagala est ajouté automatiquement et coûte 0 €.</li>
+<li>Valable aussi si tu choisis kit DUO + TA-DA Serum.</li>
+<li>Un pot par commande, jusqu'au 24 décembre 2026.</li>
+<li>Livraison gratuite incluse.</li>
+</ul>
+
+<p><em>Chagala est un complément alimentaire. Ne pas dépasser la dose journalière recommandée de 2 gélules. Les compléments alimentaires ne remplacent pas une alimentation variée. Déconseillé aux enfants, aux femmes enceintes ou allaitantes. Si tu prends des anticoagulants ou un traitement contre le diabète, ou si tu as une maladie rénale ou des calculs rénaux, parle-en d'abord à ton médecin. Tenir hors de portée des enfants.</em></p>`,
+    ingredients: null,
+    size: "2 x 10 ml ansiktsolja + 60 kapslar",
+    sizeEn: "2 × 10 ml face oil + 60 capsules",
+    guarantee:
+      "Fri frakt.",
+    guaranteeEn: "Free shipping over €60.",
+    vatRate: 0.25,
+  },
   {
     id: "duo-ta-da",
     articleNumber: "4004",
@@ -816,10 +1020,21 @@ export function getProduct(id: string): Product | undefined {
   return PRODUCTS.find((p) => p.id === id);
 }
 
+/** Produkter som ska synas i listor just nu. Kampanjprodukter visas bara medan kampanjen pågår. */
+export function visibleProducts(now: number = Date.now()): Product[] {
+  return isJulCampaignActive(now) ? PRODUCTS : PRODUCTS.filter((p) => !p.campaign);
+}
+
+/** Id som läggs i varukorgen och som recensioner hör till. */
+export function cartProductId(p: Product): string {
+  return p.cartProductId ?? p.id;
+}
+
 export function getRelatedProducts(id: string, count = 3): Product[] {
   const product = getProduct(id);
-  if (!product) return PRODUCTS.slice(0, count);
-  return PRODUCTS.filter(
+  const list = visibleProducts();
+  if (!product) return list.slice(0, count);
+  return list.filter(
     (p) => p.id !== id && (p.category === product.category || true)
   ).slice(0, count);
 }

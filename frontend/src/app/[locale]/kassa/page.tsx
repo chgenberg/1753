@@ -22,7 +22,7 @@ import { apiFetch } from "@/lib/api";
 import { loadCheckoutForm, saveCheckoutForm } from "@/lib/checkout-form-storage";
 import { trackFunnel } from "@/lib/funnel";
 import { AddressAutocomplete } from "@/components/address-autocomplete";
-import { DuoUpgrade, GiftLine, GiftProgress } from "@/components/cart-boosters";
+import { DuoUpgrade, GiftLine, GiftProgress, JulGiftLine } from "@/components/cart-boosters";
 import { useLocale } from "@/providers/locale-provider";
 import type { Locale } from "@/lib/i18n/types";
 import { useAuth } from "@/providers/auth-provider";
@@ -745,6 +745,7 @@ export default function CheckoutPage() {
                 );
               })}
               <GiftLine amount={discountedSubtotal} />
+              <JulGiftLine />
             </div>
             <DuoUpgrade className="mt-5" />
             <div className="mt-6 border-t border-border pt-4">

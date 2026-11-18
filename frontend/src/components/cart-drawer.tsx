@@ -8,7 +8,7 @@ import { useCart, type CartItem } from "@/providers/cart-provider";
 import { PRODUCTS, productDisplayName, productPrice } from "@/lib/products";
 import { formatPrice, getCurrency, getShippingCost } from "@/lib/currency";
 import { Button } from "@/components/ui/button";
-import { DuoUpgrade, GiftProgress } from "@/components/cart-boosters";
+import { DuoUpgrade, GiftProgress, JulGiftLine } from "@/components/cart-boosters";
 import { cn } from "@/lib/utils";
 import { useLocale } from "@/providers/locale-provider";
 
@@ -187,6 +187,7 @@ export function CartDrawer() {
                   );
                 })}
               </div>
+              <JulGiftLine className="mt-4 rounded-xl border border-border p-3" />
               <DuoUpgrade className="mt-4" />
             </div>
 

@@ -18,12 +18,14 @@ import type { LucideIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/product-card";
 import { SectionWrapper } from "@/components/section-wrapper";
-import { PRODUCTS, getProduct, productDisplayName } from "@/lib/products";
+import { getProduct, productDisplayName } from "@/lib/products";
 import { apiFetch } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { useLocale } from "@/providers/locale-provider";
 import { Reveal, Marquee, displayFont } from "@/components/fx/motion";
 import { MediaFrame, Pill } from "@/components/fx/frames";
+import { JulHero } from "@/components/jul-hero";
+import { useJulCampaignActive, useVisibleProducts } from "@/hooks/use-jul-campaign";
 
 const FEATURE_ICONS: LucideIcon[] = [Leaf, Droplets, Sparkles];
 
@@ -341,6 +343,8 @@ function tx(locale: string, sv: string, en: string, es?: string, de?: string, fr
 
 export default function HomePage() {
   const { t, messages, path, homeHash, locale } = useLocale();
+  const julActive = useJulCampaignActive();
+  const products = useVisibleProducts();
   const [activeFeature, setActiveFeature] = useState<FeatureItem | null>(null);
   const [videoOpen, setVideoOpen] = useState(false);
   const [showUnsub, setShowUnsub] = useState(false);
@@ -394,9 +398,19 @@ export default function HomePage() {
         </div>
       )}
 
+      {/* ── JULKAMPANJ – visas bara medan kampanjen pågår ── */}
+      <JulHero />
+
       {/* ── HERO – tre valvbågsramar i nya formspråket ── */}
-      <section className="relative z-[2] -mt-[76px] overflow-hidden rounded-b-[48px] bg-[#f5f5f7] pb-10 shadow-[0_30px_60px_rgba(0,0,0,0.06)]">
-        <div className="flex flex-col gap-10 pt-32 md:pt-36">
+      <section
+        className={cn(
+          "relative z-[2] overflow-hidden rounded-b-[48px] bg-[#f5f5f7] pb-10 shadow-[0_30px_60px_rgba(0,0,0,0.06)]",
+          // Utan kampanj ligger heron under den svävande headern. Med kampanj
+          // ligger julkortet överst och den här sektionen följer efter.
+          julActive ? "mt-4 rounded-t-[48px]" : "-mt-[76px]"
+        )}
+      >
+        <div className={cn("flex flex-col gap-10", julActive ? "pt-16 md:pt-20" : "pt-32 md:pt-36")}>
           <Reveal className="flex flex-col items-center gap-5 px-6 text-center">
             <Pill>1753 Skincare</Pill>
             <h1 className={`${displayFont} text-5xl leading-[1.05] tracking-[-0.01em] text-[#1d1d1f] md:text-7xl`}>
@@ -486,7 +500,7 @@ export default function HomePage() {
           </Reveal>
 
           <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-            {PRODUCTS.map((product, i) => (
+            {products.map((product, i) => (
               <Reveal key={product.id} delay={(i % 4) * 80}>
                 <ProductCard product={product} priority={i < 2} />
               </Reveal>

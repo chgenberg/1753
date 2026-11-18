@@ -2,13 +2,14 @@
 
 import { ProductCard } from "@/components/product-card";
 import { SectionWrapper } from "@/components/section-wrapper";
-import { PRODUCTS } from "@/lib/products";
+import { useVisibleProducts } from "@/hooks/use-jul-campaign";
 import { useLocale } from "@/providers/locale-provider";
 import { Reveal, displayFont } from "@/components/fx/motion";
 import { Pill } from "@/components/fx/frames";
 
 export function ProductGrid() {
   const { t } = useLocale();
+  const products = useVisibleProducts();
 
   return (
     <SectionWrapper>
@@ -22,7 +23,7 @@ export function ProductGrid() {
         </p>
       </Reveal>
       <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
-        {PRODUCTS.map((product, i) => (
+        {products.map((product, i) => (
           <Reveal key={product.id} delay={(i % 4) * 80}>
             <ProductCard product={product} />
           </Reveal>
