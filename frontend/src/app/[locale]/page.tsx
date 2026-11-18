@@ -514,7 +514,7 @@ export default function HomePage() {
           bg="bg-[#766a62]"
           heroImg="/New_Products/TA-DAWoman.jpg"
           heroAlt="TA-DA Serum"
-          detailImg="/New_Products/TA-DA.jpg"
+          detailImg="/Products_2026/ta-da.jpg"
           detailShape="circle"
           reverse
         />
@@ -533,7 +533,7 @@ export default function HomePage() {
           bg="bg-[#1d1d1f]"
           heroImg="/New_Products/Fungtasticwoman.jpg"
           heroAlt="Fungtastic Mushroom Extract"
-          detailImg="/New_Products/Fungtastic.jpg"
+          detailImg="/Products_2026/fungtastic.jpg"
           detailShape="rounded"
         />
 

@@ -30,6 +30,7 @@ const PRODUCT_NAMES: Record<string, string> = {
   "ta-da-serum": "TA-DA Serum",
   "au-naturel-makeup-remover": "Au Naturel Makeup Remover",
   "fungtastic-mushroom-extract": "Fungtastic Mushroom Extract",
+  chagala: "Chagala",
 };
 
 const PAGE_SIZE = 20;

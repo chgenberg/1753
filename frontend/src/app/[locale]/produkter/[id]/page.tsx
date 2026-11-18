@@ -202,13 +202,15 @@ export default async function ProductPage({ params }: Props) {
             worstRating: "1",
             reviewCount: String(reviewData.stats.count),
           }
-        : {
-            "@type": "AggregateRating",
-            ratingValue: "4.8",
-            bestRating: "5",
-            worstRating: "1",
-            reviewCount: String(product.reviews),
-          },
+        : product.reviews > 0
+          ? {
+              "@type": "AggregateRating",
+              ratingValue: "4.8",
+              bestRating: "5",
+              worstRating: "1",
+              reviewCount: String(product.reviews),
+            }
+          : undefined, // ny produkt utan omdömen: inget betyg i strukturerad data
     };
 
     if (reviewData && reviewData.reviews.length > 0) {

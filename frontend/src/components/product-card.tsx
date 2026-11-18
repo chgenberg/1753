@@ -133,19 +133,22 @@ export function ProductCard({
         <p className="mt-1 line-clamp-2 text-xs leading-relaxed text-brand-500">
           {shortDesc}
         </p>
-        <div className="mt-2 flex items-center gap-1.5">
-          <div className="flex">
-            {[...Array(5)].map((_, i) => (
-              <Star
-                key={i}
-                className="h-3 w-3 fill-amber-400 text-amber-400"
-              />
-            ))}
+        {/* Nya produkter utan omdömen visar inga stjärnor – inte fem stjärnor och "(0)". */}
+        {product.reviews > 0 && (
+          <div className="mt-2 flex items-center gap-1.5">
+            <div className="flex">
+              {[...Array(5)].map((_, i) => (
+                <Star
+                  key={i}
+                  className="h-3 w-3 fill-amber-400 text-amber-400"
+                />
+              ))}
+            </div>
+            <span className="text-[11px] font-medium text-brand-400">
+              ({product.reviews})
+            </span>
           </div>
-          <span className="text-[11px] font-medium text-brand-400">
-            ({product.reviews})
-          </span>
-        </div>
+        )}
       </div>
     </Link>
   );

@@ -62,6 +62,17 @@ const PRODUCT_BRIEF: Record<string, { actives: string; for: { sv: string; en: st
       fr: "Nettoyage",
     },
   },
+  chagala: {
+    actives: "Chaga 400 mg",
+    size: tx("en", "60 kapslar", "60 capsules"),
+    for: {
+      sv: "Ren chaga",
+      en: "Pure chaga",
+      es: "Chaga puro",
+      de: "Reiner Chaga",
+      fr: "Chaga pur",
+    },
+  },
   "fungtastic-mushroom-extract": {
     actives: tx("en", "25 % var av Chaga, Lion's Mane, Cordyceps, Reishi", "25% each of Chaga, Lion's Mane, Cordyceps, Reishi"),
     size: tx("en", "60 kapslar", "60 capsules"),

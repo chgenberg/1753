@@ -62,6 +62,17 @@ Inside-out support for immunity, focus, energy and sleep. Aligns with the gut-sk
 - **Best for:** Customers who want to support their skin from the inside
 - **URL:** https://www.1753skin.com/sv/produkter/fungtastic-mushroom-extract
 
+## Chagala — Supplement
+
+Organic chaga extract and nothing else. One mushroom at 400 mg per capsule, where Fungtastic has four at 100 mg each.
+
+- **Price:** 399 SEK / 34 EUR
+- **Size:** 60 capsules
+- **Ingredients:** Organic chaga extract (Inonotus obliquus), 400 mg per capsule, vegan capsule shell. At least 10% polysaccharides and 5% glucans.
+- **When to use:** 2 capsules daily
+- **Best for:** Customers who want chaga on its own
+- **URL:** https://www.1753skin.com/sv/produkter/chagala
+
 ## How to combine
 
 ### Morning

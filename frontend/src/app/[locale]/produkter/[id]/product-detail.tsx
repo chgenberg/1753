@@ -118,7 +118,9 @@ export default function ProductDetail({ id }: { id: string }) {
   const images = [
     { src: product.image, alt: pname },
     { src: product.imageAlt, alt: `${pname}${t("productDetail.lifestyleAltSuffix")}` },
-  ];
+  ].filter((img, i, all) => all.findIndex((other) => other.src === img.src) === i);
+  // Antal omdömen: från API:t när det svarat, annars produktdatans siffra.
+  const reviewCount = reviewStats ? reviewStats.count : product.reviews;
   const price = productPrice(product, locale);
   const origPrice = productOriginalPrice(product, locale);
   const saveAmount = origPrice
@@ -161,6 +163,7 @@ export default function ProductDetail({ id }: { id: string }) {
                 )}
               </div>
 
+              {images.length > 1 && (
               <div className="flex gap-3">
                 {images.map((img, i) => (
                   <button
@@ -179,9 +182,12 @@ export default function ProductDetail({ id }: { id: string }) {
                   </button>
                 ))}
               </div>
+              )}
             </div>
 
             <div className="flex flex-col justify-center">
+              {/* En ny produkt utan omdömen visar ingen betygsrad. */}
+              {reviewCount > 0 && (
               <div className="mb-2 flex items-center gap-2">
                 <div className="flex">
                   {[...Array(5)].map((_, i) => {
@@ -205,6 +211,7 @@ export default function ProductDetail({ id }: { id: string }) {
                     : `${product.reviews} ${t("productDetail.reviewsLabel")}`}
                 </span>
               </div>
+              )}
 
               <div className="flex items-start justify-between gap-3">
                 <h1 className="font-[family-name:var(--font-fraunces)] text-4xl tracking-[-0.01em] md:text-5xl">{pname}</h1>

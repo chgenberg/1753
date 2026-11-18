@@ -156,7 +156,7 @@ export const PRODUCTS: Product[] = [
     originalPrice: null,
     originalPriceEur: null,
     reviews: 20,
-    image: "/New_Products/TA-DA.jpg",
+    image: "/Products_2026/ta-da.jpg",
     imageAlt: "/New_Products/TA-DAWoman.jpg",
     shortDesc:
       "CBG-berikat serum som låser in fukt och ger lyster. Din huds bästa kompis – oavsett årstid.",
@@ -447,7 +447,7 @@ export const PRODUCTS: Product[] = [
     originalPrice: null,
     originalPriceEur: null,
     reviews: 83,
-    image: "/New_Products/MR.jpg",
+    image: "/Products_2026/au-naturel.jpg",
     imageAlt: "/New_Products/MRwoman.jpg",
     shortDesc:
       "Rengöringsolja med MCT och CBD. Tar bort allt – utan att röra hudens naturliga balans.",
@@ -556,6 +556,137 @@ export const PRODUCTS: Product[] = [
     vatRate: 0.25,
   },
   {
+    id: "chagala",
+    articleNumber: "4015",
+    category: "supplement",
+    name: "Chagala",
+    nameEn: "Chagala",
+    price: 399,
+    priceEur: 34,
+    originalPrice: null,
+    originalPriceEur: null,
+    reviews: 0,
+    image: "/Products_2026/chagala.jpg",
+    // Ingen miljöbild finns ännu. Samma bild används, och galleriet visar den en gång.
+    imageAlt: "/Products_2026/chagala.jpg",
+    shortDesc:
+      "Ren chaga, vildvuxen på björk. En svamp i stället för fyra – 800 mg ekologiskt extrakt om dagen.",
+    shortDescEn:
+      "Pure chaga, wild-grown on birch. One mushroom instead of four – 800 mg of organic extract a day.",
+    shortDescEs:
+      "Chaga puro, crecido de forma silvestre en abedul. Un hongo en lugar de cuatro: 800 mg de extracto ecológico al día.",
+    shortDescDe:
+      "Reiner Chaga, wild an der Birke gewachsen. Ein Pilz statt vier – 800 mg Bio-Extrakt am Tag.",
+    shortDescFr:
+      "Du chaga pur, poussé à l'état sauvage sur le bouleau. Un champignon au lieu de quatre – 800 mg d'extrait bio par jour.",
+    description: `<p>En svamp. Inget annat. Chagala är ekologiskt chagaextrakt i en vegansk kapsel – chaga som vuxit vilt på björk, och kapselskalet. Där tar ingredienslistan slut.</p>
+
+<h3>Varför bara chaga?</h3>
+<p>Fungtastic är fyra svampar i samma kapsel, en fjärdedel av varje. Chagala är den som allt började med, ensam och i full dos: 400 mg chagaextrakt per kapsel, mot 100 mg i Fungtastic. Vill du ha bredden väljer du Fungtastic. Vill du ha chagan väljer du Chagala.</p>
+
+<h3>Chaga och endocannabinoidsystemet</h3>
+<p>Chaga tar upp betulin och betulinsyra från björken den växer på. I laboratoriestudier hör betulinsyra till de växtämnen utanför hampan som binder till kroppens cannabinoidreceptorer, CB1 och CB2 – samma system som vi bygger vår hudvård kring. Det är därför en svamp från en björk hör hemma hos ett hudvårdsmärke som utgår från cannabinoider.</p>
+
+<h3>Chaga och tarmfloran</h3>
+<p>Chagans polysackarider bryts inte ner av oss, utan av bakterierna i tarmen. I djurstudier har de förskjutit tarmfloran mot fler av de bakterier som bildar kortkedjiga fettsyror. Tarm och hud hänger ihop – det är samma tanke som när vi låter hudens egna bakterier vara i fred i stället för att tvätta bort dem.</p>
+
+<h3>Vad forskningen säger, och inte säger</h3>
+<p>I cellstudier har ämnen från chaga dämpat inflammationssignaler i hudceller och minskat tecken på UV-stress. Det är lovande, men det är provrör och möss. Ingen har ännu visat i en studie på människor att chaga i kapsel förändrar huden. Vi tänker inte låtsas något annat.</p>
+<p>Det vi kan lova är vad som finns i burken. Varje batch testas för adenosin, betulinsyra, D-mannitol, ergosterol och inotodiol, och extraktet håller minst 10 % polysackarider och 5 % glukaner.</p>
+
+<h3>Så tar du den</h3>
+<p>2 kapslar om dagen ger 800 mg ekologiskt chagaextrakt. En burk räcker i 30 dagar. Överskrid inte rekommenderad daglig dos.</p>
+
+<p><em>Kosttillskott ersätter inte en varierad kost. Rekommenderas inte för barn, gravida eller ammande. Äter du blodförtunnande eller diabetesläkemedel, eller har njursjukdom eller njursten, ska du prata med din läkare först. Förvaras oåtkomligt för barn.</em></p>`,
+    descriptionEn: `<p>One mushroom. Nothing else. Chagala is organic chaga extract in a vegan capsule – chaga that grew wild on birch, and the capsule shell. That is where the ingredient list ends.</p>
+
+<h3>Why only chaga?</h3>
+<p>Fungtastic is four mushrooms in one capsule, a quarter of each. Chagala is the one it all started with, on its own and at full strength: 400 mg of chaga extract per capsule, against 100 mg in Fungtastic. If you want the breadth, choose Fungtastic. If you want the chaga, choose Chagala.</p>
+
+<h3>Chaga and the endocannabinoid system</h3>
+<p>Chaga takes up betulin and betulinic acid from the birch it grows on. In laboratory studies, betulinic acid is among the plant compounds outside hemp that bind to the body’s cannabinoid receptors, CB1 and CB2 – the same system we build our skincare around. That is why a mushroom from a birch tree belongs with a skincare brand that starts from cannabinoids.</p>
+
+<h3>Chaga and the gut flora</h3>
+<p>Chaga’s polysaccharides are not broken down by us but by the bacteria in the gut. In animal studies they have shifted the gut flora towards more of the bacteria that produce short-chain fatty acids. Gut and skin are connected – it is the same thinking as when we leave the skin’s own bacteria alone instead of washing them away.</p>
+
+<h3>What the research says, and does not say</h3>
+<p>In cell studies, compounds from chaga have dampened inflammatory signals in skin cells and reduced signs of UV stress. That is promising, but it is test tubes and mice. No one has yet shown in a human study that chaga in a capsule changes the skin. We are not going to pretend otherwise.</p>
+<p>What we can promise is what is in the jar. Every batch is tested for adenosine, betulinic acid, D-mannitol, ergosterol and inotodiol, and the extract holds at least 10% polysaccharides and 5% glucans.</p>
+
+<h3>How to take it</h3>
+<p>2 capsules a day give 800 mg of organic chaga extract. One jar lasts 30 days. Do not exceed the recommended daily dose.</p>
+
+<p><em>Food supplements are not a substitute for a varied diet. Not recommended for children or during pregnancy or breastfeeding. If you take blood thinners or diabetes medication, or have kidney disease or kidney stones, talk to your doctor first. Keep out of reach of children.</em></p>`,
+    descriptionEs: `<p>Un hongo. Nada más. Chagala es extracto ecológico de chaga en una cápsula vegana: chaga que creció de forma silvestre en el abedul, y la cápsula. Ahí termina la lista de ingredientes.</p>
+
+<h3>¿Por qué solo chaga?</h3>
+<p>Fungtastic son cuatro hongos en una cápsula, una cuarta parte de cada uno. Chagala es el hongo con el que empezó todo, solo y en dosis completa: 400 mg de extracto de chaga por cápsula, frente a 100 mg en Fungtastic. Si quieres la amplitud, elige Fungtastic. Si quieres el chaga, elige Chagala.</p>
+
+<h3>El chaga y el sistema endocannabinoide</h3>
+<p>El chaga absorbe betulina y ácido betulínico del abedul en el que crece. En estudios de laboratorio, el ácido betulínico es uno de los compuestos vegetales fuera del cáñamo que se unen a los receptores cannabinoides del cuerpo, CB1 y CB2: el mismo sistema en torno al cual construimos nuestro cuidado de la piel. Por eso un hongo de un abedul tiene su sitio en una marca que parte de los cannabinoides.</p>
+
+<h3>El chaga y la flora intestinal</h3>
+<p>Los polisacáridos del chaga no los descomponemos nosotros, sino las bacterias del intestino. En estudios con animales han desplazado la flora intestinal hacia más bacterias de las que producen ácidos grasos de cadena corta. Intestino y piel están conectados: es la misma idea que cuando dejamos en paz a las bacterias propias de la piel en lugar de eliminarlas.</p>
+
+<h3>Lo que dice la investigación, y lo que no</h3>
+<p>En estudios con células, compuestos del chaga han atenuado señales inflamatorias en células de la piel y reducido signos de estrés por rayos UV. Es prometedor, pero son tubos de ensayo y ratones. Nadie ha demostrado todavía en un estudio con personas que el chaga en cápsula cambie la piel. No vamos a fingir lo contrario.</p>
+<p>Lo que sí podemos prometer es lo que hay en el frasco. Cada lote se analiza para adenosina, ácido betulínico, D-manitol, ergosterol e inotodiol, y el extracto contiene al menos un 10 % de polisacáridos y un 5 % de glucanos.</p>
+
+<h3>Cómo tomarlo</h3>
+<p>2 cápsulas al día aportan 800 mg de extracto ecológico de chaga. Un frasco dura 30 días. No superes la dosis diaria recomendada.</p>
+
+<p><em>Los complementos alimenticios no sustituyen a una dieta variada. No recomendado para niños ni durante el embarazo o la lactancia. Si tomas anticoagulantes o medicación para la diabetes, o tienes enfermedad renal o cálculos renales, consulta antes a tu médico. Mantener fuera del alcance de los niños.</em></p>`,
+    descriptionDe: `<p>Ein Pilz. Sonst nichts. Chagala ist Bio-Chaga-Extrakt in einer veganen Kapsel – Chaga, der wild an der Birke gewachsen ist, und die Kapselhülle. Damit endet die Zutatenliste.</p>
+
+<h3>Warum nur Chaga?</h3>
+<p>Fungtastic sind vier Pilze in einer Kapsel, von jedem ein Viertel. Chagala ist der Pilz, mit dem alles angefangen hat, allein und in voller Dosis: 400 mg Chaga-Extrakt pro Kapsel, gegenüber 100 mg in Fungtastic. Wenn du die Breite willst, nimm Fungtastic. Wenn du den Chaga willst, nimm Chagala.</p>
+
+<h3>Chaga und das Endocannabinoid-System</h3>
+<p>Chaga nimmt Betulin und Betulinsäure aus der Birke auf, an der er wächst. In Laborstudien gehört Betulinsäure zu den Pflanzenstoffen außerhalb des Hanfs, die an die Cannabinoid-Rezeptoren des Körpers binden, CB1 und CB2 – dasselbe System, um das wir unsere Hautpflege aufbauen. Deshalb gehört ein Pilz von einer Birke zu einer Hautpflegemarke, die von Cannabinoiden ausgeht.</p>
+
+<h3>Chaga und die Darmflora</h3>
+<p>Die Polysaccharide des Chaga werden nicht von uns abgebaut, sondern von den Bakterien im Darm. In Tierstudien haben sie die Darmflora hin zu mehr Bakterien verschoben, die kurzkettige Fettsäuren bilden. Darm und Haut hängen zusammen – es ist derselbe Gedanke wie bei den hauteigenen Bakterien, die wir in Ruhe lassen, statt sie wegzuwaschen.</p>
+
+<h3>Was die Forschung sagt, und was nicht</h3>
+<p>In Zellstudien haben Stoffe aus Chaga Entzündungssignale in Hautzellen gedämpft und Anzeichen von UV-Stress verringert. Das ist vielversprechend, aber es sind Reagenzgläser und Mäuse. Niemand hat bisher in einer Studie am Menschen gezeigt, dass Chaga in Kapselform die Haut verändert. Wir tun nicht so, als wäre es anders.</p>
+<p>Was wir versprechen können, ist der Inhalt des Glases. Jede Charge wird auf Adenosin, Betulinsäure, D-Mannitol, Ergosterol und Inotodiol geprüft, und der Extrakt enthält mindestens 10 % Polysaccharide und 5 % Glucane.</p>
+
+<h3>So nimmst du es ein</h3>
+<p>2 Kapseln am Tag liefern 800 mg Bio-Chaga-Extrakt. Ein Glas reicht für 30 Tage. Die empfohlene Tagesdosis nicht überschreiten.</p>
+
+<p><em>Nahrungsergänzungsmittel sind kein Ersatz für eine abwechslungsreiche Ernährung. Nicht empfohlen für Kinder sowie in Schwangerschaft und Stillzeit. Wenn du Blutverdünner oder Diabetes-Medikamente nimmst oder eine Nierenerkrankung oder Nierensteine hast, sprich vorher mit deiner Ärztin oder deinem Arzt. Außerhalb der Reichweite von Kindern aufbewahren.</em></p>`,
+    descriptionFr: `<p>Un champignon. Rien d'autre. Chagala est un extrait de chaga bio dans une gélule végane – du chaga qui a poussé à l'état sauvage sur le bouleau, et l'enveloppe de la gélule. La liste d'ingrédients s'arrête là.</p>
+
+<h3>Pourquoi seulement du chaga ?</h3>
+<p>Fungtastic, ce sont quatre champignons dans une gélule, un quart de chacun. Chagala est celui par lequel tout a commencé, seul et à pleine dose : 400 mg d'extrait de chaga par gélule, contre 100 mg dans Fungtastic. Si tu veux l'éventail, choisis Fungtastic. Si tu veux le chaga, choisis Chagala.</p>
+
+<h3>Le chaga et le système endocannabinoïde</h3>
+<p>Le chaga absorbe la bétuline et l'acide bétulinique du bouleau sur lequel il pousse. Dans des études en laboratoire, l'acide bétulinique fait partie des composés végétaux, en dehors du chanvre, qui se lient aux récepteurs cannabinoïdes du corps, CB1 et CB2 – le même système autour duquel nous construisons nos soins. C'est pourquoi un champignon de bouleau a sa place dans une marque de soins qui part des cannabinoïdes.</p>
+
+<h3>Le chaga et la flore intestinale</h3>
+<p>Les polysaccharides du chaga ne sont pas dégradés par nous, mais par les bactéries de l'intestin. Dans des études sur l'animal, ils ont déplacé la flore intestinale vers davantage de bactéries productrices d'acides gras à chaîne courte. L'intestin et la peau sont liés – c'est la même idée que lorsque nous laissons tranquilles les bactéries de la peau au lieu de les éliminer.</p>
+
+<h3>Ce que dit la recherche, et ce qu'elle ne dit pas</h3>
+<p>Dans des études sur cellules, des composés du chaga ont atténué des signaux inflammatoires dans les cellules de la peau et réduit des signes de stress dû aux UV. C'est prometteur, mais ce sont des éprouvettes et des souris. Personne n'a encore montré, dans une étude chez l'humain, que le chaga en gélule change la peau. Nous n'allons pas prétendre le contraire.</p>
+<p>Ce que nous pouvons promettre, c'est ce qu'il y a dans le pot. Chaque lot est testé pour l'adénosine, l'acide bétulinique, le D-mannitol, l'ergostérol et l'inotodiol, et l'extrait contient au moins 10 % de polysaccharides et 5 % de glucanes.</p>
+
+<h3>Comment le prendre</h3>
+<p>2 gélules par jour apportent 800 mg d'extrait de chaga bio. Un pot dure 30 jours. Ne pas dépasser la dose journalière recommandée.</p>
+
+<p><em>Les compléments alimentaires ne remplacent pas une alimentation variée. Déconseillé aux enfants ainsi que pendant la grossesse et l'allaitement. Si tu prends des anticoagulants ou un traitement contre le diabète, ou si tu as une maladie rénale ou des calculs rénaux, parles-en d'abord à ton médecin. Tenir hors de portée des enfants.</em></p>`,
+    ingredients:
+      "PureChaga™-extrakt (Inonotus obliquus)*, kapselskal (hydroxipropylmetylcellulosa). *Ekologisk produktion. 400 mg per kapsel. Minst 10 % polysackarider, minst 5 % glukaner.",
+    ingredientsEn:
+      "PureChaga™ extract (Inonotus obliquus)*, capsule shell (hydroxypropyl methylcellulose). *Organic production. 400 mg per capsule. At least 10% polysaccharides, at least 5% glucans.",
+    size: "60 kapslar",
+    sizeEn: "60 capsules",
+    sizes: ["60 kapslar"],
+    guarantee:
+      "Fri frakt över 600 kr.",
+    guaranteeEn: "Free shipping over €60.",
+    vatRate: 0.06,
+  },
+  {
     id: "fungtastic-mushroom-extract",
     articleNumber: "4001",
     category: "supplement",
@@ -566,7 +697,7 @@ export const PRODUCTS: Product[] = [
     originalPrice: null,
     originalPriceEur: null,
     reviews: 63,
-    image: "/New_Products/Fungtastic.jpg",
+    image: "/Products_2026/fungtastic.jpg",
     imageAlt: "/New_Products/Fungtasticwoman.jpg",
     shortDesc:
       "Fyra medicinska svampar i perfekt balans. Stöd för immunförsvar, fokus, energi och sömn – inifrån.",
