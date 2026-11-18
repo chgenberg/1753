@@ -66,7 +66,7 @@ Inside-out support for immunity, focus, energy and sleep. Aligns with the gut-sk
 
 Organic chaga extract and nothing else. One mushroom at 400 mg per capsule, where Fungtastic has four at 100 mg each.
 
-- **Price:** 399 SEK / 34 EUR
+- **Price:** 377 SEK / 32 EUR
 - **Size:** 60 capsules
 - **Ingredients:** Organic chaga extract (Inonotus obliquus), 400 mg per capsule, vegan capsule shell. At least 10% polysaccharides and 5% glucans.
 - **When to use:** 2 capsules daily

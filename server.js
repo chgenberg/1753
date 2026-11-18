@@ -434,7 +434,7 @@ const PRODUCTS_MAP = {
   "au-naturel-makeup-remover":  { name: "Au Naturel Makeup Remover", price: 399, priceEur: 34, articleNumber: "1004", vatRate: 0.25 },
   "fungtastic-mushroom-extract":{ name: "Fungtastic Mushroom Extract", price: 377, priceEur: 32, articleNumber: "4001", vatRate: 0.06 },
   // Artikel 4015 finns i både Ongoing och Fortnox (kosttillskott, 6 % moms).
-  "chagala":                    { name: "Chagala", price: 399, priceEur: 34, articleNumber: "4015", vatRate: 0.06 }
+  "chagala":                    { name: "Chagala", price: 377, priceEur: 32, articleNumber: "4015", vatRate: 0.06 }
 };
 
 const FREE_SHIPPING_THRESHOLD = { SEK: 600, EUR: 60 };
@@ -6471,7 +6471,7 @@ PRODUKTER:
 2. TA-DA Serum (699 kr, 30 ml) – ekologisk jojobaolja och CBG 3%, bara två ingredienser
 3. DUO-kit (1 099 kr) – The ONE (10% CBD, 0,2% CBG, morgon) + I LOVE (10% CBD, 5% CBG, kväll), 2 × 10 ml
 4. Au Naturel Makeup Remover (399 kr, 100 ml) – MCT-olja + CBD
-5. Chagala (399 kr, 60 kapslar) – nytt kosttillskott med enbart ekologiskt chagaextrakt, 400 mg per kapsel, 2 kapslar per dag. Lova ingen effekt på hud eller hälsa
+5. Chagala (377 kr, 60 kapslar) – nytt kosttillskott med enbart ekologiskt chagaextrakt, 400 mg per kapsel, 2 kapslar per dag. Lova ingen effekt på hud eller hälsa
 6. Fungtastic Mushroom Extract (377 kr, 60 kapslar) – fyra svampar. Utgående: säljs så länge lagret räcker och fylls inte på. Chagala är efterföljaren
 
 REGLER:
@@ -9428,7 +9428,7 @@ VERIFIERADE PRODUKTER & INCI (enda tillåtna källan för "vad innehåller era p
 3. TA-DA Serum (id: ta-da-serum, 699 kr, 30 ml): Ekologisk jojobaolja (INCI: Simmondsia chinensis Seed Oil) + Cannabigerol (CBG) 3 % (1500 mg per flaska).
 4. Au Naturel Makeup Remover (id: au-naturel-makeup-remover, 399 kr, 100 ml): Caprylic/Capric Triglyceride (MCT) + Cannabidiol (CBD) 0,2 %.
 5. Fungtastic Mushroom Extract (id: fungtastic-mushroom-extract, 377 kr, 60 kapslar): Chaga 25 %, Lion's Mane 25 %, Cordyceps 25 %, Reishi 25 % – 400 mg per kapsel (15:1 extrakt), minst 20 % betaglukaner, 100 % ekologiskt. Kosttillskott – inte ansiktsprodukt.
-6. Chagala (id: chagala, 399 kr, 60 kapslar): ekologiskt chagaextrakt (Inonotus obliquus), 400 mg per kapsel, kapselskal av hydroxipropylmetylcellulosa. Inget annat. Minst 10 % polysackarider och 5 % glukaner. 2 kapslar per dag. Kosttillskott – inte ansiktsprodukt. Skillnad mot Fungtastic: Chagala är bara chaga (400 mg per kapsel), Fungtastic är fyra svampar (100 mg av varje). Lova ingen effekt på hud eller hälsa av Chagala – forskningen är gjord på celler och djur, inte på människor.
+6. Chagala (id: chagala, 377 kr, 60 kapslar): ekologiskt chagaextrakt (Inonotus obliquus), 400 mg per kapsel, kapselskal av hydroxipropylmetylcellulosa. Inget annat. Minst 10 % polysackarider och 5 % glukaner. 2 kapslar per dag. Kosttillskott – inte ansiktsprodukt. Skillnad mot Fungtastic: Chagala är bara chaga (400 mg per kapsel), Fungtastic är fyra svampar (100 mg av varje). Lova ingen effekt på hud eller hälsa av Chagala – forskningen är gjord på celler och djur, inte på människor.
 
 PRODUKTKATALOG (priser & id):
 1. "DUO-kit" (id: duo-kit, 1 099 kr) – The ONE + I LOVE. 2 x 10 ml.
@@ -9436,7 +9436,7 @@ PRODUKTKATALOG (priser & id):
 3. "TA-DA Serum" (id: ta-da-serum, 699 kr) – se INCI ovan.
 4. "Au Naturel Makeup Remover" (id: au-naturel-makeup-remover, 399 kr) – se INCI ovan.
 5. "Fungtastic Mushroom Extract" (id: fungtastic-mushroom-extract, 377 kr) – se INCI ovan.
-6. "Chagala" (id: chagala, 399 kr) – se INCI ovan.
+6. "Chagala" (id: chagala, 377 kr) – se INCI ovan.
 
 PRODUKTMATCHNING:
 - Torr/känslig hud → DUO-kit + TA-DA
