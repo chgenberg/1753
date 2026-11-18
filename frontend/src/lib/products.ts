@@ -567,8 +567,7 @@ export const PRODUCTS: Product[] = [
     originalPriceEur: null,
     reviews: 0,
     image: "/Products_2026/chagala.jpg",
-    // Ingen miljöbild finns ännu. Samma bild används, och galleriet visar den en gång.
-    imageAlt: "/Products_2026/chagala.jpg",
+    imageAlt: "/Products_2026/chagala-miljo.jpg",
     shortDesc:
       "Ren chaga, vildvuxen på björk. En svamp i stället för fyra – 800 mg ekologiskt extrakt om dagen.",
     shortDescEn:
