@@ -502,7 +502,7 @@ export default function HomePage() {
           bg="bg-[#108474]"
           heroImg="/New_Products/DUO+TA-DAWoman.jpg"
           heroAlt="DUO-kit"
-          detailImg="/New_Products/DUO.jpg"
+          detailImg="/Products_2026/duo.jpg"
           detailShape="arch"
         />
 

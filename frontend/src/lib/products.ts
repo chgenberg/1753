@@ -46,7 +46,7 @@ export const PRODUCTS: Product[] = [
     originalPrice: 2197,
     originalPriceEur: 189,
     reviews: 238,
-    image: "/New_Products/DUO+TA-DA.jpg",
+    image: "/Products_2026/duo-ta-da.jpg",
     imageAlt: "/New_Products/DUO+TA-DAWoman.jpg",
     shortDesc:
       "Hela rutinen i ett. Tre produkter som stärker huden på djupet – inte bara förbättrar ytan.",
@@ -291,7 +291,7 @@ export const PRODUCTS: Product[] = [
     originalPrice: 1498,
     originalPriceEur: 129,
     reviews: 515,
-    image: "/New_Products/DUO.jpg",
+    image: "/Products_2026/duo.jpg",
     imageAlt: "/New_Products/DUOwoman.jpg",
     shortDesc:
       "Två ansiktsoljor. En för morgonen, en för kvällen. Komplett hudvård som fungerar med din hud – inte mot den.",
