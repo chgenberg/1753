@@ -298,6 +298,8 @@ export const en: Messages = {
     hotspotGiftSub: "On us, worth {amount}",
     hotspotShow: "Show {product}",
     giftLabel: "Christmas offer",
+    pdpNote: "Buy a DUO kit before Christmas and Chagala is on us, worth {amount}.",
+    pdpLink: "See the Christmas kit",
   },
   cartDrawer: {
     title: "Cart",

@@ -298,6 +298,8 @@ export const de: Messages = {
     hotspotGiftSub: "Geschenkt, Wert {amount}",
     hotspotShow: "{product} anzeigen",
     giftLabel: "Weihnachtsangebot",
+    pdpNote: "Wenn du vor Weihnachten ein DUO-Kit kaufst, gibt es Chagala geschenkt, Wert {amount}.",
+    pdpLink: "Zum Weihnachtskit",
   },
   cartDrawer: {
     title: "Warenkorb",

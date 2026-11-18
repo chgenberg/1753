@@ -296,6 +296,8 @@ const bundle = {
     hotspotGiftSub: "På köpet, värde {amount}",
     hotspotShow: "Visa {product}",
     giftLabel: "Julerbjudande",
+    pdpNote: "Köper du ett DUO-kit före jul får du Chagala på köpet, värde {amount}.",
+    pdpLink: "Till julkitet",
   },
   cartDrawer: {
     title: "Varukorg",

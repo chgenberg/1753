@@ -4,7 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, Heart, Minus, Plus, RefreshCcw, Star, Truck } from "lucide-react";
+import { ArrowLeft, ArrowRight, Gift, Heart, Minus, Plus, RefreshCcw, Star, Truck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ProductCard } from "@/components/product-card";
 import { ReviewsSection } from "@/components/reviews-section";
@@ -32,6 +32,7 @@ import { cn } from "@/lib/utils";
 import { useLocale } from "@/providers/locale-provider";
 import { Reveal } from "@/components/fx/motion";
 import { useJulCampaignActive } from "@/hooks/use-jul-campaign";
+import { JUL_CAMPAIGN } from "@/lib/campaign";
 
 export default function ProductDetail({ id }: { id: string }) {
   const { t, path, locale } = useLocale();
@@ -43,6 +44,10 @@ export default function ProductDetail({ id }: { id: string }) {
   const isCampaignProduct = Boolean(product?.campaign);
   const campaignActive = useJulCampaignActive();
   const campaignOver = isCampaignProduct && !campaignActive;
+  // DUO-kit och Chagala länkar till julkitet medan kampanjen pågår.
+  const promoIds: readonly string[] = JUL_CAMPAIGN.promoProductIds;
+  const showJulLink = campaignActive && promoIds.includes(id);
+  const julGift = getProduct(JUL_CAMPAIGN.giftProductId);
   const [qty, setQty] = useState(1);
   const [activeImg, setActiveImg] = useState(0);
   const [subInterval, setSubInterval] = useState(60);
@@ -409,6 +414,30 @@ export default function ProductDetail({ id }: { id: string }) {
                   <span>{t("productDetail.freeShippingHint")}</span>
                 </div>
               </div>
+
+              {showJulLink && julGift && (
+                <Link
+                  href={path("product", { productId: JUL_CAMPAIGN.productId })}
+                  className="group/jul mt-8 flex items-center gap-4 rounded-2xl bg-[#f4ebe1] p-4 shadow-sm ring-1 ring-inset ring-black/5 transition-all duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] hover:scale-[1.01] hover:shadow-md"
+                >
+                  <span className="relative h-16 w-16 shrink-0 overflow-hidden rounded-xl bg-white/60 ring-1 ring-inset ring-black/5">
+                    <Image src="/jul/jul-duo-chagala.jpg" alt="" fill className="object-cover" sizes="64px" />
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="flex items-center gap-1.5 text-[11px] font-semibold uppercase tracking-[0.12em] text-[#0d6e62]">
+                      <Gift className="h-3 w-3" aria-hidden />
+                      {t("jul.kicker")}
+                    </span>
+                    <span className="mt-1 block text-sm leading-snug text-[#1d1d1f]">
+                      {t("jul.pdpNote", { amount: formatPrice(productPrice(julGift, locale), locale) })}
+                    </span>
+                    <span className="mt-1.5 inline-flex items-center gap-1 text-sm font-semibold text-[#1d1d1f] underline-offset-4 group-hover/jul:underline">
+                      {t("jul.pdpLink")}
+                      <ArrowRight className="h-3.5 w-3.5 transition-transform duration-300 group-hover/jul:translate-x-0.5" aria-hidden />
+                    </span>
+                  </span>
+                </Link>
+              )}
 
               <div
                 className="product-description mt-8 border-t border-brand-100 pt-6 text-[15px] leading-relaxed text-brand-600 [&_h3]:mt-6 [&_h3]:mb-2 [&_h3]:text-sm [&_h3]:font-bold [&_h3]:tracking-tight [&_h3]:text-brand-900 [&_p]:mb-3 [&_ul]:mb-3 [&_ul]:ml-4 [&_ul]:list-disc [&_ul]:space-y-1 [&_li]:text-brand-600 [&_em]:text-brand-500 [&_strong]:font-semibold [&_strong]:text-brand-800"

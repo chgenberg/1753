@@ -24,18 +24,16 @@ const SPOTS: Record<SpotId, { mobile: [number, number]; desktop: [number, number
 
 function Hotspot({
   id,
+  href,
   title,
   sub,
   label,
-  open,
-  onToggle,
 }: {
   id: SpotId;
+  href: string;
   title: string;
   sub: string;
   label: string;
-  open: boolean;
-  onToggle: (id: SpotId) => void;
 }) {
   const { mobile, desktop } = SPOTS[id];
   const style = {
@@ -46,41 +44,37 @@ function Hotspot({
   } as CSSProperties;
 
   return (
-    <div
+    <Link
+      href={href}
+      aria-label={label}
       style={style}
-      className="group absolute left-[var(--mx)] top-[var(--my)] z-[2] -translate-x-1/2 -translate-y-1/2 min-[500px]:left-[var(--dx)] min-[500px]:top-[var(--dy)]"
+      className="group absolute left-[var(--mx)] top-[var(--my)] z-[2] flex h-11 w-11 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full focus-visible:outline-none min-[500px]:left-[var(--dx)] min-[500px]:top-[var(--dy)]"
     >
-      <button
-        type="button"
-        aria-label={label}
-        aria-expanded={open}
-        onClick={() => onToggle(id)}
-        className="relative flex h-6 w-6 cursor-pointer items-center justify-center rounded-full bg-white/25 ring-1 ring-white/60 backdrop-blur-sm transition-transform duration-300 hover:scale-110 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white"
-      >
+      <span className="relative flex h-6 w-6 items-center justify-center rounded-full bg-white/25 ring-1 ring-white/60 backdrop-blur-sm transition-transform duration-300 group-hover:scale-125 group-focus-visible:scale-125 group-focus-visible:ring-2 group-focus-visible:ring-white">
         <span
           aria-hidden
           className="absolute inset-0 animate-ping rounded-full bg-white/35 [animation-duration:3.2s] motion-reduce:hidden"
         />
         <span aria-hidden className="relative h-2 w-2 rounded-full bg-white shadow-sm" />
-      </button>
-      <div
-        className={cn(
-          "pointer-events-none absolute bottom-full left-1/2 mb-2.5 -translate-x-1/2 whitespace-nowrap rounded-2xl bg-white/85 px-3.5 py-2 shadow-[0_10px_30px_rgba(0,0,0,0.12)] backdrop-blur-xl transition-all duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)]",
-          open
-            ? "translate-y-0 opacity-100"
-            : "translate-y-1 opacity-0 group-focus-within:translate-y-0 group-focus-within:opacity-100 group-hover:translate-y-0 group-hover:opacity-100"
-        )}
+      </span>
+      <span
+        aria-hidden
+        className="pointer-events-none absolute bottom-full left-1/2 -translate-x-1/2 translate-y-1 whitespace-nowrap rounded-2xl bg-white/85 px-3.5 py-2 text-left opacity-0 shadow-[0_10px_30px_rgba(0,0,0,0.12)] backdrop-blur-xl transition-all duration-300 ease-[cubic-bezier(0.25,0.1,0.25,1)] group-hover:translate-y-0 group-hover:opacity-100 group-focus-visible:translate-y-0 group-focus-visible:opacity-100"
       >
-        <p className="text-[12px] font-semibold leading-tight text-[#1d1d1f]">{title}</p>
-        <p className="mt-0.5 text-[11px] leading-tight text-[#515151]">{sub}</p>
-      </div>
-    </div>
+        <span className="block text-[12px] font-semibold leading-tight text-[#1d1d1f]">{title}</span>
+        <span className="mt-0.5 flex items-center gap-1 text-[11px] leading-tight text-[#515151]">
+          {sub}
+          <ArrowRight className="h-3 w-3 shrink-0" />
+        </span>
+      </span>
+    </Link>
   );
 }
 
 /**
  * Julkampanjens hero på startsidan: kampanjbilden i ett stort rundat kort med
- * stilla snöfall, lätt parallax mot muspekaren och två punkter på produkterna.
+ * stilla snöfall, lätt parallax mot muspekaren och två punkter på produkterna
+ * som leder till respektive produktsida.
  * Visas bara medan kampanjen pågår.
  */
 export function JulHero() {
@@ -90,7 +84,6 @@ export function JulHero() {
   const parallaxRef = useRef<HTMLDivElement>(null);
   const frameRef = useRef(0);
   const [settled, setSettled] = useState(false);
-  const [openSpot, setOpenSpot] = useState<SpotId | null>(null);
   const [added, setAdded] = useState(false);
 
   useEffect(() => {
@@ -116,10 +109,6 @@ export function JulHero() {
     cancelAnimationFrame(frameRef.current);
     parallaxRef.current?.style.setProperty("--jx", "0");
     parallaxRef.current?.style.setProperty("--jy", "0");
-  }, []);
-
-  const toggleSpot = useCallback((id: SpotId) => {
-    setOpenSpot((current) => (current === id ? null : id));
   }, []);
 
   const kit = getProduct(JUL_CAMPAIGN.productId);
@@ -186,19 +175,17 @@ export function JulHero() {
                 </picture>
                 <Hotspot
                   id="duo"
+                  href={path("product", { productId: "duo-kit" })}
                   title={t("jul.hotspotDuo")}
                   sub={t("jul.hotspotDuoSub", { price: formatPrice(price, locale) })}
                   label={t("jul.hotspotShow", { product: t("jul.hotspotDuo") })}
-                  open={openSpot === "duo"}
-                  onToggle={toggleSpot}
                 />
                 <Hotspot
                   id="gift"
+                  href={path("product", { productId: JUL_CAMPAIGN.giftProductId })}
                   title={t("jul.hotspotGift")}
                   sub={t("jul.hotspotGiftSub", { amount: giftValue })}
                   label={t("jul.hotspotShow", { product: t("jul.hotspotGift") })}
-                  open={openSpot === "gift"}
-                  onToggle={toggleSpot}
                 />
               </div>
             </div>

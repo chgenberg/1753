@@ -7,6 +7,8 @@ export const JUL_CAMPAIGN = {
   productId: "jul-duo-chagala",
   giftProductId: "chagala",
   qualifyingProductIds: ["duo-kit", "duo-ta-da"],
+  /** Produktsidor som visar en länk till julkitet: produkterna som ingår i det. */
+  promoProductIds: ["duo-kit", "chagala"],
   startsAt: Date.parse("2026-11-18T00:00:00+01:00"),
   endsAt: Date.parse("2026-12-25T00:00:00+01:00"),
 } as const;
