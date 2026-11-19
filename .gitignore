@@ -32,3 +32,7 @@ docs/smoketest/
 schedule-*-log-*.json
 schedule-*-output.log
 *.nohup.log
+
+# Exportfiler hör inte hemma i public/
+public/*.csv
+public/*.xlsx
