@@ -458,6 +458,26 @@ function julCampaignGiftApplies(items, now = Date.now()) {
   if (now < JUL_CAMPAIGN.startsAt || now >= JUL_CAMPAIGN.endsAt) return false;
   return Array.isArray(items) && items.some(i => i && JUL_CAMPAIGN.qualifyingProductIds.includes(i.id));
 }
+// Förnyelser lagrar artikelnummer (1003/4004), inte slug. En burk per order,
+// även om kitet har antal > 1. Raden har pris 0 och påverkar inte beloppet som dras.
+const JUL_RENEWAL_PRODUCT_IDS = new Set(["1003", "4004", "duo-kit", "duo-ta-da"]);
+function julRenewalGiftItem(sub, currency, now = Date.now()) {
+  if (now < JUL_CAMPAIGN.startsAt || now >= JUL_CAMPAIGN.endsAt) return null;
+  if (!JUL_RENEWAL_PRODUCT_IDS.has(String(sub?.product_id || ""))) return null;
+  const julGift = PRODUCTS_MAP[JUL_CAMPAIGN.giftProductId];
+  if (!julGift) return null;
+  return {
+    id: JUL_CAMPAIGN.giftProductId,
+    productId: JUL_CAMPAIGN.giftProductId,
+    name: julGift.name,
+    quantity: 1,
+    price: 0,
+    originalPrice: currency === "EUR" ? (julGift.priceEur || julGift.price) : julGift.price,
+    articleNumber: julGift.articleNumber,
+    vatRate: julGift.vatRate || 0.06,
+    gift: true,
+  };
+}
 // Lojalitetsnivåns rabatt, dras automatiskt när e-posten hör till ett konto på
 // nivån. Gäller inte prenumerationsrader och kombineras inte med rabattkoder:
 // kunden får den större av nivårabatt och kod.
@@ -6173,6 +6193,13 @@ async function sendSubscriptionChangeEmail(sub, action, details) {
   const firstName = (user?.name || sub.customer_name || "").split(" ")[0] || (firstNameFallback[l] || "du");
   const pn = sub.product_name;
   const hi = emailT(l, { sv: "Hej", en: "Hi", es: "Hola", de: "Hallo", fr: "Bonjour" });
+  const retryDay = details?.nextCharge
+    ? String(details.nextCharge).slice(0, 10)
+    : new Date(Date.now() + 2 * 86400000).toISOString().slice(0, 10);
+  const retryDate = new Date(`${retryDay}T12:00:00Z`).toLocaleDateString(
+    { sv: "sv-SE", en: "en-GB", es: "es-ES", de: "de-DE", fr: "fr-FR" }[l] || "sv-SE",
+    { day: "numeric", month: "long", timeZone: "Europe/Stockholm" }
+  );
 
   const actionTexts = {
     paused: {
@@ -6217,6 +6244,39 @@ async function sendSubscriptionChangeEmail(sub, action, details) {
         es: `${hi} ${firstName}, tu suscripción de <strong>${pn}</strong> ha sido actualizada.${details?.intervalDays ? ` Nuevo intervalo de entrega: cada <strong>${details.intervalDays} días</strong>.` : ""}${details?.quantity ? ` Nueva cantidad: <strong>${details.quantity}</strong>.` : ""}`,
         de: `${hi} ${firstName}, dein Abo für <strong>${pn}</strong> wurde aktualisiert.${details?.intervalDays ? ` Neues Lieferintervall: alle <strong>${details.intervalDays} Tage</strong>.` : ""}${details?.quantity ? ` Neue Menge: <strong>${details.quantity}</strong>.` : ""}`,
         fr: `${hi} ${firstName}, votre abonnement pour <strong>${pn}</strong> a été mis à jour.${details?.intervalDays ? ` Nouvel intervalle de livraison : tous les <strong>${details.intervalDays} jours</strong>.` : ""}${details?.quantity ? ` Nouvelle quantité : <strong>${details.quantity}</strong>.` : ""}`
+      }),
+    },
+    charge_failed: {
+      subject: emailT(l, { sv: "Dragningen för din prenumeration gick inte igenom", en: "We couldn't charge your subscription", es: "No pudimos cobrar tu suscripción", de: "Der Einzug für dein Abo ist fehlgeschlagen", fr: "Le prélèvement de ton abonnement n'a pas abouti" }),
+      heading: emailT(l, { sv: "Dragningen gick inte igenom", en: "The charge didn't go through", es: "El cobro no se realizó", de: "Der Einzug ging nicht durch", fr: "Le prélèvement n'est pas passé" }),
+      body: emailT(l, {
+        sv: `${hi} ${firstName}, dragningen för din prenumeration på <strong>${pn}</strong> gick inte igenom, så inget har dragits. Vi försöker igen den <strong>${retryDate}</strong>. Går det inte igenom då gör vi ett sista försök två dagar senare. Vill du inte det kan du avbryta prenumerationen under Mitt konto.`,
+        en: `${hi} ${firstName}, the charge for your subscription to <strong>${pn}</strong> didn't go through, so nothing was taken. We'll try again on <strong>${retryDate}</strong>. If that doesn't go through, we'll make one last try two days later. If you don't want that, you can cancel the subscription from My Account.`,
+        es: `${hi} ${firstName}, el cobro de tu suscripción de <strong>${pn}</strong> no se realizó, así que no se ha cobrado nada. Lo intentaremos de nuevo el <strong>${retryDate}</strong>. Si no funciona, haremos un último intento dos días después. Si no quieres, puedes cancelar la suscripción desde Mi Cuenta.`,
+        de: `${hi} ${firstName}, der Einzug für dein Abo von <strong>${pn}</strong> ist nicht durchgegangen, es wurde also nichts abgebucht. Wir versuchen es am <strong>${retryDate}</strong> erneut. Klappt das nicht, versuchen wir es zwei Tage später ein letztes Mal. Wenn du das nicht möchtest, kannst du das Abo unter Mein Konto kündigen.`,
+        fr: `${hi} ${firstName}, le prélèvement de ton abonnement <strong>${pn}</strong> n'est pas passé, rien n'a donc été débité. Nous réessaierons le <strong>${retryDate}</strong>. Si ça ne passe pas, nous ferons une dernière tentative deux jours plus tard. Si tu ne le souhaites pas, tu peux annuler l'abonnement depuis Mon Compte.`
+      }),
+    },
+    charge_stopped: {
+      subject: emailT(l, { sv: "Vi fick inte igenom dragningen för din prenumeration", en: "We couldn't complete the charge for your subscription", es: "No hemos podido cobrar tu suscripción", de: "Wir konnten dein Abo nicht einziehen", fr: "Nous n'avons pas pu prélever ton abonnement" }),
+      heading: emailT(l, { sv: "Vi slutar försöka automatiskt", en: "We won't try automatically again", es: "Dejamos de intentarlo automáticamente", de: "Wir versuchen es nicht mehr automatisch", fr: "Nous n'essaierons plus automatiquement" }),
+      body: emailT(l, {
+        sv: `${hi} ${firstName}, vi har försökt dra din prenumeration på <strong>${pn}</strong> flera gånger utan att det gått igenom. Inget mer dras automatiskt. Svara på det här mejlet så hjälper vi dig, eller avbryt prenumerationen under Mitt konto.`,
+        en: `${hi} ${firstName}, we've tried to charge your subscription to <strong>${pn}</strong> several times and it didn't go through. Nothing more will be charged automatically. Reply to this email and we'll help, or cancel the subscription from My Account.`,
+        es: `${hi} ${firstName}, hemos intentado cobrar tu suscripción de <strong>${pn}</strong> varias veces y no ha funcionado. No cobraremos nada más de forma automática. Responde a este correo y te ayudamos, o cancela la suscripción desde Mi Cuenta.`,
+        de: `${hi} ${firstName}, wir haben den Einzug für dein Abo von <strong>${pn}</strong> mehrmals versucht, ohne dass es geklappt hat. Es wird nichts mehr automatisch abgebucht. Antworte auf diese E-Mail, dann helfen wir dir, oder kündige das Abo unter Mein Konto.`,
+        fr: `${hi} ${firstName}, nous avons essayé plusieurs fois de prélever ton abonnement <strong>${pn}</strong> sans succès. Plus rien ne sera prélevé automatiquement. Réponds à cet e-mail et nous t'aidons, ou annule l'abonnement depuis Mon Compte.`
+      }),
+    },
+    charge_unconfirmed: {
+      subject: emailT(l, { sv: "Vi kunde inte bekräfta dragningen för din prenumeration", en: "We couldn't confirm the charge for your subscription", es: "No pudimos confirmar el cobro de tu suscripción", de: "Wir konnten den Einzug für dein Abo nicht bestätigen", fr: "Nous n'avons pas pu confirmer le prélèvement de ton abonnement" }),
+      heading: emailT(l, { sv: "Vi kunde inte bekräfta dragningen", en: "We couldn't confirm the charge", es: "No pudimos confirmar el cobro", de: "Wir konnten den Einzug nicht bestätigen", fr: "Nous n'avons pas pu confirmer le prélèvement" }),
+      body: emailT(l, {
+        sv: `${hi} ${firstName}, vi fick inget tydligt svar på dragningen för din prenumeration på <strong>${pn}</strong>. För säkerhets skull drar vi inte igen automatiskt. Svara på det här mejlet så kollar vi om något har dragits, eller avbryt prenumerationen under Mitt konto.`,
+        en: `${hi} ${firstName}, we didn't get a clear answer on the charge for your subscription to <strong>${pn}</strong>. To be safe, we won't charge again automatically. Reply to this email and we'll check whether anything was taken, or cancel the subscription from My Account.`,
+        es: `${hi} ${firstName}, no recibimos una respuesta clara del cobro de tu suscripción de <strong>${pn}</strong>. Por seguridad no volveremos a cobrar de forma automática. Responde a este correo y comprobamos si se cobró algo, o cancela la suscripción desde Mi Cuenta.`,
+        de: `${hi} ${firstName}, wir haben keine klare Antwort auf den Einzug für dein Abo von <strong>${pn}</strong> bekommen. Sicherheitshalber buchen wir nicht noch einmal automatisch ab. Antworte auf diese E-Mail, dann prüfen wir, ob etwas abgebucht wurde, oder kündige das Abo unter Mein Konto.`,
+        fr: `${hi} ${firstName}, nous n'avons pas eu de réponse claire pour le prélèvement de ton abonnement <strong>${pn}</strong>. Par sécurité, nous ne prélèverons plus automatiquement. Réponds à cet e-mail et nous vérifions si quelque chose a été débité, ou annule l'abonnement depuis Mon Compte.`
       }),
     },
   };
@@ -9820,9 +9880,122 @@ app.get("/health", async (req, res) => {
 // ---- RECURRING SUBSCRIPTION CHARGES (runs every 6 hours) ----
 
 const SIX_HOURS = 6 * 60 * 60 * 1000;
+const RECURRING_MAX_FAILURES = 3;
+const RECURRING_RETRY_DAYS = 2;
+
+function utcDateOffset(days) {
+  const d = new Date();
+  d.setUTCHours(12, 0, 0, 0);
+  d.setUTCDate(d.getUTCDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+
+async function recordRecurringChargeFailure(sub, chargeAmount) {
+  const retryOn = utcDateOffset(RECURRING_RETRY_DAYS);
+  // Datumet flyttas innan felraden skrivs, så en krasch inte lämnar
+  // prenumerationen aktiv och drar samma kort igen sex timmar senare.
+  await db.updateSubscription(sub.id, {
+    status: "payment_failed",
+    next_charge_date: retryOn,
+  });
+  await db.createSubscriptionCharge({
+    subscriptionId: sub.id,
+    amount: chargeAmount,
+    status: "failed",
+  });
+  const failures = await db.countFailedChargesSinceLastSuccess(sub.id);
+  if (failures >= RECURRING_MAX_FAILURES) {
+    await db.updateSubscription(sub.id, {
+      status: "payment_failed",
+      next_charge_date: utcDateOffset(-1),
+    });
+    sendSubscriptionChangeEmail(sub, "charge_stopped").catch((err) =>
+      console.error(`[Email] Sub give-up email error for ${sub.id}:`, err.message)
+    );
+    console.error(`[Recurring] Sub ${sub.id} stoppad efter ${failures} misslyckade dragningar`);
+    return;
+  }
+  if (sub.status === "active") {
+    sendSubscriptionChangeEmail(sub, "charge_failed", { nextCharge: retryOn }).catch((err) =>
+      console.error(`[Email] Sub failed-charge email error for ${sub.id}:`, err.message)
+    );
+  }
+  console.error(`[Recurring] Sub ${sub.id} misslyckades (${failures}/${RECURRING_MAX_FAILURES}), nytt försök ${retryOn}`);
+}
+
+// Dragningen kan ha gått igenom fast vi inte kunde läsa svaret. Då får den
+// inte försökas igen automatiskt, för det vore en andra debitering.
+async function recordUnconfirmedCharge(sub, chargeAmount) {
+  await db.updateSubscription(sub.id, {
+    status: "payment_failed",
+    next_charge_date: utcDateOffset(-1),
+  });
+  await db.createSubscriptionCharge({
+    subscriptionId: sub.id,
+    amount: chargeAmount,
+    status: "failed",
+  });
+  sendSubscriptionChangeEmail(sub, "charge_unconfirmed").catch((err) =>
+    console.error(`[Email] Sub unconfirmed-charge email error for ${sub.id}:`, err.message)
+  );
+  console.error(`[Recurring] Sub ${sub.id} obekräftad dragning, ingen automatisk omförsök`);
+}
+
+// Engångsombokning av dragningar som redan stod som payment_failed med datum
+// i det förflutna. De får inte dras vid deploy. Prenumeration 60 lämnas orörd.
+async function scheduleStuckFailedSubscriptions() {
+  const key = "stuck_failed_subs_retry_20261121";
+  try {
+    const claimed = await db.pool.query(
+      `INSERT INTO system_config (key, value, updated_at)
+       VALUES ($1, 'running', NOW())
+       ON CONFLICT (key) DO UPDATE
+         SET value = 'running', updated_at = NOW()
+       WHERE system_config.value IS DISTINCT FROM 'done'
+         AND (
+           system_config.value = 'error'
+           OR (system_config.value = 'running' AND system_config.updated_at < NOW() - INTERVAL '15 minutes')
+         )
+       RETURNING key`,
+      [key]
+    );
+    if (claimed.rows.length === 0) return;
+
+    const plusTwo = utcDateOffset(RECURRING_RETRY_DAYS);
+    const retryOn = plusTwo > "2026-11-21" ? plusTwo : "2026-11-21";
+    const { rows } = await db.pool.query(
+      `SELECT * FROM subscriptions
+        WHERE status = 'payment_failed'
+          AND id <> 60
+          AND cancelled_at IS NULL
+          AND paused_at IS NULL
+          AND next_charge_date < CURRENT_DATE`
+    );
+    for (const sub of rows) {
+      await db.updateSubscription(sub.id, { next_charge_date: retryOn });
+      try {
+        const result = await sendSubscriptionChangeEmail(sub, "charge_failed", { nextCharge: retryOn });
+        console.log(`[Recurring] Fastnad dragning ${sub.id} (${sub.customer_email}) ombokad till ${retryOn}, mejl: ${result?.sent ? "skickat" : result?.skipReason || result?.error || "okänt"}`);
+      } catch (err) {
+        console.error(`[Recurring] Mejl misslyckades för fastnad prenumeration ${sub.id}:`, err.message || err);
+      }
+    }
+    await db.setConfig(key, "done");
+    console.log(`[Recurring] ${rows.length} fastnade dragningar ombokade till ${retryOn} (prenumeration 60 orörd)`);
+  } catch (err) {
+    console.error("[Recurring] Kunde inte boka om fastnade dragningar:", err.message || err);
+    try {
+      await db.pool.query(
+        "UPDATE system_config SET value = 'error', updated_at = NOW() WHERE key = $1 AND value = 'running'",
+        [key]
+      );
+    } catch { /* nästa körning tar över ett error-lås */ }
+  }
+}
 
 async function processRecurringCharges() {
   try {
+    await scheduleStuckFailedSubscriptions();
     const due = await db.findDueSubscriptions();
     if (due.length === 0) return;
     console.log(`[Recurring] ${due.length} subscription(s) due for charge`);
@@ -9882,23 +10055,13 @@ async function processRecurringCharges() {
 
           if (!chargeRes.ok) {
             console.error(`[Recurring] Charge failed for sub ${sub.id}: HTTP ${chargeRes.status}`, chargeRaw.slice(0, 400));
-            await db.updateSubscription(sub.id, { status: "payment_failed" });
-            await db.createSubscriptionCharge({
-              subscriptionId: sub.id,
-              amount: chargeAmount,
-              status: "failed"
-            });
+            await recordRecurringChargeFailure(sub, chargeAmount);
             continue;
           }
           newTxId = chargeData?.TransactionId || chargeData?.transactionId;
           if (!newTxId) {
             console.error(`[Recurring] Charge OK men saknar TransactionId for sub ${sub.id}:`, chargeRaw.slice(0, 400));
-            await db.updateSubscription(sub.id, { status: "payment_failed" });
-            await db.createSubscriptionCharge({
-              subscriptionId: sub.id,
-              amount: chargeAmount,
-              status: "failed"
-            });
+            await recordUnconfirmedCharge(sub, chargeAmount);
             continue;
           }
 
@@ -9910,22 +10073,12 @@ async function processRecurringCharges() {
             const statusId = String(verify?.statusId || verify?.StatusId || "").toUpperCase();
             if (statusId !== "F") {
               console.error(`[Recurring] Charge avvisad for sub ${sub.id}: StatusId=${statusId} tx=${newTxId}`);
-              await db.updateSubscription(sub.id, { status: "payment_failed" });
-              await db.createSubscriptionCharge({
-                subscriptionId: sub.id,
-                amount: chargeAmount,
-                status: "failed"
-              });
+              await recordRecurringChargeFailure(sub, chargeAmount);
               continue;
             }
           } catch (verifyErr) {
             console.error(`[Recurring] Kunde inte verifiera tx ${newTxId} for sub ${sub.id}:`, verifyErr.message || verifyErr);
-            await db.updateSubscription(sub.id, { status: "payment_failed" });
-            await db.createSubscriptionCharge({
-              subscriptionId: sub.id,
-              amount: chargeAmount,
-              status: "failed"
-            });
+            await recordUnconfirmedCharge(sub, chargeAmount);
             continue;
           }
         }
@@ -9945,6 +10098,23 @@ async function processRecurringCharges() {
         const unitRecurring = Math.round(Number(sub.recurring_price) / qty);
         const unitPaid = Math.round((chargeAmount / qty) * 100) / 100;
 
+        const renewalItems = [{
+          id: sub.product_id,
+          name: sub.product_name,
+          quantity: qty,
+          price: unitRecurring,
+          originalPrice: product
+            ? (subCurrency === "EUR" ? (product.priceEur || product.price) : product.price)
+            : unitRecurring,
+          ...(credit > 0 ? { paidUnitPrice: unitPaid } : {}),
+          articleNumber: product?.articleNumber || sub.product_id,
+          vatRate: product?.vatRate || 0.25,
+          subscription: true,
+          intervalDays: sub.interval_days,
+        }];
+        const julGift = julRenewalGiftItem(sub, subCurrency);
+        if (julGift) renewalItems.push(julGift);
+
         const newOrder = await db.createOrder({
           orderNumber,
           customerName: user?.name || sub.customer_name || sub.product_name,
@@ -9956,20 +10126,7 @@ async function processRecurringCharges() {
           countryCode: lastOrder?.country_code || "SE",
           vivaOrderCode: null,
           merchantTrns: `RSUB-${orderNumber}`,
-          items: [{
-            id: sub.product_id,
-            name: sub.product_name,
-            quantity: qty,
-            price: unitRecurring,
-            originalPrice: product
-              ? (subCurrency === "EUR" ? (product.priceEur || product.price) : product.price)
-              : unitRecurring,
-            ...(credit > 0 ? { paidUnitPrice: unitPaid } : {}),
-            articleNumber: product?.articleNumber || sub.product_id,
-            vatRate: product?.vatRate || 0.25,
-            subscription: true,
-            intervalDays: sub.interval_days,
-          }],
+          items: renewalItems,
           totalAmount: chargeAmount,
           shippingCost: 0,
           currency: subCurrency,
@@ -9996,12 +10153,13 @@ async function processRecurringCharges() {
 
         // Nollställ engångskredit efter lyckad charge (även 0-kr om kredit ≥ recurring).
         await db.updateSubscription(sub.id, {
+          status: "active",
           next_charge_date: nextCharge.toISOString().split("T")[0],
           last_charge_date: new Date().toISOString().split("T")[0],
           next_charge_credit: 0,
         });
 
-        console.log(`[Recurring] Sub ${sub.id} charged ${chargeAmount} kr${credit ? ` (kredit -${credit})` : ""}, new order ${orderNumber}, next: ${nextCharge.toISOString().split("T")[0]}`);
+        console.log(`[Recurring] Sub ${sub.id} charged ${chargeAmount} kr${credit ? ` (kredit -${credit})` : ""}${julGift ? ", Chagala på köpet" : ""}, new order ${orderNumber}, next: ${nextCharge.toISOString().split("T")[0]}`);
 
         try {
           await handleOrderCompletion(newOrder.id);

@@ -979,14 +979,36 @@ async function updateSubscription(id, fields) {
 }
 
 async function findDueSubscriptions() {
+  // payment_failed dras bara när next_charge_date är exakt idag, alltså ett
+  // datum jobbet själv har satt. Passerade datum får inte dras vid deploy.
+  // Prenumeration 60 (Cecilia Edfors) har en manuell leverans med två Chagala
+  // och får inte dras automatiskt så länge den står som payment_failed.
   const { rows } = await pool.query(
     `SELECT * FROM subscriptions
-     WHERE status = 'active'
-       AND next_charge_date <= CURRENT_DATE
-       AND cancelled_at IS NULL
-       AND paused_at IS NULL`
+     WHERE cancelled_at IS NULL
+       AND paused_at IS NULL
+       AND NOT (id = 60 AND status = 'payment_failed')
+       AND (
+         (status = 'active' AND next_charge_date <= CURRENT_DATE)
+         OR (status = 'payment_failed' AND next_charge_date = CURRENT_DATE)
+       )`
   );
   return rows;
+}
+
+async function countFailedChargesSinceLastSuccess(subscriptionId) {
+  const { rows } = await pool.query(
+    `SELECT COUNT(*)::int AS n
+       FROM subscription_charges
+      WHERE subscription_id = $1
+        AND status = 'failed'
+        AND id > COALESCE((
+          SELECT MAX(id) FROM subscription_charges
+           WHERE subscription_id = $1 AND status = 'charged'
+        ), 0)`,
+    [subscriptionId]
+  );
+  return rows[0]?.n || 0;
 }
 
 async function createSubscriptionCharge({ subscriptionId, orderId, vivaTxId, amount, status }) {
@@ -2938,6 +2960,7 @@ module.exports = {
   findSubscriptionsByVivaCode,
   updateSubscription,
   findDueSubscriptions,
+  countFailedChargesSinceLastSuccess,
   createSubscriptionCharge,
   createSubscriber,
   findSubscriberByEmail,

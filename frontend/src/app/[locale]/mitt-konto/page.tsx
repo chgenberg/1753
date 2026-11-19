@@ -1196,8 +1196,9 @@ function SubscriptionsView({ token }: { token: string }) {
   }
 
   const activeSubs = subs.filter(
-    (s) => s.status === "active" || s.status === "paused" || s.status === "pending"
+    (s) => s.status === "active" || s.status === "paused" || s.status === "pending" || s.status === "payment_failed"
   );
+  const todayIso = new Date().toLocaleDateString("en-CA");
 
   return (
     <div className="space-y-6">
@@ -1235,10 +1236,18 @@ function SubscriptionsView({ token }: { token: string }) {
                     <span
                       className={cn(
                         "rounded-full px-2.5 py-0.5 text-[11px] font-medium",
-                        sub.status === "active" ? "bg-green-50 text-green-700" : "bg-amber-50 text-amber-700"
+                        sub.status === "active"
+                          ? "bg-green-50 text-green-700"
+                          : sub.status === "payment_failed"
+                            ? "bg-red-50 text-red-700"
+                            : "bg-amber-50 text-amber-700"
                       )}
                     >
-                      {sub.status === "active" ? d("active") : d("paused")}
+                      {sub.status === "active"
+                        ? d("active")
+                        : sub.status === "payment_failed"
+                          ? d("paymentFailed")
+                          : d("paused")}
                     </span>
                   </div>
                   <div className="mt-3 flex items-baseline gap-2">
@@ -1259,6 +1268,18 @@ function SubscriptionsView({ token }: { token: string }) {
                         day: "numeric",
                         month: "long",
                       })}
+                    </p>
+                  )}
+                  {sub.status === "payment_failed" && (
+                    <p className="mt-3 rounded-lg bg-red-50 px-3 py-2 text-xs leading-relaxed text-red-800">
+                      {(sub.next_charge_date || "").slice(0, 10) >= todayIso
+                        ? d("paymentFailedRetry", {
+                            date: new Date(sub.next_charge_date || "").toLocaleDateString(loc, {
+                              day: "numeric",
+                              month: "long",
+                            }),
+                          })
+                        : d("paymentFailedStopped")}
                     </p>
                   )}
                 </div>
@@ -1338,7 +1359,7 @@ function SubscriptionsView({ token }: { token: string }) {
                     >
                       {d("edit")}
                     </button>
-                    {sub.status === "active" ? (
+                    {sub.status === "active" && (
                       <button
                         type="button"
                         onClick={() => handleAction(sub.id, "pause")}
@@ -1346,7 +1367,8 @@ function SubscriptionsView({ token }: { token: string }) {
                       >
                         {d("pause")}
                       </button>
-                    ) : (
+                    )}
+                    {sub.status === "paused" && (
                       <button
                         type="button"
                         onClick={() => handleAction(sub.id, "resume")}
