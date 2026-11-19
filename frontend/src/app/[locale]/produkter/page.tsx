@@ -4,7 +4,7 @@ import { getMessages } from "@/lib/i18n/messages";
 import type { Locale } from "@/lib/i18n/types";
 import { visibleProducts, productDisplayName, productPrice } from "@/lib/products";
 import { localizePath } from "@/lib/i18n/navigation";
-import { getCurrency } from "@/lib/currency";
+import { formatPrice } from "@/lib/currency";
 import Link from "next/link";
 
 const BASE_URL = "https://www.1753skin.com";
@@ -141,8 +141,6 @@ export default async function ProductsPage({
 }) {
   const { locale } = await params;
   const l = locale as Locale;
-  const currency = getCurrency(l);
-  const currencySymbol = currency === "EUR" ? "€" : "kr";
 
   return (
     <>
@@ -221,7 +219,7 @@ export default async function ProductsPage({
                       <td className="px-5 py-4 text-[#515151]">{brief?.actives || "—"}</td>
                       <td className="px-5 py-4 text-[#515151]">{brief?.size || p.size || "—"}</td>
                       <td className="px-5 py-4 text-[#515151]">
-                        {productPrice(p, l)} {currencySymbol}
+                        {formatPrice(productPrice(p, l), l)}
                       </td>
                       <td className="px-5 py-4 text-[#515151]">
                         {brief?.for?.[l] || brief?.for?.en || "—"}

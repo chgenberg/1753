@@ -26,7 +26,7 @@ import {
   productPrice,
   productOriginalPrice,
 } from "@/lib/products";
-import { formatPrice } from "@/lib/currency";
+import { formatPrice, getFreeShippingThreshold } from "@/lib/currency";
 import { trackFunnel } from "@/lib/funnel";
 import { cn } from "@/lib/utils";
 import { useLocale } from "@/providers/locale-provider";
@@ -411,7 +411,7 @@ export default function ProductDetail({ id }: { id: string }) {
               <div className="mt-8 flex flex-col gap-3">
                 <div className="flex items-center gap-3 text-sm text-brand-500">
                   <Truck className="h-4 w-4" />
-                  <span>{t("productDetail.freeShippingHint")}</span>
+                  <span>{t("productDetail.freeShippingHint", { amount: formatPrice(getFreeShippingThreshold(locale), locale) })}</span>
                 </div>
               </div>
 

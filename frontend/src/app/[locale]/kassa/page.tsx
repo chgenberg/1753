@@ -9,7 +9,14 @@ import { Reveal, displayFont } from "@/components/fx/motion";
 import { Pill } from "@/components/fx/frames";
 import { useCart, type CartItem } from "@/providers/cart-provider";
 import { PRODUCTS, productDisplayName, productPrice } from "@/lib/products";
-import { formatPrice, getCurrency, getShippingCost } from "@/lib/currency";
+import {
+  formatEurApprox,
+  formatPrice,
+  formatSek,
+  getCurrency,
+  getFreeShippingThreshold,
+  getShippingCost,
+} from "@/lib/currency";
 import {
   SHIP_COUNTRIES,
   defaultShipCountry,
@@ -114,7 +121,7 @@ export default function CheckoutPage() {
   const tierName = knownMember.tier ? t(`account.tier.${knownMember.tier}`) : "";
 
   const discountedSubtotal = subtotal - effectiveDiscount;
-  const FREE_SHIPPING_THRESHOLD = currency === "EUR" ? 60 : 600;
+  const FREE_SHIPPING_THRESHOLD = getFreeShippingThreshold(locale);
   const freeShipping = discountedSubtotal >= FREE_SHIPPING_THRESHOLD;
   const shipping = freeShipping ? 0 : getShippingCost(locale);
   const total = discountedSubtotal + shipping;
@@ -638,10 +645,16 @@ export default function CheckoutPage() {
               ) : (
                 <>
                   <Lock className="mr-2 h-4 w-4" />
-                  {t("checkout.payWithTotal", { amount: formatPrice(total, locale) })}
+                  {t("checkout.payWithTotal", { amount: formatSek(total, locale) })}
                 </>
               )}
             </Button>
+
+            {locale !== "sv" && (
+              <p className="text-center text-xs leading-relaxed text-muted-foreground">
+                {t("checkout.chargedInSek", { approx: formatEurApprox(total, locale) })}
+              </p>
+            )}
 
             <div className="flex items-center justify-center gap-4 text-xs text-muted-foreground">
               <span className="flex items-center gap-1">
@@ -650,7 +663,7 @@ export default function CheckoutPage() {
               </span>
               <span className="flex items-center gap-1">
                 <Truck className="h-3.5 w-3.5" />
-                {freeShipping ? t("checkout.freeShipping") : t("checkout.shippingPaidAmount")}
+                {freeShipping ? t("checkout.freeShipping") : t("checkout.shippingPaidAmount", { amount: formatPrice(shipping, locale) })}
               </span>
             </div>
           </form>
@@ -825,13 +838,16 @@ export default function CheckoutPage() {
                 <div className="flex justify-between text-sm">
                   <span className="text-muted-foreground">{t("checkout.shipping")}</span>
                   <span>
-                    {freeShipping ? t("checkout.freeShipping") : t("checkout.shippingPaidAmount")}
+                    {freeShipping ? t("checkout.freeShipping") : t("checkout.shippingPaidAmount", { amount: formatPrice(shipping, locale) })}
                   </span>
                 </div>
                 <div className="flex justify-between border-t border-border pt-2 text-base font-bold">
                   <span>{t("checkout.total")}</span>
-                  <span>{formatPrice(total, locale)}</span>
+                  <span>{formatSek(total, locale)}</span>
                 </div>
+                {locale !== "sv" && (
+                  <p className="text-right text-xs text-muted-foreground">{formatPrice(total, locale)}</p>
+                )}
               </div>
 
               <Link

@@ -64,13 +64,13 @@ export const PRODUCTS: Product[] = [
     shortDesc:
       "Två ansiktsoljor för morgon och kväll, och en burk Chagala på köpet. Värde 1 476 kr. Gäller till och med 24 december.",
     shortDescEn:
-      "Two face oils for morning and evening, and a jar of Chagala on us. Worth €127. Until 24 December.",
+      "Two face oils for morning and evening, and a jar of Chagala on us. Worth about €132. Until 24 December.",
     shortDescEs:
-      "Dos aceites faciales para la mañana y la noche, y un bote de Chagala de regalo. Valor: 127 €. Hasta el 24 de diciembre.",
+      "Dos aceites faciales para la mañana y la noche, y un bote de Chagala de regalo. Valor: unos 132 €. Hasta el 24 de diciembre.",
     shortDescDe:
-      "Zwei Gesichtsöle für morgens und abends, dazu ein Glas Chagala geschenkt. Wert: 127 €. Bis einschließlich 24. Dezember.",
+      "Zwei Gesichtsöle für morgens und abends, dazu ein Glas Chagala geschenkt. Wert: etwa 132 €. Bis einschließlich 24. Dezember.",
     shortDescFr:
-      "Deux huiles visage pour le matin et le soir, et un pot de Chagala offert. Valeur : 127 €. Jusqu'au 24 décembre.",
+      "Deux huiles visage pour le matin et le soir, et un pot de Chagala offert. Valeur : environ 132 €. Jusqu'au 24 décembre.",
     description: `<p>Ingen rea. Inga röda lappar. Bara en burk till i paketet.</p>
 <p>Köper du ett DUO-kit före jul lägger vi med Chagala, vår nya chaga i kapslar. Du betalar för oljorna, 1 099 kr. Burken, som annars kostar 377 kr, bjuder vi på.</p>
 
@@ -104,7 +104,7 @@ export const PRODUCTS: Product[] = [
 
 <p><em>Chagala är ett kosttillskott. Överskrid inte rekommenderad daglig dos, 2 kapslar. Kosttillskott ersätter inte en varierad kost. Rekommenderas inte för barn, gravida eller ammande. Äter du blodförtunnande eller diabetesläkemedel, eller har njursjukdom eller njursten, ska du prata med din läkare först. Förvaras oåtkomligt för barn.</em></p>`,
     descriptionEn: `<p>No sale. No red tags. Just one more jar in the parcel.</p>
-<p>Buy a DUO kit before Christmas and we add Chagala, our new chaga in capsules. You pay for the oils, €95. The jar, which otherwise costs €32, is on us.</p>
+<p>Buy a DUO kit before Christmas and we add Chagala, our new chaga in capsules. You pay for the oils, about €99. The jar, which otherwise costs about €34, is on us.</p>
 
 <h3>What is in the parcel</h3>
 <ul>
@@ -136,7 +136,7 @@ export const PRODUCTS: Product[] = [
 
 <p><em>Chagala is a food supplement. Do not exceed the recommended daily dose of 2 capsules. Food supplements are not a substitute for a varied diet. Not recommended for children or during pregnancy or breastfeeding. If you take blood thinners or diabetes medication, or have kidney disease or kidney stones, talk to your doctor first. Keep out of reach of children.</em></p>`,
     descriptionEs: `<p>Sin rebajas. Sin etiquetas rojas. Solo un bote más en el paquete.</p>
-<p>Si compras un kit DUO antes de Navidad, añadimos Chagala, nuestro nuevo chaga en cápsulas. Pagas los aceites, 95 €. El bote, que normalmente cuesta 32 €, corre de nuestra cuenta.</p>
+<p>Si compras un kit DUO antes de Navidad, añadimos Chagala, nuestro nuevo chaga en cápsulas. Pagas los aceites, unos 99 €. El bote, que normalmente cuesta unos 34 €, corre de nuestra cuenta.</p>
 
 <h3>Lo que va en el paquete</h3>
 <ul>
@@ -168,7 +168,7 @@ export const PRODUCTS: Product[] = [
 
 <p><em>Chagala es un complemento alimenticio. No superes la dosis diaria recomendada de 2 cápsulas. Los complementos alimenticios no sustituyen una dieta variada. No recomendado para niños ni durante el embarazo o la lactancia. Si tomas anticoagulantes o medicación para la diabetes, o tienes enfermedad renal o cálculos renales, consulta antes a tu médico. Mantener fuera del alcance de los niños.</em></p>`,
     descriptionDe: `<p>Kein Sale. Keine roten Schilder. Nur ein Glas mehr im Paket.</p>
-<p>Wenn du vor Weihnachten ein DUO-Kit kaufst, legen wir Chagala dazu, unseren neuen Chaga in Kapseln. Du bezahlst die Öle, 95 €. Das Glas, das sonst 32 € kostet, geht auf uns.</p>
+<p>Wenn du vor Weihnachten ein DUO-Kit kaufst, legen wir Chagala dazu, unseren neuen Chaga in Kapseln. Du bezahlst die Öle, etwa 99 €. Das Glas, das sonst etwa 34 € kostet, geht auf uns.</p>
 
 <h3>Das liegt im Paket</h3>
 <ul>
@@ -200,7 +200,7 @@ export const PRODUCTS: Product[] = [
 
 <p><em>Chagala ist ein Nahrungsergänzungsmittel. Die empfohlene Tagesdosis von 2 Kapseln nicht überschreiten. Nahrungsergänzungsmittel ersetzen keine abwechslungsreiche Ernährung. Nicht empfohlen für Kinder, Schwangere oder Stillende. Wenn du Blutverdünner oder Diabetesmedikamente nimmst oder eine Nierenerkrankung oder Nierensteine hast, sprich vorher mit deinem Arzt. Außerhalb der Reichweite von Kindern aufbewahren.</em></p>`,
     descriptionFr: `<p>Pas de soldes. Pas d'étiquettes rouges. Juste un pot de plus dans le colis.</p>
-<p>Si tu achètes un kit DUO avant Noël, nous ajoutons Chagala, notre nouveau chaga en gélules. Tu paies les huiles, 95 €. Le pot, qui coûte sinon 32 €, c'est pour nous.</p>
+<p>Si tu achètes un kit DUO avant Noël, nous ajoutons Chagala, notre nouveau chaga en gélules. Tu paies les huiles, environ 99 €. Le pot, qui coûte sinon environ 34 €, c'est pour nous.</p>
 
 <h3>Ce qu'il y a dans le colis</h3>
 <ul>
@@ -236,7 +236,7 @@ export const PRODUCTS: Product[] = [
     sizeEn: "2 × 10 ml face oil + 60 capsules",
     guarantee:
       "Fri frakt.",
-    guaranteeEn: "Free shipping over €60.",
+    guaranteeEn: "Free shipping over 600 SEK (about €54).",
     vatRate: 0.25,
   },
   {
@@ -346,7 +346,7 @@ export const PRODUCTS: Product[] = [
     size: null,
     guarantee:
       "Fri frakt.",
-    guaranteeEn: "Free shipping over €60.",
+    guaranteeEn: "Free shipping over 600 SEK (about €54).",
     vatRate: 0.25,
   },
   {
@@ -481,7 +481,7 @@ export const PRODUCTS: Product[] = [
     sizes: ["30 ml"],
     guarantee:
       "Fri frakt.",
-    guaranteeEn: "Free shipping over €60.",
+    guaranteeEn: "Free shipping over 600 SEK (about €54).",
     vatRate: 0.25,
   },
   {
@@ -637,7 +637,7 @@ export const PRODUCTS: Product[] = [
     sizeEn: "2 × 10 ml glass bottles with dropper",
     guarantee:
       "Fri frakt.",
-    guaranteeEn: "Free shipping over €60.",
+    guaranteeEn: "Free shipping over 600 SEK (about €54).",
     vatRate: 0.25,
   },
   {
@@ -756,7 +756,7 @@ export const PRODUCTS: Product[] = [
     sizes: ["100 ml"],
     guarantee:
       "Fri frakt.",
-    guaranteeEn: "Free shipping over €60.",
+    guaranteeEn: "Free shipping over 600 SEK (about €54).",
     vatRate: 0.25,
   },
   {
@@ -886,7 +886,7 @@ export const PRODUCTS: Product[] = [
     sizes: ["60 kapslar"],
     guarantee:
       "Fri frakt över 600 kr.",
-    guaranteeEn: "Free shipping over €60.",
+    guaranteeEn: "Free shipping over 600 SEK (about €54).",
     vatRate: 0.06,
   },
   {
@@ -1011,7 +1011,7 @@ export const PRODUCTS: Product[] = [
     sizes: ["60 kapslar"],
     guarantee:
       "Fri frakt.",
-    guaranteeEn: "Free shipping over €60.",
+    guaranteeEn: "Free shipping over 600 SEK (about €54).",
     vatRate: 0.12,
   },
 ];
@@ -1079,10 +1079,15 @@ export function productSize(p: Product, locale: Locale): string | null {
   return p.size;
 }
 
+// Priser räknas alltid i kronor, för alla språk: ordern debiteras i SEK (se
+// lib/currency.ts). Euro visas som en omräkning i formatPrice(). Fälten
+// priceEur och originalPriceEur ligger kvar för den dag euro går att ta betalt i.
 export function productPrice(p: Product, locale: Locale): number {
-  return intl(locale) ? p.priceEur : p.price;
+  void locale;
+  return p.price;
 }
 
 export function productOriginalPrice(p: Product, locale: Locale): number | null {
-  return intl(locale) ? p.originalPriceEur : p.originalPrice;
+  void locale;
+  return p.originalPrice;
 }

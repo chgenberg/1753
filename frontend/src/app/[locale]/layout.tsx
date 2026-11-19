@@ -138,7 +138,7 @@ export default async function LocaleLayout({
     telephone: "+46732305521",
     email: "info@1753skin.com",
     priceRange: "399-1495 SEK",
-    currenciesAccepted: "SEK, EUR",
+    currenciesAccepted: "SEK",
     paymentAccepted: "Credit Card, Apple Pay, Google Pay, Swish, Klarna",
     address: {
       "@type": "PostalAddress",

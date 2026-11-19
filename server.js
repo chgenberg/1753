@@ -6549,8 +6549,9 @@ info@1753skin.com | 0732-30 55 21
 KUNSKAP:
 - 1753 SKINCARE är ett svenskt familjeföretag grundat av Christopher och Ebba Genberg
 - Adress: Södra Skjutbanevägen 10, 439 55 Åsa
-- Frakt: fri frakt över 600 kr (60 EUR), annars 55 kr. Skickas med PostNord från lagret, normalt 2–5 arbetsdagar till brevlådan eller ett utlämningsställe
-- Gåva: ordrar på minst 1 500 kr (130 EUR) efter rabatter får Au Naturel Makeup Remover på köpet automatiskt
+- Valuta: alla ordrar debiteras i svenska kronor (SEK), även för kunder utanför Sverige. Europriserna i butiken är ungefärliga omräkningar; kundens bank räknar om kronbeloppet
+- Frakt: fri frakt över 600 kr, annars 55 kr. Skickas med PostNord från lagret, normalt 2–5 arbetsdagar till brevlådan eller ett utlämningsställe
+- Gåva: ordrar på minst 1 500 kr efter rabatter får Au Naturel Makeup Remover på köpet automatiskt
 - Prenumeration: 15% rabatt, leverans var 30:e, 60:e eller 90:e dag, betalas med kort (inte Swish), ingen bindningstid. Kunden pausar, ändrar intervall eller avslutar under Mitt konto
 - Ångerrätt 14 dagar från mottagandet, oanvänd produkt i originalförpackning
 - Lojalitetsprogram: Silver (2 000 poäng) 5%, Guld (5 000) 8%, Platina (10 000) 12%. Rabatten dras automatiskt i kassan när kunden anger e-postadressen som hör till kontot. Den gäller inte prenumerationer och kombineras inte med rabattkoder: kunden får den större av nivårabatt och kod

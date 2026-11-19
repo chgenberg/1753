@@ -684,9 +684,9 @@ export function PremiumReport({ result, email, analysisId }: PremiumReportProps)
                       <p className="text-base font-semibold tracking-tight text-[#1d1d1f]">
                         {view.name}
                       </p>
-                      {view.price !== null && (
+                      {view.priceLabel !== null && (
                         <p className="text-sm font-semibold text-[#108474]">
-                          {view.price} {view.currency}
+                          {view.priceLabel}
                         </p>
                       )}
                     </div>

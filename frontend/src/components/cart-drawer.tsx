@@ -6,7 +6,7 @@ import Link from "next/link";
 import { Minus, Plus, RefreshCcw, ShoppingBag, Trash2, X } from "lucide-react";
 import { useCart, type CartItem } from "@/providers/cart-provider";
 import { PRODUCTS, productDisplayName, productPrice } from "@/lib/products";
-import { formatPrice, getCurrency, getShippingCost } from "@/lib/currency";
+import { formatPrice, getFreeShippingThreshold, getShippingCost } from "@/lib/currency";
 import { Button } from "@/components/ui/button";
 import { DuoUpgrade, GiftProgress, JulGiftLine } from "@/components/cart-boosters";
 import { cn } from "@/lib/utils";
@@ -42,8 +42,7 @@ export function CartDrawer() {
     return s + unitPrice * p.qty;
   }, 0);
   const hasSubscription = cartProducts.some((p) => p.subscription);
-  const currency = getCurrency(locale);
-  const FREE_SHIPPING_THRESHOLD = currency === "EUR" ? 60 : 600;
+  const FREE_SHIPPING_THRESHOLD = getFreeShippingThreshold(locale);
   const freeShipping = subtotal >= FREE_SHIPPING_THRESHOLD;
   const shipping = freeShipping ? 0 : getShippingCost(locale);
 
@@ -195,7 +194,7 @@ export function CartDrawer() {
               <p className="mb-3 text-center text-xs font-medium text-brand-700">
                 {freeShipping
                   ? t("cartDrawer.freeShippingLine")
-                  : t("productDetail.freeShippingHint")}
+                  : t("productDetail.freeShippingHint", { amount: formatPrice(getFreeShippingThreshold(locale), locale) })}
               </p>
               <GiftProgress amount={subtotal} className="mb-4" />
               <div className="mb-1 flex items-center justify-between text-sm text-muted-foreground">

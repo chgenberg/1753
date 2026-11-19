@@ -28,8 +28,10 @@ Skriv utkast. Skicka aldrig skarpt till kunder i samma andetag.
 - Recension: nämn 15 % efter inskickad recension. Skapa inte `TACK15` i
   utskicket – det gör `issueReviewReward` när recensionen kommer in.
 - Prenumerationens 15 % får nämnas (finns i kassan), men inte som en kod.
-- Fri frakt gäller bara över 600 kr eller 60 EUR. Skriv aldrig "oavsett
-  ordervärde".
+- Fri frakt gäller bara över 600 kr. Skriv aldrig "oavsett ordervärde".
+- Alla ordrar debiteras i kronor, även utanför Sverige. Eurobelopp i mejl till
+  andra länder är ungefärliga och ska skrivas så ("ca 54 euro"), aldrig som
+  fasta priser.
 - Koder sparas med gemener i databasen. Versaler i mejlet går bra så länge
   koden matchar med `LOWER`.
 - Lojalitetsnivåerna (Silver 5 %, Guld 8 %, Platina 12 %) dras automatiskt i

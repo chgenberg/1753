@@ -1886,8 +1886,10 @@ function drawProductRecommendations(
     doc.text(view.name, MARGIN_X + 8, ctx.y + 9);
 
     // Pris-pill till höger
-    if (view.price !== null) {
-      const priceText = `${view.price} ${view.currency}`;
+    if (view.priceLabel !== null) {
+      const priceText = view.priceLabel
+        .replace("\u2248\u00A0", "~")
+        .replace(/[\u00A0\u202F]/g, " ");
       const priceW = doc.getTextWidth(priceText) + 8;
       const pillX = PAGE_W - MARGIN_X - priceW - 4;
       doc.setFillColor(...GREEN);

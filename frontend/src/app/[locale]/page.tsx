@@ -22,6 +22,7 @@ import { getProduct, productDisplayName } from "@/lib/products";
 import { apiFetch } from "@/lib/api";
 import { cn } from "@/lib/utils";
 import { useLocale } from "@/providers/locale-provider";
+import { formatPrice, getFreeShippingThreshold } from "@/lib/currency";
 import { Reveal, Marquee, displayFont } from "@/components/fx/motion";
 import { MediaFrame, Pill } from "@/components/fx/frames";
 import { JulHero } from "@/components/jul-hero";
@@ -363,7 +364,7 @@ export default function HomePage() {
   }));
 
   const trustItems = [
-    { icon: Truck, text: t("home.trust0") },
+    { icon: Truck, text: t("home.trust0", { amount: formatPrice(getFreeShippingThreshold(locale), locale) }) },
     { icon: Shield, text: t("home.trust1") },
     { icon: Star, text: t("home.trust2") },
   ];

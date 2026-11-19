@@ -15,15 +15,16 @@ import {
   productPrice,
   productShortDesc,
 } from "@/lib/products";
+import { formatPrice } from "@/lib/currency";
 import type { Locale } from "@/lib/i18n/types";
 
 export interface PremiumProductView {
   /** Riktigt produktnamn (exempelvis "DUO-kit + TA-DA Serum"). */
   name: string;
-  /** Pris i SEK eller EUR beroende på locale (kan vara null om fallback). */
+  /** Pris i kronor (kan vara null om fallback). Ordern debiteras alltid i SEK. */
   price: number | null;
-  /** "kr" eller "€" beroende på locale. */
-  currency: "kr" | "€";
+  /** Pris färdigt att visa: "1 495 kr" på svenska, "≈ €134" på övriga språk. */
+  priceLabel: string | null;
   /** Kort beskrivning från PRODUCTS, eller null om fallback. */
   shortDesc: string | null;
   /** Bildsökväg från PRODUCTS, eller null om fallback. */
@@ -70,7 +71,7 @@ export function getPremiumProductView(
     return {
       name: productDisplayName(product, locale),
       price: productPrice(product, locale),
-      currency: locale === "sv" ? "kr" : "€",
+      priceLabel: formatPrice(productPrice(product, locale), locale),
       shortDesc: productShortDesc(product, locale),
       image: product.image || null,
       href: `${PRODUCT_PATH[locale]}/${product.id}`,
@@ -81,7 +82,7 @@ export function getPremiumProductView(
   return {
     name: fallback,
     price: null,
-    currency: locale === "sv" ? "kr" : "€",
+    priceLabel: null,
     shortDesc: null,
     image: null,
     href: null,

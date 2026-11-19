@@ -53,7 +53,7 @@ import {
   productShortDesc,
   productPrice,
 } from "@/lib/products";
-import { formatPrice } from "@/lib/currency";
+import { formatPrice, formatSek } from "@/lib/currency";
 import { LineChartComponent, ChartCard, ScoreRing, ProgressBar } from "@/components/charts";
 
 type View =
@@ -843,7 +843,7 @@ function OrdersView({ orders, loading, error }: { orders: Order[]; loading: bool
                       <p key={i} className="text-sm text-brand-600">
                         {qty}x {item.name || item.id}{" "}
                         <span className="text-brand-500">
-                          {formatPrice(price * qty, locale)}
+                          {formatSek(price * qty, locale)}
                         </span>
                       </p>
                     );
@@ -859,7 +859,7 @@ function OrdersView({ orders, loading, error }: { orders: Order[]; loading: bool
                     {d("reorder")}
                   </button>
                   <p className="text-sm font-bold">
-                    {formatPrice(Number(order.total_amount) || 0, locale)}
+                    {formatSek(Number(order.total_amount) || 0, locale)}
                   </p>
                 </div>
               </div>
@@ -1252,10 +1252,10 @@ function SubscriptionsView({ token }: { token: string }) {
                   </div>
                   <div className="mt-3 flex items-baseline gap-2">
                     <span className="text-lg font-bold">
-                      {formatPrice(sub.recurring_price, locale)}
+                      {formatSek(sub.recurring_price, locale)}
                     </span>
                     <span className="text-sm text-muted-foreground line-through">
-                      {formatPrice(sub.original_price, locale)}
+                      {formatSek(sub.original_price, locale)}
                     </span>
                     <span className="rounded bg-green-50 px-1.5 py-0.5 text-[11px] font-medium text-green-700">
                       -{sub.discount_percent}%

@@ -24,6 +24,25 @@ Kedjan har byggts ut sedan låset skrevs (leveransland, gåvor i varukorgen,
 90 dagars intervall, nivårabatt). Nya fält får läggas till. De som står här får
 inte ändras eller försvinna.
 
+## Valuta: butiken tar bara betalt i kronor
+
+Sedan 2026-11-19 skickar butiken alltid `currency: "SEK"`, oavsett språk.
+Viva-kontot har inte Multicurrency aktiverat, så euro-ordrar gick inte att
+betala med kort.
+
+- All prisräkning i frontend görs i kronor för alla språk: `productPrice()` i
+  `lib/products.ts`, `getCurrency()`, `getShippingCost()` och
+  `getFreeShippingThreshold()` i `lib/currency.ts`.
+- På övriga språk visar `formatPrice()` en ungefärlig omräkning ("≈ €134") med
+  visningskursen `SEK_PER_EUR`. Kassans summa och betalknapp visar det exakta
+  kronbeloppet med `formatSek()`, tillsammans med en rad som förklarar att
+  kundens bank räknar om.
+- Belopp som redan är debiterade (ordrar, prenumerationer) visas alltid med
+  `formatSek()`.
+- Servern stöder fortfarande `"EUR"` och har kvar europriserna i
+  `PRODUCTS_MAP`. Slå inte på euro i butiken igen förrän Viva har bekräftat
+  Multicurrency, och aldrig utan uttryckligt ok.
+
 ## Låsta API-kontrakt
 
 ### `POST /api/orders/create`
